@@ -42,7 +42,7 @@ idea {
 
 allprojects {
     group 'org.clever'
-    version "0.0.$buildVersion-SNAPSHOT"
+    version "$buildVersion-SNAPSHOT"
 
     repositories {
         mavenLocal()

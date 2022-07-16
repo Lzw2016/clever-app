@@ -4,23 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="init">
-      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app-dev.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/logback-app.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/AppContextHolder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/StartupInfoLogger.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/system/ApplicationHome.java" afterDir="false" />
+    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="clever-boot">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clever-boot/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-core/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-core/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-data-jdbc/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-security/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-security/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/context/AppContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/context/AppContext.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-spring/src/test/resources/app.yml" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/test/resources/app.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-web/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-groovy/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-groovy/build.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,7 +91,8 @@
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "yiiguxing.plugin.translate",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "configurable.group.editor",
     "spring.configuration.checksum": "5eb54656ee7a6d39735df15e1d1dc112"
   }
 }]]></component>
@@ -111,7 +101,7 @@
       <recent name="D:\SourceCode\clever\clever-app\clever-boot\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.StartApp">
+  <component name="RunManager" selected="Gradle.clever-app [build]">
     <configuration name="StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.clever.app.StartApp" />
       <module name="clever-app.clever-boot.main" />
@@ -137,6 +127,27 @@
         <option name="taskNames">
           <list>
             <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="clever-app [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -197,10 +208,16 @@
     <list>
       <item itemvalue="Application.StartApp" />
       <item itemvalue="Gradle.clever-app [build]" />
+      <item itemvalue="Gradle.clever-app [clean]" />
       <item itemvalue="JUnit.FixClassTest.t01" />
       <item itemvalue="JUnit.LoadConfigDataTest.t02" />
       <item itemvalue="JUnit.LoggingBootstrapTest.t01" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.clever-app [clean]" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -227,15 +244,33 @@
       <option name="project" value="LOCAL" />
       <updated>1657973418330</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="clever-boot">
+      <created>1657982986244</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1657982986244</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="init" />
-    <option name="LAST_COMMIT_MESSAGE" value="init" />
+    <MESSAGE value="clever-boot" />
+    <option name="LAST_COMMIT_MESSAGE" value="clever-boot" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="GradleRunConfiguration">
+        <watch expression="build_8fup25j2ceq4kxrlb4t1shrz1._run_closure4.__originalClassName" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

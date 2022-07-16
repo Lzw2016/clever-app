@@ -61,12 +61,12 @@ public class StartApp {
 //            config.configureServletContextHandler(handler -> {                          // configure the Jetty ServletContextHandler
 //            });
 //            config.jsonMapper(jsonMapper);                                              // configure Javalin's JsonMapper
-//            // Misc
-//            config.showJavalinBanner = true;                                            // show the glorious Javalin banner on startup
+            // Misc
+            config.showJavalinBanner = false;
         }).events(eventListener -> {
             eventListener.serverStarting(() -> startupInfoLogger.logStarting(log));
             eventListener.serverStarted(() -> startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime)));
-        }).start(7070);
+        }).start(9090);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 优雅停机
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
