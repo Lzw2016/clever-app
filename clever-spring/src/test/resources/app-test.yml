@@ -1,0 +1,6 @@
+clever:
+  application.name: clever-test
+
+server:
+  address: '333'
+  port: 3000

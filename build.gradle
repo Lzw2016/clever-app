@@ -1,0 +1,233 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.apache.commons:commons-lang3:3.12.0'
+        classpath 'commons-io:commons-io:2.11.0'
+    }
+}
+
+plugins {
+    id 'idea'
+    id 'java-library'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+ext {
+    buildVersion = System.getenv('buildVersion') == null ? project.properties['buildVersion'] : System.getenv('buildVersion')
+    buildSnapshot = Boolean.parseBoolean(System.getenv('buildSnapshot') == null ? project.properties['buildSnapshot'] : System.getenv('buildSnapshot'))
+    springBootVersion = '2.6.9'
+    antlr4Version = '4.9.3'
+    groovyVersion = '4.0.3'
+    jmhVersion = '1.32'
+    querydslVersion = '5.0.0'
+    schemacrawlerVersion = '16.16.18'
+    poiVersion = '5.2.2'
+}
+
+idea {
+    project {
+        jdkName = '1.8'
+        languageLevel = '1.8'
+    }
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+allprojects {
+    apply plugin: 'java-library'
+
+    group 'org.clever'
+    version "0.0.$buildVersion-SNAPSHOT"
+
+    repositories {
+        mavenLocal()
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+    }
+
+    // 默认是24小时，gradle会检查一次依赖，可以设置每次build都进行检查
+    configurations.all {
+        // resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        // options.warnings = false
+        // options.deprecation = true
+        options.compilerArgs << '-parameters'
+    }
+}
+
+subprojects {
+    apply plugin: 'idea'
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'io.spring.dependency-management'
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
+        }
+
+        dependencies {
+            // performance test
+            dependency "org.openjdk.jmh:jmh-core:$jmhVersion"
+            dependency "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+            // javax
+            dependency 'javax.servlet:javax.servlet-api:4.0.1'
+            dependency 'javax.inject:javax.inject:1'
+            dependency 'javax.validation:validation-api:2.0.1.Final'
+            dependency 'javax.persistence:persistence-api:1.0.2'
+            dependency 'jakarta.persistence:jakarta.persistence-api:2.2.3'
+            dependency 'com.google.code.findbugs:jsr305:3.0.2'
+            dependency 'org.glassfish:javax.el:3.0.1-b09'
+            // time
+            dependency 'joda-time:joda-time:2.10.14'
+            dependency 'org.joda:joda-convert:2.2.2'
+            // jdbc
+            dependency 'p6spy:p6spy:3.9.1'
+            dependency 'com.oracle.database.nls:orai18n:21.3.0.0'
+            // apache commons
+            dependency 'commons-io:commons-io:2.11.0'
+            dependency 'org.apache.commons:commons-text:1.9'
+            dependency 'org.apache.commons:commons-email:1.5'
+            dependency 'commons-beanutils:commons-beanutils:1.9.4'
+            // http相关
+            dependency 'com.squareup.okhttp3:okhttp:4.9.3'
+            dependency 'com.squareup.retrofit2:retrofit:2.9.0'
+            // json、xml相关
+            dependency 'org.json:json:20210307'
+            dependency 'com.alibaba:fastjson:1.2.78'
+            dependency 'com.thoughtworks.xstream:xstream:1.4.19'
+            // 反射相关
+            dependency 'net.jodah:typetools:0.6.3'
+            dependency 'cglib:cglib:3.3.0'
+            dependency 'org.reflections:reflections:0.10.2'
+            // groovy
+            dependency "org.apache.groovy:groovy-all:$groovyVersion"
+            dependency "org.apache.groovy:groovy:$groovyVersion"
+            // 验证码
+            dependency 'com.github.cage:cage:1.0'
+            dependency 'com.github.axet:kaptcha:0.0.9'
+            dependency 'com.github.bingoohuang:patchca:0.0.1'
+            // antlr4
+            dependency "org.antlr:antlr4-runtime:$antlr4Version"
+            dependency "org.antlr:antlr4:$antlr4Version"
+            // excel读写
+            dependency "org.apache.poi:poi:$poiVersion"
+            dependency "org.apache.poi:poi-ooxml:$poiVersion"
+            dependency "org.apache.poi:poi-ooxml:$poiVersion"
+            dependency "org.apache.poi:poi-ooxml-schemas:$poiVersion"
+            dependency 'com.alibaba:easyexcel:3.0.5'
+            // querydsl
+            dependency "com.querydsl:querydsl-core:$querydslVersion"
+            dependency "com.querydsl:querydsl-sql:$querydslVersion"
+            dependency "com.querydsl:querydsl-jpa:$querydslVersion"
+            dependency "com.querydsl:querydsl-apt:$querydslVersion"
+            dependency "com.querydsl:querydsl-codegen:$querydslVersion"
+            dependency "com.querydsl:querydsl-sql-codegen:$querydslVersion"
+            // jwt
+            dependency 'io.jsonwebtoken:jjwt-api:0.11.5'
+            dependency 'io.jsonwebtoken:jjwt-impl:0.11.5'
+            dependency 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+            // schemacrawler
+            dependency "us.fatehi:schemacrawler:$schemacrawlerVersion"
+            dependency "us.fatehi:schemacrawler-commandline:$schemacrawlerVersion"
+            dependency "us.fatehi:schemacrawler-postgresql:$schemacrawlerVersion"
+            dependency "us.fatehi:schemacrawler-oracle:$schemacrawlerVersion"
+            dependency "us.fatehi:schemacrawler-sqlserver:$schemacrawlerVersion"
+            dependency "us.fatehi:schemacrawler-mysql:$schemacrawlerVersion"
+            // 其他工具包
+            dependency 'org.jetbrains:annotations:23.0.0'
+            dependency 'com.google.guava:guava:31.0.1-jre'
+            dependency 'com.google.zxing:javase:3.4.1'
+            dependency 'ognl:ognl:3.2.21'
+            dependency 'com.github.jsqlparser:jsqlparser:4.4'
+            dependency 'com.jfinal:enjoy:4.9.21'
+            // 版本冲突的包
+            dependency 'org.ow2.asm:asm:7.1'
+            dependency 'org.apache.commons:commons-math3:3.6.1'
+            dependency 'org.javassist:javassist:3.28.0-GA'
+        }
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.openjdk.jmh:jmh-core'
+        testImplementation 'org.openjdk.jmh:jmh-generator-annprocess'
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+    }
+
+    task sourcesJar(type: Jar) {
+        archiveClassifier.convention('sources')
+        archiveClassifier.set('sources')
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar) {
+        archiveClassifier.convention('javadoc')
+        archiveClassifier.set('javadoc')
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+
+    jar {
+        manifest.attributes provider: 'gradle'
+    }
+
+    // test {
+    //     useJUnitPlatform()
+    // }
+
+    publishing {
+        repositories {
+            maven {
+                url = buildSnapshot ? "https://nexus.msvc.top/repository/maven-snapshots/" : "https://nexus.msvc.top/repository/maven-releases/"
+                credentials {
+                    username = project.properties['NEXUS_USERNAME']
+                    password = project.properties['NEXUS_PASSWORD']
+                }
+            }
+        }
+
+        publications {
+            mavenJava(MavenPublication) {
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                pom {
+                    name = 'clever-app library'
+                    description = 'clever-app library'
+                }
+            }
+        }
+    }
+}
+
+jar {
+    enabled = false
+}
