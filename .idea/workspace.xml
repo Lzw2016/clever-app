@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="">
+    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="init">
       <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/context/properties/bind/Binder.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/context/properties/bind/Binder.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,48 +68,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;spring.configuration.checksum&quot;: &quot;5eb54656ee7a6d39735df15e1d1dc112&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "spring.configuration.checksum": "5eb54656ee7a6d39735df15e1d1dc112"
   }
-}</component>
-  <component name="RunManager" selected="Gradle.clever-app [build]">
-    <configuration name="FixClassTest.t01" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+}]]></component>
+  <component name="RunManager" selected="JUnit.FixClassTest.t01">
+    <configuration name="clever-app [build]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":clever-spring:test" />
-            <option value="--tests" />
-            <option value="&quot;org.clever.FixClassTest.t01&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
-    </configuration>
-    <configuration name="clever-app [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -128,10 +103,65 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="FixClassTest.t01" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="clever-app.clever-spring.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.FixClassTest" />
+      <option name="METHOD_NAME" value="t01" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LoadConfigDataTest.t02" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="clever-app.clever-spring.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.boot.context.config.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever.boot.context.config" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.boot.context.config.LoadConfigDataTest" />
+      <option name="METHOD_NAME" value="t02" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LoggingBootstrapTest.t01" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="clever-app.clever-spring.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.boot.context.logging.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever.boot.context.logging" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.boot.context.logging.LoggingBootstrapTest" />
+      <option name="METHOD_NAME" value="t01" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Gradle.clever-app [build]" />
+      <item itemvalue="JUnit.FixClassTest.t01" />
+      <item itemvalue="JUnit.LoadConfigDataTest.t02" />
+      <item itemvalue="JUnit.LoggingBootstrapTest.t01" />
+    </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.clever-app [build]" />
-        <item itemvalue="Gradle.FixClassTest.t01" />
+        <item itemvalue="JUnit.FixClassTest.t01" />
+        <item itemvalue="JUnit.LoadConfigDataTest.t02" />
+        <item itemvalue="JUnit.LoggingBootstrapTest.t01" />
       </list>
     </recent_temporary>
   </component>
