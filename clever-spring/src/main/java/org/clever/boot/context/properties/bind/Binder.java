@@ -25,6 +25,7 @@ public class Binder {
             new HashSet<>(Arrays.asList(Object.class, Class.class))
     );
 
+    // private final Logger logger = LoggerFactory.getLogger(getClass());
     private final Iterable<ConfigurationPropertySource> sources;
     private final PlaceholdersResolver placeholdersResolver;
     private final BindConverter bindConverter;

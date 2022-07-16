@@ -40,8 +40,6 @@ idea {
 }
 
 allprojects {
-    apply plugin: 'java-library'
-
     group 'org.clever'
     version "0.0.$buildVersion-SNAPSHOT"
 
@@ -54,16 +52,6 @@ allprojects {
     // 默认是24小时，gradle会检查一次依赖，可以设置每次build都进行检查
     configurations.all {
         // resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-        // options.warnings = false
-        // options.deprecation = true
-        options.compilerArgs << '-parameters'
     }
 }
 
@@ -168,6 +156,16 @@ subprojects {
         testImplementation 'org.openjdk.jmh:jmh-core'
         testImplementation 'org.openjdk.jmh:jmh-generator-annprocess'
         testImplementation 'org.junit.jupiter:junit-jupiter'
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        // options.warnings = false
+        // options.deprecation = true
+        options.compilerArgs << '-parameters'
     }
 
     task sourcesJar(type: Jar) {
