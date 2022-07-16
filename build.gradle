@@ -20,8 +20,9 @@ ext {
     buildVersion = System.getenv('buildVersion') == null ? project.properties['buildVersion'] : System.getenv('buildVersion')
     buildSnapshot = Boolean.parseBoolean(System.getenv('buildSnapshot') == null ? project.properties['buildSnapshot'] : System.getenv('buildSnapshot'))
     springBootVersion = '2.6.9'
-    antlr4Version = '4.9.3'
+    javalinVersion = '4.6.4'
     groovyVersion = '4.0.3'
+    antlr4Version = '4.9.3'
     jmhVersion = '1.32'
     querydslVersion = '5.0.0'
     schemacrawlerVersion = '16.16.18'
@@ -100,6 +101,9 @@ subprojects {
             dependency 'net.jodah:typetools:0.6.3'
             dependency 'cglib:cglib:3.3.0'
             dependency 'org.reflections:reflections:0.10.2'
+            // javalin
+            dependency "io.javalin:javalin:$javalinVersion"
+            dependency "io.javalin:javalin-bundle:$javalinVersion"
             // groovy
             dependency "org.apache.groovy:groovy-all:$groovyVersion"
             dependency "org.apache.groovy:groovy:$groovyVersion"

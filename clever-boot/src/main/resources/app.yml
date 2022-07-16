@@ -1,0 +1,12 @@
+logging:
+  config: classpath:logback-app.xml
+  file:
+    name: '${clever.application.name:server}'
+    path: './logs/${logging.file.name}'
+  level:
+    root: debug
+    #org.eclipse.jetty.util.log: warn
+
+clever:
+  profiles.active: dev
+  application.name: clever-boot

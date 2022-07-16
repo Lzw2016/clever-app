@@ -1,7 +1,7 @@
 logging:
   config: classpath:logback-app.xml
   file:
-    name: '${spring.application.name:server}'
+    name: '${clever.application.name:server}'
     path: './logs/${logging.file.name}'
   level:
     root: debug

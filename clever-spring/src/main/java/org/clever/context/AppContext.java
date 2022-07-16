@@ -103,6 +103,12 @@ public class AppContext {
         return (T) beanHolder.getBeanInstance();
     }
 
+    /**
+     * 获取bean对象
+     *
+     * @param requiredType bean类型
+     * @return bean不存在就返回null
+     */
     public <T> T getBean(Class<T> requiredType) {
         return getBean(requiredType, false);
     }
@@ -258,6 +264,24 @@ public class AppContext {
             BeanHolder<?> existingBean = allBeanByNames.get(beanName);
             if (existingBean != null) {
                 throw new BeanOverrideException(beanName, beanHolder, existingBean);
+            }
+            if (primary) {
+                List<String> beanNames = new ArrayList<>();
+                allBeanNamesByType.forEach((aClass, names) -> {
+                    if (isTypeMatch(aClass, bean.getClass())) {
+                        beanNames.addAll(names);
+                    }
+                });
+                List<String> beanNamesFound = new ArrayList<>();
+                for (String name : beanNames) {
+                    beanHolder = allBeanByNames.get(name);
+                    if (beanHolder != null && beanHolder.isPrimary()) {
+                        beanNamesFound.add(beanHolder.getBeanName());
+                    }
+                }
+                if (beanNamesFound.size() > 1) {
+                    throw new NoUniqueBeanException(ResolvableType.forType(bean.getClass()), beanNamesFound.toArray(new String[0]));
+                }
             }
             allBeanByNames.put(beanName, beanHolder);
             CopyOnWriteArraySet<String> beanNames = allBeanNamesByType.computeIfAbsent(

@@ -5,8 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="init">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app-dev.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/logback-app.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/AppContextHolder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/StartupInfoLogger.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/system/ApplicationHome.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-boot/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-core/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-core/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-data-jdbc/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-security/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-security/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/context/AppContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/context/AppContext.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/test/resources/app.yml" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/test/resources/app.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-web/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/build.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,8 +63,18 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot/2.6.9/df3b0859dd79ab4462b7edaf0e603ac99c07074d/spring-boot-2.6.9-sources.jar!/org/springframework/boot/StartupInfoLogger.java" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -73,15 +97,34 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-boot/src/main/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "settings.editor.selected.configurable": "yiiguxing.plugin.translate",
     "spring.configuration.checksum": "5eb54656ee7a6d39735df15e1d1dc112"
   }
 }]]></component>
-  <component name="RunManager" selected="JUnit.FixClassTest.t01">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\SourceCode\clever\clever-app\clever-boot\src\main\resources" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.StartApp">
+    <configuration name="StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.clever.app.StartApp" />
+      <module name="clever-app.clever-boot.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.app.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="clever-app [build]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -103,7 +146,7 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="FixClassTest.t01" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="FixClassTest.t01" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
       <module name="clever-app.clever-spring.test" />
       <extension name="coverage">
         <pattern>
@@ -119,7 +162,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="LoadConfigDataTest.t02" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="LoadConfigDataTest.t02" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
       <module name="clever-app.clever-spring.test" />
       <extension name="coverage">
         <pattern>
@@ -135,7 +178,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="LoggingBootstrapTest.t01" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="LoggingBootstrapTest.t01" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
       <module name="clever-app.clever-spring.test" />
       <extension name="coverage">
         <pattern>
@@ -152,18 +195,12 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Application.StartApp" />
       <item itemvalue="Gradle.clever-app [build]" />
       <item itemvalue="JUnit.FixClassTest.t01" />
       <item itemvalue="JUnit.LoadConfigDataTest.t02" />
       <item itemvalue="JUnit.LoggingBootstrapTest.t01" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="JUnit.FixClassTest.t01" />
-        <item itemvalue="JUnit.LoadConfigDataTest.t02" />
-        <item itemvalue="JUnit.LoggingBootstrapTest.t01" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -183,7 +220,14 @@
       <option name="project" value="LOCAL" />
       <updated>1657971386265</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="init">
+      <created>1657973418330</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1657973418330</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -192,5 +236,9 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="init" />
     <option name="LAST_COMMIT_MESSAGE" value="init" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
