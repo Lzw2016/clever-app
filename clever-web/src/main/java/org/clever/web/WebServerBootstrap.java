@@ -41,7 +41,7 @@ public class WebServerBootstrap {
             Misc misc = webConfig.getMisc();
             initMisc(config, misc);
             // 自定义 JsonMapper
-            // config.jsonMapper(jsonMapper);
+            // config.jsonMapper(new JavalinJackson(new ObjectMapper()));
             // 注册自定义插件
             // config.registerPlugin(myPlugin);
             // 自定义配置

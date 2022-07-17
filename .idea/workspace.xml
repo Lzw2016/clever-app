@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="clever-boot">
+    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/config/JacksonConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,7 +92,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
+    "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.38375",
     "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
@@ -324,7 +326,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658065583856</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="clever-boot">
+      <created>1658066440989</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1658066440989</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
