@@ -27,7 +27,7 @@ public class AppShutdownHook {
                 try {
                     task.runnable.run();
                 } catch (Exception e) {
-                    log.error("# 执行停机任务失败 | idx={}", idx++, e);
+                    log.error("# 执行停机任务失败 {} | {}", idx++, e.getMessage(), e);
                 }
             }
         }));
