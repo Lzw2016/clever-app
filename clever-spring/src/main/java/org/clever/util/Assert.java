@@ -9,6 +9,18 @@ import java.util.function.Supplier;
  * 创建时间：2022/04/17 23:25 <br/>
  */
 public class Assert {
+    public static void isNull(Object object, String message) {
+        if (object != null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void isNull(Object object, Supplier<String> messageSupplier) {
+        if (object != null) {
+            throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+        }
+    }
+
     public static void notNull(Object object, String message) {
         if (object == null) {
             throw new IllegalArgumentException(message);

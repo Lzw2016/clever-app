@@ -5,11 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="clever-boot">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/HTTP.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/Misc.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/Server.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/WebConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/WebSocket.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-boot/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-groovy/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-groovy/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-boot/src/main/resources/app-dev.yml" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app-dev.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-boot/src/main/resources/app.yml" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/Assert.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/Assert.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,6 +93,7 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-boot/src/main/resources",
     "node.js.detected.package.eslint": "true",
@@ -92,6 +101,9 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
     "settings.editor.selected.configurable": "configurable.group.editor",
     "spring.configuration.checksum": "5eb54656ee7a6d39735df15e1d1dc112"
   }
@@ -101,7 +113,7 @@
       <recent name="D:\SourceCode\clever\clever-app\clever-boot\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.clever-app [build]">
+  <component name="RunManager" selected="Application.StartApp">
     <configuration name="StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.clever.app.StartApp" />
       <module name="clever-app.clever-boot.main" />
@@ -251,7 +263,14 @@
       <option name="project" value="LOCAL" />
       <updated>1657982986244</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="clever-boot">
+      <created>1657986273422</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1657986273422</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,6 +285,26 @@
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-server/9.4.48.v20220622/486907a29bcc49daaa40ce988eb7fb24bc4ca9b8/jetty-server-9.4.48.v20220622-sources.jar!/org/eclipse/jetty/server/handler/ResourceHandler.java</url>
+          <line>354</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-util/9.4.48.v20220622/8735704c5946a65ed5f6ce11a8fca9cc56de49af/jetty-util-9.4.48.v20220622-sources.jar!/org/eclipse/jetty/util/resource/Resource.java</url>
+          <line>289</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="java.util.concurrent.ConcurrentHashMap$MapEntry" memberName="value" />
+        <PinnedItemInfo parentTag="java.util.concurrent.ConcurrentHashMap$MapEntry" memberName="key" />
+      </pinned-members>
+    </pin-to-top-manager>
     <watches-manager>
       <configuration name="GradleRunConfiguration">
         <watch expression="build_8fup25j2ceq4kxrlb4t1shrz1._run_closure4.__originalClassName" />

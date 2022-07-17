@@ -4,7 +4,7 @@ logging:
     name: '${clever.application.name:server}'
     path: './logs/${logging.file.name}'
   level:
-    root: debug
+    root: info
     #org.eclipse.jetty.util.log: warn
 
 clever:
