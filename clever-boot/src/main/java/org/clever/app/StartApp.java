@@ -37,7 +37,7 @@ public class StartApp {
         AppContextHolder.registerBean("javalin", javalin, true);
         startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
         // 优雅停机
-        AppShutdownHook.addShutdownHook(javalin::stop, -100, "停止Web服务器");
+        AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止Web服务器");
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Integer.MAX_VALUE, "停止日志模块");
     }
 }
