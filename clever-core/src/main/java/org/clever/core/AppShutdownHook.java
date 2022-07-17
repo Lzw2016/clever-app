@@ -20,7 +20,7 @@ public class AppShutdownHook {
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            SHUTDOWN_TASK_LIST.sort(Comparator.comparingInt(o -> o.order));
+            SHUTDOWN_TASK_LIST.sort(Comparator.comparingDouble(o -> o.order));
             int idx = 1;
             for (ShutdownTask task : SHUTDOWN_TASK_LIST) {
                 log.info("# 执行停机任务 {}{}", idx++, StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : "");
@@ -40,7 +40,7 @@ public class AppShutdownHook {
      * @param order    执行顺序，值越小，优先级越高
      * @param name     任务名称
      */
-    public synchronized static void addShutdownHook(Runnable runnable, int order, String name) {
+    public synchronized static void addShutdownHook(Runnable runnable, double order, String name) {
         SHUTDOWN_TASK_LIST.add(new ShutdownTask(runnable, order, name));
     }
 
@@ -50,7 +50,7 @@ public class AppShutdownHook {
      * @param runnable 停机任务
      * @param order    执行顺序，值越小，优先级越高
      */
-    public synchronized static void addShutdownHook(Runnable runnable, int order) {
+    public synchronized static void addShutdownHook(Runnable runnable, double order) {
         SHUTDOWN_TASK_LIST.add(new ShutdownTask(runnable, order, null));
     }
 
@@ -66,7 +66,7 @@ public class AppShutdownHook {
     @Data
     private static class ShutdownTask {
         private final Runnable runnable;
-        private final int order;
+        private final double order;
         private final String name;
     }
 }
