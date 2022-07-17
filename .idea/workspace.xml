@@ -4,20 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="clever-boot">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/HTTP.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/Misc.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/Server.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/WebConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/WebSocket.java" afterDir="false" />
+    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/AppShutdownHook.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-boot/src/main/resources/app-dev.yml" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app-dev.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-boot/src/main/resources/app.yml" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/resources/app.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/Assert.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/Assert.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -270,7 +260,14 @@
       <option name="project" value="LOCAL" />
       <updated>1657986273422</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="clever-boot">
+      <created>1658045951932</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1658045951932</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -285,20 +282,6 @@
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-server/9.4.48.v20220622/486907a29bcc49daaa40ce988eb7fb24bc4ca9b8/jetty-server-9.4.48.v20220622-sources.jar!/org/eclipse/jetty/server/handler/ResourceHandler.java</url>
-          <line>354</line>
-          <option name="timeStamp" value="23" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty/jetty-util/9.4.48.v20220622/8735704c5946a65ed5f6ce11a8fca9cc56de49af/jetty-util-9.4.48.v20220622-sources.jar!/org/eclipse/jetty/util/resource/Resource.java</url>
-          <line>289</line>
-          <option name="timeStamp" value="24" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="java.util.concurrent.ConcurrentHashMap$MapEntry" memberName="value" />

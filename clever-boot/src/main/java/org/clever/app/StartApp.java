@@ -6,6 +6,7 @@ import org.clever.boot.StartupInfoLogger;
 import org.clever.boot.context.config.ConfigDataBootstrap;
 import org.clever.boot.context.logging.LoggingBootstrap;
 import org.clever.core.AppContextHolder;
+import org.clever.core.AppShutdownHook;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.web.WebServerBootstrap;
 
@@ -36,9 +37,7 @@ public class StartApp {
         AppContextHolder.registerBean("javalin", javalin, true);
         startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
         // 优雅停机
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            javalin.stop();
-            loggingBootstrap.destroy();
-        }));
+        AppShutdownHook.addShutdownHook(javalin::stop, -100, "停止Web服务器");
+        AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Integer.MAX_VALUE, "停止日志模块");
     }
 }
