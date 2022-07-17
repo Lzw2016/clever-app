@@ -32,12 +32,12 @@ public class StartApp {
         startupInfoLogger.logStarting(log);
         // 启动web服务
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
-        webServerBootstrap.init(environment);
-        Javalin javalin = webServerBootstrap.getJavalin();
+        Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
-        startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
         // 优雅停机
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Integer.MAX_VALUE, "停止日志模块");
+        // 系统启动完成日志
+        startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
     }
 }

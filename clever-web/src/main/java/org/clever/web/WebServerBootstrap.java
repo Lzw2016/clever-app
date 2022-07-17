@@ -12,6 +12,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
+import java.util.function.Consumer;
 
 /**
  * 用于初始化和启动web服务器的工具
@@ -20,16 +21,13 @@ import java.util.concurrent.SynchronousQueue;
  * 创建时间：2022/07/17 12:35 <br/>
  */
 public class WebServerBootstrap {
-    private Javalin javalin;
-
     /**
      * 初始化Web服务
      */
-    public synchronized void init(Environment environment) {
-        Assert.isNull(javalin, "WebServer 已经初始化了");
+    public synchronized Javalin init(Environment environment, Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
         Assert.notNull(environment, "environment 不能为空");
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
-        javalin = Javalin.create(config -> {
+        Javalin javalin = Javalin.create(config -> {
             // 初始化http相关配置
             HTTP http = webConfig.getHttp();
             initHTTP(config, http);
@@ -46,13 +44,25 @@ public class WebServerBootstrap {
             // config.jsonMapper(jsonMapper);
             // 注册自定义插件
             // config.registerPlugin(myPlugin);
+            // 自定义配置
+            if (configCallback != null) {
+                configCallback.accept(config);
+            }
         });
+        // 自定义配置
+        if (javalinCallback != null) {
+            javalinCallback.accept(javalin);
+        }
         javalin.start(webConfig.getHost(), webConfig.getPort());
+        return javalin;
     }
 
-    public Javalin getJavalin() {
-        Assert.notNull(javalin, "javalin 还未初始化");
-        return javalin;
+    public Javalin init(Environment environment, Consumer<JavalinConfig> configCallback) {
+        return init(environment, configCallback, null);
+    }
+
+    public Javalin init(Environment environment) {
+        return init(environment, null, null);
     }
 
     private void initHTTP(JavalinConfig config, HTTP http) {
