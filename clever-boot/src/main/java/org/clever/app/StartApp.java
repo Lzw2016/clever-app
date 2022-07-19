@@ -34,6 +34,11 @@ public class StartApp {
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
+        javalin.post("/test", ctx -> {
+           log.info("body --> {}",ctx.body());
+           log.info("body --> {}",ctx.body());
+           ctx.result("test,中文");
+        });
         // 优雅停机
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Integer.MAX_VALUE, "停止日志模块");

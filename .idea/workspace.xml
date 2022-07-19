@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/config/JacksonConfig.java" afterDir="false" />
+    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="clever-boot">
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/HotReloadClassLoader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/test/java/org/clever/core/ClassLoaderTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/test/java/org/clever/core/ClassLoaderTestA.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,6 +88,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "jdk.selected.JAVA_MODULE": "1.8",
+    "last_directory_selection": "D:/SourceCode/clever/clever-app/clever-boot/src/test/java/org/clever/app",
     "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-boot/src/main/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -104,13 +107,13 @@
       <recent name="D:\SourceCode\clever\clever-app\clever-boot\src\main\resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.clever-app [build]">
-    <configuration name="StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.ClassLoaderTest.t05">
+    <configuration name="org.clever.app.StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.clever.app.StartApp" />
       <module name="clever-app.clever-boot.main" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="org.clever.app.*" />
+          <option name="PATTERN" value="org.clever.core.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -159,6 +162,70 @@
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
+    </configuration>
+    <configuration name="ClassLoaderTest.t01" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="clever-app.clever-core.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever.core" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
+      <option name="METHOD_NAME" value="t01" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ClassLoaderTest.t02" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="clever-app.clever-core.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever.core" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
+      <option name="METHOD_NAME" value="t02" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ClassLoaderTest.t05" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="clever-app.clever-core.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever.core" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
+      <option name="METHOD_NAME" value="t05" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ClassLoaderTest.t07" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="clever-app.clever-core.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.core.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever.core" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
+      <option name="METHOD_NAME" value="t07" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration name="FixClassTest.t01" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
       <module name="clever-app.clever-spring.test" />
@@ -209,13 +276,25 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.StartApp" />
+      <item itemvalue="Application.org.clever.app.StartApp" />
       <item itemvalue="Gradle.clever-app [build]" />
       <item itemvalue="Gradle.clever-app [clean]" />
       <item itemvalue="JUnit.FixClassTest.t01" />
       <item itemvalue="JUnit.LoadConfigDataTest.t02" />
       <item itemvalue="JUnit.LoggingBootstrapTest.t01" />
+      <item itemvalue="JUnit.ClassLoaderTest.t01" />
+      <item itemvalue="JUnit.ClassLoaderTest.t02" />
+      <item itemvalue="JUnit.ClassLoaderTest.t05" />
+      <item itemvalue="JUnit.ClassLoaderTest.t07" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.ClassLoaderTest.t05" />
+        <item itemvalue="JUnit.ClassLoaderTest.t02" />
+        <item itemvalue="JUnit.ClassLoaderTest.t01" />
+        <item itemvalue="JUnit.ClassLoaderTest.t07" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -333,7 +412,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658066440989</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="clever-boot">
+      <created>1658070010307</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1658070010307</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
