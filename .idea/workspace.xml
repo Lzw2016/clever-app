@@ -99,7 +99,7 @@
       <recent name="org.clever.app" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.KotlinTest.t05">
+  <component name="RunManager" selected="Application.org.clever.app.StartApp">
     <configuration name="StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.clever.app.StartApp" />
       <module name="clever-app.clever-boot.main" />
