@@ -43,4 +43,26 @@ public class KotlinTest {
         KClass<?> kClass = JvmClassMappingKt.getKotlinClass(clazz);
         log.info("--> {}", kClass);
     }
+
+    @Test
+    public void t04() throws Exception {
+        HotReloadClassLoader classLoader = new HotReloadClassLoader(
+                Thread.currentThread().getContextClassLoader(),
+                "out/production/classes"
+        );
+        Class<?> clazz = classLoader.loadClass("org.clever.app.Test2");
+        Object companion = clazz.getField("Companion").get(null);
+        companion.getClass().getMethod("t01").invoke(companion);
+    }
+
+    @Test
+    public void t05() throws Exception {
+        HotReloadClassLoader classLoader = new HotReloadClassLoader(
+                Thread.currentThread().getContextClassLoader(),
+                "out/production/classes"
+        );
+        Class<?> clazz = classLoader.loadClass("org.clever.app.Test3");
+        Object instance = clazz.getField("INSTANCE").get(null);
+        instance.getClass().getMethod("t01").invoke(instance);
+    }
 }
