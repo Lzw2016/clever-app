@@ -4,12 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="clever-boot">
-      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/HotReloadClassLoader.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-core/src/test/java/org/clever/core/ClassLoaderTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clever-core/src/test/java/org/clever/core/ClassLoaderTestA.java" afterDir="false" />
+    <list default="true" id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clever-groovy/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-security/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-spring/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-boot/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-core/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-core/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-data-dynamic-sql/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-dynamic-sql/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-data-jdbc-meta/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc-meta/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-data-jdbc/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-groovy/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-security/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-web/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,18 +70,8 @@
       </state>
     </system>
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Class" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="HighlightingSettingsPerFile">
-    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot/2.6.9/df3b0859dd79ab4462b7edaf0e603ac99c07074d/spring-boot-2.6.9-sources.jar!/org/springframework/boot/StartupInfoLogger.java" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -76,7 +84,7 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectId" id="2C1XxzTjWRyE6fRDvs7xxx3ZKVJ" />
+  <component name="ProjectId" id="2CKOJQ1kqVbmPMsbPcV1n4Xa1LP" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -85,42 +93,15 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
-    "jdk.selected.JAVA_MODULE": "1.8",
-    "last_directory_selection": "D:/SourceCode/clever/clever-app/clever-boot/src/test/java/org/clever/app",
-    "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-boot/src/main/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.38375",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
-    "spring.configuration.checksum": "5eb54656ee7a6d39735df15e1d1dc112"
+    "nodejs_package_manager_path": "npm"
   }
 }]]></component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\SourceCode\clever\clever-app\clever-boot\src\main\resources" />
-    </key>
-  </component>
-  <component name="RunManager" selected="JUnit.ClassLoaderTest.t05">
-    <configuration name="org.clever.app.StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="org.clever.app.StartApp" />
-      <module name="clever-app.clever-boot.main" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.core.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager">
     <configuration name="clever-app [build]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -142,312 +123,20 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="clever-app [clean]" type="GradleRunConfiguration" factoryName="Gradle">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="clean" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <method v="2" />
-    </configuration>
-    <configuration name="ClassLoaderTest.t01" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="clever-app.clever-core.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.core.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.clever.core" />
-      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
-      <option name="METHOD_NAME" value="t01" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ClassLoaderTest.t02" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="clever-app.clever-core.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.core.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.clever.core" />
-      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
-      <option name="METHOD_NAME" value="t02" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ClassLoaderTest.t05" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="clever-app.clever-core.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.core.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.clever.core" />
-      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
-      <option name="METHOD_NAME" value="t05" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ClassLoaderTest.t07" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="clever-app.clever-core.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.core.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.clever.core" />
-      <option name="MAIN_CLASS_NAME" value="org.clever.core.ClassLoaderTest" />
-      <option name="METHOD_NAME" value="t07" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="FixClassTest.t01" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
-      <module name="clever-app.clever-spring.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.clever" />
-      <option name="MAIN_CLASS_NAME" value="org.clever.FixClassTest" />
-      <option name="METHOD_NAME" value="t01" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="LoadConfigDataTest.t02" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
-      <module name="clever-app.clever-spring.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.boot.context.config.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.clever.boot.context.config" />
-      <option name="MAIN_CLASS_NAME" value="org.clever.boot.context.config.LoadConfigDataTest" />
-      <option name="METHOD_NAME" value="t02" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="LoggingBootstrapTest.t01" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
-      <module name="clever-app.clever-spring.test" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.clever.boot.context.logging.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.clever.boot.context.logging" />
-      <option name="MAIN_CLASS_NAME" value="org.clever.boot.context.logging.LoggingBootstrapTest" />
-      <option name="METHOD_NAME" value="t01" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <list>
-      <item itemvalue="Application.org.clever.app.StartApp" />
-      <item itemvalue="Gradle.clever-app [build]" />
-      <item itemvalue="Gradle.clever-app [clean]" />
-      <item itemvalue="JUnit.FixClassTest.t01" />
-      <item itemvalue="JUnit.LoadConfigDataTest.t02" />
-      <item itemvalue="JUnit.LoggingBootstrapTest.t01" />
-      <item itemvalue="JUnit.ClassLoaderTest.t01" />
-      <item itemvalue="JUnit.ClassLoaderTest.t02" />
-      <item itemvalue="JUnit.ClassLoaderTest.t05" />
-      <item itemvalue="JUnit.ClassLoaderTest.t07" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="JUnit.ClassLoaderTest.t05" />
-        <item itemvalue="JUnit.ClassLoaderTest.t02" />
-        <item itemvalue="JUnit.ClassLoaderTest.t01" />
-        <item itemvalue="JUnit.ClassLoaderTest.t07" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="0d07ea4d-97c5-48a6-b279-44be1d3773ba" name="Changes" comment="" />
-      <created>1657971318813</created>
+      <changelist id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="" />
+      <created>1658547737604</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1657971318813</updated>
-      <workItem from="1657971322355" duration="1232000" />
-      <workItem from="1657972695454" duration="158000" />
+      <updated>1658547737604</updated>
+      <workItem from="1658547740267" duration="1457000" />
     </task>
-    <task id="LOCAL-00001" summary="init">
-      <created>1657971386265</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1657971386265</updated>
-    </task>
-    <task id="LOCAL-00002" summary="init">
-      <created>1657973418330</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1657973418330</updated>
-    </task>
-    <task id="LOCAL-00003" summary="clever-boot">
-      <created>1657982986244</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1657982986244</updated>
-    </task>
-    <task id="LOCAL-00004" summary="clever-boot">
-      <created>1657986273422</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1657986273422</updated>
-    </task>
-    <task id="LOCAL-00005" summary="clever-boot">
-      <created>1658045951932</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1658045951932</updated>
-    </task>
-    <task id="LOCAL-00006" summary="clever-boot">
-      <created>1658047667365</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1658047667365</updated>
-    </task>
-    <task id="LOCAL-00007" summary="clever-boot">
-      <created>1658047733289</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1658047733289</updated>
-    </task>
-    <task id="LOCAL-00008" summary="clever-boot">
-      <created>1658047904523</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1658047904524</updated>
-    </task>
-    <task id="LOCAL-00009" summary="clever-boot">
-      <created>1658047933626</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1658047933626</updated>
-    </task>
-    <task id="LOCAL-00010" summary="clever-boot">
-      <created>1658048075340</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1658048075340</updated>
-    </task>
-    <task id="LOCAL-00011" summary="clever-boot">
-      <created>1658048777636</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1658048777636</updated>
-    </task>
-    <task id="LOCAL-00012" summary="clever-boot">
-      <created>1658062908134</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1658062908134</updated>
-    </task>
-    <task id="LOCAL-00013" summary="clever-boot">
-      <created>1658064395268</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1658064395268</updated>
-    </task>
-    <task id="LOCAL-00014" summary="clever-boot">
-      <created>1658065583856</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1658065583856</updated>
-    </task>
-    <task id="LOCAL-00015" summary="clever-boot">
-      <created>1658066440989</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1658066440989</updated>
-    </task>
-    <task id="LOCAL-00016" summary="clever-boot">
-      <created>1658070010307</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1658070010307</updated>
-    </task>
-    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
-    <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="init" />
-    <MESSAGE value="clever-boot" />
-    <option name="LAST_COMMIT_MESSAGE" value="clever-boot" />
-    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <pin-to-top-manager>
-      <pinned-members>
-        <PinnedItemInfo parentTag="java.util.concurrent.ConcurrentHashMap$MapEntry" memberName="value" />
-        <PinnedItemInfo parentTag="java.util.concurrent.ConcurrentHashMap$MapEntry" memberName="key" />
-      </pinned-members>
-    </pin-to-top-manager>
-    <watches-manager>
-      <configuration name="GradleRunConfiguration">
-        <watch expression="build_8fup25j2ceq4kxrlb4t1shrz1._run_closure4.__originalClassName" />
-      </configuration>
-    </watches-manager>
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
   </component>
 </project>
