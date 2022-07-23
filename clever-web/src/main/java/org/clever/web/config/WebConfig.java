@@ -12,9 +12,9 @@ import lombok.Data;
 public class WebConfig {
     public static final String PREFIX = "web";
     /**
-     * web服务要绑定的主机IP，默认："127.0.0.1"
+     * web服务要绑定的主机IP，默认："0.0.0.0"
      */
-    private String host = "127.0.0.1";
+    private String host = "0.0.0.0";
     /**
      * web服务端口，默认：9090
      */
