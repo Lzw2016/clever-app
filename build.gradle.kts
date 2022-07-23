@@ -7,6 +7,7 @@ object Ver {
     const val springBootVersion = "2.6.10"
     const val springCloudVersion = "2021.0.3"
     const val javalinVersion = "4.6.4"
+    const val kotlinVersion = "1.6.21"
     const val groovyVersion = "4.0.3"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.32"
@@ -33,7 +34,7 @@ plugins {
     `maven-publish`
     id("io.spring.dependency-management").version("1.0.12.RELEASE")
     id("org.springframework.boot").version("2.6.10").apply(false)
-    kotlin("jvm").version("1.6.21").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.6.21").apply(false)
 }
 
 idea {
@@ -125,6 +126,12 @@ subprojects {
             // javalin
             dependency("io.javalin:javalin:${Ver.javalinVersion}")
             dependency("io.javalin:javalin-bundle:${Ver.javalinVersion}")
+            // kotlin
+            dependency("org.jetbrains.kotlin:kotlin-stdlib-common:${Ver.kotlinVersion}")
+            dependency("org.jetbrains.kotlin:kotlin-stdlib:${Ver.kotlinVersion}")
+            dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${Ver.kotlinVersion}")
+            dependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Ver.kotlinVersion}")
+            dependency("org.jetbrains.kotlin:kotlin-reflect:${Ver.kotlinVersion}")
             // groovy
             dependency("org.apache.groovy:groovy-all:${Ver.groovyVersion}")
             dependency("org.apache.groovy:groovy:${Ver.groovyVersion}")
@@ -187,9 +194,9 @@ subprojects {
         // withJavadocJar()
         withSourcesJar()
     }
-     tasks.withType<Javadoc> {
-         options.encoding = "UTF-8"
-     }
+    tasks.withType<Javadoc> {
+        options.encoding = "UTF-8"
+    }
 
     tasks.withType<Jar> {
         manifest {

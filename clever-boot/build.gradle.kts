@@ -1,14 +1,37 @@
-apply(plugin = "groovy")
-//apply(plugin = "kotlin")
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+//apply(plugin = "groovy")
+apply(plugin = "org.jetbrains.kotlin.jvm")
 //apply(plugin = "org.springframework.boot")
 
 dependencies {
     api(project(":clever-web"))
     api(project(":clever-groovy"))
+    // api("org.jetbrains.kotlin:kotlin-reflect:1.6.21")
 }
 
-tasks.withType<JavaCompile> {
-    enabled = false
+//sourceSets {
+//    main {
+//        java {
+//            setSrcDirs(listOf<String>())
+//        }
+//        withConvention(GroovySourceSet::class) {
+//            groovy {
+//                setSrcDirs(listOf("src/main/java", "src/main/groovy"))
+//            }
+//        }
+//    }
+//}
+
+//tasks.withType<JavaCompile> {
+//    enabled = false
+//}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "1.8"
+    }
 }
 
 // 拷贝lib文件
