@@ -2,6 +2,8 @@ package org.clever.web;
 
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
+import io.javalin.http.Handler;
+import io.javalin.http.HandlerType;
 import io.javalin.jetty.JettyUtil;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.env.Environment;
@@ -24,7 +26,7 @@ public class WebServerBootstrap {
     /**
      * 初始化Web服务
      */
-    public synchronized Javalin init(Environment environment, Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
+    public Javalin init(Environment environment, Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
         Assert.notNull(environment, "environment 不能为空");
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
         Javalin javalin = Javalin.create(config -> {
@@ -49,6 +51,17 @@ public class WebServerBootstrap {
                 configCallback.accept(config);
             }
         });
+        // TODO 注入MVC处理功能
+        MVC mvc = webConfig.getMvc();
+        if (mvc == null) {
+            mvc = new MVC();
+        }
+        Handler handler = ctx -> {
+
+        };
+        for (HandlerType handlerType : mvc.getHttpMethod()) {
+            javalin.addHandler(handlerType, mvc.getPath(), handler);
+        }
         // 自定义配置
         if (javalinCallback != null) {
             javalinCallback.accept(javalin);

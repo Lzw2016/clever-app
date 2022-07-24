@@ -1,5 +1,6 @@
 package org.clever.web.config;
 
+import io.javalin.http.HandlerType;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -27,7 +28,17 @@ public class MVC {
     /**
      * MVC接口前缀
      */
-    private String apiPrefix = "/api";
+    private String path = "/api/*";
+    /**
+     * MVC支持的Http Method
+     */
+    private Set<HandlerType> httpMethod = new HashSet<HandlerType>() {{
+        add(HandlerType.POST);
+        add(HandlerType.GET);
+        add(HandlerType.PUT);
+        add(HandlerType.PATCH);
+        add(HandlerType.DELETE);
+    }};
     /**
      * 允许MVC调用的package前缀
      */
