@@ -24,62 +24,47 @@ import java.util.TimeZone;
 @Data
 public class Jackson {
     /**
-     * Date format string or a fully-qualified date format class name. For instance,
-     * 'yyyy-MM-dd HH:mm:ss'.
+     * 日期格式字符串或完全限定的日期格式类名称。例如，'yyyy-MM-dd HH:mm:ss'。
      */
     private String dateFormat;
-
     /**
-     * One of the constants on Jackson's PropertyNamingStrategy. Can also be a
-     * fully-qualified class name of a PropertyNamingStrategy subclass.
+     * Jackson 的 PropertyNamingStrategy 中的常量之一。也可以是 PropertyNamingStrategy 子类的完全限定类名。
      */
     private String propertyNamingStrategy;
-
     /**
-     * Jackson visibility thresholds that can be used to limit which methods (and fields)
-     * are auto-detected.
+     * Jackson 可见性阈值，可用于限制自动检测哪些方法（和字段）。
      */
-    private final Map<PropertyAccessor, JsonAutoDetect.Visibility> visibility = new EnumMap<>(PropertyAccessor.class);
-
+    private Map<PropertyAccessor, JsonAutoDetect.Visibility> visibility = new EnumMap<>(PropertyAccessor.class);
     /**
-     * Jackson on/off features that affect the way Java objects are serialized.
+     * 开启/关闭 Jackson 特性会影响 Java 对象的序列化方式。
      */
-    private final Map<SerializationFeature, Boolean> serialization = new EnumMap<>(SerializationFeature.class);
-
+    private Map<SerializationFeature, Boolean> serialization = new EnumMap<>(SerializationFeature.class);
     /**
-     * Jackson on/off features that affect the way Java objects are deserialized.
+     * 开启/关闭 Jackson 特性会影响 Java 对象的反序列化方式。
      */
-    private final Map<DeserializationFeature, Boolean> deserialization = new EnumMap<>(DeserializationFeature.class);
-
+    private Map<DeserializationFeature, Boolean> deserialization = new EnumMap<>(DeserializationFeature.class);
     /**
-     * Jackson general purpose on/off features.
+     * 开启/关闭 Jackson 的通用特性
      */
-    private final Map<MapperFeature, Boolean> mapper = new EnumMap<>(MapperFeature.class);
-
+    private Map<MapperFeature, Boolean> mapper = new EnumMap<>(MapperFeature.class);
     /**
-     * Jackson on/off features for parsers.
+     * 开启/关闭 Jackson 的解析器特性
      */
-    private final Map<JsonParser.Feature, Boolean> parser = new EnumMap<>(JsonParser.Feature.class);
-
+    private Map<JsonParser.Feature, Boolean> parser = new EnumMap<>(JsonParser.Feature.class);
     /**
-     * Jackson on/off features for generators.
+     * 开启/关闭 Jackson 的生成器特性
      */
-    private final Map<JsonGenerator.Feature, Boolean> generator = new EnumMap<>(JsonGenerator.Feature.class);
-
+    private Map<JsonGenerator.Feature, Boolean> generator = new EnumMap<>(JsonGenerator.Feature.class);
     /**
-     * Controls the inclusion of properties during serialization. Configured with one of
-     * the values in Jackson's JsonInclude.Include enumeration.
+     * 控制序列化期间包含的属性。使用 Jackson 的 JsonInclude.Include 枚举中的值之一进行配置。
      */
     private JsonInclude.Include defaultPropertyInclusion;
-
     /**
-     * Time zone used when formatting dates. For instance, "America/Los_Angeles" or
-     * "GMT+10".
+     * 格式化日期时使用的时区。例如，“America/Los_Angeles”或“GMT+10”。
      */
-    private TimeZone timeZone = null;
-
+    private TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
     /**
-     * Locale used for formatting.
+     * 用于格式化的语言环境
      */
-    private Locale locale;
+    private Locale locale = Locale.SIMPLIFIED_CHINESE;
 }
