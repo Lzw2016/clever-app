@@ -20,6 +20,10 @@ public class WebConfig {
      */
     private int port = 9090;
     /**
+     * 全局的资源根路径
+     */
+    private String rootPath = "";
+    /**
      * HTTP 配置
      */
     private HTTP http = new HTTP();
@@ -31,6 +35,14 @@ public class WebConfig {
      * WebSocket 配置
      */
     private WebSocket webSocketConfig = new WebSocket();
+    /**
+     * MVC 配置
+     */
+    private MVC mvc = new MVC();
+    /**
+     * Jackson 配置
+     */
+    private Jackson jackson = new Jackson();
     /**
      * Misc(杂项) 配置
      */

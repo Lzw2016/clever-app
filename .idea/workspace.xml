@@ -5,6 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clever-core/TODO.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/TODO.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/Jackson.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/MVC.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/handler/HandleMethod.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/handler/HandleMethodResolver.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/handler/HandlerContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/handler/HandlerContextArgsResolver.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/handler/HandlerMapping.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/intercept/HandlerInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/WebConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -51,9 +62,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Kotlin Class" />
         <option value="Kotlin File" />
+        <option value="Interface" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -91,7 +103,7 @@
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
+    "settings.editor.selected.configurable": "yiiguxing.plugin.translate"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -260,7 +272,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1658547737604</updated>
-      <workItem from="1658547740267" duration="8209000" />
+      <workItem from="1658547740267" duration="15917000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1658549228129</created>
@@ -297,7 +309,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658589884223</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="init">
+      <created>1658590205048</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1658590205048</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -306,5 +325,9 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="init" />
     <option name="LAST_COMMIT_MESSAGE" value="init" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
