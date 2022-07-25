@@ -1,10 +1,12 @@
 package org.clever.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
 import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
 import io.javalin.jetty.JettyUtil;
+import io.javalin.plugin.json.JavalinJackson;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.env.Environment;
 import org.clever.util.Assert;
@@ -43,7 +45,8 @@ public class WebServerBootstrap {
             Misc misc = webConfig.getMisc();
             initMisc(config, misc);
             // 自定义 JsonMapper
-            // config.jsonMapper(new JavalinJackson(new ObjectMapper()));
+            Jackson jackson = webConfig.getJackson();
+            config.jsonMapper(new JavalinJackson(initJackson(jackson)));
             // 注册自定义插件
             // config.registerPlugin(myPlugin);
             // 自定义配置
@@ -180,6 +183,10 @@ public class WebServerBootstrap {
         for (HandlerType handlerType : mvc.getHttpMethod()) {
             javalin.addHandler(handlerType, mvc.getPath(), handler);
         }
+    }
+
+    private ObjectMapper initJackson(Jackson jackson) {
+        return new ObjectMapper();
     }
 
     private void initMisc(JavalinConfig config, Misc misc) {
