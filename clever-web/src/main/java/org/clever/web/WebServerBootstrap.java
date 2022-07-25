@@ -54,7 +54,7 @@ public class WebServerBootstrap {
                 configCallback.accept(config);
             }
         });
-        // TODO 注入MVC处理功能
+        // 注入MVC处理功能
         MVC mvc = webConfig.getMvc();
         initMVC(javalin, mvc);
         // 自定义配置
@@ -183,9 +183,11 @@ public class WebServerBootstrap {
         for (HandlerType handlerType : mvc.getHttpMethod()) {
             javalin.addHandler(handlerType, mvc.getPath(), handler);
         }
+        // TODO 注入MVC处理功能
     }
 
     private ObjectMapper initJackson(Jackson jackson) {
+        // TODO 自定义 JsonMapper
         return new ObjectMapper();
     }
 
