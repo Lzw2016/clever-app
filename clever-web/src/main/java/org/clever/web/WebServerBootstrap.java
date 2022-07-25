@@ -53,15 +53,7 @@ public class WebServerBootstrap {
         });
         // TODO 注入MVC处理功能
         MVC mvc = webConfig.getMvc();
-        if (mvc == null) {
-            mvc = new MVC();
-        }
-        Handler handler = ctx -> {
-
-        };
-        for (HandlerType handlerType : mvc.getHttpMethod()) {
-            javalin.addHandler(handlerType, mvc.getPath(), handler);
-        }
+        initMVC(javalin, mvc);
         // 自定义配置
         if (javalinCallback != null) {
             javalinCallback.accept(javalin);
@@ -177,6 +169,17 @@ public class WebServerBootstrap {
 
         // 注册一个 WebSocket 记录器
         // config.wsLogger(ws -> {});
+    }
+
+    private void initMVC(Javalin javalin, MVC mvc) {
+        if (mvc == null) {
+            mvc = new MVC();
+        }
+        Handler handler = ctx -> {
+        };
+        for (HandlerType handlerType : mvc.getHttpMethod()) {
+            javalin.addHandler(handlerType, mvc.getPath(), handler);
+        }
     }
 
     private void initMisc(JavalinConfig config, Misc misc) {

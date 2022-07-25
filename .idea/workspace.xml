@@ -5,9 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/Conv.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/DateUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/converter/StringToDateConverter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/converter/StringToNumberConverter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/converter/TypeConverter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/json/JsonArrayWrapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/json/JsonTypeUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/json/JsonWrapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/json/jackson/BigDecimalSerializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/json/jackson/DateDeserializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/json/jackson/JsonWrapperSerializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/BeanCopyUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/BeanMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/JacksonMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/JaxbMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/JsonXmlConverter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/XStreamMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/support/BeanConverter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/reflection/ReflectionsFindUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/reflection/ReflectionsUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-core/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/clever-core/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/MVC.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/MVC.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,6 +106,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "jdk.selected.JAVA_MODULE": "1.8",
+    "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-core/src/main/java/org/clever/core/reflection",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -94,12 +115,21 @@
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "yiiguxing.plugin.translate"
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\reflection" />
+      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\converter" />
+      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\mapper" />
+      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\json" />
+    </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="org.clever.app" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="org.clever.core" />
     </key>
   </component>
   <component name="RunManager" selected="Application.org.clever.app.StartApp">
@@ -263,7 +293,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1658547737604</updated>
-      <workItem from="1658547740267" duration="19195000" />
+      <workItem from="1658547740267" duration="23007000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1658549228129</created>
@@ -321,7 +351,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658674030865</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="init">
+      <created>1658675124410</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1658675124410</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
