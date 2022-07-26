@@ -53,7 +53,7 @@ public class JavalinPluginRegistrar {
         int idx = 1;
         for (OrderPlugin item : plugins) {
             log.info(
-                    "# BeforeHandler {}{}",
+                    "# Plugin {}{}",
                     String.format("%-2s", idx++),
                     StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
             );
