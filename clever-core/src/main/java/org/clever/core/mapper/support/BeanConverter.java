@@ -65,7 +65,6 @@ public class BeanConverter {
         return result;
     }
 
-
     public BeanConverter registerConverter(TypeConverter converter) {
         this.converter.registerConverter(converter);
         return this;
