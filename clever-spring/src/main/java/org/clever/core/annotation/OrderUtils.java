@@ -34,8 +34,8 @@ public abstract class OrderUtils {
      * @return 优先级值，或指定的默认顺序（如果找不到）
      * @see #getPriority(Class)
      */
-    public static int getOrder(Class<?> type, int defaultOrder) {
-        Integer order = getOrder(type);
+    public static double getOrder(Class<?> type, int defaultOrder) {
+        Double order = getOrder(type);
         return (order != null ? order : defaultOrder);
     }
 
@@ -47,8 +47,8 @@ public abstract class OrderUtils {
      * @return 优先级值，或指定的默认顺序（如果找不到）
      * @see #getPriority(Class)
      */
-    public static Integer getOrder(Class<?> type, Integer defaultOrder) {
-        Integer order = getOrder(type);
+    public static Double getOrder(Class<?> type, Integer defaultOrder) {
+        Double order = getOrder(type);
         return (order != null ? order : defaultOrder);
     }
 
@@ -60,7 +60,7 @@ public abstract class OrderUtils {
      * @return order值，如果找不到，则为null
      * @see #getPriority(Class)
      */
-    public static Integer getOrder(Class<?> type) {
+    public static Double getOrder(Class<?> type) {
         return getOrder((AnnotatedElement) type);
     }
 
@@ -71,7 +71,7 @@ public abstract class OrderUtils {
      * @param element 注释元素（例如类型或方法）
      * @return order值，如果找不到，则为null
      */
-    public static Integer getOrder(AnnotatedElement element) {
+    public static Double getOrder(AnnotatedElement element) {
         return getOrderFromAnnotations(element, MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY));
     }
 
@@ -83,27 +83,27 @@ public abstract class OrderUtils {
      * @param annotations 要考虑的注释
      * @return order值，如果找不到，则为null
      */
-    static Integer getOrderFromAnnotations(AnnotatedElement element, MergedAnnotations annotations) {
+    static Double getOrderFromAnnotations(AnnotatedElement element, MergedAnnotations annotations) {
         if (!(element instanceof Class)) {
             return findOrder(annotations);
         }
         Object cached = orderCache.get(element);
         if (cached != null) {
-            return (cached instanceof Integer ? (Integer) cached : null);
+            return (cached instanceof Double ? (Double) cached : null);
         }
-        Integer result = findOrder(annotations);
+        Double result = findOrder(annotations);
         orderCache.put(element, result != null ? result : NOT_ANNOTATED);
         return result;
     }
-    
-    private static Integer findOrder(MergedAnnotations annotations) {
+
+    private static Double findOrder(MergedAnnotations annotations) {
         MergedAnnotation<Order> orderAnnotation = annotations.get(Order.class);
         if (orderAnnotation.isPresent()) {
-            return orderAnnotation.getInt(MergedAnnotation.VALUE);
+            return orderAnnotation.getDouble(MergedAnnotation.VALUE);
         }
         MergedAnnotation<?> priorityAnnotation = annotations.get(JAVAX_PRIORITY_ANNOTATION);
         if (priorityAnnotation.isPresent()) {
-            return priorityAnnotation.getInt(MergedAnnotation.VALUE);
+            return priorityAnnotation.getDouble(MergedAnnotation.VALUE);
         }
         return null;
     }

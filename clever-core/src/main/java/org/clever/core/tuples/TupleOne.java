@@ -1,6 +1,6 @@
 package org.clever.core.tuples;
 
-import com.yvan.core.tuples.value.One;
+import org.clever.core.tuples.value.One;
 
 /**
  * 作者：lizw <br/>

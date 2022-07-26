@@ -1,9 +1,9 @@
 package org.clever.core.tuples;
 
-import com.yvan.core.tuples.value.Four;
-import com.yvan.core.tuples.value.One;
-import com.yvan.core.tuples.value.Three;
-import com.yvan.core.tuples.value.Two;
+import org.clever.core.tuples.value.Four;
+import org.clever.core.tuples.value.One;
+import org.clever.core.tuples.value.Three;
+import org.clever.core.tuples.value.Two;
 
 /**
  * 四元元组

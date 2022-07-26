@@ -10,14 +10,14 @@ public interface Ordered {
     /**
      * 最高的优先级
      */
-    int HIGHEST_PRECEDENCE = Integer.MIN_VALUE;
+    double HIGHEST_PRECEDENCE = Double.MIN_VALUE;
     /**
      * 最低的优先级
      */
-    int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
+    double LOWEST_PRECEDENCE = Double.MAX_VALUE;
 
     /**
      * 优先级，值越小优先级越高
      */
-    int getOrder();
+    double getOrder();
 }

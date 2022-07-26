@@ -22,7 +22,7 @@ public interface HandlerContextArgsResolver extends Ordered {
     HandlerContext getHandlerContext(HttpServletRequest request, HttpServletResponse response, HandleMethod handleMethod);
 
     @Override
-    default int getOrder() {
+    default double getOrder() {
         return 0;
     }
 }

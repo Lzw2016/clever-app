@@ -24,5 +24,5 @@ public @interface Order {
      *
      * @see Ordered#getOrder()
      */
-    int value() default Ordered.LOWEST_PRECEDENCE;
+    double value() default Ordered.LOWEST_PRECEDENCE;
 }

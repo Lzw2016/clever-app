@@ -40,7 +40,7 @@ public interface TransactionSynchronization extends Ordered, Flushable {
      * <p>默认值为 {@link Ordered#LOWEST_PRECEDENCE}.
      */
     @Override
-    default int getOrder() {
+    default double getOrder() {
         return Ordered.LOWEST_PRECEDENCE;
     }
 

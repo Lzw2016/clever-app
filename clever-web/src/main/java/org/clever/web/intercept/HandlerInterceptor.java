@@ -44,7 +44,7 @@ public interface HandlerInterceptor extends Ordered {
      * @see org.clever.core.Ordered
      */
     @Override
-    default int getOrder() {
+    default double getOrder() {
         return 0;
     }
 }

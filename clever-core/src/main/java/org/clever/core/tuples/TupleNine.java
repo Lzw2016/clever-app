@@ -1,6 +1,6 @@
 package org.clever.core.tuples;
 
-import com.yvan.core.tuples.value.*;
+import org.clever.core.tuples.value.*;
 
 /**
  * 九元元组

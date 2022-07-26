@@ -22,7 +22,7 @@ public interface HandleMethodResolver extends Ordered {
     HandleMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, String matcherPath);
 
     @Override
-    default int getOrder() {
+    default double getOrder() {
         return 0;
     }
 }

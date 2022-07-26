@@ -56,9 +56,9 @@ public class OrderComparator implements Comparator<Object> {
         } else if (p2 && !p1) {
             return 1;
         }
-        int i1 = getOrder(o1, sourceProvider);
-        int i2 = getOrder(o2, sourceProvider);
-        return Integer.compare(i1, i2);
+        double i1 = getOrder(o1, sourceProvider);
+        double i2 = getOrder(o2, sourceProvider);
+        return Double.compare(i1, i2);
     }
 
     /**
@@ -69,8 +69,8 @@ public class OrderComparator implements Comparator<Object> {
      * @param obj 要检查的对象
      * @return order值，或{@code Ordered.LOWEST_PRECEDENCE}作为回退
      */
-    private int getOrder(Object obj, OrderSourceProvider sourceProvider) {
-        Integer order = null;
+    private double getOrder(Object obj, OrderSourceProvider sourceProvider) {
+        Double order = null;
         if (obj != null && sourceProvider != null) {
             Object orderSource = sourceProvider.getOrderSource(obj);
             if (orderSource != null) {
@@ -96,9 +96,9 @@ public class OrderComparator implements Comparator<Object> {
      * @param obj 要检查的对象
      * @return order值，或{@code Ordered.LOWEST_PRECEDENCE}作为回退
      */
-    protected int getOrder(Object obj) {
+    protected double getOrder(Object obj) {
         if (obj != null) {
-            Integer order = findOrder(obj);
+            Double order = findOrder(obj);
             if (order != null) {
                 return order;
             }
@@ -113,7 +113,7 @@ public class OrderComparator implements Comparator<Object> {
      * @param obj 要检查的对象
      * @return 订单值，如果未找到，则为null
      */
-    protected Integer findOrder(Object obj) {
+    protected Double findOrder(Object obj) {
         return (obj instanceof Ordered ? ((Ordered) obj).getOrder() : null);
     }
 

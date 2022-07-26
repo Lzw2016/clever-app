@@ -67,7 +67,7 @@ public class StandardConfigDataLocationResolver implements ConfigDataLocationRes
     }
 
     @Override
-    public int getOrder() {
+    public double getOrder() {
         return Ordered.LOWEST_PRECEDENCE;
     }
 

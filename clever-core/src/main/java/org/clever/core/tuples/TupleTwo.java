@@ -1,7 +1,7 @@
 package org.clever.core.tuples;
 
-import com.yvan.core.tuples.value.One;
-import com.yvan.core.tuples.value.Two;
+import org.clever.core.tuples.value.One;
+import org.clever.core.tuples.value.Two;
 
 /**
  * 二元元组

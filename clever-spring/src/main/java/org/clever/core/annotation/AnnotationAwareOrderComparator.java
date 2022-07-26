@@ -33,18 +33,18 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
      * 此实现检查 {@link Order @Order} 或 {@code javax.annotation.Priority @Priority} 关于各种元素，除了 {@link org.clever.core.Ordered} 超类。
      */
     @Override
-    protected Integer findOrder(Object obj) {
-        Integer order = super.findOrder(obj);
+    protected Double findOrder(Object obj) {
+        Double order = super.findOrder(obj);
         if (order != null) {
             return order;
         }
         return findOrderFromAnnotation(obj);
     }
 
-    private Integer findOrderFromAnnotation(Object obj) {
+    private Double findOrderFromAnnotation(Object obj) {
         AnnotatedElement element = (obj instanceof AnnotatedElement ? (AnnotatedElement) obj : obj.getClass());
         MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY);
-        Integer order = OrderUtils.getOrderFromAnnotations(element, annotations);
+        Double order = OrderUtils.getOrderFromAnnotations(element, annotations);
         if (order == null && obj instanceof DecoratingProxy) {
             return findOrderFromAnnotation(((DecoratingProxy) obj).getDecoratedClass());
         }

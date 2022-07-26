@@ -390,7 +390,7 @@ public abstract class DataSourceUtils {
         }
 
         @Override
-        public int getOrder() {
+        public double getOrder() {
             return this.order;
         }
 
