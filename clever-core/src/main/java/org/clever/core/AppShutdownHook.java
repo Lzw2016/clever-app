@@ -23,7 +23,11 @@ public class AppShutdownHook {
             SHUTDOWN_TASK_LIST.sort(Comparator.comparingDouble(o -> o.order));
             int idx = 1;
             for (ShutdownTask task : SHUTDOWN_TASK_LIST) {
-                log.info("# 执行停机任务 {}{}", idx++, StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : "");
+                log.info(
+                        "# 执行停机任务 {}{}",
+                        String.format("%-2s", idx++),
+                        StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : ""
+                );
                 try {
                     task.runnable.run();
                 } catch (Exception e) {

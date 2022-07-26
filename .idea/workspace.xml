@@ -4,9 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="">
+    <list default="true" id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="init">
+      <change afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/core/Initializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/core/InitializerException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/JavalinHandlerRegistrar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/JavalinPluginRegistrar.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/src/main/java/org/clever/app/StartApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/AppShutdownHook.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/AppShutdownHook.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-data-jdbc/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/context/config/ConfigDataBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/context/config/ConfigDataBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/context/logging/LoggingBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/boot/context/logging/LoggingBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/Assert.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/Assert.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/StringUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/util/StringUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/test/java/org/clever/FixClassTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/src/test/java/org/clever/FixClassTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-web/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/MVC.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/MVC.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,6 +182,22 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="FixClassTest.t01" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
+      <module name="clever-app.clever-spring.test" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.clever.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.clever" />
+      <option name="MAIN_CLASS_NAME" value="org.clever.FixClassTest" />
+      <option name="METHOD_NAME" value="t01" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="KotlinTest.t01" type="JUnit" factoryName="JUnit" nameIsGenerated="true">
       <module name="clever-app.clever-boot.test" />
       <extension name="coverage">
@@ -252,6 +282,7 @@
       <item itemvalue="Application.org.clever.app.StartApp" />
       <item itemvalue="Gradle.clever-app [build]" />
       <item itemvalue="Gradle.clever-app [clean]" />
+      <item itemvalue="JUnit.FixClassTest.t01" />
       <item itemvalue="JUnit.KotlinTest.t01" />
       <item itemvalue="JUnit.KotlinTest.t02" />
       <item itemvalue="JUnit.KotlinTest.t03" />
@@ -273,7 +304,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1658547737604</updated>
-      <workItem from="1658547740267" duration="28041000" />
+      <workItem from="1658547740267" duration="41866000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1658549228129</created>
@@ -373,7 +404,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658806276034</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="init">
+      <created>1658806889001</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1658806889001</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

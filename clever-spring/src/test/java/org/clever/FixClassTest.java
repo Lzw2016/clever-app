@@ -20,6 +20,8 @@ public class FixClassTest {
         Set<String> ignoreClassNames = new HashSet<>(Arrays.asList(
                 ".core.io.VfsUtils",
                 ".core.io.support.VfsPatternUtils",
+                ".core.Initializer",
+                ".core.InitializerException",
                 ".beans.factory.config.BeanHolder",
                 ".beans.factory.NoSuchBeanException",
                 ".beans.factory.NoUniqueBeanException",

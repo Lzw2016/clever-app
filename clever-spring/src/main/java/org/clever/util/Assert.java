@@ -1,5 +1,9 @@
 package org.clever.util;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -9,6 +13,82 @@ import java.util.function.Supplier;
  * 创建时间：2022/04/17 23:25 <br/>
  */
 public class Assert {
+    public static void isFalse(boolean expression, String message) {
+        if (expression) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void isFalse(boolean expression, Supplier<String> messageSupplier) {
+        if (expression) {
+            throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+        }
+    }
+
+    public static void isNotBlank(String text, String message) {
+        if (StringUtils.isBlank(text)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void isNotBlank(String text, Supplier<String> messageSupplier) {
+        if (StringUtils.isBlank(text)) {
+            throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+        }
+    }
+
+    public static void isBlank(String text, String message) {
+        if (StringUtils.isNotBlank(text)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void isBlank(String text, Supplier<String> messageSupplier) {
+        if (StringUtils.isNotBlank(text)) {
+            throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+        }
+    }
+
+    public static void doesNotContain(String textToSearch, String substring, String message) {
+        if ((textToSearch != null
+                && !textToSearch.isEmpty())
+                && (substring != null
+                && !substring.isEmpty())
+                && textToSearch.contains(substring)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void notEmpty(Collection<?> collection, String message) {
+        if (isEmpty(collection)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static boolean isEmpty(Object obj) {
+        if (obj == null) {
+            return true;
+        }
+        if (obj instanceof Optional) {
+            return !((Optional) obj).isPresent();
+        }
+        if (obj instanceof CharSequence) {
+            return ((CharSequence) obj).length() == 0;
+        }
+        if (obj.getClass().isArray()) {
+            return Array.getLength(obj) == 0;
+        }
+        if (obj instanceof Collection) {
+            return ((Collection) obj).isEmpty();
+        }
+        if (obj instanceof Map) {
+            return ((Map) obj).isEmpty();
+        }
+        // else
+        return false;
+    }
+
     public static void isNull(Object object, String message) {
         if (object != null) {
             throw new IllegalArgumentException(message);

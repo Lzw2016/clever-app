@@ -16,15 +16,6 @@ import java.util.Set;
  */
 @Data
 public class MVC {
-//    /**
-//     * 如果没有找到处理请求的处理程序，是否应该抛出“NoHandlerFoundException”。
-//     */
-//    private boolean throwExceptionIfNoHandlerFound = false;
-//    /**
-//     * 是否启用由“HandlerExceptionResolver”解决的异常的警告日志记录，“DefaultHandlerExceptionResolver”除外。
-//     */
-//    private boolean logResolvedException = false;
-
     /**
      * MVC接口前缀
      */

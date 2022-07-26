@@ -24,6 +24,63 @@ public class StringUtils {
     }
 
     /**
+     * <p>检查 CharSequence 是否不为空 ("")、不为空且仅不为空格。</p>
+     * <p>空白由 {@link Character#isWhitespace(char)} 定义</p>
+     *
+     * <pre>
+     * StringUtils.isNotBlank(null)      = false
+     * StringUtils.isNotBlank("")        = false
+     * StringUtils.isNotBlank(" ")       = false
+     * StringUtils.isNotBlank("bob")     = true
+     * StringUtils.isNotBlank("  bob  ") = true
+     * </pre>
+     *
+     * @param cs 要检查的 CharSequence，可能为 null
+     * @return {@code true} 如果 CharSequence 不为空且不为 null 且仅为空格
+     */
+    public static boolean isNotBlank(final CharSequence cs) {
+        return !isBlank(cs);
+    }
+
+    /**
+     * <p>检查 CharSequence 是否为空 ("")、null 或仅空格</p>
+     * <p>空白由 {@link Character#isWhitespace(char)} 定义</p>
+     *
+     * <pre>
+     * StringUtils.isBlank(null)      = true
+     * StringUtils.isBlank("")        = true
+     * StringUtils.isBlank(" ")       = true
+     * StringUtils.isBlank("bob")     = false
+     * StringUtils.isBlank("  bob  ") = false
+     * </pre>
+     *
+     * @param cs 要检查的 CharSequence，可能为 null
+     * @return {@code true} 如果 CharSequence 为空、空或仅空格
+     */
+    public static boolean isBlank(final CharSequence cs) {
+        final int strLen = length(cs);
+        if (strLen == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 如果 CharSequence 为 {@code null}，则获取 CharSequence 长度或 {@code 0}
+     *
+     * @param cs 一个 CharSequence 或 {@code null}
+     * @return 如果 CharSequence 为 {@code null}，则 CharSequence 长度或 {@code 0}
+     */
+    public static int length(final CharSequence cs) {
+        return cs == null ? 0 : cs.length();
+    }
+
+    /**
      * 从给定的字符串中修剪前导和尾随空格
      *
      * @param str 要检查的字符串

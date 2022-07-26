@@ -9,6 +9,7 @@ import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
 import io.javalin.jetty.JettyUtil;
 import io.javalin.plugin.json.JavalinJackson;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.beans.BeanUtils;
 import org.clever.beans.FatalBeanException;
@@ -36,10 +37,18 @@ import java.util.function.Consumer;
  * 创建时间：2022/07/17 12:35 <br/>
  */
 public class WebServerBootstrap {
+    protected volatile boolean initialized = false;
+    @Getter
+    private final JavalinPluginRegistrar pluginRegistrar = new JavalinPluginRegistrar();
+    @Getter
+    private final JavalinHandlerRegistrar handlerRegistrar = new JavalinHandlerRegistrar();
+
     /**
-     * 初始化Web服务
+     * 初始化并启动Web服务
      */
     public Javalin init(Environment environment, Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
+        Assert.isTrue(!initialized, "不能多次初始化");
+        initialized = true;
         Assert.notNull(environment, "environment 不能为空");
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
         Javalin javalin = Javalin.create(config -> {
@@ -59,12 +68,14 @@ public class WebServerBootstrap {
             Jackson jackson = webConfig.getJackson();
             config.jsonMapper(new JavalinJackson(initJackson(jackson)));
             // 注册自定义插件
-            // config.registerPlugin(myPlugin);
+            pluginRegistrar.init(config);
             // 自定义配置
             if (configCallback != null) {
                 configCallback.accept(config);
             }
         });
+        // 注册自定义Handler
+        handlerRegistrar.init(javalin);
         // 注入MVC处理功能
         MVC mvc = webConfig.getMvc();
         initMVC(javalin, mvc);
@@ -76,10 +87,16 @@ public class WebServerBootstrap {
         return javalin;
     }
 
+    /**
+     * 初始化并启动Web服务
+     */
     public Javalin init(Environment environment, Consumer<JavalinConfig> configCallback) {
         return init(environment, configCallback, null);
     }
 
+    /**
+     * 初始化并启动Web服务
+     */
     public Javalin init(Environment environment) {
         return init(environment, null, null);
     }

@@ -5,6 +5,7 @@ import org.clever.boot.env.RandomValuePropertySource;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.core.io.DefaultResourceLoader;
 import org.clever.core.io.ResourceLoader;
+import org.clever.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,7 @@ import java.util.Collection;
  */
 public class ConfigDataBootstrap {
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    protected volatile boolean initialized = false;
     private final ResourceLoader resourceLoader;
     private final Collection<String> additionalProfiles;
     private final ConfigDataEnvironmentUpdateListener environmentUpdateListener;
@@ -43,6 +45,8 @@ public class ConfigDataBootstrap {
      * 读取系统配置到 {@code environment} 中
      */
     public void init(StandardEnvironment environment) {
+        Assert.isTrue(!initialized, "不能多次初始化");
+        initialized = true;
         ConfigurationPropertySources.attach(environment);
         RandomValuePropertySource.addToEnvironment(environment, logger);
         ConfigDataEnvironment configDataEnvironment = new ConfigDataEnvironment(

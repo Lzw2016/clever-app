@@ -7,6 +7,7 @@ import org.clever.boot.logging.*;
 import org.clever.core.ResolvableType;
 import org.clever.core.env.ConfigurableEnvironment;
 import org.clever.core.env.Environment;
+import org.clever.util.Assert;
 import org.clever.util.LinkedMultiValueMap;
 import org.clever.util.MultiValueMap;
 import org.clever.util.StringUtils;
@@ -66,6 +67,7 @@ public class LoggingBootstrap {
         CLEVER_BOOT_LOGGING_LOGGERS = Collections.unmodifiableMap(loggers);
     }
 
+    protected volatile boolean initialized = false;
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final ClassLoader classLoader;
     private LoggingSystem loggingSystem;
@@ -92,6 +94,8 @@ public class LoggingBootstrap {
      * 初始化日志模块
      */
     public void init(ConfigurableEnvironment environment) {
+        Assert.isTrue(!initialized, "不能多次初始化");
+        initialized = true;
         if (this.loggingSystem == null) {
             this.loggingSystem = LoggingSystem.get(classLoader);
         }
