@@ -35,9 +35,9 @@ public class StartApp {
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         javalin.post("/test", ctx -> {
-           log.info("body --> {}",ctx.body());
-           log.info("body --> {}",ctx.body());
-           ctx.result("test,中文");
+            log.info("body --> {}", ctx.body());
+            log.info("body --> {}", ctx.body());
+            ctx.result("test,中文");
         });
         // 优雅停机
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");
