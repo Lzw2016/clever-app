@@ -33,13 +33,13 @@ public class StartApp {
         // 启动web服务
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
         webServerBootstrap.getHandlerRegistrar()
-                .addBeforeHandler(ctx -> {
+                .addBeforeHandler("*", ctx -> {
                     log.info("### 1 start");
                     Thread.sleep(1000 * 3);
                     log.info("### 1 end");
-                }, "*")
-                .addBeforeHandler(ctx -> log.info("### 1"), "*")
-                .addBeforeHandler(ctx -> log.info("### 2"), "*");
+                })
+                .addBeforeHandler("*", ctx -> log.info("### 1"))
+                .addBeforeHandler("*", ctx -> log.info("### 2"));
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理

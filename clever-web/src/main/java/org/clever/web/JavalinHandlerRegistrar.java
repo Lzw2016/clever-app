@@ -41,12 +41,12 @@ public class JavalinHandlerRegistrar {
     /**
      * 增加 Before 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
      * @param name    拦截器名称
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addBeforeHandler(Handler handler, String path, double order, String name) {
+    public synchronized JavalinHandlerRegistrar addBeforeHandler(String path, double order, String name, Handler handler) {
         Assert.notNull(handler, "handler 不能为 nul");
         Assert.isNotBlank(path, "path 不能为空");
         beforeHandler.add(new OrderItem<>(handler, path, order, name));
@@ -56,33 +56,33 @@ public class JavalinHandlerRegistrar {
     /**
      * 增加 Before 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addBeforeHandler(Handler handler, String path, double order) {
-        return addBeforeHandler(handler, path, order, null);
+    public synchronized JavalinHandlerRegistrar addBeforeHandler(String path, double order, Handler handler) {
+        return addBeforeHandler(path, order, null, handler);
     }
 
     /**
      * 增加 Before 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addBeforeHandler(Handler handler, String path) {
-        return addBeforeHandler(handler, path, 0, null);
+    public synchronized JavalinHandlerRegistrar addBeforeHandler(String path, Handler handler) {
+        return addBeforeHandler(path, 0, null, handler);
     }
 
     /**
      * 增加 After 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
      * @param name    拦截器名称
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addAfterHandler(Handler handler, String path, double order, String name) {
+    public synchronized JavalinHandlerRegistrar addAfterHandler(String path, double order, String name, Handler handler) {
         Assert.notNull(handler, "handler 不能为 nul");
         Assert.isNotBlank(path, "path 不能为空");
         afterHandler.add(new OrderItem<>(handler, path, order, name));
@@ -92,33 +92,33 @@ public class JavalinHandlerRegistrar {
     /**
      * 增加 After 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addAfterHandler(Handler handler, String path, double order) {
-        return addAfterHandler(handler, path, order, null);
+    public synchronized JavalinHandlerRegistrar addAfterHandler(String path, double order, Handler handler) {
+        return addAfterHandler(path, order, null, handler);
     }
 
     /**
      * 增加 After 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addAfterHandler(Handler handler, String path) {
-        return addAfterHandler(handler, path, 0, null);
+    public synchronized JavalinHandlerRegistrar addAfterHandler(String path, Handler handler) {
+        return addAfterHandler(path, 0, null, handler);
     }
 
     /**
      * 增加 WebSocket  Before 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
      * @param name    拦截器名称
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addWsBeforeHandler(Consumer<WsConfig> handler, String path, double order, String name) {
+    public synchronized JavalinHandlerRegistrar addWsBeforeHandler(String path, double order, String name, Consumer<WsConfig> handler) {
         Assert.notNull(handler, "handler 不能为 nul");
         Assert.isNotBlank(path, "path 不能为空");
         wsBeforeHandler.add(new OrderItem<>(handler, path, order, name));
@@ -128,33 +128,33 @@ public class JavalinHandlerRegistrar {
     /**
      * 增加 WebSocket  Before 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addWsBeforeHandler(Consumer<WsConfig> handler, String path, double order) {
-        return addWsBeforeHandler(handler, path, order, null);
+    public synchronized JavalinHandlerRegistrar addWsBeforeHandler(String path, double order, Consumer<WsConfig> handler) {
+        return addWsBeforeHandler(path, order, null, handler);
     }
 
     /**
      * 增加 WebSocket  Before 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addWsBeforeHandler(Consumer<WsConfig> handler, String path) {
-        return addWsBeforeHandler(handler, path, 0, null);
+    public synchronized JavalinHandlerRegistrar addWsBeforeHandler(String path, Consumer<WsConfig> handler) {
+        return addWsBeforeHandler(path, 0, null, handler);
     }
 
     /**
      * 增加 WebSocket After 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
      * @param name    拦截器名称
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addWsAfterHandler(Consumer<WsConfig> handler, String path, double order, String name) {
+    public synchronized JavalinHandlerRegistrar addWsAfterHandler(String path, double order, String name, Consumer<WsConfig> handler) {
         Assert.notNull(handler, "handler 不能为 nul");
         Assert.isNotBlank(path, "path 不能为空");
         wsBeforeHandler.add(new OrderItem<>(handler, path, order, name));
@@ -164,22 +164,22 @@ public class JavalinHandlerRegistrar {
     /**
      * 增加 WebSocket After 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
      * @param order   顺序，值越小，优先级越高
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addWsAfterHandler(Consumer<WsConfig> handler, String path, double order) {
-        return addWsBeforeHandler(handler, path, order, null);
+    public synchronized JavalinHandlerRegistrar addWsAfterHandler(String path, double order, Consumer<WsConfig> handler) {
+        return addWsBeforeHandler(path, order, null, handler);
     }
 
     /**
      * 增加 WebSocket After 拦截器
      *
-     * @param handler 拦截器
      * @param path    拦截路径
+     * @param handler 拦截器
      */
-    public synchronized JavalinHandlerRegistrar addWsAfterHandler(Consumer<WsConfig> handler, String path) {
-        return addWsBeforeHandler(handler, path, 0, null);
+    public synchronized JavalinHandlerRegistrar addWsAfterHandler(String path, Consumer<WsConfig> handler) {
+        return addWsBeforeHandler(path, 0, null, handler);
     }
 
     /**
