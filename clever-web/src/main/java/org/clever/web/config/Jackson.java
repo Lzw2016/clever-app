@@ -24,13 +24,27 @@ import java.util.TimeZone;
 @Data
 public class Jackson {
     /**
-     * 日期格式字符串或完全限定的日期格式类名称。例如，'yyyy-MM-dd HH:mm:ss'。
+     * 日期格式字符串或完全限定的日期格式类名称。默认: 'yyyy-MM-dd HH:mm:ss'。
      */
-    private String dateFormat;
+    private String dateFormat = "yyyy-MM-dd HH:mm:ss";
     /**
-     * Jackson 的 PropertyNamingStrategy 中的常量之一。也可以是 PropertyNamingStrategy 子类的完全限定类名。
+     * 用于格式化的语言环境
+     */
+    private Locale locale = Locale.SIMPLIFIED_CHINESE;
+    /**
+     * 格式化日期时使用的时区。例如，“America/Los_Angeles”或“GMT+10”。
+     */
+    private TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
+    /**
+     * Jackson 的 {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} 中的静态成员之一之一。
+     * 也可以是 PropertyNamingStrategy 子类的完全限定类名。
      */
     private String propertyNamingStrategy;
+    /**
+     * 控制序列化期间包含的属性。
+     * 使用 Jackson 的 JsonInclude.Include 枚举中的值之一进行配置。
+     */
+    private JsonInclude.Include defaultPropertyInclusion;
     /**
      * Jackson 可见性阈值，可用于限制自动检测哪些方法（和字段）。
      */
@@ -55,16 +69,4 @@ public class Jackson {
      * 开启/关闭 Jackson 的生成器特性
      */
     private Map<JsonGenerator.Feature, Boolean> generator = new EnumMap<>(JsonGenerator.Feature.class);
-    /**
-     * 控制序列化期间包含的属性。使用 Jackson 的 JsonInclude.Include 枚举中的值之一进行配置。
-     */
-    private JsonInclude.Include defaultPropertyInclusion;
-    /**
-     * 格式化日期时使用的时区。例如，“America/Los_Angeles”或“GMT+10”。
-     */
-    private TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
-    /**
-     * 用于格式化的语言环境
-     */
-    private Locale locale = Locale.SIMPLIFIED_CHINESE;
 }

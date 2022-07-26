@@ -1,19 +1,30 @@
 package org.clever.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.*;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
 import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
 import io.javalin.jetty.JettyUtil;
 import io.javalin.plugin.json.JavalinJackson;
+import org.apache.commons.lang3.StringUtils;
+import org.clever.beans.BeanUtils;
+import org.clever.beans.FatalBeanException;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.env.Environment;
+import org.clever.core.mapper.JacksonMapper;
+import org.clever.core.tuples.TupleThree;
 import org.clever.util.Assert;
+import org.clever.util.ClassUtils;
+import org.clever.util.ReflectionUtils;
 import org.clever.web.config.*;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
@@ -187,8 +198,87 @@ public class WebServerBootstrap {
     }
 
     private ObjectMapper initJackson(Jackson jackson) {
-        // TODO 自定义 JsonMapper
-        return new ObjectMapper();
+        if (jackson == null) {
+            jackson = new Jackson();
+        }
+        ObjectMapper mapper = JacksonMapper.newObjectMapper();
+        // dateFormat
+        if (StringUtils.isNotBlank(jackson.getDateFormat())) {
+            mapper.setDateFormat(new SimpleDateFormat(jackson.getDateFormat()));
+        }
+        // locale
+        if (jackson.getLocale() != null) {
+            mapper.setLocale(jackson.getLocale());
+        }
+        // timeZone
+        if (jackson.getTimeZone() != null) {
+            mapper.setTimeZone(jackson.getTimeZone());
+        }
+        // propertyNamingStrategy
+        String strategy = jackson.getPropertyNamingStrategy();
+        if (strategy != null) {
+            PropertyNamingStrategy propertyNamingStrategy;
+            try {
+                propertyNamingStrategy = (PropertyNamingStrategy) BeanUtils.instantiateClass(ClassUtils.forName(strategy, null));
+            } catch (ClassNotFoundException ex) {
+                Field field = ReflectionUtils.findField(PropertyNamingStrategy.class, strategy, PropertyNamingStrategy.class);
+                Assert.notNull(field, () -> "Constant named '" + strategy + "' not found on " + PropertyNamingStrategy.class.getName());
+                try {
+                    propertyNamingStrategy = (PropertyNamingStrategy) field.get(null);
+                } catch (Exception ex2) {
+                    throw new IllegalStateException(ex2);
+                }
+            }
+            mapper.setPropertyNamingStrategy(propertyNamingStrategy);
+        }
+        // defaultPropertyInclusion
+        if (jackson.getDefaultPropertyInclusion() != null) {
+            mapper.setDefaultPropertyInclusion(jackson.getDefaultPropertyInclusion());
+        }
+        // visibility
+        if (jackson.getVisibility() != null) {
+            jackson.getVisibility().forEach(mapper::setVisibility);
+        }
+        Consumer<TupleThree<ObjectMapper, Object, Boolean>> configureFeature = tuple -> {
+            ObjectMapper objectMapper = tuple.getValue1();
+            Object feature = tuple.getValue2();
+            Boolean enabled = tuple.getValue3();
+            if (feature instanceof JsonParser.Feature) {
+                objectMapper.configure((JsonParser.Feature) feature, enabled);
+            } else if (feature instanceof JsonGenerator.Feature) {
+                objectMapper.configure((JsonGenerator.Feature) feature, enabled);
+            } else if (feature instanceof SerializationFeature) {
+                objectMapper.configure((SerializationFeature) feature, enabled);
+            } else if (feature instanceof DeserializationFeature) {
+                objectMapper.configure((DeserializationFeature) feature, enabled);
+            } else if (feature instanceof MapperFeature) {
+                // noinspection deprecation
+                objectMapper.configure((MapperFeature) feature, enabled);
+            } else {
+                throw new FatalBeanException("Unknown feature class: " + feature.getClass().getName());
+            }
+        };
+        // serialization
+        if (jackson.getSerialization() != null) {
+            jackson.getSerialization().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+        }
+        // deserialization
+        if (jackson.getSerialization() != null) {
+            jackson.getSerialization().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+        }
+        // mapper
+        if (jackson.getMapper() != null) {
+            jackson.getMapper().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+        }
+        // parser
+        if (jackson.getParser() != null) {
+            jackson.getParser().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+        }
+        // generator
+        if (jackson.getGenerator() != null) {
+            jackson.getGenerator().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+        }
+        return mapper;
     }
 
     private void initMisc(JavalinConfig config, Misc misc) {

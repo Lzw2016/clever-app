@@ -5,7 +5,30 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/Tuple.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleEight.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleFive.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleFour.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleNine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleOne.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleSeven.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleSix.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleTen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleThree.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/TupleTwo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Eight.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Five.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Four.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Nine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/One.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Seven.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Six.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Ten.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Three.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/tuples/value/Two.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/WebServerBootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/Jackson.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-web/src/main/java/org/clever/web/config/Jackson.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +107,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "jdk.selected.JAVA_MODULE": "1.8",
-    "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-core/src/main/java/org/clever/core/reflection",
+    "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-core/src/main/java/org/clever/core/tuples",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -98,6 +121,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\tuples" />
       <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\reflection" />
       <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\converter" />
       <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\mapper" />
@@ -271,7 +295,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1658547737604</updated>
-      <workItem from="1658547740267" duration="23215000" />
+      <workItem from="1658547740267" duration="26717000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1658549228129</created>
@@ -350,7 +374,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658760829163</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="init">
+      <created>1658760866433</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1658760866433</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
