@@ -6,7 +6,7 @@ apply(plugin = "org.jetbrains.kotlin.jvm")
 
 dependencies {
     api(project(":clever-web"))
-    api(project(":clever-groovy"))
+    // api(project(":clever-groovy"))
     // api("org.jetbrains.kotlin:kotlin-stdlib-common")
     // api("org.jetbrains.kotlin:kotlin-stdlib")
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk7")

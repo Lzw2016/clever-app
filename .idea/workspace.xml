@@ -6,6 +6,143 @@
   <component name="ChangeListManager">
     <list default="true" id="ed932dc4-5de7-441f-a431-a088a4dc4595" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-boot/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/clever-boot/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/BeanMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-core/src/main/java/org/clever/core/mapper/BeanMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-data-jdbc/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/clever-spring/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/CannotAcquireLockException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/CannotAcquireLockException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/CannotSerializeTransactionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/CannotSerializeTransactionException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/ConcurrencyFailureException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/ConcurrencyFailureException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/DataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/DataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/DataAccessResourceFailureException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/DataAccessResourceFailureException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/DataIntegrityViolationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/DataIntegrityViolationException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/DataRetrievalFailureException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/DataRetrievalFailureException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/DeadlockLoserDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/DeadlockLoserDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/DuplicateKeyException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/DuplicateKeyException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/EmptyResultDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/EmptyResultDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/IncorrectResultSizeDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/IncorrectResultSizeDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/InvalidDataAccessApiUsageException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/InvalidDataAccessApiUsageException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/InvalidDataAccessResourceUsageException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/InvalidDataAccessResourceUsageException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/NonTransientDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/NonTransientDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/NonTransientDataAccessResourceException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/NonTransientDataAccessResourceException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/PermissionDeniedDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/PermissionDeniedDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/PessimisticLockingFailureException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/PessimisticLockingFailureException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/QueryTimeoutException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/QueryTimeoutException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/RecoverableDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/RecoverableDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/TransientDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/TransientDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/TransientDataAccessResourceException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/TransientDataAccessResourceException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/TypeMismatchDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/TypeMismatchDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/UncategorizedDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/UncategorizedDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/support/DataAccessUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/support/DataAccessUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/dao/support/PersistenceExceptionTranslator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/dao/support/PersistenceExceptionTranslator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/BadSqlGrammarException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/BadSqlGrammarException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/CannotGetJdbcConnectionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/CannotGetJdbcConnectionException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/IncorrectResultSetColumnCountException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/IncorrectResultSetColumnCountException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/InvalidResultSetAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/InvalidResultSetAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/SQLWarningException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/SQLWarningException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/UncategorizedSQLException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/UncategorizedSQLException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ArgumentPreparedStatementSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ArgumentPreparedStatementSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ArgumentTypePreparedStatementSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ArgumentTypePreparedStatementSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/BatchPreparedStatementSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/BatchPreparedStatementSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/CallableStatementCallback.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/CallableStatementCallback.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/CallableStatementCreator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/CallableStatementCreator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ColumnMapRowMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ColumnMapRowMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ConnectionCallback.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ConnectionCallback.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/DisposableSqlTypeValue.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/DisposableSqlTypeValue.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/InterruptibleBatchPreparedStatementSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/InterruptibleBatchPreparedStatementSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/JdbcOperations.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/JdbcOperations.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/JdbcTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/JdbcTemplate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ParameterDisposer.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ParameterDisposer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ParameterizedPreparedStatementSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ParameterizedPreparedStatementSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/PreparedStatementCallback.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/PreparedStatementCallback.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/PreparedStatementCreator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/PreparedStatementCreator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/PreparedStatementCreatorFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/PreparedStatementCreatorFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/PreparedStatementSetter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/PreparedStatementSetter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ResultSetExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ResultSetExtractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/ResultSetSupportingSqlParameter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/ResultSetSupportingSqlParameter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/RowCallbackHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/RowCallbackHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/RowMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/RowMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/RowMapperResultSetExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/RowMapperResultSetExtractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SingleColumnRowMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SingleColumnRowMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlOutParameter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlOutParameter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlParameter.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlParameter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlParameterValue.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlParameterValue.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlReturnResultSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlReturnResultSet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlReturnType.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlReturnType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlReturnUpdateCount.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlReturnUpdateCount.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlRowSetResultSetExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlRowSetResultSetExtractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/SqlTypeValue.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/SqlTypeValue.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/StatementCallback.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/StatementCallback.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/StatementCreatorUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/StatementCreatorUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/AbstractSqlParameterSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/AbstractSqlParameterSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/BeanPropertySqlParameterSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/BeanPropertySqlParameterSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/EmptySqlParameterSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/EmptySqlParameterSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/MapSqlParameterSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/MapSqlParameterSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/NamedParameterJdbcOperations.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/NamedParameterJdbcOperations.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/NamedParameterJdbcTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/NamedParameterJdbcTemplate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/NamedParameterUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/NamedParameterUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/ParsedSql.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/ParsedSql.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/SqlParameterSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/SqlParameterSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/core/namedparam/SqlParameterSourceUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/core/namedparam/SqlParameterSourceUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/ConnectionHandle.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/ConnectionHandle.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/ConnectionHolder.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/ConnectionHolder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/ConnectionProxy.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/ConnectionProxy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/DataSourceTransactionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/DataSourceTransactionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/DataSourceUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/DataSourceUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/DelegatingDataSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/DelegatingDataSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/JdbcTransactionObjectSupport.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/JdbcTransactionObjectSupport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/SimpleConnectionHandle.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/SimpleConnectionHandle.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/SmartDataSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/SmartDataSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/datasource/TransactionAwareDataSourceProxy.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/datasource/TransactionAwareDataSourceProxy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/AbstractFallbackSQLExceptionTranslator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/AbstractFallbackSQLExceptionTranslator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/CustomSQLErrorCodesTranslation.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/CustomSQLErrorCodesTranslation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/CustomSQLExceptionTranslatorRegistry.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/CustomSQLExceptionTranslatorRegistry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/DatabaseMetaDataCallback.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/DatabaseMetaDataCallback.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/JdbcAccessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/JdbcAccessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/JdbcUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/JdbcUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/KeyHolder.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/KeyHolder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/MetaDataAccessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/MetaDataAccessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/SQLErrorCodeSQLExceptionTranslator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/SQLErrorCodeSQLExceptionTranslator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/SQLErrorCodes.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/SQLErrorCodes.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/SQLErrorCodesFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/SQLErrorCodesFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/SQLExceptionSubclassTranslator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/SQLExceptionSubclassTranslator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/SQLExceptionTranslator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/SQLExceptionTranslator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/SQLStateSQLExceptionTranslator.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/SQLStateSQLExceptionTranslator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/SqlValue.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/SqlValue.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/rowset/ResultSetWrappingSqlRowSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/rowset/ResultSetWrappingSqlRowSet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/rowset/ResultSetWrappingSqlRowSetMetaData.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/rowset/ResultSetWrappingSqlRowSetMetaData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/rowset/SqlRowSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/rowset/SqlRowSet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/rowset/SqlRowSetMetaData.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/rowset/SqlRowSetMetaData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/jdbc/support/sql-error-codes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/jdbc/support/sql-error-codes.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/CannotCreateTransactionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/CannotCreateTransactionException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/IllegalTransactionStateException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/IllegalTransactionStateException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/InvalidTimeoutException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/InvalidTimeoutException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/NestedTransactionNotSupportedException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/NestedTransactionNotSupportedException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/PlatformTransactionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/PlatformTransactionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/SavepointManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/SavepointManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/StaticTransactionDefinition.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/StaticTransactionDefinition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionDefinition.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionDefinition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionExecution.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionExecution.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionSuspensionNotSupportedException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionSuspensionNotSupportedException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionSystemException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionSystemException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionTimedOutException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionTimedOutException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/TransactionUsageException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/TransactionUsageException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/UnexpectedRollbackException.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/UnexpectedRollbackException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/AbstractPlatformTransactionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/AbstractPlatformTransactionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/AbstractTransactionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/AbstractTransactionStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/DefaultTransactionDefinition.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/DefaultTransactionDefinition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/DefaultTransactionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/DefaultTransactionStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/ResourceHolder.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/ResourceHolder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/ResourceHolderSupport.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/ResourceHolderSupport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/ResourceTransactionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/ResourceTransactionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/SmartTransactionObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/SmartTransactionObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/TransactionSynchronization.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/TransactionSynchronization.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/TransactionSynchronizationManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/TransactionSynchronizationManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clever-spring/src/main/java/org/clever/transaction/support/TransactionSynchronizationUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/clever-data-jdbc/src/main/java/org/clever/transaction/support/TransactionSynchronizationUtils.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +221,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "jdk.selected.JAVA_MODULE": "1.8",
-    "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-core/src/main/java/org/clever/core/tuples",
+    "last_opened_file_path": "D:/SourceCode/clever/clever-app/clever-data-jdbc/src/main/java/org/clever/transaction",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -98,11 +235,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\SourceCode\clever\clever-app\clever-data-jdbc\src\main\java\org\clever\transaction" />
+      <recent name="D:\SourceCode\clever\clever-app\clever-data-jdbc\src\main\java\org\clever\jdbc" />
+      <recent name="D:\SourceCode\clever\clever-app\clever-data-jdbc\src\main\java\org\clever\dao" />
       <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\tuples" />
       <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\reflection" />
-      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\converter" />
-      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\mapper" />
-      <recent name="D:\SourceCode\clever\clever-app\clever-core\src\main\java\org\clever\core\json" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="org.clever.app" />
@@ -111,7 +248,7 @@
       <recent name="org.clever.core" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.org.clever.app.StartApp">
+  <component name="RunManager" selected="JUnit.FixClassTest.t01">
     <configuration name="StartApp" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.clever.app.StartApp" />
       <module name="clever-app.clever-boot.main" />
@@ -289,7 +426,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1658547737604</updated>
-      <workItem from="1658547740267" duration="43137000" />
+      <workItem from="1658547740267" duration="46276000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1658549228129</created>
@@ -424,7 +561,21 @@
       <option name="project" value="LOCAL" />
       <updated>1658845541984</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="init">
+      <created>1658847602922</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1658847602922</updated>
+    </task>
+    <task id="LOCAL-00021" summary="init">
+      <created>1658847720527</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1658847720527</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

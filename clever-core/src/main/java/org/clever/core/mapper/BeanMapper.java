@@ -19,7 +19,8 @@ public class BeanMapper {
     private static final BeanConverter BEAN_CONVERTER = new BeanConverter();
 
     static {
-        BEAN_CONVERTER.registerConverter(new StringToDateConverter()).registerConverter(new StringToNumberConverter());
+        BEAN_CONVERTER.registerConverter(new StringToDateConverter())
+                .registerConverter(new StringToNumberConverter());
     }
 
     public static void registerConverter(TypeConverter converter) {
