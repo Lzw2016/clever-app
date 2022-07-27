@@ -1,4 +1,12 @@
 import org.gradle.plugins.ide.idea.model.IdeaLanguageLevel
+import java.util.*
+
+val localProperty = Properties().apply {
+    val local = project.rootProject.file("local.properties")
+    if (local.exists()) {
+        local.inputStream().use { this.load(it) }
+    }
+}
 
 val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVersion"]
 val buildSnapshot: Boolean = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
@@ -213,8 +221,8 @@ subprojects {
             maven {
                 setUrl("https://nexus.msvc.top/repository/maven-${if (buildSnapshot) "snapshots" else "releases"}/")
                 credentials {
-                    username = project.properties["NEXUS_USERNAME"] as String?
-                    password = project.properties["NEXUS_PASSWORD"] as String?
+                    username = localProperty["NEXUS_USERNAME"] as String?
+                    password = localProperty["NEXUS_PASSWORD"] as String?
                 }
             }
         }
