@@ -9,6 +9,7 @@ import org.clever.core.AppContextHolder;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.web.WebServerBootstrap;
+import org.clever.web.plugin.ExceptionHandlerPlugin;
 
 import java.time.Duration;
 
@@ -32,14 +33,15 @@ public class StartApp {
         startupInfoLogger.logStarting(log);
         // 启动web服务
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
-        webServerBootstrap.getHandlerRegistrar()
-                .addBeforeHandler("*", ctx -> {
-                    log.info("### 1 start");
-                    Thread.sleep(1000 * 3);
-                    log.info("### 1 end");
-                })
-                .addBeforeHandler("*", ctx -> log.info("### 1"))
-                .addBeforeHandler("*", ctx -> log.info("### 2"));
+//        webServerBootstrap.getHandlerRegistrar()
+//                .addBeforeHandler("*", ctx -> {
+//                    log.info("### 1 start");
+//                    Thread.sleep(1000 * 3);
+//                    log.info("### 1 end");
+//                })
+//                .addBeforeHandler("*", ctx -> log.info("### 1"))
+//                .addBeforeHandler("*", ctx -> log.info("### 2"));
+        webServerBootstrap.getPluginRegistrar().addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件");
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
@@ -47,6 +49,9 @@ public class StartApp {
             log.info("body --> {}", ctx.body());
             log.info("body --> {}", ctx.body());
             ctx.result("test,中文");
+        });
+        javalin.get("/test2", ctx -> {
+            throw new RuntimeException("服务端异常");
         });
         // 优雅停机
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");
