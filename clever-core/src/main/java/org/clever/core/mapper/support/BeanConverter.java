@@ -1,10 +1,14 @@
 package org.clever.core.mapper.support;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
 import net.sf.cglib.core.Converter;
 import org.apache.commons.lang3.ClassUtils;
 import org.clever.core.converter.TypeConverter;
+import org.clever.core.mapper.SharedConversionService;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +24,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class BeanConverter {
+    /**
+     * 缓存 BeanCopier 对象
+     */
+    private static final Cache<String, BeanCopier> CACHE = CacheBuilder.newBuilder().maximumSize(1024).build();
+
     /**
      * 自定义的cglib Converter
      */
@@ -40,9 +49,13 @@ public class BeanConverter {
      * @param source 数据源对象
      * @param target 目标对象
      */
+    @SneakyThrows
     public void copyTo(Object source, Object target) {
-        // TODO 可以缓存 BeanCopier 对象
-        BeanCopier beanCopier = BeanCopier.create(source.getClass(), target.getClass(), true);
+        if (source == null || target == null) {
+            return;
+        }
+        final String key = String.format("%s->%s", source.getClass().getName(), target.getClass().getName());
+        BeanCopier beanCopier = CACHE.get(key, () -> BeanCopier.create(source.getClass(), target.getClass(), true));
         beanCopier.copy(source, target, converter);
     }
 
@@ -137,6 +150,10 @@ public class BeanConverter {
                     );
                 }
                 return resolvedTypeConverter.convert(source, targetType, context);
+            }
+            if (SharedConversionService.Instance.canConvert(source.getClass(), targetType)) {
+                // noinspection unchecked
+                return SharedConversionService.Instance.convert(source, targetType);
             }
             return null;
         }

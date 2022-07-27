@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import org.clever.beans.BeanUtils;
 import org.clever.beans.BeanWrapper;
 import org.clever.beans.BeanWrapperImpl;
-import org.clever.format.support.DefaultFormattingConversionService;
 
 import java.beans.PropertyDescriptor;
 import java.math.BigDecimal;
@@ -21,8 +20,6 @@ import java.util.function.BiFunction;
  * @see BeanMapper
  */
 public class BeanCopyUtils {
-    private static final DefaultFormattingConversionService CONVERSION_SERVICE = new DefaultFormattingConversionService();
-
     /**
      * 获取JavaBean的字段名
      *
@@ -210,8 +207,8 @@ public class BeanCopyUtils {
                 srcWrapper.setPropertyValue(name, mapValue);
             } else if (BigDecimal.class.isAssignableFrom(mapValueType) && Number.class.isAssignableFrom(valueType)) {
                 srcWrapper.setPropertyValue(name, mapValue);
-            } else if (CONVERSION_SERVICE.canConvert(mapValueType, valueType)) {
-                srcWrapper.setPropertyValue(name, CONVERSION_SERVICE.convert(mapValue, valueType));
+            } else if (SharedConversionService.Instance.canConvert(mapValueType, valueType)) {
+                srcWrapper.setPropertyValue(name, SharedConversionService.Instance.convert(mapValue, valueType));
             }
         }
     }

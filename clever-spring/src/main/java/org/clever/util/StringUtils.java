@@ -15,6 +15,21 @@ public class StringUtils {
     private static final String CURRENT_PATH = ".";
     private static final char EXTENSION_SEPARATOR = '.';
 
+    /**
+     * 调用对象的toString方法，如果对象为空返回默认值
+     *
+     * @param object     需要toString的对象
+     * @param defaultStr 对象为空时返回的默认值
+     * @return 返回对象的toString方法结果
+     */
+    public static String objectToString(Object object, String defaultStr) {
+        if (null == object) {
+            return defaultStr;
+        } else {
+            return object.toString();
+        }
+    }
+
     public static boolean hasText(String str) {
         return (str != null && !str.isEmpty() && containsText(str));
     }

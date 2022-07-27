@@ -103,11 +103,13 @@ subprojects {
             // javax
             dependency("javax.servlet:javax.servlet-api:4.0.1")
             dependency("javax.inject:javax.inject:1")
-            dependency("javax.validation:validation-api:2.0.1.Final")
             dependency("javax.persistence:persistence-api:1.0.2")
             dependency("jakarta.persistence:jakarta.persistence-api:2.2.3")
             dependency("com.google.code.findbugs:jsr305:3.0.2")
             dependency("org.glassfish:javax.el:3.0.1-b09")
+            // validation
+            dependency("javax.validation:validation-api:2.0.1.Final")
+            dependency("org.hibernate.validator:hibernate-validator:6.2.3.Final")
             // time
             dependency("joda-time:joda-time:2.10.14")
             dependency("org.joda:joda-convert:2.2.2")
@@ -122,6 +124,7 @@ subprojects {
             dependency("commons-beanutils:commons-beanutils:1.9.4")
             // http相关
             dependency("com.squareup.okhttp3:okhttp:4.9.3")
+            dependency("com.squareup.retrofit2:converter-jackson:2.9.0")
             dependency("com.squareup.retrofit2:retrofit:2.9.0")
             // json、xml相关
             dependency("org.json:json:20210307")
@@ -181,7 +184,7 @@ subprojects {
             dependency("ognl:ognl:3.2.21")
             dependency("com.github.jsqlparser:jsqlparser:4.4")
             dependency("com.jfinal:enjoy:4.9.21")
-            // 版本冲突的包
+            dependency("com.belerweb:pinyin4j:2.5.1")
             dependency("org.ow2.asm:asm:7.1")
             dependency("org.apache.commons:commons-math3:3.6.1")
             dependency("org.javassist:javassist:3.28.0-GA")
