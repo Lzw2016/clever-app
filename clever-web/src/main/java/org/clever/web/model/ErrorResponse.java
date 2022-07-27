@@ -42,7 +42,7 @@ public class ErrorResponse implements Serializable {
     /**
      * 异常栈
      */
-    private final Map<String, Object> details = new LinkedHashMap<>();
+    private final Map<String, Object> details = new LinkedHashMap<>(4);
 
     public ErrorResponse() {
     }

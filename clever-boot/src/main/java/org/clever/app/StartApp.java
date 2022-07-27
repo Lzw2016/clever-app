@@ -8,6 +8,7 @@ import org.clever.boot.context.logging.LoggingBootstrap;
 import org.clever.core.AppContextHolder;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.env.StandardEnvironment;
+import org.clever.core.exception.BusinessException;
 import org.clever.web.WebServerBootstrap;
 import org.clever.web.plugin.ExceptionHandlerPlugin;
 
@@ -51,7 +52,7 @@ public class StartApp {
             ctx.result("test,中文");
         });
         javalin.get("/test2", ctx -> {
-            throw new RuntimeException("服务端异常");
+            throw new BusinessException("服务端异常");
         });
         // 优雅停机
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");

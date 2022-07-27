@@ -50,9 +50,13 @@ public class ExceptionHandlerPlugin implements Plugin {
                 exception.getMessage(),
                 exception.getClass().getName()
         );
+        final int maxDepth = 32;
         Throwable cause = exception;
         while (cause != null) {
             response.getDetails().put(cause.getClass().getName(), cause.getMessage());
+            if (response.getDetails().size() >= maxDepth) {
+                break;
+            }
             cause = cause.getCause();
         }
         return response;
