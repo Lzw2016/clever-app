@@ -12,7 +12,7 @@ public class OrderIncrementTest {
     @Test
     public void t01() {
         OrderIncrement orderIncrement = new OrderIncrement();
-        int count = 19;
+        int count = 39;
         log.info("### 1");
         for (int i = 0; i < count; i++) {
             log.info("#1--> {}", orderIncrement.incrL1());
