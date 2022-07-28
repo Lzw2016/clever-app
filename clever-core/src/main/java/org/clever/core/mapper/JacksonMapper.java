@@ -17,6 +17,7 @@ import org.clever.beans.BeanUtils;
 import org.clever.core.KotlinDetector;
 import org.clever.core.json.jackson.BigDecimalSerializer;
 import org.clever.core.json.jackson.DateDeserializer;
+import org.clever.core.json.jackson.JsonWrapperSerializer;
 import org.clever.util.ClassUtils;
 import org.clever.util.LinkedMultiValueMap;
 import org.clever.util.MultiValueMap;
@@ -218,6 +219,7 @@ public class JacksonMapper {
         module.addSerializer(Long.TYPE, ToStringSerializer.instance);
         module.addDeserializer(Date.class, DateDeserializer.instance);
         mapper.registerModules(modules);
+        mapper.registerModules(JsonWrapperSerializer.MODEL);
         return mapper;
     }
 
