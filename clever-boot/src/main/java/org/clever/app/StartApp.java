@@ -7,6 +7,7 @@ import org.clever.boot.context.config.ConfigDataBootstrap;
 import org.clever.boot.context.logging.LoggingBootstrap;
 import org.clever.core.AppContextHolder;
 import org.clever.core.AppShutdownHook;
+import org.clever.core.OrderIncrement;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.core.exception.BusinessException;
 import org.clever.web.WebServerBootstrap;
@@ -42,7 +43,8 @@ public class StartApp {
 //                })
 //                .addBeforeHandler("*", ctx -> log.info("### 1"))
 //                .addBeforeHandler("*", ctx -> log.info("### 2"));
-        webServerBootstrap.getPluginRegistrar().addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件");
+        OrderIncrement orderIncrement = new OrderIncrement();
+        webServerBootstrap.getPluginRegistrar().addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", orderIncrement.incrL1());
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
