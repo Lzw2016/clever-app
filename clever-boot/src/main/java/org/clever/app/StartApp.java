@@ -35,7 +35,11 @@ public class StartApp {
         startupInfoLogger.logStarting(log);
         // 启动web服务
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
-//        webServerBootstrap.getHandlerRegistrar()
+        webServerBootstrap.getHandlerRegistrar()
+                .addBeforeHandler("*", ctx-> {
+                    ctx.result("OK");
+                    ctx.res.getOutputStream().close();
+                });
 //                .addBeforeHandler("*", ctx -> {
 //                    log.info("### 1 start");
 //                    Thread.sleep(1000 * 3);
@@ -44,7 +48,8 @@ public class StartApp {
 //                .addBeforeHandler("*", ctx -> log.info("### 1"))
 //                .addBeforeHandler("*", ctx -> log.info("### 2"));
         OrderIncrement orderIncrement = new OrderIncrement();
-        webServerBootstrap.getPluginRegistrar().addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", orderIncrement.incrL1());
+        webServerBootstrap.getPluginRegistrar()
+                .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", orderIncrement.incrL1());
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
@@ -56,6 +61,7 @@ public class StartApp {
         javalin.get("/test2", ctx -> {
             throw new BusinessException("服务端异常");
         });
+//        javalin.error()
         // 优雅停机
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Integer.MAX_VALUE, "停止日志模块");

@@ -12,11 +12,11 @@ val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVer
 val buildSnapshot: Boolean = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
-    const val springBootVersion = "2.6.10"
-    const val springCloudVersion = "2021.0.3"
-    const val javalinVersion = "4.6.4"
+    const val springBootVersion = "2.6.12"
+    const val springCloudVersion = "2021.0.4"
+    const val javalinVersion = "4.6.6"
     const val kotlinVersion = "1.6.21"
-    const val groovyVersion = "4.0.3"
+    const val groovyVersion = "4.0.5"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.32"
     const val querydslVersion = "5.0.0"
@@ -41,7 +41,7 @@ plugins {
     `java-library`
     `maven-publish`
     id("io.spring.dependency-management").version("1.0.12.RELEASE")
-    id("org.springframework.boot").version("2.6.10").apply(false)
+    id("org.springframework.boot").version("2.6.12").apply(false)
     id("org.jetbrains.kotlin.jvm").version("1.6.21").apply(false)
 }
 
