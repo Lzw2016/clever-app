@@ -29,7 +29,7 @@ public class HotReloadClassLoader extends ClassLoader {
      * 内部ClassLoader的引用队列，用于观察内部的ClassLoader对象是否被垃圾回收
      */
     private static final ReferenceQueue<ClassLoader> REFERENCE_QUEUE = new ReferenceQueue<>();
-    private static final ConcurrentMap<Reference<ClassLoader>, Long> PHANTOMREFERENCE_MAP = new ConcurrentHashMap<>(8);
+    private static final ConcurrentMap<Reference<ClassLoader>, Long> PHANTOM_REFERENCE_MAP = new ConcurrentHashMap<>(8);
     private static final AtomicInteger INNER_CLASS_LOADER_COUNT = new AtomicInteger(0);
     private static final AtomicLong SERIAL_NUMBER = new AtomicLong(0);
 
@@ -38,7 +38,7 @@ public class HotReloadClassLoader extends ClassLoader {
             while (true) {
                 Reference<?> phantomReference = REFERENCE_QUEUE.poll();
                 if (phantomReference != null) {
-                    Long serialNumber = PHANTOMREFERENCE_MAP.remove(phantomReference);
+                    Long serialNumber = PHANTOM_REFERENCE_MAP.remove(phantomReference);
                     log.info("[#{}]InnerClassLoader被GC回收，当前size={}", serialNumber, INNER_CLASS_LOADER_COUNT.decrementAndGet());
                 }
                 try {
@@ -176,7 +176,7 @@ public class HotReloadClassLoader extends ClassLoader {
             super(parent);
             // 创建序列号
             final Long serialNumber = SERIAL_NUMBER.incrementAndGet();
-            PHANTOMREFERENCE_MAP.put(new PhantomReference<>(this, REFERENCE_QUEUE), serialNumber);
+            PHANTOM_REFERENCE_MAP.put(new PhantomReference<>(this, REFERENCE_QUEUE), serialNumber);
             // InnerClassLoader对象计数
             final Integer count = INNER_CLASS_LOADER_COUNT.incrementAndGet();
             log.info("[#{}]InnerClassLoader被创建 size={},", serialNumber, count);
