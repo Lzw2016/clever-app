@@ -67,7 +67,7 @@ public class HotReloadClassLoader extends ClassLoader {
     /**
      * 内部委托的 ClassLoader
      */
-    private volatile ClassLoader innerClassLoader = new InnerClassLoader(this.getParent());
+    private volatile ClassLoader innerClassLoader;
 
     /**
      * @param parent      父ClassLoader
@@ -80,6 +80,7 @@ public class HotReloadClassLoader extends ClassLoader {
         Assert.notEmpty(loadPath, "loadPath 不能为空");
         this.basePackage = basePackage;
         this.loadPath = cleanPath(loadPath);
+        this.innerClassLoader = new InnerClassLoader(this.getParent());
     }
 
     /**
@@ -119,7 +120,7 @@ public class HotReloadClassLoader extends ClassLoader {
      * @return 卸载的Class数量
      */
     public int unloadClass(String... names) {
-        if (names == null || names.length <= 0) {
+        if (names == null || names.length == 0) {
             return 0;
         }
         return unloadClass(Arrays.asList(names));
@@ -157,7 +158,7 @@ public class HotReloadClassLoader extends ClassLoader {
     }
 
     private boolean basePackageFilter(String name) {
-        if (basePackage == null || basePackage.length <= 0) {
+        if (basePackage == null || basePackage.length == 0) {
             return true;
         }
         for (String prefix : basePackage) {
