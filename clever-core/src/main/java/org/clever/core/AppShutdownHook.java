@@ -34,7 +34,7 @@ public class AppShutdownHook {
                     log.error("# 执行停机任务失败 {} | {}", idx++, e.getMessage(), e);
                 }
             }
-        }));
+        }, "app-shutdown-hook"));
     }
 
     /**
