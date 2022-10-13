@@ -12,7 +12,7 @@ clever-data-redis   基于spring-data-redis实现对Redis操作的轻度封装
 
 clever-security     实现一套RBAC模型的权限认证功能
 
-clever-boot         启动类
+clever-boot         应用启动项目,各个组件模块整合示例
 
 ### 依赖关系
 
