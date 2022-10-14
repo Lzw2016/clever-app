@@ -30,7 +30,6 @@ public class SqlFuncDialectTransformTest {
         return transform;
     }
 
-
     @Test
     public void t01() {
         // sql_func_1(jObject.fieldA.java_func(), jObject.fieldB, "YYYY-DD-MM", jVar2, jVar3)
