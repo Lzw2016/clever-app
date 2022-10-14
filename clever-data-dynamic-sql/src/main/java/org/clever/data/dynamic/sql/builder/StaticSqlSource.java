@@ -22,6 +22,7 @@ public class StaticSqlSource implements SqlSource {
     public BoundSql getBoundSql(DbType dbType, Object parameterObject) {
         String sqlDialect = originalSql;
         LinkedHashMap<String, Object> sqlVariable = new LinkedHashMap<>();
+        // 使用antlr实现的自定义函数功能
         if (ParseSqlFuncUtils.needParse(originalSql)) {
             sqlDialect = ParseSqlFuncUtils.parseSqlFunc(dbType, originalSql, parameterObject, sqlVariable);
         }
