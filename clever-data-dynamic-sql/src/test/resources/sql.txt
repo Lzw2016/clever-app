@@ -1,0 +1,194 @@
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t01#-->
+    select * from sql_script where id=#{id} and name like '${name}'
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t02#-->
+    select * from sql_script
+    where
+        id=#{id}
+        and name=#{name}
+        and id in (
+            <foreach collection='list' item='item' separator=','>
+                #{item}
+            </foreach>
+        )
+        and name in (
+            <foreach collection='names' item='item' separator=','>
+                #{item}
+            </foreach>
+        )
+    order by ${orderBy}
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t03#-->
+    select * from author where username=#{username} and favourite_section=#{favouriteSection}
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t04#-->
+    select * from author where username=#{author.username}
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t05#-->
+    select * from sql_script
+    where
+        id=#{id}
+        and name=#{name}
+        and id in (
+            <foreach collection='list' item='item' separator=','>
+                #{item}
+            </foreach>
+        )
+        and name in (
+            <foreach collection='names' item='item' separator=','>
+                #{item}
+            </foreach>
+        )
+    order by ${orderBy}
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t06#-->
+    <bind name='pattern' value='title4' />
+    select * from sql_script
+    where
+        id=#{id}
+        and name=${name}
+        and id in (
+            <foreach collection='list' item='item' separator=','>
+                #{item}
+            </foreach>
+        )
+        <if test='title != null'>
+            and title=#{title}
+        </if>
+        <choose>
+            <when test='title2'>
+                and title2=#{title2}
+            </when>
+            <when test='title3'>
+                and title5=#{title5}
+            </when>
+            <otherwise>
+                and featured=#{featured}
+            </otherwise>
+        </choose>
+        and title4 like #{pattern}
+        order by ${orderBy}
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t07#-->
+    <bind name='pattern' value='"title4"' />
+    select * from sql_script
+    where
+        id=#{id}
+        and name=${name}
+        and id in (
+            <foreach collection='list' item='item' separator=','>#{item}</foreach>
+        )
+        <if test='title != null'>
+            and title=#{title}
+        </if>
+        <choose>
+            <when test='title2.name'>
+                and title2=#{title2}
+            </when>
+            <when test='title3'>
+                and title5=#{title5}
+            </when>
+            <otherwise>
+                and featured=#{featured}
+            </otherwise>
+        </choose>
+        and title4 like #{pattern}
+        order by ${orderBy}
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t08#-->
+    select * from sql_script
+    <where>
+        <if test="f1 != null">
+            and f1=#{f1}
+        </if>
+        <if test="f2 != null">
+            and f2 like #{f2}
+        </if>
+        <if test="f3 != null and f3 != ''">
+            and f3 like #{f3}
+        </if>
+        and f4 in
+            <foreach item="item" index="index" collection="f4List" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        <choose>
+            <when test="f5 != null">
+                and f5 like #{f5}
+            </when>
+            <when test="f6 != null">
+                and f6 like #{f6}
+            </when>
+            <otherwise>
+                and (f5 = 1 or f6 = 1)
+            </otherwise>
+        </choose>
+        and f7=${f7}
+    </where>
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t09#-->
+    update Author
+    <set>
+        <if test="f1 != null">
+            f1=#{f1},
+        </if>
+        <if test="f2 != null">
+            f2=#{f2},
+        </if>
+        <if test="f3 != null">
+            f3=#{f3},
+        </if>
+        <if test="f4 != null">
+            f4=#{f4}
+        </if>
+    </set>
+    where id=#{id}
+</script>
+# -------------------------------------------------------------------------------------
+<script>
+    <!--#t10#-->
+    select * from sql_script
+    <where>
+        <if test="#str.isNotBlank(f1)">
+            and f1=#{f1}
+        </if>
+        <if test="#str.isNotBlank(f2)">
+            and f2=#{f2}
+        </if>
+        <if test="#obj.isIn(f3, 'aaa', 'bbb', 'ccc', 1, false)">
+            and f3=#{f3}
+        </if>
+        <if test="#obj.notEmpty(f1)">
+            and f1=#{f1}
+        </if>
+        <if test="#obj.notEmpty(f4)">
+            and f4=#{f4}
+        </if>
+        <if test="#obj.notEmpty(f5)">
+            and f5=#{f5}
+        </if>
+        <if test="#obj.notEmpty(f6)">
+            and f6=#{f6}
+        </if>
+    </where>
+</script>
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------

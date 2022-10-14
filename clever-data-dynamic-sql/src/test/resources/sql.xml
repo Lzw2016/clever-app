@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="test">
+    <select id="t02">
+        select * from sql_script
+        <where>
+            <if test="#str.isNotBlank(f1)">
+                and f1=#{f1}
+            </if>
+            <if test="#str.isNotBlank(f2)">
+                and f2=#{f2}
+            </if>
+            <if test="#obj.isIn(f3, 'aaa', 'bbb', 'ccc', 1, false)">
+                and f3=#{f3}
+            </if>
+            <if test="#obj.notEmpty(f1)">
+                and f1=#{f1}
+            </if>
+            <if test="#obj.notEmpty(f4)">
+                and f4=#{f4}
+            </if>
+            <if test="#obj.notEmpty(f5)">
+                and f5=#{f5}
+            </if>
+            <if test="#obj.notEmpty(f6)">
+                and f6=#{f6}
+            </if>
+        </where>
+    </select>
+
+    <select id="t03">
+        <bind name="aUpperCase" value="a.toUpperCase()"/>
+        <bind name="bToString" value="b.toString()"/>
+        select * from entity_a
+        where a=#{aUpperCase}
+        and b=#{bToString}
+        and c=#{c}
+        and d=#{d}
+        and e=#{e}
+    </select>
+
+    <select id="t04">
+        select * from entity_mixin
+        where a=#{a}
+          and b=#{b}
+          and f in
+          <foreach collection="f" item="item" open="(" close=")" separator=",">
+              #{item}
+          </foreach>
+          and g_entity_a=#{g.a}
+          and g_entity_b=#{g.b}
+          and h_entity_g_a=#{h.g.a}
+          and h_entity_g_b=#{h.g.b}
+          and i in
+        <foreach collection="i" item="item" open="(" close=")" separator=",">
+            #{item.a}
+        </foreach>
+    </select>
+
+    <select id="t05">
+        select * from entity_a
+        where a='@{to_date(today1)}'
+          and cc=#{c}
+          and b='@{to_date(today2)}'
+          and c='@{func_1("tesst", a, func_2(b, c))}'
+          and bb=#{b}
+    </select>
+
+    <select id="t06">
+        select * from entity_a
+        where a=#{a}
+          and b=#{b}
+          and id in ('@{join(arr)}')
+          and c=#{c}
+    </select>
+
+    <sql id="t07">
+
+    </sql>
+</mapper>

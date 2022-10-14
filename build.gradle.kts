@@ -76,7 +76,7 @@ allprojects {
     java.sourceCompatibility = JavaVersion.VERSION_1_8
     java.targetCompatibility = JavaVersion.VERSION_1_8
 
-    tasks.withType<JavaCompile> {
+    tasks.compileJava {
         options.encoding = "UTF-8"
         // options.isWarnings = false
         // options.isDeprecation = true
@@ -202,20 +202,20 @@ subprojects {
     }
 
     java {
-        // withJavadocJar()
+        withJavadocJar()
         withSourcesJar()
     }
-    tasks.withType<Javadoc> {
+    tasks.javadoc {
         options.encoding = "UTF-8"
     }
 
-    tasks.withType<Jar> {
+    tasks.jar {
         manifest {
             attributes["provider"] = "gradle"
         }
     }
 
-    // tasks.withType<Test> {
+    // tasks.test {
     //     useJUnitPlatform()
     // }
 
@@ -250,6 +250,6 @@ subprojects {
     }
 }
 
-tasks.withType<Jar> {
+tasks.jar {
     enabled = false
 }

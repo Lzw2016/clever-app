@@ -27,7 +27,7 @@ dependencies {
 //    }
 //}
 
-//tasks.withType<JavaCompile> {
+//tasks.compileJava {
 //    enabled = false
 //}
 
@@ -53,7 +53,7 @@ tasks.create("copyResources", Copy::class) {
 }
 
 // 配置启动jar
-tasks.withType<Jar> {
+tasks.jar {
     enabled = true
     manifest.attributes["Main-Class"] = "org.clever.app.StartApp"
     val classPaths = project.configurations.runtimeClasspath.get().files.map { file -> "lib/${file.name}" }.toMutableList()
