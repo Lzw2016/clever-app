@@ -1,8 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-//apply(plugin = "groovy")
-apply(plugin = "org.jetbrains.kotlin.jvm")
-//apply(plugin = "org.springframework.boot")
+plugins {
+    //id("groovy")
+    id("org.jetbrains.kotlin.jvm")
+    //id("org.springframework.boot")
+}
 
 dependencies {
     api(project(":clever-web"))
