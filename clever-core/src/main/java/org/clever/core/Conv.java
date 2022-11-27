@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 
@@ -104,6 +105,22 @@ public class Conv extends Conversion {
         } catch (Exception ignored) {
         }
         return result;
+    }
+
+    public static Timestamp asTimestamp(Object obj, Timestamp def) {
+        Timestamp result = def;
+        try {
+            Date date = DateUtils.parseDate(obj);
+            if (date != null) {
+                result = new Timestamp(date.getTime());
+            }
+        } catch (Exception ignored) {
+        }
+        return result;
+    }
+
+    public static Timestamp asTimestamp(Object obj) {
+        return asTimestamp(obj, new Timestamp(SystemClock.now()));
     }
 
     public static String asString(Object obj) {

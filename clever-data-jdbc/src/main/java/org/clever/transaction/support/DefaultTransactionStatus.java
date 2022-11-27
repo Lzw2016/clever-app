@@ -34,11 +34,11 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
      * 创建新的{@code DefaultTransactionStatus}实例
      *
      * @param transaction        可以保存内部事务实现状态的基础事务对象
-     * @param newTransaction     如果交易是新的，则参与现有交易
+     * @param newTransaction     如果事务是新的，则参与现有事务
      * @param newSynchronization 如果已为给定事务打开新事务同步
      * @param readOnly           事务是否标记为只读
      * @param debug              是否应为处理此事务启用调试日志记录？将其缓存在此处可以防止重复调用以询问日志记录系统是否应启用调试日志记录。
-     * @param suspendedResources 本交易暂停的资源持有人（如有）
+     * @param suspendedResources 本事务暂停的资源持有人（如有）
      */
     public DefaultTransactionStatus(Object transaction,
                                     boolean newTransaction,

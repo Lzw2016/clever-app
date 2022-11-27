@@ -657,6 +657,16 @@ public class StringUtils {
         return new LinkedHashSet<>(Arrays.asList(tokens));
     }
 
+    /**
+     * 删除所有出现的给定子字符串
+     * @param inString 原始的{@code String}
+     * @param pattern 删除所有出现的模式
+     * @return 结果 {@code String}
+     */
+    public static String delete(String inString, String pattern) {
+        return replace(inString, pattern, "");
+    }
+
     private static Locale parseLocaleTokens(String localeString, String[] tokens) {
         String language = (tokens.length > 0 ? tokens[0] : "");
         String country = (tokens.length > 1 ? tokens[1] : "");

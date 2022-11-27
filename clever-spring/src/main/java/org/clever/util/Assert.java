@@ -65,6 +65,12 @@ public class Assert {
         }
     }
 
+    public static void notEmpty(Map<?, ?> map, String message) {
+        if (CollectionUtils.isEmpty(map)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     private static boolean isEmpty(Object obj) {
         if (obj == null) {

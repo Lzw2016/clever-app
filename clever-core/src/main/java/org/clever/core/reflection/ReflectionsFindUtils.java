@@ -21,7 +21,7 @@
 //
 //    static {
 //        ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
-//        configurationBuilder.setUrls(ClasspathHelper.forPackage("com.yvan"));
+//        configurationBuilder.setUrls(ClasspathHelper.forPackage("org.clever"));
 //        configurationBuilder.setScanners(Scanners.SubTypes, Scanners.TypesAnnotated);
 //        REFLECTIONS = new Reflections(configurationBuilder);
 //    }

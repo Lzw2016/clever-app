@@ -89,7 +89,7 @@ public class ClassLoaderTest {
 //        final HotReloadEngine engine = new HotReloadEngine(new String[]{
 //                root.getAbsolutePath(),
 //                new File("../../wms-core/src/main/groovy").getAbsolutePath(),
-//                new File("../../yvan-framework/yvan-studio/src/main/groovy").getAbsolutePath(),
+//                new File("../../framework/studio/src/main/groovy").getAbsolutePath(),
 //        });
 //        long startTime = System.currentTimeMillis();
 //        for (String className : groovyNames) {
