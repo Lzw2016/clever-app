@@ -2245,7 +2245,7 @@ public class Jdbc extends AbstractDataSource {
             paramMap = new HashMap<>();
         }
         queryForCursor.execute(new JdbcContext(sql, paramMap));
-        SqlLoggerUtils.printfTotal(queryForCursor.getRch().getRowCount());
+        SqlLoggerUtils.printfTotal(queryForCursor.getInterruptRowCallbackHandler().getRowCount());
     }
 
     /**
@@ -2491,18 +2491,14 @@ public class Jdbc extends AbstractDataSource {
     @Data
     protected static class QueryForCursor implements JdbcExecute<Void> {
         private final Jdbc jdbc;
-        private final RowCountCallbackHandler rch;
+        private final InterruptRowCallbackHandler interruptRowCallbackHandler;
 
         @Override
         public Void execute(JdbcContext context) {
-            // TODO 需要支持读取数据时手动跳出读取
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
-                jdbc.jdbcTemplate.query(context.getSql(), new MapSqlParameterSource(context.getParamMap()), rch);
-                if (rch instanceof BatchDataReaderCallback) {
-                    ((BatchDataReaderCallback) rch).processEnd();
-                }
+                jdbc.jdbcTemplate.query(context.getSql(), new MapSqlParameterSource(context.getParamMap()), (ResultSetExtractor<?>) interruptRowCallbackHandler);
                 return null;
             } catch (Exception e) {
                 exception = e;

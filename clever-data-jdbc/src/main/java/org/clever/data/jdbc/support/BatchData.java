@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.support;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.clever.core.mapper.BeanCopyUtils;
 
 import java.io.Serializable;
@@ -35,6 +36,11 @@ public class BatchData implements Serializable {
      * 当前读取的行数
      */
     protected final int rowCount;
+    /**
+     * 是否已经中断数据回调
+     */
+    @Setter
+    protected boolean interrupted = false;
 
     public BatchData(String[] columnNames, int[] columnTypes, int columnCount, List<Map<String, Object>> rowDataList, int rowCount) {
         this.columnNames = Arrays.asList(columnNames);

@@ -1,7 +1,6 @@
 package org.clever.data.jdbc.support;
 
 import org.clever.core.RenameStrategy;
-import org.clever.jdbc.core.RowCountCallbackHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +15,7 @@ import java.util.function.Consumer;
  * 作者：lizw <br/>
  * 创建时间：2020/02/19 17:53 <br/>
  */
-public class BatchDataReaderCallback extends RowCountCallbackHandler {
+public class BatchDataReaderCallback extends InterruptRowCallbackHandler {
     private static final int Default_Batch_Size = 200;
 
     /**
@@ -49,20 +48,26 @@ public class BatchDataReaderCallback extends RowCountCallbackHandler {
     }
 
     @Override
-    protected synchronized void processRow( ResultSet rs, int rowNum) throws SQLException {
+    protected void processRow(ResultSet rs, int rowNum) throws SQLException {
         Map<String, Object> rowData = mapRowMapper.mapRow(rs, rowNum);
         rowDataList.add(rowData);
         if (rowDataList.size() >= batchSize) {
-            consumer.accept(new BatchData(getColumnNames(), getColumnTypes(), getColumnCount(), rowDataList, this.getRowCount()));
+            BatchData batchData = new BatchData(getColumnNames(), getColumnTypes(), getColumnCount(), rowDataList, this.getRowCount());
+            consumer.accept(batchData);
             rowDataList = new ArrayList<>(this.batchSize);
+            if (batchData.isInterrupted()) {
+                this.interrupted = true;
+            }
         }
     }
 
-    public synchronized void processEnd() {
+    @Override
+    public void processEnd() {
         if (rowDataList.isEmpty()) {
             return;
         }
-        consumer.accept(new BatchData(getColumnNames(), getColumnTypes(), getColumnCount(), rowDataList, this.getRowCount()));
+        BatchData batchData = new BatchData(getColumnNames(), getColumnTypes(), getColumnCount(), rowDataList, this.getRowCount());
+        consumer.accept(batchData);
         rowDataList = new ArrayList<>();
     }
 }
