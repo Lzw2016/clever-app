@@ -2074,15 +2074,28 @@ public class Jdbc extends AbstractDataSource {
     // --------------------------------------------------------------------------------------------
 
     /**
+     * 返回下一个主键值
+     *
+     * @param primaryKeyName 主键名称
+     */
+    public Long nextPK(String primaryKeyName) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = DialectFactory.nextPKSql(primaryKeyName, dbType, null);
+        Assert.notNull(sqlInfo, "sqlInfo 不能为空");
+        Assert.isNotBlank(sqlInfo.getValue1(), "sqlInfo.sql 不能为空");
+        Assert.notNull(sqlInfo.getValue2(), "sqlInfo.params 不能为空");
+        return beginTX(status -> queryLong(sqlInfo.getValue1(), sqlInfo.getValue2()));
+    }
+
+    /**
      * TODO 启用Oracle服务端日志(dbms_output)
      */
-    public static void enableDbmsOutput() {
+    public void enableDbmsOutput() {
     }
 
     /**
      * TODO 禁用Oracle服务端日志(dbms_output)
      */
-    public static void disableDbmsOutput() {
+    public void disableDbmsOutput() {
     }
 
     // --------------------------------------------------------------------------------------------
