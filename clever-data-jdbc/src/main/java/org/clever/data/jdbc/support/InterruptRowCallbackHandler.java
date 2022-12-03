@@ -33,13 +33,13 @@ public class InterruptRowCallbackHandler extends RowCountCallbackHandler impleme
     }
 
     /**
-     * 开始
+     * 处理数据行之前的回调
      */
     public void processStart() {
     }
 
     /**
-     *
+     * 处理数据行之后的回调
      */
     public void processEnd() {
     }
