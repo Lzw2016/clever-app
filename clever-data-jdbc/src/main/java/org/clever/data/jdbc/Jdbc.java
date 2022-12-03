@@ -274,7 +274,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sql          sql脚本，参数格式[:param]
      * @param paramMap     参数，参数格式[:param]
@@ -285,7 +285,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -295,7 +295,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sql          sql脚本，参数格式[:param]
      * @param resultRename 返回数据字段名重命名策略
@@ -305,7 +305,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
@@ -314,7 +314,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sql          sql脚本，参数格式[:param]
      * @param param        参数，参数格式[:param]
@@ -325,7 +325,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -335,7 +335,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个实体对象
+     * 查询一条数据，返回一个实体对象(sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -346,7 +346,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个实体对象
+     * 查询一条数据，返回一个实体对象(sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param clazz 查询对象类型
@@ -356,7 +356,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个实体对象
+     * 查询一条数据，返回一个实体对象(sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -366,7 +366,98 @@ public class Jdbc extends AbstractDataSource {
         return queryOne(sql, BeanCopyUtils.toMap(param), clazz);
     }
 
-    // TODO 新增 queryFirst
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param paramMap     参数，参数格式[:param]
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public Map<String, Object> queryFirst(String sql, Map<String, Object> paramMap, RenameStrategy resultRename) {
+        return queryData(sql, paramMap, new QueryOne<>(this, MapRowMapper.create(resultRename), true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Map<String, Object> queryFirst(String sql, Map<String, Object> paramMap) {
+        return queryFirst(sql, paramMap, DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public Map<String, Object> queryFirst(String sql, RenameStrategy resultRename) {
+        return queryFirst(sql, Collections.emptyMap(), resultRename);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Map<String, Object> queryFirst(String sql) {
+        return queryFirst(sql, Collections.emptyMap(), DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param param        参数，参数格式[:param]
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public Map<String, Object> queryFirst(String sql, Object param, RenameStrategy resultRename) {
+        return queryFirst(sql, BeanCopyUtils.toMap(param), resultRename);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Map<String, Object> queryFirst(String sql, Object param) {
+        return queryFirst(sql, BeanCopyUtils.toMap(param), DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     * @param clazz    查询对象类型
+     */
+    public <T> T queryFirst(String sql, Map<String, Object> paramMap, Class<T> clazz) {
+        return queryData(sql, paramMap, new QueryOne<>(this, new DataClassRowMapper<>(clazz), true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param clazz 查询对象类型
+     */
+    public <T> T queryFirst(String sql, Class<T> clazz) {
+        return queryFirst(sql, Collections.emptyMap(), clazz);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     * @param clazz 查询对象类型
+     */
+    public <T> T queryFirst(String sql, Object param, Class<T> clazz) {
+        return queryFirst(sql, BeanCopyUtils.toMap(param), clazz);
+    }
 
     /**
      * 查询多条数据，返回一个Map集合
@@ -462,7 +553,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 String
+     * 查询返回一个 String (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -472,7 +563,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 String
+     * 查询返回一个 String (sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -482,7 +573,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 String
+     * 查询返回一个 String (sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
@@ -491,7 +582,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Long
+     * 查询返回一个 Long (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -501,7 +592,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Long
+     * 查询返回一个 Long (sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -511,7 +602,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Long
+     * 查询返回一个 Long (sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
@@ -520,7 +611,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Double
+     * 查询返回一个 Double (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -530,7 +621,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Double
+     * 查询返回一个 Double (sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -540,7 +631,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Double
+     * 查询返回一个 Double (sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
@@ -549,7 +640,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 BigDecimal
+     * 查询返回一个 BigDecimal (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -559,7 +650,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 BigDecimal
+     * 查询返回一个 BigDecimal (sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -569,7 +660,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 BigDecimal
+     * 查询返回一个 BigDecimal (sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
@@ -578,7 +669,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Boolean
+     * 查询返回一个 Boolean (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -588,7 +679,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Boolean
+     * 查询返回一个 Boolean (sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -598,7 +689,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Boolean
+     * 查询返回一个 Boolean (sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
@@ -607,7 +698,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Date
+     * 查询返回一个 Date (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -617,7 +708,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Date
+     * 查询返回一个 Date (sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -627,7 +718,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Date
+     * 查询返回一个 Date (sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
@@ -636,7 +727,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Timestamp
+     * 查询返回一个 Timestamp (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
@@ -646,7 +737,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Timestamp
+     * 查询返回一个 Timestamp (sql返回多条数据会抛出异常)
      *
      * @param sql   sql脚本，参数格式[:param]
      * @param param 参数，参数格式[:param]
@@ -656,12 +747,215 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 查询返回一个 Timestamp
+     * 查询返回一个 Timestamp (sql返回多条数据会抛出异常)
      *
      * @param sql sql脚本，参数格式[:param]
      */
     public Timestamp queryTimestamp(String sql) {
         return queryTimestamp(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 String
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public String queryFirstString(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, String.class, true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 String
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public String queryFirstString(String sql, Object param) {
+        return queryFirstString(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 String
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public String queryFirstString(String sql) {
+        return queryFirstString(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 String
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Long queryFirstLong(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, Long.class, true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Long
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Long queryFirstLong(String sql, Object param) {
+        return queryFirstLong(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Long
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Long queryFirstLong(String sql) {
+        return queryFirstLong(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Double
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Double queryFirstDouble(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, Double.class, true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Double
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Double queryFirstDouble(String sql, Object param) {
+        return queryFirstDouble(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Double
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Double queryFirstDouble(String sql) {
+        return queryFirstDouble(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 BigDecimal
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public BigDecimal queryFirstBigDecimal(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, BigDecimal.class, true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 BigDecimal
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public BigDecimal queryFirstBigDecimal(String sql, Object param) {
+        return queryFirstBigDecimal(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 BigDecimal
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public BigDecimal queryFirstBigDecimal(String sql) {
+        return queryFirstBigDecimal(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Boolean
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Boolean queryFirstBoolean(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, Boolean.class, true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Boolean
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Boolean queryFirstBoolean(String sql, Object param) {
+        return queryFirstBoolean(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Boolean
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Boolean queryFirstBoolean(String sql) {
+        return queryFirstBoolean(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Date
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Date queryFirstDate(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, Date.class, true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Date
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Date queryFirstDate(String sql, Object param) {
+        return queryFirstDate(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Date
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Date queryFirstDate(String sql) {
+        return queryFirstDate(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Timestamp
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Timestamp queryFirstTimestamp(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, Timestamp.class, true));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Timestamp
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Timestamp queryFirstTimestamp(String sql, Object param) {
+        return queryFirstTimestamp(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Timestamp
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Timestamp queryFirstTimestamp(String sql) {
+        return queryFirstTimestamp(sql, Collections.emptyMap());
     }
 
     /**
@@ -2070,13 +2364,29 @@ public class Jdbc extends AbstractDataSource {
     protected static class QueryObject<T> implements JdbcExecute<T> {
         private final Jdbc jdbc;
         private final Class<T> returnType;
+        private final boolean queryFirst;
+
+        public QueryObject(Jdbc jdbc, Class<T> returnType, boolean queryFirst) {
+            this.jdbc = jdbc;
+            this.returnType = returnType;
+            this.queryFirst = queryFirst;
+        }
+
+        public QueryObject(Jdbc jdbc, Class<T> returnType) {
+            this(jdbc, returnType, false);
+        }
 
         @Override
         public T execute(JdbcContext context) {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
-                List<T> list = jdbc.jdbcTemplate.query(context.getSql(), context.getParamMap(), new SingleColumnRowMapper<>(returnType));
+                String sql = context.getSql();
+                if (queryFirst) {
+                    // 改写查询sql，限制查询数据量
+                    sql = DialectFactory.buildPaginationSql(0, 1, sql, jdbc.dbType, null);
+                }
+                List<T> list = jdbc.jdbcTemplate.query(sql, context.getParamMap(), new SingleColumnRowMapper<>(returnType));
                 return DataAccessUtils.singleResult(list);
             } catch (Exception e) {
                 exception = e;
@@ -2091,13 +2401,29 @@ public class Jdbc extends AbstractDataSource {
     protected static class QueryOne<T> implements JdbcExecute<T> {
         private final Jdbc jdbc;
         private final RowMapper<T> rowMapper;
+        private final boolean queryFirst;
+
+        public QueryOne(Jdbc jdbc, RowMapper<T> rowMapper, boolean queryFirst) {
+            this.jdbc = jdbc;
+            this.rowMapper = rowMapper;
+            this.queryFirst = queryFirst;
+        }
+
+        public QueryOne(Jdbc jdbc, RowMapper<T> rowMapper) {
+            this(jdbc, rowMapper, false);
+        }
 
         @Override
         public T execute(JdbcContext context) {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
-                List<T> list = jdbc.jdbcTemplate.query(context.getSql(), context.getParamMap(), rowMapper);
+                String sql = context.getSql();
+                if (queryFirst) {
+                    // 改写查询sql，限制查询数据量
+                    sql = DialectFactory.buildPaginationSql(0, 1, sql, jdbc.dbType, null);
+                }
+                List<T> list = jdbc.jdbcTemplate.query(sql, context.getParamMap(), rowMapper);
                 return DataAccessUtils.singleResult(list);
             } catch (Exception e) {
                 exception = e;
