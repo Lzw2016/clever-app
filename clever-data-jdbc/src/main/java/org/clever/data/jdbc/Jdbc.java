@@ -2087,6 +2087,27 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
+     * 返回下一个唯一id的值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     */
+    public Long nextId(String idName) {
+        return null;
+    }
+
+    /***
+     * 批量获取唯一id的值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     * @param size 唯一id值数量(1 ~ 10W)
+     */
+    public List<Long> nextIds(String idName, int size) {
+        return null;
+    }
+
+    /**
      * TODO 启用Oracle服务端日志(dbms_output)
      */
     public void enableDbmsOutput() {
@@ -2474,6 +2495,7 @@ public class Jdbc extends AbstractDataSource {
 
         @Override
         public Void execute(JdbcContext context) {
+            // TODO 需要支持读取数据时手动跳出读取
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
