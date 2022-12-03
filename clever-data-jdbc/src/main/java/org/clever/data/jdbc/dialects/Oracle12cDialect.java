@@ -1,5 +1,8 @@
 package org.clever.data.jdbc.dialects;
 
+import org.clever.core.tuples.TupleTwo;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,5 +18,12 @@ public class Oracle12cDialect extends AbstractDialect {
     @Override
     public String buildPaginationSql(String originalSql, long offset, long limit) {
         return originalSql + " OFFSET " + offset + " ROWS FETCH NEXT " + limit + " ROWS ONLY";
+    }
+
+    @Override
+    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
+        return TupleTwo.creat("SELECT :pkName FROM DUAL", new HashMap<String, Object>() {{
+            put("pkName", String.format("%s.NEXTVAL", primaryKeyName));
+        }});
     }
 }

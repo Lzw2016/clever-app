@@ -2,6 +2,7 @@ package org.clever.data.jdbc.dialects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.model.request.page.IPage;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.support.mybatisplus.ExceptionUtils;
 import org.clever.util.Assert;
@@ -84,6 +85,17 @@ public class DialectFactory {
      */
     public static String buildPaginationSql(IPage<?> page, String buildSql, DbType dbType, String dialectClazz) {
         return buildPaginationSql(page.offset(), page.getSize(), buildSql, dbType, dialectClazz);
+    }
+
+    /**
+     * 返回能得到下一个主键值的SQL语句以及参数
+     *
+     * @param primaryKeyName 主键名称
+     * @param dbType         数据库类型
+     * @param dialectClazz   数据库方言
+     */
+    public static TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName, DbType dbType, String dialectClazz) {
+        return getDialect(dbType, dialectClazz).nextPKSql(primaryKeyName);
     }
 
     /**

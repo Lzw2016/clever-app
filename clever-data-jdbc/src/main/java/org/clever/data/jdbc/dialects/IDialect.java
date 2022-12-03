@@ -1,5 +1,7 @@
 package org.clever.data.jdbc.dialects;
 
+import org.clever.core.tuples.TupleTwo;
+
 import java.util.Map;
 
 /**
@@ -30,4 +32,11 @@ public interface IDialect {
      * @param limit       数据量
      */
     String buildPaginationSql(String originalSql, long offset, long limit);
+
+    /**
+     * 返回能得到下一个主键值的SQL语句以及参数
+     *
+     * @param primaryKeyName 主键名称
+     */
+    TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName);
 }

@@ -1,5 +1,8 @@
 package org.clever.data.jdbc.dialects;
 
+import org.clever.core.tuples.TupleTwo;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -23,5 +26,12 @@ public class H2Dialect extends AbstractDialect {
             sql += (" offset " + offset);
         }
         return sql;
+    }
+
+    @Override
+    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
+        return TupleTwo.creat("select nextval(:pkName)", new HashMap<String, Object>() {{
+            put("pkName", primaryKeyName);
+        }});
     }
 }

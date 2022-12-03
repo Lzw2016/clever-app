@@ -1,5 +1,8 @@
 package org.clever.data.jdbc.dialects;
 
+import org.clever.core.tuples.TupleTwo;
+
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,5 +24,12 @@ public class DB2Dialect extends AbstractDialect {
         long firstParam = offset + 1;
         long secondParam = offset + limit;
         return "SELECT * FROM (SELECT TMP_PAGE.*, ROWNUMBER() OVER() AS ROW_ID FROM ( " + originalSql + " ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN " + firstParam + " AND " + secondParam;
+    }
+
+    @Override
+    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
+        return TupleTwo.creat("values nextval for :pkName", new HashMap<String, Object>() {{
+            put("pkName", primaryKeyName);
+        }});
     }
 }

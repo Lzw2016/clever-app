@@ -1,5 +1,6 @@
 package org.clever.data.jdbc.dialects;
 
+import org.clever.core.tuples.TupleTwo;
 import org.clever.util.StringUtils;
 
 import java.util.Map;
@@ -51,5 +52,10 @@ public class SybaseDialect extends AbstractDialect {
         sql.append(" select * from #t where rownum > ").append(offset).append(" and rownum <= ").append(limit);
         sql.append(" drop table #t ");
         return sql.toString();
+    }
+
+    @Override
+    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
+        throw new UnsupportedOperationException("不支持当前操作");
     }
 }
