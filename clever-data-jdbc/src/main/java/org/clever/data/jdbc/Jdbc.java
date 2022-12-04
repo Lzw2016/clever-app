@@ -2290,7 +2290,7 @@ public class Jdbc extends AbstractDataSource {
                 }
             }
             if (rowId.getValue1() == null) {
-                throw new RuntimeException("未知的异常");
+                throw new RuntimeException("auto_increment_id 表数据不存在(未知的异常)");
             }
             params.clear();
             params.put("size", size);
