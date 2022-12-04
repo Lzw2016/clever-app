@@ -7,15 +7,19 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
 import org.clever.core.codec.EncodeDecodeUtils;
+import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.IPage;
 import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
+import org.clever.core.tuples.TupleOne;
 import org.clever.core.tuples.TupleTwo;
+import org.clever.dao.DuplicateKeyException;
 import org.clever.dao.support.DataAccessUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.dialects.DialectFactory;
@@ -2233,16 +2237,6 @@ public class Jdbc extends AbstractDataSource {
         return beginTX(status -> queryLong(sqlInfo.getValue1(), sqlInfo.getValue2()));
     }
 
-    /**
-     * 返回下一个唯一id的值 <br/>
-     * <b>此功能需要数据库表支持</b>
-     *
-     * @param idName 唯一id名称
-     */
-    public Long nextId(String idName) {
-        return null;
-    }
-
     /***
      * 批量获取唯一id的值 <br/>
      * <b>此功能需要数据库表支持</b>
@@ -2251,7 +2245,79 @@ public class Jdbc extends AbstractDataSource {
      * @param size 唯一id值数量(1 ~ 10W)
      */
     public List<Long> nextIds(String idName, int size) {
-        return null;
+        Assert.isTrue(size >= 1 && size <= 10_0000, "size取值范围必须在1 ~ 10W之间");
+        final Map<String, Object> params = new HashMap<>();
+        params.put("sequence_name", idName);
+        params.put("prefix", "");
+        Map<String, Object> result = queryOne(
+                "select id, current_value from auto_increment_id where sequence_name=:sequence_name and prefix=:prefix",
+                params,
+                RenameStrategy.None
+        );
+        final TupleOne<Long> rowId = TupleOne.creat(null), oldValue = TupleOne.creat(null);
+        if (result != null) {
+            rowId.setValue1(Conv.asLong(result.get("id"), null));
+            oldValue.setValue1(Conv.asLong(result.get("current_value"), null));
+        }
+        Long currentValue = beginTX(status -> {
+            if (rowId.getValue1() == null) {
+                try {
+                    Long id = SnowFlake.SNOW_FLAKE.nextId();
+                    params.clear();
+                    params.put("id", id);
+                    params.put("sequence_name", idName);
+                    params.put("prefix", "");
+                    params.put("description", "系统自动生成");
+                    params.put("create_at", new Date());
+                    insertTable("auto_increment_id", params, RenameStrategy.None);
+                } catch (DuplicateKeyException e) {
+                    // 插入数据失败: 唯一约束错误
+                    log.warn("插入 auto_increment_id 表失败: {}", e.getMessage());
+                } catch (Exception e) {
+                    log.warn("插入 auto_increment_id 表失败", e);
+                }
+                params.clear();
+                params.put("sequence_name", idName);
+                params.put("prefix", "");
+                Map<String, Object> rowData = queryOne(
+                        "select id, current_value from auto_increment_id where sequence_name=:sequence_name and prefix=:prefix",
+                        params,
+                        RenameStrategy.None
+                );
+                if (rowData != null) {
+                    rowId.setValue1(Conv.asLong(rowData.get("id"), null));
+                    oldValue.setValue1(Conv.asLong(rowData.get("current_value"), null));
+                }
+            }
+            if (rowId.getValue1() == null) {
+                throw new RuntimeException("未知的异常");
+            }
+            params.clear();
+            params.put("size", size);
+            params.put("id", rowId.getValue1());
+            params.put("update_at", new Date());
+            // 更新序列数据(使用数据库行级锁保证并发性)
+            update("update auto_increment_id set current_value=current_value+:size update_at=:update_at where id=:id", params);
+            // 查询更新之后的值
+            return queryLong("select current_value from auto_increment_id where id=:id", params);
+        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        oldValue.setValue1(currentValue - size);
+        List<Long> ids = new ArrayList<>(size);
+        for (int i = 1; i <= size; i++) {
+            ids.add(oldValue.getValue1() + i);
+        }
+        return ids;
+    }
+
+    /**
+     * 返回下一个唯一id的值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     */
+    public Long nextId(String idName) {
+        List<Long> ids = nextIds(idName, 1);
+        return ids.get(0);
     }
 
     /**
