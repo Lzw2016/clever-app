@@ -70,15 +70,15 @@ public class Jdbc extends AbstractDataSource {
     /**
      * 事务默认是否只读
      */
-    public static final boolean Default_ReadOnly = false;
+    public static final boolean DEFAULT_READ_ONLY = false;
     /**
      * 分页时最大的页大小
      */
-    public static final int Max_Page_Size = QueryByPage.PAGE_SIZE_MAX;
+    public static final int PAGE_SIZE_MAX = QueryByPage.PAGE_SIZE_MAX;
     /**
      * 设置游标读取数据时，单批次的数据读取量(值不能太大也不能太小)
      */
-    public static final int Fetch_Size = 500;
+    public static final int FETCH_SIZE = 500;
     /**
      * 事务默认超时时间
      */
@@ -86,7 +86,7 @@ public class Jdbc extends AbstractDataSource {
     /**
      * 事务名称前缀
      */
-    private static final String Transaction_Name_Prefix = "TX";
+    private static final String TRANSACTION_NAME_PREFIX = "TX";
 
     /**
      * 数据源名称
@@ -130,7 +130,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = hikariConfig.getPoolName();
         this.dataSource = new HikariDataSource(hikariConfig);
         this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(this.dataSource));
-        this.jdbcTemplate.getJdbcTemplate().setFetchSize(Fetch_Size);
+        this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
         initCheck();
@@ -148,7 +148,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = dataSourceName;
         this.dataSource = dataSource;
         this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(this.dataSource));
-        this.jdbcTemplate.getJdbcTemplate().setFetchSize(Fetch_Size);
+        this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
         initCheck();
@@ -164,7 +164,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSource = jdbcTemplate.getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
         this.jdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        this.jdbcTemplate.getJdbcTemplate().setFetchSize(Fetch_Size);
+        this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
         initCheck();
@@ -180,7 +180,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSource = namedParameterJdbcTemplate.getJdbcTemplate().getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
         this.jdbcTemplate = namedParameterJdbcTemplate;
-        this.jdbcTemplate.getJdbcTemplate().setFetchSize(Fetch_Size);
+        this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
         initCheck();
@@ -2090,7 +2090,7 @@ public class Jdbc extends AbstractDataSource {
      * @see TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout, int isolationLevel) {
-        return beginTX(action, propagationBehavior, timeout, isolationLevel, Default_ReadOnly);
+        return beginTX(action, propagationBehavior, timeout, isolationLevel, DEFAULT_READ_ONLY);
     }
 
     /**
@@ -2103,7 +2103,7 @@ public class Jdbc extends AbstractDataSource {
      * @see TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout) {
-        return beginTX(action, propagationBehavior, timeout, TransactionDefinition.ISOLATION_DEFAULT, Default_ReadOnly);
+        return beginTX(action, propagationBehavior, timeout, TransactionDefinition.ISOLATION_DEFAULT, DEFAULT_READ_ONLY);
     }
 
     /**
@@ -2115,7 +2115,7 @@ public class Jdbc extends AbstractDataSource {
      * @see TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior) {
-        return beginTX(action, propagationBehavior, TX_TIMEOUT, TransactionDefinition.ISOLATION_DEFAULT, Default_ReadOnly);
+        return beginTX(action, propagationBehavior, TX_TIMEOUT, TransactionDefinition.ISOLATION_DEFAULT, DEFAULT_READ_ONLY);
     }
 
     /**
@@ -2126,7 +2126,7 @@ public class Jdbc extends AbstractDataSource {
      * @see TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action) {
-        return beginTX(action, TransactionDefinition.PROPAGATION_REQUIRED, TX_TIMEOUT, TransactionDefinition.ISOLATION_DEFAULT, Default_ReadOnly);
+        return beginTX(action, TransactionDefinition.PROPAGATION_REQUIRED, TX_TIMEOUT, TransactionDefinition.ISOLATION_DEFAULT, DEFAULT_READ_ONLY);
     }
 
     /**
@@ -2238,7 +2238,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /***
-     * 批量获取唯一id的值 <br/>
+     * 批量获取唯一的id值 <br/>
      * <b>此功能需要数据库表支持</b>
      *
      * @param idName 唯一id名称
@@ -2310,7 +2310,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 返回下一个唯一id的值 <br/>
+     * 返回下一个唯一的id值 <br/>
      * <b>此功能需要数据库表支持</b>
      *
      * @param idName 唯一id名称
@@ -2318,6 +2318,75 @@ public class Jdbc extends AbstractDataSource {
     public Long nextId(String idName) {
         List<Long> ids = nextIds(idName, 1);
         return ids.get(0);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param codeName code名称
+     * @param size     唯一 code 值数量(1 ~ 10W)
+     */
+    public List<String> nextCodes(String codeName, int size) {
+        // TODO 批量获取唯一的 code 值
+        return null;
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param codeName code名称
+     */
+    public List<String> nextCode(String codeName) {
+        return nextCodes(codeName, 1);
+    }
+
+    /**
+     * 借助数据库表实现的排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   jdbc.beginTX(status -> {
+     *       jdbc.lock(lockName);
+     *       // 业务逻辑处理...
+     *       return null;
+     *   }, TransactionDefinition.PROPAGATION_REQUIRES_NEW, lockTimeout);
+     * }</pre>
+     *
+     * @param lockName 锁名称
+     */
+    public void lock(String lockName) {
+        Assert.isNotBlank(lockName, "lockName 不能为空");
+        final Map<String, Object> params = new HashMap<>();
+        params.put("lock_name", lockName);
+        params.put("update_at", new Date());
+        // 使用数据库行级锁保证并发性
+        int lock = update("update sys_lock set lock_count=lock_count+1, update_at=:update_at where lock_name=:lock_name", params);
+        if (lock <= 0) {
+            try {
+                Long id = SnowFlake.SNOW_FLAKE.nextId();
+                params.clear();
+                params.put("id", id);
+                params.put("lock_name", lockName);
+                params.put("lock_count", 0);
+                params.put("description", "系统自动生成");
+                params.put("create_at", new Date());
+                insertTable("sys_lock", params, RenameStrategy.None);
+            } catch (DuplicateKeyException e) {
+                // 插入数据失败: 唯一约束错误
+                log.warn("插入 sys_lock 表失败: {}", e.getMessage());
+            } catch (Exception e) {
+                log.warn("插入 sys_lock 表失败", e);
+            }
+            // 使用数据库行级锁保证并发性
+            params.clear();
+            params.put("lock_name", lockName);
+            params.put("update_at", new Date());
+            lock = update("update sys_lock set lock_count=lock_count+1, update_at=:update_at where lock_name=:lock_name", params);
+            if (lock <= 0) {
+                throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
+            }
+        }
     }
 
     /**
@@ -2383,7 +2452,7 @@ public class Jdbc extends AbstractDataSource {
         Assert.hasText(sql, "sql不能为空");
         Assert.notNull(pagination, "分页配置不能为空");
         sql = StringUtils.trim(sql);
-        Page<T> page = new Page<>(pagination.getPageNo(), Math.min(pagination.getPageSize(), Max_Page_Size));
+        Page<T> page = new Page<>(pagination.getPageNo(), Math.min(pagination.getPageSize(), PAGE_SIZE_MAX));
         // 执行 count 查询
         if (pagination.isSearchCount()) {
             long total = queryCount(sql, paramMap);
@@ -2540,9 +2609,9 @@ public class Jdbc extends AbstractDataSource {
         int nextSerialNumber = transactionSerialNumber.incrementAndGet();
         String transactionName;
         if (nextSerialNumber < 0) {
-            transactionName = Transaction_Name_Prefix + nextSerialNumber;
+            transactionName = TRANSACTION_NAME_PREFIX + nextSerialNumber;
         } else {
-            transactionName = Transaction_Name_Prefix + "+" + nextSerialNumber;
+            transactionName = TRANSACTION_NAME_PREFIX + "+" + nextSerialNumber;
         }
         return transactionName;
     }

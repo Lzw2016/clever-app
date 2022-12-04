@@ -22,6 +22,30 @@ create unique index idx_auto_increment_id_unique_value on auto_increment_id (seq
 
 
 /* ====================================================================================================================
+    sys_lock -- 系统锁
+==================================================================================================================== */
+create table sys_lock
+(
+    id                  bigint                  not null        auto_increment                          comment '主键id',
+    lock_name           varchar(127)    binary  not null                                                comment '锁名称',
+    lock_count          bigint                  not null        default 0                               comment '锁次数',
+    description         varchar(511)                                                                    comment '说明',
+    create_at           datetime(3)             not null        default current_timestamp(3)            comment '创建时间',
+    update_at           datetime(3)                             on update current_timestamp(3)          comment '更新时间',
+    primary key (id)
+) comment = '自增长id表';
+create index sys_lock_lock_name on sys_lock (lock_name);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+
+/* ====================================================================================================================
     存储过程 procedure
 ==================================================================================================================== */
 -- [存储过程]获取自增长序列值
