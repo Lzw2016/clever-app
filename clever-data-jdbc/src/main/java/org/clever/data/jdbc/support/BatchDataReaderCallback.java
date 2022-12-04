@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * 游标批量读取模式
@@ -16,16 +17,16 @@ import java.util.function.Consumer;
  * 创建时间：2020/02/19 17:53 <br/>
  */
 public class BatchDataReaderCallback extends InterruptRowCallbackHandler {
-    private static final int Default_Batch_Size = 200;
+    private static final int DEFAULT_BATCH_SIZE = 200;
 
     /**
      * 一个批次的数据量
      */
     private final int batchSize;
     /**
-     * 游标批次读取数据消费者
+     * 游标批次读取数据回调(返回true则中断数据读取)
      */
-    private final Consumer<BatchData> consumer;
+    private final Function<BatchData, Boolean> callback;
     /**
      * 数据行转Map实现
      */
@@ -37,12 +38,12 @@ public class BatchDataReaderCallback extends InterruptRowCallbackHandler {
 
     /**
      * @param batchSize    一个批次的数据量
-     * @param consumer     读取数据消费者
+     * @param callback     游标批次读取数据回调(返回true则中断数据读取)
      * @param resultRename 返回数据字段名重命名策略
      */
-    public BatchDataReaderCallback(int batchSize, Consumer<BatchData> consumer, RenameStrategy resultRename) {
-        this.batchSize = batchSize <= 0 ? Default_Batch_Size : batchSize;
-        this.consumer = consumer;
+    public BatchDataReaderCallback(int batchSize, Function<BatchData, Boolean> callback, RenameStrategy resultRename) {
+        this.batchSize = batchSize <= 0 ? DEFAULT_BATCH_SIZE : batchSize;
+        this.callback = callback;
         this.mapRowMapper = MapRowMapper.create(resultRename);
         this.rowDataList = new ArrayList<>(this.batchSize);
     }
@@ -53,11 +54,9 @@ public class BatchDataReaderCallback extends InterruptRowCallbackHandler {
         rowDataList.add(rowData);
         if (rowDataList.size() >= batchSize) {
             BatchData batchData = new BatchData(getColumnNames(), getColumnTypes(), getColumnCount(), rowDataList, this.getRowCount());
-            consumer.accept(batchData);
+            Boolean interrupted = callback.apply(batchData);
+            this.interrupted = Objects.equals(interrupted, true);
             rowDataList = new ArrayList<>(this.batchSize);
-            if (batchData.isInterrupted()) {
-                this.interrupted = true;
-            }
         }
     }
 
@@ -67,7 +66,7 @@ public class BatchDataReaderCallback extends InterruptRowCallbackHandler {
             return;
         }
         BatchData batchData = new BatchData(getColumnNames(), getColumnTypes(), getColumnCount(), rowDataList, this.getRowCount());
-        consumer.accept(batchData);
+        callback.apply(batchData);
         rowDataList = new ArrayList<>();
     }
 }

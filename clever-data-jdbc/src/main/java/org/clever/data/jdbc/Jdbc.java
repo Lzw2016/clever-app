@@ -45,6 +45,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Jdbc 数据库操作封装
@@ -1424,12 +1425,88 @@ public class Jdbc extends AbstractDataSource {
      * @param sql          sql脚本，参数格式[:param]
      * @param paramMap     参数，参数格式[:param]
      * @param batchSize    一个批次的数据量
-     * @param consumer     游标批次读取数据消费者
+     * @param callback     游标批次读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sql, Map<String, Object> paramMap, int batchSize, Function<BatchData, Boolean> callback, RenameStrategy resultRename) {
+        final BatchDataReaderCallback batchDataReaderCallback = new BatchDataReaderCallback(batchSize, callback, resultRename);
+        queryForCursor(sql, paramMap, new QueryForCursor(this, batchDataReaderCallback));
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql       sql脚本，参数格式[:param]
+     * @param paramMap  参数，参数格式[:param]
+     * @param batchSize 一个批次的数据量
+     * @param callback  游标批次读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sql, Map<String, Object> paramMap, int batchSize, Function<BatchData, Boolean> callback) {
+        queryForCursor(sql, paramMap, batchSize, callback, DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param batchSize    一个批次的数据量
+     * @param callback     游标批次读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sql, int batchSize, Function<BatchData, Boolean> callback, RenameStrategy resultRename) {
+        queryForCursor(sql, Collections.emptyMap(), batchSize, callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql       sql脚本，参数格式[:param]
+     * @param batchSize 一个批次的数据量
+     * @param callback  游标批次读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sql, int batchSize, Function<BatchData, Boolean> callback) {
+        queryForCursor(sql, Collections.emptyMap(), batchSize, callback, DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param param        参数，参数格式[:param]
+     * @param batchSize    一个批次的数据量
+     * @param callback     游标批次读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sql, Object param, int batchSize, Function<BatchData, Boolean> callback, RenameStrategy resultRename) {
+        queryForCursor(sql, BeanCopyUtils.toMap(param), batchSize, callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql       sql脚本，参数格式[:param]
+     * @param param     参数，参数格式[:param]
+     * @param batchSize 一个批次的数据量
+     * @param callback  游标批次读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sql, Object param, int batchSize, Function<BatchData, Boolean> callback) {
+        queryForCursor(sql, BeanCopyUtils.toMap(param), batchSize, callback, DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param paramMap     参数，参数格式[:param]
+     * @param batchSize    一个批次的数据量
+     * @param consumer     游标批次读取数据回调
      * @param resultRename 返回数据字段名重命名策略
      */
     public void queryForCursor(String sql, Map<String, Object> paramMap, int batchSize, Consumer<BatchData> consumer, RenameStrategy resultRename) {
-        final BatchDataReaderCallback batchDataReaderCallback = new BatchDataReaderCallback(batchSize, consumer, resultRename);
-        queryForCursor(sql, paramMap, new QueryForCursor(this, batchDataReaderCallback));
+        queryForCursor(sql, paramMap, batchSize, batchData -> {
+            consumer.accept(batchData);
+            return false;
+        }, resultRename);
     }
 
     /**
@@ -1497,11 +1574,11 @@ public class Jdbc extends AbstractDataSource {
      *
      * @param sql          sql脚本，参数格式[:param]
      * @param paramMap     参数，参数格式[:param]
-     * @param consumer     游标批次读取数据消费者
+     * @param callback     游标读取数据回调(返回true则中断数据读取)
      * @param resultRename 返回数据字段名重命名策略
      */
-    public void queryForCursor(String sql, Map<String, Object> paramMap, Consumer<RowData> consumer, RenameStrategy resultRename) {
-        final RowDataReaderCallback rowDataReaderCallback = new RowDataReaderCallback(consumer, resultRename);
+    public void queryForCursor(String sql, Map<String, Object> paramMap, Function<RowData, Boolean> callback, RenameStrategy resultRename) {
+        final RowDataReaderCallback rowDataReaderCallback = new RowDataReaderCallback(callback, resultRename);
         queryForCursor(sql, paramMap, new QueryForCursor(this, rowDataReaderCallback));
     }
 
@@ -1510,7 +1587,77 @@ public class Jdbc extends AbstractDataSource {
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param paramMap 参数，参数格式[:param]
-     * @param consumer 游标批次读取数据消费者
+     * @param callback 游标读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sql, Map<String, Object> paramMap, Function<RowData, Boolean> callback) {
+        queryForCursor(sql, paramMap, callback, DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param callback     游标读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sql, Function<RowData, Boolean> callback, RenameStrategy resultRename) {
+        queryForCursor(sql, Collections.emptyMap(), callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param callback 游标读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sql, Function<RowData, Boolean> callback) {
+        queryForCursor(sql, Collections.emptyMap(), callback, DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param param        参数，参数格式[:param]
+     * @param callback     游标读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sql, Object param, Function<RowData, Boolean> callback, RenameStrategy resultRename) {
+        queryForCursor(sql, BeanCopyUtils.toMap(param), callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param param    参数，参数格式[:param]
+     * @param callback 游标读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sql, Object param, Function<RowData, Boolean> callback) {
+        queryForCursor(sql, BeanCopyUtils.toMap(param), callback, DEFAULT_RESULT_RENAME);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param paramMap     参数，参数格式[:param]
+     * @param consumer     游标读取数据回调
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sql, Map<String, Object> paramMap, Consumer<RowData> consumer, RenameStrategy resultRename) {
+        queryForCursor(sql, paramMap, rowData -> {
+            consumer.accept(rowData);
+            return false;
+        }, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     * @param consumer 游标读取数据回调
      */
     public void queryForCursor(String sql, Map<String, Object> paramMap, Consumer<RowData> consumer) {
         queryForCursor(sql, paramMap, consumer, DEFAULT_RESULT_RENAME);
@@ -1520,7 +1667,7 @@ public class Jdbc extends AbstractDataSource {
      * 查询多条数据(大量数据)，使用游标读取
      *
      * @param sql          sql脚本，参数格式[:param]
-     * @param consumer     游标批次读取数据消费者
+     * @param consumer     游标读取数据回调
      * @param resultRename 返回数据字段名重命名策略
      */
     public void queryForCursor(String sql, Consumer<RowData> consumer, RenameStrategy resultRename) {
@@ -1531,7 +1678,7 @@ public class Jdbc extends AbstractDataSource {
      * 查询多条数据(大量数据)，使用游标读取
      *
      * @param sql      sql脚本，参数格式[:param]
-     * @param consumer 游标批次读取数据消费者
+     * @param consumer 游标读取数据回调
      */
     public void queryForCursor(String sql, Consumer<RowData> consumer) {
         queryForCursor(sql, Collections.emptyMap(), consumer, DEFAULT_RESULT_RENAME);
@@ -1542,7 +1689,7 @@ public class Jdbc extends AbstractDataSource {
      *
      * @param sql          sql脚本，参数格式[:param]
      * @param param        参数，参数格式[:param]
-     * @param consumer     游标批次读取数据消费者
+     * @param consumer     游标读取数据回调
      * @param resultRename 返回数据字段名重命名策略
      */
     public void queryForCursor(String sql, Object param, Consumer<RowData> consumer, RenameStrategy resultRename) {
@@ -1554,7 +1701,7 @@ public class Jdbc extends AbstractDataSource {
      *
      * @param sql      sql脚本，参数格式[:param]
      * @param param    参数，参数格式[:param]
-     * @param consumer 游标批次读取数据消费者
+     * @param consumer 游标读取数据回调
      */
     public void queryForCursor(String sql, Object param, Consumer<RowData> consumer) {
         queryForCursor(sql, BeanCopyUtils.toMap(param), consumer, DEFAULT_RESULT_RENAME);

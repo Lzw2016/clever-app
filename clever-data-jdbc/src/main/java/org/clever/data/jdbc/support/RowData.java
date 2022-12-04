@@ -1,7 +1,6 @@
 package org.clever.data.jdbc.support;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.clever.core.mapper.BeanCopyUtils;
 
 import java.io.Serializable;
@@ -35,11 +34,6 @@ public class RowData implements Serializable {
      * 当前读取的行数
      */
     private final int rowCount;
-    /**
-     * 是否已经中断数据回调
-     */
-    @Setter
-    protected boolean interrupted = false;
 
     public RowData(String[] columnNames, int[] columnTypes, int columnCount, Map<String, Object> rowData, int rowCount) {
         this.columnNames = Arrays.asList(columnNames);

@@ -5,7 +5,8 @@ import org.clever.core.RenameStrategy;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * 作者：lizw <br/>
@@ -13,20 +14,20 @@ import java.util.function.Consumer;
  */
 public class RowDataReaderCallback extends InterruptRowCallbackHandler {
     /**
-     * 游标读取数据消费者
+     * 游标读取数据回调(返回true则中断数据读取)
      */
-    private final Consumer<RowData> consumer;
+    private final Function<RowData, Boolean> callback;
     /**
      * 数据行转Map实现
      */
     private final MapRowMapper mapRowMapper;
 
     /**
-     * @param consumer       读取数据消费者
+     * @param callback       游标读取数据回调(返回true则中断数据读取)
      * @param renameStrategy 返回数据字段名重命名策略
      */
-    public RowDataReaderCallback(Consumer<RowData> consumer, RenameStrategy renameStrategy) {
-        this.consumer = consumer;
+    public RowDataReaderCallback(Function<RowData, Boolean> callback, RenameStrategy renameStrategy) {
+        this.callback = callback;
         this.mapRowMapper = MapRowMapper.create(renameStrategy);
     }
 
@@ -34,9 +35,7 @@ public class RowDataReaderCallback extends InterruptRowCallbackHandler {
     protected void processRow(ResultSet rs, int rowNum) throws SQLException {
         Map<String, Object> rowMap = mapRowMapper.mapRow(rs, rowNum);
         RowData rowData = new RowData(getColumnNames(), getColumnTypes(), getColumnCount(), rowMap, this.getRowCount());
-        consumer.accept(rowData);
-        if (rowData.isInterrupted()) {
-            this.interrupted = true;
-        }
+        Boolean interrupted = callback.apply(rowData);
+        this.interrupted = Objects.equals(interrupted, true);
     }
 }
