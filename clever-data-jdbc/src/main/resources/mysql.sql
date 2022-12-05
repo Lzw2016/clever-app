@@ -5,17 +5,35 @@ create table auto_increment_id
 (
     id                  bigint                  not null        auto_increment                          comment '主键id',
     sequence_name       varchar(127)    binary  not null                                                comment '序列名称',
-    prefix              varchar(127)    binary  not null                                                comment '序列前缀',
     current_value       bigint                  not null        default -1                              comment '当前值',
     description         varchar(511)                                                                    comment '说明',
     create_at           datetime(3)             not null        default current_timestamp(3)            comment '创建时间',
     update_at           datetime(3)                             on update current_timestamp(3)          comment '更新时间',
     primary key (id)
 ) comment = '自增长id表';
-create index idx_auto_increment_id_sequence_name on auto_increment_id (sequence_name);
-create index idx_auto_increment_id_prefix on auto_increment_id (prefix);
-create unique index idx_auto_increment_id_unique_prefix on auto_increment_id (sequence_name, prefix);
-create unique index idx_auto_increment_id_unique_value on auto_increment_id (sequence_name, prefix, current_value);
+create unique index idx_auto_increment_id_sequence_name on auto_increment_id (sequence_name);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/
+
+
+/* ====================================================================================================================
+    biz_code_rule -- 业务编码表
+==================================================================================================================== */
+create table biz_code
+(
+    id                  bigint                  not null        auto_increment                          comment '主键id',
+    code_name           varchar(127)    binary  not null                                                comment '编码名称',
+    pattern             varchar(127)    binary  not null                                                comment '编码规则表达式',
+    sequence            bigint                  not null        default -1                              comment '序列值',
+    reset_pattern       varchar(127)    binary                                                          comment '重置sequence值的表达式，使用Java日期格式化字符串',
+    reset_flag          varchar(127)    binary  not null        default ''                              comment '重置sequence值标识，此字段值变化后则需要重置',
+    description         varchar(511)                                                                    comment '说明',
+    create_at           datetime(3)             not null        default current_timestamp(3)            comment '创建时间',
+    update_at           datetime(3)                             on update current_timestamp(3)          comment '更新时间',
+    primary key (id)
+) comment = '业务编码表';
+create unique index biz_code_code_name on biz_code (code_name);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/
@@ -38,8 +56,6 @@ create index sys_lock_lock_name on sys_lock (lock_name);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/
-
-
 
 
 

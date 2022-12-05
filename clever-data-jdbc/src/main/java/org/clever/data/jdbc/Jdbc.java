@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
 import org.clever.core.codec.EncodeDecodeUtils;
+import org.clever.core.id.BusinessCodeUtils;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.core.model.request.QueryByPage;
@@ -18,6 +20,7 @@ import org.clever.core.model.request.page.IPage;
 import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
 import org.clever.core.tuples.TupleOne;
+import org.clever.core.tuples.TupleThree;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.dao.DuplicateKeyException;
 import org.clever.dao.support.DataAccessUtils;
@@ -2248,17 +2251,7 @@ public class Jdbc extends AbstractDataSource {
         Assert.isTrue(size >= 1 && size <= 10_0000, "size取值范围必须在1 ~ 10W之间");
         final Map<String, Object> params = new HashMap<>();
         params.put("sequence_name", idName);
-        params.put("prefix", "");
-        Map<String, Object> result = queryOne(
-                "select id, current_value from auto_increment_id where sequence_name=:sequence_name and prefix=:prefix",
-                params,
-                RenameStrategy.None
-        );
-        final TupleOne<Long> rowId = TupleOne.creat(null), oldValue = TupleOne.creat(null);
-        if (result != null) {
-            rowId.setValue1(Conv.asLong(result.get("id"), null));
-            oldValue.setValue1(Conv.asLong(result.get("current_value"), null));
-        }
+        final TupleOne<Long> rowId = TupleOne.creat(queryLong("select id from auto_increment_id where sequence_name=:sequence_name", params));
         Long currentValue = beginTX(status -> {
             if (rowId.getValue1() == null) {
                 try {
@@ -2266,7 +2259,6 @@ public class Jdbc extends AbstractDataSource {
                     params.clear();
                     params.put("id", id);
                     params.put("sequence_name", idName);
-                    params.put("prefix", "");
                     params.put("description", "系统自动生成");
                     params.put("create_at", new Date());
                     insertTable("auto_increment_id", params, RenameStrategy.None);
@@ -2278,33 +2270,26 @@ public class Jdbc extends AbstractDataSource {
                 }
                 params.clear();
                 params.put("sequence_name", idName);
-                params.put("prefix", "");
-                Map<String, Object> rowData = queryOne(
-                        "select id, current_value from auto_increment_id where sequence_name=:sequence_name and prefix=:prefix",
-                        params,
-                        RenameStrategy.None
-                );
-                if (rowData != null) {
-                    rowId.setValue1(Conv.asLong(rowData.get("id"), null));
-                    oldValue.setValue1(Conv.asLong(rowData.get("current_value"), null));
-                }
+                rowId.setValue1(queryLong("select id from auto_increment_id where sequence_name=:sequence_name", params));
             }
             if (rowId.getValue1() == null) {
                 throw new RuntimeException("auto_increment_id 表数据不存在(未知的异常)");
             }
+            // 更新序列数据(使用数据库行级锁保证并发性)
             params.clear();
             params.put("size", size);
             params.put("id", rowId.getValue1());
             params.put("update_at", new Date());
-            // 更新序列数据(使用数据库行级锁保证并发性)
             update("update auto_increment_id set current_value=current_value+:size update_at=:update_at where id=:id", params);
             // 查询更新之后的值
+            params.clear();
+            params.put("id", rowId.getValue1());
             return queryLong("select current_value from auto_increment_id where id=:id", params);
         }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-        oldValue.setValue1(currentValue - size);
+        long oldValue = currentValue - size;
         List<Long> ids = new ArrayList<>(size);
         for (int i = 1; i <= size; i++) {
-            ids.add(oldValue.getValue1() + i);
+            ids.add(oldValue + i);
         }
         return ids;
     }
@@ -2328,8 +2313,52 @@ public class Jdbc extends AbstractDataSource {
      * @param size     唯一 code 值数量(1 ~ 10W)
      */
     public List<String> nextCodes(String codeName, int size) {
-        // TODO 批量获取唯一的 code 值
-        return null;
+        Assert.isTrue(size >= 1 && size <= 10_0000, "size取值范围必须在1 ~ 10W之间");
+        TupleThree<String, Date, Long> res = beginTX(status -> {
+            // 使用数据库行级锁保证并发性
+            Map<String, Object> params = new HashMap<>();
+            params.put("code_name", codeName);
+            Map<String, Object> result = queryOne(
+                    "select id, pattern, sequence, reset_pattern, reset_flag from biz_code where code_name=:code_name for update",
+                    params,
+                    RenameStrategy.None
+            );
+            if (result == null) {
+                throw new RuntimeException("biz_code 表数据不存在: code_name=" + codeName);
+            }
+            final Long rowId = Conv.asLong(result.get("id"));
+            final String pattern = Conv.asString(result.get("pattern"));
+            final Long sequence = Conv.asLong(result.get("sequence"));
+            final String resetPattern = Conv.asString(result.get("reset_pattern"));
+            final String resetFlag = Conv.asString(result.get("reset_flag"));
+            final Date now = new Date();
+            // 计算 reset_flag
+            String newResetFlag = resetFlag;
+            Long newSequence = sequence;
+            if (StringUtils.isNotBlank(resetPattern)) {
+                newResetFlag = DateFormatUtils.format(now, resetPattern);
+            }
+            // 判断是否需要重置 sequence 计数
+            if (!Objects.equals(resetFlag, newResetFlag)) {
+                newSequence = 0L;
+            }
+            newSequence = newSequence + size;
+            // 更新数据库值
+            params.clear();
+            params.put("id", rowId);
+            Map<String, Object> fields = new HashMap<>();
+            fields.put("sequence", newSequence);
+            fields.put("reset_flag", newResetFlag);
+            fields.put("update_at", now);
+            updateTable("auto_increment_id", fields, params, RenameStrategy.None);
+            return TupleThree.creat(pattern, now, newSequence);
+        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        long oldValue = res.getValue3() - size;
+        List<String> codes = new ArrayList<>(size);
+        for (int i = 1; i <= size; i++) {
+            codes.add(BusinessCodeUtils.create(res.getValue1(), res.getValue2(), oldValue + i));
+        }
+        return codes;
     }
 
     /**
@@ -2356,7 +2385,7 @@ public class Jdbc extends AbstractDataSource {
      * @param lockName 锁名称
      */
     public void lock(String lockName) {
-        Assert.isNotBlank(lockName, "lockName 不能为空");
+        Assert.isNotBlank(lockName, "参数 lockName 不能为空");
         final Map<String, Object> params = new HashMap<>();
         params.put("lock_name", lockName);
         params.put("update_at", new Date());
