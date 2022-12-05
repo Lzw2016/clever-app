@@ -69,7 +69,6 @@ delimiter $
 -- create definer = `dbuser`@`%` procedure next_id
 create procedure next_id(
     in p_sequence_name      varchar(127),   -- 序列名称
-    in p_prefix             varchar(127),   -- 序列前缀
     in p_step               bigint,         -- 序列步进长度(必须大于0,默认为1)
     out p_old_value         bigint,         -- 序列自动增长之前的值
     out p_current_value     bigint          -- 序列自动增长后的值
@@ -85,21 +84,21 @@ begin
     select
         id, current_value into row_id, p_old_value
     from auto_increment_id
-    where sequence_name=p_sequence_name and prefix=p_prefix;
+    where sequence_name=p_sequence_name;
     -- 开启事务
     start transaction;
     if (row_id is null or trim(row_id)='' or p_old_value is null) then
         -- 插入新数据
         insert into auto_increment_id
-            (sequence_name, prefix, description)
+            (sequence_name, description)
         values
-            (p_sequence_name, p_prefix, '系统自动生成')
+            (p_sequence_name, '系统自动生成')
         on duplicate key update update_at=now();
         -- 查询数据主键
         select
             id, current_value into row_id, p_old_value
         from auto_increment_id
-        where sequence_name=p_sequence_name and prefix=p_prefix;
+        where sequence_name=p_sequence_name;
     end if;
     -- 更新序列数据(使用Mysql行级锁保证并发性)
     update auto_increment_id set current_value=current_value+p_step where id=row_id;
