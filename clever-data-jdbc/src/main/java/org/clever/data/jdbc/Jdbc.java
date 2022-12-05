@@ -132,7 +132,7 @@ public class Jdbc extends AbstractDataSource {
         Assert.notNull(hikariConfig, "HikariConfig不能为空");
         this.dataSourceName = hikariConfig.getPoolName();
         this.dataSource = new HikariDataSource(hikariConfig);
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(this.dataSource));
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(this.dataSource));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -150,7 +150,7 @@ public class Jdbc extends AbstractDataSource {
         Assert.notNull(dataSource, "DataSource不能为空");
         this.dataSourceName = dataSourceName;
         this.dataSource = dataSource;
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplate(this.dataSource));
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(this.dataSource));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -166,7 +166,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = dataSourceName;
         this.dataSource = jdbcTemplate.getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(jdbcTemplate));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -182,7 +182,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = dataSourceName;
         this.dataSource = namedParameterJdbcTemplate.getJdbcTemplate().getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
-        this.jdbcTemplate = namedParameterJdbcTemplate;
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(namedParameterJdbcTemplate.getJdbcTemplate()));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -2422,12 +2422,14 @@ public class Jdbc extends AbstractDataSource {
      * TODO 启用Oracle服务端日志(dbms_output)
      */
     public void enableDbmsOutput() {
+
     }
 
     /**
      * TODO 禁用Oracle服务端日志(dbms_output)
      */
     public void disableDbmsOutput() {
+
     }
 
     // --------------------------------------------------------------------------------------------
