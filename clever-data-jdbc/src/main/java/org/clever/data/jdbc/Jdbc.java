@@ -34,6 +34,7 @@ import org.clever.jdbc.core.namedparam.EmptySqlParameterSource;
 import org.clever.jdbc.core.namedparam.MapSqlParameterSource;
 import org.clever.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.clever.jdbc.core.namedparam.SqlParameterSource;
+import org.clever.jdbc.core.simple.SimpleJdbcCall;
 import org.clever.jdbc.datasource.DataSourceTransactionManager;
 import org.clever.jdbc.support.GeneratedKeyHolder;
 import org.clever.jdbc.support.JdbcUtils;
@@ -50,6 +51,8 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -62,6 +65,14 @@ import java.util.function.Function;
  */
 @Slf4j
 public class Jdbc extends AbstractDataSource {
+    /**
+     * <pre>{@code
+     * 缓存调用存储过程调用对象(提高性能~20倍)
+     * Map<dataSourceName@procedure_name, SimpleJdbcCall>
+     * 参考: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/simple/SimpleJdbcCall.html
+     * }</pre>
+     */
+    private final static ConcurrentMap<String, SimpleJdbcCall> PROCEDURE_CACHE = new ConcurrentHashMap<>();
     /**
      * 默认的返回数据字段名重命名策略
      */
@@ -2062,6 +2073,72 @@ public class Jdbc extends AbstractDataSource {
     }
 
     // --------------------------------------------------------------------------------------------
+    //  调用存储过程
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     * @param paramMap      参数
+     */
+    public Map<String, Object> callGet(final String procedureName, Map<String, ?> paramMap) {
+        SimpleJdbcCall jdbcCall = getJdbcCall(procedureName);
+        MapSqlParameterSource sqlParameter = new MapSqlParameterSource(paramMap);
+        return jdbcCall.execute(sqlParameter);
+    }
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     * @param params        参数
+     */
+    public Map<String, Object> callGet(final String procedureName, Object... params) {
+        SimpleJdbcCall jdbcCall = getJdbcCall(procedureName);
+        return jdbcCall.execute(params);
+    }
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     * @param params        参数
+     */
+    public Map<String, Object> callGet(String procedureName, List<?> params) {
+        return callGet(procedureName, params.toArray());
+    }
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     */
+    public Map<String, Object> callGet(String procedureName) {
+        return callGet(procedureName, new HashMap<>());
+    }
+
+    /**
+     * 执行存储过程
+     *
+     * @param procedureName 存贮过程名称
+     * @param params        参数
+     */
+    public void call(String procedureName, Object... params) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = SqlUtils.getCallSql(procedureName, Arrays.asList(params));
+        update(sqlInfo.getValue1(), sqlInfo.getValue2());
+    }
+
+    /**
+     * 执行存储过程
+     *
+     * @param procedureName 存贮过程名称
+     */
+    public void call(String procedureName) {
+        call(procedureName, Collections.emptyList());
+    }
+
+    // --------------------------------------------------------------------------------------------
     //  事务操作
     // --------------------------------------------------------------------------------------------
 
@@ -2224,7 +2301,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     // --------------------------------------------------------------------------------------------
-    //  特定的数据库操作
+    //  业务含义操作
     // --------------------------------------------------------------------------------------------
 
     /**
@@ -2645,6 +2722,24 @@ public class Jdbc extends AbstractDataSource {
             transactionName = TRANSACTION_NAME_PREFIX + "+" + nextSerialNumber;
         }
         return transactionName;
+    }
+
+    /**
+     * 获取存储过程调用对象
+     *
+     * @param procedureName 存储过程名称
+     */
+    private SimpleJdbcCall getJdbcCall(String procedureName) {
+        return PROCEDURE_CACHE.computeIfAbsent(
+                String.format("%s@%s", dataSourceName, procedureName),
+                key -> {
+                    SimpleJdbcCall procedure = new ProcedureJdbcCall(this)
+                            .withProcedureName(procedureName)
+                            .withNamedBinding();
+                    procedure.compile();
+                    return procedure;
+                }
+        );
     }
 
     // --------------------------------------------------------------------------------------------

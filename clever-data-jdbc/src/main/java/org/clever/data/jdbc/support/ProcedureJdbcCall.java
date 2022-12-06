@@ -8,7 +8,6 @@ import org.clever.data.jdbc.listener.JdbcListeners;
 import org.clever.jdbc.core.CallableStatementCreatorFactory;
 import org.clever.jdbc.core.namedparam.SqlParameterSource;
 import org.clever.jdbc.core.simple.SimpleJdbcCall;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -53,20 +52,23 @@ public class ProcedureJdbcCall extends SimpleJdbcCall {
     }
 
     @Override
-    protected @NotNull Map<String, Object> doExecute(@NotNull SqlParameterSource parameterSource) {
+    protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
         return doExecute(() -> super.doExecute(parameterSource));
     }
 
     @Override
-    protected @NotNull Map<String, Object> doExecute(Object @NotNull ... args) {
+    protected Map<String, Object> doExecute(Object... args) {
         return doExecute(() -> super.doExecute(args));
     }
 
     @Override
-    protected @NotNull Map<String, Object> doExecute(@NotNull Map<String, ?> args) {
+    protected Map<String, Object> doExecute(Map<String, ?> args) {
         return doExecute(() -> super.doExecute(args));
     }
 
+    /**
+     * 支持 JdbcListeners
+     */
     private <T> T doExecute(Supplier<T> supplier) {
         Exception exception = null;
         try {
