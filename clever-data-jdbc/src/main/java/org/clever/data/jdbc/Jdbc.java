@@ -26,8 +26,8 @@ import org.clever.dao.DuplicateKeyException;
 import org.clever.dao.support.DataAccessUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.dialects.DialectFactory;
-import org.clever.data.jdbc.listener.FetchServerOutputListener;
 import org.clever.data.jdbc.listener.JdbcListeners;
+import org.clever.data.jdbc.listener.OracleDbmsOutputListener;
 import org.clever.data.jdbc.support.*;
 import org.clever.jdbc.core.*;
 import org.clever.jdbc.core.namedparam.EmptySqlParameterSource;
@@ -130,6 +130,14 @@ public class Jdbc extends AbstractDataSource {
     @Getter
     private final DataSourceTransactionManager transactionManager;
     /**
+     * 是否启用收集SQLWarning输出(支持Oracle的dbms_output输出)
+     */
+    private final ThreadLocal<Boolean> enableSqlWarning = new ThreadLocal<>();
+    /**
+     * 收集SQLWarning输出的数据缓冲区
+     */
+    private final ThreadLocal<StringBuilder> sqlWarningBuffer = new ThreadLocal<>();
+    /**
      * 数据库操作监听器
      */
     private final JdbcListeners listeners = new JdbcListeners();
@@ -143,7 +151,9 @@ public class Jdbc extends AbstractDataSource {
         Assert.notNull(hikariConfig, "HikariConfig不能为空");
         this.dataSourceName = hikariConfig.getPoolName();
         this.dataSource = new HikariDataSource(hikariConfig);
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(this.dataSource));
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
+                this.dataSource, this.enableSqlWarning, this.sqlWarningBuffer
+        ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -161,7 +171,9 @@ public class Jdbc extends AbstractDataSource {
         Assert.notNull(dataSource, "DataSource不能为空");
         this.dataSourceName = dataSourceName;
         this.dataSource = dataSource;
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(this.dataSource));
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
+                this.dataSource, this.enableSqlWarning, this.sqlWarningBuffer
+        ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -177,7 +189,9 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = dataSourceName;
         this.dataSource = jdbcTemplate.getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(jdbcTemplate));
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
+                jdbcTemplate, this.enableSqlWarning, this.sqlWarningBuffer
+        ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -193,7 +207,9 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = dataSourceName;
         this.dataSource = namedParameterJdbcTemplate.getJdbcTemplate().getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(namedParameterJdbcTemplate.getJdbcTemplate()));
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
+                namedParameterJdbcTemplate.getJdbcTemplate(), this.enableSqlWarning, this.sqlWarningBuffer
+        ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
         this.transactionManager = new DataSourceTransactionManager(this.dataSource);
@@ -229,8 +245,11 @@ public class Jdbc extends AbstractDataSource {
         Assert.notNull(dbType, "DbType不能为空");
     }
 
+    /**
+     * 初始化操作
+     */
     private void init() {
-        listeners.add(new FetchServerOutputListener());
+        listeners.add(new OracleDbmsOutputListener(this.enableSqlWarning, this.sqlWarningBuffer));
     }
 
     @Override
@@ -2264,6 +2283,43 @@ public class Jdbc extends AbstractDataSource {
     // --------------------------------------------------------------------------------------------
 
     /**
+     * 获取SQLWarning输出(支持Oracle的dbms_output输出)
+     *
+     * @param clear 是否清空SQLWarning缓存
+     */
+    public String getSqlWarning(boolean clear) {
+        StringBuilder output = this.sqlWarningBuffer.get();
+        if (clear) {
+            this.sqlWarningBuffer.remove();
+        }
+        return output == null ? "" : output.toString();
+    }
+
+    /**
+     * 获取SQLWarning输出(支持Oracle的dbms_output输出)
+     */
+    public String getSqlWarning() {
+        return getSqlWarning(false);
+    }
+
+    /**
+     * 启用收集SQLWarning输出(支持Oracle的dbms_output输出)
+     */
+    public void enableSqlWarning() {
+        this.enableSqlWarning.set(true);
+    }
+
+    /**
+     * 禁用收集SQLWarning输出(支持Oracle的dbms_output输出)
+     *
+     * @return 返回之前输出的数据 & 清空数据
+     */
+    public String disableSqlWarning() {
+        this.enableSqlWarning.remove();
+        return getSqlWarning(true);
+    }
+
+    /**
      * 获取数据源信息
      */
     public JdbcInfo getInfo() {
@@ -2493,20 +2549,6 @@ public class Jdbc extends AbstractDataSource {
                 throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
             }
         }
-    }
-
-    /**
-     * TODO 启用Oracle服务端日志(dbms_output)
-     */
-    public void enableDbmsOutput() {
-
-    }
-
-    /**
-     * TODO 禁用Oracle服务端日志(dbms_output)
-     */
-    public void disableDbmsOutput() {
-
     }
 
     // --------------------------------------------------------------------------------------------
