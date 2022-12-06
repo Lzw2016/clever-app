@@ -5,11 +5,13 @@ import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.listener.JdbcListeners;
+import org.clever.jdbc.core.CallableStatementCreatorFactory;
 import org.clever.jdbc.core.namedparam.SqlParameterSource;
 import org.clever.jdbc.core.simple.SimpleJdbcCall;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -42,8 +44,11 @@ public class ProcedureJdbcCall extends SimpleJdbcCall {
                 && StringUtils.startsWith(callString, "{call")
                 && StringUtils.endsWith(callString, ")}")) {
             callString = callString.substring(1, callString.length() - 1);
-            ReflectionsUtils.setFieldValue(this, "callString", callString);
-            ReflectionsUtils.setFieldValue(this.getCallableStatementFactory(), "callString", callString);
+            this.callString = callString;
+            CallableStatementCreatorFactory cscf = this.callableStatementFactory;
+            if (!Objects.equals(cscf.getCallString(), callString)) {
+                this.callableStatementFactory = cscf.mutate(callString);
+            }
         }
     }
 

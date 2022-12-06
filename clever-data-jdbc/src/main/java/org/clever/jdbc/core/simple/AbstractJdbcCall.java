@@ -47,11 +47,11 @@ public abstract class AbstractJdbcCall {
     /**
      * 生成的字符串用于调用语句。
      */
-    private String callString;
+    protected String callString;
     /**
      * 一个委托，使我们能够根据此类声明的参数有效地创建 CallableStatementCreators
      */
-    private CallableStatementCreatorFactory callableStatementFactory;
+    protected CallableStatementCreatorFactory callableStatementFactory;
 
     /**
      * 使用 {@link DataSource} 初始化时要使用的构造函数

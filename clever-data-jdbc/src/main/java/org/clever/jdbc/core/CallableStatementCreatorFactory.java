@@ -88,6 +88,16 @@ public class CallableStatementCreatorFactory {
     }
 
     /**
+     * 根据当前对象创建一个新对象，值改变参数对应的属性
+     */
+    public CallableStatementCreatorFactory mutate(String callString) {
+        CallableStatementCreatorFactory result = new CallableStatementCreatorFactory(callString, this.declaredParameters);
+        result.resultSetType = this.resultSetType;
+        result.updatableResults = this.updatableResults;
+        return result;
+    }
+
+    /**
      * 给定这些参数，返回一个新的 CallableStatementCreator 实例。
      *
      * @param params 参数列表（可能是 {@code null}）
