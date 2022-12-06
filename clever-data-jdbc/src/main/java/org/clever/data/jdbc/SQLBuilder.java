@@ -1,4 +1,4 @@
-package org.clever.data.jdbc.support;
+package org.clever.data.jdbc;
 
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
@@ -8,6 +8,7 @@ import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.dialects.DialectFactory;
 import org.clever.data.jdbc.dialects.IDialect;
+import org.clever.data.jdbc.support.SqlUtils;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

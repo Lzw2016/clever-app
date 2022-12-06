@@ -1,4 +1,4 @@
-package org.clever.data.jdbc.support;
+package org.clever.data.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -123,6 +123,7 @@ public class SQLBuilderTest {
                 .addFieldAndValue("g", "7")
                 .addFieldAndValue("h", "8");
         log.info("--> {}", insertBuilder.buildSql());
+        log.info("--> {}", insertBuilder.getParams());
     }
 
     @Test
@@ -131,8 +132,9 @@ public class SQLBuilderTest {
                 .setTable("ta")
                 .setWhere("a=1 AND b=2")
                 .addWhere("c=3")
-                .addWhere("d=:d")
+                .addWhere("d=:d").addParam("d", 666)
                 .addWhere("e=5");
         log.info("--> {}", deleteBuilder.buildSql());
+        log.info("--> {}", deleteBuilder.getParams());
     }
 }
