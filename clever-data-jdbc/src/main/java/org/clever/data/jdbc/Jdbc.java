@@ -2500,8 +2500,9 @@ public class Jdbc extends AbstractDataSource {
      *
      * @param codeName code名称
      */
-    public List<String> nextCode(String codeName) {
-        return nextCodes(codeName, 1);
+    public String nextCode(String codeName) {
+        List<String> codes = nextCodes(codeName, 1);
+        return codes.get(0);
     }
 
     /**

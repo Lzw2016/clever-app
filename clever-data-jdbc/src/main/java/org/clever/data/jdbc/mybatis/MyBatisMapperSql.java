@@ -20,4 +20,5 @@ public interface MyBatisMapperSql {
     SqlSource getSqlSource(String sqlId, String stdXmlPath, DbType dbType, String... projects);
 
     // TODO: startWatch stopWatch | 根据 file.lastModified() 判断时间有没有变化
+    // TODO: 既能支持 ClassPath 又能支持 FileSystem 的组合 MyBatisMapperSql 实现
 }

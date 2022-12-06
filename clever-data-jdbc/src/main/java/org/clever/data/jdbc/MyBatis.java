@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 作者：lizw <br/>
@@ -112,7 +113,7 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sqlId        SQL ID
      * @param param        参数
@@ -124,7 +125,7 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sqlId SQL ID
      * @param param 参数
@@ -135,7 +136,7 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sqlId        SQL ID
      * @param resultRename 返回数据字段名重命名策略
@@ -145,7 +146,7 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个Map
+     * 查询一条数据，返回一个Map(sql返回多条数据会抛出异常)
      *
      * @param sqlId SQL ID
      */
@@ -154,7 +155,7 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个实体对象
+     * 查询一条数据，返回一个实体对象(sql返回多条数据会抛出异常)
      *
      * @param sqlId SQL ID
      * @param param 参数
@@ -166,13 +167,74 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
-     * 查询一条数据，返回一个实体对象
+     * 查询一条数据，返回一个实体对象(sql返回多条数据会抛出异常)
      *
      * @param sqlId SQL ID
      * @param clazz 查询对象类型
      */
     public <T> T queryOne(String sqlId, Class<T> clazz) {
         return jdbc.queryOne(getSql(sqlId), clazz);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sqlId        SQL ID
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public Map<String, Object> queryFirst(String sqlId, RenameStrategy resultRename) {
+        return jdbc.queryFirst(getSql(sqlId), resultRename);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sqlId SQL ID
+     */
+    public Map<String, Object> queryFirst(String sqlId) {
+        return jdbc.queryFirst(getSql(sqlId));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sqlId        SQL ID
+     * @param param        参数，参数格式
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public Map<String, Object> queryFirst(String sqlId, Object param, RenameStrategy resultRename) {
+        return jdbc.queryFirst(getSql(sqlId), param, resultRename);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public Map<String, Object> queryFirst(String sqlId, Object param) {
+        return jdbc.queryFirst(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sqlId SQL ID
+     * @param clazz 查询对象类型
+     */
+    public <T> T queryFirst(String sqlId, Class<T> clazz) {
+        return jdbc.queryFirst(getSql(sqlId), clazz);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个Map
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     * @param clazz 查询对象类型
+     */
+    public <T> T queryFirst(String sqlId, Object param, Class<T> clazz) {
+        return jdbc.queryFirst(getSql(sqlId), param, clazz);
     }
 
     /**
@@ -380,6 +442,139 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
+     * 查询sql执行结果的第一条数据，返回一个 String
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public String queryFirstString(String sqlId, Object param) {
+        return jdbc.queryFirstString(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 String
+     *
+     * @param sqlId SQL ID
+     */
+    public String queryFirstString(String sqlId) {
+        return jdbc.queryFirstString(getSql(sqlId));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Long
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public Long queryFirstLong(String sqlId, Object param) {
+        return jdbc.queryFirstLong(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Long
+     *
+     * @param sqlId SQL ID
+     */
+    public Long queryFirstLong(String sqlId) {
+        return jdbc.queryFirstLong(getSql(sqlId));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Double
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public Double queryFirstDouble(String sqlId, Object param) {
+        return jdbc.queryFirstDouble(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Double
+     *
+     * @param sqlId SQL ID
+     */
+    public Double queryFirstDouble(String sqlId) {
+        return jdbc.queryFirstDouble(getSql(sqlId));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 BigDecimal
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public BigDecimal queryFirstBigDecimal(String sqlId, Object param) {
+        return jdbc.queryFirstBigDecimal(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 BigDecimal
+     *
+     * @param sqlId SQL ID
+     */
+    public BigDecimal queryFirstBigDecimal(String sqlId) {
+        return jdbc.queryFirstBigDecimal(getSql(sqlId));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Boolean
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public Boolean queryFirstBoolean(String sqlId, Object param) {
+        return jdbc.queryFirstBoolean(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Boolean
+     *
+     * @param sqlId SQL ID
+     */
+    public Boolean queryFirstBoolean(String sqlId) {
+        return jdbc.queryFirstBoolean(getSql(sqlId));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Date
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public Date queryFirstDate(String sqlId, Object param) {
+        return jdbc.queryFirstDate(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Date
+     *
+     * @param sqlId SQL ID
+     */
+    public Date queryFirstDate(String sqlId) {
+        return jdbc.queryFirstDate(getSql(sqlId));
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Timestamp
+     *
+     * @param sqlId SQL ID
+     * @param param 参数，参数格式
+     */
+    public Timestamp queryFirstTimestamp(String sqlId, Object param) {
+        return jdbc.queryFirstTimestamp(getSql(sqlId), param);
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个 Timestamp
+     *
+     * @param sqlId SQL ID
+     */
+    public Timestamp queryFirstTimestamp(String sqlId) {
+        return jdbc.queryFirstTimestamp(getSql(sqlId));
+    }
+
+    /**
      * SQL Count(获取一个SQL返回的数据总量)
      *
      * @param sqlId SQL ID
@@ -543,6 +738,56 @@ public class MyBatis extends AbstractDataSource {
      * 查询多条数据(大量数据)，使用游标读取
      *
      * @param sqlId        SQL ID
+     * @param param        参数，参数格式
+     * @param batchSize    一个批次的数据量
+     * @param callback     游标批次读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sqlId, Object param, int batchSize, Function<BatchData, Boolean> callback, RenameStrategy resultRename) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        jdbc.queryForCursor(sqlInfo.getValue1(), sqlInfo.getValue2(), batchSize, callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId     SQL ID
+     * @param param     参数，参数格式
+     * @param batchSize 一个批次的数据量
+     * @param callback  游标批次读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sqlId, Object param, int batchSize, Function<BatchData, Boolean> callback) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        jdbc.queryForCursor(sqlInfo.getValue1(), sqlInfo.getValue2(), batchSize, callback);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId        SQL ID
+     * @param batchSize    一个批次的数据量
+     * @param callback     游标批次读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sqlId, int batchSize, Function<BatchData, Boolean> callback, RenameStrategy resultRename) {
+        jdbc.queryForCursor(getSql(sqlId), batchSize, callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId     SQL ID
+     * @param batchSize 一个批次的数据量
+     * @param callback  游标批次读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sqlId, int batchSize, Function<BatchData, Boolean> callback) {
+        jdbc.queryForCursor(getSql(sqlId), batchSize, callback);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId        SQL ID
      * @param param        参数
      * @param batchSize    一个批次的数据量
      * @param consumer     游标批次读取数据消费者
@@ -587,6 +832,52 @@ public class MyBatis extends AbstractDataSource {
      */
     public void queryForCursor(String sqlId, int batchSize, Consumer<BatchData> consumer) {
         jdbc.queryForCursor(getSql(sqlId), batchSize, consumer);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId        SQL ID
+     * @param param        参数，参数格式
+     * @param callback     游标读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sqlId, Object param, Function<RowData, Boolean> callback, RenameStrategy resultRename) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        jdbc.queryForCursor(sqlInfo.getValue1(), sqlInfo.getValue2(), callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId    SQL ID
+     * @param param    参数
+     * @param callback 游标读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sqlId, Object param, Function<RowData, Boolean> callback) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        jdbc.queryForCursor(sqlInfo.getValue1(), sqlInfo.getValue2(), callback);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId        SQL ID
+     * @param callback     游标读取数据回调(返回true则中断数据读取)
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    public void queryForCursor(String sqlId, Function<RowData, Boolean> callback, RenameStrategy resultRename) {
+        jdbc.queryForCursor(getSql(sqlId), callback, resultRename);
+    }
+
+    /**
+     * 查询多条数据(大量数据)，使用游标读取
+     *
+     * @param sqlId    SQL ID
+     * @param callback 游标读取数据回调(返回true则中断数据读取)
+     */
+    public void queryForCursor(String sqlId, Function<RowData, Boolean> callback) {
+        jdbc.queryForCursor(getSql(sqlId), callback);
     }
 
     /**
@@ -691,6 +982,68 @@ public class MyBatis extends AbstractDataSource {
      */
     public InsertResult insert(String sqlId) {
         return jdbc.insert(getSql(sqlId));
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  调用存储过程
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     * @param paramMap      参数
+     */
+    public Map<String, Object> callGet(final String procedureName, Map<String, ?> paramMap) {
+        return jdbc.callGet(procedureName, paramMap);
+    }
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     * @param params        参数
+     */
+    public Map<String, Object> callGet(final String procedureName, Object... params) {
+        return jdbc.callGet(procedureName, params);
+    }
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     * @param params        参数
+     */
+    public Map<String, Object> callGet(String procedureName, List<?> params) {
+        return jdbc.callGet(procedureName, params);
+    }
+
+    /**
+     * 执行存储过程(以Map形式返回数据)
+     *
+     * @param procedureName 存贮过程名称
+     */
+    public Map<String, Object> callGet(String procedureName) {
+        return jdbc.callGet(procedureName);
+    }
+
+    /**
+     * 执行存储过程
+     *
+     * @param procedureName 存贮过程名称
+     * @param params        参数
+     */
+    public void call(String procedureName, Object... params) {
+        jdbc.call(procedureName, params);
+    }
+
+    /**
+     * 执行存储过程
+     *
+     * @param procedureName 存贮过程名称
+     */
+    public void call(String procedureName) {
+        jdbc.call(procedureName);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -817,6 +1170,38 @@ public class MyBatis extends AbstractDataSource {
     // --------------------------------------------------------------------------------------------
 
     /**
+     * 获取SQLWarning输出(支持Oracle的dbms_output输出)
+     *
+     * @param clear 是否清空SQLWarning缓存
+     */
+    public String getSqlWarning(boolean clear) {
+        return jdbc.getSqlWarning(clear);
+    }
+
+    /**
+     * 获取SQLWarning输出(支持Oracle的dbms_output输出)
+     */
+    public String getSqlWarning() {
+        return jdbc.getSqlWarning();
+    }
+
+    /**
+     * 启用收集SQLWarning输出(支持Oracle的dbms_output输出)
+     */
+    public void enableSqlWarning() {
+        jdbc.enableSqlWarning();
+    }
+
+    /**
+     * 禁用收集SQLWarning输出(支持Oracle的dbms_output输出)
+     *
+     * @return 返回之前输出的数据 & 清空数据
+     */
+    public String disableSqlWarning() {
+        return jdbc.disableSqlWarning();
+    }
+
+    /**
      * 获取数据源信息
      */
     public JdbcInfo getInfo() {
@@ -828,6 +1213,78 @@ public class MyBatis extends AbstractDataSource {
      */
     public JdbcDataSourceStatus getStatus() {
         return jdbc.getStatus();
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  业务含义操作
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 返回下一个主键值
+     *
+     * @param primaryKeyName 主键名称
+     */
+    public Long nextPK(String primaryKeyName) {
+        return jdbc.nextPK(primaryKeyName);
+    }
+
+    /***
+     * 批量获取唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     * @param size 唯一id值数量(1 ~ 10W)
+     */
+    public List<Long> nextIds(String idName, int size) {
+        return jdbc.nextIds(idName, size);
+    }
+
+    /**
+     * 返回下一个唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     */
+    public Long nextId(String idName) {
+        return jdbc.nextId(idName);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param codeName code名称
+     * @param size     唯一 code 值数量(1 ~ 10W)
+     */
+    public List<String> nextCodes(String codeName, int size) {
+        return jdbc.nextCodes(codeName, size);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param codeName code名称
+     */
+    public String nextCode(String codeName) {
+        return jdbc.nextCode(codeName);
+    }
+
+    /**
+     * 借助数据库表实现的排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   mybatis.beginTX(status -> {
+     *       mybatis.lock(lockName);
+     *       // 业务逻辑处理...
+     *       return null;
+     *   }, TransactionDefinition.PROPAGATION_REQUIRES_NEW, lockTimeout);
+     * }</pre>
+     *
+     * @param lockName 锁名称
+     */
+    public void lock(String lockName) {
+        jdbc.lock(lockName);
     }
 
     // --------------------------------------------------------------------------------------------
