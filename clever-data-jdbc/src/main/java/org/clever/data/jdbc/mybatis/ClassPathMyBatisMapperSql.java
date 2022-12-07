@@ -1,14 +1,15 @@
 package org.clever.data.jdbc.mybatis;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.clever.core.io.Resource;
 import org.clever.core.io.support.PathMatchingResourcePatternResolver;
 import org.clever.util.Assert;
 
 import java.io.InputStream;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,29 +31,15 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
      * classpath:com/mycompany/**&#47;applicationContext.xml
      * </pre>
      */
-    private final List<String> locationPatterns;
-    /**
-     * 解析后的sql.xml文件集合
-     */
-    private final Set<Resource> resourceSet;
+    @Getter
+    private final String locationPattern;
 
     /**
      * @param locationPattern classpath路径模式
      */
     public ClassPathMyBatisMapperSql(String locationPattern) {
-        this(Collections.singletonList(locationPattern));
-    }
-
-    /**
-     * @param locationPatterns classpath路径模式
-     */
-    public ClassPathMyBatisMapperSql(List<String> locationPatterns) {
-        Assert.notEmpty(locationPatterns, "locationPatterns不能为空");
-        for (String locationPattern : locationPatterns) {
-            Assert.isNotBlank(locationPattern, "locationPattern不能为空");
-        }
-        this.locationPatterns = locationPatterns;
-        this.resourceSet = initResource();
+        Assert.isNotBlank(locationPattern, "参数locationPattern不能为空");
+        this.locationPattern = locationPattern;
         initLoad();
     }
 
@@ -62,18 +49,12 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
     @SneakyThrows
     protected synchronized Set<Resource> initResource() {
         Set<Resource> resourceSet = new HashSet<>();
-        for (String locationPattern : locationPatterns) {
-            int xmlFileSize = 0;
-            Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
-            for (Resource resource : resources) {
-                if (resource.isReadable() && resource.getURL().toExternalForm().toLowerCase().endsWith(".xml")) {
-                    resourceSet.add(resource);
-                    xmlFileSize++;
-                }
+        Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
+        for (Resource resource : resources) {
+            if (resource.isReadable() && resource.getURL().toExternalForm().toLowerCase().endsWith(".xml")) {
+                resourceSet.add(resource);
             }
-            log.debug("locationPattern={}加载完成 | resource-size={} | xml-file-size={}", locationPattern, resources.length, xmlFileSize);
         }
-        log.info("Resource加载完成! | xml-file-size={}", resourceSet.size());
         return resourceSet;
     }
 
@@ -115,14 +96,31 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
 
     @Override
     public void reloadAll() {
+        Set<Resource> resourceSet = initResource();
         for (Resource resource : resourceSet) {
             try {
                 final String absolutePath = resource.getURL().toExternalForm();
                 log.info("# 解析文件: {}", absolutePath);
+                // TODO 需要得到 xmlPath
                 reloadFile(absolutePath, true);
             } catch (Exception e) {
                 log.error("解析sql.xml文件失败 | path={}", resource, e);
             }
         }
+    }
+
+    @SneakyThrows
+    @Override
+    public Map<String, Long> getAllLastModified() {
+        Map<String, Long> result = new HashMap<>();
+        Set<Resource> resourceSet = initResource();
+        for (Resource resource : resourceSet) {
+            if (resource.isFile()) {
+                result.put(resource.getFile().getAbsolutePath(), resource.lastModified());
+            } else {
+                result.put(resource.getURL().toExternalForm(), resource.lastModified());
+            }
+        }
+        return result;
     }
 }

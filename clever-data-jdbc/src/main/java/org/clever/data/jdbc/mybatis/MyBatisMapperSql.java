@@ -19,6 +19,20 @@ public interface MyBatisMapperSql {
      */
     SqlSource getSqlSource(String sqlId, String stdXmlPath, DbType dbType, String... projects);
 
-    // TODO: startWatch stopWatch | 根据 file.lastModified() 判断时间有没有变化
-    // TODO: 既能支持 ClassPath 又能支持 FileSystem 的组合 MyBatisMapperSql 实现
+    /**
+     * 开始监听sql.xml文件变化
+     *
+     * @param period 两次执行任务的时间间隔(单位：毫秒)
+     */
+    void startWatch(int period);
+
+    /**
+     * 停止监听sql.xml文件变化
+     */
+    void stopWatch();
+
+    /**
+     * 是否在监听sql.xml文件变化
+     */
+    boolean idWatch();
 }

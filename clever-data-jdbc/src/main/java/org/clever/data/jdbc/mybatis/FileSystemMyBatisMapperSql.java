@@ -113,4 +113,10 @@ public class FileSystemMyBatisMapperSql extends AbstractMyBatisMapperSql {
             }
         }
     }
+
+    @Override
+    public Map<String, Long> getAllLastModified() {
+        // TODO getAllLastModified
+        return null;
+    }
 }

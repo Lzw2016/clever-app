@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.SystemClock;
+import org.clever.core.job.DaemonExecutor;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.DynamicSqlParser;
 import org.clever.data.dynamic.sql.builder.SqlSource;
@@ -21,13 +22,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 作者：lizw <br/>
  * 创建时间：2020/09/30 15:37 <br/>
  */
 public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
-    protected static final Logger log = LoggerFactory.getLogger(MyBatisMapperSql.class);
+    private static final AtomicInteger EXECUTOR_COUNT = new AtomicInteger(0);
+    protected final Logger log = LoggerFactory.getLogger(getClass());
     /**
      * 所有的mybatis动态sql信息 {@code Map<stdXmlPath, SqlSourceGroup>}
      * <pre>{@code
@@ -47,15 +50,16 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
      *     - sql.projectC.xml
      * }</pre>
      */
-    private final ConcurrentMap<String, SqlSourceGroup> allSqlSourceGroupMap = new ConcurrentHashMap<>(512);
-
-    protected SqlSourceGroup getSqlSourceGroup(final String stdXmlPath) {
-        return allSqlSourceGroupMap.get(FilenameUtils.normalize(stdXmlPath, true));
-    }
-
-    protected void putSqlSourceGroup(final String stdXmlPath, SqlSourceGroup sqlSourceGroup) {
-        allSqlSourceGroupMap.put(FilenameUtils.normalize(stdXmlPath, true), sqlSourceGroup);
-    }
+    protected final ConcurrentMap<String, SqlSourceGroup> allSqlSourceGroupMap = new ConcurrentHashMap<>(512);
+    /**
+     * sql.xml的最后修改时间搓 {@code ConcurrentMap<AbsolutePath, LastModified>}
+     */
+    protected final ConcurrentMap<String, Long> sqlXmlLastModifiedMap = new ConcurrentHashMap<>();
+    /**
+     * 监听sql.xml文件变化的后台线程
+     */
+    private final DaemonExecutor daemonWatch = new DaemonExecutor(String.format("mybatis-watch-%s", EXECUTOR_COUNT.incrementAndGet()));
+    private volatile boolean watch = false;
 
     @Override
     public SqlSource getSqlSource(final String sqlId, final String stdXmlPath, final DbType dbType, String... projects) {
@@ -90,11 +94,52 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
         }
         SqlSource sqlSource = sqlSourceGroup.getSqlSource(sqlId, dbType, projects);
         if (sqlSource == null) {
-            loadSqlSourceGroup(sqlSourceGroup, sqlId, stdXmlPath, dbType, projects);
             // 加载sql -> stdXmlPath, dbType, projects
+            loadSqlSourceGroup(sqlSourceGroup, sqlId, stdXmlPath, dbType, projects);
             sqlSource = sqlSourceGroup.getSqlSource(sqlId, dbType, projects);
         }
         return sqlSource;
+    }
+
+    @Override
+    public void startWatch(int period) {
+        if (watch) {
+            return;
+        }
+        synchronized (daemonWatch) {
+            if (watch) {
+                return;
+            }
+            daemonWatch.scheduleAtFixedRate(this::loadChange, period);
+            watch = true;
+        }
+    }
+
+    @Override
+    public void stopWatch() {
+        if (!watch) {
+            return;
+        }
+        synchronized (daemonWatch) {
+            if (!watch) {
+                return;
+            }
+            daemonWatch.stop();
+            watch = false;
+        }
+    }
+
+    @Override
+    public boolean idWatch() {
+        return watch;
+    }
+
+    protected SqlSourceGroup getSqlSourceGroup(final String stdXmlPath) {
+        return allSqlSourceGroupMap.get(FilenameUtils.normalize(stdXmlPath, true));
+    }
+
+    protected void putSqlSourceGroup(final String stdXmlPath, SqlSourceGroup sqlSourceGroup) {
+        allSqlSourceGroupMap.put(FilenameUtils.normalize(stdXmlPath, true), sqlSourceGroup);
     }
 
     protected void loadSqlSourceGroup(final SqlSourceGroup sqlSourceGroup, final String sqlId, final String stdXmlPath, final DbType dbType, String... projects) {
@@ -111,7 +156,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
             if (fileExists(projectXmlPath)) {
                 Map<String, SqlSource> sqlSourceMap = Collections.emptyMap();
                 try (InputStream inputStream = openInputStream(projectXmlPath)) {
-                    sqlSourceMap = loadSqlSource(inputStream, getAbsolutePath(projectXmlPath)).getValue1();
+                    sqlSourceMap = loadSqlSource(inputStream, projectXmlPath).getValue1();
                     sqlSourceGroup.clearAndSetProjectMap(project, sqlSourceMap);
                 } catch (Exception ignored) {
                 }
@@ -125,7 +170,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
         if (fileExists(dbTypeXmlPath)) {
             Map<String, SqlSource> sqlSourceMap = Collections.emptyMap();
             try (InputStream inputStream = openInputStream(dbTypeXmlPath)) {
-                sqlSourceMap = loadSqlSource(inputStream, getAbsolutePath(dbTypeXmlPath)).getValue1();
+                sqlSourceMap = loadSqlSource(inputStream, dbTypeXmlPath).getValue1();
                 sqlSourceGroup.clearAndSetDbTypeMap(dbType, sqlSourceMap);
             } catch (Exception ignored) {
             }
@@ -136,7 +181,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
         // 标准SQL文件
         if (fileExists(stdXmlPath)) {
             try (InputStream inputStream = openInputStream(stdXmlPath)) {
-                Map<String, SqlSource> sqlSourceMap = loadSqlSource(inputStream, getAbsolutePath(stdXmlPath)).getValue1();
+                Map<String, SqlSource> sqlSourceMap = loadSqlSource(inputStream, stdXmlPath).getValue1();
                 sqlSourceGroup.clearAndSetStdSqlSource(sqlSourceMap);
             } catch (Exception ignored) {
             }
@@ -146,11 +191,12 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     /**
      * 加载指定文件
      *
-     * @param inputStream  文件输入流
-     * @param absolutePath 文件绝对路径
+     * @param inputStream 文件输入流
+     * @param xmlPath     sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”
      * @return {@code TupleTwo<Map<sqlId, SqlSource>, 是否存在异常>}
      */
-    protected TupleTwo<Map<String, SqlSource>, Boolean> loadSqlSource(InputStream inputStream, String absolutePath) {
+    protected TupleTwo<Map<String, SqlSource>, Boolean> loadSqlSource(final InputStream inputStream, final String xmlPath) {
+        final String absolutePath = getAbsolutePath(xmlPath);
         final Map<String, SqlSource> sqlSourceMap = new HashMap<>();
         final TupleTwo<Map<String, SqlSource>, Boolean> tupleTwo = TupleTwo.creat(sqlSourceMap, false);
         try {
@@ -207,7 +253,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
      * @param xmlPath       sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”
      * @param skipException 是否跳过异常
      */
-    public void reloadFile(final String xmlPath, boolean skipException) {
+    protected void reloadFile(final String xmlPath, boolean skipException) {
         final boolean exists = fileExists(xmlPath);
         final String extName = FilenameUtils.getExtension(xmlPath);
         Assert.isTrue("xml".equals(extName), String.format("sql.xml文件后缀名必须是“.xml”：%s", xmlPath));
@@ -236,7 +282,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
             Map<String, SqlSource> sqlSourceMap = null;
             boolean hasException = false;
             try (InputStream inputStream = openInputStream(xmlPath)) {
-                TupleTwo<Map<String, SqlSource>, Boolean> tupleTwo = loadSqlSource(inputStream, getAbsolutePath(xmlPath));
+                TupleTwo<Map<String, SqlSource>, Boolean> tupleTwo = loadSqlSource(inputStream, xmlPath);
                 sqlSourceMap = tupleTwo.getValue1();
                 hasException = tupleTwo.getValue2();
             } catch (Exception ignored) {
@@ -263,7 +309,14 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     }
 
     /**
-     * 获取文件的绝对路径
+     * 加载变化的sql.xml文件
+     */
+    public void loadChange() {
+//        TODO 加载变化的sql.xml文件
+    }
+
+    /**
+     * 获取文件的绝对路径(仅仅只为了打印日志，不影响sql.xml文件解析)
      *
      * @param xmlPath sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”
      */
@@ -287,6 +340,11 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
      * 加载所有文件
      */
     public abstract void reloadAll();
+
+    /**
+     * 返回所有sql.xml文件的最后修改时间 {@code ConcurrentMap<AbsolutePath, LastModified>}
+     */
+    public abstract Map<String, Long> getAllLastModified();
 
     /**
      * 初始化加载所有配置
