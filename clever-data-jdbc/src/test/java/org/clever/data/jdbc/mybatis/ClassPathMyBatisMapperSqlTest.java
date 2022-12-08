@@ -129,4 +129,14 @@ public class ClassPathMyBatisMapperSqlTest {
         SqlSource sqlSource = myBatisMapperSql.getSqlSource("t01", "dao/UserDao.xml", DbType.MYSQL);
         log.info("SQL = {}", sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql());
     }
+
+    @SneakyThrows
+    @Test
+    public void t07() {
+        final String locationPattern = "classpath:performance_test/**/*.xml";
+        ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
+        myBatisMapperSql.startWatch(100);
+        Thread.sleep(2_000);
+        log.info("### SqlSourceCount={}", myBatisMapperSql.getSqlSourceCount());
+    }
 }

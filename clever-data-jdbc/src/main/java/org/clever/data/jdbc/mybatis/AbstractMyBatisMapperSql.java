@@ -76,25 +76,20 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
         }
         SqlSourceGroup sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
         if (sqlSourceGroup == null) {
-            synchronized (allSqlSourceGroupMap) {
-                sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
-                if (sqlSourceGroup == null) {
-                    final String stdXmlPathNoExt = FilenameUtils.removeExtension(stdXmlPath);
-                    final List<String> xmlPaths = new ArrayList<>(projects.length + 2);
-                    xmlPaths.add(stdXmlPath);
-                    xmlPaths.add(String.format("%s.%s.xml", stdXmlPathNoExt, dbType.getDb()));
-                    for (String project : projects) {
-                        if (StringUtils.isBlank(project)) {
-                            continue;
-                        }
-                        xmlPaths.add(String.format("%s.%s.xml", stdXmlPathNoExt, StringUtils.trim(project)));
-                    }
-                    // 文件存在才创建 SqlSourceGroup
-                    if (xmlPaths.stream().anyMatch(this::fileExists)) {
-                        sqlSourceGroup = new SqlSourceGroup();
-                        putSqlSourceGroup(stdXmlPath, sqlSourceGroup);
-                    }
+            final String stdXmlPathNoExt = FilenameUtils.removeExtension(stdXmlPath);
+            final List<String> xmlPaths = new ArrayList<>(projects.length + 2);
+            xmlPaths.add(stdXmlPath);
+            xmlPaths.add(String.format("%s.%s.xml", stdXmlPathNoExt, dbType.getDb()));
+            for (String project : projects) {
+                if (StringUtils.isBlank(project)) {
+                    continue;
                 }
+                xmlPaths.add(String.format("%s.%s.xml", stdXmlPathNoExt, StringUtils.trim(project)));
+            }
+            // 文件存在才创建 SqlSourceGroup
+            if (xmlPaths.stream().anyMatch(this::fileExists)) {
+                sqlSourceGroup = new SqlSourceGroup();
+                putSqlSourceGroup(stdXmlPath, sqlSourceGroup);
             }
             if (sqlSourceGroup == null) {
                 return null;
@@ -123,13 +118,8 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
         final DbType dbType = DbType.getDbType(project);
         SqlSourceGroup sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
         if (exists && sqlSourceGroup == null) {
-            synchronized (allSqlSourceGroupMap) {
-                sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
-                if (sqlSourceGroup == null) {
-                    sqlSourceGroup = new SqlSourceGroup();
-                    putSqlSourceGroup(stdXmlPath, sqlSourceGroup);
-                }
-            }
+            sqlSourceGroup = new SqlSourceGroup();
+            putSqlSourceGroup(stdXmlPath, sqlSourceGroup);
         }
         if (!exists && sqlSourceGroup == null) {
             return;

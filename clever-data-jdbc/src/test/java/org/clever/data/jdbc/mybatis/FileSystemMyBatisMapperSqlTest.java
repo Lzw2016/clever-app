@@ -2,9 +2,12 @@ package org.clever.data.jdbc.mybatis;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.data.dynamic.sql.builder.SqlSource;
+import org.clever.data.dynamic.sql.dialect.DbType;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * 作者：lizw <br/>
@@ -47,5 +50,23 @@ public class FileSystemMyBatisMapperSqlTest {
                 (endTime - startTime),
                 myBatisMapperSql.getAllLastModified().size()
         );
+    }
+
+    @Test
+    public void t03() {
+        final String absolutePath = new File("./src/test/resources/dao").getAbsolutePath();
+        FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(absolutePath);
+        SqlSource sqlSource = myBatisMapperSql.getSqlSource("t01", "UserDao.xml", DbType.MYSQL);
+        log.info("SQL = {}", sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql());
+    }
+
+    @SneakyThrows
+    @Test
+    public void t04() {
+        final String absolutePath = new File("./src/test/resources/performance_test").getAbsolutePath();
+        FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(absolutePath);
+        myBatisMapperSql.startWatch(100);
+        Thread.sleep(2_000);
+        log.info("### SqlSourceCount={}", myBatisMapperSql.getSqlSourceCount());
     }
 }
