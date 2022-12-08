@@ -13,11 +13,3 @@ dependencies {
     // runtimeOnly("com.oracle.database.jdbc:ojdbc8")
     // runtimeOnly("com.microsoft.sqlserver:mssql-jdbc")
 }
-
-sourceSets {
-    main {
-        resources {
-            srcDirs("src/main/resources", "src/main/java")
-        }
-    }
-}

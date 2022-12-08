@@ -2,6 +2,7 @@ package org.clever.data.jdbc.mybatis;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.clever.core.io.ClassPathResource;
 import org.clever.core.io.Resource;
 import org.clever.core.io.support.PathMatchingResourcePatternResolver;
@@ -48,12 +49,37 @@ public class ClassPathMyBatisMapperSqlTest {
 
         Resource[] resources = resolver.getResources("classpath*:**/*.xml");
         for (Resource res : resources) {
-            res = resolver.getResource(res.toString());
-            if (res instanceof ClassPathResource) {
-                log.info("--> {}", ((ClassPathResource) res).getPath());
-            } else {
-                log.info("--> {}", res.getClass());
+            String[] flagArr = {
+                    // jar包
+                    ".jar!/",
+                    // IDEA 自带编译器
+                    "/out/production/classes/",
+                    "/out/production/resources/",
+                    "/out/test/classes/",
+                    "/out/test/resources/",
+                    // gradle编译器
+                    "/build/classes/java/main/",
+                    "/build/classes/java/test/",
+                    "/build/classes/kotlin/main/",
+                    "/build/classes/kotlin/test/",
+                    "/build/classes/groovy/main/",
+                    "/build/classes/groovy/test/",
+                    "/build/resources/main/",
+                    "/build/resources/test/",
+                    // maven编译器
+                    "/target/classes/",
+                    "/target/test-classes/",
+            };
+            String url = res.getURL().toExternalForm();
+            for (String flag : flagArr) {
+                int idx = url.indexOf(flag);
+                if (idx >= 0) {
+                    url = url.substring(idx + flag.length());
+                    break;
+                }
             }
+            url = FilenameUtils.normalize(url, true);
+            log.info("--> {}", url);
         }
     }
 }

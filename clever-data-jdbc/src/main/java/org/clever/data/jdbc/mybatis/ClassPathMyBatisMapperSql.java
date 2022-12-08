@@ -2,15 +2,13 @@ package org.clever.data.jdbc.mybatis;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FilenameUtils;
 import org.clever.core.io.Resource;
 import org.clever.core.io.support.PathMatchingResourcePatternResolver;
 import org.clever.util.Assert;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * TODO: 深度测试，支持多个path
@@ -18,6 +16,40 @@ import java.util.Set;
  * 创建时间：2020/09/30 15:51 <br/>
  */
 public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
+    /**
+     * Resource.getURL().toExternalForm()返回的路径例如: <br/>
+     * <pre>{@code
+     * "clever-data-jdbc/out/production/resources/org/clever/jdbc/support/sql-error-codes.xml"
+     * "spring-context-5.3.23.jar!/org/springframework/remoting/rmi/RmiInvocationWrapperRTD.xml"
+     * }</pre>
+     * 此变量用户定位用class文件所对应的包名，改变成: <br/>
+     * <pre>{@code
+     * "org/clever/jdbc/support/sql-error-codes.xml"
+     * "org/springframework/remoting/rmi/RmiInvocationWrapperRTD.xml"
+     * }</pre>
+     */
+    public static final List<String> CLASS_URL_PREFIX = new ArrayList<String>() {{
+        // jar包
+        add(".jar!/");
+        // IDEA 自带编译器
+        add("/out/production/classes/");
+        add("/out/production/resources/");
+        add("/out/test/classes/");
+        add("/out/test/resources/");
+        // gradle编译器
+        add("/build/classes/java/main/");
+        add("/build/classes/java/test/");
+        add("/build/classes/kotlin/main/");
+        add("/build/classes/kotlin/test/");
+        add("/build/classes/groovy/main/");
+        add("/build/classes/groovy/test/");
+        add("/build/resources/main/");
+        add("/build/resources/test/");
+        // maven编译器
+        add("/target/classes/");
+        add("/target/test-classes/");
+    }};
+
     /**
      * 加载Resource实现对象
      */
@@ -41,21 +73,6 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
         Assert.isNotBlank(locationPattern, "参数locationPattern不能为空");
         this.locationPattern = locationPattern;
         initLoad();
-    }
-
-    /**
-     * 解析sql.xml资源文件
-     */
-    @SneakyThrows
-    protected synchronized Set<Resource> initResource() {
-        Set<Resource> resourceSet = new HashSet<>();
-        Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
-        for (Resource resource : resources) {
-            if (resource.isReadable() && resource.getURL().toExternalForm().toLowerCase().endsWith(".xml")) {
-                resourceSet.add(resource);
-            }
-        }
-        return resourceSet;
     }
 
     @Override
@@ -101,8 +118,7 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
             try {
                 final String absolutePath = resource.getURL().toExternalForm();
                 log.info("# 解析文件: {}", absolutePath);
-                // TODO 需要得到 xmlPath
-                reloadFile(absolutePath, true);
+                reloadFile(getXmlPath(absolutePath), true);
             } catch (Exception e) {
                 log.error("解析sql.xml文件失败 | path={}", resource, e);
             }
@@ -122,5 +138,36 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
             }
         }
         return result;
+    }
+
+    /**
+     * 解析sql.xml资源文件
+     */
+    @SneakyThrows
+    protected synchronized Set<Resource> initResource() {
+        Set<Resource> resourceSet = new HashSet<>();
+        Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
+        for (Resource resource : resources) {
+            if (resource.isReadable() && resource.getURL().toExternalForm().toLowerCase().endsWith(".xml")) {
+                resourceSet.add(resource);
+            }
+        }
+        return resourceSet;
+    }
+
+    /**
+     * 把绝对路径转换成class path路径
+     */
+    protected String getXmlPath(String absolutePath) {
+        String classPath = absolutePath;
+        for (String prefix : CLASS_URL_PREFIX) {
+            int idx = classPath.indexOf(prefix);
+            if (idx >= 0) {
+                classPath = classPath.substring(idx + prefix.length());
+                break;
+            }
+        }
+        classPath = FilenameUtils.normalize(classPath, true);
+        return classPath;
     }
 }
