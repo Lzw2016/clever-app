@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryOrderOut">
+        select a.*,
+               b.customer_code,
+               b.customer_name,
+               c.owner_code,
+               c.owner_name
+        from order_out a
+             inner join bas_customer b on a.customer_id = b.customer_id
+             inner join bas_owner c on c.owner_id = a.owner_id
+        where a.wh_id = #{wh_id}
+          and a.status = #{status}
+          and a.order_biz_type not in (24)
+          --@ and a.dates >= #{start_date}
+          --@ and a.dates &lt;= #{end_date}
+          --@ and a.owner_id = #{owner_id}
+          --@ and a.order_out_code = #{order_out_code}
+          --@ and a.order_type = #{order_type}
+          --@ and a.order_biz_type = #{order_biz_type}
+          --@ and a.remark = #{remark}
+        order by a.order_out_code
+    </select>
+
+    <select id="queryOrderOutDetails">
+        select a.*,
+               b.item_name,
+               b.item_code,
+               b.item_desc,
+               b.manufacturer,
+               b.origin,
+               d.package_level,
+               c.package_code,
+               (a.qty * e.package_meas / d.package_meas) as uom_qty
+        from order_out_details a
+             inner join bas_item b on a.item_id = b.item_id
+             inner join bas_package c on c.package_id = a.package_id
+             inner join bas_package_items d on d.package_item_id = a.package_item_id
+             inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        where a.order_out_id = #{order_out_id}
+          and a.status = #{status}
+        order by a.line_no
+    </select>
+
+    <select id="queryWhName">
+        select wh_name
+        from bas_wh
+        where wh_id = #{wh_id}
+    </select>
+
+    <select id="queryOrderOutList">
+        select a.order_out_id,a.wave_id,a.order_out_code,a.owner_id,a.wh_id,a.order_type,a.order_biz_type,
+        a.status,a.customer_id,a.dates,a.pickup_type,
+        sum(b.qty / c.package_meas * d.package_meas * c.volume) as order_volume
+        from order_out a
+        inner join order_out_details b on a.order_out_id = b.order_out_id
+        inner join bas_package_items c on c.package_id = b.package_id and c.package_item_id = b.package_item_id
+        inner join bas_package_items d on d.package_id = b.package_id and d.package_level = 1
+        <where>
+            a.order_out_id in
+            <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+        group by a.order_out_id,a.wave_id,a.order_out_code,a.owner_id,a.wh_id,a.order_type,a.order_biz_type,
+        a.status,a.customer_id,a.dates,a.pickup_type
+    </select>
+
+    <select id="queryStaffName">
+        select *
+        from sys_user
+        where user_id = #{user_id}
+    </select>
+
+    <select id="queryParam">
+
+    </select>
+
+    <select id="queryWave">
+        select a.*
+        from order_wave a
+        where a.wh_id = #{wh_id}
+              --@ and a.dates >= #{start_date}
+              --@ and a.dates &lt;= #{end_date}
+              --@ and a.wave_no = #{wave_no}
+        order by a.wave_no
+    </select>
+
+    <select id="queryWaveDetails">
+        select a.*,
+               b.dates,
+               b.order_out_code,
+               c.owner_name,
+               d.customer_name,
+               b.order_type,
+               b.order_biz_type,
+               d.customer_code
+        from order_wave_details a
+             inner join order_out b on a.order_out_id = b.order_out_id
+             inner join bas_owner c on c.owner_id = b.owner_id
+             inner join bas_customer d on d.customer_id = b.customer_id
+        where a.wave_id = #{wave_id}
+        order by b.order_out_code
+    </select>
+
+    <select id="queryWaveDetailsByIds">
+        select a.*,b.order_out_id,b.status as wave_line_status,a.wave_rep_status
+        from order_wave a
+        inner join order_wave_details b on a.wave_id = b.wave_id
+        <where>
+            a.wave_id in
+            <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+                #{item.wave_id}
+            </foreach>
+            and not exists(select 1 from order_out_details where status != 30 and status != 35 and b.order_out_id = order_out_id)
+        </where>
+    </select>
+
+    <select id="queryWaveRepByIds">
+        select a.wave_id
+        from order_wave a
+        inner join order_wave_details b on a.wave_id = b.wave_id
+        <where>
+            a.status = #{status} and a.wave_id in
+            <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="queryOutDetailsByWaveIds">
+        select a.order_out_id
+        from order_out a
+        where a.wave_id = #{wave_id}
+    </select>
+
+</mapper>

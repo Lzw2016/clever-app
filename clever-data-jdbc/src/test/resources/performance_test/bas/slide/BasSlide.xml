@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasSlide">
+    <select id="selectSlide">
+        select *
+        from bas_slide A
+        <where>
+            A.is_enable = 1 and A.wh_id = #{wh_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.slide_code like', 'A.slide_name like')}
+        </where>
+    </select>
+</mapper>

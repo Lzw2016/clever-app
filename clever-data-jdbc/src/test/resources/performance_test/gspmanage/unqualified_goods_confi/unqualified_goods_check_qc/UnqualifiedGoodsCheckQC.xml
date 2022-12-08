@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UnqualifiedGoodsCheckQC">
+    <select id="selectUnqualifiedGoods" resultType="map">
+        SELECT
+            TA.DANJ_NO,  -- 单据编号
+            TA.DANJ_SORT,  -- 单据行号
+            TA.SHANGP_ID,  -- 商品ID
+            TB.item_id,   -- 商品编号
+            TB.item_name,  -- 中文名
+            TB.manufacturer,  -- 生产厂家
+            '*' YAOP_GUIG,    -- 药品规格
+            (select bpi.package_unit from bas_item bi left join bas_package bp on bi.item_id = bp.item_id
+                                                      left join bas_package_items bpi on bpi.package_id = bp.package_id
+             where bpi.package_level = '3' and bi.item_id = TA.SHANGP_ID)  BAOZ_DANW,   -- 包装单位
+            -- TB.BAOZ_DANW,   -- 包装数量
+            TB.approval_no,   -- 批准文号
+            TB.remark,  -- 备注
+            TA.LOT,  -- 批号
+            -- TE.YOUX_DATE,  -- 是否优先出库
+            TE.lot02,  -- 生产日期
+            TE.lot03,  -- 有效期至
+            TE.lot01,  -- 批号
+            TA.DANW_ID,  -- 单位编号
+            TC.customer_code,  -- 单位编号
+            TC.customer_name,  -- 单位名称
+            TA.RUK_NUM,  -- 入库数量
+            TA.BUHGP_NUM,  -- 不合格品数量
+            TA.ZHILQK_REFLECTION,  -- 质量情况反馈
+            TA.SUOZBM_OPINION,   -- 所在部门意见
+            TA.ZHILGLBM_AFFIRMATION,  -- 质量管理部门意见
+            TA.SHENH_FLG,  -- 是否审核
+            TA.ZHUANCTZ_FLG,  -- 是否转成台账
+            TA.YUAN_NO,  -- 原单据编号
+            TA.HANGHAO_OLD,  -- 原行号
+            TA.YEZ_ID,  -- 货主ID
+            TD.owner_name,  -- 货主名称
+            TF.RIQI_DATE,
+            TF.CAOZ_STAFF,
+            TF.ZHIJ_STAFF,
+            TF.ZHIJ_STAFF_ID,
+            TF.CAOZ_STAFF_ID,
+            TF.YANS_ZZ,
+            'NHK' TO_KUB
+            -- (SELECT T.loc_id FROM bas_location /*JC_HWZD*/ T WHERE T.loc_classify='4' AND T.is_lock='0' AND T.owner_id=TA.YEZ_ID AND ROWNUM=1) TO_HUOW_ID
+        FROM GSP_BHGYPQRB_MX TA,GSP_BHGYPQRB_HZ TF, bas_item TB, bas_customer /*JC_DWZL*/ TC, bas_owner /*JC_HZZL*/ TD, bas_lot_att /*JC_PHWHB*/ TE
+        WHERE TA.SHANGP_ID = TB.item_id
+          AND TA.DANW_ID = TC.customer_id
+          AND TA.YEZ_ID = TD.owner_id
+          AND TA.LOT = TE.lot_id
+          AND TA.SHANGP_ID = TE.item_id
+          AND TA.DANJ_NO = TF.DANJ_NO
+          --@ and TA.DANJ_NO = #{DANJ_NO}
+    </select>
+
+    <update id="sql_bhgsh_zgb_sh_hz">
+        update GSP_BHGYPQRB_HZ set ZHIG_BZ = #{ZHIG_BZ} where DANJ_NO = #{DANJ_NO}
+    </update>
+
+    <update id="sql_bhgsh_zgb_sh_mx">
+        update GSP_BHGYPQRB_MX set ZHILGLBM_AFFIRMATION=#{ZHILGLBM_AFFIRMATION} , SHENH_FLG = '1' where DANJ_NO=#{danj_no} and DANJ_SORT = #{danj_sort}
+    </update>
+
+    <select id="selectBHGSPTP" resultType="map">
+        SELECT DANJ_NO,
+               TO_CHAR(RIQI_DATE,'YYYY-MM-DD') RIQI_DATE,
+               CAOZ_STAFF,
+               ZHIJ_STAFF,
+               YANS_ZZ
+        FROM
+            (SELECT T_HZ.DANJ_NO,
+                    T_HZ.RIQI_DATE,
+                    T_HZ.CAOZ_STAFF CAOZ_STAFF,
+                    T_HZ.ZHIJ_STAFF ZHIJ_STAFF,
+                    T_HZ.YANS_ZZ  YANS_ZZ
+             FROM GSP_BHGYPQRB_HZ T_HZ
+             WHERE T_HZ.YANS_ZZ IS NULL
+               AND #{V_TYPE}='YSZSH'
+               AND T_HZ.HOUSE_ID = #{HOUSE_ID}
+             UNION
+             SELECT T_HZ.DANJ_NO,
+                    T_HZ.RIQI_DATE,
+                    T_HZ.CAOZ_STAFF CAOZ_STAFF,
+                    T_HZ.ZHIJ_STAFF ZHIJ_STAFF,
+                    T_HZ.YANS_ZZ    YANS_ZZ
+             FROM GSP_BHGYPQRB_HZ T_HZ
+             WHERE T_HZ.YANS_ZZ IS NOT NULL
+               AND T_HZ.ZHIG_BZ IS NULL
+               AND #{V_TYPE}='ZGBSH'
+               AND T_HZ.HOUSE_ID = #{HOUSE_ID}
+            )
+    </select>
+</mapper>

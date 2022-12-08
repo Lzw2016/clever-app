@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderInBase">
+    <!--(select decode(count(1), count(decode(qty, order_qty, 1, NULL)), 1, 0) from order_in_details oid where oid.order_in_id = oi.order_in_id) as order_end,-->
+    <!--(select decode(count(1), count(decode(qty, order_qty, 1, NULL)), 1, 0) from asn_in_details aid where aid.asn_in_id = oi.asn_in_id) as asn_end-->
+    <select id="uploadDataByOrderId">
+        select
+            oi.is_complete,
+            (select decode(count(1), count(decode(ci.cmd_state, 1000, 1, NULL)), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as order_is_put
+        from order_in oi where oi.order_in_id = #{order_in_id}
+    </select>
+
+    <select id="asnInEnd">
+        select *  from (
+            select
+                aid.asn_in_id, decode(sum(aid.qty), sum(aid.order_qty), 1, 0) as num
+            from asn_in_details aid
+            inner join asn_in ai on aid.asn_in_id = ai.asn_in_id
+            where ai.order_biz_type = 12
+            and not exists (
+                select 1 from cmd_in ci where ci.asn_in_id = ai.asn_in_id
+            )
+            and not exists (
+                select 1 from order_in_details oid where oid.asn_in_id = aid.asn_in_id
+            )
+            group by aid.asn_in_id
+        ) t where asn_in_id = #{asn_in_id}
+
+        <!--select
+            ai.asn_in_id,
+            (select decode(count(1), count(decode(qty, order_qty, 1, NULL)), 1, 0) from asn_in_details aid where aid.asn_in_id = ai.asn_in_id) as num
+        from asn_in ai where ai.asn_in_id = #{asn_in_id}
+        and not exists (
+            select 1 from cmd_in ci where ci.asn_in_id = ai.asn_in_id
+        )-->
+    </select>
+
+    <select id="uploadDataByAsnId">
+        select
+           decode(count(1), count(decode(is_complete, 1, 1, NULL)), 1, 0) as is_complete,
+           decode(count(1), count(decode(cmd_state, 1000, 1, NULL)), 1, 0) as order_is_put
+        from (select ci.asn_in_id, oi.is_complete, ci.cmd_state
+            from order_in oi inner join cmd_in ci on oi.order_in_id = ci.order_id where ci.asn_in_id = #{asn_in_id}
+        ) a group by asn_in_id
+    </select>
+
+    <insert id="insert_in_upload1">
+        insert into order_in_upload
+            select t.asn_in_id,
+            t.asn_line_no,
+            t.business_code,
+            t.business_code_line,
+            t.order_type,
+            t.order_biz_type,
+            t.quality_flg,
+            t.item_id,
+            t.lot_id,
+            t_in.order_staff_id,
+            t.quality_employee_id,
+            t.put_staff_id,
+            t.qty,
+            t.package_id,
+            #{upload_id},
+            to_char(sysdate, 'yyyy-mm-dd'),
+            t.owner_id,
+            t.wh_id,
+            t_in.supplier_id
+            from cmd_in t
+            left join order_in t_in on t.order_id = t_in.order_in_id
+            where t.order_id = #{order_id} and t.upload_order_id is null and t.qty > 0
+    </insert>
+
+    <insert id="insert_in_upload2">
+        insert into order_in_upload
+            select t.asn_in_id,
+            t.asn_line_no,
+            t.business_code,
+            t.business_code_line,
+            t.order_type,
+            t.order_biz_type,
+            t.quality_flg,
+            t.item_id,
+            t.lot_id,
+            t_in.order_staff_id,
+            t.quality_employee_id,
+            t.put_staff_id,
+            t.qty,
+            t.package_id,
+            #{upload_id},
+            to_char(sysdate, 'yyyy-mm-dd'),
+            t.owner_id,
+            t.wh_id,
+            t_in.supplier_id
+            from cmd_in t
+            left join order_in t_in on t.order_id = t_in.order_in_id
+            where t.asn_in_id = #{asn_in_id} and t.upload_order_id is null and t.qty > 0
+    </insert>
+
+    <insert id="insert_rk_sc_bill1">
+        insert into inf_rk_sc_bill
+SELECT #{upload_id},
+         ROWNUM,
+         A.* FROM
+         (select
+         BO.OWNER_CODE,
+         BW.WH_CODE,
+         sysdate,
+         BC.CUSTOMER_ID_ERP,
+         ai.ASN_STAFF,
+         (SELECT T2.USER_NAME FROM ORDER_IN T1,SYS_USER T2 WHERE T1.ORDER_STAFF_ID=T2.USER_ID AND T1.ORDER_IN_CODE=OI.ORDER_IN_CODE AND ROWNUM=1) ORDER_IN_CODE,
+         (SELECT T2.USER_NAME FROM CMD_IN T1,SYS_USER T2 WHERE T1.QUALITY_EMPLOYEE_ID=T2.USER_ID AND T1.ORDER_ID=OI.ORDER_IN_ID AND ROWNUM=1) ZHIJ_STAFF,
+         (SELECT T2.USER_NAME FROM ORDER_IN T1,SYS_USER T2 WHERE T1.ORDER_STAFF_ID=T2.USER_ID AND T1.ORDER_IN_CODE=OI.ORDER_IN_CODE AND ROWNUM=1) SHOUH_STAFF,
+         decode(t.ORDER_BIZ_TYPE, 12,4, t.ORDER_TYPE),
+         t.ORDER_BIZ_TYPE,
+         t.Business_Code_Line,
+         t.business_code,
+         TI.ITEM_ID_ERP,
+         LOT.LOT01,
+         LOT.LOT02,
+         LOT.LOT03,
+         SUM(t.qty),
+         t.quality,
+         0 TIAOM_NUM,
+         'N' ZT,
+         '' ERROR_MSG,
+         oi.ORDER_IN_CODE RKKPD_NO,
+         '' MAKER,
+         '' CHANDI,
+         LOT.LOT12 AREACODE,
+         '' CUNC_CONDITION,
+         decode(AD.TUIH_RESAON, 'N/A', '', AD.TUIH_RESAON) YN_GUID,
+         decode(AD.KAIP_DW, 'N/A', '', AD.KAIP_DW) KAIP_DW,
+         decode(AD.FAC_ERP, 'N/A', '', AD.FAC_ERP) FAC_ERP,
+         '' ERROR_DESC,
+         ai.ZBUSI_NAM,
+         AD.DERP_LINE
+    from cmd_in t
+    left join asn_in ai
+      on t.asn_in_id = ai.asn_in_id
+    LEFT JOIN ORDER_IN OI
+      ON T.ORDER_ID = OI.ORDER_IN_ID
+    LEFT JOIN ASN_IN_DETAILS AD
+      ON T.ASN_LINE_NO = AD.ASN_LINE_NO
+     AND T.ASN_IN_ID=AD.ASN_IN_ID
+    LEFT JOIN BAS_CUSTOMER BC
+      ON AI.SUPPLIER_ID = BC.CUSTOMER_ID
+    LEFT JOIN BAS_ITEM TI
+      ON T.ITEM_ID = TI.ITEM_ID
+    LEFT JOIN BAS_LOT_ATT LOT
+      ON T.LOT_ID = LOT.LOT_ID
+    LEFT JOIN BAS_WH BW
+      ON T.WH_ID = BW.WH_ID
+    LEFT JOIN BAS_OWNER BO
+      ON T.OWNER_ID = BO.OWNER_ID
+   where t.order_id = #{order_id}
+     and t.qty > 0 and t.quality_flg in (2)
+   GROUP BY T.BUSINESS_CODE,
+            T.BUSINESS_CODE_LINE,
+            LOT.LOT01,
+            LOT.LOT02,
+            LOT.LOT03,
+            LOT.LOT12,
+            OI.ORDER_IN_CODE,
+            OI.ORDER_IN_ID,
+            BC.CUSTOMER_ID_ERP,
+            AD.KAIP_DW,
+            AD.FAC_ERP,
+            T.QUALITY,
+            BW.WH_CODE,
+            BO.OWNER_CODE,
+            ai.Asn_Staff,
+            T.ORDER_TYPE,
+            T.ORDER_BIZ_TYPE,
+            TI.ITEM_ID_ERP,
+            AD.TUIH_RESAON,
+            ai.ZBUSI_NAM,
+            AD.DERP_LINE) A
+    </insert>
+
+    <insert id="insert_rk_sc_bill2">
+         insert into inf_rk_sc_bill
+         SELECT #{upload_id},
+         ROWNUM,
+         A.* FROM
+         (select
+         BO.OWNER_CODE,
+         BW.WH_CODE,
+         sysdate,
+         BC.CUSTOMER_ID_ERP,
+         ai.ASN_STAFF,
+         (SELECT T2.USER_NAME FROM ORDER_IN T1,SYS_USER T2 WHERE T1.ORDER_STAFF_ID=T2.USER_ID AND T1.ORDER_IN_CODE=OI.ORDER_IN_CODE AND ROWNUM=1) ORDER_IN_CODE,
+         (SELECT T2.USER_NAME FROM CMD_IN T1,SYS_USER T2 WHERE T1.QUALITY_EMPLOYEE_ID=T2.USER_ID AND T1.ORDER_ID=OI.ORDER_IN_ID AND ROWNUM=1) ZHIJ_STAFF,
+         (SELECT T2.USER_NAME FROM ORDER_IN T1,SYS_USER T2 WHERE T1.ORDER_STAFF_ID=T2.USER_ID AND T1.ORDER_IN_CODE=OI.ORDER_IN_CODE AND ROWNUM=1) SHOUH_STAFF,
+         decode(t.ORDER_BIZ_TYPE, 12, 4, t.ORDER_TYPE),
+         t.ORDER_BIZ_TYPE,
+         t.Business_Code_Line,
+         t.business_code,
+         TI.ITEM_ID_ERP,
+         LOT.LOT01,
+         LOT.LOT02,
+         LOT.LOT03,
+         SUM(t.qty),
+         t.quality,
+         0 TIAOM_NUM,
+         'N' ZT,
+         '' ERROR_MSG,
+         oi.ORDER_IN_CODE RKKPD_NO,
+         '' MAKER,
+         '' CHANDI,
+         LOT.LOT12 AREACODE,
+         '' CUNC_CONDITION,
+         decode(AD.TUIH_RESAON, 'N/A', '', AD.TUIH_RESAON) YN_GUID,
+         decode(AD.KAIP_DW, 'N/A', '', AD.KAIP_DW) KAIP_DW,
+         decode(AD.FAC_ERP, 'N/A', '', AD.FAC_ERP) FAC_ERP,
+         '' ERROR_DESC,
+         ai.ZBUSI_NAM,
+         AD.DERP_LINE
+    from cmd_in t
+    left join asn_in ai
+      on t.asn_in_id = ai.asn_in_id
+    LEFT JOIN ORDER_IN OI
+      ON T.ORDER_ID = OI.ORDER_IN_ID
+    LEFT JOIN ASN_IN_DETAILS AD
+      ON T.ASN_LINE_NO = AD.ASN_LINE_NO
+     AND T.ASN_IN_ID=AD.ASN_IN_ID
+    LEFT JOIN BAS_CUSTOMER BC
+      ON AI.SUPPLIER_ID = BC.CUSTOMER_ID
+    LEFT JOIN BAS_ITEM TI
+      ON T.ITEM_ID = TI.ITEM_ID
+    LEFT JOIN BAS_LOT_ATT LOT
+      ON T.LOT_ID = LOT.LOT_ID
+    LEFT JOIN BAS_WH BW
+      ON T.WH_ID = BW.WH_ID
+    LEFT JOIN BAS_OWNER BO
+      ON T.OWNER_ID = BO.OWNER_ID
+   where t.asn_in_id = #{asn_in_id}
+     and t.qty > 0 and t.quality_flg in (2)
+   GROUP BY T.BUSINESS_CODE,
+            T.BUSINESS_CODE_LINE,
+            LOT.LOT01,
+            LOT.LOT02,
+            LOT.LOT03,
+            LOT.LOT12,
+            OI.ORDER_IN_CODE,
+            OI.ORDER_IN_ID,
+            BC.CUSTOMER_ID_ERP,
+            AD.KAIP_DW,
+            AD.FAC_ERP,
+            T.QUALITY,
+            BW.WH_CODE,
+            BO.OWNER_CODE,
+            ai.Asn_Staff,
+            T.ORDER_TYPE,
+            T.ORDER_BIZ_TYPE,
+            TI.ITEM_ID_ERP,
+            AD.TUIH_RESAON,
+            ai.ZBUSI_NAM,
+            AD.DERP_LINE) A
+    </insert>
+
+</mapper>

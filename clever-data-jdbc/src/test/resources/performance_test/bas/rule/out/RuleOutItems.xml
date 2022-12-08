@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RuleOutItems">
+
+    <select id="queryAllRuleOutItem">
+        select t.rule_item_id,
+               t.rule_out_id,
+               t.rule_order,
+               t.rule_name,
+               t.order_type,
+               t.order_biz_type,
+               t.pack_level,
+               t.target_pack_level,
+               t.quality,
+               t.loc_expr,
+               t.stock_match_mode,
+               t.is_enable,
+               t.create_at,
+               t.create_by,
+               t.update_at,
+               t.update_by
+        from rule_out_items t
+        where t.is_enable = 1
+        --@ AND t.rule_item_id = #{rule_item_id}
+        --@ AND t.rule_out_id = #{rule_out_id}
+    </select>
+
+</mapper>

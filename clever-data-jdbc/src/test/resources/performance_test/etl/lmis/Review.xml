@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Review">
+
+    <select id="queryAllContainer">
+        SELECT T.BIANHAO,T.RONGQ_TYPE,T.RONGQ_STATE,T.FENPD_NO,T.HOUSE_ID FROM JC_RQZLB T
+    </select>
+
+    <select id="queryAllReview">
+        SELECT T.FUHT_ID,T.FUHT_NO,T.HOUSE_ID,T.FUHT_CATEGORY,KEY_FLG,FUHT_WORKLOAD,YEZ_ID FROM JC_FHT_MAIN T
+    </select>
+
+    <select id="queryAllReviewSlide">
+        SELECT T.FUHT_ID,T.HUAD_NO,T.KEY_FLG,T.ZANCW_LIMITED FROM JC_FHT_HUAD_EQUIPMENT T
+    </select>
+
+</mapper>

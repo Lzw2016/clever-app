@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Role">
+    <select id="getRoleMenuMethod" resultType="map">
+        select t2.*
+        from sys_role_permission t1, sys_button t2
+        where t1.prmission_id = t2.button_id (+)
+            and T1.role_id = #{role_id}
+            and T1.wh_id = #{wh_id}
+            and permission_type = 1
+            and permission_id = #{menu_id}
+    </select>
+
+    <select id="allMenuResourceList" resultType="map">
+        select
+            resource_id,
+            resource_parent,
+            CASE
+                when resource_type = 1 THEN 'PC-' || resource_name
+                when resource_type = 3 THEN 'PDA-' || resource_name
+            ELSE resource_name
+            END resource_name,
+            scope_url,
+            resource_icon,
+            resource_type
+        from sys_resource
+        where is_enable = '1' and resource_type in ('1','3')
+        order by resource_order asc
+    </select>
+
+    <select id="allMenuRoleResourceList" resultType="map">
+        select sr.* from sys_role_resource srr
+        inner join sys_resource sr on srr.resource_id = sr.resource_id
+        where srr.role_id = #{role_id} and sr.is_enable = '1'
+        and srr.wh_id = #{wh_id} and sr.resource_type in ('1','3')
+    </select>
+
+    <select id="allButRoleResourceList" resultType="map">
+        SELECT
+            sr.*,
+            CASE when srr.wh_id is NULL THEN 'Y' ELSE 'N' END flg
+        FROM
+            sys_resource sr
+            LEFT JOIN sys_role_resource srr ON sr.resource_id = srr.resource_id
+            AND srr.role_id = #{role_id} AND srr.wh_id = #{wh_id}
+        WHERE sr.resource_parent = #{parent_id} and sr.is_enable = '1' and sr.resource_type in ('2','4')
+    </select>
+
+    <delete id="deleteMenu">
+        delete from sys_role_resource
+        where wh_id = #{wh_id} and role_id = #{role_id} and
+        resource_id in (SELECT resource_id FROM sys_resource where resource_type in (1 , 3))
+    </delete>
+
+    <delete id="deleteBtn">
+        delete from sys_role_resource
+        where wh_id = #{wh_id} and role_id = #{role_id} and
+        resource_id in (SELECT resource_id FROM sys_resource where resource_type in (2 , 4))
+    </delete>
+
+    <select id="selectUserByRoleId">
+        select from sys_user_role srr
+        inner join sys_user_role on srr.role_id
+    </select>
+
+</mapper>

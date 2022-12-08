@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasCustom">
+    <select id="selectCustom">
+        select bc.customer_id,
+        bc.customer_code,
+        bc.owner_id,
+        bc.direction_id,
+        bc.custom_type,
+        bc.customer_name,
+        bc.create_by,
+        bc.update_by,
+        bc.create_at,
+        bc.update_at,
+        bc.remark,
+        bc.is_enable,
+        bc.customer_id_erp,
+        bc.slide_id,
+        bc.slide_code,
+        bc.address,
+        bc.drug_supervision_code,
+        bc.distribution_mode,
+        bc.zhuj_code,
+        bc.danw_simplename,
+        bc.lianx_staff,
+        bc.lianx_phone,
+        bc.postcode,
+        bc.yew_staff,
+        bc.shouh_phone,
+        bc.shouh_staff
+        from bas_customer bc
+        <where>
+            bc.is_enable = 1
+            <if test="#obj.notEmpty(ownerArr)">
+               and bc.owner_id in
+                <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                   #{item}
+                </foreach>
+            </if>
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'bc.customer_name like', 'bc.customer_code like')}
+        </where>
+    </select>
+
+    <select id="queryAllCustom">
+        select t.customer_id,
+               t.customer_code,
+               t.owner_id,
+               t.direction_id,
+               t.custom_type,
+               t.customer_name,
+               /*t.create_by,*/
+               /*t.update_by,*/
+               t.create_at,
+               t.update_at,
+               t.remark,
+               t.is_enable,
+               t.customer_id_erp,
+               t.slide_id,
+               t.slide_code,
+               t.address,
+               t.drug_supervision_code,
+               t.distribution_mode,
+               t.zhuj_code,
+               t.danw_simplename,
+               t.lianx_staff,
+               t.lianx_phone,
+               t.postcode,
+               t.yew_staff,
+               t.shouh_phone,
+               t.shouh_staff,
+               bs.slide_name,
+               bo.owner_name,
+               bd.direction_name,
+                nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+                nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        from bas_customer t
+         left join bas_slide bs on t.slide_id = bs.slide_id
+         left join bas_owner bo on bo.owner_id = t.owner_id
+         left join bas_direction bd on bd.direction_id = t.direction_id
+        where t.is_enable = 1
+        --@ AND t.customer_code = #{customer_code}
+        --@ AND t.customer_name = #{customer_name}
+        --@ AND to_char(t.update_at,'yyyy-mm-dd') = #{update_at}
+        <if test="#obj.notEmpty(ownerList)">
+            and t.owner_id in
+            <foreach collection="ownerList" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        ORDER BY t.CREATE_AT desc
+    </select>
+</mapper>

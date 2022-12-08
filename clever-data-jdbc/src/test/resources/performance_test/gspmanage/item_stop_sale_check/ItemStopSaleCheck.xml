@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemStopSaleCheck">
+    <select id="sql_sptssh" resultType="map">
+        SELECT GSP_SPTS.SHANGP_ID,
+               bi.item_code SHANGP_NO,
+                 bi.item_name CHINESE_NAME,
+                 '*' YAOP_GUIG,
+                 bi.manufacturer MAKER,
+                 (select package_unit from bas_package_items bpi where bpi.item_id = GSP_SPTS.SHANGP_ID AND bpi.PACKAGE_LEVEL = '3') BAOZ_DANW,
+                 bi.approval_no PIZ_NO,
+                 GSP_SPTS.LOT,
+                 GSP_SPTS.KUB,
+                 GSP_SPTS.XIANS_LOC,
+                 GSP_SPTS.NUM,
+                 GSP_SPTS.RIQI_DATE,
+                 GSP_SPTS.CAOZ_STAFF,
+                 GSP_SPTS.REMARK,
+                 GSP_SPTS.DANJ_NO,
+                 GSP_SPTS.HANGHAO,
+                 GSP_SPTS.SHENH_FLG,
+                 GSP_SPTS.SHENH_STAFF ,
+                 GSP_SPTS.SHENHYJ,
+                 GSP_SPTS.TINSYY,
+                 GSP_SPTS.JIECTSYY ,
+               (select customer_code from bas_customer bc where bc.CUSTOMER_ID = GSP_SPTS.DANW_ID) DANW_NO,
+               (select customer_name from bas_customer bc where bc.CUSTOMER_ID = GSP_SPTS.DANW_ID) DANW_NAME,
+                 bla.lot02 SHENGCHAN_DATE,
+                 bla.lot03 YOUX_DATE,
+                (SELECT owner_name FROM bas_owner bo/*JC_HZZL*/ WHERE bo.owner_id/*YEZ_ID*/=bi.owner_id/*JC_SPZL.YEZ_ID*/) owner_name
+            FROM GSP_SPTS,
+                 bas_item bi/*JC_SPZL*/  ,
+                 bas_lot_att bla/*JC_PHWHB P*/
+           WHERE ( GSP_SPTS.SHANGP_ID = bi.item_id/*JC_SPZL.SHANGP_ID*/ ) AND
+                  ( GSP_SPTS.YEZ_ID = bi.owner_id/*JC_SPZL.YEZ_ID*/ ) AND
+                 (GSP_SPTS.SHANGP_ID = bla.item_id(+)/*P.SHANGP_ID(+)*/) AND
+                 ( GSP_SPTS.LOT        = bla.lot_id/*P.LOT(+)*/) AND
+                 ( ( DANJ_NO = #{DANJ_NO} ) AND
+                 ( SHENH_FLG = #{SHENH_FLG} ) )
+    </select>
+
+    <select id="get_sptssh" resultType="map">
+        SELECT DISTINCT CAOZ_STAFF ZHIJ_STAFF,DANJ_NO,RIQI_DATE
+          FROM GSP_SPTS
+         WHERE SHENH_FLG = #{SHENH_FLG} AND HOUSE_ID like #{HOUSE_ID}
+    </select>
+
+    <update id="sql_sptssh_sh">
+        UPDATE GSP_SPTS SET SHENH_FLG='1',SHENH_STAFF_ID=#{SHENH_STAFF_ID},SHENH_STAFF = #{SHENH_STAFF},SHENHYJ = #{SHENHYJ} WHERE DANJ_NO = #{DANJ_NO}
+    </update>
+
+    <select id="sql_sptssh_query" resultType="map">
+        select * from GSP_SPTS where DANJ_NO = #{DANJ_NO}
+    </select>
+
+    <insert id="sql_spkcztbh_xz_hz">
+        insert into KCGL_KCZTBH_HZ
+          (DANJ_NO, RIQI_DATE, CAOZ_STAFF, ZHIJ_STAFF, KUC_STATE_BH,HOUSE_ID)
+        values
+          (#{DANJ_NO}, SYSDATE, #{CAOZ_STAFF}, #{ZHIJ_STAFF}, #{KUC_STATE_BH},#{HOUSE_ID})
+    </insert>
+
+    <insert id="sql_spkcztbh_xz_mx">
+        insert into KCGL_KCZTBH_MX
+          (DANJ_NO,
+           HANGHAO,
+           SHANGP_ID,
+           LOT,
+           YUANYIN,
+           CHUL_OPIN,
+           NUM,
+           HUOW_ID,
+           KUCSL_COND,
+           LOCK_FLG)
+        values
+          (#{DANJ_NO},
+           #{HANGHAO},
+           #{SHANGP_ID},
+           #{LOT},
+           #{YUANYIN},
+           #{CHUL_OPIN},
+           #{NUM},
+           #{HUOW_ID},
+           '0',
+           '0')
+    </insert>
+
+
+    
+</mapper>

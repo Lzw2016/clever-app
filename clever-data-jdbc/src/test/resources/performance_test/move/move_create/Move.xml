@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Move">
+
+    <select id="queryMoveOrder" resultType="map">
+        select A.*
+        from order_move A
+        where
+        A.wh_id = #{wh_id}
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.move_no like')}
+    </select>
+
+    <select id="queryItemAndPackageItems" resultType="map">
+        select
+            TA.*,
+            TB.package_item_id
+        from
+            bas_item TA, bas_package_items TB
+        where
+            TA.item_id in (#{itemIdList})
+            and TA.owner_id in (#{owner_id_list})
+            and TA.item_id = TB.item_id
+            and TB.package_level = 1
+    </select>
+
+    <select id="get_sp_list" resultType="map">
+        SELECT DISTINCT
+            TC.owner_id,
+            TC.owner_code,
+            TC.owner_name,
+            TA.item_id,
+            TA.item_code,
+            TA.item_name,
+            TA.logogram,
+            TA.manufacturer,
+            TB.package_unit,
+            TB.package_meas,
+            TB.package_id,
+            TD.package_code,
+            TD.package_name,
+            TB.package_item_id
+        FROM
+            bas_item TA,
+            bas_package_items TB,
+            bas_owner TC,
+            bas_package TD
+        WHERE
+        TA.owner_id in (#{owner_id_list})
+        AND TA.is_enable = 1
+        AND TD.item_id = TA.item_id
+        AND TD.package_id = TB.package_id
+        AND TA.owner_id = TC.owner_id
+        AND TA.item_id = TB.item_id
+        AND TB.package_level = 3
+        <if test="list!= null and list.size() > 0">
+            AND
+            <foreach collection="list" item="item" index="index" open="("  close=")">
+                ( TA.item_code = #{item.item_code} AND TA.owner_id = #{item.owner_id} )
+                <if test="index != (list.size() - 1)">
+                    OR
+                </if>
+            </foreach>
+        </if>
+        ORDER BY TA.item_code, TA.logogram
+    </select>
+
+    <select id="get_ychw" resultType="map">
+        SELECT
+            TC.loc_code,
+            TC.loc_classify,
+            TG.area_id,
+            TD.lot_id,
+            trim(TD.lot01) lot01,
+            TA.qty,
+            TD.lot02,
+            TD.lot03,
+            TC.loc_id,
+            TA.quality,
+            TA.lpn,
+            DECODE(TC.loc_type, '4', 'Y', 'N') is_auto_loc,
+            TB.item_code
+        FROM
+            inv_loc TA, bas_item TB, bas_location TC, bas_lot_att TD, bas_package_items TF, bas_area TG
+        WHERE
+            TA.qty - TA.qty_out - TA.qty_rep_out > 0
+            AND TA.item_id = TB.item_id
+            AND TA.owner_id = TB.owner_id
+            AND TA.loc_id = TC.loc_id
+            AND TA.lot_id = TD.lot_id
+            AND TA.package_id = TF.package_id
+            AND TG.area_id = TC.area_id
+            AND TC.loc_type != 4
+            AND TA.is_lock = 0
+            AND TA.qty_lock = 0
+            AND TA.wh_id = #{wh_id}
+            AND TF.item_id = TA.item_id
+            AND TF.package_level = 3
+            <if test="list!= null and list.size() > 0">
+                AND
+                <foreach collection="list" item="item" index="index" open="("  close=")">
+                    ( TC.loc_code = #{item.loc_code_from} AND TB.item_code = #{item.item_code} AND (TA.owner_id = #{item.owner_id}) AND trim(TD.lot01) = #{item.lot01} )
+                    <if test="index != (list.size() - 1)">
+                        OR
+                    </if>
+                </foreach>
+            </if>
+    </select>
+
+    <select id="get_yrhw" resultType="map">
+        select
+            TA.loc_id,
+            TA.loc_code,
+            TA.loc_classify,
+            TA.area_id
+        from
+            bas_location TA
+        where
+            TA.owner_id in (#{owner_id_list})
+            and TA.wh_id = #{wh_id}
+            and TA.loc_type != 4
+            <if test="list!= null and list.size() > 0">
+                AND
+                <foreach collection="list" item="item" index="index" open="(" close=")">
+                    ( TA.loc_code = #{item.loc_code_to} AND TA.loc_classify = #{item.loc_classify} AND (TA.owner_id = #{item.owner_id}) )
+                    <if test="index != (list.size() - 1)">
+                        OR
+                    </if>
+                </foreach>
+            </if>
+    </select>
+</mapper>

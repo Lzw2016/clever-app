@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+    <!-- 查询供应商送货预约单列表-->
+    <select id="queryByPage">
+        SELECT
+            T.asn_voucher,
+            T.appointment_id,
+            T.supplier_id,
+            TO_CHAR(T.delivery_date,'YYYY-MM-DD') delivery_date,
+            T.appointment_delivery_date,
+            T.arrival_date,
+            T.piect_qty,
+            T.sku_qty,
+            T.is_enable,
+            T.owner_id,
+            T.wh_id,
+            T.create_at,
+            nvl(
+                    (
+                        SELECT
+                            su.user_name
+                        FROM
+                            sys_login_agent sla
+                                INNER JOIN sys_user su ON su.user_id = sla.user_id
+                        WHERE
+                            to_char( sla.login_id ) = T.create_by
+                    ),
+                    T.create_by
+                ) create_by,
+            nvl(
+                    (
+                        SELECT
+                            su.user_name
+                        FROM
+                            sys_login_agent sla
+                                INNER JOIN sys_user su ON su.user_id = sla.user_id
+                        WHERE
+                            to_char( sla.login_id ) = T.update_by
+                    ),
+                    T.update_by
+                ) update_by,
+            T.update_at,
+            BC.CUSTOMER_CODE,
+            BC.CUSTOMER_NAME,
+            BO.OWNER_CODE,
+            BO.OWNER_NAME,
+            BW.WH_NAME,
+            BW.WH_CODE,
+            (
+                SELECT
+                    COUNT( DISTINCT T.supplier_id ) AS CUSTOMER_COUNT
+                FROM
+                    SUPPLIER_DELIVER_APPOINTMENT T
+                        INNER JOIN BAS_CUSTOMER BC ON BC.CUSTOMER_ID = T.SUPPLIER_ID
+                        LEFT JOIN BAS_OWNER BO ON BO.OWNER_ID = T.OWNER_ID
+                        INNER JOIN BAS_WH BW ON BW.WH_ID = T.WH_ID
+                WHERE
+                    T.IS_ENABLE > 0
+                --% and (BC.CUSTOMER_CODE like #{customer} or BC.CUSTOMER_NAME like #{customer})
+                --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+                --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+                --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') >= #{start_date}
+                --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') &lt;= #{end_date}
+            ) AS CUSTOMER_COUNT,
+            (
+                SELECT
+                    SUM( T.sku_qty ) AS QTY_COUNT
+                FROM
+                    SUPPLIER_DELIVER_APPOINTMENT T
+                        INNER JOIN BAS_CUSTOMER BC ON BC.CUSTOMER_ID = T.SUPPLIER_ID
+                        LEFT JOIN BAS_OWNER BO ON BO.OWNER_ID = T.OWNER_ID
+                        INNER JOIN BAS_WH BW ON BW.WH_ID = T.WH_ID
+                WHERE
+                    T.IS_ENABLE > 0
+                --% and (BC.CUSTOMER_CODE like #{customer} or BC.CUSTOMER_NAME like #{customer})
+                --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+                --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+                --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') >= #{start_date}
+                --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') &lt;= #{end_date}
+            ) QTY_COUNT,
+            (
+                SELECT
+                    SUM( T.piect_qty ) AS SKU_COUNT
+                FROM
+                    SUPPLIER_DELIVER_APPOINTMENT T
+                        INNER JOIN BAS_CUSTOMER BC ON BC.CUSTOMER_ID = T.SUPPLIER_ID
+                        LEFT JOIN BAS_OWNER BO ON BO.OWNER_ID = T.OWNER_ID
+                        INNER JOIN BAS_WH BW ON BW.WH_ID = T.WH_ID
+                WHERE
+                    T.IS_ENABLE > 0
+                --% and (BC.CUSTOMER_CODE like #{customer} or BC.CUSTOMER_NAME like #{customer})
+                --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+                --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+                --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') >= #{start_date}
+                --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') &lt;= #{end_date}
+            ) SKU_COUNT
+        FROM
+            SUPPLIER_DELIVER_APPOINTMENT T
+                INNER JOIN BAS_CUSTOMER BC ON BC.CUSTOMER_ID = T.SUPPLIER_ID
+                LEFT JOIN BAS_OWNER BO ON BO.OWNER_ID = T.OWNER_ID
+                INNER JOIN BAS_WH BW ON BW.WH_ID = T.WH_ID
+        WHERE
+            T.IS_ENABLE > 0
+            --% and (BC.CUSTOMER_CODE like #{customer} or BC.CUSTOMER_NAME like #{customer})
+            --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+            --% and (BO.OWNER_CODE LIKE #{owner} OR BO.OWNER_NAME LIKE #{owner})
+            --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') >= #{start_date}
+            --@ and TO_CHAR(T.DELIVERY_DATE,'YYYY-MM-DD') &lt;= #{end_date}
+        order by T.DELIVERY_DATE
+    </select>
+</mapper>

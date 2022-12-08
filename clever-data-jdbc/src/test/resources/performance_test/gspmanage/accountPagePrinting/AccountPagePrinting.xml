@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AccountPagePrinting">
+
+    <select id="getAccountPagePrint" resultType="map">
+        SELECT
+        T.MEMO,--记账原因
+        T.LEDGER_TIME,--账页时间
+        T.ORDER_CODE,--订单编码
+        T.QTY,-- 数量
+        T.QTY_IN,--入库数
+        T.QTY_OUT,--出库数
+        T.STOCK,--库存数
+        T.LEDGER_ID, --主键
+        BLA.LOT01,--批次属性1
+        BC.CUSTOMER_CODE,--客户编码
+        BC.CUSTOMER_NAME,--客户名称
+        BI.ITEM_CODE,--商品编码
+        BI.ITEM_NAME,--商品名称
+        BL.LOC_CODE,--库位编码
+        BW.WH_CODE,--仓编码
+        BI.MANUFACTURER, --生产厂家
+        t.ITEM_ID
+
+        FROM
+            (
+            SELECT
+                MEMO,
+                to_char( LEDGER_TIME, 'yyyy-mm-dd' ) LEDGER_TIME,
+                ORDER_CODE,
+                SUM( QTY ) QTY,
+                SUM( QTY_IN ) QTY_IN,
+                SUM( QTY_OUT ) QTY_OUT,
+                SUM( QTY + QTY_IN - QTY_OUT ) STOCK,
+                WH_ID,
+                ITEM_ID,
+                LOC_ID,
+                CUSTOM_ID,
+                LOT_ID,
+                LEDGER_ID
+            FROM
+                INV_LEDGER
+            GROUP BY
+                MEMO,
+                to_char( LEDGER_TIME, 'yyyy-mm-dd' ),
+                LOT_ID,
+                LOC_ID,
+                WH_ID,
+                ITEM_ID,
+                ORDER_CODE,
+                CUSTOM_ID,
+                LEDGER_ID
+            ) T
+            INNER JOIN BAS_LOT_ATT BLA ON BLA.LOT_ID = T.LOT_ID
+            INNER JOIN BAS_CUSTOMER BC ON BC.CUSTOMER_ID = T.CUSTOM_ID
+            INNER JOIN BAS_ITEM BI ON BI.ITEM_ID = T.ITEM_ID
+            INNER JOIN BAS_LOCATION BL ON BL.LOC_ID = T.LOC_ID
+            INNER JOIN BAS_WH BW ON BW.WH_ID = T.WH_ID
+        WHERE
+            BLA.LOT12 = '5000'
+            AND T.memo IN ( '入库-上架回传-记-实际货位库存账', '入库-上架回传-记-实际货位库存账-ZZP', '拣货记帐' )
+            <if test="#obj.notEmpty(start_date)">
+                and  T.LEDGER_TIME >= #{start_date}
+            </if>
+            <if test="#obj.notEmpty(end_date)">
+                and  T.LEDGER_TIME &lt;= #{end_date}
+            </if>
+            <if test = "#obj.notEmpty(customer)" >
+                and BC.CUSTOMER_CODE = #{customer}
+            </if>
+            <if test = "#obj.notEmpty(item)" >
+                and BI.ITEM_CODE = #{item}
+            </if>
+            <if test = "#obj.notEmpty(lot01)" >
+                and BLA.LOT01 = #{lot01}
+            </if>
+            <if test = "#obj.notEmpty(order_code)" >
+                and T.ORDER_CODE = #{order_code}
+            </if>
+    </select>
+
+
+
+</mapper>

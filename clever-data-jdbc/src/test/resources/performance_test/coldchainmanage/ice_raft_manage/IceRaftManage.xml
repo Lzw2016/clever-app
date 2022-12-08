@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="IceRaftManage">
+
+    <insert id="addIceRaftManage">
+        insert into cc_icefloe_manage
+        (icefloe_manage_id, dates, wh_id,create_by,update_by)
+        values
+            (#{icefloe_manage_id},
+             #{dates},
+             #{wh_id},
+             #{create_by},
+             #{create_by})
+    </insert>
+
+    <select id="queryFloe">
+        SELECT
+        a.floe_id AS icefloe_id,
+        a.floe_no,
+        a.floe_type,
+        b.x_start_time,
+        b.x_end_time,
+        b.x_recorder,
+        b.x_recorder_end,
+        b.s_start_time,
+        b.s_end_time,
+        b.s_recorder,
+        b.s_recorder_end,
+        b.y_start_time,
+        b.y_end_time,
+        b.y_recorder,
+        b.y_recorder_end,
+        b.freezer_no,
+        b.freezer_id,
+        b.icefloe_manage_type,
+        b.icefloe_manage_id,
+        b.line_no,
+        b.is_qualified
+        FROM
+        bas_ice_floe a
+        left join
+        (
+        select
+        detail.x_start_time,detail.x_end_time,detail.x_recorder,detail.x_recorder_end,
+        detail.s_start_time,detail.s_end_time,detail.s_recorder,detail.s_recorder_end,
+        detail.y_start_time,detail.y_end_time,detail.y_recorder,detail.y_recorder_end,
+        forcer.forcer_no as freezer_no,detail.icefloe_id,
+        forcer.forcer_id as freezer_id,detail.icefloe_manage_type,detail.icefloe_manage_id,detail.line_no, detail.is_qualified
+        from cc_icefloe_manage_details detail
+        left join bas_ice_forcer forcer on detail.freezer_id=forcer.forcer_id
+        ) b on a.floe_id =b.icefloe_id
+        where
+        a.wh_id =#{wh_id}
+        <if test="!#obj.isEmpty(floe_no)">
+            and a.floe_no in  (#{floe_no})
+        </if>
+
+        <if test="!#obj.isEmpty(floe_type)">
+            and a.floe_type = #{floe_type}
+        </if>
+        <if test="!#obj.isEmpty(freezer_id)">
+            and (b.freezer_id =#{freezer_id})
+        </if>
+        order by a.floe_no
+    </select>
+
+</mapper>

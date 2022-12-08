@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Staff">
+    <select id="queryAllUser">
+        SELECT T.* FROM JC_ZHIYDOC T
+    </select>
+
+    <select id="queryAllJob">
+        SELECT T.ZHIDZ,T.ZHID_CONTENT,T.HANGHAO FROM JC_ZDWH_MX T where T.ENGLISH_NAME='GANGWEI' order by T.HANGHAO
+    </select>
+
+    <select id="queryAllOpera">
+        SELECT T.ZHIDZ,T.ZHID_CONTENT,T.HANGHAO FROM JC_ZDWH_MX T where T.ENGLISH_NAME='LEIBIE' order by T.HANGHAO
+    </select>
+
+    <select id="queryUserOpera">
+        SELECT T.ZHIY_ID,T.HOUSE_ID,T.LEIBIE,T.YEW_TYPE FROM JC_ZHIYDOC_TSYW T
+    </select>
+
+    <select id="queryAllRole">
+        SELECT JIAOS_ID,
+               JIAOS_NAME
+        FROM SYS_ROLE_LIST
+    </select>
+
+    <select id="queryAllWfh">
+        SELECT T.ZHIY_ID,T.FUHE_ORDER,T.HOUSE_ID,T.TIH_WAY,T.PEIS_DIRECT FROM JC_ZHIYDOC_FUHY T order by ZHIY_ID,FUHE_ORDER
+    </select>
+
+    <select id="queryAllJhy">
+        SELECT T.ZHIY_ID,T.ZUOY_ORDER,T.HOUSE_ID,T.JIANHYJH_ORDER,T.QUYU_NO FROM JC_ZHIYDOC_JHY T order by T.ZHIY_ID,T.JIANHYJH_ORDER
+    </select>
+
+</mapper>

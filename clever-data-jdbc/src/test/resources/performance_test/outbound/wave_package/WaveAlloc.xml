@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryCustomSlide">
+        select slide_id,slide_code from bas_customer where customer_id = #{customer_id}
+    </select>
+
+    <select id="queryCmdOutAppendList">
+        select a.wave_id,c.wave_no,b.cmd_state as next_cmd_state,c.PRIORITY,a.order_id as order_out_id,nvl(d.order_out_code,a.order_id) as order_out_code,
+        a.cmd_line_no as line_no,d.customer_id,a.wh_id,a.owner_id,nvl(d.order_type,2) as out_order_type,nvl(d.order_biz_type,21) as out_order_biz_type,
+        0 as rep_order_type,0 as rep_order_biz_type,a.state as quality,a.item_id,a.package_id,(a.qty_plan - a.qty) as order_qty,a.append_type,a.append_state,
+        0 as lot_id,a.lot01,a.lot02,a.lot03,a.lot04,a.lot05,a.lot06,a.lot07,a.lot08,a.lot09,a.lot10,a.lot11,a.lot12,a.lpn,d.order_type
+        from cmd_out a
+        left join cmd_out b on a.cmd_id = b.CMD_ID_SUPER
+        inner join order_wave c on c.wave_id = a.wave_id
+        left join order_out d on d.order_out_id = a.order_id
+        where a.append_state in (1,2) and (a.qty_plan - a.qty) > 0 and a.cmd_state &lt;= #{end_state}
+    </select>
+
+    <select id="queryWave">
+        select a.status as wave_status,
+            b.status as wave_line_status,
+            c.owner_id,
+            a.dispatch_type,
+            c.wh_id,
+            c.order_out_id,
+            c.order_out_code,
+            c.order_type,
+            c.order_biz_type,
+            c.customer_id,
+            d.package_id,
+            d.package_item_id,
+            d.item_id,
+            d.qty,
+            d.line_no,
+            d.lot01,d.lot02,
+            d.lot03,d.lot04,d.lot05,d.lot06,d.lot07,d.lot08,d.lot09,d.lot10,d.lot11,d.lot12,
+            d.quality,
+            c.status as order_status,c.slide_id,c.slide_code,
+            d.status as order_line_status,a.wave_no,a.wave_id,a.priority,nvl(d.cancel_qty,0) as cancel_qty,
+            nvl(d.bwave_cancel_qty,0) as bwave_cancel_qty
+            from order_wave a
+            inner join order_wave_details b on a.wave_id = b.wave_id
+            inner join order_out c on c.order_out_id = b.order_out_id
+            inner join order_out_details d on d.order_out_id = c.order_out_id
+            where c.order_biz_type != 24 and a.wave_id = #{wave_id} and (d.status = 40 or a.status = 35)
+    </select>
+
+    <select id="queryWaveList">
+        select * from (
+        select a.wave_id
+        from order_wave a
+        inner join order_wave_details b on a.wave_id = b.wave_id
+        inner join order_out c on c.order_out_id = b.order_out_id
+        inner join order_out_details d on d.order_out_id = c.order_out_id
+        where c.order_biz_type != 24 and (d.status = #{lineStatus} or a.status = #{waveStatus})
+        order by a.priority,a.wave_no,c.order_out_code,d.line_no
+        ) a where rownum = 1
+    </select>
+
+    <select id="queryWaveRepDetails">
+        select sum(b.qty - nvl(b.cancel_qty,0) - nvl(b.bwave_cancel_qty,0)) as orderQty,b.item_id,b.quality,a.wh_id,a.owner_id,
+        b.package_id,b.lot01,b.lot02,b.lot03,b.lot04,b.lot05,b.lot06,b.lot07,b.lot08,b.lot09,
+        b.lot10,b.lot11,b.lot12,a.order_type,a.order_biz_type
+        from order_out a
+        inner join order_out_details b on a.order_out_id = b.order_out_id
+        inner join order_wave c on c.wave_id = a.wave_id
+        where c.wave_rep_status = #{wave_rep_status} and c.status = #{status}
+        and (b.lot01 is null or b.lot01 = 'N/A') and (b.lot02 is null or b.lot02 = 'N/A')
+        and (b.lot03 is null or b.lot03 = 'N/A')
+        and a.order_biz_type !=22
+        group by b.item_id,b.quality,a.wh_id,a.owner_id,b.package_id,b.lot01,a.order_type,a.order_biz_type,
+        b.lot02,b.lot03,b.lot04,b.lot05,b.lot06,b.lot07,b.lot08,b.lot09,b.lot10,b.lot11,b.lot12
+    </select>
+
+    <select id="queryCmdOutMaxLine">
+        select max(cmd_line_no) as lineNo from cmd_out where order_id = #{order_id}
+    </select>
+
+    <select id="queryPackageItems">
+        select a.*
+        from bas_package_items a
+        where a.package_id = #{package_id} and a.item_id = #{item_id}
+        order by a.package_level desc
+    </select>
+
+    <select id="queryOutDetailsByWaveIds">
+        select a.order_out_id from order_out a
+        <where>
+            a.wave_id = #{wave_id}
+        </where>
+    </select>
+
+    <select id="queryCmdLineByOrderId">
+        select max(cmd_line_no) from cmd_out where order_id = #{order_id}
+    </select>
+
+    <select id="queryMinStatusByOrder">
+        select min(status) as status from order_out_details where order_out_id = #{order_out_id}
+    </select>
+
+    <select id="queryMinStatusByWave">
+        select min(status) as status from order_wave_details where wave_id = #{wave_id}
+    </select>
+
+</mapper>

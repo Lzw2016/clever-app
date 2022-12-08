@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasContainer">
+    <select id="selectContainer">
+        SELECT
+        a.lpn,
+        a.wh_id,
+        a.container_code,
+        a.container_type,
+        ( SELECT dict_text FROM bas_dict_items WHERE dict_code = 'CONTAINER_TYPE' AND dict_value = a.container_type ) AS container_type_name,
+        a.container_state,
+        ( SELECT dict_text FROM bas_dict_items WHERE dict_code = 'CONTAINER_STATE' AND dict_value = a.container_state ) AS container_state_name,
+        ( SELECT wh_name FROM bas_wh WHERE wh_id = a.wh_id ) AS wh_name,
+        CASE
+
+        WHEN a.pick_group = 0 THEN
+        NULL ELSE a.pick_group
+        END AS pick_group,
+        a.create_by,
+        a.create_at,
+        a.update_by,
+        a.update_at
+        FROM
+        bas_container a
+        where a.wh_id = #{wh_id}
+        <if test="!#obj.isEmpty(container_type)">
+            AND a.container_type = #{container_type}
+        </if>
+        <if test="!#obj.isEmpty(container_state)">
+            AND a.container_state = #{container_state}
+        </if>
+        ${@com.galaxis.wms.ext.Sql@phrase('and', 'a.container_code like')}
+    </select>
+</mapper>

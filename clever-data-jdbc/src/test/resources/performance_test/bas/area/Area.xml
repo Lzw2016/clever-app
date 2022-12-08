@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasArea">
+
+	<select id="queryAllArea">
+SELECT
+    rownum+52 AA,
+    a.area_id,
+    a.wh_id,
+    a.area_code,
+    a.area_name,
+    a.review_type,
+    a.pick_mode,
+    a.chail_group,
+    a.area_classify,
+    a.pick_work_type,
+    a.is_enable,
+    a.create_at,
+    /*a.create_by,*/
+    a.update_at,
+    /*a.update_by,*/
+    nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
+    nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
+FROM
+    bas_area a
+<where>
+--@ AND a.is_enable = #{is_enable}
+--@ AND a.area_classify = #{area_classify}
+--@ AND a.area_code = #{area_code}
+--% AND a.area_name like #{area_name}
+--@ AND a.wh_id = #{wh_id}
+</where>
+	</select>
+
+</mapper>

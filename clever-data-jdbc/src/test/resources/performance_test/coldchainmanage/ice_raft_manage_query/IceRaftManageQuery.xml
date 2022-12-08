@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="IceRaftManageQuery">
+ <select id="query">
+     select hz.icefloe_manage_id,hz.create_by,hz.dates,mx.icefloe_id,mx.freezer_id,
+            floe.floe_no,floe.floe_type,forcer.forcer_no,mx.icefloe_manage_type,mx.line_no,
+            mx.x_start_time,mx.x_end_time,mx.x_recorder,mx.x_recorder_end,
+            mx.s_start_time,mx.s_end_time,mx.s_recorder,mx.s_recorder_end,
+            mx.y_start_time,mx.y_end_time,mx.y_recorder,mx.y_recorder_end,
+            mx.is_qualified
+     from cc_icefloe_manage hz
+     inner join cc_icefloe_manage_details mx on hz.icefloe_manage_id =mx.icefloe_manage_id
+     inner join bas_ice_floe floe on mx.icefloe_id=floe.floe_id
+     left join bas_ice_forcer forcer on mx.freezer_id=forcer.forcer_id
+     where hz.wh_id =#{wh_id}
+         <if test="!#obj.isEmpty(dates)">
+             and hz.dates=#{dates}
+         </if>
+         <if test="!#obj.isEmpty(floe_no)">
+             and floe.floe_no like concat('%',concat(#{floe_no},'%'))
+         </if>
+         <if test="!#obj.isEmpty(forcer_no)">
+             and forcer.forcer_no like concat('%',concat(#{forcer_no},'%'))
+         </if>
+         <if test="!#obj.isEmpty(is_qualified)">
+             and mx.is_qualified =#{is_qualified}
+         </if>
+         <if test="!#obj.isEmpty(floe_type)">
+             and floe.floe_type =#{floe_type}
+         </if>
+         <if test="!#obj.isEmpty(operator)">
+             and hz.create_by =#{operator}
+         </if>
+     order by hz.dates, floe.floe_no
+ </select>
+    <select id="selectIcefloeManage">
+        select * from cc_icefloe_manage_details where icefloe_manage_id =#{icefloe_manage_id}
+    </select>
+
+
+</mapper>

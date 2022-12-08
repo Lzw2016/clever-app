@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="VisibleForeignMatterCheck">
+    <insert id="sql_kjywjcjl_xz_hz">
+        insert into visible_foreign_matter_check
+          (RIQI_DATE,
+           DANJ_NO,
+           DANW_ID,
+           ZHIJ_STAFF,
+           FUJ_STAFF,
+           CAOZ_STAFF,
+           HOUSE_ID,
+           ZHIJ_STAFF_ID,
+           FUJ_STAFF_ID,
+           CAOZ_STAFF_ID)
+        values
+          (to_date(#{RIQI_DATE}, 'yyyy-mm-dd'),
+           #{DANJ_NO},
+           #{DANW_ID},
+           #{ZHIJ_STAFF},
+           #{FUJ_STAFF},
+           #{CAOZ_STAFF},
+           #{HOUSE_ID},
+           #{ZHIJ_STAFF_ID},
+           #{FUJ_STAFF_ID},
+           #{CAOZ_STAFF_ID})
+    </insert>
+
+    <insert id="sql_kjywjcjl_xz_mx">
+        insert into GSP_KJYWJC_MX
+        (DANJ_NO,
+         HANGHAO,
+         SHANGP_ID,
+         LOT,
+         NUM,
+         CHOUY_NUM,
+         CHUJ_RESULT,
+         CHUJ_ADVISE,
+         CHUJ_BHGL,
+         FUJ_RESULT,
+         FUJ_ADVISE,
+         FUJ_BUHGL,
+         KJYW_NUM_CJ,
+         KJYW_NUM_CJQT,
+         FJ_NUM,
+         KJYW_NUM_FJ,
+         KJYW_NUM_FJQT,
+         CHECK_RESULT,
+         YEZ_ID)
+      values
+        (#{DANJ_NO},
+         #{HANGHAO},
+         #{SHANGP_ID},
+         #{LOT},
+         #{NUM},
+         #{CHOUY_NUM},
+         #{CHUJ_RESULT},
+         #{CHUJ_ADVISE},
+         #{CHUJ_BHGL},
+         #{FUJ_RESULT},
+         #{FUJ_ADVISE},
+         #{FUJ_BUHGL},
+         #{KJYW_NUM_CJ},
+         #{KJYW_NUM_CJQT},
+         #{FJ_NUM},
+         #{KJYW_NUM_FJ},
+         #{KJYW_NUM_FJQT},
+         #{CHECK_RESULT},
+         #{YEZ_ID})
+    </insert>
+
+</mapper>

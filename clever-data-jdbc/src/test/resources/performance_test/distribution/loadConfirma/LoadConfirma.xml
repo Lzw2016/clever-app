@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="loadConfirma">
+    <select id="queryList" resultType="map">
+        SELECT D.direction_id,
+               E.direction_name,
+               T.print_flag,
+               T.distribution_state,
+               T.order_load_id,
+               T.order_load_code,
+               T.create_at,
+               T.start_time,
+               T.dock_no,
+               T.delivery_staff,
+               (SELECT user_name FROM sys_user WHERE user_id = T.delivery_staff)delivery_staff_name,
+               T.load_reviewer,
+               T.transport_type,
+               T.car_code,
+               T.driver,
+               B.car_id,
+               B.model,
+               B.load_weight,
+               B.load_qty,
+               B.state,
+               T.shipping_company_id,
+               C.company_id,
+               C.company_code,
+               C.company_name,
+               C.liaison,
+               C.liaison_phone,
+               C.address,
+               T.is_pack_review,
+               F.customer_count,
+               F.bill_count,
+               F.fcl_qty,
+               F.lcl_qty,
+               (F.fcl_qty + F.lcl_qty) all_qty,
+               F.gift_qty,
+               F.sum_weight,
+               F.sum_amount,
+               F.sku_type,
+               F.pickup_mode
+        FROM order_load T
+             INNER JOIN order_load_details TD ON T.order_load_id = TD.order_load_id
+             LEFT JOIN bas_car B ON T.car_code = B.car_code
+             LEFT JOIN bas_shipping_company C ON T.shipping_company_id = C.company_id
+             LEFT JOIN bas_customer D ON TD.customer_id = D.customer_id
+             LEFT JOIN bas_direction E ON D.direction_id = E.direction_id
+             LEFT JOIN (
+            SELECT TC.order_load_id,
+                   COUNT(DISTINCT TC.customer_id) customer_count,
+                   COUNT(DISTINCT TC.bill_id)     bill_count,
+                   TC.fcl_qty,
+                   TC.lcl_qty,
+                   SUM(DISTINCT TC.gift_qty)               gift_qty,
+                   SUM(DISTINCT TC.sum_weight)             sum_weight,
+                   SUM(DISTINCT TC.sum_amount)             sum_amount,
+                   TC.sku_type,
+                   TC.pickup_mode
+            FROM (
+                     SELECT TA.order_load_id,
+                            TA.bill_id,
+                            TA.customer_id,
+                            TB.sku_type,
+                            SUM(DISTINCT TA.fcl_qty) fcl_qty,
+                            SUM(DISTINCT TA.lcl_qty) lcl_qty,
+                            TB.gift_qty,
+                            TB.sum_weight,
+                            TB.sum_amount,
+                            TB.pickup_mode
+                     FROM order_load_details TA,
+                          distribution_count TB,
+                          distribution_count_details TJMX
+                     WHERE TA.bill_id = TB.distribution_count_id
+                       AND TA.split_order_no = TB.split_order_no
+                     GROUP BY TA.order_load_id,
+                              TA.bill_id,
+                              TA.customer_id,
+                              TB.gift_qty,
+                              TB.sum_weight,
+                              TB.sum_amount,
+                              TB.sku_type,
+                              TB.pickup_mode
+                 ) TC
+            GROUP BY TC.order_load_id,
+                     TC.fcl_qty,
+                     TC.lcl_qty,
+                     TC.sku_type,
+                     TC.pickup_mode
+        ) F ON T.order_load_id = F.order_load_id
+        WHERE T.wh_id = #{wh_id}
+              --% AND T.order_load_code like #{order_load_code}
+        order by T.order_load_id
+    </select>
+
+    <!--配送周转箱统计-->
+    <select id="queryTurnoverBox" resultType="map">
+        SELECT
+        T.customer_id,
+        TC.customer_code,
+        TC.customer_name,
+        NVL( T.turn_box_qty, 0 ) turn_box_qty,
+        NVL( T.back_turn_box_qty, 0 ) back_turn_box_qty,
+        NVL( (T.back_turn_box_qty - T.turn_box_qty), 0 ) diff_turn_box_qty,
+        NVL( T.paper_box_qty, 0 ) paper_box_qty,
+        NVL( T.back_paper_box_qty, 0 ) back_paper_box_qty,
+        NVL( (T.back_paper_box_qty - T.paper_box_qty), 0 ) diff_paper_box_qty
+        FROM
+        CUSTOMER_BOX_COUNT T
+        INNER JOIN bas_customer TC ON T.CUSTOMER_ID = TC.CUSTOMER_ID
+        <if test="!#obj.isEmpty(customer_id)">
+            WHERE T.customer_id = #{customer_id}
+        </if>
+    </select>
+
+    <update id="changeQty">
+        update customer_box_count
+        set back_turn_box_qty = nvl(back_turn_box_qty, 0) + #{diff1} , back_paper_box_qty = nvl(back_paper_box_qty, 0) + #{diff2}
+        where customer_id = #{customer_id}
+    </update>
+
+</mapper>

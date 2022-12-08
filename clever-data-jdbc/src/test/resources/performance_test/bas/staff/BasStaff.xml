@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasStaff">
+    <select id="selectStaff">
+        select * from bas_staff A
+        <where>
+            A.is_enable = 1 and A.wh_id = #{wh_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.staff_name like', 'A.staff_no like')}
+        </where>
+    </select>
+
+    <select id="query">
+        select A.USER_ID, A.USER_NAME
+        from sys_user A
+             inner join SYS_USER_OWNER B on A.USER_ID = B.USER_ID
+        where B.WH_ID = #{wh_id}
+    </select>
+
+    <select id="queryStage">
+    select A.STAGE_ID, A.STAGE_NAME
+    from bas_stage A
+    where A.WH_ID = #{wh_id}
+</select>
+</mapper>

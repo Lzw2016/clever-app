@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="LoadRePrint">
+    <!--查询配送打印汇总-->
+    <select id="queryPrintOrder" resultType="map">
+        SELECT T.print_flag,
+               T.distribution_state,
+               T.order_load_id,
+               T.order_load_code,
+               T.create_at,
+               T.start_time,
+               T.back_time,
+               T.dock_no,
+               T.delivery_staff,
+               S.user_name delivery_staff_name,
+               T.load_reviewer,
+               T.transport_type,
+               T.car_code,
+               T.driver,
+               T.out_mileage,
+               T.back_mileage,
+               B.car_id,
+               B.model,
+               B.load_weight,
+               B.load_qty,
+               B.state,
+               T.shipping_company_id,
+               C.company_id,
+               C.company_code,
+               C.company_name,
+               C.liaison,
+               C.liaison_phone,
+               C.address,
+               T.is_pack_review,
+               F.customer_count,
+               F.bill_count,
+               F.fcl_qty,
+               F.lcl_qty,
+               (F.fcl_qty + F.lcl_qty) all_qty,
+               F.gift_qty,
+               F.sum_weight,
+               F.sum_amount,
+               F.sku_type,
+               F.pickup_mode
+        FROM order_load T
+                 LEFT JOIN bas_car B ON T.car_code = B.car_code
+                 LEFT JOIN bas_shipping_company C ON T.shipping_company_id = C.company_id
+                 LEFT JOIN sys_user S ON T.delivery_staff = S.user_id
+                 LEFT JOIN (
+            SELECT TC.order_load_id,
+                   COUNT(DISTINCT TC.customer_id) customer_count,
+                   COUNT(DISTINCT TC.bill_id)     bill_count,
+                   SUM(TC.fcl_qty)                fcl_qty,
+                   SUM(TC.lcl_qty)                lcl_qty,
+                   SUM(TC.gift_qty)               gift_qty,
+                   SUM(TC.sum_weight)             sum_weight,
+                   SUM(TC.sum_amount)             sum_amount,
+                   TC.sku_type,
+                   TC.pickup_mode
+            FROM (
+                     SELECT
+                         TA.order_load_id,
+                         TA.bill_id,
+                         TA.customer_id,
+                         TB.sku_type,
+                         SUM( TA.fcl_qty ) fcl_qty,
+                         SUM( TA.lcl_qty ) lcl_qty,
+                         TB.gift_qty,
+                         TB.sum_weight,
+                         TB.sum_amount,
+                         TB.pickup_mode
+                     FROM
+                         order_load_details TA
+                             LEFT JOIN distribution_count TB ON TA.bill_id = TB.distribution_count_id
+                             LEFT JOIN distribution_count_details TJMX ON TA.bill_id = TJMX.distribution_count_id
+                     WHERE
+                         TA.split_order_no = TB.split_order_no
+                     GROUP BY
+                         TA.order_load_id,
+                         TA.bill_id,
+                         TA.customer_id,
+                         TB.gift_qty,
+                         TB.sum_weight,
+                         TB.sum_amount,
+                         TB.sku_type,
+                         TB.pickup_mode
+                 ) TC
+            GROUP BY TC.order_load_id,
+                     TC.sku_type,
+                     TC.pickup_mode
+        ) F ON T.order_load_id = F.order_load_id
+        WHERE T.distribution_state = #{distribution_state}
+          AND T.transport_type = #{transport_type}
+          AND T.wh_id = #{wh_id}
+        order by T.order_load_id
+    </select>
+    <!--查询配送打印汇总(历史)-->
+    <select id="queryPrintOrderHis" resultType="map">
+        SELECT T.print_flag,
+               T.distribution_state,
+               T.order_load_id,
+               T.order_load_code,
+               T.create_at,
+               T.start_time,
+               T.back_time,
+               T.dock_no,
+               T.delivery_staff,
+               S.user_name delivery_staff_name,
+               T.load_reviewer,
+               T.transport_type,
+               T.car_code,
+               T.driver,
+               T.out_mileage,
+               T.back_mileage,
+               B.car_id,
+               B.model,
+               B.load_weight,
+               B.load_qty,
+               B.state,
+               T.shipping_company_id,
+               C.company_id,
+               C.company_code,
+               C.company_name,
+               C.liaison,
+               C.liaison_phone,
+               C.address,
+               T.is_pack_review,
+               F.customer_count,
+               F.bill_count,
+               F.fcl_qty,
+               F.lcl_qty,
+               (F.fcl_qty + F.lcl_qty) all_qty,
+               F.gift_qty,
+               F.sum_weight,
+               F.sum_amount,
+               F.sku_type,
+               F.pickup_mode
+        FROM WMS8_HIS.order_load T
+                 LEFT JOIN bas_car B ON T.car_code = B.car_code
+                 LEFT JOIN bas_shipping_company C ON T.shipping_company_id = C.company_id
+                 LEFT JOIN sys_user S ON T.delivery_staff = S.user_id
+                 LEFT JOIN (
+            SELECT TC.order_load_id,
+                   COUNT(DISTINCT TC.customer_id) customer_count,
+                   COUNT(DISTINCT TC.bill_id)     bill_count,
+                   SUM(TC.fcl_qty)                fcl_qty,
+                   SUM(TC.lcl_qty)                lcl_qty,
+                   SUM(TC.gift_qty)               gift_qty,
+                   SUM(TC.sum_weight)             sum_weight,
+                   SUM(TC.sum_amount)             sum_amount,
+                   TC.sku_type,
+                   TC.pickup_mode
+            FROM (
+                     SELECT
+                         TA.order_load_id,
+                         TA.bill_id,
+                         TA.customer_id,
+                         TB.sku_type,
+                         SUM( TA.fcl_qty ) fcl_qty,
+                         SUM( TA.lcl_qty ) lcl_qty,
+                         TB.gift_qty,
+                         TB.sum_weight,
+                         TB.sum_amount,
+                         TB.pickup_mode
+                     FROM
+                         WMS8_HIS.order_load_details TA
+                             LEFT JOIN WMS8_HIS.distribution_count TB ON TA.bill_id = TB.distribution_count_id
+                             LEFT JOIN WMS8_HIS.distribution_count_details TJMX ON TA.bill_id = TJMX.distribution_count_id
+                     WHERE
+                         TA.split_order_no = TB.split_order_no
+                     GROUP BY
+                         TA.order_load_id,
+                         TA.bill_id,
+                         TA.customer_id,
+                         TB.gift_qty,
+                         TB.sum_weight,
+                         TB.sum_amount,
+                         TB.sku_type,
+                         TB.pickup_mode
+                 ) TC
+            GROUP BY TC.order_load_id,
+                     TC.sku_type,
+                     TC.pickup_mode
+        ) F ON T.order_load_id = F.order_load_id
+        WHERE T.distribution_state = #{distribution_state}
+          AND T.transport_type = #{transport_type}
+          AND T.wh_id = #{wh_id}
+        order by T.order_load_id
+    </select>
+    <!--查询配送打印明细-->
+    <select id="queryPrintOrderDetails" resultType="map">
+        SELECT DISTINCT TA.split_order_no,
+                        TA.billing_time,
+                        TA.sku_type,
+                        TA.pickup_mode,
+                        TA.remark,
+                        TA.distribution_count_id,
+                        TA.is_reload,
+                        TA.sum_amount,
+                        TA.sum_weight,
+                        TA.sum_volume,
+                        TA.cold_drugs_qty,
+                        TA.expensive_drugs_qty,
+                        TA.import_drugs_qty,
+                        TA.psychotropic_drugs_qty,
+                        TA.special_drugs_qty,
+                        TA.other_drugs_qty,
+                        TA.gift_qty,
+                        TA.distribution_type,
+                        TA.sale_type,
+                        TA.settlement_type,
+                        TA.salesman,
+                        TA.drawer,
+                        TA.distribution_count_code,
+                        TB.customer_code,
+                        TB.customer_name,
+                        TC.order_load_id,
+                        TX.order_load_code,
+                        TC.load_sequence,
+                        TC.fcl_qty,
+                        TC.lcl_qty,
+                        (TC.fcl_qty + TC.lcl_qty)all_qty,
+                        TC.quality_qty,
+                        TC.invoice_no,
+                        TC.invoice_box_no,
+                        TC.tag_no,
+                        TC.cold_box_no,
+                        TC.is_review,
+                        TC.delivery_staff,
+                        TC.real_lcl_qty,
+                        TC.real_fcl_qty,
+                        (TC.real_lcl_qty + TC.real_fcl_qty) all_real_qty,
+                        TF.direction_id,
+                        TF.direction_name,
+                        TG.owner_code,
+                        TG.owner_name,
+                        TD.order_out_code,
+                        TD.status,
+                        (SELECT stage_code FROM bas_stage WHERE stage_id = TD.start_stage_id) start_stage,
+                        (SELECT stage_code FROM bas_stage WHERE stage_id = TD.end_stage_id) end_stage
+        FROM distribution_count TA,
+             bas_customer TB,
+             order_load_details TC,
+             order_out TD,
+             distribution_count_details TE,
+             bas_direction TF,
+             bas_owner TG,
+             order_load TX
+        WHERE TA.customer_id = TB.customer_id
+          AND TA.distribution_count_id = TC.bill_id
+          AND TA.distribution_count_id = TD.order_out_id
+          AND TC.fcl_qty + TC.lcl_qty > 0
+          AND TF.direction_id = TB.direction_id
+          AND TG.owner_id = TA.owner_id
+          AND TC.order_load_id = TX.order_load_id
+          AND TC.order_load_id = #{order_load_id}
+        GROUP BY TA.split_order_no,
+                 TA.billing_time,
+                 TA.sku_type,
+                 TA.pickup_mode,
+                 TA.remark,
+                 TA.distribution_count_id,
+                 TA.is_reload,
+                 TA.lcl_qty,
+                 TA.sum_amount,
+                 TA.sum_weight,
+                 TA.sum_volume,
+                 TA.cold_drugs_qty,
+                 TA.expensive_drugs_qty,
+                 TA.import_drugs_qty,
+                 TA.psychotropic_drugs_qty,
+                 TA.special_drugs_qty,
+                 TA.other_drugs_qty,
+                 TA.gift_qty,
+                 TA.distribution_type,
+                 TA.sale_type,
+                 TA.settlement_type,
+                 TA.salesman,
+                 TA.drawer,
+                 TA.distribution_count_code,
+                 TB.customer_code,
+                 TB.customer_name,
+                 TC.order_load_id,
+                 TX.order_load_code,
+                 TC.load_sequence,
+                 TC.fcl_qty,
+                 TC.lcl_qty,
+                 TC.quality_qty,
+                 TC.invoice_no,
+                 TC.invoice_box_no,
+                 TC.tag_no,
+                 TC.cold_box_no,
+                 TC.is_review,
+                 TC.delivery_staff,
+                 TC.real_lcl_qty,
+                 TC.real_fcl_qty,
+                 TF.direction_id,
+                 TF.direction_name,
+                 TG.owner_code,
+                 TG.owner_name,
+                 TD.order_out_code,
+                 TD.status,
+                 TD.start_stage_id,
+                 TD.end_stage_id
+        ORDER BY TA.distribution_count_id
+    </select>
+    <!--查询配送打印明细(历史)-->
+    <select id="queryPrintOrderDetailsHis" resultType="map">
+        SELECT DISTINCT TA.split_order_no,
+                        TA.billing_time,
+                        TA.sku_type,
+                        TA.pickup_mode,
+                        TA.remark,
+                        TA.distribution_count_id,
+                        TA.is_reload,
+                        TA.sum_amount,
+                        TA.sum_weight,
+                        TA.sum_volume,
+                        TA.cold_drugs_qty,
+                        TA.expensive_drugs_qty,
+                        TA.import_drugs_qty,
+                        TA.psychotropic_drugs_qty,
+                        TA.special_drugs_qty,
+                        TA.other_drugs_qty,
+                        TA.gift_qty,
+                        TA.distribution_type,
+                        TA.sale_type,
+                        TA.settlement_type,
+                        TA.salesman,
+                        TA.drawer,
+                        TA.distribution_count_code,
+                        TB.customer_code,
+                        TB.customer_name,
+                        TC.order_load_id,
+                        TX.order_load_code,
+                        TC.load_sequence,
+                        TC.fcl_qty,
+                        TC.lcl_qty,
+                        (TC.fcl_qty + TC.lcl_qty)all_qty,
+                        TC.quality_qty,
+                        TC.invoice_no,
+                        TC.invoice_box_no,
+                        TC.tag_no,
+                        TC.cold_box_no,
+                        TC.is_review,
+                        TC.delivery_staff,
+                        TC.real_lcl_qty,
+                        TC.real_fcl_qty,
+                        (TC.real_lcl_qty + TC.real_fcl_qty) all_real_qty,
+                        TF.direction_id,
+                        TF.direction_name,
+                        TG.owner_code,
+                        TG.owner_name,
+                        TD.order_out_code,
+                        TD.status,
+                        (SELECT stage_code FROM bas_stage WHERE stage_id = TD.start_stage_id) start_stage,
+                        (SELECT stage_code FROM bas_stage WHERE stage_id = TD.end_stage_id) end_stage
+        FROM WMS8_HIS.distribution_count TA,
+             bas_customer TB,
+             WMS8_HIS.order_load_details TC,
+             WMS8_HIS.order_out TD,
+             dWMS8_HIS.istribution_count_details TE,
+             bas_direction TF,
+             bas_owner TG,
+             WMS8_HIS.order_load TX
+        WHERE TA.customer_id = TB.customer_id
+          AND TA.distribution_count_id = TC.bill_id
+          AND TA.distribution_count_id = TD.order_out_id
+          AND TC.fcl_qty + TC.lcl_qty > 0
+          AND TF.direction_id = TB.direction_id
+          AND TG.owner_id = TA.owner_id
+          AND TC.order_load_id = TX.order_load_id
+          AND TC.order_load_id = #{order_load_id}
+        GROUP BY TA.split_order_no,
+                 TA.billing_time,
+                 TA.sku_type,
+                 TA.pickup_mode,
+                 TA.remark,
+                 TA.distribution_count_id,
+                 TA.is_reload,
+                 TA.lcl_qty,
+                 TA.sum_amount,
+                 TA.sum_weight,
+                 TA.sum_volume,
+                 TA.cold_drugs_qty,
+                 TA.expensive_drugs_qty,
+                 TA.import_drugs_qty,
+                 TA.psychotropic_drugs_qty,
+                 TA.special_drugs_qty,
+                 TA.other_drugs_qty,
+                 TA.gift_qty,
+                 TA.distribution_type,
+                 TA.sale_type,
+                 TA.settlement_type,
+                 TA.salesman,
+                 TA.drawer,
+                 TA.distribution_count_code,
+                 TB.customer_code,
+                 TB.customer_name,
+                 TC.order_load_id,
+                 TX.order_load_code,
+                 TC.load_sequence,
+                 TC.fcl_qty,
+                 TC.lcl_qty,
+                 TC.quality_qty,
+                 TC.invoice_no,
+                 TC.invoice_box_no,
+                 TC.tag_no,
+                 TC.cold_box_no,
+                 TC.is_review,
+                 TC.delivery_staff,
+                 TC.real_lcl_qty,
+                 TC.real_fcl_qty,
+                 TF.direction_id,
+                 TF.direction_name,
+                 TG.owner_code,
+                 TG.owner_name,
+                 TD.order_out_code,
+                 TD.status,
+                 TD.start_stage_id,
+                 TD.end_stage_id
+        ORDER BY TA.distribution_count_id
+    </select>
+</mapper>

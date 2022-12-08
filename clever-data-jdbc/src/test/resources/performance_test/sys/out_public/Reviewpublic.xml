@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Pickpublic">
+    <select id="queryParam">
+        select param_value from bas_param where param_code = #{param_code} and wh_id = #{wh_id}
+    </select>
+
+    <select id="getPackNo">
+        select max(to_number(nvl(cmd_barcode.pack_no,0))) as pack_no from cmd_barcode cmd_barcode
+        where cmd_barcode.order_id = #{order_id} and cmd_barcode.pack_no != 'N/A'
+    </select>
+
+    <select id="get_list_line">
+        select t_cmd.order_id, t_cmd.cmd_line_no, t_area.carriy_mode, bi.is_abnormity,nvl(t_cmd.is_unpack,0) as is_unpack,
+        t_cmd.order_type,t_cmd.order_biz_type,t_cmd.wh_id
+        from cmd_out t_cmd
+        inner join bas_location t_loc on t_cmd.loc_id_real =t_loc.loc_id
+        left join order_out t_o on t_o.order_out_id = t_cmd.order_id
+        left join bas_area_transition t_area on t_cmd.area_id = t_area.from_area_id
+            and t_area.order_type in (2,3)
+            and t_area.target_area_id=t_loc.area_id
+            and t_area.wh_id = t_cmd.wh_id
+        inner join bas_item bi on t_cmd.item_id = bi.item_id
+        where t_cmd.pick_group = #{pick_group} and t_cmd.cmd_line_no = #{cmd_line_no}
+    </select>
+
+    <select id="check_list_line">
+        select barcode from cmd_barcode where pick_group = #{pick_group}
+    </select>
+
+
+</mapper>

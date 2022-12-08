@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RuleOut">
+
+    <select id="selectRuleOut">
+        select *
+        from rule_out
+        <where>
+            wh_id = #{wh_id}
+        </where>
+    </select>
+
+    <select id="queryAllRuleOut">
+        select t.rule_out_id,
+               t.wh_id,
+               t.name,
+               t.create_at,
+               t.create_by,
+               t.update_at,
+               t.update_by
+        from rule_out t
+        --@ where t.name like #{name}
+    </select>
+
+</mapper>

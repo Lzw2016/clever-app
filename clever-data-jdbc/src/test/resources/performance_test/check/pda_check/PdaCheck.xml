@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CheckPlan">
+
+    <select id="queryDetails" resultType="map">
+        select
+            TA.*,
+            TA.qty3 - TA.qty diver_qty,
+            TB.item_code,
+            TB.item_name,
+            TB.logogram,
+            TC.chk_no,
+            TD.loc_code,
+            TE.lot01,
+            (select TX.user_name from sys_user TX where TX.user_id = TA.check_staff_id1) check_staff_name1,
+            (select TX.user_name from sys_user TX where TX.user_id = TA.check_staff_id2) check_staff_name2,
+            (select TX.user_name from sys_user TX where TX.user_id = TA.check_staff_id3) check_staff_name3
+        from
+            pda_check_details TA, bas_item TB, pda_check TC, bas_location TD, bas_lot_att TE
+        where
+            TA.chk_id = TC.chk_id
+            and TC.chk_no = #{order_no}
+            and TA.item_id = TB.item_id
+            and TD.loc_id = TA.loc_id
+            and TE.lot_id = TA.lot_id
+            <if test = "check_diff != null and check_diff == 1">
+                and TA.qty3 is not null and (( TA.qty <![CDATA[ <> ]]> TA.qty1 ) or ( TA.qty <![CDATA[ <> ]]> TA.qty2 ))
+            </if>
+    </select>
+
+    <select id="queryDetailsById" resultType="map">
+        select
+            - ( TA.qty3 - TA.qty ) diff_qty,
+            TA.*,
+            TD.lot01, TD.lot02,
+            TD.lot03, TD.lot04,
+            TD.lot05, TD.lot06,
+            TD.lot07, TD.lot08,
+            TD.lot09, TD.lot10,
+            TD.lot11, TD.lot12,
+            TC.owner_id
+        from pda_check_details TA, inv_loc TB, bas_item TC, bas_lot_att TD, bas_package TF
+        where
+            TA.item_id = TB.item_id
+            and TA.lot_id = TB.lot_id
+            and TB.package_id = TA.package_id
+            and TB.loc_id = TA.loc_id
+            and TC.item_id = TA.item_id
+            and TC.item_id = TF.item_id
+            and TA.package_id = TF.package_id
+            and TA.lot_id = TD.lot_id
+            and TD.item_id = TA.item_id
+            and TA.chk_id = #{chk_id}
+    </select>
+
+</mapper>

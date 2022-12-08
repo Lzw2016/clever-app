@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Pickpublic">
+
+    <insert id="insert_cold">
+        insert into cold_temp_data
+        (
+            order_out_code,
+            barcode,
+            has_upload
+        )
+        values
+        (
+            #{order_out_code},
+            #{barcode},
+            0
+        )
+    </insert>
+
+    <select id="getPackNo">
+        select max(to_number(nvl(cmd_barcode.pack_no,0))) as pack_no from cmd_barcode cmd_barcode
+        where cmd_barcode.order_id = #{order_id} and (cmd_barcode.pack_no != 'N/A' or cmd_barcode.pack_no is null)
+    </select>
+
+    <select id="queryParam">
+        select param_value from bas_param where param_code = #{param_code} and wh_id = #{wh_id}
+    </select>
+
+    <select id="get_list">
+        select ow.wave_no, t_o.slide_code, t_o.order_out_code, t_cmd.order_id, t_cmd.cmd_line_no, t_area.carriy_mode, bi.is_abnormity,nvl(t_cmd.is_unpack,0) as is_unpack,
+        t_cmd.order_type,t_cmd.order_biz_type,t_cmd.wh_id
+        from cmd_out t_cmd
+        inner join bas_location t_loc on t_cmd.loc_id_real =t_loc.loc_id
+        left join order_wave ow on t_cmd.wave_id = ow.wave_id
+        left join order_out t_o on t_o.order_out_id = t_cmd.order_id
+        left join bas_area_transition t_area on t_cmd.area_id = t_area.from_area_id
+            and t_area.order_type in (2,3)
+            and t_area.target_area_id=t_loc.area_id
+            and t_area.wh_id = t_cmd.wh_id
+        inner join bas_item bi on t_cmd.item_id = bi.item_id
+        where t_cmd.pick_group = #{pick_group}
+    </select>
+
+    <select id="check_list">
+        select barcode from cmd_barcode where pick_group = #{pick_group}
+    </select>
+
+    <insert id="insertConveyor">
+        INSERT INTO
+        WCS.WCS_TASK(
+                 SN,
+				 TASK_ID,
+				 BATCH_NO,
+				 PLAN_TARGET_NO,
+				 TASK_TYPE,
+				 RESERVED_FIELD1,
+				 RESERVED_FIELD2,
+				 RESERVED_FIELD3,
+				 RESERVED_FIELD4,
+				 RESERVED_FIELD5
+				 )
+        VALUES
+        <foreach collection="wcsTaskArr" separator="," item="item" index="index">
+            (#{item.SN}, #{item.TASK_ID}, #{item.BATCH_NO}, #{item.PLAN_TARGET_NO}, '1',
+             '', '', '', '', '')
+        </foreach>
+    </insert>
+
+</mapper>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemRecheckNoticesCheck">
+    <update id="updateGspYpfjcltzdHz">
+        UPDATE GSP_YPFJCLTZD_HZ SET FUJ_STAFF =#{FUJ_STAFF}, FUJ_STAFF_ID = #{FUJ_STAFF_ID} WHERE DANJ_NO =#{DANJ_NO}
+    </update>
+
+    <insert id="addYkkpdHz">    -- 移库开票单汇总
+        insert into YK_KPD_HZ
+          (DANJ_NO, RIQI_DATE, BUH_STAFF, CAOZ_STAFF, HOUSE_ID,BUH_STAFF_ID,CAOZ_STAFF_ID)
+        values
+          (#{DANJ_NO},
+           SYSDATE,
+           #{BUH_STAFF},
+           #{CAOZ_STAFF},
+           #{HOUSE_ID},
+           #{BUH_STAFF_ID},
+           #{CAOZ_STAFF_ID})
+    </insert>
+
+    <select id="sql_thk_hw" resultType="map">
+        SELECT T.HUOW_ID FROM VIW_THK_HW t where T.YEZ_ID=#{YEZ_ID} AND ROWNUM=1
+    </select>
+
+    <insert id="sql_ykkpd_xz_mx">
+        insert into YK_KPD_MX
+          (DANJ_NO,
+           HANGHAO,
+           SHANGP_ID,
+           LOT,
+           HUOW_ID_OLD,
+           MUDHW_ID,
+           KUB_FROM,
+           KUBIE_TO,
+           NUM,
+           TUOP_BARCODE,
+           YEW_TYPE,
+           YUANYIN,
+           ZHIX_FLG,
+           YEZ_ID,
+           KUC_STATE_OLD,
+           KUC_STATE_MD)
+        values
+          (#{DANJ_NO},
+           #{HANGHAO},
+           #{SHANGP_ID},
+           #{LOT},
+           #{HUOW_ID_OLD},
+           #{MUDHW_ID},
+           #{KUB_FROM},
+           #{KUBIE_TO},
+           #{NUM},
+           #{TUOP_BARCODE},
+           #{YEW_TYPE},
+           #{YUANYIN},
+           'N',
+           #{YEZ_ID},
+           #{KUC_STATE_OLD},
+           #{KUC_STATE_MD})
+    </insert>
+
+    <update id="sql_spfjtzsh_xg_mx">
+        UPDATE GSP_YPFJCLTZD_MX
+           SET FUJ_RESULT  =#{FUJ_RESULT},
+               CHUL_OPIN   =#{CHUL_OPIN},
+               YIZ_ADDRESS =#{YIZ_ADDRESS},
+               SHENH_FLG   = 'Y'
+         WHERE DANJ_NO =#{DANJ_NO}
+           AND DANJ_SORT =#{DANJ_SORT}
+    </update>
+
+    <select id="sql_spfjmx" resultType="map">
+        SELECT T.SHANGP_ID,
+        T.LOT,
+        T.FUJ_RESULT,
+        T.CHUL_OPIN,
+        T.NUM,
+        T.HUOW_ID
+        FROM GSP_YPFJCLTZD_MX T
+        WHERE T.DANJ_NO=#{DANJ_NO}
+        and t.SHANGP_ID=#{SHANGP_ID}
+        and t.LOT=#{LOT}
+    </select>
+
+    <insert id="sql_spkcztbh_xz_hz">
+        insert into KCGL_KCZTBH_HZ
+          (DANJ_NO, RIQI_DATE, CAOZ_STAFF, ZHIJ_STAFF, KUC_STATE_BH,HOUSE_ID)
+        values
+          (#{DANJ_NO}, SYSDATE, #{CAOZ_STAFF}, #{ZHIJ_STAFF}, #{KUC_STATE_BH},#{HOUSE_ID})
+    </insert>
+
+    <insert id="sql_spkcztbh_xz_mx">
+        insert into KCGL_KCZTBH_MX
+          (DANJ_NO,
+           HANGHAO,
+           SHANGP_ID,
+           LOT,
+           YUANYIN,
+           CHUL_OPIN,
+           NUM,
+           HUOW_ID,
+           KUCSL_COND,
+           LOCK_FLG)
+        values
+          (#{DANJ_NO},
+           #{HANGHAO},
+           #{SHANGP_ID},
+           #{LOT},
+           #{YUANYIN},
+           #{CHUL_OPIN},
+           #{NUM},
+           #{HUOW_ID},
+           '0',
+           'N')
+    </insert>
+
+    <select id="selectSpfjtzshHz" resultType="map">
+        SELECT h.DANJ_NO,
+               h.RIQI_DATE,
+               h.YANGH_STAFF,
+               h.FUJ_STAFF,
+               h.zhij_staff,
+               h.CAOZ_STAFF,
+               h.HOUSE_ID
+        FROM GSP_YPFJCLTZD_HZ h
+        WHERE h.danj_no IN
+              (SELECT danj_no FROM GSP_YPFJCLTZD_MX m WHERE  h.DANJ_NO = m.danj_no AND m.SHENH_FLG = '0')
+          AND H.RIQI_DATE <![CDATA[>=]]> TO_DATE(#{BEG_DATE}, 'yyyy-mm-dd') AND H.RIQI_DATE <![CDATA[<=]]> TO_DATE(#{END_DATE}, 'yyyy-mm-dd')
+          AND H.HOUSE_ID = #{HOUSE_ID}
+          AND H.FUJ_STAFF_ID IS NULL
+    </select>
+
+    <select id="selectSpfjtzsh" resultType="map">
+        SELECT GSP_YPFJCLTZD_MX.DANJ_NO,
+               GSP_YPFJCLTZD_MX.DANJ_SORT,
+               GSP_YPFJCLTZD_MX.SHANGP_ID,
+               GSP_YPFJCLTZD_MX.LOT,
+               GSP_YPFJCLTZD_MX.XIANS_LOC,
+               GSP_YPFJCLTZD_MX.NUM,
+               GSP_YPFJCLTZD_MX.ZHIL_QUESTION,
+               GSP_YPFJCLTZD_MX.FUJ_RESULT,
+               GSP_YPFJCLTZD_MX.CHUL_OPIN,
+               GSP_YPFJCLTZD_MX.YIZ_ADDRESS,
+               GSP_YPFJCLTZD_MX.DANW_ID,
+               GSP_YPFJCLTZD_MX.CAIGOU_STAFF,
+               GSP_YPFJCLTZD_MX.SHENH_FLG,
+               GSP_YPFJCLTZD_MX.Huow_Id,
+               (select t.loc_classify from bas_location t where t.loc_id = GSP_YPFJCLTZD_MX.huow_id) KUB,
+               -- (SELECT T.KUB FROM JC_HWZD T WHERE T.HUOW_ID=GSP_YPFJCLTZD_MX.huow_id) KUB,
+               bi.item_id SHANGP_NO,
+               bi.item_name CHINESE_NAME,
+               -- bi.YAOP_GUIG,  -- 规格  需添加
+              -- bi.BAOZ_DANW,  -- 包装单位   需添加
+               -- JC_PHWHB.LOT,
+               bla.lot02 SHENGCHAN_DATE,
+               bla.lot03 YOUX_DATE,
+               bi.MANUFACTURER MAKER,  -- 生产厂家
+               -- JC_SPZL.CAIGOU_STAFF,
+               bc.CUSTOMER_CODE DANW_NAME,
+               bc.CUSTOMER_NAME DANW_NO,
+               bo.owner_name YEZ_NAME,
+               bi.owner_id YEZ_ID
+        FROM GSP_YPFJCLTZD_MX
+                 LEFT JOIN /*JC_SPZL*/ bas_item bi  ON GSP_YPFJCLTZD_MX.SHANGP_ID = bi.item_id
+                 LEFT JOIN /*JC_DWZL*/ bas_customer bc  ON GSP_YPFJCLTZD_MX.DANW_ID = bc.customer_id
+                 LEFT JOIN /*JC_HZZL*/ bas_owner bo ON GSP_YPFJCLTZD_MX.YEZ_ID = bo.owner_id
+                 LEFT JOIN /*JC_PHWHB*/ bas_lot_att bla ON GSP_YPFJCLTZD_MX.SHANGP_ID = bla.item_id AND
+                                                           GSP_YPFJCLTZD_MX.LOT = bla.lot_id
+        WHERE (GSP_YPFJCLTZD_MX.DANJ_NO = #{DANJ_NO} OR #{DANJ_NO}='%')
+          AND GSP_YPFJCLTZD_MX.SHENH_FLG = '0'
+          AND GSP_YPFJCLTZD_MX.YEZ_ID =bi.owner_id
+    </select>
+</mapper>

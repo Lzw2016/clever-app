@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Staff">
+    <select id="getAllHwxd">
+        select shangp_id,
+               xuhao,
+               kub,
+               luoj_area,
+               hwxd_type,
+               yez_id,
+               house_id
+        from JC_SPHWXD_MX t
+--      where rownum &lt;  1000
+--         where SHANGP_ID in (
+--                             'SPH00099773', 'SPH00002183', 'SPH00032041'
+--             )
+        order by shangp_id, kub, xuhao
+    </select>
+</mapper>

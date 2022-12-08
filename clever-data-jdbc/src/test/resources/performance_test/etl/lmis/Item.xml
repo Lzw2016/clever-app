@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Item">
+    <select id="queryAllItem">
+        select
+            a.*,
+            b.lot as lot01,
+            b.shengchan_date as lot02,
+            b.youx_date as lot03
+        from jc_spzl a
+                 left join jc_phwhb b on a.shangp_id = b.shangp_id
+        order by a.shangp_id
+    </select>
+</mapper>

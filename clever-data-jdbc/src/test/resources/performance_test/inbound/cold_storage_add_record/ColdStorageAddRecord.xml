@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ColdStorageAddRecord">
+    <select id="queryItemByStockEnv">
+        select t.order_in_id,
+        t.order_in_code,
+        t.supplier_id,
+        bc.customer_code,
+        bc.customer_name as supplier_name,
+        t.dates,
+        t.create_at,
+        t.cold_address,
+        t.cold_company,
+        t.cold_start_temp,
+        t.cold_end_temp,
+        t.cold_transport_tool,
+        t.cold_wenk_way,
+        t.cold_transport_person,
+        t.asn_in_id,
+        t.remark,
+        t.cold_car,
+        t.cold_start_time,
+        t.cold_end_time,
+        t.cold_photo_id,
+        t.asn_staff,
+        t.business_code,
+        t.order_type,
+        t.order_biz_type,
+        t.is_cold_upload,
+        t.is_photo_upload,
+        t.is_complete,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.order_staff_id), (select TT.user_name from sys_user TT where TT.user_id = t.order_staff_id)) order_staff_id,
+        t.path
+        from (select
+        oi.order_in_id,
+        oi.order_in_code,
+        oi.supplier_id,
+        oi.dates,
+        oi.create_at,
+        oi.cold_address,
+        oi.cold_company,
+        oi.cold_start_temp,
+        oi.cold_end_temp,
+        oi.cold_transport_tool,
+        oi.cold_wenk_way,
+        oi.cold_transport_person,
+        oi.asn_in_id,
+        oi.remark,
+        oi.cold_car,
+        oi.cold_start_time,
+        oi.cold_end_time,
+        oi.cold_photo_id,
+        oi.asn_staff,
+        oi.business_code,
+        oi.order_type,
+        oi.order_biz_type,
+        CASE WHEN oi.cold_address != 'N/A'
+                and oi.cold_company != 'N/A'
+                and oi.cold_transport_tool != -1
+                and oi.cold_start_time != 'N/A'
+                and oi.cold_end_time != 'N/A'
+            THEN '是'
+            ELSE '否'
+        END is_cold_upload,
+        (select p.path  from photos p where p.order_id = oi.order_in_id and p.path is not null and p.photo_type = 2 and rownum = 1 ) path,
+        CASE
+            WHEN (select p.path  from photos p where p.order_id = oi.order_in_id and p.photo_type = 2 and rownum = 1) is not null  THEN '是'
+            ELSE '否'
+        END is_photo_upload,
+        oi.is_complete,
+        oi.order_staff_id
+        from order_in oi
+        where oi.order_biz_type = 11
+        <if test="#obj.notEmpty(item_code)">
+              and exists ( select * from order_in_details k where k.item_id in (select j.item_id from bas_item j where j.item_code = #{item_code}) and k.order_in_id = oi.order_in_id)
+        </if>
+        and exists(select 1 from order_in_details oid inner join bas_item bi on bi.item_id = oid.item_id where bi.stock_env = 4 and oid.order_in_id = oi.order_in_id and oid.quality_flg !=88)
+        union all
+        select
+        oi.order_in_id,
+        oi.order_in_code,
+        oi.supplier_id,
+        oi.dates,
+        oi.create_at,
+        oi.cold_address,
+        oi.cold_company,
+        oi.cold_start_temp,
+        oi.cold_end_temp,
+        oi.cold_transport_tool,
+        oi.cold_wenk_way,
+        oi.cold_transport_person,
+        oi.asn_in_id,
+        oi.remark,
+        oi.cold_car,
+        oi.cold_start_time,
+        oi.cold_end_time,
+        oi.cold_photo_id,
+        oi.asn_staff,
+        oi.business_code,
+        oi.order_type,
+        oi.order_biz_type,
+        CASE
+        WHEN oi.cold_address != 'N/A'
+                and oi.cold_company != 'N/A'
+                and oi.cold_transport_tool != -1
+                and oi.cold_start_time != 'N/A'
+                and oi.cold_end_time != 'N/A'
+            THEN '是'
+            ELSE '否'
+        END is_cold_upload,
+        (select p.path  from photos p where p.order_id = oi.order_in_id and p.path is not null and rownum &lt;= 1 ) path,
+        CASE
+        WHEN (select p.path  from photos p where p.order_id = oi.order_in_id and rownum &lt;= 1) is not null  THEN '是'
+            ELSE '否'
+        END is_photo_upload,
+        oi.is_complete,
+        oi.order_staff_id
+        from wms8_his.order_in oi
+        where oi.order_biz_type = 11
+        <if test="#obj.notEmpty(item_code)">
+            and exists ( select * from order_in_details k where k.item_id in (select j.item_id from bas_item j where j.item_code = #{item_code}) and k.order_in_id = oi.order_in_id)
+        </if>
+        and exists(select 1 from wms8_his.order_in_details oid inner join bas_item bi on bi.item_id = oid.item_id where bi.stock_env = 4 and oid.order_in_id = oi.order_in_id and oid.quality_flg !=88)
+        ) t
+        left join bas_customer bc on t.supplier_id = bc.customer_id
+        where 1 = 1
+        <if test="#obj.notEmpty(order_in_code)">
+            and (t.order_in_code = #{order_in_code})
+        </if>
+        <if test="#obj.notEmpty(business_code)">
+            and t.business_code = #{business_code}
+        </if>
+        <if test="#obj.notEmpty(barcode)">
+            and exists(select 1 from cmd_in where order_id = t.order_in_id and barcode = #{barcode})
+        </if>
+        <if test="#obj.notEmpty(date)">
+            and t.create_at >= TO_DATE(#{date},'YYYY-MM-DD hh24:mi:ss')
+            and not exists (select * from photos p where p.order_id = t.order_in_id and p.path is not null)
+        </if>
+        order by t.dates desc
+    </select>
+
+    <select id="queryOrderDetails">
+        select
+        d.item_id,
+        d.item_code,
+        d.item_name,
+        d.logogram,
+        d.manufacturer,
+        d.origin,
+        d.is_double_quality,
+        f.package_unit,
+        floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1)) AS medium,
+        t.lot_id,
+        t.qty,
+        t.quality_flg,
+        floor(nvl(t.qty, 0) / nvl(g.package_meas, 1))          AS order_piece, -- 验收件数
+        mod(t.qty, nvl(g.package_meas, 1))                     AS order_less,  -- 验收零货数量
+        t.order_in_id,
+        t.order_in_code,
+        t.order_line_no,
+        t.package_id,
+        t.lpn,
+        t.price,
+        t.asn_in_id,
+        t.asn_line_no,
+        t.barcode,
+        t.business_code,
+        t.cmd_line_no,
+        t.loc_id,
+        i.loc_code,
+        h.area_id,
+        h.area_code,
+        h.area_name,
+        j.lot01,
+        j.lot02,
+        j.lot03,
+        t.owner_id,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.quality_employee_id), (select TT.user_name from sys_user TT where TT.user_id = t.quality_employee_id)) quality_employee_id
+        from
+        (select
+        a.lot_id,
+        a.qty,
+        a.quality_flg,
+        a.order_in_id,
+        b.order_in_code,
+        a.order_line_no,
+        a.package_id,
+        a.lpn,
+        a.price,
+        a.asn_in_id,
+        a.asn_line_no,
+        c.barcode,
+        b.business_code,
+        c.cmd_line_no,
+        c.loc_id,
+        b.owner_id,
+        a.item_id,
+        c.area_id,
+        c.quality_employee_id
+        from order_in_details a
+        inner join order_in b on a.order_in_id = b.order_in_id
+        inner join cmd_in c on c.order_id = a.order_in_id and c.order_line_no = a.order_line_no
+        union all
+        select
+        a.lot_id,
+        a.qty,
+        a.quality_flg,
+        a.order_in_id,
+        b.order_in_code,
+        a.order_line_no,
+        a.package_id,
+        a.lpn,
+        a.price,
+        a.asn_in_id,
+        a.asn_line_no,
+        c.barcode,
+        b.business_code,
+        c.cmd_line_no,
+        c.loc_id,
+        b.owner_id,
+        a.item_id,
+        c.area_id,
+        c.quality_employee_id
+        from wms8_his.order_in_details a
+        inner join wms8_his.order_in b on a.order_in_id = b.order_in_id
+        inner join wms8_his.cmd_in c on c.order_id = a.order_in_id and c.order_line_no = a.order_line_no
+        ) t
+        inner join bas_item d on d.item_id = t.item_id
+        inner join bas_lot_att e on e.lot_id = t.lot_id
+        inner join bas_package_items f on f.PACKAGE_ID = t.PACKAGE_ID and f.item_id = t.item_id and f.PACKAGE_LEVEL = '1'
+        inner join bas_package_items g on g.PACKAGE_ID = t.PACKAGE_ID and g.item_id = t.item_id and g.PACKAGE_LEVEL = '3'
+        inner join bas_area h on h.area_id = t.area_id
+        inner join bas_location i on i.loc_id = t.loc_id
+        inner join bas_lot_att j on t.lot_id = j.lot_id
+        where d.stock_env = 4
+          and t.quality_flg ! =88
+        and t.order_in_id = #{order_in_id} <!--and c.cmd_state <![CDATA[ < 20 ]]>-->
+        <if test="#obj.notEmpty(barcode)">
+            and c.barcode = #{barcode}
+        </if>
+        <if test="#obj.notEmpty(item_code)">
+            --% and (d.item_code like #{item_code} or d.logogram like #{item_code} or d.APPROVAL_NO like #{item_code})
+        </if>
+        order by t.order_line_no
+    </select>
+
+
+    <select id="queryItemByStockEnvHis">
+        select oid.* from wms8_his.order_in_details oid inner join bas_item bi on bi.item_id = oid.item_id
+        where oid.order_in_id = #{order_in_id}
+          and bi.stock_env = 4
+    </select>
+
+    <!--冷藏品信息补录-收货信息补录（历史表）-->
+    <select id="updateColdStorage">
+        update wms8_his.order_in t
+        set t.cold_address = #{cold_address},
+         t.cold_company = #{cold_company},
+         t.cold_start_temp = #{cold_start_temp},
+         t.cold_end_temp = #{cold_end_temp},
+         t.cold_transport_tool = #{cold_transport_tool},
+         t.cold_wenk_way = #{cold_wenk_way},
+         t.cold_transport_person = #{cold_transport_person},
+         t.cold_car = #{cold_car},
+         t.cold_start_time = #{cold_start_time},
+         t.cold_end_time = #{cold_end_time},
+         t.cold_photo_id = #{cold_photo_id},
+         t.update_by = #{update_by},
+         t.update_at = #{update_at}
+       where t.order_in_id = #{order_in_id}
+
+    </select>
+
+</mapper>

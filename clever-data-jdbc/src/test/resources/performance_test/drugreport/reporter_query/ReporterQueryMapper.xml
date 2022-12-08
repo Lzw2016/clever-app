@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ReporterQuery">
+
+    <select id="selectPathByNo" parameterType="String"  resultType="com.galaxis.wms.entity.Photos">
+        select
+            p.path
+        from order_in oi
+             inner join cmd_in ci on ci.order_id = oi.order_in_id
+             inner join bas_item bi on bi.item_id = ci.item_id
+             inner join photos p on p.order_id = oi.order_in_id
+        where ci.order_id = #{order_in_id}
+
+    </select>
+
+</mapper>

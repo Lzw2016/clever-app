@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CheckApprove">
+
+    <select id="queryAll" resultType="map">
+        SELECT
+            TA.owner_id,
+            TD.owner_code,
+            TD.owner_name,
+            TD.logogram,
+            TB.item_id,
+            TB.item_code,
+            TB.item_name,
+            TB.manufacturer,
+            TF.package_meas,
+            TF.package_unit,
+            SUM(TA.qty) qty,
+            (SUM(TA.qty) - MOD(SUM(TA.qty), TF.package_meas )) / TF.package_meas ykjs,
+            round( mod( SUM(TA.qty), TF.package_meas ),2) yklss,
+            TA.lot_id,
+            TE.lot01,
+            TE.lot12,
+            TA.quality,
+            TF.package_id
+        FROM
+            inv_loc TA,
+            bas_item TB,
+            bas_location TC,
+            bas_owner TD,
+            bas_lot_att TE,
+            bas_package_items TF
+        where
+            TA.item_id = TB.item_id
+            AND TA.owner_id = TD.owner_id
+            AND TA.loc_id = TC.loc_id
+            AND TC.loc_classify = 9
+            AND TA.lot_id = TE.lot_id
+            AND TF.item_id = TA.item_id
+            AND TF.package_id = TA.package_id
+            AND TF.package_level = 3
+            AND TA.wh_id LIKE #{wh_id}
+            AND TA.owner_id in (#{owner_id_list})
+            <if test="item_code!=null and item_code!=''">
+                AND (TB.item_code LIKE '%' || #{item_code} || '%' OR TB.logogram '%' || LIKE #{item_code}) || '%'
+            </if>
+        GROUP BY
+            TA.owner_id,
+            TD.owner_code,
+            TD.owner_name,
+            TD.logogram,
+            TB.item_id,
+            TB.item_code,
+            TB.item_name,
+            TB.manufacturer,
+            TE.lot12,
+            TF.package_meas,
+            TF.package_unit,
+            TA.lot_id,
+            TE.lot01,
+            TA.quality,
+            TF.package_id
+    </select>
+
+    <select id="query" resultType="map">
+        SELECT
+            TA.item_id,
+            TA.lot_id,
+            TA.loc_id,
+            TA.qty,
+            TB.loc_classify,
+            TC.sap_meins
+        FROM
+            inv_loc TA,
+            bas_location TB,
+            bas_item TC
+        WHERE
+            TA.loc_id = TB.loc_id
+            AND TC.item_id = TA.item_id
+            AND TA.wh_id = #{wh_id}
+            AND TA.item_id = #{item_id}
+            AND TB.loc_classify = 9
+            AND TA.lot_id = #{lot_id}
+    </select>
+
+    <insert id="insert_check_approve_his">
+        insert into WMS8_HIS.check_approve_his
+        (
+            approve_id,
+            approve_no,
+            dates,
+            item_id,
+            lot_id,
+            qty,
+            chk_type,
+            owner_id,
+            wh_id,
+            approve_staff_id,
+            approve_staff_name,
+            create_by,
+            create_at,
+            update_by,
+            update_at
+        )
+        values
+        (
+            #{approve_id},
+            #{approve_no},
+            #{dates},
+            #{item_id},
+            #{lot_id},
+            #{qty},
+            #{chk_type},
+            #{owner_id},
+            #{wh_id},
+            #{approve_staff_id},
+            #{approve_staff_name},
+            #{create_by},
+            #{create_at},
+            #{update_by},
+            #{update_at}
+        )
+    </insert>
+
+</mapper>

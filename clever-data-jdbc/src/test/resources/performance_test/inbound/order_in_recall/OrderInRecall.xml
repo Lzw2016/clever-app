@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderInRecall">
+
+    <select id="selectItemPackage">
+        SELECT
+        bi.*,
+        bp.package_id,
+        bp.package_code,
+        bp.package_name,
+        bp.package_supply_id
+        FROM
+        bas_item bi
+        inner JOIN bas_package bp ON bi.item_id = bp.item_id
+        inner join bas_owner bo on bo.owner_id = bi.owner_id
+        WHERE 1 = 1
+            --@ and bi.item_id = #{item_id}
+            --@ and bi.item_code = #{item_code}
+            --@ and bo.owner_code = #{owner_code}
+    </select>
+
+</mapper>

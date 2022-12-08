@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryStaffId">
+        select staff_id from bas_staff where user_id = #{user_id} and wh_id = #{wh_id} and rownum = 1
+    </select>
+
+    <select id="queryOrderDetailsMinStatus">
+        select min(status) as status from order_out_details where order_out_id = #{order_id}
+    </select>
+
+    <select id="queryOrderOut">
+        select a.*,b.customer_code,b.customer_name,c.owner_code,c.owner_name
+        from order_out a
+        inner join bas_customer b on a.customer_id = b.customer_id
+        inner join bas_owner c on c.owner_id = a.owner_id
+        where a.wh_id = #{wh_id} and a.status &lt; #{status}
+        and ((a.status >= 70 and a.status &lt; 120) or a.status &lt; 30
+        or exists(select 1 from cmd_out where a.order_out_id = order_id and barcode != 'N/A' and barcode is not null
+            and pack_no != 'N/A' and pack_no is not null and cmd_state in (90)))
+        --@ and a.dates >= #{start_date}
+        --@ and a.dates &lt;= #{end_date}
+        --@ and a.owner_id = #{owner_id}
+        --% and a.order_out_code like #{order_out_code}
+        --@ and b.customer_id = #{customer_id}
+        order by a.order_out_code
+    </select>
+
+    <select id="queryOrderOutDetails">
+        select a.*,b.item_name,b.item_code,b.item_desc,b.manufacturer,b.origin,d.package_level,c.package_code,
+        ROUND((a.qty * e.package_meas / d.package_meas),3) as uom_qty,a.order_out_id as order_id
+        from order_out_details a
+        inner join bas_item b on a.item_id = b.item_id
+        inner join bas_package c on c.package_id = a.package_id
+        inner join bas_package_items d on d.package_item_id = a.package_item_id
+        inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        where a.order_out_id = #{order_out_id} and a.status &lt; #{status}
+        order by a.line_no
+    </select>
+
+    <select id="queryCmdOutDetails">
+        select a.*,b.item_name,b.item_code,b.item_desc,b.manufacturer,b.origin,d.package_level,c.package_code,
+        ROUND((a.qty * e.package_meas / d.package_meas),3) as uom_qty,f.loc_code,g.area_code,g.area_name,a.cmd_line_no as line_no
+        from cmd_out a
+        inner join bas_item b on a.item_id = b.item_id
+        inner join bas_package c on c.package_id = a.package_id
+        inner join bas_package_items d on d.package_item_id = a.package_item_id
+        inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        inner join bas_location f on f.loc_id = a.loc_id_real
+        inner join bas_area g on g.area_id = f.area_id
+        where a.order_id = #{order_out_id} and a.cmd_state >= #{start_state} and a.cmd_state &lt;= #{end_state}
+        order by a.cmd_line_no
+    </select>
+
+    <select id="queryCmdOutByReview">
+        select a.order_id,a.review_no,a.pack_no,a.barcode,a.merge_barcode,a.review_type,count(1) as count_row,
+        a.cmd_state,b.USER_NAME as review_staff
+        from cmd_out a
+        left join sys_user b on a.review_staff_id = b.user_id
+        where a.order_id = #{order_out_id} and a.cmd_state >= #{start_state} and a.cmd_state &lt; #{end_state}
+        and a.barcode != 'N/A' and a.barcode is not null and a.pack_no != 'N/A' and a.pack_no is not null
+        --@ and b.user_name = #{user_name}
+        group by a.order_id,a.review_no,a.pick_group,a.pack_no,a.barcode,a.merge_barcode,a.review_type,a.cmd_state,b.USER_NAME
+    </select>
+
+    <select id="queryOrderDetailsList">
+        select a.order_out_id as order_id,a.line_no as line_no,a.item_id,a.qty,nvl(a.bwave_cancel_qty,0) as bwave_cancel_qty,
+        nvl(a.cancel_qty,0) as cancel_qty,a.status
+        from order_out_details a
+        inner join order_out b on a.order_out_id = b.order_out_id
+        where b.wh_id = #{wh_id}
+        <foreach collection="list" item="item" index="index" separator=" or " close=")" open=" and (">
+            (a.order_out_id = #{item.order_id} and a.line_no = #{item.line_no})
+        </foreach>
+    </select>
+
+    <select id="queryCmdDetailsList">
+        select * from cmd_out where wh_id = #{wh_id}
+        <foreach collection="list" item="item" index="index" separator=" or " close=")" open=" and (">
+            (order_id = #{item.order_id} and cmd_line_no = #{item.line_no})
+        </foreach>
+    </select>
+
+    <select id="queryCmdReview">
+        select distinct a.order_id,a.review_no,a.pick_group,a.pack_no,a.barcode,a.merge_barcode,a.cmd_state,b.pickup_type
+        from cmd_out a
+        inner join order_out b on a.order_id = b.order_out_id
+        where a.wh_id = #{wh_id}
+        <foreach collection="list" item="item" index="index" separator=" or " close=")" open=" and (">
+            (order_id = #{item.order_id} and barcode = #{item.barcode} and pack_no = #{item.pack_no})
+        </foreach>
+    </select>
+
+</mapper>

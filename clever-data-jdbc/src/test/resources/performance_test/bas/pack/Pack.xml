@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasPackage">
+
+    <select id="queryAllPackage">
+        SELECT a.package_id,
+        bi.item_name,
+        bi.item_code,
+        a.item_id,
+        a.package_code,
+        a.package_name,
+        a.package_supply_id,
+        bi.manufacturer,
+        a.is_enable,
+        a.create_at,
+               /*create_by,*/
+        a.update_at,
+               /*update_by*/
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
+        FROM bas_package a
+        inner join bas_item bi on a.item_id = bi.item_id
+        where a.is_enable = 1
+        --@ AND a.item_id = #{item_id}
+        --@ AND a.package_id = #{package_id}
+        --@ AND a.package_name = #{package_name}
+        --@ AND a.package_code = #{package_code}
+        <if test="#obj.notEmpty(ownerList)">
+            and bi.owner_id in
+            <foreach collection="ownerList" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by CREATE_AT desc
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ReportTool">
+
+    <select id="reportSettingQuery1">
+        SELECT
+            t.condition_id,
+            t.report_id,
+            t.chinese_name,
+            t.english_name,
+            t.field_type,
+            t.notes,
+            ( SELECT COUNT(bd.dict_code) FROM bas_dict bd WHERE bd.dict_code = T.english_name ) AS dict
+        FROM
+            bas_report_condition t
+        WHERE
+            t.report_id = #{reportId}
+        order by condition_id asc
+    </select>
+
+    <select id="getFieldNameList">
+        SELECT
+            t.*,
+            ( SELECT COUNT(bd.dict_code) FROM bas_dict bd WHERE bd.dict_code = t.english_name ) AS dict
+        FROM
+            bas_report_field t
+        WHERE t.english_name in
+        <foreach collection="list" item="field" index="index" open="(" close=")" separator=",">
+            #{field}
+        </foreach>
+    </select>
+
+
+    <select id="reportQuery">
+        ${sql}
+    </select>
+
+</mapper>

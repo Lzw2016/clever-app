@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryParam">
+        select *
+        from bas_param
+        where param_code = #{param_code}
+    </select>
+
+    <select id="queryStages">
+        select distinct a.stage_code, a.stage_name, a.stage_category, a.stage_type, a.stage_desc, a.sort_num, a.stage_id
+        from bas_stage a
+             inner join bas_stage_direction b on a.stage_id = b.stage_id and a.wh_id = b.wh_id
+        where a.is_lock = 0
+          and (a.order_out_id is null or a.order_out_id &lt;= 0)
+          --@ and b.direction_id = #{direction_id}
+          --@ and (a.pickup_type = #{pickup_type} or a.pickup_type is null or a.pickup_type = 0)
+          --@ and (a.order_type = #{order_type} or a.order_type is null or a.order_type = 0)
+          --@ and (a.biz_type = #{biz_type} or a.biz_type is null or a.biz_type = 0)
+          --@ and a.wh_id = #{wh_id}
+          --@ and a.owner_id = #{owner_id}
+        order by a.sort_num
+    </select>
+
+
+</mapper>

@@ -40,7 +40,7 @@ public class BusinessCodeUtilsTest {
             BusinessCodeUtils.create("CS${yyyyMMdd}${id6}", new Date(), i);
         }
         long endTime = System.currentTimeMillis();
-        // 540次/ms | 1849ms
-        log.info("{}次/ms | {}ms", count / (endTime - startTime), (endTime - startTime));
+        // 540ms/次 | 1849ms
+        log.info("{}ms/次 | {}ms", count / (endTime - startTime), (endTime - startTime));
     }
 }

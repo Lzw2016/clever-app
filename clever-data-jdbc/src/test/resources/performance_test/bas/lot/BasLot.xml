@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasOwner">
+    <select id="selectLot">
+        SELECT
+        *
+        FROM
+        bas_lot_att bla
+        LEFT JOIN inv_lot il ON bla.lot_id = il.lot_id
+        <where>
+            bla.item_id = #{item_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'lot01 like')}
+        </where>
+    </select>
+</mapper>

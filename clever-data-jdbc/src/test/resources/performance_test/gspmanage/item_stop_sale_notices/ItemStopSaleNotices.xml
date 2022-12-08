@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemStopSaleNotices">
+    <select id="sql_spkcztbh_ph_d" resultType="map">
+        SELECT LOT 批号,
+              TO_CHAR(SHENGCHAN_DATE,'YYYY/MM/DD') 生产日期,
+              TO_CHAR(YOUX_DATE,'YYYY/MM/DD') 有效期至,
+              NUM 数量,
+              NUM 库存数量,
+              JIANSHU 件数,
+              LINGS_NUM 零散数,
+              NEW_FLAG 新老标识,
+              XIANS_LOC 显示货位,
+              KUC_STATE 库存状态,
+              HUOW_ID 货位内码
+              FROM (SELECT A.LOT LOT,
+                           A.SHENGCHAN_DATE SHENGCHAN_DATE,
+                           A.YOUX_DATE YOUX_DATE,
+                           NVL((C.NUM - C.CHUKYK_NUM), 0) NUM,
+                           fnc_utl_sltojs(A.SHANGP_ID,NVL((C.NUM - C.CHUKYK_NUM), 0)) JIANSHU,
+                           fnc_utl_sltolss(A.SHANGP_ID,NVL((C.NUM - C.CHUKYK_NUM), 0)) LINGS_NUM,
+                           DECODE(SIGN(ROUND(MONTHS_BETWEEN(YOUX_DATE, SYSDATE) /
+                                             DECODE(MONTHS_BETWEEN(YOUX_DATE,
+                                                                   SHENGCHAN_DATE),
+                                                    0,
+                                                    12,
+                                                    MONTHS_BETWEEN(YOUX_DATE,
+                                                                   SHENGCHAN_DATE)),
+                                             1) / TO_NUMBER(FNC_UTL_GETSYSCS('XPHSX', #{HOUSE_ID})) - 1),
+                                  -1,
+                                  '老批号',
+                                  '新批号') NEW_FLAG,
+                           D.XIANS_LOC,
+                           C.KUC_STATE,
+                           C.HUOW_ID
+                      FROM JC_PHWHB A, JC_SPZL B, KC_SPPHHW C, JC_HWZD D
+                     WHERE A.SHANGP_ID = B.SHANGP_ID
+                       AND A.SHANGP_ID = C.SHANGP_ID
+                       AND A.LOT = C.LOT
+                       AND C.HUOW_ID = D.HUOW_ID
+                       AND B.SHANGP_ID LIKE UPPER(#{SHANGP_ID})
+--                        AND A.LOT LIKE UPPER('%')
+                       AND C.HOUSE_ID = D.HOUSE_ID
+                       AND C.HOUSE_ID = #{HOUSE_ID}
+                       ${@com.yvan.Sql@phrase('AND', 'A.LOT like')}
+                     ORDER BY C.NUM DESC, A.LOT)
+    </select>
+
+    <insert id="sql_sptstzd_xz">
+        insert into GSP_SPTS
+          (SHANGP_ID,
+           LOT,
+           KUB,
+           XIANS_LOC,
+           huow_id,
+           NUM,
+           RIQI_DATE,
+           CAOZ_STAFF,
+           REMARK,
+           DANJ_NO,
+           HANGHAO,
+           SHENH_FLG,
+           SHENH_STAFF,
+           SHENHYJ,
+           TINSYY,
+           JIECTSYY,
+           DANW_ID,
+           YUAN_NO,
+           HANGHAO_OLD,
+           YEZ_ID,
+           HOUSE_ID,
+           CAOZ_STAFF_ID)
+        values
+          (#{item_id},
+           #{lot_id},
+           #{loc_classify},
+           #{loc_code},
+           #{loc_id},
+           #{NUM},
+           SYSDATE,
+           #{CAOZ_STAFF},
+           #{REMARK},
+           #{DANJ_NO},
+           #{HANGHAO},
+           '0',
+           '',
+           '',
+           #{TINSYY},
+           '',
+           #{customer_id},
+           '',
+           '',
+           #{owner_id},
+           #{HOUSE_ID},
+           #{CAOZ_STAFF_ID})
+    </insert>
+
+    <select id="sql_syscs_house" resultType="map">
+        SELECT CANSZ FROM SYS_CS WHERE  CANS_NO=#{CANS_NO} AND HOUSE_ID=#{HOUSE_ID}
+    </select>
+
+    <update id="sql_sptssh_sh">
+        UPDATE GSP_SPTS SET SHENH_FLG='Y',SHENH_STAFF_ID=#{SHENH_STAFF_ID},SHENH_STAFF = #{SHENH_STAFF} WHERE DANJ_NO = #{DANJ_NO}
+    </update>
+
+    <select id="sql_sptssh_query" resultType="map">
+        select * from GSP_SPTS where DANJ_NO = #{DANJ_NO}
+    </select>
+
+    <insert id="sql_spkcztbh_xz_hz">
+        insert into KCGL_KCZTBH_HZ
+          (DANJ_NO, RIQI_DATE, CAOZ_STAFF, ZHIJ_STAFF, KUC_STATE_BH,HOUSE_ID)
+        values
+          (#{DANJ_NO}, SYSDATE, #{CAOZ_STAFF}, #{ZHIJ_STAFF}, #{KUC_STATE_BH},#{HOUSE_ID})
+    </insert>
+
+    <insert id="sql_spkcztbh_xz_mx">
+        insert into KCGL_KCZTBH_MX
+          (DANJ_NO,
+           HANGHAO,
+           SHANGP_ID,
+           LOT,
+           YUANYIN,
+           CHUL_OPIN,
+           NUM,
+           HUOW_ID,
+           KUCSL_COND,
+           LOCK_FLG)
+        values
+          (#{DANJ_NO},
+           #{HANGHAO},
+           #{SHANGP_ID},
+           #{LOT},
+           #{YUANYIN},
+           #{CHUL_OPIN},
+           #{NUM},
+           #{HUOW_ID},
+           '0',
+           'N')
+    </insert>
+    
+</mapper>

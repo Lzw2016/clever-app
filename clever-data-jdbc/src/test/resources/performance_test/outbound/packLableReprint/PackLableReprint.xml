@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PackLableReprint">
+    <!--整件拣货标签 流水号-->
+    <select id="getPackLableReprint" resultType="map">
+        SELECT
+        x.*,
+        ( ( x.qty - mod( x.qty, x.package_meas ) ) / x.package_meas ) order_piece,
+        mod( x.qty, x.package_meas ) order_less
+        from
+        (
+        select
+        o.order_out_code,
+        b.create_at,
+        b.order_type,
+        b.pick_group,
+        b.barcode_print_type,
+        b.pick_obtain_time,
+        e.item_id,
+        e.item_code,
+        e.item_name,
+        ( select package_unit from bas_package_items where package_level = 3 and package_id = b.package_id ) package_unit,
+        ( select package_meas from bas_package_items where package_level = 3 and package_id = b.package_id ) package_meas,
+        ( select loc_code from bas_location where loc_id = t_in.loc_id_real ) loc_to,
+        b.lot_id,
+        c.lot01,
+        d.loc_code,
+        b.barcode,
+        b.loc_id,
+        sum( b.qty ) qty,
+        f.user_name collect_staff,
+        g.user_name pick_staff
+        from
+        cmd_out b
+        left join order_out o on b.order_id = o.order_out_id
+        left join bas_lot_att c on b.lot_id = c.lot_id
+        left join bas_location d on b.loc_id = d.loc_id
+        left join bas_item e on b.item_id = e.item_id
+        left join sys_user f on b.collect_staff_id = f.user_id
+        left join sys_user g on b.pick_staff_id = g.user_id
+        left join cmd_in t_in on b.cmd_id = t_in.cmd_id_super
+        where
+        b.order_type in ( 2, 3 )
+        and b.cmd_state >= 50
+        and b.is_unpack = 0
+        <if test = "#obj.notEmpty(queryValue)" >
+            and (
+            o.order_out_code like '%' || #{queryValue} || '%'
+            or f.user_name like '%' || #{queryValue} || '%'
+            or g.user_name like '%' || #{queryValue} || '%'
+            or b.barcode like '%' || #{queryValue} || '%'
+            or e.item_code like '%' || #{queryValue} || '%'
+            )
+        </if>
+        <if test = "#obj.notEmpty(order_type)" >
+            and b.order_type = #{order_type}
+        </if>
+        <if test="#obj.notEmpty(start_date)">
+            and TO_CHAR( b.create_at, 'yyyy-mm-dd' ) >= #{start_date}
+        </if>
+        <if test="#obj.notEmpty(end_date)">
+            and TO_CHAR( b.create_at, 'yyyy-mm-dd' ) &lt;= #{end_date}
+        </if>
+        group by
+        o.order_out_code,
+        b.create_at,
+        b.order_type,
+        b.pick_group,
+        b.barcode_print_type,
+        b.pick_obtain_time,
+        e.item_id,
+        e.item_code,
+        e.item_name,
+        b.package_id,
+        t_in.loc_id_real,
+        b.lot_id,
+        c.lot01,
+        d.loc_code,
+        b.barcode,
+        b.loc_id,
+        b.qty,
+        f.user_name,
+        g.user_name
+        order by
+        b.pick_group desc
+        ) x
+    </select>
+
+
+
+</mapper>

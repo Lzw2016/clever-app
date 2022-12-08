@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+    <select id="queryByPage">
+        select t.order_out_code,
+               t.customer_name,
+               t.box_no,
+               t.item_type,
+               t.item_name,
+               t.qty,
+               t.package_unit,
+               t.create_at,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+               t.customer_id,
+               t.wh_id,
+               t.order_out_id,
+               t.owner_id,
+               bc.customer_code,
+               bo.owner_name,bo.owner_code,bw.wh_code,bw.wh_name, to_char(t.print_order,'00000') print_order
+        from (select * from diy_order_out union select * from wms8_his.diy_order_out  ) t
+            inner join bas_owner bo on bo.owner_id = t.owner_id
+            inner join bas_customer bc on bc.customer_id = t.customer_id
+            inner join bas_wh bw on t.wh_id = bw.wh_id
+        where t.wh_id = #{wh_id}
+            --% and t.order_out_code like #{order_out_code}
+            --% and t.item_name like #{item_name}
+            --@ and bc.customer_code in (#{customer_code})
+            --@ and t.item_type = #{item_type}
+            --@ and t.create_at  >=  TO_DATE(#{start_date},'YYYY-MM-DD hh24:mi:ss')
+            --@ and t.create_at  &lt;=  TO_DATE(#{end_date},'YYYY-MM-DD hh24:mi:ss')
+
+        order by to_char(t.create_at,'yyyy-mm-dd hh:mm:ss') desc ,t.order_out_code, to_number(substr(t.box_no,(instr(t.box_no,'-')+1)))
+    </select>
+
+</mapper>

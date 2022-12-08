@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderInSplit">
+
+    <select id="querySplit">
+        select d.item_id,
+            d.item_code,
+            d.item_name,
+            d.logogram,
+            d.manufacturer,
+            d.origin,
+            d.is_double_quality,
+            f.package_unit,
+            floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1))                 AS medium,
+            c.lot_id,
+            c.qty,
+            c.quality_flg,
+            floor(nvl(c.qty, 0) / nvl(g.package_meas, 1))                          AS order_piece,
+            mod((c.qty), nvl(g.package_meas, 1))                                   AS order_less,
+            c.order_id                                                             as order_in_id,
+            c.order_line_no,
+            c.package_id,
+            c.lpn,
+            c.price,
+            c.asn_in_id,
+            c.asn_line_no,
+            c.business_code,
+            c.cmd_line_no,
+            c.loc_id,
+            c.loc_id_real,
+            i.loc_code,
+            i1.loc_code                                                            as loc_code_real,
+            h.area_id,
+            h.area_code,
+            h.area_name,
+            j.lot01,
+            j.lot02,
+            j.lot03,
+            -- (select user_name from sys_user where user_id = a.ORDER_STAFF_ID) as order_staff,
+            ''                                                                     as order_staff,
+            (select user_name from sys_user where user_id = c.QUALITY_EMPLOYEE_ID) as quality_employee,
+            c.splity_employee_id,
+            c.update_employee,
+            c.order_type,
+            c.order_biz_type,
+            oi.order_in_code
+        from cmd_in c
+        inner join order_in oi on c.order_id = oi.order_in_id
+        inner join bas_item d on d.item_id = c.item_id
+        inner join bas_lot_att e on e.lot_id = c.lot_id
+        inner join bas_package_items f
+        on f.PACKAGE_ID = c.PACKAGE_ID and f.item_id = c.item_id and f.PACKAGE_LEVEL = '1'
+        inner join bas_package_items g
+        on g.PACKAGE_ID = c.PACKAGE_ID and g.item_id = c.item_id and g.PACKAGE_LEVEL = '3'
+        inner join bas_area h on h.area_id = c.area_id
+        inner join bas_location i on i.loc_id = c.loc_id
+        inner join bas_location i1 on i1.loc_id = c.loc_id_real
+        inner join bas_lot_att j on c.lot_id = j.lot_id
+        where c.order_id = #{order_in_id} and c.order_line_no = #{order_line_no}
+    </select>
+
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasShippingCompany">
+    <select id="queryAllShippingCompany">
+        select
+        t.company_id,
+        t.company_code,
+        t.company_name,
+        t.telephone,
+        t.address,
+        t.liaison,
+        t.liaison_phone,
+        t.remark,
+        t.logogram,
+        t.wh_id,
+        t.create_at,
+        t.create_by,
+        t.update_at,
+        t.update_by,
+        bw.wh_name
+        from
+        bas_shipping_company t
+        left join bas_wh bw on t.wh_id = bw.wh_id
+        where 1 = 1
+        --@ AND t.company_code = #{company_code}
+        --% AND t.company_name like #{company_name}
+    </select>
+</mapper>

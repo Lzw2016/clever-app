@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="User">
+    <select id="query">
+        SELECT DISTINCT
+        a.user_id,
+        a.user_code,
+        a.user_name,
+        a.is_enable
+        FROM
+        sys_user a
+        INNER JOIN sys_user_resource b ON b.user_id = a.user_id
+        INNER JOIN sys_resource c ON c.resource_id = b.resource_id
+        WHERE
+        a.is_enable = 1
+        <if test="!#obj.isEmpty(resource_name)">
+            AND c.resource_name LIKE '%' || #{resource_name} || '%'
+        </if>
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.user_name like', 'A.user_code like')}
+    </select>
+
+    <select id="queryUserPut">
+        select * from sys_user su where
+        su.is_enable = '1'
+        AND su.user_id in (
+            select sur.user_id
+            from sys_resource sr
+            inner join sys_user_resource sur
+            on sur.resource_id = sr.resource_id
+            <if test = "permissionCodeList != null">
+                and sr.permission_code in
+                <foreach collection="permissionCodeList" separator="," item="item" index="index" open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test = "resourceTypeList != null">
+                and sr.resource_type in
+                <foreach collection="resourceTypeList" separator="," item="item" index="index" open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test = "resourceNameDesc != null">
+                and sr.resource_name like '%' || #{resourceNameDesc} || '%'
+            </if>
+            and sur.wh_id=#{wh_id}
+        )
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'su.user_name like', 'su.user_code like')}
+    </select>
+
+    <select id="queryUser">
+        select su.user_id,
+               su.user_code,
+               su.user_name,
+               su.is_enable,
+               /*su.create_by,*/
+               su.create_at,
+               /*su.update_by,*/
+               su.update_at,
+               nvl((select s.user_name from sys_login_agent sla inner join sys_user s on s.user_id = sla.user_id where to_char(sla.login_id) = su.create_by), su.create_by) create_by,
+               nvl((select s.user_name from sys_login_agent sla inner join sys_user s on s.user_id = sla.user_id where to_char(sla.login_id) = su.update_by), su.update_by) update_by
+        from sys_user su
+        where su.user_code not like 'report_%'
+        --% and su.user_name like #{user_name}
+        --% and su.user_code like #{user_code}
+        --@ and su.is_enable = #{is_enable}
+    </select>
+
+    <select id="reportQueryUser">
+        select su.user_id,
+               su.user_code,
+               su.user_name,
+               su.is_enable,
+               su.create_at,
+               su.update_at,
+               nvl((select s.user_name from sys_login_agent sla inner join sys_user s on s.user_id = sla.user_id where to_char(sla.login_id) = su.create_by), su.create_by) create_by,
+               nvl((select s.user_name from sys_login_agent sla inner join sys_user s on s.user_id = sla.user_id where to_char(sla.login_id) = su.update_by), su.update_by) update_by
+        from sys_user su
+        where su.user_code like 'report_%'
+        --% and su.user_name like #{user_name}
+        --% and su.user_code like #{user_code}
+        --@ and su.is_enable = #{is_enable}
+    </select>
+
+    <select id="queryLoginAgent">
+        SELECT login_id,
+               login_user_type,
+               agent_type,
+               termial_id,
+               auth_type,
+               login_name,
+               is_enable,
+               login_count,
+               last_login_at,
+               create_by,
+               create_at,
+               update_by,
+               update_at
+        FROM sys_login_agent
+        where user_id = #{user_id}
+    </select>
+
+    <select id="queryUserRoleWh">
+        select *
+        from sys_user_role sur
+             inner join sys_role sr on sur.role_id = sr.role_id
+        where sur.wh_id = #{wh_id}
+          and sur.user_id = #{user_id}
+    </select>
+
+    <select id="queryUserResourceWh">
+        select *
+        from sys_user_resource sur
+             inner join sys_resource sr on sur.resource_id = sr.resource_id
+        where sur.wh_id = #{wh_id}
+          and sur.user_id = #{user_id}
+    </select>
+
+    <select id="queryUserOwnerWh">
+        select *
+        from sys_user_owner suo
+             inner join bas_owner bo on suo.owner_id = bo.owner_id
+        where suo.wh_id = #{wh_id}
+          and suo.user_id = #{user_id}
+    </select>
+
+    <select id="queryUserPickWh">
+        select sup.*, ba.area_code, ba.area_name
+        from sys_user_pick sup
+        inner join bas_area ba on sup.area_id = ba.area_id
+        where sup.wh_id = #{wh_id} and sup.user_id = #{user_id}
+    </select>
+
+    <select id="queryUserOutreviewWh">
+        select *
+        from sys_user_outreview suo
+        where suo.wh_id = #{wh_id}
+          and suo.user_id = #{user_id}
+    </select>
+
+    <select id="queryUserRole">
+        select sr.*,
+            CASE when sur.role_id is NULL THEN 'N' ELSE 'Y' END flg
+        FROM sys_role sr
+        left join sys_user_role sur on sr.role_id = sur.role_id and sur.user_id = #{user_id} --@ and sur.wh_id = #{wh_id}
+        order by sr.role_id
+    </select>
+
+    <select id="queryUserResource">
+        select sr.*,
+               CASE when sur.resource_id is NULL THEN 'N' ELSE 'Y' END flg
+        FROM sys_resource sr
+             left join sys_user_resource sur on sr.resource_id = sur.resource_id
+            and sur.wh_id = #{wh_id} and sur.user_id = #{user_id}
+        where sr.resource_type in (5, 6)
+        order by sr.resource_id
+    </select>
+
+    <select id="queryUserOwner">
+        select bo.OWNER_ID,
+               bo.OWNER_CODE,
+               bo.OWNER_NAME,
+               bo.LOGOGRAM,
+               bo.CONTACT,
+               bo.TELEPHONE,
+               bo.PROVINCE,
+               bo.CITY,
+               bo.ZIP,
+               bo.ADDRESS,
+               bo.REMARK,
+               bo.IS_ENABLE,
+               CASE when suo.owner_id is NULL THEN 'N' ELSE 'Y' END flg
+        FROM bas_owner bo
+        inner join bas_wh_owner bwo on bo.owner_id = bwo.owner_id and bwo.wh_id = #{wh_id}
+             left join sys_user_owner suo on suo.owner_id = bo.owner_id
+            and suo.wh_id = #{wh_id} and suo.user_id = #{user_id}
+        order by bo.owner_id
+    </select>
+
+    <select id="queryUserPick">
+        select sup.* , ba.area_code, ba.area_name
+        FROM sys_user_pick sup
+        inner join bas_area ba on sup.area_id = ba.area_id
+        where sup.wh_id = #{wh_id} and sup.user_id = #{user_id}
+        order by sup.PICK_ORDER asc
+    </select>
+
+
+</mapper>

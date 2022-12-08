@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="orderUpload">
+
+    <select id="queryRK" resultType="map">
+        select DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, YEW_TYPE, RIQI_DATE from INF_RK_SC_BILL t
+        where 1=1  and YEW_TYPE <![CDATA[<>]]> '4' and YEW_TYPE <![CDATA[<>]]> '5'
+        and zt in ('N','E')
+        <if test="YEWDJ_NO!=null and YEWDJ_NO!=''">
+            AND UPPER(t.YEWDJ_NO) like UPPER('%' || #{YEWDJ_NO} || '%')
+        </if>
+        <if test="DANJ_NO!=null and DANJ_NO!=''">
+            AND UPPER(t.DANJ_NO) like UPPER('%' || #{DANJ_NO} || '%')
+        </if>
+        <if test="HUOZ_ID!=null and HUOZ_ID!=''">
+            AND UPPER(t.HUOZ_ID) like UPPER('%' || #{HUOZ_ID} || '%')
+        </if>
+        <if test="WLZX_CODE!=null and WLZX_CODE!=''">
+            AND UPPER(t.WLZX_CODE) like UPPER('%' || #{WLZX_CODE} || '%')
+        </if>
+        group by DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, YEW_TYPE, RIQI_DATE
+        order by t.DANJ_NO
+    </select>
+
+    <select id="queryRK_XTD" resultType="map">
+        select DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, YEW_TYPE, RIQI_DATE, CAOZ_STAFF from INF_RK_SC_BILL t
+        where 1=1  and zt in ('N','E') and YEW_TYPE = '4' and (nvl(yn_guid,'uuuu') = 'A' or (yewdj_no like '%-%' and nvl(yn_guid,'uuuu') != 'A'))
+        <if test="YEWDJ_NO!=null and YEWDJ_NO!=''">
+            AND UPPER(t.YEWDJ_NO) like UPPER('%' || #{YEWDJ_NO} || '%')
+        </if>
+        <if test="DANJ_NO!=null and DANJ_NO!=''">
+            AND UPPER(t.DANJ_NO) like UPPER('%' || #{DANJ_NO} || '%')
+        </if>
+        <if test="HUOZ_ID!=null and HUOZ_ID!=''">
+            AND UPPER(t.HUOZ_ID) like UPPER('%' || #{HUOZ_ID} || '%')
+        </if>
+        <if test="WLZX_CODE!=null and WLZX_CODE!=''">
+            AND UPPER(t.WLZX_CODE) like UPPER('%' || #{WLZX_CODE} || '%')
+        </if>
+        group by DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, YEW_TYPE, RIQI_DATE,CAOZ_STAFF
+        order by t.DANJ_NO
+    </select>
+
+    <update id="resetZT_RK">
+        update INF_RK_SC_BILL SET ERROR_MSG = '3', ZT = #{ZT} WHERE DANJ_NO=#{DANJ_NO} AND HUOZ_ID=#{HUOZ_ID} AND WLZX_CODE=#{WLZX_CODE}
+    </update>
+
+    <select id="queryCK" resultType="map">
+        select DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, RIQI_DATE from INF_CK_SC_BILL t
+        where 1=1 and substr(t.danj_no,1,3) not like 'TZD' and zt in ('N','E')
+        <if test="YEWDJ_NO!=null and YEWDJ_NO!=''">
+            AND UPPER(t.YEWDJ_NO) like UPPER('%' || #{YEWDJ_NO} || '%')
+        </if>
+        <if test="DANJ_NO!=null and DANJ_NO!=''">
+            AND UPPER(t.DANJ_NO) like UPPER('%' || #{DANJ_NO} || '%')
+        </if>
+        <if test="HUOZ_ID!=null and HUOZ_ID!=''">
+            AND UPPER(t.HUOZ_ID) like UPPER('%' || #{HUOZ_ID} || '%')
+        </if>
+        <if test="WLZX_CODE!=null and WLZX_CODE!=''">
+            AND UPPER(t.WLZX_CODE) like UPPER('%' || #{WLZX_CODE} || '%')
+        </if>
+        group by DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, RIQI_DATE
+        order by t.DANJ_NO
+    </select>
+
+    <update id="resetZT_CK">
+        update INF_CK_SC_BILL SET ERROR_MSG = '3', ZT = #{ZT}
+        WHERE DANJ_NO=#{DANJ_NO} AND HUOZ_ID=#{HUOZ_ID} AND WLZX_CODE=#{WLZX_CODE}
+    </update>
+
+    <select id="queryPD" resultType="map">
+        select danj_no, huoz_id, wlzx_code, zt, error_desc,
+            riqi_char, caoz_staff, shangp_id, yingk_num, lot
+        from INF_PD_SC_BILL
+        where 1=1 and zt in ('N','E') and pd_type = 1
+        <if test="DANJ_NO!=null and DANJ_NO!=''">
+            AND UPPER(DANJ_NO) like UPPER('%' || #{DANJ_NO} || '%')
+        </if>
+        <if test="HUOZ_ID!=null and HUOZ_ID!=''">
+            AND UPPER(HUOZ_ID) like UPPER('%' || #{HUOZ_ID} || '%')
+        </if>
+        <if test="WLZX_CODE!=null and WLZX_CODE!=''">
+            AND UPPER(WLZX_CODE) like UPPER('%' || #{WLZX_CODE} || '%')
+        </if>
+        order by danj_no
+    </select>
+
+    <update id="resetZT_PD">
+        update INF_PD_SC_BILL set error_msg = '3', zt = #{ZT}
+        where DANJ_NO=#{DANJ_NO} AND HUOZ_ID=#{HUOZ_ID} AND WLZX_CODE=#{WLZX_CODE} AND pd_type = 1
+    </update>
+
+    <select id="queryYK" resultType="map">
+        select distinct danj_no, huoz_id, wlzx_code, zt, error_desc, riqi_date, caoz_staff, shangp_id, num, lot from INF_MOVE_BILL t
+        where 1=1 and zt in ('N','E')
+        <if test="DANJ_NO!=null and DANJ_NO!=''">
+            AND UPPER(DANJ_NO) like UPPER('%' || #{DANJ_NO} || '%')
+        </if>
+        <if test="HUOZ_ID!=null and HUOZ_ID!=''">
+            AND UPPER(HUOZ_ID) like UPPER('%' || #{HUOZ_ID} || '%')
+        </if>
+        <if test="WLZX_CODE!=null and WLZX_CODE!=''">
+            AND UPPER(WLZX_CODE) like UPPER('%' || #{WLZX_CODE} || '%')
+        </if>
+        order by danj_no
+    </select>
+
+    <update id="resetZT_YK">
+        update INF_MOVE_BILL set error_msg = '3', zt = #{ZT}
+        where DANJ_NO=#{DANJ_NO} AND HUOZ_ID=#{HUOZ_ID} AND WLZX_CODE=#{WLZX_CODE}
+    </update>
+
+    <select id="queryCK_his" resultType="map">
+        select DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, RIQI_DATE from INF_CK_SC_BILL_OLD t
+        where 1=1 and YEW_TYPE <![CDATA[<>]]> '4' and YEW_TYPE <![CDATA[<>]]> '5'
+        --and zt in ('N','E')
+        <if test="YEWDJ_NO!=null and YEWDJ_NO!=''">
+            AND UPPER(t.YEWDJ_NO) like UPPER('%' || #{YEWDJ_NO} || '%')
+        </if>
+        <if test="DANJ_NO!=null and DANJ_NO!=''">
+            AND UPPER(t.DANJ_NO) like UPPER('%' || #{DANJ_NO} || '%')
+        </if>
+        <if test="HUOZ_ID!=null and HUOZ_ID!=''">
+            AND UPPER(t.HUOZ_ID) like UPPER('%' || #{HUOZ_ID} || '%')
+        </if>
+        <if test="WLZX_CODE!=null and WLZX_CODE!=''">
+            AND UPPER(t.WLZX_CODE) like UPPER('%' || #{WLZX_CODE} || '%')
+        </if>
+        group by DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, RIQI_DATE
+        order by t.DANJ_NO
+    </select>
+
+    <insert id="insertInfCK">
+        insert into inf_ck_sc_bill
+        select * from inf_ck_sc_bill_old
+        where danj_no = #{DANJ_NO}
+    </insert>
+
+    <delete id="deleteOld">
+        delete inf_ck_sc_bill_old
+        where danj_no = #{DANJ_NO}
+    </delete>
+
+    <insert id="HIS_RK">
+        insert into inf_rk_sc_bill_old
+        select * from inf_rk_sc_bill
+        where danj_no = #{DANJ_NO}
+    </insert>
+
+    <delete id="DEL_RK">
+        delete inf_rk_sc_bill
+        where danj_no = #{DANJ_NO}
+    </delete>
+
+    <insert id="HIS_CK">
+        insert into inf_ck_sc_bill_old
+        select * from inf_ck_sc_bill
+        where danj_no = #{DANJ_NO}
+    </insert>
+
+    <delete id="DEL_CK">
+        delete inf_ck_sc_bill
+        where danj_no = #{DANJ_NO}
+    </delete>
+
+    <insert id="HIS_PD">
+        insert into inf_pd_sc_bill_old
+        select * from inf_pd_sc_bill
+        where danj_no = #{DANJ_NO}
+    </insert>
+
+    <delete id="DEL_PD">
+        delete inf_pd_sc_bill
+        where danj_no = #{DANJ_NO}
+    </delete>
+
+    <insert id="HIS_YK">
+        insert into inf_move_bill_old
+        select * from inf_move_bill
+        where danj_no = #{DANJ_NO}
+    </insert>
+
+    <delete id="DEL_YK">
+        delete inf_move_bill
+        where danj_no = #{DANJ_NO}
+    </delete>
+
+</mapper>

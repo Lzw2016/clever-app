@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ColdUpload">
+
+    <select id="queryHz_test">
+        select top 1 * from HXOA_QAS.dbo.material_dn where dn_number = 'mql'
+    </select>
+
+    <select id="queryMx_test">
+        select top 1 * from HXOA_QAS.dbo.material_dn_wcs where dn_number = 'mql'
+    </select>
+
+    <select id="queryHz_prod">
+        select top 1 * from HXOA.dbo.material_dn where dn_number = 'mql'
+    </select>
+
+    <select id="queryMx_prod">
+        select top 1 * from HXOA.dbo.material_dn_wcs where dn_number = 'mql'
+    </select>
+
+    <insert id="insert_material_dn_test">
+        insert into HXOA_QAS.dbo.material_dn
+        (
+            dn_number,
+            company_code,
+            deliver,
+            deliver_desc,
+            deliver_address,
+            receiver,
+            receiver_desc,
+            receiver_address,
+            create_time,
+            state_delivery
+        )
+        values
+        (
+            #{dn_number},
+            #{company_code},
+            #{deliver},
+            #{deliver_desc},
+            #{deliver_address},
+            #{receiver},
+            #{receiver_desc},
+            #{receiver_address},
+            #{create_time},
+            #{state_delivery}
+        )
+    </insert>
+
+    <insert id="insert_material_dn_wcs_test">
+        insert into HXOA_QAS.dbo.material_dn_wcs
+        (
+            dn_number,
+            BoxOrderNum,
+            createTime,
+            flag
+        )
+        values
+        (
+            #{dn_number},
+            #{box_order_num},
+            #{create_time},
+            #{flag}
+        )
+    </insert>
+
+    <insert id="insert_material_dn_prod">
+        insert into HXOA.dbo.material_dn
+        (
+            dn_number,
+            company_code,
+            deliver,
+            deliver_desc,
+            deliver_address,
+            receiver,
+            receiver_desc,
+            receiver_address,
+            create_time,
+            state_delivery
+        )
+        values
+        (
+            #{dn_number},
+            #{company_code},
+            #{deliver},
+            #{deliver_desc},
+            #{deliver_address},
+            #{receiver},
+            #{receiver_desc},
+            #{receiver_address},
+            #{create_time},
+            #{state_delivery}
+        )
+    </insert>
+
+    <insert id="insert_material_dn_wcs_prod">
+        insert into HXOA.dbo.material_dn_wcs
+        (
+            dn_number,
+            BoxOrderNum,
+            createTime,
+            flag
+        )
+        values
+        (
+            #{dn_number},
+            #{box_order_num},
+            #{create_time},
+            #{flag}
+        )
+    </insert>
+
+    <select id="queryColdPack" resultType="map">
+        <![CDATA[
+              select
+                   t.order_out_code,
+                   t.order_out_id,
+                   t.barcode,
+                   t.owner_code,
+                   t.wh_code,
+                   t.wh_name,
+                   t.customer_code,
+                   t.customer_name,
+                   t.address,
+                   t.review_confirm_time,
+                   t.has_upload
+              from (
+                    select distinct
+                                    co.review_confirm_time,
+                                     co.BARCODE,
+                                     oo.ORDER_OUT_CODE,
+                                     oo.ORDER_OUT_ID,
+                                     bo.owner_code,
+                                     bw.wh_code,
+                                     bw.wh_name,
+                                     bc.customer_code,
+                                     bc.customer_name,
+                                     bc.address,
+                                     decode(dd.order_out_id, NULL, 0, 1) has_upload
+                      from CMD_OUT co
+                     inner join BAS_ITEM bi
+                        on co.ITEM_ID = bi.ITEM_ID
+                     inner join ORDER_OUT oo
+                        on co.ORDER_ID = oo.ORDER_OUT_ID
+                     inner join bas_owner bo
+                        on bo.owner_id = co.owner_id
+                     inner join bas_wh bw
+                        on bw.wh_id = co.wh_id
+                     left join bas_customer bc
+                        on bc.customer_id = oo.customer_id
+                     left join order_load_upload_records dd
+                        on dd.order_out_id = co.ORDER_ID and dd.barcode = co.barcode
+                     where STOCK_ENV = 4
+                       and co.BARCODE != 'N/A'
+                       and co.CMD_STATE >= 90
+                       and not exists (select 1
+                              from CMD_OUT rt
+                             where co.ORDER_ID = rt.ORDER_ID
+                               and rt.CMD_STATE < 90)
+
+                    union
+
+                    select distinct
+                                     co.review_confirm_time,
+                                     co.BARCODE,
+                                     oo.ORDER_OUT_CODE,
+                                     oo.ORDER_OUT_ID,
+                                     bo.owner_code,
+                                     bw.wh_code,
+                                     bw.wh_name,
+                                     bc.customer_code,
+                                     bc.customer_name,
+                                     bc.address,
+                                     decode(dd.order_out_id, NULL, 0, 1) has_upload
+                      from WMS8_HIS.CMD_OUT co
+                     inner join BAS_ITEM bi
+                        on co.ITEM_ID = bi.ITEM_ID
+                     inner join WMS8_HIS.ORDER_OUT oo
+                        on co.ORDER_ID = oo.ORDER_OUT_ID
+                     inner join bas_owner bo
+                        on bo.owner_id = co.owner_id
+                     inner join bas_wh bw
+                        on bw.wh_id = co.wh_id
+                     left join bas_customer bc
+                        on bc.customer_id = oo.customer_id
+                     left join order_load_upload_records dd
+                        on dd.order_out_id = co.ORDER_ID and dd.barcode = co.barcode
+                     where STOCK_ENV = 4
+                       and co.BARCODE != 'N/A'
+                       and co.CMD_STATE >= 90) t
+                     where 1 = 1
+        ]]>
+                <if test="start_time != null and start_time != ''">
+                    AND to_char(t.review_confirm_time,'yyyy-mm-dd hh:mm:ss') >= #{start_time}
+                </if>
+                <if test="end_time != null and end_time != ''">
+                    AND to_char(t.review_confirm_time,'yyyy-mm-dd hh:mm:ss') <![CDATA[ < ]]> #{end_time}
+                </if>
+                <if test="order_out_code != null and order_out_code != ''">
+                    AND t.order_out_code = #{order_out_code}
+                </if>
+                <if test="customer_code != null and customer_code != ''">
+                    AND (t.customer_code like #{customer_code} or t.customer_name like #{customer_code})
+                </if>
+                <if test="has_upload != null">
+                    AND t.has_upload = #{has_upload}
+                </if>
+    </select>
+
+    <select id="query_material_delivery" resultType = "map" >
+        select * from HXOA_QAS.dbo.material_delivery
+        where 1=1
+        <if test="dn_number != null and dn_number != ''">
+            AND dn_number like '%' + #{dn_number} + '%'
+        </if>
+        <if test="box_number != null and box_number != ''">
+            AND box_number like '%' + #{box_number} + '%'
+        </if>
+        <if test="start_time != null and start_time != ''">
+            AND deliver_time >= #{start_time}
+        </if>
+        <if test="end_time != null and end_time != ''">
+            AND deliver_time <![CDATA[ < ]]> #{end_time}
+        </if>
+        AND company_code in (#{owner_id_list})
+    </select>
+
+    <select id="query_material_receive" resultType = "map" >
+        select * from HXOA_QAS.dbo.material_receive
+        where 1=1
+        <if test="dn_number != null and dn_number != ''">
+            AND dn_number like '%' + #{dn_number} + '%'
+        </if>
+        <if test="box_number != null and box_number != ''">
+            AND box_number like '%' + #{box_number} + '%'
+        </if>
+        <if test="start_time != null and start_time != ''">
+            AND receive_time >= #{start_time}
+        </if>
+        <if test="end_time != null and end_time != ''">
+            AND receive_time <![CDATA[ < ]]> #{end_time}
+        </if>
+    </select>
+
+    <select id="query_wms_material_delivery" resultType = "map" >
+        select t1.*, t2.customer_name from wms_material_delivery t1 left join bas_customer t2 on t1.receiver = t2.customer_code and t2.custom_type = 2
+        where 1=1
+        <if test="dn_number != null and dn_number != ''">
+            AND t1.dn_number like '%' + #{dn_number} + '%'
+        </if>
+        <if test="box_number != null and box_number != ''">
+            AND t1.box_number like '%' + #{box_number} + '%'
+        </if>
+        <if test="start_time != null and start_time != ''">
+            AND t1.deliver_time >= #{start_time}
+        </if>
+        <if test="end_time != null and end_time != ''">
+            AND t1.deliver_time <![CDATA[ < ]]> #{end_time}
+        </if>
+        <if test="id != null and id != ''">
+            AND t1.id = #{id}
+        </if>
+    </select>
+
+    <select id="query_wms_material_receive" resultType = "map" >
+        select t1.*, t2.customer_name from wms_material_receive t1 left join bas_customer t2 on t1.receiver = t2.customer_code and t2.custom_type = 1
+        where 1=1
+        <if test="dn_number != null and dn_number != ''">
+            AND t1.dn_number like '%' + #{dn_number} + '%'
+        </if>
+        <if test="box_number != null and box_number != ''">
+            AND t1.box_number like '%' + #{box_number} + '%'
+        </if>
+        <if test="start_time != null and start_time != ''">
+            AND t1.receive_time >= #{start_time}
+        </if>
+        <if test="end_time != null and end_time != ''">
+            AND t1.receive_time <![CDATA[ < ]]> #{end_time}
+        </if>
+        <if test="id != null and id != ''">
+            AND t1.id = #{id}
+        </if>
+    </select>
+
+</mapper>

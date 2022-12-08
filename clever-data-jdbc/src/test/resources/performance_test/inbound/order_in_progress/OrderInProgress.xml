@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderInPut">
+
+    <select id="queryProgress">
+            select
+                order_in_id,
+                order_in_code,
+                business_code,
+                customer_code,
+                supplier_name,
+                check_progress,
+                put_progress,
+                is_complete,
+                ROUND((check_progress * 0.5 + put_progress * 0.5), 4) total_progress
+            from (
+                select
+                    oi.order_in_id,
+                    oi.order_in_code ,
+                    oi.business_code ,
+                    oi.supplier_id ,
+                    bc.customer_code,
+                    oi.is_complete,
+                    bc.customer_name as supplier_name,
+        ROUND(
+        (
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state > 10 ) / NULLIF( ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id ), 0 )
+        ),
+        4
+        ) check_progress,
+        ROUND(
+        (
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state >= 1000 ) / NULLIF( ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id ), 0 )
+        ),
+        4
+        ) put_progress
+                from order_in oi
+                inner join bas_customer bc on oi.supplier_id = bc.customer_id
+                where oi.wh_id = #{wh_id}
+                --@ and oi.order_biz_type = #{asn_type}
+                <if test="#obj.notEmpty(ownerArr)">
+                and oi.owner_id in
+                <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            )
+    </select>
+    <!--验收进度查询-->
+    <select id="queryCheckProgress">
+        select
+        order_in_id,
+        order_in_code,
+        business_code,
+        customer_code,
+        supplier_name,
+        ok_check,
+        un_check,
+        check_progress,
+        ok_put,
+        un_put,
+        put_progress,
+        all_line,
+        is_complete
+        from (
+        select
+        oi.order_in_id,
+        oi.order_in_code ,
+        oi.business_code ,
+        oi.supplier_id ,
+        bc.customer_code,
+        oi.is_complete,
+        bc.customer_name as supplier_name,
+        ROUND(
+        (
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state >= 20 ) / NULLIF( ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id ), 0 )
+        ),
+        4
+        ) check_progress,
+        ROUND(
+        (
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state >= 1000 ) / NULLIF( ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id ), 0 )
+        ),
+        4
+        ) put_progress,
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state >= 20 ) ok_check,
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state &lt; 20) un_check,
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state >= 1000) ok_put,
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state &lt; 1000) un_put,
+        ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id ) all_line
+        from order_in oi
+        inner join bas_customer bc on oi.supplier_id = bc.customer_id
+        where oi.wh_id = #{wh_id}
+        --@ and oi.order_biz_type = #{asn_type}
+        <if test="#obj.notEmpty(ownerArr)">
+            and oi.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        )
+    </select>
+
+    <!-- 上架明细 -->
+    <select id="queryCmdInProgress">
+        SELECT
+        T.*,
+        BI.ITEM_CODE,
+        BI.ITEM_NAME,
+        BI.ITEM_SPECIFICATION,
+        BI.APPROVAL_NO,
+        BI.MANUFACTURER,
+        BI.SSXKCYR_MAN,
+        BLA.LOT01,
+        BLA.LOT02,
+        BLA.LOT03,
+        BPI.PACKAGE_MEAS， FLOOR(NVL(T.QTY, 0) / NVL(BPI.PACKAGE_MEAS, 1)) PIECE,
+        MOD(NVL(T.QTY, 0), NVL(BPI.PACKAGE_MEAS, 1)) LESS,
+        BPI.PACKAGE_UNIT,
+        OI.ORDER_IN_CODE,
+        BA.AREA_CLASSIFY,
+        BL1.LOC_CODE,
+        BL2.LOC_CODE LOC_CODE_REAL,
+        SU.USER_NAME QUALITY_EMPLOYEE,
+        SU2.USER_NAME PUT_STAFF,
+        AI.ASN_STAFF,
+        SU3.USER_NAME ORDER_STAFF
+        FROM CMD_IN T
+        LEFT JOIN ORDER_IN OI ON OI.ORDER_IN_ID = T.ORDER_ID
+        INNER JOIN BAS_ITEM BI ON BI.ITEM_ID = T.ITEM_ID
+        INNER JOIN BAS_LOT_ATT BLA ON BLA.LOT_ID = T.LOT_ID
+        INNER JOIN BAS_PACKAGE_ITEMS BPI ON BPI.PACKAGE_ITEM_ID = T.PACKAGE_ITEM_ID
+        INNER JOIN BAS_AREA BA ON BA.AREA_ID = T.AREA_ID
+        LEFT JOIN BAS_LOCATION BL1 ON BL1.LOC_ID = T.LOC_ID
+        LEFT JOIN BAS_LOCATION BL2 ON BL2.LOC_ID = T.LOC_ID_REAL
+        LEFT JOIN SYS_USER SU ON SU.USER_ID = T.QUALITY_EMPLOYEE_ID
+        LEFT JOIN SYS_USER SU2 ON SU2.USER_ID = T.PUT_STAFF_ID
+        LEFT JOIN SYS_USER SU3 ON SU3.USER_ID = OI.ORDER_STAFF_ID
+        LEFT JOIN ASN_IN AI ON AI.ASN_IN_ID = T.ASN_IN_ID
+        WHERE   1 = 1   -- CMD_STATE >= 1000
+        AND T.QTY > 0
+        AND T.QUALITY_FLG IN ('1','2')
+        AND T.BARCODE IS NOT NULL
+        AND BL2.LOC_CLASSIFY != '1'
+        AND T.WH_ID = #{wh_id}
+        AND T.ORDER_ID = #{order_in_id}
+        AND T.OWNER_ID IN
+        <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>

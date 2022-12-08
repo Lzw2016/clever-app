@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Distributionpublic">
+
+    <select id="queryParam">
+        select param_value from bas_param where param_code = #{param_code} and wh_id = #{wh_id}
+    </select>
+    <insert id="insert_Distribution_order">
+        insert into distribution_count
+        (distribution_count_id,
+        customer_id,
+        quality_qty,
+        fcl_qty,
+        lcl_qty,
+        expensive_drugs_qty,
+        cold_drugs_qty,
+        import_drugs_qty,
+        psychotropic_drugs_qty,
+        special_drugs_qty,
+        other_drugs_qty,
+        gift_qty,
+        sum_amount,
+        sum_volume,
+        sum_weight,
+        is_reload,
+        billing_time,
+        sku_type,
+        settlement_type,
+        sale_type,
+        distribution_type,
+        drawer,
+        salesman,
+        pickup_mode,
+        remark,
+        consignment_pay,
+        address,
+        is_inverse,
+        split_order_no,
+        is_plan_car,
+        transportation_type,
+        wh_id,
+        distribution_count_code,
+        owner_id)
+        SELECT t_HZ.ORDER_OUT_ID, <!--单据号-->
+        t_HZ.CUSTOMER_ID, <!--单位id-->
+        count(distinct t_mx.item_id), <!--品规数-->
+        sum((T_MX.qty - MOD(T_MX.qty, t_pack.package_meas)) /
+        t_pack.package_meas), <!--整件数-->
+        F_CALC_PXJS(sum((t_pack.length * t_pack.width * t_pack.high /
+        t_pack.package_meas) *
+        MOD(t_mx.qty, t_pack.package_meas) / 38000)) zfjs, <!--拼箱数-->
+        0, <!--贵重药品数-->
+        count(distinct decode(t_sku.STOCK_ENV, 4, t_mx.item_id)), <!--冷藏品-->
+        0, <!--进口药品数-->
+        0, <!--精神药品数-->
+        0, <!--特管药品数-->
+        0, <!--其它药品数-->
+        0, <!--赠品数-->
+        0, <!--总金额-->
+        ROUND(sum((t_pack.length * t_pack.width * t_pack.high /
+        t_pack.package_meas) *
+        MOD(t_mx.qty, t_pack.package_meas) / 1000000),
+        2), <!--总体积-->
+        0, <!--总重量-->
+        0, <!--是否重新装车-->
+        sysdate, <!--开票时间-->
+        0, <!--商品类型-->
+        0, <!--结算类型-->
+        T_HZ.ORDER_BIZ_TYPE, <!--销售类型-->
+        1, <!--配送类型-->
+        t_HZ.BILL_STAFF, <!--开票员-->
+        t_HZ.BILL_STAFF, <!--业务员-->
+        t_HZ.Pickup_Type, <!--提货方式-->
+        t_HZ.Remark, <!--客户备注-->
+        'N/A', <!--托运付款-->
+        'N/A', <!--送货地址-->
+        0, <!--是否整单冲红-->
+        0, <!--拆分序号-->
+        0, <!--是否排车-->
+        1, <!--运输类型-->
+        t_HZ.Wh_Id, <!--仓库ID-->
+        t_HZ.ORDER_OUT_CODE, <!--业务单据编号-->
+        t_HZ.Owner_Id <!--业主内码-->
+        FROM order_out t_HZ
+        inner join ORDER_OUT_DETAILS T_MX
+        on t_hz.order_out_id = t_mx.order_out_id
+        inner join bas_package_items t_pack
+        on T_MX.Package_Id = t_pack.package_id
+        and t_pack.package_level = 3
+        inner join bas_item t_sku
+        on T_MX.Item_Id = t_sku.item_id
+        WHERE t_HZ.order_out_id=${order_out_id}
+        GROUP BY T_HZ.ORDER_OUT_ID,
+        T_HZ.CUSTOMER_ID,
+        t_HZ.BILL_STAFF, <!--开票员-->
+        t_HZ.BILL_STAFF, <!--业务员-->
+        t_HZ.Pickup_Type, <!--提货方式-->
+        t_HZ.Remark, <!--客户备注-->
+        t_HZ.Wh_Id, <!--仓库ID-->
+        t_HZ.ORDER_OUT_CODE, <!--业务单据编号-->
+        t_HZ.Owner_Id, <!--业主内码-->
+        T_HZ.ORDER_BIZ_TYPE
+
+    </insert>
+    <insert id="insert_Distribution_cmd">
+        insert into distribution_count
+        (distribution_count_id,
+        customer_id,
+        quality_qty,
+        fcl_qty,
+        lcl_qty,
+        expensive_drugs_qty,
+        cold_drugs_qty,
+        import_drugs_qty,
+        psychotropic_drugs_qty,
+        special_drugs_qty,
+        other_drugs_qty,
+        gift_qty,
+        sum_amount,
+        sum_volume,
+        sum_weight,
+        is_reload,
+        billing_time,
+        sku_type,
+        settlement_type,
+        sale_type,
+        distribution_type,
+        drawer,
+        salesman,
+        pickup_mode,
+        remark,
+        consignment_pay,
+        address,
+        is_inverse,
+        split_order_no,
+        is_plan_car,
+        transportation_type,
+        wh_id,
+        distribution_count_code,
+        owner_id)
+        SELECT t_HZ.ORDER_OUT_ID, <!--单据号-->
+        t_HZ.CUSTOMER_ID, <!--单位id-->
+        count(distinct t_mx.item_id), <!--品规数-->
+        sum(decode(t_mx.is_unpack,
+        0,decode(t_mx.merge_barcode, null, (T_MX.qty - MOD(T_MX.qty, t_pack.package_meas)) /t_pack.package_meas, 'N/A', (T_MX.qty - MOD(T_MX.qty, t_pack.package_meas)) /t_pack.package_meas, 0),0)), <!--整件数-->
+        count(distinct
+        decode(t_mx.merge_barcode, null, decode(t_mx.pack_no, 'N/A', null, t_mx.pack_no), 'N/A',
+        decode(t_mx.pack_no, 'N/A', null, t_mx.pack_no), t_mx.merge_barcode)) zfjs, <!--拼箱数-->
+        0, <!--贵重药品数-->
+        count(distinct decode(t_sku.STOCK_ENV, 4, t_mx.item_id, null)), <!--冷藏品-->
+        0, <!--进口药品数-->
+        0, <!--精神药品数-->
+        0, <!--特管药品数-->
+        0, <!--其它药品数-->
+        0, <!--赠品数-->
+        0, <!--总金额-->
+        decode(ROUND(sum((t_pack.length * t_pack.width * t_pack.high / t_pack.package_meas) * MOD(t_mx.qty, t_pack.package_meas) / 1000000), 2), 0, 1, ROUND(sum((t_pack.length * t_pack.width * t_pack.high / t_pack.package_meas) * MOD(t_mx.qty, t_pack.package_meas) / 1000000), 2)), <!--总体积-->
+        decode(ROUND(sum(t_pack.weight * MOD(t_mx.qty, t_pack.package_meas)),2), null, 1, 0, 1, ROUND(sum(t_pack.weight * MOD(t_mx.qty, t_pack.package_meas)),2)), <!--总重量-->
+        0, <!--是否重新装车-->
+        sysdate, <!--开票时间-->
+        0, <!--商品类型-->
+        0, <!--结算类型-->
+        T_HZ.ORDER_BIZ_TYPE, <!--销售类型-->
+        1, <!--配送类型-->
+        t_HZ.BILL_STAFF, <!--开票员-->
+        t_HZ.BILL_STAFF, <!--业务员-->
+        t_HZ.Pickup_Type, <!--提货方式-->
+        t_HZ.Remark, <!--客户备注-->
+        'N/A', <!--托运付款-->
+        'N/A', <!--送货地址-->
+        0, <!--是否整单冲红-->
+        0, <!--拆分序号-->
+        0, <!--是否排车-->
+        1, <!--运输类型-->
+        t_HZ.Wh_Id, <!--仓库ID-->
+        t_HZ.ORDER_OUT_CODE, <!--业务单据编号-->
+        t_HZ.Owner_Id <!--业主内码-->
+        FROM order_out t_HZ
+        inner join cmd_out T_MX
+        on t_hz.order_out_id = t_mx.order_id
+        inner join bas_package_items t_pack
+        on T_MX.Package_Id = t_pack.package_id
+        and t_pack.package_level = 3
+        inner join bas_item t_sku
+        on T_MX.Item_Id = t_sku.item_id
+        where t_mx.order_type!=6
+        and t_mx.is_short=0
+        and t_HZ.order_out_id=${order_out_id}
+        GROUP BY T_HZ.ORDER_OUT_ID,
+        T_HZ.CUSTOMER_ID,
+        t_HZ.BILL_STAFF, <!--开票员-->
+        t_HZ.BILL_STAFF, <!--业务员-->
+        t_HZ.Pickup_Type, <!--提货方式-->
+        t_HZ.Remark, <!--客户备注-->
+        t_HZ.Wh_Id, <!--仓库ID-->
+        t_HZ.ORDER_OUT_CODE, <!--业务单据编号-->
+        t_HZ.Owner_Id, <!--业主内码-->
+        T_HZ.ORDER_BIZ_TYPE
+
+    </insert>
+
+    <insert id="insert_Distribution_details">
+        insert into distribution_count_details
+          (barcode,
+           split_order_no,
+           distribution_count_id,
+           distribution_no,
+           stage_code,
+           scatter_mark,
+           task_status,
+           pack_no,
+           is_enable,
+           is_pda_review,
+           item_id,
+           lot_id,
+           is_split,
+           qty,
+           is_refrigerate,
+           refrigerate_box_code)
+        select
+         t.barcode,
+         0,
+         t.order_id,
+         NULL,
+         t.collect_stage_id,
+         t.is_unpack,
+         t.cmd_state,
+         t.pack_no,
+         1,
+         1,
+         t.ITEM_ID,
+         t.LOT_ID,
+         0,
+         sum((t.qty - MOD(t.qty, t_pack.package_meas)) /
+                     t_pack.package_meas),
+         (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id=t.ITEM_ID),
+         'N/A'
+         from cmd_out t INNER JOIN BAS_PACKAGE_ITEMS t_pack ON t.PACKAGE_ID=t_pack.Package_Id AND t_pack.Package_Level=3
+         WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 AND t.IS_UNPACK!=1 and (t.merge_barcode is null or t.merge_barcode = 'N/A')
+         and t.order_id=#{order_id}
+         group by t.barcode,t.order_id,t.collect_stage_id,t.is_unpack,t.cmd_state,t.pack_no,t.item_id,t.lot_id
+         UNION ALL
+        select
+         t.barcode,
+         0,
+         t.order_id,
+         NULL,
+         t.collect_stage_id,
+         t.is_unpack,
+         t.cmd_state,
+         t.pack_no,
+         1,
+         1,
+         NULL,
+         NULL,
+         0,
+         1,
+         (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id =
+         (SELECT T1.ITEM_ID FROM CMD_OUT T1 WHERE T1.BARCODE=t.BARCODE AND ROWNUM=1)),
+         'N/A'
+         from cmd_out t
+         WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 AND t.IS_UNPACK=1 and t.order_id=#{order_id} and (t.merge_barcode is null or t.merge_barcode = 'N/A')
+         group by t.barcode,t.order_id,t.collect_stage_id,t.is_unpack,t.cmd_state,t.pack_no
+         UNION ALL
+        select
+         t.merge_barcode,
+         0,
+         t.order_id,
+         NULL,
+         t.collect_stage_id,
+         1,
+         t.cmd_state,
+         '合箱',
+         1,
+         1,
+         NULL,
+         NULL,
+         0,
+         1,
+         (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id =
+         (SELECT T1.ITEM_ID FROM CMD_OUT T1 WHERE T1.MERGE_BARCODE=t.MERGE_BARCODE AND ROWNUM=1)),
+         'N/A'
+         from cmd_out t
+         WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 and t.order_id=#{order_id} and t.merge_barcode is not null and t.merge_barcode != 'N/A'
+         group by t.order_id,t.collect_stage_id,t.cmd_state,t.merge_barcode
+    </insert>
+
+    <insert id="insert_order_load_details_cold">
+        insert into order_load_details_cold
+        (order_id,
+         customer_id,
+         item_id,
+         lot_id,
+         price,
+         qty,
+         pack_no,
+         is_unpack,
+         is_append,
+         barcode,
+         is_load_confirma
+        )
+        select t.ORDER_ID, od.CUSTOMER_ID, t.ITEM_ID, t.LOT_ID, t.PRICE, t.qty, t.PACK_NO, t.IS_UNPACK, t.IS_APPEND, t.BARCODE, 0 from CMD_OUT t
+        inner join ORDER_OUT od on od.ORDER_OUT_ID = t.ORDER_ID
+        inner join BAS_ITEM bi on bi.STOCK_ENV = 4 and bi.ITEM_ID = t.ITEM_ID
+        where t.ORDER_ID = #{order_id} and t.QTY!=0 AND t.ORDER_TYPE!=6 and t.IS_COLLECT = 1
+    </insert>
+
+
+</mapper>

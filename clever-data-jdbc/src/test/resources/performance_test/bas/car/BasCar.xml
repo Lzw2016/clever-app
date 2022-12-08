@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasCar">
+    <select id="selectCar">
+        select A.car_id,
+        A.car_code,
+        A.logogram,
+        A.model,
+        A.car_type,
+        A.load_weight,
+        A.load_qty,
+        A.state,
+        A.is_out,
+        A.shipping_company,
+        A.wh_id,
+        A.create_at,
+        A.create_by,
+        A.update_at,
+        A.update_by
+        from bas_car A
+        <where>
+            A.wh_id = #{wh_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.car_code like', 'A.car_id like')}
+        </where>
+    </select>
+
+    <select id="queryAllCar">
+        select t.car_id,
+        t.car_code,
+        t.logogram,
+        t.model,
+        t.car_type,
+        t.load_weight,
+        t.load_qty,
+        t.state,
+        t.is_out,
+        t.shipping_company,
+        t.wh_id,
+        (select wh_name from bas_wh a where a.wh_id = t.wh_id ) wh_name,
+        t.create_at,
+        /*t.create_by,*/
+        t.update_at,
+        /*t.update_by,*/
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        from bas_car t
+        left join bas_wh bw on t.wh_id = bw.wh_id
+        <where>
+            1 = 1
+            --@ AND t.car_code = #{car_code}
+            --@ AND t.model = #{model}
+            --@ AND t.type = #{type}
+            --@ AND t.stage = #{stage}
+            --@ AND t.is_out = #{is_out}
+        </where>
+    </select>
+</mapper>

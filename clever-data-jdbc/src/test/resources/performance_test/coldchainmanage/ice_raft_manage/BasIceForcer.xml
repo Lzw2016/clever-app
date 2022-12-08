@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasIceForcer">
+
+    <select id="selectForcer">
+        select forcer.forcer_id,forcer.forcer_no,forcer.is_enable,forcer.wh_id,forcer.create_by,forcer.update_by,
+               forcer.update_at,forcer.create_at
+        from bas_ice_forcer forcer
+        where forcer.is_enable=1
+          and forcer.wh_id =#{wh_id}
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'forcer.forcer_no like')}
+
+    </select>
+
+
+</mapper>

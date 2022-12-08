@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AsnIn">
+    <select id="selectHeader">
+
+        select
+        a.*,
+        b.customer_code, b.customer_name,
+        b.customer_code as supplier_code,
+        b.customer_name as supplier_name,
+        c.owner_name
+        from asn_in a
+        inner join bas_customer b on a.supplier_id = b.customer_id
+        inner join bas_owner c on a.owner_id = c.owner_id
+        where a.owner_id=#{owner_id} and a.wh_id = #{wh_id}
+        and exists (
+        select 1 from asn_in_details aid
+        where aid.asn_in_id = a.asn_in_id and aid.qty > aid.order_qty
+        )
+        --% and ( b.CUSTOMER_NAME like #{supplier} or b.CUSTOMER_CODE like #{supplier} )
+        --% and a.asn_in_code like #{asn_in_code}
+        --@ and a.order_biz_type = #{order_biz_type}
+        --@ and a.asn_in_id = #{asn_in_id}
+        --% and a.business_code like #{business_code}
+
+        <if test="!#obj.isEmpty(item_code)">
+
+            and exists (
+            select 1 from asn_in_details aid
+            inner join bas_package_items bpi on bpi.PACKAGE_ID = aid.PACKAGE_ID and bpi.ITEM_ID = aid.ITEM_ID and
+            bpi.PACKAGE_LEVEL = '1'
+            inner join bas_item bi on bi.ITEM_ID = bpi.ITEM_ID
+            where aid.asn_in_id = a.asn_in_id and aid.QTY > aid.ORDER_QTY
+            and (
+            --% bpi.BARCODE like #{item_code}
+            --% OR bi.ITEM_CODE like #{item_code}
+            --% OR bi.LOGOGRAM like #{item_code}
+            )
+            )
+
+        </if>
+
+        order by a.asn_in_id DESC
+
+    </select>
+
+    <select id="selectDetail">
+
+        select b.item_id,
+               b.item_code,
+               b.item_name,
+               b.manufacturer,
+               b.origin,
+               b.item_desc,
+               b.item_mhdhb,
+               b.is_check,
+               b.approval_no,
+               b.ssxkcyr_man,
+               b.wlhf,
+               b.item_tips,
+               a.qty,                                                                          -- 总数量
+               a.order_qty,                                                                    -- 已收货数量
+               (a.qty - nvl(a.order_qty, 0))                                 as surplus_qty,   -- 可收货数量
+               floor(nvl(A.order_qty, 0) / nvl(C.package_meas, 1))           AS order_piece,   -- 已收货件数
+               floor((A.qty - nvl(A.order_qty, 0)) / nvl(C.package_meas, 1)) AS surplus_piece, -- 可收货件数
+               mod(nvl(A.order_qty, 0), nvl(C.package_meas, 1))              AS order_less,    -- 已收零货数量
+               mod((A.qty - nvl(A.order_qty, 0)), nvl(C.package_meas, 1))    AS surplus_less,  -- 可收零货数量
+
+               g.package_item_id                                             as package_item_id_level4,
+               to_number(nvl(g.package_meas, 0) / nvl(c.package_meas, 1))    AS large,         -- 托盘数量 4级包装
+
+               c.package_level,
+               c.package_meas,
+               c.package_unit,
+               c.package_item_id,
+               floor(nvl(C.package_meas, 0) / nvl(d.package_meas, 1))        AS medium,        -- 3级包装数量
+
+               d.package_meas                                                as primary_meas,
+               d.package_unit                                                as primary_unit,
+               d.package_item_id                                             as primary_item_id,
+               d.barcode as item_barcode,
+
+               b.stock_env,
+               c.is_unpack,
+               e.dict_text                                                   as package_level_name,
+               f.asn_in_code,
+               a.asn_in_id,
+               a.asn_line_no,
+               a.package_id,
+               a.lot_id,
+               a.lot01,
+               a.lot02,
+               a.lot03,
+               a.lot04,
+               a.lot12,
+               a.price,
+               DECODE(F.ORDER_BIZ_TYPE,13,2,14,2,a.quality) quality,
+               f.business_code,
+               a.business_code_line,
+               f.is_quick_in,
+               f.order_type,
+               f.order_biz_type,
+               rp.name as rule_name
+        from asn_in_details a
+            INNER JOIN asn_in f ON f.asn_in_id = a.asn_in_id
+             inner join bas_item b on a.item_id = b.item_id and b.owner_id = f.owner_id
+             inner join bas_package_items c on c.package_id = a.package_id and c.package_level = 3
+             inner join bas_package_items d on d.package_id = a.package_id and d.package_level = 1
+             left join bas_dict_items e on e.dict_value = c.package_level and e.dict_code = 'PACK_LEVEL'
+             inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 4
+             left join rule_apply ra on ra.MATCH_ID = b.item_id and ra.match_type = '4' and ra.rule_type = '1' and ra.is_enable = 1
+             left join rule_putaway rp on ra.rule_id = rp.rule_putaway_id and rp.wh_id = #{wh_id}
+        where a.asn_in_id = #{asn_in_id}
+          and a.qty > a.order_qty
+        order by a.asn_in_id, a.asn_line_no
+
+    </select>
+
+    <select id="selectBackHeader">
+
+        select
+        a.*,b.customer_code,b.customer_name,
+        b.customer_name as supplier_name,c.owner_name
+        from asn_in a
+        inner join bas_customer b on a.supplier_id = b.customer_id
+        inner join bas_owner c on a.owner_id = c.owner_id
+        where a.order_type = 1 and a.order_biz_type = 12 and  exists (
+            select 1 from asn_in_details aid
+            where aid.asn_in_id = a.asn_in_id and aid.qty > aid.order_qty
+        )
+        and (a.asn_in_code = #{asn_in_code} or a.business_code = #{business_code})
+
+    </select>
+
+    <select id="selectBackDetails">
+
+        select b.item_id,
+               b.item_code,
+               b.item_name,
+               b.manufacturer,
+               b.origin,
+               b.item_desc,
+               b.item_mhdhb,
+               b.logogram,
+
+               a.qty,                                                                          -- 总数量
+               a.order_qty,                                                                    -- 已收货数量
+               (a.qty - nvl(a.order_qty, 0))                                 as surplus_qty,   -- 可收货数量
+               floor(nvl(A.order_qty, 0) / nvl(C.package_meas, 1))           AS order_piece,   -- 已收货件数
+               floor((A.qty - nvl(A.order_qty, 0)) / nvl(C.package_meas, 1)) AS surplus_piece, -- 可收货件数
+               mod(nvl(A.order_qty, 0), nvl(C.package_meas, 1))              AS order_less,    -- 已收零货数量
+               mod((A.qty - nvl(A.order_qty, 0)), nvl(C.package_meas, 1))    AS surplus_less,  -- 可收零货数量
+
+               g.package_item_id                                             as package_item_id_level4,
+               to_number(nvl(g.package_meas, 0) / nvl(c.package_meas, 1))    AS large,         -- 托盘数量 4级包装
+
+               c.package_level,
+               c.package_meas,
+               c.package_unit,
+               c.package_item_id,
+               floor(nvl(C.package_meas, 0) / nvl(d.package_meas, 1))        AS medium,        -- 3级包装数量
+
+               d.package_meas                                                as primary_meas,
+               d.package_unit                                                as primary_unit,
+               d.package_item_id                                             as primary_item_id,
+
+               b.stock_env,
+               c.is_unpack,
+               e.dict_text                                                   as package_level_name,
+               f.asn_in_code,
+               a.asn_in_id,
+               a.asn_line_no,
+               a.package_id,
+               a.lot_id,
+               a.lot01,
+               a.lot02,
+               a.lot03,
+               a.price,
+               '2' quality,
+               f.business_code,
+               a.business_code_line,
+               f.is_quick_in,
+               a.zname1
+        from asn_in_details a
+            inner join asn_in f on f.asn_in_id = a.asn_in_id
+             inner join bas_item b on a.item_id = b.item_id and b.owner_id = f.owner_id
+             inner join bas_package_items c on c.package_id = a.package_id and c.package_level = 3
+             inner join bas_package_items d on d.package_id = a.package_id and d.package_level = 1
+             left join bas_dict_items e on e.dict_value = c.package_level and e.dict_code = 'PACK_LEVEL'
+             inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 4
+        where a.asn_in_id = #{asn_in_id} and a.qty > a.order_qty
+        --@ and (b.item_code = #{item_code} or Upper(b.logogram) like  '%' ||  #{item_code} || '%' or d.barcode = #{item_code})
+
+    </select>
+
+    <select id="asnInEnd">
+        <!--select ai.asn_in_id from asn_in ai
+        where (
+            select decode(count(1), count(decode(qty, order_qty, 1, NULL)), 1, 0)
+            from asn_in_details aid where aid.asn_in_id = ai.asn_in_id
+        ) > 0 and not exists (
+            select 1 from cmd_in ci where ci.asn_in_id = ai.asn_in_id
+        )-->
+        select *  from (
+            select
+                aid.asn_in_id, decode(sum(aid.qty), sum(aid.order_qty), 1, 0) as flg
+            from asn_in_details aid
+            inner join asn_in ai on aid.asn_in_id = ai.asn_in_id
+            where ai.order_biz_type = 12
+            and not exists (
+                select 1 from cmd_in ci where ci.asn_in_id = ai.asn_in_id
+            ) and not exists (
+                select 1 from order_in_details oid where oid.asn_in_id = aid.asn_in_id
+            ) group by aid.asn_in_id
+        ) t where flg > 0
+    </select>
+
+
+      <select id="asnInEnd2">
+    select distinct t.asn_in_id,t.business_code, t2.daoh_date
+      from asn_in t
+      left join inf_rk_cgdd_bill_old t2
+        on t.order_biz_type = 11
+       and t.business_code = t2.danj_no
+     where sysdate > t2.daoh_date
+       and not exists
+     (select 1 from cmd_in t1 where t.asn_in_id = t1.asn_in_id)
+      </select>
+
+    <!--<select id="asnInEnd">
+        select
+            ai.asn_in_id,
+            (select decode(count(1), count(decode(qty, order_qty, 1, NULL)), 1, 0) from asn_in_details aid where aid.asn_in_id = ai.asn_in_id) as num
+        from asn_in ai where ai.asn_in_id = #{asn_in_id}
+        and not exists (
+            select 1 from cmd_in ci where ci.asn_in_id = ai.asn_in_id
+        )
+    </select>-->
+</mapper>

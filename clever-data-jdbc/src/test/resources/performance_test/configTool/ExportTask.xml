@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+    <select id="query">
+        select
+        a.*,
+        '详情' details,
+        '下载' download
+        from export_task a
+        <where>
+            <if test="!#obj.isEmpty(create_by)">
+                and a.create_by=#{create_by}
+            </if>
+            <if test="!#obj.isEmpty(title)">
+                and a.title like '%' || #{title} || '%'
+            </if>
+            <if test="!#obj.isEmpty(state)">
+                and a.state=#{state}
+            </if>
+        </where>
+        order by a.create_at desc
+    </select>
+</mapper>

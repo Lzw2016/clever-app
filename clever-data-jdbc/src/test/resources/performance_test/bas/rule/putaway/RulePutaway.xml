@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RulePutaway">
+
+    <select id="queryRuleSerch">
+        select a.rule_putaway_id,a.name as rule_putaway_name,a.name,a.wh_id,a.create_at,a.update_at,a.create_by,a.update_by
+        from rule_putaway a
+        <where>
+            --@ and a.wh_id = #{whId}
+            ${@com.galaxis.wms.ext.Sql@phrase('and', 'a.name like')}
+        </where>
+    </select>
+
+    <select id="queryRule">
+        select *
+        from rule_putaway t
+        where t.wh_id = #{whId}
+        --% AND t.name like #{rule_name}
+        --@ AND t.rule_putaway_id = #{rule_putaway_id}
+        <if test="!#obj.isEmpty(rule_item_id)">
+            AND t.RULE_PUTAWAY_ID in (
+            select RULE_PUTAWAY_ID from
+                rule_putaway_items where rule_item_id = #{rule_item_id}
+            )
+        </if>
+        <if test="!#obj.isEmpty(item_id)">
+            AND t.RULE_PUTAWAY_ID in (
+                select RULE_ID from rule_apply t1 where t1.match_id = #{item_id}
+            )
+        </if>
+    </select>
+
+    <select id="queryRuleItems">
+        select *
+        from rule_putaway_items t
+        where t.rule_putaway_id = #{rule_putaway_id}
+        order by rule_order
+    </select>
+
+    <select id="queryRuleItemOne">
+        select *
+        from rule_putaway_items t
+        where t.rule_item_id = #{rule_item_id}
+        order by rule_order
+    </select>
+
+    <select id="queryDictForExpr">
+        select (
+                   case dict_code
+                       WHEN 'AREA_CLASSIFY' THEN 'loc_classify'
+                       WHEN 'LOC_TYPE' THEN 'loc_type'
+                       WHEN 'LOC_ENV' THEN 'loc_env'
+                       WHEN 'LOC_PROC_MODE' THEN 'loc_proc_mode'
+                       WHEN 'LOC_ABC' THEN 'loc_abc'
+                       WHEN 'LOC_USE' THEN 'loc_use'
+                       end
+                   ) as dict_code,
+               dict_text,
+               dict_value
+        from bas_dict_items
+        where dict_code in
+              (
+               'AREA_CLASSIFY',
+               'LOC_TYPE',
+               'LOC_ENV',
+               'LOC_PROC_MODE',
+               'LOC_ABC',
+               'LOC_USE'
+                  )
+    </select>
+
+    <select id="queryExcludeLoc">
+        select * from bas_location t
+        where 1=1
+        <if test="!#obj.isEmpty(rule_item_id)">
+            and t.loc_id not in (
+                select rpl.loc_id from rule_putaway_loc rpl
+                inner join bas_location bl on bl.loc_id = rpl.loc_id
+                where rpl.rule_item_id = #{rule_item_id}
+            )
+        </if>
+        <if test="!#obj.isEmpty(loc_id)">
+            AND (
+            '' || t.loc_id = #{loc_id}
+            --% OR t.loc_code like #{loc_id}
+            )
+        </if>
+        --@ AND t.loc_classify = #{loc_classify}
+        --@ AND t.road_text >= #{road_text1}
+        --@ AND t.road_text &lt;= #{road_text2}
+        --@ AND t.row_text >= #{row_text1}
+        --@ AND t.row_text &lt;= #{row_text2}
+        --@ AND t.cno_text >= #{cno_text1}
+        --@ AND t.cno_text &lt;= #{cno_text2}
+        --@ AND t.column_text >= #{column_text1}
+        --@ AND t.column_text &lt;= #{column_text2}
+    </select>
+
+    <select id="queryIncludeLoc">
+        select * from bas_location t
+        where t.loc_id in (
+        select rpl.loc_id from rule_putaway_loc rpl
+        inner join bas_location bl on bl.loc_id = rpl.loc_id
+        where rpl.rule_item_id = #{rule_item_id}
+        )
+        <if test="!#obj.isEmpty(loc_id)">
+            AND (
+            '' || t.loc_id = #{loc_id}
+            --% OR t.loc_code like #{loc_id}
+            )
+        </if>
+        --@ AND t.loc_classify = #{loc_classify}
+        --@ AND t.road_text >= #{road_text1}
+        --@ AND t.road_text &lt;= #{road_text2}
+        --@ AND t.row_text >= #{row_text1}
+        --@ AND t.row_text &lt;= #{row_text2}
+        --@ AND t.cno_text >= #{cno_text1}
+        --@ AND t.cno_text &lt;= #{cno_text2}
+        --@ AND t.column_text >= #{column_text1}
+        --@ AND t.column_text &lt;= #{column_text2}
+    </select>
+
+    <select id="queryExcludeLocGroup">
+        select *
+        from bas_location_group t
+        where t.group_id not in (
+            select rplg.group_id
+            from rule_putaway_loc_group rplg
+                 inner join bas_location_group blg on blg.group_id = rplg.group_id
+            where rplg.rule_item_id = #{rule_item_id}
+        )
+        --% AND t.group_name like #{group_name}
+        --@ AND t.loc_classify = #{loc_classify}
+        --@ AND t.is_enable = #{is_enable}
+    </select>
+
+    <select id="queryIncludeLocGroup">
+        select *
+        from bas_location_group t
+        where t.group_id in (
+            select rplg.group_id
+            from rule_putaway_loc_group rplg
+                 inner join bas_location_group blg on blg.group_id = rplg.group_id
+            where rplg.rule_item_id = #{rule_item_id}
+        )
+        --% AND t.group_name like #{group_name}
+        --@ AND t.loc_classify = #{loc_classify}
+        --@ AND t.is_enable = #{is_enable}
+    </select>
+
+</mapper>

@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ColdOut">
+
+    <select id="pdaQueryOrder" resultType="map">
+        select
+        distinct t1.*,
+        t4.customer_name as to_customer_name,
+        t4.customer_code as to_customer_code,
+        t4.customer_id as to_customer_id,
+        t5.barcode
+        from
+        order_out t1,
+        order_out_details t2,
+        bas_item t3,
+        bas_customer t4,
+        cmd_out t5
+        where
+        t1.order_out_id = t2.order_out_id
+        and t2.item_id = t3.item_id
+        and t3.stock_env = 4
+        and t4.customer_id = t1.customer_id
+        and t5.order_id = t1.order_out_id
+        and not exists (select 1 from cold_out_info xx where xx.order_out_code = t1.order_out_code and xx.barcode = t5.barcode)
+        <if test="#obj.notEmpty(customer_code)">
+            and t4.customer_code = #{customer_code}
+        </if>
+        <if test="#obj.notEmpty(startDate)">
+            and t1.dates >= #{startDate}
+        </if>
+        <if test="#obj.notEmpty(endDate)">
+            and t1.dates &lt;= #{endDate}
+        </if>
+        <if test="#obj.notEmpty(order_type)">
+            and t1.order_type = #{order_type}
+        </if>
+        <if test="#obj.notEmpty(order_biz_type)">
+            and t1.order_biz_type = #{order_biz_type}
+        </if>
+        <if test="#obj.notEmpty(exclude_biz_type)">
+            and t1.order_biz_type != #{exclude_biz_type}
+        </if>
+    </select>
+
+    <select id="pdaQueryOrderForModify" resultType="map">
+        select
+        distinct t1.*,
+        t4.customer_name as to_customer_name,
+        t4.customer_code as to_customer_code,
+        t4.customer_id as to_customer_id,
+        t5.barcode
+        from
+        order_out t1,
+        order_out_details t2,
+        bas_item t3,
+        bas_customer t4,
+        cmd_out t5,
+        cold_out_info t6
+        where
+        t1.order_out_id = t2.order_out_id
+        and t2.item_id = t3.item_id
+        and t3.stock_env = 4
+        and t4.customer_id = t1.customer_id
+        and t5.order_id = t1.order_out_id
+        and t6.order_out_code = t1.order_out_code
+        and t6.barcode = t5.barcode
+        and t6.is_enable = 0
+        <if test="#obj.notEmpty(customer_code)">
+            and t4.customer_code = #{customer_code}
+        </if>
+        <if test="#obj.notEmpty(startDate)">
+            and t1.dates >= #{startDate}
+        </if>
+        <if test="#obj.notEmpty(endDate)">
+            and t1.dates &lt;= #{endDate}
+        </if>
+        <if test="#obj.notEmpty(order_type)">
+            and t1.order_type = #{order_type}
+        </if>
+        <if test="#obj.notEmpty(order_biz_type)">
+            and t1.order_biz_type = #{order_biz_type}
+        </if>
+        <if test="#obj.notEmpty(exclude_biz_type)">
+            and t1.order_biz_type != #{exclude_biz_type}
+        </if>
+    </select>
+
+    <select id="pdaQueryOrderForRec" resultType="map">
+        select distinct
+        t1.*,
+        t4.customer_code,
+        (select tt.dict_text from bas_dict_items tt where tt.dict_code = 'WENK_WAY' and tt.dict_value = t1.wenk_way) as wenk_type_desc,
+        t6.car_code as car_code,
+        t5.user_name as driver_user_name
+        from
+        cold_out_info t1
+        inner join order_out t2 on t1.order_out_code = t2.order_out_code
+        inner join cmd_out t3 on t1.barcode = t3.barcode and t2.order_out_id = t3.order_id
+        left join bas_customer t4 on t4.customer_id = t2.customer_id
+        left join sys_user t5 on t5.user_id = t1.driver_user_id
+        left join bas_car t6 on t6.car_id = t1.car_id
+        where
+        t1.is_enable = 1
+        and t1.cold_start_temp is not null
+        and t1.fahuo_time is not null
+        and t1.cold_end_temp is null
+        and t1.shouh_time is null
+        <if test="#obj.notEmpty(customer_code)">
+            and t4.customer_code = #{customer_code}
+        </if>
+        <if test="#obj.notEmpty(startDate)">
+            and TO_CHAR(t1.fahuo_time,'yyyy-mm-dd') >= #{startDate}
+        </if>
+        <if test="#obj.notEmpty(endDate)">
+            and TO_CHAR(t1.fahuo_time,'yyyy-mm-dd') &lt;= #{endDate}
+        </if>
+        <if test="#obj.notEmpty(order_type)">
+            and t2.order_type = #{order_type}
+        </if>
+        <if test="#obj.notEmpty(order_biz_type)">
+            and t2.order_biz_type = #{order_biz_type}
+        </if>
+        <if test="#obj.notEmpty(exclude_biz_type)">
+            and t2.order_biz_type != #{exclude_biz_type}
+        </if>
+        <if test="#obj.notEmpty(order_out_code)">
+            and t1.order_out_code like '%' || #{order_out_code} || '%'
+        </if>
+        <if test="#obj.notEmpty(barcode)">
+            and t1.barcode like '%' || #{barcode} || '%'
+        </if>
+    </select>
+
+    <select id="pdaForQueryTemp" resultType="map">
+        select distinct
+        t1.*,
+        t4.customer_code,
+        (select tt.dict_text from bas_dict_items tt where tt.dict_code = 'WENK_WAY' and tt.dict_value = t1.wenk_way) as wenk_type_desc,
+        t6.car_code as car_code,
+        t5.user_name as driver_user_name
+        from
+        cold_out_info t1
+        inner join order_out t2 on t1.order_out_code = t2.order_out_code
+        inner join cmd_out t3 on t1.barcode = t3.barcode and t2.order_out_id = t3.order_id
+        left join bas_customer t4 on t4.customer_id = t2.customer_id
+        left join sys_user t5 on t5.user_id = t1.driver_user_id
+        left join bas_car t6 on t6.car_id = t1.car_id
+        where
+        t1.is_enable = 1
+        and t1.cold_start_temp is not null
+        and t1.fahuo_time is not null
+--         and t1.cold_end_temp is not null
+--         and t1.shouh_time is not null
+        <if test="#obj.notEmpty(customer_code)">
+            and t4.customer_code = #{customer_code}
+        </if>
+        <if test="#obj.notEmpty(startDate)">
+            and t2.dates >= #{startDate}
+        </if>
+        <if test="#obj.notEmpty(endDate)">
+            and t2.dates &lt;= #{endDate}
+        </if>
+        <if test="#obj.notEmpty(order_type)">
+            and t2.order_type = #{order_type}
+        </if>
+        <if test="#obj.notEmpty(order_biz_type)">
+            and t2.order_biz_type = #{order_biz_type}
+        </if>
+        <if test="#obj.notEmpty(exclude_biz_type)">
+            and t2.order_biz_type != #{exclude_biz_type}
+        </if>
+        <if test="#obj.notEmpty(order_out_code)">
+            and t1.order_out_code like '%' || #{order_out_code} || '%'
+        </if>
+        <if test="#obj.notEmpty(barcode)">
+            and t1.barcode like '%' || #{barcode} || '%'
+        </if>
+    </select>
+
+    <select id="pdaQueryIn" resultType="map">
+        select
+        distinct t1.*,
+        t4.customer_name as customer_name,
+        t4.customer_code as customer_code,
+        t4.customer_id as customer_id
+        from
+        asn_in t1,
+        asn_in_details t2,
+        bas_item t3,
+        bas_customer t4
+        where
+        t1.asn_in_id = t2.asn_in_id
+        and t2.item_id = t3.item_id
+        and t3.stock_env = 4
+        and t4.customer_id = t1.supplier_id
+        and not exists (select 1 from cold_out_info xx where xx.order_out_code = t1.business_code and xx.barcode = to_char(t1.asn_in_id))
+        <if test="#obj.notEmpty(customer_code)">
+            and t4.customer_code = #{customer_code}
+        </if>
+        <if test="#obj.notEmpty(startDate)">
+            and t1.dates >= #{startDate}
+        </if>
+        <if test="#obj.notEmpty(endDate)">
+            and t1.dates &lt;= #{endDate}
+        </if>
+        <if test="#obj.notEmpty(order_type)">
+            and t1.order_type = #{order_type}
+        </if>
+        <if test="#obj.notEmpty(order_biz_type)">
+            and t1.order_biz_type = #{order_biz_type}
+        </if>
+    </select>
+
+    <select id="queryReceive" resultType="map">
+        select
+        t1.*,
+        t2.user_name as user_name1,
+        t3.user_name as user_name2,
+        t5.customer_code
+        from
+        cold_out_info t1
+        left join sys_user t2 on t2.user_id = t1.fahuo_user_id
+        left join sys_user t3 on t3.user_id = t1.shouh_user_id
+        inner join order_out t4 on t4.order_out_code = t1.order_out_code
+        inner join bas_customer t5 on t4.customer_id = t5.customer_id
+        where
+        t1.is_enable = 1
+        and t1.cold_start_temp is not null
+        and t1.fahuo_time is not null
+        and t1.cold_end_temp is null
+        and t1.shouh_time is null
+        <if test="#obj.notEmpty(order_type)">
+            and t1.order_type = #{order_type}
+        </if>
+        <if test="#obj.notEmpty(order_biz_type)">
+            and t1.order_biz_type = #{order_biz_type}
+        </if>
+        <if test="#obj.notEmpty(customer_code)">
+            and t5.customer_code = #{customer_code}
+        </if>
+    </select>
+
+    <insert id="convert_to_records">
+        insert into cold_out_info_records
+        select * from cold_out_info
+        where order_out_code = #{order_out_code}
+        and barcode = #{barcode}
+        and order_type = #{order_type}
+        and order_biz_type = #{order_biz_type}
+    </insert>
+
+    <select id="queryOut2" resultType="map">
+        select distinct
+            o.order_out_code,
+            b.barcode,
+            o.order_biz_type,
+            t.customer_id,
+            t.customer_code,
+            t.customer_name,
+            t.address,
+            o.dates
+        from
+            cmd_out b
+            inner join order_out o on b.order_id = o.order_out_id
+            inner join bas_customer t on o.customer_id = t.customer_id
+            inner join bas_item m on m.item_id = b.item_id
+        where
+            b.order_type in ( 2, 3 )
+            and b.cmd_state >= 50
+            --and b.is_unpack = 0
+            and not exists (select 1 from cold_out_info t1 where t1.order_out_code = o.order_out_code and t1.barcode = b.barcode)
+            and m.stock_env = 4
+    </select>
+
+    <select id="queryOut" resultType="map">
+        select
+        order_out_code,
+        barcode,
+        order_biz_type,
+        owner_code,
+        wh_code,
+        customer_id,
+        customer_code,
+        customer_name,
+        address,
+        dates,
+        reject_type,
+        reject_reason,
+        container_code
+        from
+        (
+            select distinct
+            o.order_out_code,
+            b.barcode,
+            o.order_biz_type,
+            e.owner_code,
+            f.wh_code,
+            t.customer_id,
+            t.customer_code,
+            t.customer_name,
+            t.address,
+            o.dates,
+            0 reject_type,
+            '' reject_reason,
+            '' container_code
+            from
+            cmd_out b
+            inner join order_out o on b.order_id = o.order_out_id
+            inner join bas_customer t on o.customer_id = t.customer_id
+            inner join bas_owner e on e.owner_id = o.owner_id
+            inner join bas_wh f on f.wh_id = o.wh_id
+            inner join bas_item m on m.item_id = b.item_id
+            where
+            b.order_type in ( 2, 3 )
+            and b.cmd_state >= 50
+            --and b.is_unpack = 0
+            and not exists (select 1 from cold_out_info t1 where t1.order_out_code = o.order_out_code and t1.barcode = b.barcode)
+            and m.stock_env = 4
+
+            union
+
+            select distinct
+            o.order_out_code,
+            b.barcode,
+            o.order_biz_type,
+            e.owner_code,
+            f.wh_code,
+            t.customer_id,
+            t.customer_code,
+            t.customer_name,
+            t.address,
+            o.dates,
+            c.reject_type,
+            c.reject_reason,
+            c.container_code
+            from
+            cmd_out b
+            inner join order_out o on b.order_id = o.order_out_id
+            inner join bas_customer t on o.customer_id = t.customer_id
+            inner join bas_owner e on e.owner_id = o.owner_id
+            inner join bas_wh f on f.wh_id = o.wh_id
+            inner join cold_out_info c on c.order_out_code = o.order_out_code and c.barcode = b.barcode
+            inner join bas_item m on m.item_id = b.item_id
+            where
+            b.order_type in ( 2, 3 )
+            and b.cmd_state >= 50
+            --and b.is_unpack = 0
+            and c.is_enable = 0
+            and m.stock_env = 4
+        ) TX
+        where 1=1
+        <if test = "#obj.notEmpty(customer_id)" >
+            and TX.customer_id = #{customer_id}
+        </if>
+        <if test = "#obj.notEmpty(order_out_code)" >
+            and TX.order_out_code like '%' || #{order_out_code} || '%'
+        </if>
+        <if test = "#obj.notEmpty(barcode)" >
+            and TX.barcode like '%' || #{barcode} || '%'
+        </if>
+        <if test = "#obj.notEmpty(container_code)" >
+            and TX.container_code like '%' || #{container_code} || '%'
+        </if>
+        <if test="#obj.notEmpty(start_time)">
+            and TX.dates >= #{start_time}
+        </if>
+        <if test="#obj.notEmpty(end_time)">
+            and TX.dates &lt;= #{end_time}
+        </if>
+    </select>
+
+    <select id="queryInfo" resultType="map">
+        select
+            a.*,
+            u1.user_name as driver_user_name,
+            u2.user_name as weituo_user_name,
+            u3.user_name as fahuo_user_name,
+            c.customer_code as chengy_danw_code,
+            d.car_code
+        from
+            cold_out_info a
+            left join sys_user u1 on a.driver_user_id = u1.user_id
+            left join sys_user u2 on a.weituo_user_id = u2.user_id
+            left join sys_user u3 on a.fahuo_user_id = u3.user_id
+            left join bas_customer c on a.chengy_danw_id = c.customer_id
+            left join bas_car d on a.car_id = d.car_id
+        where
+            a.is_enable = #{is_enable}
+            <if test="order_out_code != null and order_out_code != ''">
+                AND a.order_out_code = #{order_out_code}
+            </if>
+            <if test="barcode != null and barcode != ''">
+                and a.barcode = #{barcode}
+            </if>
+            <if test="order_biz_type != null and order_biz_type != ''">
+                and a.order_biz_type = #{order_biz_type}
+            </if>
+            <if test="customer_id != null and customer_id != ''">
+                and c.customer_id = #{customer_id}
+            </if>
+            <if test="#obj.notEmpty(start_time)">
+                and TO_CHAR( a.fahuo_time, 'yyyy-mm-dd' ) >= #{start_time}
+            </if>
+            <if test="#obj.notEmpty(end_time)">
+                and TO_CHAR( a.fahuo_time, 'yyyy-mm-dd' ) &lt;= #{end_time}
+            </if>
+    </select>
+
+    <update id="approveReject">
+        update cold_out_info TT
+        set TT.is_enable = 0, reject_type = #{reject_type}, reject_reason = #{reject_reason}
+        where TT.order_out_code = #{order_out_code} AND TT.barcode = #{barcode} AND TT.order_biz_type = #{order_biz_type}
+    </update>
+
+</mapper>

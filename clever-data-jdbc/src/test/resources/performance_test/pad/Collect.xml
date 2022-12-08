@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Collect">
+    <select id="collectPalletQueryButton">
+        SELECT
+        bc.customer_name,
+        t.collect_pallet_code,
+        nvl( ( SELECT user_name FROM sys_user WHERE user_id = t.COLLECT_TRANSPORT_STAFF_ID ), t.COLLECT_TRANSPORT_STAFF_ID ) COLLECT_TRANSPORT_STAFF,
+        nvl( ( SELECT user_name FROM sys_user WHERE user_id = t.COLLECT_STAFF_ID ), t.COLLECT_STAFF_ID ) COLLECT_STAFF,
+        bs.stage_code,
+        bs.stage_name,
+        t.barcode,
+        oo.order_out_code,
+        t.merge_barcode,
+        CASE
+        WHEN t.collect_stage_id IS NOT NULL THEN
+        '已集运' ELSE '未集运'
+        END gather_state
+        FROM
+        (
+        SELECT
+        *
+        FROM
+        cmd_out co
+        WHERE
+        co.barcode != 'N/A'
+        AND concat( co.order_id, co.cmd_line_no ) IN (
+        SELECT
+        concat( min( t.order_id ), min( t.cmd_line_no ) )
+        FROM
+        cmd_out t
+        WHERE
+        t.wh_id = 1000000002
+        GROUP BY
+        t.barcode
+        )
+        ) t
+        INNER JOIN order_out oo ON oo.order_out_id = t.order_id
+        INNER JOIN bas_customer bc ON bc.customer_id = oo.customer_id
+        LEFT JOIN bas_stage bs ON bs.stage_id = t.collect_stage_id
+        WHERE
+        1 = 1
+        <if test="!#obj.isEmpty(order_out_code)">
+            AND oo.order_out_code = #{order_out_code}
+        </if>
+        <if test="!#obj.isEmpty(is_pallet) and is_pallet == 1">
+            AND t.collect_staff_id IS NOT NULL
+        </if>
+        <if test="!#obj.isEmpty(is_pallet) and is_pallet == 0">
+            AND t.collect_staff_id IS NULL
+        </if>
+    </select>
+    <!--客户已集运仓位件数查询-->
+    <select id="queryCollectByCustomer">
+        SELECT
+            bs.stage_code,
+            t.qty
+        FROM
+            (
+                SELECT
+                    *
+                FROM
+                    cmd_out co
+                WHERE
+                    co.barcode != 'N/A'
+		AND concat( co.order_id, co.cmd_line_no ) IN (
+		SELECT
+			concat( min( t.order_id ), min( t.cmd_line_no ) )
+		FROM
+			cmd_out t
+		WHERE
+			t.wh_id = #{wh_id}
+		GROUP BY
+			t.barcode
+		)
+            ) t
+                INNER JOIN order_out oo ON oo.order_out_id = t.order_id
+                INNER JOIN bas_customer bc ON bc.customer_id = oo.customer_id
+                LEFT JOIN bas_stage bs ON bs.stage_id = t.collect_stage_id
+        WHERE
+          bc.CUSTOMER_CODE = #{customer_code}
+          AND t.collect_staff_id IS NOT NULL
+    </select>
+</mapper>

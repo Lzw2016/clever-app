@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasForcer">
+    <select id="selectForcer">
+        select *
+        from bas_ice_forcer A
+        <where>
+            A.is_enable = 1 and A.wh_id = #{wh_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.forcer_no like', 'A.forcer_no like')}
+        </where>
+    </select>
+
+    <select id="queryAllForcer">
+        SELECT a.forcer_id,
+        a.wh_id,
+        (SELECT wh_name FROM bas_wh WHERE wh_id = a.wh_id) AS wh_name,
+        a.forcer_no,
+        a.is_enable,
+        /*a.create_by,*/
+        a.create_at,
+        /*a.update_by,*/
+        a.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
+        FROM bas_ice_forcer a inner  join bas_wh_owner bwo on a.wh_id = bwo.wh_id
+        where 1 = 1
+        <if test="forcer_no!= null and forcer_no != '' and forcer_no != 'N/A'">
+            AND a.forcer_no = #{forcer_no} AND a.forcer_no != 'N/A'
+        </if>
+        <if test="is_enable!= null and is_enable != '' and is_enable != 'N/A'">
+            AND a.is_enable = #{is_enable}
+        </if>
+        order by a.forcer_no
+    </select>
+</mapper>

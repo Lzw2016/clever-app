@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasIceFloe">
+
+    <select id="selectIceFloe">
+       select floe.floe_id,floe.floe_no,floe.is_enable,floe.wh_id,floe.create_by,floe.update_by,floe.create_at,floe.update_at,floe.floe_type
+       from bas_ice_floe floe
+       where floe.is_enable=1
+        and floe.wh_id =#{wh_id}
+           ${@com.galaxis.wms.ext.Sql@phrase('AND', 'floe.floe_no like')}
+
+    </select>
+    <select id="selectFloeByManageType">
+        select floe.floe_id as icefloe_id,floe.floe_no,floe.is_enable,floe.floe_type,floe.create_by,floe.update_by,floe.create_at,floe.update_at,
+        #{icefloe_manage_type} as icefloe_manage_type
+        from bas_ice_floe floe
+        where is_enable=1
+        <if test="!#obj.isEmpty('icefloe_manage_type') ">
+          <choose>
+              <when test="icefloe_manage_type==1 or icefloe_manage_type==2">
+                  and floe.floe_type=1
+              </when>
+          <otherwise>
+              and floe.floe_type=2
+          </otherwise>
+          </choose>
+        </if>
+    </select>
+
+
+</mapper>

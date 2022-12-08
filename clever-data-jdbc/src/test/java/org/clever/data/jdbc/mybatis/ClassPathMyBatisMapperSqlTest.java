@@ -82,4 +82,39 @@ public class ClassPathMyBatisMapperSqlTest {
             log.info("--> {}", url);
         }
     }
+
+    @SneakyThrows
+    @Test
+    public void t04() {
+        ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql("classpath:dao/*.xml");
+        myBatisMapperSql.reloadAll();
+        log.info("加载完成");
+        myBatisMapperSql.startWatch(100);
+        Thread.sleep(20_000);
+    }
+
+    @SneakyThrows
+    @Test
+    public void t05() {
+        final long startTime = System.currentTimeMillis();
+        final int count = 10;
+        final String locationPattern = "classpath:performance_test/**/*.xml";
+        long firstTime = 0;
+        for (int i = 0; i < count; i++) {
+            ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
+            myBatisMapperSql.reloadAll();
+            if (firstTime == 0) {
+                firstTime = System.currentTimeMillis() - startTime;
+            }
+        }
+        final long endTime = System.currentTimeMillis();
+        ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
+        // 520ms/次 | 第一次:840ms | 总时间:5204ms | sql.xml文件数量:157 TODO: 需要优化性能
+        log.info("{}ms/次 | 第一次:{}ms | 总时间:{}ms | sql.xml文件数量:{}",
+                (endTime - startTime) / count,
+                firstTime,
+                (endTime - startTime),
+                myBatisMapperSql.getAllLastModified().size()
+        );
+    }
 }

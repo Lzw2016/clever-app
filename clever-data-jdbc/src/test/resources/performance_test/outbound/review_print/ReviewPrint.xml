@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ReviewPrint">
+    <!--复核单查询-->
+    <select id="reviewQuery" resultType="map">
+        SELECT
+        ta.order_out_id,
+        ta.order_out_code,
+        ( CASE WHEN ta.status >= 140 THEN 1 ELSE 0 END ) confirm_flg,
+        ( SELECT count( 0 ) FROM cmd_out WHERE is_unpack = 0 AND is_short = 0 AND order_id = ta.order_out_id ) full_qty,
+        ta.status,
+        td.owner_code,
+        td.owner_name,
+        tb.customer_id,
+        tb.customer_code,
+        tb.customer_name,
+        ta.create_at,
+        ta.pickup_type,
+        ta.start_stage_id,
+        te.stage_code start_stage_code,
+        ta.end_stage_id,
+        tf.stage_code end_stage_code,
+        ta.remark,
+        ta.wh_id,
+        ta.bill_staff,
+        ta.order_biz_type,
+        ta.is_short,
+        ta.review_end_time,
+        ta.collect_end_time,
+        ta.review_print_flg,
+        ta.review_print_time,
+        ta.review_print_count
+        FROM
+        order_out ta
+        LEFT JOIN bas_customer tb ON ta.customer_id = tb.customer_id
+        LEFT JOIN bas_owner td ON ta.owner_id = td.owner_id
+        LEFT JOIN bas_stage te ON ta.start_stage_id = te.stage_id
+        LEFT JOIN bas_stage tf ON ta.end_stage_id = tf.stage_id
+        <where>
+            ta.wh_id=#{wh_id}
+            <if test="#obj.notEmpty(review_print_flg)">
+                AND ta.review_print_flg = #{review_print_flg}
+            </if>
+            <if test="order_out_code != null and order_out_code != ''">
+                AND ta.order_out_code LIKE '%' || #{order_out_code} || '%'
+            </if>
+            <if test="is_short != null and is_short != ''">
+                AND ta.is_short = #{is_short}
+            </if>
+            <if test="customer_code != null and customer_code != ''">
+                AND tb.customer_code = #{customer_code}
+            </if>
+            <if test="start_date != null and start_date != ''">
+                AND TO_CHAR(ta.create_at,'YYYY-MM-DD') >= #{ start_date }
+            </if>
+            <if test="end_date != null and end_date != ''">
+                AND TO_CHAR(ta.create_at,'YYYY-MM-DD') &lt;= #{end_date}
+            </if>
+        </where>
+        ORDER BY ta.order_out_code
+    </select>
+    <!--复核单明细查询-->
+    <select id="reviewQueryDetail" resultType="map">
+        SELECT
+        T.*,
+        (T.qty_plan * T.price) real_amount,
+        ((T.qty - MOD(T.qty,T.package_meas))/T.package_meas) pack_qty,
+        MOD(T.qty,T.package_meas) unpack_qty
+        FROM
+        (SELECT
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        (SELECT user_name FROM sys_user WHERE user_id = ta.review_staff_id)review_staff_name,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        ( SELECT price FROM order_out_details td WHERE td.order_out_id = ta.order_id AND td.item_id = ta.item_id AND rownum = 1 ) price,
+        ( SELECT favourable_price FROM order_out_details td WHERE td.order_out_id = ta.order_id AND td.item_id = ta.item_id AND rownum = 1 ) favourable_price,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        (SELECT package_unit FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_unit,
+        (SELECT package_meas FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_meas,
+        tc.create_at,
+        SUM ( ta.qty ) qty,
+        SUM ( ta.qty_plan ) qty_plan
+        FROM
+        cmd_out ta
+        INNER JOIN bas_item tb ON ta.item_id = tb.item_id
+        INNER JOIN bas_lot_att tc ON ta.lot_id = tc.lot_id
+        WHERE ta.qty > 0
+        AND ta.order_biz_type = #{order_biz_type}
+        AND wh_id=#{wh_id}
+        <if test="order_out_id != null and order_out_id != ''">
+            AND ta.order_id = #{ order_out_id }
+        </if>
+        GROUP BY
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        ta.review_staff_id,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        ta.package_id,
+        tc.create_at,
+        ta.qty
+        ORDER BY ta.pack_no)T
+        UNION ALL
+        (
+        SELECT
+        0 cmd_line_no,
+        order_out_id order_id,
+        21 order_biz_type,
+        NULL item_id,
+        0 is_short,
+        0 is_unpack,
+        NULL wh_id,
+        '' review_staff_name,
+        '' lot01,
+        '' lot02,
+        '' lot03,
+        0 price,
+        0 favourable_price,
+        NULL pack_no,
+        '' item_code,
+        item_name,
+        '' item_specification,
+        '' manufacturer,
+        package_unit,
+        0 package_meas,
+        create_at,
+        0 qty,
+        0 qty_plan,
+        0 real_amount,
+        0 pack_qty,
+        0 unpack_qty
+        FROM
+        DIY_ORDER_OUT
+        WHERE wh_id=#{wh_id}
+        <if test="order_out_id != null and order_out_id != ''">
+            AND order_out_id = #{order_out_id}
+        </if>
+        )
+    </select>
+    <!--历史复核单查询-->
+    <select id="reviewQueryHis" resultType="map">
+        SELECT
+        ta.order_out_id,
+        ta.order_out_code,
+        ( CASE WHEN ta.status >= 140 THEN 1 ELSE 0 END ) confirm_flg,
+        ( SELECT count( 0 ) FROM WMS8_HIS.cmd_out WHERE is_unpack = 0 AND is_short = 0 AND order_id = ta.order_out_id ) full_qty,
+        ta.status,
+        td.owner_code,
+        td.owner_name,
+        tb.customer_id,
+        tb.customer_code,
+        tb.customer_name,
+        ta.create_at,
+        ta.pickup_type,
+        ta.start_stage_id,
+        te.stage_code start_stage_code,
+        ta.end_stage_id,
+        tf.stage_code end_stage_code,
+        ta.remark,
+        ta.wh_id,
+        ta.bill_staff,
+        ta.order_biz_type,
+        ta.is_short,
+        ta.review_end_time,
+        ta.collect_end_time,
+        ta.review_print_flg,
+        ta.review_print_time,
+        ta.review_print_count
+        FROM
+        WMS8_HIS.order_out ta
+        LEFT JOIN bas_customer tb ON ta.customer_id = tb.customer_id
+        LEFT JOIN bas_owner td ON ta.owner_id = td.owner_id
+        LEFT JOIN bas_stage te ON ta.start_stage_id = te.stage_id
+        LEFT JOIN bas_stage tf ON ta.end_stage_id = tf.stage_id
+        <where>
+            ta.wh_id=#{wh_id}
+            <if test="is_short != null and is_short != ''">
+                AND ta.is_short = #{is_short}
+            </if>
+            <if test="review_print_flg != null and review_print_flg != ''">
+                AND ta.review_print_flg = #{ review_print_flg }
+            </if>
+            <if test="order_out_code != null and order_out_code != ''">
+                AND ta.order_out_code LIKE '%' || #{order_out_code} || '%'
+            </if>
+            <if test="customer_code != null and customer_code != ''">
+                AND tb.customer_code = #{customer_code}
+            </if>
+            <if test="start_date != null and start_date != ''">
+                AND TO_CHAR(ta.create_at,'YYYY-MM-DD') >= #{ start_date }
+            </if>
+            <if test="end_date != null and end_date != ''">
+                AND TO_CHAR(ta.create_at,'YYYY-MM-DD') &lt;= #{end_date}
+            </if>
+        </where>
+        ORDER BY ta.order_out_code
+    </select>
+    <!--历史复核单明细查询-->
+    <select id="reviewQueryHisDetail" resultType="map">
+        SELECT
+        T.*,
+        ((T.qty - MOD(T.qty,T.package_meas))/T.package_meas) pack_qty,
+        MOD(T.qty,T.package_meas) unpack_qty
+        FROM
+        (SELECT
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        (SELECT user_name FROM sys_user WHERE user_id = ta.review_staff_id)review_staff_name,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        ta.price,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        (SELECT package_unit FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_unit,
+        (SELECT package_meas FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_meas,
+        tc.create_at,
+        SUM ( ta.qty ) qty,
+        SUM ( ta.qty_plan ) qty_plan,
+        (SUM ( ta.qty_plan ) * ta.price)real_amount
+        FROM
+        WMS8_HIS.cmd_out ta
+        INNER JOIN bas_item tb ON ta.item_id = tb.item_id
+        INNER JOIN bas_lot_att tc ON ta.lot_id = tc.lot_id
+        WHERE ta.qty > 0
+        AND ta.order_biz_type = #{order_biz_type}
+        AND wh_id=#{wh_id}
+        <if test="order_out_id != null and order_out_id != ''">
+            AND ta.order_id = #{ order_out_id }
+        </if>
+        GROUP BY
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        ta.review_staff_id,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        ta.price,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        ta.package_id,
+        tc.create_at,
+        ta.qty
+        ORDER BY ta.pack_no)T
+    </select>
+    <!--获取报告单图片-->
+    <select id="getReportPhotos" resultType="map">
+        SELECT
+            t.wh_id,
+            t.item_id,
+            t.lot_id,
+            t.photo_id,
+            t.photo_type,
+            t.path
+        FROM
+            photos T
+        WHERE
+            T.wh_id =#{wh_id}
+          AND T.item_id =#{item_id}
+          AND T.lot_id =#{lot_id}
+    </select>
+
+    <select id="queryPrintFHD" resultType="map">
+        select PKG_CK_OUTCHK.F_FHD_PRINT(#{IV_DANJ_NO},#{IV_TYPE}) as fhd from dual
+    </select>
+
+    <!--出库批量新增-根据customer_id查询order_out_code-->
+    <select id="queryOrderCodeByCusId" resultType="map">
+        select * from (select t.order_out_id, t.order_out_code
+                       from (SELECT oo.order_out_id, oo.order_out_code,oo.wave_id
+                             FROM order_out oo
+                                      left join order_wave ow
+                                                on ow.wave_id = oo.wave_id
+                             WHERE 1 = 1
+                               and oo.customer_id = #{customer_id}
+                               and ow.wave_no not like 'X%'
+                             order by oo.create_at desc) t
+                       where rownum = 1
+
+                       union all
+
+                       select t.order_out_id, t.order_out_code
+                       from (SELECT oo.order_out_id, oo.order_out_code,oo.wave_id
+                             FROM order_out oo
+
+                             WHERE 1 = 1
+                               and oo.customer_id = #{customer_id}
+
+                             order by oo.create_at desc) t
+                       where rownum = 1)
+        where rownum = 1
+    </select>
+
+    <!--手工单查询-->
+    <select id="reviewQueryHand" resultType="map">
+        select t.order_out_id, t.order_out_code,bc.customer_code , bc.customer_name,bo.owner_name,t.create_at,t.customer_id,
+               t.print_flg,0 confirm_flg,t.item_type order_biz_type,t.count full_qty
+        from
+        (select
+           t.order_out_id,t.print_flg,t.wh_id,t.order_out_code,t.item_type,t.customer_id,t.owner_id,to_char(t.create_at,'yyyy-mm-dd') create_at,count(*) count
+        from diy_order_out t
+        group by t.order_out_id,t.wh_id,t.order_out_code,t.item_type,t.customer_id,t.owner_id,to_char(t.create_at,'yyyy-mm-dd'),t.print_flg
+            ) t
+        inner join bas_customer bc on bc.customer_id = t.customer_id
+        left join bas_owner bo on bo.owner_id = t.owner_id
+        <where>
+            t.wh_id=#{wh_id}
+            <if test="order_out_code != null and order_out_code != ''">
+                AND t.order_out_code LIKE '%' || #{order_out_code} || '%'
+            </if>
+            <if test="customer_code != null and customer_code != ''">
+                AND bc.customer_code = #{customer_code}
+            </if>
+            <if test="start_date != null and start_date != ''">
+                AND t.create_at >= #{ start_date }
+            </if>
+            <if test="end_date != null and end_date != ''">
+                AND t.create_at &lt;= #{end_date}
+            </if>
+        </where>
+        ORDER BY t.order_out_code
+    </select>
+    <!--手工单单明细查询-->
+    <select id="reviewQueryHandDetail" resultType="map">
+        select
+        0 is_short, t.item_name,t.package_unit,t.qty,t.box_no pack_no,t.order_out_code,bc.customer_code,t.customer_name
+        from diy_order_out t
+        left join bas_customer bc on bc.customer_id = t.customer_id
+        WHERE t.qty > 0
+        AND t.item_type = #{order_biz_type}
+        AND wh_id=#{wh_id}
+        <if test="order_out_id != null and order_out_id != ''">
+            AND t.order_out_id = #{ order_out_id }
+        </if>
+        <if test="customer_id != null and customer_id != ''">
+            AND t.customer_id = #{customer_id}
+        </if>
+
+    </select>
+    <!-- 手工录入查询当天是否已经生产单据编号-->
+    <select id="queryDiyOutByDate" resultType="map">
+        select * from( select * from diy_order_out t where t.create_at >  TO_DATE(#{date},'YYYY-MM-DD hh24:mi:ss')
+                           and t.customer_id = #{customer_id} order by to_number(substr(t.box_no,(instr(t.box_no,'-')+1))) desc) where rownum = 1
+
+    </select>
+
+</mapper>

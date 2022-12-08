@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="internalMaintainPlan">
+    <!--查询-->
+    <select id="getInternalMaintainPlan" resultType="map">
+        select * from
+        (SELECT
+        item_id,
+        item_code,
+        item_name,
+        item_specification,
+        --jixing,
+        package_unit,
+        package_meas,
+        manufacturer,
+        approval_no,
+        quality,
+        loc_code,
+        lot_id,
+        lot01,
+        lot02,
+        lot03,
+        qty,
+        inbound_time,
+        stock_env,
+        yb_flg,
+        shouy_flg,
+        sf_zdkz,
+        owner_id,
+        owner_name,
+        wh_id,
+        loc_id,
+        ssxkcyr_man,
+        item_classify,
+        item_category
+        FROM
+        (
+        SELECT
+        t.item_id,
+        s.item_code,
+        s.item_name,
+        s.item_specification,
+        --s.jixing,
+        s.ssxkcyr_man,
+        s.manufacturer,
+        s.approval_no,
+        ( SELECT package_unit FROM bas_package_items WHERE item_id = t.item_id AND package_level = 3 ) package_unit,
+        ( SELECT package_meas FROM bas_package_items WHERE item_id = t.item_id AND package_level = 3 ) package_meas,
+        loc_code,
+        t.lot_id,
+        t.quality,
+        p.lot01,
+        p.lot02,
+        p.lot03,
+        s.chandi,
+        s.stock_env,
+        s.shouy_flg,
+        s.yb_flg,
+        t.qty,
+        s.sf_zdkz,
+        (
+        SELECT
+        max( dates )
+        FROM
+        wms8_his.order_in k,
+        wms8_his.order_in_details m
+        WHERE
+        k.order_in_id = m.order_in_id
+        AND m.item_id = t.item_id
+        AND m.lot_id = t.lot_id
+        AND k.wh_id = t.wh_id
+        ) inbound_time,
+        s.owner_id,
+        ( SELECT owner_name FROM bas_owner WHERE owner_id = s.owner_id ) owner_name,
+        t.wh_id,
+        t.loc_id,
+        s.item_classify,
+        s.item_category
+        FROM
+        (
+        SELECT
+        a.*
+        FROM
+        (
+        SELECT
+        ta.item_id,
+        ta.lot_id,
+        tb.loc_code,
+        ta.qty,
+        ta.quality,
+        row_number ( ) over ( partition BY ta.wh_id, ta.item_id ORDER BY ta.wh_id, ta.item_id ) line_no,
+        ta.owner_id,
+        ta.wh_id,
+        ta.loc_id
+        FROM
+        inv_loc ta
+        INNER JOIN bas_location tb ON ta.loc_id = tb.loc_id
+        INNER JOIN bas_item tc ON ta.item_id = tc.item_id
+        WHERE
+        ta.wh_id = tb.wh_id
+        --AND yp_flg = 1
+        AND NOT EXISTS ( SELECT 1 FROM gsp_internal_maintain WHERE item_id = ta.item_id AND lot_id = ta.lot_id AND
+        loc_id = ta.loc_id )
+        ) a
+        WHERE
+        a.line_no = 1
+        ) t,
+        bas_lot_att p,
+        bas_item s
+        WHERE
+        t.item_id = p.item_id
+        AND s.owner_id = t.owner_id
+        AND t.lot_id = p.lot_id
+        AND s.item_id = p.item_id
+        AND s.zengp_flg = 0
+        ) x
+        where (('1' = #{maintainType} AND lot02 <![CDATA[ <= ]]> #{lot02})
+        OR ('2' = #{maintainType} AND inbound_time <![CDATA[ >= ]]> to_date(#{inbound_time}, 'yyyy-mm-dd'))
+        OR ('3' = #{maintainType} AND loc_code LIKE '%'||#{loc_code}||'%' ))
+        )tmp
+        <where>
+            <if test="flag=='1'.toString()">
+                and sf_zdkz != 1
+            </if>
+            <if test="flag=='2'.toString()">
+                and shouy_flg = 1
+            </if>
+            <if test="flag=='3'.toString()">
+                and shouy_flg != 1 AND yb_flg = 1
+            </if>
+            <if test="flag=='4'.toString()">
+                and shouy_flg != 1 AND yb_flg != 1 AND jxq = 1
+            </if>
+            <if test="flag=='5'.toString()">
+                and item_classify = 'Z001'
+            </if>
+            <if test="flag=='6'.toString()">
+                and item_classify in ('Z005','Z006','Z007','Z016')
+            </if>
+            <if test="flag=='7'.toString()">
+                and sf_zdkz = 1
+            </if>
+        </where>
+    </select>
+
+</mapper>

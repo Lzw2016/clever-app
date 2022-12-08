@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="LocArea">
+
+    <select id="queryAll" resultType="map">
+        select
+            TA.*,
+            TB.item_code,
+            TB.item_name
+        from
+            bas_loc_area TA,
+            bas_item TB
+        where
+            TA.item_id = TB.item_id
+            and TA.wh_id = #{wh_id}
+            and TB.owner_id in (#{owner_id_list})
+            --@ AND TA.loc_classify = #{loc_classify}
+            --@ AND TA.lot12 like '%' || #{lot12} || '%'
+            --@ AND TB.item_code like '%' || #{item_code} || '%'
+        order by
+            TB.item_code, TA.loc_classify, TA.lot12
+    </select>
+
+</mapper>

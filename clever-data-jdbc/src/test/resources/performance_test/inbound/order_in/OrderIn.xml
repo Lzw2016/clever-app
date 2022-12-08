@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderIn">
+    <select id="queryAsnDetailsByCom">
+        select
+            a.item_id, a.package_id, b.owner_id, b.supplier_id,
+            b.asn_in_code,a.qty,a.asn_in_id,a.asn_line_no,a.order_qty,
+            b.order_type, b.order_biz_type, b.business_code , a.business_code_line
+        from asn_in_details a
+        inner join asn_in b on a.asn_in_id = b.asn_in_id
+        <where>
+            b.wh_id = #{whId} and
+            <foreach collection="list" separator=" or " item="item" index="index" open="(" close=")">
+                (a.asn_in_id = #{item.asn_in_id} and a.asn_line_no = #{item.asn_line_no})
+            </foreach>
+        </where>
+    </select>
+
+    <select id="selectOwner">
+        select *
+        from bas_owner
+        where is_enable = 1
+        --@ and owner_id = #{owner_id}
+    </select>
+
+    <select id="queryAsnDetailsEableQty">
+        select a.qty, nvl(a.order_qty, 0) as order_qty
+        from asn_in_details a
+        where a.asn_in_id = #{asn_in_id}
+          and a.asn_line_no = #{asn_line_no}
+    </select>
+
+    <select id="queryMinStatusAsnDetails">
+        select min(a.status) as status
+        from asn_in_details a
+        where a.asn_in_id = #{asn_in_id}
+    </select>
+
+    <select id="queryPackageItems">
+        select * from bas_package_items
+        <where>
+            PACKAGE_LEVEL != 4 and
+            <foreach collection="list" separator=" or " item="item" index="index" open="(" close=")">
+                (package_id = #{item.package_id} and item_id = #{item.item_id})
+            </foreach>
+        </where>
+    </select>
+
+    <select id="queryRecall">
+        select * from order_in_recall
+        <where>
+            1 = 1 and
+            <foreach collection="list" separator=" or " item="item" index="index" open="(" close=")">
+                (item_id = #{item.item_id} and lot01 = #{item.lot01})
+            </foreach>
+        </where>
+    </select>
+
+    <select id="queryItemLocArea">
+        select * from bas_loc_area
+        <where>
+            WH_ID = #{whId} and item_id in
+            <foreach collection="list" separator="," item="item" index="index" open="(" close=")">
+                #{item.item_id}
+            </foreach>
+        </where>
+    </select>
+    
+    <select id="queryItemLot">
+        select item_id, lot01, lot02, lot03 from bas_lot_att
+        <where>
+            1 = 1 and
+            <foreach collection="list" separator=" or " item="item" index="index" open="(" close=")">
+                (item_id = #{item.item_id} and lot01 = #{item.lot01})
+            </foreach>
+        </where>
+        group by item_id, lot01, lot02, lot03
+    </select>
+
+    <select id="queryMaxLineNo">
+        select * from (
+            select order_in_id, order_in_code, max(order_line_no) as line_no from (
+                select t.order_in_id, t1.order_in_code, t.order_line_no from order_in_details t
+                inner join order_in t1 on t.order_in_id = t1.order_in_id
+                where t.asn_in_id = #{asn_in_id} and t1.order_staff_id = #{user_id}
+            ) group by order_in_id, order_in_code order by order_in_id desc
+        ) where rownum = 1
+    </select>
+
+    <select id="orderInRejectEnd">
+        select order_id from (
+            select
+                ci.order_id,
+                decode(count(1), count(decode(ci.quality_flg, 88, 1, decode(ci.qty, 0, 1, NULL))), 1, 0) flg
+            from cmd_in ci group by ci.order_id
+        ) t where t.flg > 0
+    </select>
+
+    <select id="cmdInvJobToHis">
+        <![CDATA[
+            SELECT t.cmd_inv_id FROM cmd_inv_job t where t.is_complete=1 and t.complete_time < sysdate - 30
+        ]]>
+    </select>
+
+    <select id="cmdOutJobToHis">
+        <![CDATA[
+            SELECT t.cmd_job_id FROM cmd_out_job t where t.is_complete=1 and t.complete_time < sysdate - 30
+        ]]>
+    </select>
+
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ItemRejectionCheckChecTeam">
+    <select id="sql_spjssh_ysz_yszz" resultType="map">
+        SELECT ZHIY_NO 职员编号,YANS_ZZ 验收组长
+          FROM (SELECT ZHIY_ID,ZHIY_NO, ZHIY_NAME, ZHIY_NAME YANS_ZZ
+                  FROM JC_ZHIYDOC T_ZY, KH_JC_JSZD T_JS
+                 WHERE T_ZY.JIAOS_ID = T_JS.JIAOS_ID
+                   AND T_JS.JIAOS_NAME LIKE '质管%组长')
+                   )
+    </select>
+
+    <select id="queryGspSpjskpshMx" resultType="map">
+        SELECT SHANGP_NO,
+           SHANGP_NAME,
+           YAOP_GUIG,
+           BAOZ_DANW,
+           BAOZ_NUM,
+           MAKER,
+           PIZ_NO,
+           YAOPZL_STD,
+           LOT,
+           SHENGCHAN_DATE,
+           YOUX_DATE,
+           TRUNC(NUM/BAOZ_NUM,0) JIANSHU,
+           MOD(NUM,BAOZ_NUM) LINGS_NUM,
+           NUM,
+           YANS_NUM,
+           YANS_YIJU,
+           JUSHOU_REASON,
+           ADVISE_ZHIJY,
+           ADVISE_YANSZ,
+           ADVISE_ZHIGB,
+           DANJ_NO,
+           HANGHAO,
+           SHANGP_ID
+      FROM GSP_YPJSD_MX
+     WHERE (DANJ_NO = #{DANJ_NO} OR #{DANJ_NO}='%')
+    </select>
+
+    <update id="sql_spjssh_ysz_sh_hz">
+        update GSP_YPJSD_HZ set YANS_ZZ=#{YANS_ZZ} where DANJ_NO=#{DANJ_NO}
+    </update>
+
+    <update id="sql_spjssh_ysz_sh_mx">
+        update GSP_YPJSD_MX set ADVISE_YANSZ=#{advise_yansz} where DANJ_NO=#{danj_no} and HANGHAO=#{hanghao}
+    </update>
+
+    <select id="sql_spjssh_tq_cx" resultType="map">
+        SELECT DANJ_NO,
+               RIQI_DATE,
+               YEZ_NO,
+               YEZ_NAME,
+               DANW_NO,
+               DANW_NAME,
+               CAOZ_STAFF,
+               ZHIJ_STAFF,
+               YANS_ZZ
+        FROM
+            (SELECT T_HZ.DANJ_NO,
+                    T_HZ.RIQI_DATE,
+                    bo.owner_code YEZ_NO,
+                    bo.owner_name YEZ_NAME,
+                    bc.customer_code DANW_NO,
+                    bc.customer_name DANW_NAME,
+                    T_HZ.CAOZ_STAFF CAOZ_STAFF,
+                    T_HZ.ZHIJ_STAFF ZHIJ_STAFF,
+                    T_HZ.YANS_ZZ    YANS_ZZ
+             FROM GSP_YPJSD_HZ T_HZ, bas_owner bo/*Jc_Hzzl T_YEZ*/, bas_customer bc/*JC_DWZL T_DW*/
+             WHERE T_HZ.YEZ_ID = bo.owner_id /*T_YEZ.YEZ_ID*/
+               AND T_HZ.DANW_ID = bc.customer_id/*T_DW.DANW_ID*/
+               AND T_HZ.YANS_ZZ IS NULL
+               AND #{V_TYPE}='YSZSH'
+               AND T_HZ.HOUSE_ID = #{HOUSE_ID}
+             UNION
+             SELECT T_HZ.DANJ_NO,
+                    T_HZ.RIQI_DATE,
+                    bo.owner_code YEZ_NO,
+                    bo.owner_name YEZ_NAME,
+                    bc.customer_code DANW_NO,
+                    bc.customer_name DANW_NAME,
+                    T_HZ.CAOZ_STAFF CAOZ_STAFF,
+                    T_HZ.ZHIJ_STAFF ZHIJ_STAFF,
+                    T_HZ.YANS_ZZ    YANS_ZZ
+             FROM GSP_YPJSD_HZ T_HZ, bas_owner bo/*Jc_Hzzl T_YEZ*/, bas_customer bc/*JC_DWZL T_DW*/
+             WHERE T_HZ.YEZ_ID = bo.owner_id /*T_YEZ.YEZ_ID*/
+               AND T_HZ.DANW_ID = bc.customer_id/*T_DW.DANW_ID*/
+               AND T_HZ.YANS_ZZ IS NOT NULL
+               AND T_HZ.ZHIG_BZ IS NULL
+               AND #{V_TYPE}='ZGBSH'
+               AND T_HZ.HOUSE_ID = #{HOUSE_ID}
+            )
+    </select>
+
+</mapper>

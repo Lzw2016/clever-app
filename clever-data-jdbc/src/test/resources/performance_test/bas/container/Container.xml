@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Container">
+
+    <select id="queryAllContainer">
+        SELECT a.lpn,
+               a.wh_id,
+               (SELECT wh_name FROM bas_wh WHERE wh_id = a.wh_id)         AS wh_name,
+               a.container_code,
+               a.container_type,
+               (
+                   SELECT dict_text
+                   FROM bas_dict_items
+                   WHERE dict_code = 'CONTAINER_TYPE'
+                     AND dict_value = a.container_type
+               )                                                          as container_type_name,
+               a.container_state,
+               (
+                   SELECT dict_text
+                   FROM bas_dict_items
+                   WHERE dict_code = 'CONTAINER_STATE'
+                     AND dict_value = a.container_state
+               )                                                          as container_state_name,
+               case when a.pick_group = 0 then null else a.pick_group end as pick_group,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by,
+               a.create_at,
+               a.update_at
+        FROM bas_container a inner join bas_wh_owner bwo on a.wh_id = bwo.wh_id
+        where 1 = 1
+        --@ AND a.container_code = #{container_code}
+        --@ AND a.container_type = #{container_type}
+        --@ AND a.container_state = #{container_state}
+        <if test="#obj.notEmpty(ownerList)">
+            and bwo.owner_id in
+            <foreach collection="ownerList" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by a.create_at desc
+    </select>
+
+</mapper>

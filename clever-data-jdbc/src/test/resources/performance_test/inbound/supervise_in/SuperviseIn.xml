@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SuperviseIn">
+
+    <select id="queryOrderItems">
+        select
+            distinct bi.*, bla.lot_id, bla.lot01, bla.lot02, bla.lot03,
+            oid.package_id, oi.owner_id, oi.order_in_id as order_id
+        from order_in_details oid
+        inner join order_in oi on oi.order_in_id = oid.order_in_id
+        inner join bas_item bi on oid.item_id = bi.item_id
+        inner join bas_lot_att bla on oid.lot_id = bla.lot_id
+        where bi.is_supervise = '1'
+        and (oi.order_in_id = #{order_in_id} or oi.order_in_code = #{order_in_code} or oi.business_code = #{business_code})
+        <if test="!#obj.isEmpty(supervise_code)">
+            and exists (
+                select 1 from supervise_in where supervise_type = '1' and supervise_code = #{supervise_code}
+            )
+        </if>
+
+    </select>
+
+    <select id="queryOrderItemsSupervise">
+        select
+            si.supervise_code, bi.item_name
+        from supervise_in si
+        inner join order_in oi on oi.order_in_id = si.order_id
+        inner join bas_item bi on si.item_id = bi.item_id
+        inner join bas_lot_att bla on si.lot_id = bla.lot_id
+        where bi.is_supervise = '1' and si.supervise_type = '1'
+        and (si.order_id = #{order_in_id} or oi.order_in_code = #{order_in_code} or oi.business_code = #{business_code})
+        and si.item_id = #{item_id} and si.package_id = #{package_id}  and si.lot_id = #{lot_id}
+    </select>
+
+    <select id="queryOrderDetails">
+        select
+            bi.item_code , bi.item_name,
+            oid.qty,
+            floor(nvl(oid.qty, 0) / nvl(g.package_meas, 1))          AS order_piece,
+            mod(oid.qty, nvl(g.package_meas, 1))                     AS order_less
+        from order_in_details oid
+        inner join order_in oi on oid.order_in_id = oi.order_in_id
+        inner join bas_item bi on oid.item_id = bi.item_id
+        inner join bas_package_items g on g.PACKAGE_ID = oid.PACKAGE_ID and g.item_id = oid.item_id and g.PACKAGE_LEVEL = '3'
+        and (oi.order_in_id = #{order_in_id} or oi.order_in_code = #{order_in_code} or oi.business_code = #{business_code})
+        and oid.item_id = #{item_id} and oid.package_id = #{package_id}  and oid.lot_id = #{lot_id}
+    </select>
+
+
+</mapper>

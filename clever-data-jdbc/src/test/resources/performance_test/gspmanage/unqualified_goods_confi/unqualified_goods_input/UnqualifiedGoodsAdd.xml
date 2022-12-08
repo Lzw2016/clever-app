@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UnqualifiedGoodsAdd">
+    <select id="pickHz" resultType="map">
+        SELECT h.DANJ_NO,
+               h.RIQI_DATE,
+               h.YANGH_STAFF,
+               h.FUJ_STAFF,
+               h.zhij_staff,
+               h.CAOZ_STAFF,
+               h.HOUSE_ID
+        FROM GSP_YPFJCLTZD_HZ h
+        WHERE h.danj_no IN
+              (SELECT danj_no FROM GSP_YPFJCLTZD_MX m WHERE  h.DANJ_NO = m.danj_no AND m.SHENH_FLG = '1' AND m.chul_opin='3')
+          AND H.RIQI_DATE <![CDATA[>=]]> TO_DATE(#{BEG_DATE}, 'yyyy-mm-dd') AND H.RIQI_DATE <![CDATA[<=]]> TO_DATE(#{END_DATE}, 'yyyy-mm-dd')
+          AND H.HOUSE_ID = #{HOUSE_ID}
+    </select>
+
+    <select id="selectFHSH" resultType="map">
+        SELECT GSP_YPFJCLTZD_MX.DANJ_NO,
+               GSP_YPFJCLTZD_MX.DANJ_SORT,
+               GSP_YPFJCLTZD_MX.SHANGP_ID,
+               GSP_YPFJCLTZD_MX.LOT,
+               GSP_YPFJCLTZD_MX.XIANS_LOC,
+               GSP_YPFJCLTZD_MX.NUM,
+               GSP_YPFJCLTZD_MX.NUM BUHGP_NUM,
+               GSP_YPFJCLTZD_MX.NUM RUK_NUM,
+               fnc_utl_getzdwh('ZHIL_QUESTION',GSP_YPFJCLTZD_MX.ZHIL_QUESTION) ZHIL_QUESTION,
+               GSP_YPFJCLTZD_MX.FUJ_RESULT,
+               GSP_YPFJCLTZD_MX.CHUL_OPIN,
+               GSP_YPFJCLTZD_MX.YIZ_ADDRESS,
+               GSP_YPFJCLTZD_MX.DANW_ID,
+               GSP_YPFJCLTZD_MX.CAIGOU_STAFF,
+               GSP_YPFJCLTZD_MX.SHENH_FLG,
+               bi.item_code SHANGP_NO,
+               bi.item_name CHINESE_NAME,
+               bpi.package_meas YAOP_GUIG,
+               bpi.package_unit BAOZ_DANW,
+               bla.lot_id LOT,
+               bla.lot02 SHENGCHAN_DATE,
+               bla.lot03 YOUX_DATE,
+               bi.remark MAKER,
+               -- JC_SPZL.CAIGOU_STAFF,
+               bc.customer_name DANW_NAME,
+               bc.customer_code DANW_NO,
+               bo.owner_name YEZ_NAME,
+               bo.owner_id YEZ_ID,
+               GSP_YPFJCLTZD_MX.HUOW_ID
+        FROM GSP_YPFJCLTZD_MX
+                 LEFT JOIN bas_item bi/*JC_SPZL*/  ON GSP_YPFJCLTZD_MX.SHANGP_ID = bi.item_id
+                 LEFT JOIN bas_customer bc/*JC_DWZL*/  ON GSP_YPFJCLTZD_MX.DANW_ID = bc.customer_id
+                 LEFT JOIN bas_owner bo/*JC_HZZL*/  ON GSP_YPFJCLTZD_MX.YEZ_ID = bo.woner_id
+                 LEFT JOIN bas_package_items bpi ON GSP_YPFJCLTZD_MX.SHANGP_ID = bpi.item_id and bpi.PACKAGE_LEVEL = '3'
+                 LEFT JOIN bas_lot_att bla /*JC_PHWHB*/ ON GSP_YPFJCLTZD_MX.SHANGP_ID = bla.item_id AND
+                                       GSP_YPFJCLTZD_MX.LOT = bla.lot_id
+        WHERE (GSP_YPFJCLTZD_MX.DANJ_NO = #{DANJ_NO} OR #{DANJ_NO}='%')
+          AND GSP_YPFJCLTZD_MX.SHENH_FLG = '0'
+          AND CHUL_OPIN='3'
+          AND GSP_YPFJCLTZD_MX.YEZ_ID =bi.owner_id
+    </select>
+
+</mapper>

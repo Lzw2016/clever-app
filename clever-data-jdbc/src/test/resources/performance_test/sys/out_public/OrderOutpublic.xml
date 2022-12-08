@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryOrderDetailsByVolume">
+        select count(1) as contNum
+        from bas_package_items a
+        where a.item_id = #{item_id} and ((a.length &lt;= 0 or a.length is null) or (a.width &lt;= 0 or a.width is null)
+        or (a.high &lt;= 0 or a.high is null) or (a.volume &lt;= 0 or a.volume is null) or (a.package_meas &lt;= 0 or a.package_meas is null))
+    </select>
+
+    <select id="queryOrderDetails">
+        select a.item_id,b.wh_id,b.owner_id,a.order_out_id,a.line_no
+        from order_out_details a inner join order_out b on a.order_out_id = b.order_out_id
+        where a.status in (10,15)
+    </select>
+
+    <select id="queryOrderMaster">
+        select min(a.status) as minStatus,a.order_out_id
+        from order_out_details a
+        <where>
+        a.order_out_id in
+            <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </where>
+        group by a.order_out_id
+    </select>
+
+</mapper>

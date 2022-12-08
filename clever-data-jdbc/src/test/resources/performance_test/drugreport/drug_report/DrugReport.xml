@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderInCheck">
+
+    <select id="queryOrder">
+        select oi.order_in_id,
+               oi.order_in_code,
+               oi.supplier_id,
+               bc.customer_code,
+               bc.customer_name as supplier_name,
+               oi.dates,
+               oi.asn_staff,
+               oi.business_code,
+               oi.order_type,
+               oi.order_biz_type,
+               (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+               oi.is_complete
+        from order_in oi
+             left join bas_customer bc on oi.supplier_id = bc.customer_id
+        where
+            (CASE
+                WHEN (select count(p.photo_id) from photos p where p.order_id = oi.order_in_id) = '0' THEN '0'
+                ELSE CASE
+                        WHEN (select count(*) from  (select count(oid.order_in_id) from order_in_details oid where oid.order_in_id = oi.order_in_id
+                            group by (oid.order_in_id,oid.item_id,oid.lot_id))t)
+                                 = (select count(p.path)
+                            from photos p where p.order_id = oi.order_in_id) THEN '1'
+                        ELSE '0'
+                     END
+             END ) = 0
+             /* exists(
+            select 1 from order_in_details oid
+            inner join photos p on p.order_id = oid.order_in_id and p.item_id = oid.item_id and p.lot_id = oid.lot_id
+        where oi.order_in_id = oid.order_in_id and p.path is null
+        )*/
+        <if test="#obj.notEmpty(order_in_code)">
+            and (oi.order_in_code = #{order_in_code})
+        </if>
+        <if test="#obj.notEmpty(business_code)">
+            and oi.business_code = #{business_code}
+        </if>
+        --@ and oi.order_biz_type = #{order_biz_type}
+        <if test="#obj.notEmpty(barcode)">
+            and exists(select 1 from cmd_in where order_id = oi.order_in_id and barcode = #{barcode})
+        </if>
+        <if test="#obj.notEmpty(start_date )  ">
+            AND to_char(oi.dates,'yyyy-mm-dd') &gt;=  #{start_date }
+        </if>
+        <if test="#obj.notEmpty(end_date) ">
+            AND to_char(oi.dates,'yyyy-mm-dd') &lt;= #{end_date}
+        </if>
+        <!--<if test="#obj.notEmpty(item_code)">
+            and exists(
+                select 1 from cmd_in ci
+                inner join bas_item bi on ci.item_id = bi.item_id
+                where ci.order_id = oi.order_in_id
+                &#45;&#45;% and (bi.item_code like #{item_code} or bi.logogram like #{item_code} or bi.APPROVAL_NO like #{item_code})
+            )
+        </if>-->
+        order by oi.order_in_code desc
+    </select>
+
+    <select id="queryOrderDetails">
+        SELECT  bla.lot_id,
+        bla.lot01,
+        bla.lot02,
+        bla.lot03,
+        t.package_id,
+        t.create_at,
+        bi.item_id,
+        bi.owner_id,
+        bi.item_code,
+        bi.item_name,
+        bi.logogram,
+        bi.item_desc,
+        bi.manufacturer,
+        bi.origin,
+        bi.stock_env,
+        bi.item_classify,
+        bi.item_category,
+        bi.item_abc,
+        bi.approval_no,
+        bi.remark,
+        bi.is_enable,
+        bi.item_abc2,
+        bi.item_mhdhb,
+        bi.item_specification,
+        bi.is_double_quality,
+        bi.is_supervise,
+        bi.is_expensive,
+        bi.is_abnormity,
+        bi.item_id_erp,
+        bi.is_check,
+        bi.changuo,
+        bi.chandi,
+        bi.sap_meins,
+        bi.kaipdw_min,
+        bi.shouy_flg,
+        bi.fangc_flg,
+        bi.tgyp_flg,
+        bi.jink_flg,
+        bi.yis_flg,
+        bi.caigou_staff,
+        bi.ssxkcyr,
+        bi.english_name,
+        bi.chaifen_lidu,
+        bi.fuzeren,
+        bi.group_code,
+        bi.chai_abc,
+        bi.query_flg,
+        bi.ssxkcyr_man,
+        bi.yixp_flg,
+        bi.yb_flg,
+        bi.guizyp_flg,
+        bi.jiang_flg,
+        bi.yfc_flg,
+        bi.zengp_flg,
+        bi.yp_flg,
+        bi.sdbh_cs,
+        bi.uxhp_js,
+        bi.gjktp_cs,
+        bi.miniktp_cs,
+        bi.sf_zdkz,
+        bi.picture,
+        bi.wlhf,
+        bi.cus_jiang_flg,
+        CASE WHEN (select COUNT(*) from photos where item_id = bi.item_id AND lot_id = bla.lot_id AND photo_type = 1 AND package_id = t.package_id ) > 1 THEN p.path
+        ELSE case
+        when p.path is not null then p.path
+        else (select path from photos where item_id = bi.item_id AND lot_id = bla.lot_id AND package_id = t.package_id  and photo_type = 1 and rownum = 1 )
+        end
+        END path ,
+        -- p.path,
+        t.supplier_id,
+        t.customer_code,
+        t.customer_name,
+        CASE
+        WHEN CASE WHEN (select COUNT(*) from photos where item_id = bi.item_id AND lot_id = bla.lot_id AND photo_type = 1 AND package_id = t.package_id ) > 1 THEN p.path
+        ELSE case
+        when p.path is not null then p.path
+        else (select path from photos where item_id = bi.item_id AND lot_id = bla.lot_id AND package_id = t.package_id and photo_type = 1 and rownum = 1 )
+        end
+        END IS NOT NULL THEN '1'
+        ELSE '0'
+        END is_upload
+        FROM (SELECT
+        oid.lot_id,
+        oid.item_id,
+        oid.package_id,
+        max(oid.create_at) create_at,
+        oi.supplier_id,
+        bc.customer_code,
+        bc.customer_name
+        FROM (select * from order_in union all select * from wms8_his.order_in) oi
+        INNER JOIN (select * from order_in_details union all select * from wms8_his.order_in_details) oid ON oid.order_in_id = oi.order_in_id
+        INNER JOIN (select * from cmd_in union all select * from wms8_his.cmd_in) c_in  ON c_in.order_id = oid.order_in_id and c_in.order_line_no = oid.order_line_no
+        INNER JOIN bas_customer bc ON oi.supplier_id = bc.customer_id
+        WHERE oi.order_biz_type NOT IN (12, 14)
+        and c_in.quality_flg = 2
+        and bc.customer_code != 'D900'
+        GROUP BY  oid.lot_id,oid.item_id, oid.package_id,oi.supplier_id, bc.customer_code,bc.customer_name
+        ) t
+        INNER JOIN bas_lot_att bla ON t.lot_id = bla.lot_id
+        INNER JOIN bas_item bi ON bi.item_id = t.item_id
+        LEFT JOIN bas_customer bc ON t.supplier_id = bc.customer_id
+        LEFT JOIN photos p ON p.item_id = bi.item_id AND p.lot_id = t.lot_id AND p.package_id = t.package_id AND p.photo_type = 1 AND p.supplier_id = t.supplier_id
+
+        WHERE 1 = 1
+        --@ and t.create_at >= TO_DATE(#{start_date},'YYYY-MM-DD hh24:mi:ss')
+        --@ and t.create_at &lt;= TO_DATE(#{end_date},'YYYY-MM-DD hh24:mi:ss')
+        <if test="#obj.notEmpty(item_code)">
+            AND bi.item_code = #{item_code}
+        </if>
+        <if test="#obj.notEmpty(lot01)">
+            AND bla.lot01 = #{lot01}
+        </if>
+        --% AND (t.customer_code like #{customer} or t.customer_name like #{customer})
+    </select>
+
+    <select id="selectUserOwnerList">
+        select user_id,wh_id,owner_id from sys_user_owner
+        where 1=1
+        <if test="#obj.notEmpty(list)">
+            and
+            <foreach collection="list" item="item" index="index" open="(" separator="or" close=")">
+                (user_id = #{item.userId} and wh_id = #{item.whId} and owner_id = #{item.ownerId})
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectOrderDetailList">
+        select
+        ci.quality_flg,
+        ci.quality,
+        ci.qty,
+        ci.order_id,
+        ci.owner_id,
+        ci.item_id,
+        ci.package_id,
+        ci.loc_id,
+        ci.lot_id,
+        ci.lpn,
+        oi.supplier_id,
+        oi.order_in_code,
+        oi.order_type,
+        oi.order_biz_type,
+        ci.asn_line_no,
+        ci.asn_in_id,
+        oid.order_line_no,
+        oi.business_code,
+        ci.barcode
+        from cmd_in ci
+        inner join order_in_details oid on ci.ORDER_ID = oid.ORDER_IN_ID and ci.ORDER_LINE_NO = oid.ORDER_LINE_NO
+        inner join order_in oi on oid.order_in_id = oi.order_in_id
+        where 1=1
+        <if test="#obj.notEmpty(list)">
+            and
+            <foreach collection="list" item="item" index="index" open="(" separator="or" close=")">
+                (ci.order_id = #{item.order_in_id} and ci.order_line_no = #{item.order_line_no})
+            </foreach>
+
+        </if>
+    </select>
+
+    <select id="pdaQueryOrderDetails">
+        select d.item_id,
+               d.item_code,
+               d.item_name,
+               d.logogram,
+               d.manufacturer,
+               d.origin,
+               '2' as quality_flg,
+               ci.quality,
+               ci.qty,
+               ci.order_id,
+               ci.owner_id,
+               ci.item_id,
+               ci.package_id,
+               ci.loc_id,
+               ci.lot_id,
+               ci.lpn,
+               ci.barcode,
+               oi.supplier_id,
+               oi.order_in_code,
+               oi.order_type,
+               oi.order_biz_type,
+               ci.asn_line_no,
+               ci.asn_in_id,
+               oid.order_in_id,
+               oid.order_line_no,
+               (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+               j.lot01,
+               j.lot02,
+               j.lot03,
+               oi.business_code,
+               g.package_meas,
+               floor(nvl(ci.qty, 0) / nvl(g.package_meas, 1)) AS order_piece, -- 验收件数
+               mod(ci.qty, nvl(g.package_meas, 1))            AS order_less   -- 验收零货数量
+
+        from cmd_in ci
+             inner join order_in_details oid on ci.ORDER_ID = oid.ORDER_IN_ID and ci.ORDER_LINE_NO = oid.ORDER_LINE_NO
+             inner join order_in oi on oid.order_in_id = oi.order_in_id
+             inner join bas_item d on d.item_id = ci.item_id
+             inner join bas_package_items f
+                        on f.PACKAGE_ID = ci.PACKAGE_ID and f.item_id = ci.item_id and f.PACKAGE_LEVEL =
+                                                                                       '1'
+             inner join bas_package_items g
+                        on g.PACKAGE_ID = ci.PACKAGE_ID and g.item_id = ci.item_id and g.PACKAGE_LEVEL =
+                                                                                       '3'
+             inner join bas_lot_att j on ci.lot_id = j.lot_id
+             inner join bas_customer bc on bc.customer_id = oi.supplier_id
+        where ci.cmd_state <![CDATA[ < 20 ]]>
+        --@ and ci.business_code = #{business_code}
+        --@ and d.approval_no = #{approval_no}
+        --% and ( d.item_code like #{item_code} or d.logogram like #{item_code} )
+        order by ci.order_id desc, ci.order_line_no asc
+    </select>
+
+    <select id="getSupervise">
+        select count(1) from order_in_details oid
+        inner join bas_item bi on oid.item_id = bi.item_id
+        where oid.order_in_id = #{order_in_id} and bi.is_supervise = '1'
+    </select>
+</mapper>

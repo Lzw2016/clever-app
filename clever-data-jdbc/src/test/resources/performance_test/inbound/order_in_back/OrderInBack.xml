@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrderInBack">
+
+    <select id="query">
+        select
+            ai.asn_in_id,
+            ai.asn_in_code,
+            ai.sd_code,
+            ai.dates,
+            ai.order_type,
+            ai.order_biz_type,
+            ai.business_code,
+            ai.owner_id,
+            bc.customer_id,
+            bc.customer_code,
+            bc.customer_name,
+            ai.supplier_id,
+            (select count(1) from asn_in_details where asn_in_id = ai.asn_in_id) as total,
+            (select tuih_resaon from asn_in_details where asn_in_id = ai.asn_in_id and rownum = 1) as tuih_resaon,
+            (
+            select su.user_name from asn_in_details aid
+            inner join sys_user su on aid.SEARCH_LOCK = su.user_id
+            where asn_in_id = ai.asn_in_id and rownum = 1
+            ) as order_staff,
+            (select count(CASE when order_qty = qty THEN '1' ELSE NULL END) from asn_in_details where asn_in_id = ai.asn_in_id) as process_total1,
+            (select count(CASE when order_qty = 0 THEN '1' ELSE NULL END) from asn_in_details where asn_in_id = ai.asn_in_id) as process_total2,
+            (select count(CASE when order_qty > 0 and <![CDATA[ order_qty < qty ]]> THEN '1' ELSE NULL END) from asn_in_details where asn_in_id = ai.asn_in_id) as process_total3
+        from asn_in ai
+        left join bas_customer bc on bc.customer_id = ai.supplier_id
+        where ai.wh_id = #{wh_id} and ai.ORDER_TYPE = 1 and ai.ORDER_BIZ_TYPE = 12
+        <!--and exists (
+            select 1 from asn_in_details aid
+            where aid.asn_in_id = ai.asn_in_id and aid.qty > aid.order_qty
+        )-->
+        <if test="#obj.notEmpty(ownerArr)">
+            and ai.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        --% and ai.sd_code like #{sd_code}
+        --% and ai.business_code like #{business_code}
+        --% and bc.customer_code like #{customer_code}
+    </select>
+
+    <select id="queryDetailsList">
+        select d.item_id,
+               d.item_code,
+               d.item_name,
+               d.logogram,
+               d.manufacturer,
+               d.origin,
+               (aid.qty - aid.order_qty) as surplus_qty,
+               aid.qty,
+               aid.order_qty,
+               aid.zname1,
+               aid.package_id,
+               aid.price,
+               aid.asn_in_id,
+               aid.asn_line_no,
+               ai.business_code,
+               ai.owner_id,
+               aid.lot01,
+               aid.lot02,
+               aid.lot03
+        from asn_in_details aid
+             inner join asn_in ai on ai.asn_in_id = aid.asn_in_id
+             inner join bas_item d on d.item_id = aid.item_id
+             inner join bas_package_items f
+                        on f.PACKAGE_ID = aid.PACKAGE_ID and f.item_id = aid.item_id and f.PACKAGE_LEVEL = '1'
+             inner join bas_package_items g
+                        on g.PACKAGE_ID = aid.PACKAGE_ID and g.item_id = aid.item_id and g.PACKAGE_LEVEL = '3'
+        where ai.WH_ID = #{wh_id} and ai.ORDER_TYPE = 1 and ai.ORDER_BIZ_TYPE = 12
+        <if test="#obj.notEmpty(barcode)">
+            and ai.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="ckb_all">
+            and aid.qty > aid.order_qty
+        </if>
+        and aid.asn_in_id = #{asn_in_id}
+        --@ and aid.asn_line_no = #{asn_line_no}
+        --@ and (d.item_code = #{item_keyword} or d.approval_no = #{item_keyword} or (Upper(d.logogram) like  '%' ||  Upper(#{item_keyword}) || '%' AND d.logogram!='N/A') or f.BARCODE = #{item_keyword})
+
+    </select>
+
+    <select id="queryDetailsOne">
+        select d.item_id,
+               d.item_code,
+               d.item_name,
+               d.logogram,
+               d.manufacturer,
+               d.origin,
+               (aid.qty - aid.order_qty) as surplus_qty,
+               aid.qty,
+               aid.order_qty,
+               aid.zname1,
+               aid.tuih_resaon,
+               aid.package_id,
+               aid.price,
+               aid.asn_in_id,
+               aid.asn_line_no,
+               ai.business_code,
+               ai.sd_code,
+               ai.asn_in_code,
+               ai.owner_id,
+               aid.lot01,
+                f.package_meas as primary_meas,
+                f.package_item_id as primary_item_id,
+                g.package_meas,
+                g.package_item_id,
+                aid.lot01,
+                aid.lot02,
+                aid.lot03,
+                d.stock_env,
+                ai.owner_id,
+                bc.customer_code,
+                bc.customer_name,
+                ai.supplier_id,
+                ai.order_type,
+                ai.order_biz_type
+        from asn_in_details aid
+             inner join asn_in ai on ai.asn_in_id = aid.asn_in_id
+             inner join bas_item d on d.item_id = aid.item_id
+             inner join bas_package_items f
+                        on f.PACKAGE_ID = aid.PACKAGE_ID and f.item_id = aid.item_id and f.PACKAGE_LEVEL = '1'
+             inner join bas_package_items g
+                        on g.PACKAGE_ID = aid.PACKAGE_ID and g.item_id = aid.item_id and g.PACKAGE_LEVEL = '3'
+            left join bas_customer bc on bc.customer_id = ai.supplier_id
+        where ai.WH_ID = #{wh_id} and ai.ORDER_TYPE = 1 and ai.ORDER_BIZ_TYPE = 12 and aid.qty > aid.order_qty
+        <if test="#obj.notEmpty(barcode)">
+            and ai.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        --@ and bc.customer_id = #{customer_id}
+        --@ and ai.sd_code = #{sd_code}
+        --@ and aid.asn_in_id = #{asn_in_id}
+        --@ and aid.asn_line_no = #{asn_line_no}
+        --@ and (d.item_code = #{item_keyword} or d.approval_no = #{item_keyword} or (Upper(d.logogram) like  '%' ||  Upper(#{item_keyword}) || '%' AND d.logogram!='N/A') or f.BARCODE = #{item_keyword})
+    </select>
+
+    <select id="queryPreOrderIn">
+        select
+            oi.*
+        from order_in oi
+        where order_in_id = #{order_in_id}
+    </select>
+
+    <select id="queryPreOrderDetails">
+        select d.item_id,
+            d.item_code,
+            d.item_name,
+            d.logogram,
+            d.manufacturer,
+            d.origin,
+            d.is_double_quality,
+            f.package_unit,
+            floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1)) AS medium,
+            (select qty from asn_in_details where asn_in_id = a.asn_in_id and asn_line_no = a.asn_line_no) as qty_total,
+            (select order_qty from asn_in_details where asn_in_id = a.asn_in_id and asn_line_no = a.asn_line_no) as order_qty,
+            a.qty,
+            a.package_id,
+            a.lpn,
+            a.price,
+            a.asn_in_id,
+            a.asn_line_no,
+            a.order_in_id,
+            a.order_line_no,
+            b.business_code,
+            b.owner_id,
+            a.lot01,
+            a.lot02,
+            a.lot03,
+            a.lot12,
+            bl.loc_code
+        from order_in_details a
+        inner join order_in b on a.order_in_id = b.order_in_id
+        inner join bas_item d on d.item_id = a.item_id
+        inner join bas_package_items f on f.PACKAGE_ID = a.PACKAGE_ID and f.item_id = a.item_id and f.PACKAGE_LEVEL = '1'
+        inner join bas_package_items g on g.PACKAGE_ID = a.PACKAGE_ID and g.item_id = a.item_id and g.PACKAGE_LEVEL = '3'
+        left join bas_location bl on bl.LOC_ID = a.back_loc_id
+        where b.WH_ID = #{wh_id} and b.ORDER_TYPE = 1 and b.ORDER_BIZ_TYPE = 12
+        <if test="#obj.notEmpty(ownerArr)">
+            and b.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        and a.order_in_id = #{order_in_id}
+        order by a.order_line_no desc
+    </select>
+
+    <select id="queryPreAsnProcessData">
+        select
+            ai.*,
+            bc.customer_code,
+            bc.customer_name,
+            ( select tuih_resaon from asn_in_details where asn_in_id = ai.asn_in_id and rownum = 1) as tuih_resaon,
+            ( select count(1) from asn_in_details where asn_in_id = ai.asn_in_id ) as total,
+            ( select count(CASE when ORDER_QTY > 0 THEN '1' ELSE NULL END) from asn_in_details where asn_in_id = ai.asn_in_id ) as process_total,
+            (select sum(ORDER_QTY) from asn_in_details where asn_in_id = ai.asn_in_id) as sum_order_qty,
+            (select sum(QTY) from asn_in_details where asn_in_id = ai.asn_in_id) as sum_qty
+        from asn_in ai
+        left join bas_customer bc on bc.customer_id = ai.supplier_id
+        where ai.asn_in_id =  #{asn_in_id}
+    </select>
+
+    <select id="queryMaxLineNo">
+        select * from (
+            select order_in_id, order_in_code, max(order_line_no) as line_no from (
+                select t.order_in_id, t1.order_in_code, t.order_line_no from order_in_details t
+                inner join order_in t1 on t.order_in_id = t1.order_in_id
+                where t.asn_in_id = #{asn_in_id} and t1.order_staff_id = #{user_id}
+            ) group by order_in_id, order_in_code order by order_in_id desc
+        ) where rownum = 1
+    </select>
+
+    <select id="queryOrderInDetails">
+        select
+            oid.*,
+            oid.qty as surplus_less,
+            oid.qty as surplus_qty,
+            ai.business_code,
+            aid.business_code_line,
+            ai.is_quick_in,
+            ai.owner_id,
+            ai.order_type,
+            ai.order_biz_type,
+            oid.back_loc_id as loc_id
+        from order_in_details oid
+        inner join asn_in ai on oid.asn_in_id = ai.asn_in_id
+        inner join asn_in_details aid on aid.asn_in_id = ai.asn_in_id and oid.asn_line_no = aid.asn_line_no
+        left join cmd_in ci on oid.order_in_id = ci.order_id and oid.ORDER_LINE_NO = ci.ORDER_LINE_NO
+        where oid.order_in_id = #{order_in_id} and ci.ORDER_LINE_NO is null
+    </select>
+
+    <select id="queryOrderInList">
+        select
+        oi.order_in_id,
+        oi.order_in_code,
+        ai.sd_code,
+        oi.business_code,
+        oi.dates,
+        bc.customer_code,
+        bc.customer_name,
+        oi.order_type,
+        oi.order_biz_type,
+        (select sum(qty) from asn_in_details where asn_in_id = ai.asn_in_id) as sum_qty,
+        (select sum(order_qty) from asn_in_details where asn_in_id = ai.asn_in_id) as sum_order_qty,
+        (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff
+        from  order_in oi
+        inner join asn_in ai on oi.asn_in_id = ai.asn_in_id
+        left join bas_customer bc on bc.customer_id = ai.supplier_id
+        where 1=1 and oi.order_biz_type = 12
+        --% and ai.sd_code like #{sd_code}
+        --% and ai.business_code like #{business_code}
+        --@ and aid.asn_line_no = #{asn_line_no}
+        --% and bc.customer_code like #{customer_code}
+        --@ and oi.order_staff_id = #{user_id}
+    </select>
+
+    <select id="queryOrderInDetailsList">
+        select
+        oid.order_line_no,
+        bi.item_code,
+        bi.item_name,
+        bi.logogram,
+        -- package_meas,
+        bi.manufacturer,
+        -- package_unit,
+        -- medium,
+        oid.qty,
+        aid.qty as asn_qty,
+        (aid.qty-aid.order_qty) as order_qty,
+        oid.lot01,
+        oid.lot02,
+        oid.lot03
+        from order_in_details oid
+        inner join order_in oi on oid.order_in_id = oi.order_in_id
+        inner join asn_in ai on oid.asn_in_id = ai.asn_in_id
+        inner join asn_in_details aid on aid.asn_in_id = ai.asn_in_id and oid.asn_line_no = aid.asn_line_no
+        inner join bas_item bi on oid.item_id = bi.item_id
+        where oid.order_in_id = #{order_in_id}
+        --% and ai.sd_code like #{sd_code}
+        --% and ai.business_code like #{business_code}
+        --@ and aid.asn_line_no = #{asn_line_no}
+        --% and bc.customer_code like #{customer_code}
+        --@ and oi.order_staff_id = #{user_id}
+        order by oid.order_line_no desc
+    </select>
+</mapper>

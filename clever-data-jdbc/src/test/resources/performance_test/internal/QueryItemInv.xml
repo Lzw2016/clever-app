@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QueryItemInv">
+    <select id="queryAllItemInv">
+        SELECT
+        T.wh_id,
+        T.owner_id,
+        A.owner_code,
+        A.owner_name,
+        T.item_id,
+        B.item_code,
+        B.item_name,
+        d.loc_code,
+        T.package_id,
+        f.lot01,
+        f.lot02,
+        f.lot03,
+        (T.qty - MOD(T.qty,C.package_meas)) / C.package_meas js,
+        MOD(T.qty,C.package_meas) lss,
+        B.manufacturer,
+        T.quality,
+        T.qty,
+        T.qty_in,
+        T.qty_out,
+        T.qty_rep_in,
+        T.qty_rep_out,
+        T.qty_hold,
+        T.qty_lock,
+        T.qty_onway,
+        T.is_lock,
+        e.AREA_CODE,e.AREA_NAME
+        FROM
+        inv_loc T
+        LEFT JOIN bas_owner A ON T.owner_id = A.owner_id
+        LEFT JOIN bas_item B ON T.item_id = B.item_id
+        LEFT JOIN bas_package_items C ON T.item_id = C.item_id and t.package_id=c.package_id and c.package_level=3
+        left join bas_location d on t.loc_id =d.loc_id
+        left join bas_area e on e.area_id = d.area_id
+        left join bas_lot_att f on t.lot_id=f.lot_id and t.item_id=f.item_id
+        <where>
+            --@ A.owner_code = #{owner_code}
+            --@ AND B.item_code = #{item_code}
+            --@ AND B.item_name = #{item_name}
+            --@ AND T.quality = #{quality}
+            --@ AND f.lot01 like '%' || #{lot01} || '%'
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasDirection">
+    <select id="selectDirection">
+        select *
+        from bas_direction A
+        <where>
+            A.wh_id = #{wh_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.direction_id like', 'A.direction_name like')}
+        </where>
+    </select>
+</mapper>

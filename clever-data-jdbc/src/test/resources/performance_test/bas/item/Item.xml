@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryCheckItemUse">
+        select count(1) as checkNum from inv_loc where item_id = #{itemId} and (qty_rep_in > 0 or qty_rep_out > 0)
+    </select>
+
+    <select id="queryPhotoById">
+        select *
+        from photos a
+        where photo_id = #{photo_id}
+    </select>
+
+    <select id="queryLotByItem">
+        select a.path,b.item_id,b.item_code,b.item_name,c.lot01,a.photo_id,a.lot_id
+        from photos a
+        inner join bas_item b on a.item_id = b.item_id
+        inner join bas_lot_att c on c.lot_id = a.lot_id and a.item_id = c.item_id
+        where a.lot_id = #{lot_id} and a.item_id = #{item_id}
+    </select>
+
+    <select id="queryLotItem">
+        select a.*
+        from bas_lot_att a
+        inner join bas_item b on a.item_id = b.item_id
+        where a.item_id = #{item_id}
+    </select>
+
+    <select id="queryRuleItem">
+        select ro.rule_out_id,ro.name as rule_out_name,rt.rule_turnover_id,rt.name as rule_turnover_name,
+        ra.rule_alloc_id,ra.rule_alloc_name as rule_alloc_name,rp.rule_putaway_id,rp.name as rule_putaway_name
+        from bas_item a
+        left join rule_apply b on b.match_id = a.item_id and b.rule_type = 4
+        left join rule_out ro on ro.rule_out_id = b.rule_id
+        left join rule_apply c on c.match_id = a.item_id and c.rule_type = 5
+        left join rule_turnover rt on rt.rule_turnover_id = c.rule_id
+        left join rule_apply d on d.match_id = a.item_id and d.rule_type = 6
+        left join rule_alloc ra on ra.rule_alloc_id = d.rule_id
+        left join rule_apply e on e.match_id = a.item_id and e.rule_type = 1
+        left join rule_putaway rp on rp.rule_putaway_id = e.rule_id
+        where a.item_id = #{item_id}
+    </select>
+
+    <select id="queryPackageItem">
+        select c.package_unit,c.package_meas,b.barcode as xiaobz_barcode,d.barcode as zhongbz_barcode,c.barcode as dabz_barcode,
+        1 as tiji_coefficient,c.length,c.width,c.high as height,c.volume as tiji,c.weight as weight,floor(e.package_meas/c.package_meas) as biaoztp_num,
+        d.package_meas as zhongbz,c.package_unit as baoz_danw,c.package_meas as baoz_num,c.package_meas as box_package_meas
+        from bas_item a
+        left join bas_package_items b on a.item_id = b.item_id and b.package_level = 1
+        left join bas_package_items c on a.item_id = c.item_id and c.package_level = 3
+        left join bas_package_items d on a.item_id = d.item_id and d.package_level = 2
+        left join bas_package_items e on a.item_id = e.item_id and e.package_level = 4
+        where a.item_id = #{item_id}
+    </select>
+
+    <select id="queryAllItem">
+        SELECT a.item_id,
+               a.owner_id,
+               (SELECT owner_name FROM bas_owner WHERE owner_id = a.owner_id) as owner_name,
+               a.item_code,
+               a.item_name,
+               a.logogram,
+               a.item_desc,
+               a.manufacturer,
+               a.origin,
+               a.stock_env,
+               a.item_classify,
+               a.item_category,
+               a.item_abc,
+               a.item_tips,
+               a.approval_no,
+               a.remark,
+               a.is_enable,
+               a.create_at,
+               a.update_at,
+               bpi.barcode,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
+        FROM bas_item a
+        LEFT JOIN bas_package_items bpi ON bpi.item_id = a.item_id
+        AND bpi.package_level = 1
+        where a.is_enable = 1
+        --@ and a.owner_id = #{owner_id}
+        --@ and a.item_classify = #{item_classify}
+        --% and (a.item_code like #{item_code} or a.approval_no like #{item_code} or bpi.barcode like #{item_code})
+        --% and a.item_name like #{item_name}
+        <if test="#obj.isEmpty(owner_id)">
+            <if test="#obj.notEmpty(ownerList)">
+                and a.owner_id in
+                <foreach collection="ownerList" separator="," item="item" index="index" open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </if>
+        --@ AND a.item_id = #{item_id}
+    </select>
+
+    <select id="queryItemById">
+        SELECT a.*,b.owner_name
+        FROM bas_item a
+        left join bas_owner b on a.owner_id = b.owner_id
+        <where>
+            --@ AND a.item_id = #{item_id}
+        </where>
+    </select>
+
+    <update id="updateRuleApply">
+        update RULE_APPLY a set a.match_type = #{match_type},a.rule_type = #{rule_type},
+                                a.rule_id = #{rule_id},a.is_enable = #{is_enable}
+        where 1 = 1
+            --@ AND a.MATCH_ID = #{item_id}
+    </update>
+
+</mapper>

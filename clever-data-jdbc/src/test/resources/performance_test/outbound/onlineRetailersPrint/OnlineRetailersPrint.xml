@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OnlineRetailersPrint">
+    <!--电商单据查询-->
+    <select id="onlineRetailersQuery" resultType="map">
+        SELECT
+        order_out_id,
+        order_out_code,
+        wave_no,
+        platform_no,
+        platform_type,
+        online_store_name,
+        barcode,
+        NVL ( express_print_flg, 0 ) express_print_flg,
+        NVL ( express_print_count, 0 ) express_print_count,
+        order_load_id,
+        NVL( order_load_code, '未排车' ) order_load_code,
+        order_no,
+        NVL( weight, 0 ) weight,
+        confirm_flg,
+        status,
+        review_print_flg,
+        owner_name,
+        customer_code,
+        customer_name,
+        TO_CHAR(express_print_date,'YYYY-MM-DD') express_print_date,
+        express_print_by,
+        pickup_type,
+        start_stage_code,
+        end_stage_code,
+        remark,
+        order_biz_type,
+        bill_staff,
+        review_staff_id,
+        review_staff_name,
+        review_end_time,
+        less_qty,
+        all_amount,
+        is_short,
+        review_print_time,
+        review_print_count,
+        receiver_name,
+        receiver_addres,
+        receiver_cellpho,
+        receiver_telepho,
+        kunnr,
+        name1,
+        aftersale_phone,
+        addr,
+        ( SELECT count( 0 ) FROM cmd_out WHERE is_unpack = 0 AND is_short = 0 AND order_biz_type = 21 AND order_id = p.order_out_id ) full_qty
+        FROM
+        (
+        SELECT DISTINCT
+        ta.order_out_id,
+        ta.order_out_code,
+        ow.wave_no,
+        ta.platform_no,
+        ta.platform_type,
+        ta.online_store_name,
+        ( CASE WHEN ta.status >= 140 THEN 1 ELSE 0 END ) confirm_flg,
+        ta.status,
+        td.owner_code,
+        td.owner_name,
+        tb.customer_code,
+        tb.customer_name,
+        ta.create_at,
+        ta.pickup_type,
+        ta.start_stage_id,
+        te.stage_code start_stage_code,
+        ta.end_stage_id,
+        tf.stage_code end_stage_code,
+        ta.remark,
+        ta.wh_id,
+        ta.bill_staff,
+        ta.order_biz_type,
+        ta.is_short,
+        tc.item_id,
+        tc.review_staff_id,
+        tg.user_name review_staff_name,
+        ta.review_end_time,
+        ta.collect_end_time,
+        ta.review_print_flg,
+        ta.review_print_time,
+        ta.review_print_count,
+        ta.receiver_name,
+        ta.receiver_addres,
+        ta.receiver_cellpho,
+        ta.receiver_telepho,
+        ta.kunnr,
+        ta.name1,
+        ta.aftersale_phone,
+        ta.addr,
+        th.order_no,
+        th.weight,
+        th.barcode,
+        th.express_print_flg,
+        th.express_print_count,
+        th.express_print_date,
+        th.express_print_by,
+        tj.order_load_id,
+        tj.order_load_code,
+        (
+        SELECT
+        COUNT( DISTINCT tg.qty )
+        FROM
+        cmd_out tg
+        WHERE
+        tg.order_id = ta.order_out_id
+        AND tg.wh_id = ta.wh_id
+        AND tg.is_unpack = 1
+        ) less_qty,
+        (
+        SELECT
+        SUM(( co.qty_plan * od.price ))
+        FROM
+        cmd_out co
+        INNER JOIN order_out_details od ON od.order_out_id = co.order_id AND od.item_id = co.item_id
+        WHERE
+        co.order_id = ta.order_out_id
+        ) all_amount
+        FROM
+        order_out ta
+        LEFT JOIN bas_customer tb ON ta.customer_id = tb.customer_id
+        LEFT JOIN (
+        SELECT
+        t.order_id,
+        t.ITEM_ID,
+        t.wh_id,
+        t.pick_group,
+        t.review_staff_id,
+        t.barcode,
+        x.user_name,
+        MAX( t.collect_time ) collect_time
+        FROM
+        cmd_out t
+        INNER JOIN sys_user x ON t.review_staff_id = x.user_id
+        WHERE
+        t.collect_time IS NOT NULL
+        GROUP BY
+        t.order_id,
+        t.ITEM_ID,
+        t.wh_id,
+        t.pick_group,
+        t.review_staff_id,
+        t.barcode,
+        x.user_name
+        ) tc ON ta.order_out_id = tc.order_id
+        LEFT JOIN bas_owner td ON ta.owner_id = td.owner_id
+        LEFT JOIN bas_stage te ON ta.start_stage_id = te.stage_id
+        LEFT JOIN bas_stage tf ON ta.end_stage_id = tf.stage_id
+        LEFT JOIN sys_user tg ON tc.review_staff_id = tg.user_id
+        LEFT JOIN cmd_barcode th ON ta.order_out_id = th.order_id
+        LEFT JOIN order_load_details ti ON ta.order_out_id = ti.bill_id
+        LEFT JOIN order_load tj ON ti.order_load_id = tj.order_load_id
+        LEFT JOIN order_wave ow ON ow.wave_id = ta.wave_id
+        WHERE
+        ta.status >= 120
+        ) p
+        <where>
+            wh_id=#{wh_id}
+            --AND pickup_type >= 3
+            <if test="#obj.notEmpty(express_print_flg)">
+                AND express_print_flg = #{express_print_flg}
+            </if>
+            <if test="#obj.notEmpty(wave_no)">
+                AND wave_no = #{wave_no}
+            </if>
+            <if test="order_out_code != null and order_out_code != ''">
+                AND (order_out_code = #{order_out_code} OR order_no = #{order_out_code} OR platform_no = #{order_out_code})
+            </if>
+            <if test="is_short != null and is_short != ''">
+                AND is_short = #{is_short}
+            </if>
+            <if test="#obj.notEmpty(pickup_type)">
+                AND pickup_type = #{pickup_type}
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND barcode = #{barcode}
+            </if>
+            <if test="start_date != null and start_date != ''">
+                AND TO_CHAR(express_print_date,'YYYY-MM-DD') >= #{ start_date }
+            </if>
+            <if test="end_date != null and end_date != ''">
+                AND TO_CHAR(express_print_date,'YYYY-MM-DD') &lt;= #{ end_date }
+            </if>
+            <if test="platform_type != null and platform_type != ''">
+                AND PLATFORM_TYPE = #{platform_type}
+            </if>
+        </where>
+        ORDER BY create_at desc
+    </select>
+    <!--电商明细查询-->
+    <select id="onlineRetailersDetailQuery" resultType="map">
+        SELECT
+        T.*,
+        ((T.qty - MOD(T.qty,T.package_meas))/T.package_meas) pack_qty,
+        MOD(T.qty,T.package_meas) unpack_qty
+        FROM
+        (SELECT
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        td.price,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        (SELECT package_unit FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_unit,
+        (SELECT package_meas FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_meas,
+        tc.create_at,
+        SUM ( ta.qty ) qty,
+        SUM ( ta.qty_plan ) qty_plan,
+        (SUM ( ta.qty_plan ) * td.price)real_amount
+        FROM
+        cmd_out ta
+        INNER JOIN bas_item tb ON ta.item_id = tb.item_id
+        INNER JOIN bas_lot_att tc ON ta.lot_id = tc.lot_id
+        INNER JOIN order_out_details td ON td.order_out_id = ta.order_id AND td.item_id = ta.item_id
+        <where>
+            AND ta.order_biz_type = #{order_biz_type}
+            AND wh_id=#{wh_id}
+            <if test="order_out_id != null and order_out_id != ''">
+                AND ta.order_id = #{ order_out_id }
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND ta.barcode = #{ barcode }
+            </if>
+        </where>
+        GROUP BY
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        td.price,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        ta.package_id,
+        tc.create_at,
+        ta.qty
+        ORDER BY ta.pack_no)T
+    </select>
+    <!--电商历史查询-->
+    <select id="onlineRetailersQueryHis" resultType="map">
+        SELECT
+        order_out_id,
+        order_out_code,
+        wave_no,
+        platform_no,
+        platform_type,
+        online_store_name,
+        barcode,
+        NVL ( express_print_flg, 0 ) express_print_flg,
+        NVL ( express_print_count, 0 ) express_print_count,
+        express_print_by,
+        order_load_id,
+        NVL( order_load_code, '未排车' ) order_load_code,
+        order_no,
+        NVL( weight, 0 ) weight,
+        confirm_flg,
+        status,
+        review_print_flg,
+        owner_name,
+        customer_code,
+        customer_name,
+        TO_CHAR(express_print_date,'YYYY-MM-DD') express_print_date,
+        pickup_type,
+        start_stage_code,
+        end_stage_code,
+        remark,
+        order_biz_type,
+        bill_staff,
+        review_staff_id,
+        review_staff_name,
+        review_end_time,
+        less_qty,
+        all_amount,
+        is_short,
+        review_print_time,
+        review_print_count,
+        RECEIVER_NAME,
+        RECEIVER_ADDRES,
+        RECEIVER_CELLPHO,
+        RECEIVER_TELEPHO,
+        KUNNR,
+        NAME1,
+        AFTERSALE_PHONE,
+        ADDR,
+        ( SELECT count( 0 ) FROM WMS8_HIS.cmd_out WHERE is_unpack = 0 AND is_short = 0 AND order_biz_type = 21 AND order_id = p.order_out_id ) full_qty
+        FROM
+        (
+        SELECT DISTINCT
+        ta.order_out_id,
+        ta.order_out_code,
+        ow.wave_no,
+        ta.platform_no,
+        ta.platform_type,
+        ta.online_store_name,
+        ( CASE WHEN ta.status >= 140 THEN 1 ELSE 0 END ) confirm_flg,
+        ta.status,
+        td.owner_code,
+        td.owner_name,
+        tb.customer_code,
+        tb.customer_name,
+        ta.create_at,
+        ta.pickup_type,
+        ta.start_stage_id,
+        te.stage_code start_stage_code,
+        ta.end_stage_id,
+        tf.stage_code end_stage_code,
+        ta.remark,
+        ta.wh_id,
+        ta.bill_staff,
+        ta.order_biz_type,
+        ta.is_short,
+        tc.item_id,
+        tc.review_staff_id,
+        tg.user_name review_staff_name,
+        ta.review_end_time,
+        ta.collect_end_time,
+        ta.review_print_flg,
+        ta.review_print_time,
+        ta.review_print_count,
+        ta.RECEIVER_NAME,
+        ta.RECEIVER_ADDRES,
+        ta.RECEIVER_CELLPHO,
+        ta.RECEIVER_TELEPHO,
+        ta.KUNNR,
+        ta.NAME1,
+        ta.AFTERSALE_PHONE,
+        ta.ADDR,
+        th.order_no,
+        th.weight,
+        th.barcode,
+        th.express_print_flg,
+        th.express_print_count,
+        th.express_print_date,
+        th.express_print_by,
+        tj.order_load_id,
+        tj.order_load_code,
+        (
+        SELECT
+        COUNT( DISTINCT tg.qty )
+        FROM
+        WMS8_HIS.cmd_out tg
+        WHERE
+        tg.order_id = ta.order_out_id
+        AND tg.wh_id = ta.wh_id
+        AND tg.is_unpack = 1
+        ) less_qty,
+        (
+        SELECT
+        SUM(( co.qty_plan * od.price ))
+        FROM
+        WMS8_HIS.cmd_out co
+        INNER JOIN WMS8_HIS.order_out_details od ON od.order_out_id = co.order_id AND od.item_id = co.item_id
+        WHERE
+        co.order_id = ta.order_out_id
+        ) all_amount
+        FROM
+        WMS8_HIS.order_out ta
+        LEFT JOIN bas_customer tb ON ta.customer_id = tb.customer_id
+        LEFT JOIN (
+        SELECT
+        t.order_id,
+        t.ITEM_ID,
+        t.wh_id,
+        t.pick_group,
+        t.review_staff_id,
+        t.barcode,
+        x.user_name,
+        MAX( t.collect_time ) collect_time
+        FROM
+        WMS8_HIS.cmd_out t
+        INNER JOIN sys_user x ON t.review_staff_id = x.user_id
+        WHERE
+        t.collect_time IS NOT NULL
+        GROUP BY
+        t.order_id,
+        t.ITEM_ID,
+        t.wh_id,
+        t.pick_group,
+        t.review_staff_id,
+        t.barcode,
+        x.user_name
+        ) tc ON ta.order_out_id = tc.order_id
+        LEFT JOIN bas_owner td ON ta.owner_id = td.owner_id
+        LEFT JOIN bas_stage te ON ta.start_stage_id = te.stage_id
+        LEFT JOIN bas_stage tf ON ta.end_stage_id = tf.stage_id
+        LEFT JOIN sys_user tg ON tc.review_staff_id = tg.user_id
+        LEFT JOIN WMS8_HIS.cmd_barcode th ON ta.order_out_id = th.order_id
+        LEFT JOIN WMS8_HIS.order_load_details ti ON ta.order_out_id = ti.bill_id
+        LEFT JOIN WMS8_HIS.order_load tj ON ti.order_load_id = tj.order_load_id
+        LEFT JOIN WMS8_HIS.order_wave ow ON ow.wave_id = ta.wave_id
+        WHERE
+        ta.status >= 140
+        ) p
+        <where>
+            wh_id=#{wh_id}
+            --AND pickup_type >= 3
+            <if test="#obj.notEmpty(express_print_flg)">
+                AND express_print_flg = #{express_print_flg}
+            </if>
+            <if test="#obj.notEmpty(wave_no)">
+                AND wave_no = #{wave_no}
+            </if>
+            <if test="order_out_code != null and order_out_code != ''">
+                AND (order_out_code = #{order_out_code} OR order_no = #{order_out_code} OR platform_no = #{order_out_code})
+            </if>
+            <if test="is_short != null and is_short != ''">
+                AND is_short = #{is_short}
+            </if>
+            <if test="#obj.notEmpty(pickup_type)">
+                AND pickup_type = #{pickup_type}
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND barcode = #{barcode}
+            </if>
+            <if test="start_date != null and start_date != ''">
+                AND TO_CHAR(express_print_date,'YYYY-MM-DD') >= #{ start_date }
+            </if>
+            <if test="end_date != null and end_date != ''">
+                AND TO_CHAR(express_print_date,'YYYY-MM-DD') &lt;= #{ end_date }
+            </if>
+            <if test="platform_type != null and platform_type != ''">
+                AND PLATFORM_TYPE = #{platform_type}
+            </if>
+        </where>
+        ORDER BY create_at desc
+    </select>
+    <!--电商历史明细查询-->
+    <select id="onlineRetailersHisDetailQuery" resultType="map">
+        SELECT
+        T.*,
+        ((T.qty - MOD(T.qty,T.package_meas))/T.package_meas) pack_qty,
+        MOD(T.qty,T.package_meas) unpack_qty
+        FROM
+        (SELECT
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        td.price,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        (SELECT package_unit FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_unit,
+        (SELECT package_meas FROM bas_package_items WHERE package_id = ta.package_id AND package_level = 3)package_meas,
+        tc.create_at,
+        SUM ( ta.qty ) qty,
+        SUM ( ta.qty_plan ) qty_plan,
+        (SUM ( ta.qty_plan ) * td.price)real_amount
+        FROM
+        WMS8_HIS.cmd_out ta
+        INNER JOIN bas_item tb ON ta.item_id = tb.item_id
+        INNER JOIN bas_lot_att tc ON ta.lot_id = tc.lot_id
+        INNER JOIN WMS8_HIS.order_out_details td ON td.order_out_id = ta.order_id AND td.item_id = ta.item_id
+        <where>
+            AND ta.order_biz_type = #{order_biz_type}
+            AND wh_id=#{wh_id}
+            <if test="order_out_id != null and order_out_id != ''">
+                AND ta.order_id = #{ order_out_id }
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND ta.barcode = #{ barcode }
+            </if>
+        </where>
+        GROUP BY
+        ta.cmd_line_no,
+        ta.order_id,
+        ta.order_biz_type,
+        ta.item_id,
+        ta.is_short,
+        ta.is_unpack,
+        ta.wh_id,
+        tc.lot01,
+        tc.lot02,
+        tc.lot03,
+        td.price,
+        ta.pack_no,
+        tb.item_code,
+        tb.item_name,
+        tb.item_specification,
+        tb.manufacturer,
+        ta.package_id,
+        tc.create_at,
+        ta.qty
+        ORDER BY ta.pack_no)T
+    </select>
+    <!--快递历史查询打印次数-->
+    <select id="expressPrintCountHis">
+        SELECT
+            NVL(TA.EXPRESS_PRINT_COUNT,0 ) EXPRESS_PRINT_COUNT
+        FROM
+            WMS8_HIS.CMD_BARCODE TA
+        WHERE
+            TA.ORDER_NO = #{order_no}
+          AND ROWNUM = 1
+    </select>
+    <!--更新快递历史打印次数-->
+    <update id="updatePrintCountHis">
+        UPDATE WMS8_HIS.CMD_BARCODE TA
+        SET TA.EXPRESS_PRINT_COUNT = #{express_print_count}+1,
+            TA.EXPRESS_PRINT_FLG = 1,
+            TA.EXPRESS_PRINT_DATE = SYSDATE
+        WHERE
+            TA.ORDER_NO = #{order_no}
+    </update>
+</mapper>

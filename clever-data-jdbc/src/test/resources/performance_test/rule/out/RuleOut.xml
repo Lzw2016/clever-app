@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RuleOut">
+
+    <select id="selectRuleOut">
+        select t.rule_out_id,
+        t.wh_id,
+        t.name,
+        t.create_at,
+        t.create_by,
+        t.update_at,
+        t.update_by,
+        t.name as rule_out_name
+        from rule_out t
+        <where>
+            wh_id = #{wh_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 't.name like')}
+        </where>
+    </select>
+
+    <select id="queryAllRuleOut">
+        select t.rule_out_id,
+               t.wh_id,
+               t.name,
+               t.create_at,
+               t.update_at,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        from rule_out t
+        --%   where t.name like #{name}
+    </select>
+
+</mapper>

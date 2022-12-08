@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CheckRegister">
+
+    <select id="get_ychw" resultType="map">
+        SELECT
+        TA.owner_id,
+        TC.loc_code,
+        TC.loc_classify,
+        TG.area_id,
+        TD.lot_id,
+        trim(TD.lot01) lot01,
+        TA.qty,
+        TD.lot02,
+        TD.lot03,
+        TC.loc_id,
+        TA.quality,
+        TA.lpn,
+        TB.item_code
+        FROM
+        inv_loc TA, bas_item TB, bas_location TC, bas_lot_att TD, bas_package_items TF, bas_area TG
+        WHERE
+        TA.item_id = TB.item_id
+        AND TA.owner_id = TB.owner_id
+        AND TA.loc_id = TC.loc_id
+        AND TA.lot_id = TD.lot_id
+        AND TA.package_id = TF.package_id
+        AND TG.area_id = TC.area_id
+        AND TA.wh_id = #{wh_id}
+        AND TF.item_id = TA.item_id
+        AND TF.package_level = 3
+        <if test="list!= null and list.size() > 0">
+            AND
+            <foreach collection="list" item="item" index="index" open="("  close=")">
+                ( TC.loc_code = #{item.loc_code_old} AND TB.item_code = #{item.item_code}
+                AND (TA.owner_id = #{item.owner_id}) AND trim(TD.lot01) = #{item.lot01_old} AND TA.qty >= #{item.qty_old})
+                <if test="index != (list.size() - 1)">
+                    OR
+                </if>
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryItemWithPackage" resultType="map">
+        select
+            TA.*,
+            TB.package_item_id,
+            TB.package_id,
+            TB.package_meas,
+            TB.package_unit
+        from bas_item TA, bas_package_items TB
+        where
+            TA.item_code in (#{itemCodeList})
+            and TA.owner_id in (#{owner_id_list})
+            and TA.item_id = TB.item_id
+            and TB.package_level = 3
+    </select>
+
+    <select id="queryInfo" resultType="map">
+        SELECT
+        TB.loc_classify,
+        TB.loc_code,
+        TB.loc_id,
+        TA.qty,
+        TA.qty qty_old,
+        TA.qty_in,
+        TA.qty_out,
+        TA.qty_rep_in,
+        TA.qty_rep_out,
+        TA.qty_lock,
+        TC.item_id,
+        TC.item_code,
+        TC.item_name,
+        TF.package_id,
+        TF.package_item_id,
+        TF.package_unit,
+        TF.package_meas,
+        TF.is_unpack,
+        TD.lot_id,
+        TD.lot01,
+        TD.lot02,
+        TD.lot03,
+        TD.lot04,
+        TD.lot05,
+        TD.lot06,
+        TD.lot07,
+        TD.lot08,
+        TD.lot09,
+        TD.lot10,
+        TD.lot11,
+        TD.lot12,
+        TA.lpn,
+        TC.manufacturer,
+        TA.quality,
+        TC.owner_id,
+        TC.item_mhdhb,
+        TA.is_lock,
+        DECODE(TB.loc_type, '4', 'Y', 'N') is_auto_loc
+        FROM   inv_loc TA ,
+        bas_location   TB,
+        bas_item   TC,
+        bas_lot_att  TD,
+        bas_package TE,
+        bas_package_items TF
+        WHERE TA.item_id = TC.item_id
+        AND TE.item_id = TC.item_id
+        AND TE.package_id = TF.package_id
+        AND TF.package_level = '3'
+        AND TA.owner_id = TC.owner_id
+        AND TA.item_id = TD.item_id
+        AND TA.lot_id = TD.lot_id
+        AND TA.loc_id = TB.loc_id
+        <![CDATA[
+        AND TB.loc_classify <> '9'
+        ]]>
+        AND (TA.item_id = #{item_id} OR TA.loc_id = #{loc_id})
+        AND TA.wh_id LIKE '%' || #{wh_id} || '%'
+        ORDER BY
+        is_auto_loc,
+        TB.loc_type,
+        TB.loc_code,
+        TA.lot_id
+    </select>
+
+</mapper>

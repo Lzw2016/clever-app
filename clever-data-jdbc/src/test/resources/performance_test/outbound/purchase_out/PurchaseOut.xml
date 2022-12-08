@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryOrderDetailsByAlloc">
+        select a.owner_id, a.wh_id, a.order_out_id,a.order_type,a.order_biz_type,a.status
+        from order_out a
+        where a.order_type = #{order_type}
+        and a.order_biz_type = #{order_biz_type}
+        and a.order_out_id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryOrderOut">
+        select a.*, b.customer_code, b.customer_name, c.owner_code, c.owner_name
+        from order_out a
+             inner join bas_customer b on a.customer_id = b.customer_id
+             inner join bas_owner c on c.owner_id = a.owner_id
+        where a.wh_id = #{wh_id}
+          and a.order_type = #{order_type}
+          and a.order_biz_type = #{order_biz_type}
+        <if test="order_out_code != null and order_out_code.size() > 0">
+            and a.order_out_code in (#{order_out_code})
+        </if>
+          --@ and a.status = #{status}
+          --@ and a.dates >= #{start_date}
+          --@ and a.dates &lt;= #{end_date}
+          --@ and a.owner_id = #{owner_id}
+          --@ and b.customer_code = #{customer_code}
+        order by a.order_out_code
+    </select>
+
+    <select id="queryOrderOutHis">
+        select a.*, b.customer_code, b.customer_name, c.owner_code, c.owner_name
+        from WMS8_HIS.order_out a
+        inner join bas_customer b on a.customer_id = b.customer_id
+        inner join bas_owner c on c.owner_id = a.owner_id
+        where a.wh_id = #{wh_id}
+        and a.order_type = #{order_type}
+        and a.order_biz_type = #{order_biz_type}
+        <if test="order_out_code != null and order_out_code.size() > 0">
+            and a.order_out_code in (#{order_out_code})
+        </if>
+        --@ and a.status = #{status}
+        --@ and a.dates >= #{start_date}
+        --@ and a.dates &lt;= #{end_date}
+        --@ and a.owner_id = #{owner_id}
+        --@ and b.customer_code = #{customer_code}
+        order by a.order_out_code
+    </select>
+
+    <select id="queryOrderOutDetails">
+        select a.*,
+               b.item_name,
+               b.item_code,
+               b.item_desc,
+               b.manufacturer,
+               b.origin,
+               d.package_level,
+               c.package_code,
+               (a.qty * e.package_meas / d.package_meas) as uom_qty
+        from order_out_details a
+             inner join bas_item b on a.item_id = b.item_id
+             inner join bas_package c on c.package_id = a.package_id
+             inner join bas_package_items d on d.package_item_id = a.package_item_id
+             inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        where a.order_out_id = #{order_out_id}
+        order by a.line_no
+    </select>
+
+    <select id="queryOrderOutDetailsHis">
+        select a.*,
+               b.item_name,
+               b.item_code,
+               b.item_desc,
+               b.manufacturer,
+               b.origin,
+               d.package_level,
+               c.package_code,
+               (a.qty * e.package_meas / d.package_meas) as uom_qty
+        from WMS8_HIS.order_out_details a
+                 inner join bas_item b on a.item_id = b.item_id
+                 inner join bas_package c on c.package_id = a.package_id
+                 inner join bas_package_items d on d.package_item_id = a.package_item_id
+                 inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        where a.order_out_id = #{order_out_id}
+        order by a.line_no
+    </select>
+    <!--查询订单指令行-->
+    <select id="queryCmdOutDetails">
+        select a.*,
+               b.item_name,
+               b.item_code,
+               b.item_desc,
+               b.manufacturer,
+               b.origin,
+               d.package_level,
+               c.package_code,
+               (a.qty * e.package_meas / d.package_meas) as uom_qty
+        from cmd_out a
+                 inner join bas_item b on a.item_id = b.item_id
+                 inner join bas_package c on c.package_id = a.package_id
+                 inner join bas_package_items d on d.package_item_id = a.package_item_id
+                 inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        where a.order_id = #{order_out_id}
+        order by a.cmd_line_no
+    </select>
+    <!--查询订单历史指令行-->
+    <select id="queryCmdOutDetailsHis">
+        select a.*,
+               b.item_name,
+               b.item_code,
+               b.item_desc,
+               b.manufacturer,
+               b.origin,
+               d.package_level,
+               c.package_code,
+               (a.qty * e.package_meas / d.package_meas) as uom_qty
+        from WMS8_HIS.cmd_out a
+                 inner join bas_item b on a.item_id = b.item_id
+                 inner join bas_package c on c.package_id = a.package_id
+                 inner join bas_package_items d on d.package_item_id = a.package_item_id
+                 inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        where a.order_id = #{order_out_id}
+        order by a.cmd_line_no
+    </select>
+
+    <select id="queryOrderOutByAlloc">
+        select * from order_out where order_out_id in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryOrderOutList">
+        select a.owner_id, a.wh_id, a.order_out_id,a.order_type,a.order_biz_type
+        from order_out a
+        where a.order_type = #{order_type}
+          and a.order_biz_type = #{order_biz_type}
+          and not exists(select 1 from order_out_details where a.order_out_id = order_out_id and status != #{status})
+          --@ and a.status = #{status}
+    </select>
+
+</mapper>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DrugCodeCount">
+    <!--药监码扫描统计-->
+    <select id="drugCodeCountQuery" resultType="map">
+        select
+            a.*,
+            a.qty-a.ok_qty no_qty,
+            decode(a.qty-a.ok_qty,0,1,0) is_all
+        from
+            (
+            select
+        e.customer_code,
+        e.customer_name,
+        b.order_out_code,
+        to_char(b.create_at,'yyyy-mm-dd') create_at,
+        c.item_code,
+        c.item_name,
+        d.lot01,
+        sum( a.qty ) qty,
+        ( select count( 1 ) from order_drug_code where order_id = a.order_id and item_id = a.item_id and lot_id =
+        a.lot_id ) ok_qty
+        from
+        cmd_out a
+        inner join order_out b on b.order_out_id = a.order_id
+        inner join bas_item c on c.item_id = a.item_id
+        inner join bas_lot_att d on d.lot_id = a.lot_id
+        inner join bas_customer e on e.customer_id = b.customer_id
+        where
+            a.qty > 0
+            and a.is_unpack = 1
+            --@ and b.ORDER_OUT_CODE = #{order_out_code}
+            --@ and e.customer_code = #{customer_code}
+            --@ and c.item_code = #{item_code}
+            --@ and c.item_name = #{item_name}
+            --@ and d.lot01 = #{lot01}
+            --@ and TO_CHAR(b.create_at,'YYYY-MM-DD') >= #{start_date}
+            --@ and TO_CHAR(b.create_at,'YYYY-MM-DD') &lt;= #{end_date}
+        group by
+        a.order_id,
+        a.item_id,
+        a.lot_id,
+        e.customer_code,
+        e.customer_name,
+        b.order_out_code,
+        to_char(b.create_at,'yyyy-mm-dd'),
+        c.item_code,
+        c.item_name,
+        d.lot01
+        order by to_char(b.create_at,'yyyy-mm-dd') desc
+        ) a
+        <where>
+            --@ decode( a.qty - a.ok_qty, 0, 1, 0 ) = #{is_all}
+        </where>
+    </select>
+
+
+
+</mapper>

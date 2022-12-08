@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SystemPrintSetting">
+
+    <select id="getAllPrintPlan" resultType="map">
+        SELECT
+            sys_print_plan_inf.plan_id,
+            sys_print_plan_inf.plan_code,
+            sys_print_plan_inf.plan_name,
+            sys_print_plan_inf.wh_id,
+            sys_print_plan_inf.template_name,
+            sys_print_plan_area_tag.print_tag,
+            sys_print_plan_area_tag.tag_desc
+        FROM
+            sys_print_plan_inf sys_print_plan_inf
+            LEFT JOIN sys_print_plan_area_tag sys_print_plan_area_tag ON sys_print_plan_area_tag.plan_id = sys_print_plan_inf.plan_id
+            WHERE 1 = 1
+            --% AND (sys_print_plan_inf.plan_code LIKE #{plan} OR sys_print_plan_inf.plan_name LIKE #{plan})
+        order by sys_print_plan_inf.plan_code asc
+    </select>
+
+    <select id="queryPrintPlan">
+        SELECT *
+        FROM SYS_PRINT_PLAN_INF
+        where 1 = 1
+        --@ and PLAN_ID = #{PLAN_ID}
+        --@ and PLAN_CODE = #{PLAN_CODE}
+        --@ and WH_ID = #{WH_ID}
+    </select>
+
+    <update id="uploadTemplate">
+        update SYS_PRINT_PLAN_INF
+        set TEMPLATE_NAME = #{TEMPLATE_NAME},
+            TEMPLATE_FILE = #{TEMPLATE_FILE}
+        where PLAN_ID = #{PLAN_ID}
+    </update>
+
+</mapper>

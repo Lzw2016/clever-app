@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Loc">
+    <select id="queryAllWh">
+        select *
+        from jc_wlzx_pz
+    </select>
+
+    <select id="queryAllStage">
+        select *
+        from JC_ZCQZD
+    </select>
+
+    <select id="queryAllDirection">
+        select *
+        from jc_route
+        where cengj = 1
+    </select>
+
+    <select id="queryAllSlide">
+        SELECT *
+        FROM JC_FJHD_HZ
+    </select>
+
+    <select id="queryAllArea">
+        select *
+        from JC_KFBMDYB t
+    </select>
+
+    <select id="queryAllLocation">
+        SELECT T.*
+        FROM JC_HWZD T
+    </select>
+
+    <select id="queryAllLocGroup">
+        -- 逻辑区域维护表
+        SELECT kub,
+               ljqy,
+               beiz,
+               house_id
+        FROM jc_ljqywh t
+    </select>
+
+    <select id="queryAllLocGroupRel">
+        -- 货位字典中查到 逻辑区域编号与货位ID
+        select t.luoj_area, huow_id
+        from JC_HWZD t
+        where LUOJ_AREA is not null
+    </select>
+
+    <select id="queryAllTransition">
+        SELECT T.*
+        FROM JC_SPKNYDGZ T
+    </select>
+</mapper>

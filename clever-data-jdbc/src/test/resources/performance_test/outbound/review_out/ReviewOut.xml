@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryOrderItem">
+        select a.order_id,a.lot_id, 1 as cus_jiang_flg,
+        case when d.customer_code like 'A%' and b.jiang_flg = 1 then b.cus_jiang_flg else b.jiang_flg end jiang_flg
+        from cmd_out a
+        inner join bas_item b on a.item_id = b.item_id
+        left join order_out c on c.order_out_id = a.order_id
+        left join bas_customer d on d.customer_id = c.customer_id
+        where pick_group = #{pickGroup} and cmd_line_no = #{cmdLineNo}
+    </select>
+
+    <select id="queryUserMsg">
+        select user_id, user_code, user_name
+        from sys_user
+        where user_id = #{userId}
+          and rownum = 1
+    </select>
+
+    <select id="queryOutCustom">
+        select b.*
+        from order_out a
+        inner join bas_customer b on a.customer_id = b.customer_id
+
+    </select>
+
+    <select id="queryOrderPickupType">
+        select pickup_type from order_out where order_out_id = #{order_id}
+    </select>
+
+    <select id="queryOrder">
+        select a.owner_id,a.order_id,b.pickup_type,b.order_out_code
+        from cmd_out a
+        inner join order_out b on a.order_id = b.order_out_id
+        where a.pick_group = #{pick_group} and rownum = 1
+    </select>
+
+    <select id="queryOrderIsCancel">
+        select max(is_cancel) as is_cancel from order_out where order_out_id = #{order_out_id}
+    </select>
+
+    <select id="reviewComfirmPrint">
+        SELECT
+            a.owner_id,
+            b.order_out_code,
+            b.order_out_id,
+            a.pick_group,
+            c.item_code,
+            c.item_name,
+            d.package_meas,
+            d.package_unit,
+            d.package_unit AS package_unit_name,
+            f.lot01,
+            a.qty,
+            g.customer_code,
+            g.customer_name,
+            b.pickup_type,
+            h.USER_NAME AS review_staff_name,
+            e.dict_text AS order_type_name,
+            to_char( SYSDATE, 'yyyy-mm-dd hh24:ss:mi' ) AS now_time,
+            a.pack_no,
+            a.barcode,
+            g.address
+        FROM
+            cmd_out a
+            INNER JOIN order_out b ON a.order_id = b.order_out_id
+            INNER JOIN bas_item c ON c.item_id = a.item_id
+            LEFT JOIN bas_package_items d ON d.package_id = a.package_id
+            AND d.package_item_id = a.package_item_id
+            LEFT JOIN bas_dict_items e ON e.dict_value = nvl( b.order_biz_type, 0 )
+            AND e.dict_code = 'ORDER_BIZ_TYPE'
+            LEFT JOIN bas_lot_att f ON f.lot_id = a.lot_id
+            LEFT JOIN bas_customer g ON g.customer_id = b.customer_id
+            LEFT JOIN sys_user h ON h.user_id = a.review_staff_id
+        where a.order_id = #{order_id} and a.cmd_line_no in
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+        ORDER BY a.barcode,a.pack_no
+    </select>
+
+    <select id="queryCmdOut">
+        select a.*,b.item_code
+        from cmd_out a
+        inner join bas_item b on a.item_id = b.item_id
+        where a.order_id = #{order_id} and a.cmd_line_no = #{cmd_line_no}
+    </select>
+
+    <select id="queryOrderSkuByDrup">
+        select a.*,a.create_by as user_name,c.item_code,c.item_name,d.customer_id,d.customer_code,d.customer_name,b.order_out_code
+        from order_drug_code a
+        inner join order_out b on a.order_id = b.order_out_id
+        inner join bas_item c on c.item_id = a.item_id
+        inner join bas_customer d on d.customer_id = a.customer_id
+        where a.order_id = #{order_id} and a.item_id = #{item_id} and a.lot_id = #{lot_id}
+    </select>
+
+    <select id="queryOrderSku">
+        select a.ORDER_ID,a.CMD_LINE_NO,a.ITEM_ID,to_char(sysdate,'yyyy-mm-dd hh24:mi:ss') as create_at,b.order_type,a.lot_id,
+        #{user_name} as user_name,c.item_code,c.item_name,d.customer_code,d.customer_name,0 as is_upload,b.order_out_code,
+        case when a.turnbox_no is null or a.turnbox_no = 'N/A' then to_char(a.pick_group) else a.turnbox_no end as turnbox_no,
+        b.customer_id
+        from cmd_out a
+        inner join order_out b on a.order_id = b.order_out_id
+        inner join bas_item c on c.item_id = a.item_id
+        inner join bas_customer d on d.customer_id = b.customer_id
+        where a.order_id = #{order_id} and a.cmd_line_no = #{cmd_line_no}
+    </select>
+
+    <select id="querySkuBarCode">
+        select a.item_id,a.item_code,a.item_name,a.item_specification,d.package_meas as box_meas,b.package_unit,d.package_unit as box_unit,
+        b.barcode as min_barcode,c.barcode as smaller_barcode,d.barcode as box_barcode
+        from bas_item a
+        inner join bas_package_items b on a.item_id = b.item_id and b.package_level = 1
+        inner join bas_package_items c on a.item_id = c.item_id and c.package_level = 2
+        inner join bas_package_items d on a.item_id = d.item_id and d.package_level = 3
+        where a.item_id = #{item_id}
+    </select>
+
+    <select id="queryReviewList">
+        select a.cmd_id,
+               a.order_id,
+               a.cmd_line_no,
+               a.item_id,
+               a.lot_id,
+               a.pack_no,
+               a.qty_plan,
+               a.qty,
+               d.package_unit,
+               a.pick_group,
+               b.item_name,
+               b.item_code,
+               c.lot01,
+               c.lot02,
+               c.lot03,
+               b.manufacturer,
+               b.ITEM_SPECIFICATION,
+               d.PACKAGE_UNIT,
+               a.owner_id,
+               e.loc_id,
+               e.LOC_CODE,
+               a.review_obtain_time,
+               f.user_name             as pick_staff_name,
+               g.package_meas as pack_num,
+               a.qty_plan               as old_qty_plan,
+               1 as is_append,
+               a.wh_id
+        from cmd_out a
+             inner join bas_item b on a.item_id = b.item_id
+             inner join bas_lot_att c on c.item_id = b.item_id and a.lot_id = c.lot_id
+             inner join bas_package_items d on d.package_item_id = a.package_item_id
+             inner join bas_location e on e.loc_id = a.loc_id
+             left join sys_user f on f.user_id = a.pick_staff_id
+             inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 3
+        where pick_group = #{pick_group} and a.cmd_state = 70
+        order by a.review_obtain_item_time desc
+    </select>
+
+    <select id="queryCmdLine">
+        select qty, qty_plan
+        from cmd_out
+        where order_id = #{order_id}
+          and cmd_line_no = #{cmd_line_no}
+    </select>
+
+    <select id="queryReviewTask">
+        select a.review_no,
+               a.pick_group,
+               a.turnbox_no,
+               a.review_group,
+               b.pickup_type,
+               e.customer_name,
+               case when d.user_name is not null then '已索取' else '未索取' end as is_demand,
+               d.user_name                                 as review_staff_name,
+               e.customer_code,
+               count(distinct a.item_id)                         as item_num,
+               sum(ceil(ceil(a.qty / f.package_meas) * nvl(f.VOLUME, 1) / 10)) as box_num,
+               b.order_out_code,
+               e.slide_code,g.user_name as pick_staff_name,
+               (
+                    select count(distinct PACK_NO) from cmd_out where a.pick_group = pick_group and cmd_state >= 90
+               ) as review_num
+        from cmd_out a
+             inner join order_out b on a.order_id = b.order_out_id
+             left join sys_user d on d.user_id = a.review_staff_id
+             left join bas_customer e on e.customer_id = b.customer_id
+            left join bas_package_items f on f.package_item_id = a.package_item_id
+            left join sys_user g on g.user_id = a.pick_staff_id
+            left join bas_area ba on ba.area_id = a.area_id
+        where a.wh_id = #{whId} and a.cmd_state >= 60 and a.cmd_state &lt; 90 and a.is_active = 1 and a.pick_group != 0 and a.is_unpack = 1
+        --@ and a.review_no = #{reviewNo}
+        --@ and b.order_out_code like #{orderOutCode}
+        --@ and ba.area_code like #{area_code}
+        group by a.review_no,a.pick_group,a.turnbox_no,a.review_group,b.pickup_type,e.customer_code,d.user_name,e.customer_name,
+        b.order_out_code,g.user_name,e.slide_code
+        order by a.review_no,a.pick_group,a.turnbox_no
+    </select>
+
+    <select id="queryOrderByPickGroup">
+        select a.order_id,
+               b.order_out_code,
+               c.customer_code,
+               c.customer_name,
+               a.pick_group,
+               b.pickup_type,
+               g.boxs,
+               e.boxs_sum,
+               f.demand_boxs,
+               c.distribution_mode,
+               wv.wave_no,
+               b.remark,
+               (e.boxs_sum - nvl(f.demand_boxs, 0)) as no_demand_boxs
+        from cmd_out a
+             inner join order_wave wv on wv.wave_id = a.wave_id
+             inner join order_out b on a.order_id = b.order_out_id
+             inner join bas_customer c on c.customer_id = b.customer_id
+             inner join bas_package_items d on d.package_item_id = a.package_item_id
+             left join (
+            select count(1) as boxs_sum, pick_group
+            from cmd_out
+            where pick_group = #{pick_group}
+              and is_unpack = 1
+            group by pick_group
+        ) e on e.pick_group = a.pick_group
+             left join (
+            select count(1) as demand_boxs, pick_group
+            from cmd_out
+            where pick_group = #{pick_group}
+              and is_unpack = 1
+              and cmd_state >= 70
+              and cmd_state &lt;= 90
+            group by pick_group
+        ) f on f.pick_group = a.pick_group
+             left join (
+            select sum(ceil(ceil(a.qty / b.package_meas) * nvl(b.volume, 1) / #{leveBoxVolume})) as boxs, a.order_id
+            from cmd_out a
+                 inner join bas_package_items b on a.package_item_id = b.package_item_id
+            where exists(select 1 from cmd_out where pick_group = #{pick_group} and a.order_id = order_id)
+            group by a.order_id
+        ) g on g.order_id = a.order_id
+        where a.pick_group = #{pick_group}
+          and a.owner_id = #{owner_id}
+          and rownum = 1
+    </select>
+
+    <select id="queryLevelBoxVolume">
+        select param_value
+        from bas_param
+        where param_code = 'LEVEL_VOLUME' and wh_id = #{wh_id}
+          and rownum = 1
+    </select>
+
+    <update id="insertSplitDetails">
+        insert into cmd_out(order_id, cmd_line_no, loc_id, lot_id, item_id, package_id, lpn, state, loc_id_real,
+                            qty_plan,
+                            qty, area_id, chail_group, order_type, order_biz_type, cmd_id, cmd_id_super, cmd_order,
+                            is_active, cmd_state, advance_state, work_mode, is_unpack, pick_group, review_group, lot01,
+                            lot02, lot03, lot04, lot05, lot06, lot07, lot08, lot09, lot10, lot11, lot12, pick_order,
+                            price,
+                            pack_no, is_short, is_append, turnbox_no, review_no, platform_no, barcode,
+                            barcode_print_type,
+                            create_time, update_time, termial_ip, wave_id, review_type, is_collect, append_type,
+                            sow_table, sow_position,
+                            is_assign, assign_state, line_no_old, package_item_id, create_at, create_by, update_at,
+                            update_by,
+                            owner_id, wh_id, pick_staff_id, pick_obtain_time, pick_confirm_time, sow_pick_group,
+                            review_staff_id,
+                            review_obtain_time, review_confirm_time, review_obtain_item_time)
+        select order_id,
+               #{max_line_no},
+               loc_id,
+               lot_id,
+               item_id,
+               package_id,
+               lpn,
+               state,
+               loc_id_real,
+               #{qty_plan},
+               #{qty_plan},
+               area_id,
+               chail_group,
+               order_type,
+               order_biz_type,
+               cmd_id,
+               cmd_id_super,
+               cmd_order,
+               is_active,
+               cmd_state,
+               advance_state,
+               work_mode,
+               is_unpack,
+               pick_group,
+               review_group,
+               lot01,
+               lot02,
+               lot03,
+               lot04,
+               lot05,
+               lot06,
+               lot07,
+               lot08,
+               lot09,
+               lot10,
+               lot11,
+               lot12,
+               pick_order,
+               price,
+               pack_no,
+               is_short,
+               is_append,
+               turnbox_no,
+               review_no,
+               platform_no,
+               barcode,
+               barcode_print_type,
+               create_time,
+               update_time,
+               termial_ip,
+               wave_id,
+               review_type,
+               is_collect,
+               append_type,
+               sow_table,
+               sow_position,
+               is_assign,
+               assign_state,
+               line_no_old,
+               package_item_id,
+               create_at,
+               create_by,
+               update_at,
+               update_by,
+               owner_id,
+               wh_id,
+               pick_staff_id,
+               pick_obtain_time,
+               pick_confirm_time,
+               sow_pick_group,
+               review_staff_id,
+               review_obtain_time,
+               review_confirm_time,
+               review_obtain_item_time
+        from cmd_out
+        where order_id = #{order_id}
+          and cmd_line_no = #{cmd_line_no}
+    </update>
+
+    <select id="queryBasStaff">
+        select user_id, user_code, user_name
+        from sys_user
+        where user_code = #{user_code}
+          and rownum = 1
+    </select>
+
+    <select id="queryBasStaffById">
+        select user_id, user_code, user_name
+        from sys_user
+        where user_id = #{user_id}
+          and rownum = 1
+    </select>
+
+    <select id="queryDemandReviewList">
+        select a.cmd_id,
+               a.order_id,
+               a.cmd_line_no,
+               a.item_id,
+               a.lot_id,
+               a.pack_no,
+               a.qty_plan,
+               a.qty,
+               d.package_unit,
+               a.pick_group,
+               b.item_name,
+               b.item_code,
+               c.lot01,
+               c.lot02,
+               c.lot03,
+               b.manufacturer,
+               b.ITEM_SPECIFICATION,
+               d.PACKAGE_UNIT,
+               a.owner_id,
+               e.loc_id,
+               e.LOC_CODE,
+               a.review_obtain_time,
+               f.user_name             as pick_staff_name,
+               g.package_meas as pack_num,
+               a.qty_plan               as old_qty_plan,
+               1 as is_append,b.stock_env,
+               h.order_out_code,
+               a.qty as oldQty,g.barcode as box_barcode,i.barcode as un_barcode,
+               j.barcode as min_barcode,b.logogram
+        from cmd_out a
+             inner join bas_item b on a.item_id = b.item_id
+             inner join bas_lot_att c on c.item_id = b.item_id and a.lot_id = c.lot_id
+             inner join bas_package_items d on d.package_item_id = a.package_item_id
+             inner join bas_location e on e.loc_id = a.loc_id
+             left join sys_user f on f.user_id = a.pick_staff_id
+             inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 3
+             inner join order_out h on h.order_out_id = a.order_id
+             left join bas_package_items i on i.package_id = a.package_id and i.package_level = 2
+             left join bas_package_items j on j.package_id = a.package_id and j.package_level = 1
+        where order_id = #{order_id}
+          and review_staff_id = #{staff_id}
+          and review_no = #{review_code}
+          and cmd_state = #{status}
+        order by a.review_obtain_item_time desc
+    </select>
+
+    <select id="querySplitReviewDetails">
+        select a.cmd_state, a.qty
+        from cmd_out a
+        where a.cmd_line_no = #{cmd_line_no}
+          and a.order_id = #{order_id}
+    </select>
+
+    <select id="queryBarCode">
+        select a.cmd_id,
+               a.order_id,
+               a.cmd_line_no,
+               a.item_id,
+               a.lot_id,
+               a.pack_no,
+               a.qty_plan,
+               a.qty,
+               d.package_unit,
+               a.pick_group,
+               b.item_name,
+               b.item_code,
+               c.lot01,
+               c.lot02,
+               c.lot03,
+               b.manufacturer,
+               b.ITEM_SPECIFICATION,
+               a.owner_id,
+               e.loc_id,
+               e.LOC_CODE,
+               a.review_obtain_time,
+               f.user_name             as pick_staff_name,
+               g.package_meas as pack_num,
+               h.order_out_code,i.user_name as review_staff_name,a.barcode,
+               j.customer_code,j.customer_name
+        from cmd_out a
+             inner join bas_item b on a.item_id = b.item_id
+             inner join bas_lot_att c on c.item_id = b.item_id and a.lot_id = c.lot_id
+             inner join bas_package_items d on d.package_item_id = a.package_item_id
+             inner join bas_location e on e.loc_id = a.loc_id
+             left join sys_user f on f.user_id = a.pick_staff_id
+             inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 3
+             inner join order_out h on h.order_out_id = a.order_id
+             left join sys_user i on f.user_id = a.review_staff_id
+             left join bas_customer j on j.customer_id = h.customer_id
+        where a.cmd_state in (90,100,110) and to_char(a.create_at,'yyyy-mm-dd') >= #{start_date}
+        and to_char(a.create_at,'yyyy-mm-dd') &lt;= #{end_date}
+        <if test="barcode != null and barcode != ''">
+            and a.barcode like '%'||#{barcode}||'%'
+        </if>
+        <if test="order_out_code != null and order_out_code != ''">
+            and h.order_out_code like '%'||#{order_out_code}||'%'
+        </if>
+    </select>
+
+    <select id="queryReviewDetails">
+        select a.*
+        from cmd_out a
+        where a.pick_group = #{pick_group}
+          and a.cmd_line_no = #{cmd_line_no}
+          and a.item_id = #{item_id}
+    </select>
+
+    <select id="queryReviewMaster">
+        select a.cmd_id,
+               a.order_id,
+               a.cmd_line_no,
+               a.item_id,
+               a.lot_id,
+               a.pack_no,
+               a.qty_plan,
+               a.qty,
+               d.package_unit,
+               a.pick_group,
+               b.item_name,
+               b.item_code,
+               c.lot01,
+               c.lot02,
+               c.lot03,
+               b.manufacturer,
+               b.ITEM_SPECIFICATION,
+               d.PACKAGE_UNIT,
+               a.owner_id,
+               e.loc_id,
+               e.LOC_CODE,
+               a.review_obtain_time,
+               f.user_name             as pick_staff_name,
+               g.package_meas as pack_num,
+               h.order_out_code,g.barcode as box_barcode,i.barcode as un_barcode,j.barcode as min_barcode,
+               b.logogram,1 as cus_jiang_flg,
+               case when k.customer_code like 'A%' and b.jiang_flg = 1 then b.cus_jiang_flg else b.jiang_flg end jiang_flg
+        from cmd_out a
+             inner join bas_item b on a.item_id = b.item_id
+             inner join bas_lot_att c on c.item_id = b.item_id and a.lot_id = c.lot_id
+             inner join bas_package_items d on d.package_item_id = a.package_item_id
+             inner join bas_location e on e.loc_id = a.loc_id
+             left join sys_user f on f.user_id = a.pick_staff_id
+             inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 3
+             inner join order_out h on h.order_out_id = a.order_id
+             inner join bas_package_items i on i.package_id = a.package_id and i.package_level = 2
+             inner join bas_package_items j on j.package_id = a.package_id and j.package_level = 1
+             left join bas_customer k on k.customer_id = h.customer_id
+        where a.REVIEW_STAFF_ID = #{staff_id}
+          and a.pick_group = #{pick_group}
+          and a.REVIEW_NO = #{review_code}
+          and a.WH_ID = #{wh_id}
+          and a.cmd_state = #{status}
+          --@ and a.item_id = #{item_id}
+    </select>
+
+    <select id="queryBasItem">
+        select item_id,lot_id from cmd_out where order_id = #{order_id} and cmd_line_no = #{cmd_line_no}
+    </select>
+
+    <select id="queryReviewDetailsByItem">
+        select a.*,b.item_code
+        from cmd_out a
+             inner join bas_item b on a.item_id = b.item_id
+        where a.pick_group = #{pick_group}
+          and a.wh_id = #{wh_id}
+          and (b.item_code like #{item_code} or b.logogram like #{item_code} or b.item_name like #{item_code}
+            or exists(select 1 from bas_package_items where a.package_id = package_id and barcode like #{item_code}))
+          and a.cmd_state = 70
+    </select>
+
+    <!--查询业务单据信息-->
+    <select id="getReviewOutBill" resultType="map">
+        <choose>
+            <when test="history == true">
+                SELECT *
+                FROM (SELECT
+                DECODE( T_BC.SPLIT_NO, 'N/A', '拼箱', '整箱' ) SPLTI_NO,
+                TA.ORDER_ID,
+                TB.ORDER_OUT_CODE,
+                TA.PACK_NO,
+                TA.BARCODE,
+                TC.USER_NAME REVIEW_STAFF,
+                max(TA.REVIEW_CONFIRM_TIME) as REVIEW_CONFIRM_TIME,
+                TB.CUSTOMER_ID,
+                DW.CUSTOMER_CODE,
+                DW.CUSTOMER_NAME,
+                TA.REVIEW_NO
+                FROM
+                WMS8_HIS.CMD_OUT TA
+                INNER JOIN WMS8_HIS.ORDER_OUT TB ON TA.ORDER_ID = TB.ORDER_OUT_ID
+                INNER JOIN BAS_CUSTOMER DW ON DW.CUSTOMER_ID = TB.CUSTOMER_ID
+                INNER JOIN SYS_USER TC ON TA.REVIEW_STAFF_ID = TC.USER_ID
+                INNER JOIN SYS_USER_ROLE TD ON TA.REVIEW_STAFF_ID = TD.USER_ID
+                INNER JOIN WMS8_HIS.CMD_BARCODE T_BC ON TA.ORDER_ID = T_BC.ORDER_ID
+                AND TA.BARCODE = T_BC.BARCODE
+                WHERE
+                TA.WH_ID = TB.WH_ID
+                AND TA.IS_UNPACK = 1
+                AND TA.CMD_STATE >= 90
+                --@ and tc.user_name = #{user_name}
+              ${@com.galaxis.wms.ext.Sql@phrase('AND', 'DW.CUSTOMER_CODE like',
+                'DW.CUSTOMER_NAME like', 'TB.ORDER_OUT_CODE like', 'TC.USER_NAME like',
+                'TA.TURNBOX_NO like', 'TA.BARCODE like'
+                )}
+                group by TB.ORDER_OUT_CODE,TA.PACK_NO,TA.BARCODE,TC.USER_NAME,TB.CUSTOMER_ID,DW.CUSTOMER_CODE,
+                DW.CUSTOMER_NAME,TA.REVIEW_NO,TA.ORDER_ID,T_BC.SPLIT_NO
+
+                )
+                ORDER BY REVIEW_CONFIRM_TIME, ORDER_OUT_CODE, PACK_NO
+            </when>
+            <otherwise>
+                SELECT *
+                FROM (SELECT
+                DECODE( T_BC.SPLIT_NO, 'N/A', '拼箱', '整箱' ) SPLTI_NO,
+                TB.ORDER_OUT_CODE,
+                TA.PACK_NO,
+                TA.BARCODE,
+                TC.USER_NAME REVIEW_STAFF,
+                max(TA.REVIEW_CONFIRM_TIME) as REVIEW_CONFIRM_TIME,
+                TB.CUSTOMER_ID,
+                DW.CUSTOMER_CODE,
+                DW.CUSTOMER_NAME,
+                TA.REVIEW_NO,
+                TA.ORDER_ID
+                FROM
+                CMD_OUT TA
+                INNER JOIN ORDER_OUT TB ON TA.ORDER_ID = TB.ORDER_OUT_ID
+                INNER JOIN BAS_CUSTOMER DW ON DW.CUSTOMER_ID = TB.CUSTOMER_ID
+                INNER JOIN SYS_USER TC ON TA.REVIEW_STAFF_ID = TC.USER_ID
+                INNER JOIN SYS_USER_ROLE TD ON TA.REVIEW_STAFF_ID = TD.USER_ID
+                INNER JOIN CMD_BARCODE T_BC ON TA.ORDER_ID = T_BC.ORDER_ID
+                AND TA.BARCODE = T_BC.BARCODE
+                WHERE
+                TA.WH_ID = TB.WH_ID
+                AND TA.IS_UNPACK = 1
+                AND TA.CMD_STATE >= 90
+                --@ and tc.user_name = #{user_name}
+              ${@com.galaxis.wms.ext.Sql@phrase('AND', 'DW.CUSTOMER_CODE like',
+                'DW.CUSTOMER_NAME like', 'TB.ORDER_OUT_CODE like', 'TC.USER_NAME like',
+                'TA.TURNBOX_NO like', 'TA.BARCODE like'
+                )}
+                group by TB.ORDER_OUT_CODE,TA.PACK_NO,TA.BARCODE,TC.USER_NAME,TB.CUSTOMER_ID,DW.CUSTOMER_CODE,
+                DW.CUSTOMER_NAME,TA.REVIEW_NO,TA.ORDER_ID,T_BC.SPLIT_NO
+
+                )
+                ORDER BY REVIEW_CONFIRM_TIME, ORDER_OUT_CODE, PACK_NO
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getReviewOutBillByBarcode">
+        <choose>
+            <when test="history == true">
+                SELECT *
+                FROM (SELECT
+                DECODE( T_BC.SPLIT_NO, 'N/A', '拼箱', '整箱' ) SPLTI_NO,
+                TA.ORDER_ID,
+                TB.ORDER_OUT_CODE,
+                TA.PACK_NO,
+                TA.BARCODE,
+                TC.USER_NAME REVIEW_STAFF,
+                TA.REVIEW_CONFIRM_TIME,
+                TB.CUSTOMER_ID,
+                DW.CUSTOMER_CODE,
+                DW.CUSTOMER_NAME,
+                TA.REVIEW_NO
+                FROM
+                WMS8_HIS.CMD_OUT TA
+                INNER JOIN WMS8_HIS.ORDER_OUT TB ON TA.ORDER_ID = TB.ORDER_OUT_ID
+                INNER JOIN BAS_CUSTOMER DW ON DW.CUSTOMER_ID = TB.CUSTOMER_ID
+                INNER JOIN SYS_USER TC ON TA.REVIEW_STAFF_ID = TC.USER_ID
+                INNER JOIN SYS_USER_ROLE TD ON TA.REVIEW_STAFF_ID = TD.USER_ID
+                INNER JOIN WMS8_HIS.CMD_BARCODE T_BC ON TA.ORDER_ID = T_BC.ORDER_ID
+                AND TA.BARCODE = T_BC.BARCODE
+                WHERE
+                TA.WH_ID = TB.WH_ID
+                AND TA.IS_UNPACK = 1
+                AND TA.CMD_STATE >= 90
+                AND TA.BARCODE =#{bracode}
+                AND ROWNUM=1 )
+            </when>
+            <otherwise>
+                SELECT *
+                FROM (SELECT
+                DECODE( T_BC.SPLIT_NO, 'N/A', '拼箱', '整箱' ) SPLTI_NO,
+                TB.ORDER_OUT_CODE,
+                TA.PACK_NO,
+                TA.BARCODE,
+                TC.USER_NAME REVIEW_STAFF,
+                TA.REVIEW_CONFIRM_TIME,
+                TB.CUSTOMER_ID,
+                DW.CUSTOMER_CODE,
+                DW.CUSTOMER_NAME,
+                TA.REVIEW_NO,
+                TA.ORDER_ID
+                FROM
+                CMD_OUT TA
+                INNER JOIN ORDER_OUT TB ON TA.ORDER_ID = TB.ORDER_OUT_ID
+                INNER JOIN BAS_CUSTOMER DW ON DW.CUSTOMER_ID = TB.CUSTOMER_ID
+                INNER JOIN SYS_USER TC ON TA.REVIEW_STAFF_ID = TC.USER_ID
+                INNER JOIN SYS_USER_ROLE TD ON TA.REVIEW_STAFF_ID = TD.USER_ID
+                INNER JOIN CMD_BARCODE T_BC ON TA.ORDER_ID = T_BC.ORDER_ID
+                AND TA.BARCODE = T_BC.BARCODE
+                WHERE
+                TA.WH_ID = TB.WH_ID
+                AND TA.IS_UNPACK = 1
+                AND TA.CMD_STATE >= 90
+                AND TA.BARCODE =#{bracode}
+                AND ROWNUM=1)
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

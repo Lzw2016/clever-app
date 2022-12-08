@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Param">
+    <select id="selectParam">
+        select *
+        from bas_param A
+        where A.wh_id = #{wh_id}
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.param_name like', 'A.param_code like')}
+    </select>
+
+    <select id="queryAllParam">
+        select
+        T.wh_id,
+        T.param_code,
+        T.param_name,
+        T.param_value,
+        T.param_desc,
+        T.create_by,
+        T.create_at,
+        T.update_by,
+        T.update_at
+        FROM
+        bas_param T
+        <where>
+            --@ AND T.wh_id = #{wh_id}
+            --% AND T.param_code like #{param_code}
+            --% AND T.param_name like #{param_name}
+        </where>
+    </select>
+</mapper>

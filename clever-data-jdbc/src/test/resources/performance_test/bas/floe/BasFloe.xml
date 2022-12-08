@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasFloe">
+    <select id="selectFloe">
+        select *
+        from bas_slide A
+        <where>
+            A.is_enable = 1 and A.wh_id = #{wh_id}
+            ${@com.galaxis.wms.ext.Sql@phrase('AND', 'A.slide_code like', 'A.slide_name like')}
+        </where>
+    </select>
+
+    <select id="queryAllFloe">
+        SELECT
+        a.wh_id,
+        (SELECT wh_name FROM bas_wh WHERE wh_id = a.wh_id) AS wh_name,
+        a.floe_id,
+        a.floe_no,
+        a.floe_type,
+        a.floe_status,
+        a.is_enable,
+        a.create_at,
+        a.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
+        FROM bas_ice_floe a
+        where 1 = 1
+        <if test="floe_no!= null and floe_no != '' and floe_no != 'N/A'">
+            AND a.floe_no = #{floe_no} AND a.floe_no != 'N/A'
+        </if>
+        <if test="floe_type!= null and floe_type != '' and floe_type != 'N/A'">
+            AND a.floe_type = #{floe_type}
+        </if>
+        <if test="is_enable!= null and is_enable != '' and is_enable != 'N/A'">
+            AND a.is_enable = #{is_enable}
+        </if>
+        order by a.floe_no
+    </select>
+</mapper>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="InternalMaintainPlanUphold">
+    <!--查询-->
+    <select id="getInternalMaintainPlanUphold" resultType="map">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        0 check_flg,
+        k.item_id,
+        s.item_code,
+        s.item_name,
+        s.item_specification,
+        ( SELECT package_meas FROM bas_package_items WHERE package_level = 3 AND item_id = k.item_id ) package_meas,
+        ( SELECT package_unit FROM bas_package_items WHERE package_level = 3 AND item_id = k.item_id ) package_unit,
+        s.manufacturer,
+        s.stock_env,
+        k.lot_id,
+        k.loc_id,
+        k.qty,
+        k.create_at,
+        (SELECT user_name FROM sys_user where user_id = k.operator_id)operator_name,
+        k.order_id,
+        k.order_code,
+        k.order_line_no,
+        k.inbound_time,
+        k.inv_loc_quality,
+        k.opinion,
+        k.is_approve,
+        (SELECT user_name FROM sys_user where user_id = k.approve_staff_id)approve_staff_name,
+        k.approve_staff_id,
+        k.remark,
+        k.unqualified_reason,
+        --s.jixing,
+        p.lot01,
+        p.lot02,
+        p.lot03,
+        s.approval_no,
+        k.maintain_type,
+        s.owner_id,
+        hw.loc_code,
+        hw.area_id,
+        k.maintain_time,
+        s.item_classify,
+        ( SELECT owner_name FROM bas_owner WHERE owner_id = s.owner_id ) owner_name,
+        ( CASE WHEN s.is_expensive = 1 THEN 1 WHEN s.stock_env = 3 THEN 1 END ) important_flg
+        FROM
+        gsp_internal_maintain k
+        LEFT JOIN bas_item s ON k.item_id = s.item_id
+        LEFT JOIN bas_lot_att p ON k.lot_id = p.lot_id
+        LEFT JOIN bas_location hw ON k.loc_id = hw.loc_id
+        WHERE
+        k.owner_id = s.owner_id
+        AND p.item_id = k.item_id
+        AND k.wh_id = hw.wh_id
+        AND k.is_approve = #{is_approve}
+        AND (k.maintain_type = #{ATYPE} AND K.create_at <![CDATA[>=]]> TO_DATE(#{star_date}, 'yyyy-mm-dd') AND
+        k.create_at <![CDATA[<=]]> TO_DATE(#{end_date}, 'yyyy-mm-dd'))
+        <if test="operator_id!=null and operator_id!=''">
+            AND k.operator_id LIKE #{operator_id}
+        </if>
+        <if test="order_code!=null and order_code!=''">
+            AND k.order_code LIKE #{order_code}
+        </if>
+        AND k.wh_id = #{wh_id}
+        ORDER BY k.order_code
+        ) tmp
+        <where>
+            <if test="sxFlag=='1'.toString()">
+                <!-- 普通商品 -->
+                AND important_flg = 0
+            </if>
+            <if test="sxFlag=='6'.toString()">
+                <!--中药商品-->
+                AND area_id IN ('')
+                <!--and YAOP_CATEGORY in ('1','2','3')-->
+            </if>
+            <if test="sxFlag=='7'.toString()">
+                <!--重点商品-->
+                AND important_flg = 1
+                <!--and YAOP_CATEGORY in ('11','14','30')-->
+            </if>
+        </where>
+    </select>
+
+</mapper>

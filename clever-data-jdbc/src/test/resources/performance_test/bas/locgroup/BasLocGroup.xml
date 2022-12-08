@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasItem">
+
+    <select id="selectLocGroup">
+        select *
+        from bas_location_group
+        where is_enable = 1
+        --% AND group_name like #{group_name}
+    </select>
+
+    <select id="queryAllLocGroupRel">
+        select t.*
+        from bas_location t
+             inner join bas_location_group_rel rel on t.loc_id = rel.loc_id
+        where rel.group_id = #{group_id}
+    </select>
+
+    <select id="queryAllLocGroup">
+        SELECT T.group_id,
+               T.wh_id,
+               T.group_name,
+               T.loc_classify,
+               T.is_enable,
+               T.create_at,
+               /*T.create_by,*/
+               T.update_at,
+               /*T.update_by,*/
+               T.remark,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.create_by), T.create_by) create_by,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.update_by), T.update_by) update_by,
+               (select count(*) from bas_location_group_rel rel where rel.group_id = T.group_id) loc_count
+        FROM bas_location_group T inner join bas_wh_owner bwo on T.wh_id = bwo.wh_id
+        where 1 = 1 and  T.is_enable = 1
+        --@ AND T.group_id = #{group_id}
+        --@ AND T.loc_classify = #{loc_classify}
+        --@ AND T.is_enable = #{is_enable}
+        --% AND T.remark like #{remark}
+        --% AND T.group_name like #{group_name}
+
+        <if test="#obj.notEmpty(ownerList)">
+            and bwo.owner_id in
+            <foreach collection="ownerList" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+
+    </select>
+
+    <select id="queryAllLocExcludeRel">
+        select *
+        from bas_location t
+        where t.loc_id not in (
+            select loc_id
+            from bas_location_group_rel
+            where group_id = #{group_id}
+        )
+        --@ AND is_enable = #{is_enable}
+        --@ AND wh_id = #{wh_id}
+        --% AND t.loc_code like #{loc_code}
+        --@ AND t.loc_classify = #{loc_classify}
+        --@ AND t.loc_type = #{loc_type}
+        --@ AND t.loc_env = #{loc_env}
+        --@ AND t.loc_use = #{loc_use}
+        --@ AND t.loc_abc = #{loc_abc}
+        --@ AND t.is_lock = #{is_lock}
+        <if test="#obj.notEmpty(loc_id) and loc_id != 0 ">
+            AND t.loc_id = #{loc_id}
+        </if>
+    </select>
+
+    <select id="queryAllLocIncludeRel">
+        select *
+        from bas_location t
+        where t.loc_id in (
+            select loc_id
+            from bas_location_group_rel
+            where group_id = #{group_id}
+        )
+        --@ AND is_enable = #{is_enable}
+        --% AND t.loc_code like #{loc_code}
+        --@ AND t.loc_classify = #{loc_classify}
+        --@ AND t.loc_type = #{loc_type}
+        --@ AND t.loc_env = #{loc_env}
+        --@ AND t.loc_use = #{loc_use}
+        --@ AND t.loc_abc = #{loc_abc}
+        --@ AND t.loc_id = #{loc_id}
+        --@ AND t.is_lock = #{is_lock}
+    </select>
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+    <select id="queryOrderOutDetailsList">
+        select a.*
+        from order_out_details a
+        <where>
+            a.status = 60 and a.order_out_id = #{order_out_id}
+        </where>
+    </select>
+
+    <select id="queryOrderOut">
+        select status,order_biz_type,order_type,wave_id from order_out where order_out_id = #{order_out_id}
+    </select>
+
+    <select id="queryOrderWaveMixStatus">
+        select min(status) as status from order_wave_details where wave_id = #{wave_id}
+    </select>
+
+    <select id="queryInvLoc">
+        select d.owner_name,e.item_name,b.loc_code,f.area_code,f.area_name,c.lot01,c.lot02,c.lot03,c.lot04,c.lot05,c.lot06,
+        c.lot07,c.lot08,c.lot09,c.lot10,c.lot11,c.lot12,
+        ((a.qty + a.qty_rep_in) - (a.qty_hold + a.qty_lock + a.qty_out + a.qty_rep_out + a.qty_onway)) as qty_available,a.*
+        from inv_loc a
+        inner join bas_location b on a.loc_id = b.loc_id
+        inner join bas_lot_att c on c.lot_id = a.lot_id
+        inner join bas_owner d on d.owner_id = a.owner_id
+        inner join bas_item e on e.item_id = a.item_id
+        inner join bas_area f on f.area_id = b.area_id
+        where a.item_id = #{item_id} and (a.qty + a.qty_rep_in) > (a.qty_hold + a.qty_lock + a.qty_out + a.qty_rep_out + a.qty_onway)
+        and a.is_lock = 0
+        --@ and c.lot01 = #{lot01}
+        --@ and c.lot02 = #{lot02}
+        --@ and c.lot03 = #{lot03}
+        --@ and c.lot04 = #{lot04}
+        --@ and c.lot05 = #{lot05}
+        --@ and c.lot06 = #{lot06}
+        --@ and c.lot07 = #{lot07}
+        --@ and c.lot08 = #{lot08}
+        --@ and c.lot09 = #{lot09}
+        --@ and c.lot10 = #{lot10}
+        --@ and c.lot11 = #{lot11}
+        --@ and c.lot12 = #{lot12}
+    </select>
+
+    <select id="queryOrderOutMixStatus">
+        select min(status) as status from order_out_details where order_out_id = #{order_out_id}
+    </select>
+
+    <select id="queryOrderShortage">
+        select a.*,b.customer_code,b.customer_name,c.owner_code,c.owner_name,d.wave_no
+        from order_out a
+        inner join bas_customer b on a.customer_id = b.customer_id
+        inner join bas_owner c on c.owner_id = a.owner_id
+        inner join order_wave d on d.wave_id = a.wave_id
+        where a.wh_id = #{wh_id} and a.status = #{status}
+        and exists(select 1 from order_out_details where a.order_out_id = order_out_id and status = #{status})
+        --% and a.order_out_code like #{order_out_code}
+        order by a.order_out_code
+    </select>
+
+    <select id="queryOrderShortageDetails">
+        <if test=" is_short == 1">
+            select a.qty - nvl(a.bwave_cancel_qty,0) - nvl(a.cancel_qty,0) as now_cancel_qty,a.*,b.item_name,b.item_code,
+            b.item_desc,b.manufacturer,b.origin,d.package_level,c.package_code,
+            trunc(a.qty / f.package_meas) as box_qty,a.qty - (trunc(a.qty / f.package_meas) * f.package_meas) as less_qty
+        </if>
+        <if test=" is_short == 0">
+            select a.*,b.item_name,b.item_code,b.item_desc,b.manufacturer,b.origin,d.package_level,c.package_code,0 as now_cancel_qty,
+            trunc(a.qty / f.package_meas) as box_qty,a.qty - (trunc(a.qty / f.package_meas) * f.package_meas) as less_qty
+        </if>
+        from order_out_details a
+        inner join bas_item b on a.item_id = b.item_id
+        inner join bas_package c on c.package_id = a.package_id
+        inner join bas_package_items d on d.package_item_id = a.package_item_id
+        inner join bas_package_items e on e.package_id = c.package_id and e.package_level = 1
+        inner join bas_package_items f on f.package_id = c.package_id and f.package_level = 3
+        where a.order_out_id = #{order_out_id} and a.status = #{status}
+        order by a.line_no
+    </select>
+
+</mapper>

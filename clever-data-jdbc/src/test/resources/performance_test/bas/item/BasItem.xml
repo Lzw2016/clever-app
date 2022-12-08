@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasItem">
+    <select id="selectItem">
+        select item.*, TX.barcode, owner.owner_code, owner.owner_name
+        from bas_item item, bas_owner owner, bas_package_items TX
+        where item.is_enable = 1
+        and item.owner_id = owner.owner_id
+        and TX.item_id = item.item_id
+        and TX.package_level = 1
+        --@ and item.owner_id = #{owner_id}
+        <if test="#obj.notEmpty(ownerList)">
+            and item.owner_id in
+            <foreach collection="ownerList" item="owner" index="index" open="(" separator="," close=")">
+                #{owner}
+            </foreach>
+        </if>
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'item.item_code like', 'item.item_name like', 'item.logogram like', 'TX.barcode like')}
+    </select>
+
+    <select id="selectItemPackage">
+        SELECT
+        bi.*,
+        bp.package_id,
+        ( SELECT owner_name FROM bas_owner bo WHERE bo.owner_id = bi.owner_id ) owner_name,
+        ( SELECT owner_code FROM bas_owner bo WHERE bo.owner_id = bi.owner_id ) owner_code,
+        bp.package_code,
+        bp.package_name,
+        bp.package_supply_id,
+        bpi.package_item_id,
+        bpi.package_level,
+        bpi.package_meas,
+        bpi.package_unit,
+        bpi.is_unpack,
+        bpi.is_master,
+        bpi.length,
+        bpi.width,
+        bpi.high,
+        bpi.volume,
+        bpi.weight,
+        bpi.cno,
+        bpi.cno_box_num,
+        bpi.barcode
+        FROM
+        bas_item bi
+        LEFT JOIN bas_package bp ON bi.item_id = bp.item_id
+        LEFT JOIN bas_package_items bpi ON bpi.package_id = bp.package_id and bpi.package_level = '3'
+        WHERE 1 = 1
+        <if test="#obj.notEmpty(item_id)">
+            AND bi.item_id = #{item_id}
+        </if>
+        AND bi.owner_id in (#{ownerList})
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'bi.item_code like', 'bi.item_name like', 'bi.logogram like')}
+    </select>
+</mapper>

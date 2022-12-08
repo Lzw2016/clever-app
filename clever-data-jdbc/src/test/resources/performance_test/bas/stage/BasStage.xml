@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BasStage">
+    <select id="selectStage">
+        select *
+        from bas_stage
+        where 1 = 1
+        <if test="#obj.notEmpty(stage_name) and #obj.notEmpty(stage_id)">
+            and (stage_name = #{stage_name} or stage_id = #{stage_id})
+        </if>
+        <if test="#obj.notEmpty(stage_name) and #obj.isEmpty(stage_id)">
+            and stage_name = #{stage_name}
+        </if>
+
+         --@ and wh_id = #{wh_id}
+    </select>
+
+    <select id="queryAllStage">
+        SELECT t.stage_id,
+               t.wh_id,
+               t.owner_id,
+               t.slide_id,
+               t.stage_code,
+               t.stage_name,
+               t.stage_category,
+               t.stage_type,
+               t.stage_desc,
+               t.order_type,
+               t.order_biz_type,
+               t.order_out_id,
+               t.pickup_type,
+               t.is_lock,
+               t.update_at,
+               /*t.update_by,*/
+               t.create_at,
+               /*t.create_by,*/
+               t.sort_num,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        FROM bas_stage t
+        where 1 = 1
+        --@ AND t.is_lock = #{is_lock}
+        --@ AND t.wh_id = #{wh_id}
+        --@ AND t.owner_id = #{owner_id}
+        --@ AND t.slide_id = #{slide_id}
+        --@ AND t.stage_code = #{stage_code}
+        --@ AND t.stage_name = #{stage_name}
+        --@ AND t.stage_category = #{stage_category}
+        --@ AND t.stage_type = #{stage_type}
+        --@ AND t.order_type = #{order_type}
+        --@ AND t.biz_type = #{order_biz_type}
+        --@ AND t.order_out_id = #{order_out_id}
+        --@ AND t.pickup_type = #{pickup_type}
+    </select>
+</mapper>
