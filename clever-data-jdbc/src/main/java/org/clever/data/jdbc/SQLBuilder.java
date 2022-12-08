@@ -18,6 +18,7 @@ import java.util.Map;
  * 作者：lizw <br/>
  * 创建时间：2021/07/22 15:56 <br/>
  */
+@SuppressWarnings("ALL")
 public class SQLBuilder {
     /**
      * fields与whereMap字段名默认的重命名策略
@@ -27,8 +28,6 @@ public class SQLBuilder {
     private static final String SPACE = StringUtils.SPACE;
     private static final String COMMA = ",";
     private static final String WHERE_AND = "AND";
-    public static final String ASC = "ASC";
-    public static final String DESC = "DESC";
 
     /**
      * 创建一个Select SQL构建器
@@ -97,10 +96,24 @@ public class SQLBuilder {
         return TupleTwo.creat(sb.toString(), paramMap);
     }
 
+    public static enum Sort {
+        ASC("ASC"),
+        DESC("DESC");
+        private String sort;
+
+        private Sort(String sort) {
+            this.sort = sort;
+        }
+
+        @Override
+        public String toString() {
+            return sort;
+        }
+    }
+
     /**
      * Select SQL构建器
      */
-    @SuppressWarnings("UnusedReturnValue")
     public static class SelectBuilder {
         /**
          * 数据库类型(跟分页有关系)
@@ -364,9 +377,7 @@ public class SQLBuilder {
         public SelectBuilder innerJoin(String joinTable, String condition, boolean bool) {
             if (bool) {
                 delLast(from, COMMA);
-                from.append(SPACE).append("INNER JOIN").append(SPACE)
-                        .append(joinTable).append(SPACE)
-                        .append(condition);
+                from.append(SPACE).append("INNER JOIN").append(SPACE).append(joinTable).append(SPACE).append(condition);
                 delLast(from, COMMA);
                 from.append(COMMA);
             }
@@ -392,9 +403,7 @@ public class SQLBuilder {
         public SelectBuilder leftJoin(String joinTable, String condition, boolean bool) {
             if (bool) {
                 delLast(from, COMMA);
-                from.append(SPACE).append("LEFT JOIN").append(SPACE)
-                        .append(joinTable).append(SPACE)
-                        .append(condition);
+                from.append(SPACE).append("LEFT JOIN").append(SPACE).append(joinTable).append(SPACE).append(condition);
                 delLast(from, COMMA);
                 from.append(COMMA);
             }
@@ -420,9 +429,7 @@ public class SQLBuilder {
         public SelectBuilder rightJoin(String joinTable, String condition, boolean bool) {
             if (bool) {
                 delLast(from, COMMA);
-                from.append(SPACE).append("RIGHT JOIN").append(SPACE)
-                        .append(joinTable).append(SPACE)
-                        .append(condition);
+                from.append(SPACE).append("RIGHT JOIN").append(SPACE).append(joinTable).append(SPACE).append(condition);
                 delLast(from, COMMA);
                 from.append(COMMA);
             }
@@ -445,7 +452,6 @@ public class SQLBuilder {
          * @param condition 查询条件
          * @param params    查询参数
          */
-        @SuppressWarnings("DuplicatedCode")
         public SelectBuilder setWhere(String condition, Map<String, Object> params, boolean bool) {
             if (bool) {
                 if (params != null && !params.isEmpty()) {
@@ -462,11 +468,37 @@ public class SQLBuilder {
         /**
          * 重新设置查询条件
          *
+         * @param condition  查询条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder setWhere(String condition, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setWhere(condition, params, bool);
+        }
+
+        /**
+         * 重新设置查询条件
+         *
          * @param condition 查询条件
          * @param params    查询参数
          */
         public SelectBuilder setWhere(String condition, Map<String, Object> params) {
             return setWhere(condition, params, true);
+        }
+
+        /**
+         * 重新设置查询条件
+         *
+         * @param condition  查询条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder setWhere(String condition, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setWhere(condition, params);
         }
 
         /**
@@ -484,7 +516,6 @@ public class SQLBuilder {
          * @param condition 查询条件
          * @param params    查询参数
          */
-        @SuppressWarnings("DuplicatedCode")
         public SelectBuilder addWhere(String condition, Map<String, Object> params, boolean bool) {
             if (bool) {
                 if (params != null && !params.isEmpty()) {
@@ -500,11 +531,37 @@ public class SQLBuilder {
         /**
          * 增加查询条件
          *
+         * @param condition  查询条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder addWhere(String condition, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addWhere(condition, params, bool);
+        }
+
+        /**
+         * 增加查询条件
+         *
          * @param condition 查询条件
          * @param params    查询参数
          */
         public SelectBuilder addWhere(String condition, Map<String, Object> params) {
             return addWhere(condition, params, true);
+        }
+
+        /**
+         * 增加查询条件
+         *
+         * @param condition  查询条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder addWhere(String condition, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addWhere(condition, params);
         }
 
         /**
@@ -537,11 +594,11 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置查询分组
+         * 新增查询分组列
          */
-        public SelectBuilder addGroupBy(String groupBy, boolean bool) {
+        public SelectBuilder addGroupBy(String column, boolean bool) {
             if (bool) {
-                this.groupBy.append(SPACE).append(groupBy);
+                this.groupBy.append(SPACE).append(column);
                 delLast(this.groupBy, COMMA);
                 this.groupBy.append(COMMA);
             }
@@ -549,16 +606,16 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置查询分组
+         * 新增查询分组列
          */
-        public SelectBuilder addGroupBy(String groupBy) {
-            return addGroupBy(groupBy, true);
+        public SelectBuilder addGroupBy(String column) {
+            return addGroupBy(column, true);
         }
 
         /**
-         * 重新设置查询条件
+         * 重新设置having条件
          *
-         * @param having 过滤分组条件
+         * @param having having条件
          * @param params 查询参数
          */
         public SelectBuilder setHaving(String having, Map<String, Object> params, boolean bool) {
@@ -575,9 +632,22 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置查询条件
+         * 重新设置having条件
          *
-         * @param having 过滤分组条件
+         * @param having     having条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder setHaving(String having, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setHaving(having, params, bool);
+        }
+
+        /**
+         * 重新设置having条件
+         *
+         * @param having having条件
          * @param params 查询参数
          */
         public SelectBuilder setHaving(String having, Map<String, Object> params) {
@@ -585,18 +655,31 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置过滤分组条件
+         * 重新设置having条件
          *
-         * @param having 过滤分组条件
+         * @param having     having条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder setHaving(String having, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setHaving(having, params);
+        }
+
+        /**
+         * 重新设置having条件
+         *
+         * @param having having条件
          */
         public SelectBuilder setHaving(String having) {
             return setHaving(having, null, true);
         }
 
         /**
-         * 增加过滤分组条件
+         * 新增having条件
          *
-         * @param having 过滤分组条件
+         * @param having having条件
          * @param params 参数
          */
         public SelectBuilder addHaving(String having, Map<String, Object> params, boolean bool) {
@@ -612,13 +695,39 @@ public class SQLBuilder {
         }
 
         /**
-         * 增加过滤分组条件
+         * 新增having条件
          *
-         * @param having 过滤分组条件
+         * @param having     having条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder addHaving(String having, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addHaving(having, params, bool);
+        }
+
+        /**
+         * 新增having条件
+         *
+         * @param having having条件
          * @param params 参数
          */
         public SelectBuilder addHaving(String having, Map<String, Object> params) {
             return addHaving(having, params, true);
+        }
+
+        /**
+         * 新增having条件
+         *
+         * @param having     having条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public SelectBuilder addHaving(String having, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addHaving(having, params);
         }
 
         /**
@@ -656,11 +765,9 @@ public class SQLBuilder {
          * @param orderBy 排序字段
          * @param sort    排序规则 ASC DESC
          */
-        public SelectBuilder addOrderBy(String orderBy, String sort, boolean bool) {
+        public SelectBuilder addOrderBy(String orderBy, Sort sort, boolean bool) {
             if (bool) {
-                this.orderBy.append(SPACE)
-                        .append(orderBy).append(SPACE)
-                        .append(sort);
+                this.orderBy.append(SPACE).append(orderBy).append(SPACE).append(sort);
                 delLast(this.orderBy, COMMA);
                 this.orderBy.append(COMMA);
             }
@@ -673,7 +780,7 @@ public class SQLBuilder {
          * @param orderBy 排序字段
          * @param sort    排序规则 ASC DESC
          */
-        public SelectBuilder addOrderBy(String orderBy, String sort) {
+        public SelectBuilder addOrderBy(String orderBy, Sort sort) {
             return addOrderBy(orderBy, sort, true);
         }
 
@@ -683,7 +790,7 @@ public class SQLBuilder {
          * @param orderBy 排序字段
          */
         public SelectBuilder addOrderBy(String orderBy) {
-            return addOrderBy(orderBy, ASC, true);
+            return addOrderBy(orderBy, Sort.ASC, true);
         }
 
         /**
@@ -692,7 +799,7 @@ public class SQLBuilder {
          * @param orderBy 排序字段
          */
         public SelectBuilder addOrderByAsc(String orderBy, boolean bool) {
-            return addOrderBy(orderBy, ASC, bool);
+            return addOrderBy(orderBy, Sort.ASC, bool);
         }
 
         /**
@@ -701,7 +808,7 @@ public class SQLBuilder {
          * @param orderBy 排序字段
          */
         public SelectBuilder addOrderByAsc(String orderBy) {
-            return addOrderBy(orderBy, ASC, true);
+            return addOrderBy(orderBy, Sort.ASC, true);
         }
 
         /**
@@ -710,7 +817,7 @@ public class SQLBuilder {
          * @param orderBy 排序字段
          */
         public SelectBuilder addOrderByDesc(String orderBy, boolean bool) {
-            return addOrderBy(orderBy, DESC, bool);
+            return addOrderBy(orderBy, Sort.DESC, bool);
         }
 
         /**
@@ -719,7 +826,7 @@ public class SQLBuilder {
          * @param orderBy 排序字段
          */
         public SelectBuilder addOrderByDesc(String orderBy) {
-            return addOrderBy(orderBy, DESC, true);
+            return addOrderBy(orderBy, Sort.DESC, true);
         }
 
         /**
@@ -845,7 +952,6 @@ public class SQLBuilder {
     /**
      * Update SQL构建器
      */
-    @SuppressWarnings("UnusedReturnValue")
     public static class UpdateBuilder {
         /**
          * sql参数
@@ -1013,7 +1119,7 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置更新的字段
+         * 新增更新的字段
          *
          * @param field  字段 field=:fieldValue
          * @param params 参数
@@ -1031,7 +1137,20 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置更新的字段
+         * 新增更新的字段
+         *
+         * @param field      字段 field=:fieldValue
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public UpdateBuilder addField(String field, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addField(field, params);
+        }
+
+        /**
+         * 新增更新的字段
          *
          * @param field  字段 field=:fieldValue
          * @param params 参数
@@ -1041,7 +1160,20 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置更新的字段
+         * 新增更新的字段
+         *
+         * @param field      字段 field=:fieldValue
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public UpdateBuilder addField(String field, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addField(field);
+        }
+
+        /**
+         * 新增更新的字段
          *
          * @param field 字段 field=:fieldValue
          */
@@ -1050,7 +1182,7 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置更新的字段以及字段值
+         * 新增更新的字段以及字段值
          *
          * @param fields       需要更新的字段值
          * @param paramsRename fields字段名重命名策略
@@ -1067,7 +1199,7 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置更新的字段以及字段值
+         * 新增更新的字段以及字段值
          *
          * @param fields       需要更新的字段值
          * @param paramsRename fields字段名重命名策略
@@ -1077,7 +1209,7 @@ public class SQLBuilder {
         }
 
         /**
-         * 重新设置更新的字段以及字段值
+         * 新增更新的字段以及字段值
          *
          * @param fields 需要更新的字段值
          */
@@ -1091,7 +1223,6 @@ public class SQLBuilder {
          * @param condition 更新条件
          * @param params    更新参数
          */
-        @SuppressWarnings("DuplicatedCode")
         public UpdateBuilder setWhere(String condition, Map<String, Object> params, boolean bool) {
             if (bool) {
                 if (params != null && !params.isEmpty()) {
@@ -1108,11 +1239,37 @@ public class SQLBuilder {
         /**
          * 重新设置更新条件
          *
+         * @param condition  更新条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public UpdateBuilder setWhere(String condition, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setWhere(condition, params, bool);
+        }
+
+        /**
+         * 重新设置更新条件
+         *
          * @param condition 更新条件
          * @param params    更新参数
          */
         public UpdateBuilder setWhere(String condition, Map<String, Object> params) {
             return setWhere(condition, params, true);
+        }
+
+        /**
+         * 重新设置更新条件
+         *
+         * @param condition  更新条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public UpdateBuilder setWhere(String condition, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setWhere(condition, params);
         }
 
         /**
@@ -1130,7 +1287,6 @@ public class SQLBuilder {
          * @param condition 更新条件
          * @param params    更新参数
          */
-        @SuppressWarnings("DuplicatedCode")
         public UpdateBuilder addWhere(String condition, Map<String, Object> params, boolean bool) {
             if (bool) {
                 if (params != null && !params.isEmpty()) {
@@ -1146,11 +1302,37 @@ public class SQLBuilder {
         /**
          * 增加更新条件
          *
+         * @param condition  更新条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public UpdateBuilder addWhere(String condition, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addWhere(condition, params, bool);
+        }
+
+        /**
+         * 增加更新条件
+         *
          * @param condition 更新条件
          * @param params    更新参数
          */
         public UpdateBuilder addWhere(String condition, Map<String, Object> params) {
             return addWhere(condition, params, true);
+        }
+
+        /**
+         * 增加更新条件
+         *
+         * @param condition  更新条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public UpdateBuilder addWhere(String condition, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addWhere(condition, params);
         }
 
         /**
@@ -1166,7 +1348,6 @@ public class SQLBuilder {
     /**
      * Insert SQL构建器
      */
-    @SuppressWarnings("UnusedReturnValue")
     public static class InsertBuilder {
         /**
          * 插入语句
@@ -1242,7 +1423,7 @@ public class SQLBuilder {
         }
 
         /**
-         * 设置插入语句
+         * 设置插入语句，默认是"INSERT INTO"，可改为"REPLACE INTO"
          */
         public InsertBuilder setInsertSql(String insertSql) {
             return setInsertSql(insertSql, true);
@@ -1359,6 +1540,16 @@ public class SQLBuilder {
          * @param name  字段名
          * @param value 字段值
          */
+        public InsertBuilder addFieldAndValue(String name, Object value, boolean bool) {
+            return addFieldAndValue(name, value, DEFAULT_PARAMS_RENAME, bool);
+        }
+
+        /**
+         * 增加插入的字段以及字段值
+         *
+         * @param name  字段名
+         * @param value 字段值
+         */
         public InsertBuilder addFieldAndValue(String name, Object value) {
             return addFieldAndValue(name, value, DEFAULT_PARAMS_RENAME, true);
         }
@@ -1367,7 +1558,6 @@ public class SQLBuilder {
     /**
      * Delete SQL构建器
      */
-    @SuppressWarnings("UnusedReturnValue")
     public static class DeleteBuilder {
         /**
          * sql参数
@@ -1473,7 +1663,6 @@ public class SQLBuilder {
          * @param condition 删除条件
          * @param params    删除参数
          */
-        @SuppressWarnings("DuplicatedCode")
         public DeleteBuilder setWhere(String condition, Map<String, Object> params, boolean bool) {
             if (bool) {
                 if (params != null && !params.isEmpty()) {
@@ -1490,11 +1679,37 @@ public class SQLBuilder {
         /**
          * 重新设置删除条件
          *
+         * @param condition  删除条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public DeleteBuilder setWhere(String condition, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setWhere(condition, params, bool);
+        }
+
+        /**
+         * 重新设置删除条件
+         *
          * @param condition 删除条件
          * @param params    删除参数
          */
         public DeleteBuilder setWhere(String condition, Map<String, Object> params) {
             return setWhere(condition, params, true);
+        }
+
+        /**
+         * 重新设置删除条件
+         *
+         * @param condition  删除条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public DeleteBuilder setWhere(String condition, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return setWhere(condition, params);
         }
 
         /**
@@ -1512,7 +1727,6 @@ public class SQLBuilder {
          * @param condition 删除条件
          * @param params    删除参数
          */
-        @SuppressWarnings("DuplicatedCode")
         public DeleteBuilder addWhere(String condition, Map<String, Object> params, boolean bool) {
             if (bool) {
                 if (params != null && !params.isEmpty()) {
@@ -1528,11 +1742,37 @@ public class SQLBuilder {
         /**
          * 增加删除条件
          *
+         * @param condition  删除条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public DeleteBuilder addWhere(String condition, String paramName, Object paramValue, boolean bool) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addWhere(condition, params, bool);
+        }
+
+        /**
+         * 增加删除条件
+         *
          * @param condition 删除条件
          * @param params    删除参数
          */
         public DeleteBuilder addWhere(String condition, Map<String, Object> params) {
             return addWhere(condition, params, true);
+        }
+
+        /**
+         * 增加删除条件
+         *
+         * @param condition  删除条件
+         * @param paramName  参数名
+         * @param paramValue 参数值
+         */
+        public DeleteBuilder addWhere(String condition, String paramName, Object paramValue) {
+            Map<String, Object> params = new HashMap<>();
+            params.put(paramName, paramValue);
+            return addWhere(condition, params);
         }
 
         /**

@@ -36,7 +36,7 @@ public class SQLBuilderTest {
                 .setHaving("c=1", null, true)
                 .setHaving("c=2", null, false)
                 .setOrderBy("a")
-                .addOrderBy("a1", "ASC", false)
+                .addOrderBy("a1", SQLBuilder.Sort.ASC, false)
                 .addOrderByDesc("a2", true)
                 .setPagination(2, 10);
         log.info("--> {}", selectBuilder.buildSql());
@@ -65,7 +65,7 @@ public class SQLBuilderTest {
                 .addHaving("max(c)=1", null, true)
                 .addHaving("max(c)=2", null, false)
                 .setOrderBy("a")
-                .addOrderBy("a1", "ASC", false)
+                .addOrderBy("a1", SQLBuilder.Sort.ASC, true)
                 .addOrderByDesc("a2", true)
                 .setPagination(2, 10);
         log.info("--> {}", selectBuilder.buildSql());
@@ -86,7 +86,7 @@ public class SQLBuilderTest {
                 .addWhere("c=1", null, true)
                 .addWhere("c=2", null, false)
                 .setOrderBy("a")
-                .addOrderBy("a1", "ASC", false)
+                .addOrderBy("a1", SQLBuilder.Sort.ASC, false)
                 .addOrderByDesc("a2", true)
                 .setPagination(2, 10);
         log.info("--> {}", selectBuilder.buildSql());
@@ -132,7 +132,7 @@ public class SQLBuilderTest {
                 .setTable("ta")
                 .setWhere("a=1 AND b=2")
                 .addWhere("c=3")
-                .addWhere("d=:d").addParam("d", 666)
+                .addWhere("d=:d", "d", 666)
                 .addWhere("e=5");
         log.info("--> {}", deleteBuilder.buildSql());
         log.info("--> {}", deleteBuilder.getParams());
