@@ -22,8 +22,8 @@ public class XMLMapperEntityResolver implements EntityResolver {
     private static final String MYBATIS_CONFIG_SYSTEM = "mybatis-3-config.dtd";
     private static final String MYBATIS_MAPPER_SYSTEM = "mybatis-3-mapper.dtd";
 
-    private static final String MYBATIS_CONFIG_DTD = "xml/mybatis/mybatis-3-config.dtd";
-    private static final String MYBATIS_MAPPER_DTD = "xml/mybatis/mybatis-3-mapper.dtd";
+    private static final String MYBATIS_CONFIG_DTD = "mybatis/mybatis-3-config.dtd";
+    private static final String MYBATIS_MAPPER_DTD = "mybatis/mybatis-3-mapper.dtd";
 
     /**
      * Converts a public DTD into a local one.

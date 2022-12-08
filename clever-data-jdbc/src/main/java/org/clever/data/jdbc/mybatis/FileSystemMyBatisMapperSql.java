@@ -52,7 +52,7 @@ public class FileSystemMyBatisMapperSql extends AbstractMyBatisMapperSql {
     @Override
     public String getXmlPath(String absolutePath) {
         absolutePath = FilenameUtils.normalize(absolutePath, true);
-        return absolutePath.substring(rootAbsolutePath.length());
+        return absolutePath.substring(rootAbsolutePath.length() + 1);
     }
 
     @Override

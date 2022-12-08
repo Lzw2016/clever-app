@@ -333,6 +333,17 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     }
 
     /**
+     * 返回当前 SqlSource 对象的数量
+     */
+    public int getSqlSourceCount() {
+        int count = 0;
+        for (SqlSourceGroup item : allSqlSourceGroupMap.values()) {
+            count = count + item.getSqlSourceCount();
+        }
+        return count;
+    }
+
+    /**
      * 文件是否存在
      *
      * @param xmlPath sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”

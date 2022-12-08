@@ -105,13 +105,13 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
     @SneakyThrows
     @Override
     public InputStream openInputStream(String xmlPath) {
-        final Resource resource = PATH_MATCHING_RESOLVER.getResource(xmlPath);
+        Resource resource = PATH_MATCHING_RESOLVER.getResource(xmlPath);
         return resource.getInputStream();
     }
 
     @Override
     public String getXmlPath(String absolutePath) {
-        String classPath = absolutePath;
+        String classPath = FilenameUtils.normalize(absolutePath, true);
         for (String prefix : CLASS_URL_PREFIX) {
             int idx = classPath.indexOf(prefix);
             if (idx >= 0) {

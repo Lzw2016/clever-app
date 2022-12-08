@@ -23,7 +23,6 @@ public class FileSystemMyBatisMapperSqlTest {
         Thread.sleep(20_000);
     }
 
-    @SneakyThrows
     @Test
     public void t02() {
         final String absolutePath = new File("./src/test/resources/performance_test").getAbsolutePath();
@@ -33,13 +32,15 @@ public class FileSystemMyBatisMapperSqlTest {
         for (int i = 0; i < count; i++) {
             FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(absolutePath);
             myBatisMapperSql.reloadAll();
+            // ### SqlSourceCount=654
+            log.info("### SqlSourceCount={}", myBatisMapperSql.getSqlSourceCount());
             if (firstTime == 0) {
                 firstTime = System.currentTimeMillis() - startTime;
             }
         }
         final long endTime = System.currentTimeMillis();
         FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(absolutePath);
-        //  48ms/次 | 第一次:122ms | 总时间:484ms | sql.xml文件数量:157
+        //  462ms/次 | 第一次:997ms | 总时间:4629ms | sql.xml文件数量:157
         log.info("{}ms/次 | 第一次:{}ms | 总时间:{}ms | sql.xml文件数量:{}",
                 (endTime - startTime) / count,
                 firstTime,

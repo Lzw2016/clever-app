@@ -6,7 +6,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.clever.core.io.ClassPathResource;
 import org.clever.core.io.Resource;
 import org.clever.core.io.support.PathMatchingResourcePatternResolver;
+import org.clever.data.dynamic.sql.builder.SqlSource;
+import org.clever.data.dynamic.sql.dialect.DbType;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
 
 /**
  * 作者：lizw <br/>
@@ -93,7 +97,6 @@ public class ClassPathMyBatisMapperSqlTest {
         Thread.sleep(20_000);
     }
 
-    @SneakyThrows
     @Test
     public void t05() {
         final long startTime = System.currentTimeMillis();
@@ -103,18 +106,27 @@ public class ClassPathMyBatisMapperSqlTest {
         for (int i = 0; i < count; i++) {
             ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
             myBatisMapperSql.reloadAll();
+            // ### SqlSourceCount=654
+            log.info("### SqlSourceCount={}", myBatisMapperSql.getSqlSourceCount());
             if (firstTime == 0) {
                 firstTime = System.currentTimeMillis() - startTime;
             }
         }
         final long endTime = System.currentTimeMillis();
         ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
-        // 520ms/次 | 第一次:840ms | 总时间:5204ms | sql.xml文件数量:157 TODO: 需要优化性能
+        // 552ms/次 | 第一次:1127ms | 总时间:5521ms | sql.xml文件数量:157
         log.info("{}ms/次 | 第一次:{}ms | 总时间:{}ms | sql.xml文件数量:{}",
                 (endTime - startTime) / count,
                 firstTime,
                 (endTime - startTime),
                 myBatisMapperSql.getAllLastModified().size()
         );
+    }
+
+    @Test
+    public void t06() {
+        ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql("classpath:dao/*.xml");
+        SqlSource sqlSource = myBatisMapperSql.getSqlSource("t01", "dao/UserDao.xml", DbType.MYSQL);
+        log.info("SQL = {}", sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql());
     }
 }

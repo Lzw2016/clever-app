@@ -100,4 +100,18 @@ public class SqlSourceGroup {
     public void removeDbTypeMap(DbType dbType) {
         dbTypeMap.remove(dbType.getDb());
     }
+
+    /**
+     * 返回当前 SqlSource 对象的数量
+     */
+    public int getSqlSourceCount() {
+        int count = stdSqlSource.size();
+        for (ConcurrentMap<String, SqlSource> item : projectMap.values()) {
+            count = count + item.size();
+        }
+        for (ConcurrentMap<String, SqlSource> item : dbTypeMap.values()) {
+            count = count + item.size();
+        }
+        return count;
+    }
 }
