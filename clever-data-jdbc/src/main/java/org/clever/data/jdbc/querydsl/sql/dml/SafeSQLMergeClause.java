@@ -10,6 +10,9 @@ import java.sql.Connection;
 import java.util.function.Supplier;
 
 /**
+ * 自定义SQLMergeClause主要职责： <br/>
+ * 1.处理insert set null值报错问题 <br/>
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/01/28 22:34 <br/>
  */

@@ -9,6 +9,8 @@ import com.querydsl.sql.dml.SQLInsertBatch;
 import java.util.List;
 
 /**
+ * 在querydsl执行insert之前的字段填充逻辑<br/>
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/02/04 16:32 <br/>
  */

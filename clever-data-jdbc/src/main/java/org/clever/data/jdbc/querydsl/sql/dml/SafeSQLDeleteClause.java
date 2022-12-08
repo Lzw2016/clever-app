@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.util.function.Supplier;
 
 /**
+ * 自定义SQLDeleteClause主要职责： <br/>
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/01/28 22:34 <br/>
  */

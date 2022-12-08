@@ -2,6 +2,9 @@ package org.clever.core.model.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.clever.core.model.request.page.Page;
+
+import java.util.List;
 
 /**
  * 分页查询基础类
@@ -88,37 +91,24 @@ public class QueryByPage extends QueryBySort {
         this.pageNo = pageNo;
     }
 
-//    /**
-//     * 分页
-//     */
-//    private IPage<?> page;
-//    /**
-//     * 设置分页对象
-//     */
-//    public void page(IPage<?> page) {
-//        this.page = page;
-//    }
-//
-//    /**
-//     * 获取请求参数对应的 IPage 对象<br />
-//     * <strong>注意: 当前方法指定要在分页查询执行之后调用否则数据不准确</strong>
-//     * <pre>
-//     *     {@code
-//     *     return query.result(permissionMapper.findByPage(query));
-//     *     }
-//     * </pre>
-//     */
-//    public <T> Page<T> result(List<T> records) {
-//        if (page == null) {
-//            page = new Page<>(getPageNo(), getPageSize());
-//        }
-//        Page<T> newPage = new Page<>();
-//        newPage.setTotal(page.getTotal());
-//        newPage.setSize(page.getSize());
-//        newPage.setCurrent(page.getCurrent());
-//        newPage.setSearchCount(page.isSearchCount());
-//        newPage.setPages(page.getPages());
-//        newPage.setRecords(records);
-//        return newPage;
-//    }
+    /**
+     * 获取请求参数对应的 IPage 对象<br />
+     * <strong>注意: 当前方法指定要在分页查询执行之后调用否则数据不准确</strong>
+     * <pre>
+     *     {@code
+     *     return query.result(permissionMapper.findByPage(query));
+     *     }
+     * </pre>
+     */
+    public static <T> Page<T> result(QueryByPage queryPage, List<T> records) {
+        Page<?> page = new Page<>(queryPage.getPageNo(), queryPage.getPageSize());
+        Page<T> newPage = new Page<>();
+        newPage.setTotal(page.getTotal());
+        newPage.setSize(page.getSize());
+        newPage.setCurrent(page.getCurrent());
+        newPage.setSearchCount(page.isSearchCount());
+        newPage.setPages(page.getPages());
+        newPage.setRecords(records);
+        return newPage;
+    }
 }

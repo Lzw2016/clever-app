@@ -18,7 +18,8 @@ import java.sql.Connection;
 import java.util.function.Supplier;
 
 /**
- * 基于 {@link com.querydsl.sql.AbstractSQLQueryFactory} 的改造
+ * 基于 {@link com.querydsl.sql.AbstractSQLQueryFactory} 的改造，
+ * 使用 {@link SafeSQLDeleteClause}、{@link SafeSQLInsertClause}、{@link SafeSQLMergeClause}、{@link SafeSQLUpdateClause} 替换默认的实现
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/01/28 22:00 <br/>

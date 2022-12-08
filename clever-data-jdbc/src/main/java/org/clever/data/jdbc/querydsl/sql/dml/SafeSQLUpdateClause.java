@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
+ * 自定义SQLUpdateClause主要职责： <br/>
+ * 1.处理set null值报错问题 <br/>
+ * 2.新增SQLUpdateFill功能 <br/>
+ * 3.新增setx函数，自动类型转换 <br/>
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/01/28 22:33 <br/>
  */

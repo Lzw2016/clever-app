@@ -11,11 +11,13 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 /**
+ * SQLClause 工具类
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/02/18 19:24 <br/>
  */
+@SuppressWarnings("ALL")
 public class SQLClause {
-    @SuppressWarnings({"unchecked", "rawtypes", "DuplicatedCode"})
     public static void setx(SQLInsertClause insertClause, Path<?> path, Object value) {
         if (value == null) {
             insertClause.setNull(path);
@@ -27,7 +29,6 @@ public class SQLClause {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "DuplicatedCode"})
     public static void setx(SQLUpdateClause updateClause, Path<?> path, Object value) {
         if (value == null) {
             updateClause.setNull(path);
@@ -39,38 +40,38 @@ public class SQLClause {
         }
     }
 
-    public static Object getFieldValue(final Path<?> path, final Object fieldValue) {
+    public static Object getFieldValue(Path<?> path, Object fieldValue) {
         if (fieldValue == null) {
             return null;
         }
         Class<?> fieldType = path.getType();
-        Object value = null;
-        if (fieldType.isAssignableFrom(Number.class)) {
-            value = Conv.asDecimal(fieldValue, null);
+        if (fieldValue instanceof Boolean && Number.class.isAssignableFrom(fieldType)) {
+            fieldValue = ((Boolean) fieldValue) ? 1 : 0;
+        } else if (fieldType.isAssignableFrom(Number.class)) {
+            fieldValue = Conv.asDecimal(fieldValue);
         } else if (fieldType.isAssignableFrom(Short.class) || fieldType.isAssignableFrom(short.class)) {
-            value = Conv.asShort(fieldValue, null);
+            fieldValue = Conv.asShort(fieldValue);
         } else if (fieldType.isAssignableFrom(Integer.class) || fieldType.isAssignableFrom(int.class)) {
-            value = Conv.asInteger(fieldValue, null);
+            fieldValue = Conv.asInteger(fieldValue);
         } else if (fieldType.isAssignableFrom(Long.class) || fieldType.isAssignableFrom(long.class)) {
-            value = Conv.asLong(fieldValue, null);
+            fieldValue = Conv.asLong(fieldValue);
         } else if (fieldType.isAssignableFrom(Float.class) || fieldType.isAssignableFrom(float.class)) {
-            value = Conv.asFloat(fieldValue, null);
+            fieldValue = Conv.asFloat(fieldValue);
         } else if (fieldType.isAssignableFrom(Double.class) || fieldType.isAssignableFrom(double.class)) {
-            value = Conv.asDouble(fieldValue, null);
+            fieldValue = Conv.asDouble(fieldValue);
         } else if (fieldType.isAssignableFrom(Boolean.class) || fieldType.isAssignableFrom(boolean.class)) {
-            value = Conv.asBoolean(fieldValue, null);
+            fieldValue = Conv.asBoolean(fieldValue);
         } else if (fieldType.isAssignableFrom(BigDecimal.class)) {
-            value = Conv.asDecimal(fieldValue, null);
+            fieldValue = Conv.asDecimal(fieldValue);
         } else if (fieldType.isAssignableFrom(CharSequence.class)) {
-            value = Conv.asString(fieldValue, null);
+            fieldValue = Conv.asString(fieldValue);
+        } else if (fieldType.isAssignableFrom(String.class)) {
+            fieldValue = Conv.asString(fieldValue);
         } else if (fieldType.isAssignableFrom(Date.class)) {
-            value = Conv.asDate(fieldValue, null);
+            fieldValue = Conv.asDate(fieldValue);
         } else if (fieldType.isAssignableFrom(Timestamp.class)) {
-            value = Conv.asTimestamp(fieldValue, null);
+            fieldValue = Conv.asTimestamp(fieldValue);
         }
-        if (value == null) {
-            value = fieldValue;
-        }
-        return value;
+        return fieldValue;
     }
 }

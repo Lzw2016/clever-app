@@ -11,7 +11,8 @@ import java.sql.Connection;
 import java.util.function.Supplier;
 
 /**
- * 基于 {@link com.querydsl.sql.SQLQueryFactory} 的改造
+ * 基于 {@link com.querydsl.sql.SQLQueryFactory} 的改造，
+ * 使用 {@link AbstractSQLQueryFactory} 替换默认的实现
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/01/28 22:08 <br/>

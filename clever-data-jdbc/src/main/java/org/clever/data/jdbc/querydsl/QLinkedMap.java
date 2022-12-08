@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /**
+ * querydsl查询返回LinkedHashMap支持
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2021/12/09 14:56 <br/>
  */

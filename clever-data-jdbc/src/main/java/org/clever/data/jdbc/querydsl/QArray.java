@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * querydsl查询返回数组支持
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/02/20 22:10 <br/>
  */

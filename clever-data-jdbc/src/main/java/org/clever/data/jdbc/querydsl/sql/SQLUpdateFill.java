@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * querydsl 执行更新之前的字段填充逻辑<br/>
+ * 在querydsl执行update之前的字段填充逻辑<br/>
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/02/04 16:16 <br/>
  */

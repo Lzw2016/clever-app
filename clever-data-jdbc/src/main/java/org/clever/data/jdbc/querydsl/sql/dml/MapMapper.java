@@ -15,6 +15,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * querydsl中使用Map对象传参数: <br/>
+ * <pre>{@code
+ *  InsertClause.populate(map, MapMapper.DEFAULT)
+ *  UpdateClause.populate(map, MapMapper.DEFAULT)
+ * }</pre>
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/01/29 10:29 <br/>
  */
