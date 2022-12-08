@@ -3,7 +3,6 @@ package org.clever.data.jdbc.mybatis;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.SystemClock;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.DynamicSqlParser;
@@ -102,6 +101,92 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     }
 
     @Override
+    public void reloadFile(final String xmlPath, boolean skipException) {
+        final boolean exists = fileExists(xmlPath);
+        final String extName = FilenameUtils.getExtension(xmlPath);
+        Assert.isTrue("xml".equals(extName), String.format("sql.xml文件后缀名必须是“.xml”：%s", xmlPath));
+        final String name = FilenameUtils.getBaseName(xmlPath);
+        Assert.isNotBlank(name, String.format("文件名不能为空：%s", xmlPath));
+        final String path = FilenameUtils.getFullPath(xmlPath);
+        final String stdName = StringUtils.split(name, '.')[0];
+        final String stdXmlPath = FilenameUtils.concat(path, String.format("%s.xml", stdName));
+        final String project = StringUtils.trim(name.substring(Math.min(stdName.length() + 1, name.length())));
+        final DbType dbType = DbType.getDbType(project);
+        SqlSourceGroup sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
+        if (exists && sqlSourceGroup == null) {
+            synchronized (allSqlSourceGroupMap) {
+                sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
+                if (sqlSourceGroup == null) {
+                    sqlSourceGroup = new SqlSourceGroup();
+                    putSqlSourceGroup(stdXmlPath, sqlSourceGroup);
+                }
+            }
+        }
+        if (!exists && sqlSourceGroup == null) {
+            return;
+        }
+        if (exists) {
+            // 文件存在
+            Map<String, SqlSource> sqlSourceMap = null;
+            boolean hasException = false;
+            try (InputStream inputStream = openInputStream(xmlPath)) {
+                TupleTwo<Map<String, SqlSource>, Boolean> tupleTwo = loadSqlSource(inputStream, xmlPath);
+                sqlSourceMap = tupleTwo.getValue1();
+                hasException = tupleTwo.getValue2();
+            } catch (Exception ignored) {
+            }
+            if (sqlSourceMap != null && (!hasException || skipException)) {
+                if (dbType != null) {
+                    sqlSourceGroup.clearAndSetDbTypeMap(dbType, sqlSourceMap);
+                } else if (StringUtils.isNotBlank(project)) {
+                    sqlSourceGroup.clearAndSetProjectMap(project, sqlSourceMap);
+                } else {
+                    sqlSourceGroup.clearAndSetStdSqlSource(sqlSourceMap);
+                }
+            }
+        } else {
+            // 文件被删除
+            if (dbType != null) {
+                sqlSourceGroup.removeDbTypeMap(dbType);
+            } else if (StringUtils.isNotBlank(project)) {
+                sqlSourceGroup.removeProjectMap(project);
+            } else {
+                sqlSourceGroup.clearStdSqlSource();
+            }
+        }
+    }
+
+    @Override
+    public synchronized void reloadAll() {
+        Map<String, Long> fileLastModifiedMap = getAllLastModified();
+        List<String> needLoad = new ArrayList<>(fileLastModifiedMap.size());
+        // 变化的文件(包含删除的文件)
+        sqlXmlLastModifiedMap.forEach((absolutePath, lastModified) -> {
+            if (!Objects.equals(fileLastModifiedMap.get(absolutePath), lastModified)) {
+                needLoad.add(absolutePath);
+            }
+        });
+        // 新增的文件
+        fileLastModifiedMap.forEach((absolutePath, lastModified) -> {
+            if (!sqlXmlLastModifiedMap.containsKey(absolutePath)) {
+                needLoad.add(absolutePath);
+            }
+        });
+        // 加载文件
+        for (String absolutePath : needLoad) {
+            log.info("# 解析文件: {}", absolutePath);
+            try {
+                reloadFile(getXmlPath(absolutePath), true);
+            } catch (Exception e) {
+                log.error("# 解析sql.xml文件失败 | path={}", absolutePath);
+            }
+        }
+        // 更新 sqlXmlLastModifiedMap
+        sqlXmlLastModifiedMap.clear();
+        sqlXmlLastModifiedMap.putAll(fileLastModifiedMap);
+    }
+
+    @Override
     public void startWatch(int period) {
         if (watch) {
             return;
@@ -110,7 +195,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
             if (watch) {
                 return;
             }
-            daemonWatch.scheduleAtFixedRate(this::loadChange, period);
+            daemonWatch.scheduleAtFixedRate(this::reloadAll, period);
             watch = true;
         }
     }
@@ -130,7 +215,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     }
 
     @Override
-    public boolean idWatch() {
+    public boolean isWatch() {
         return watch;
     }
 
@@ -248,81 +333,6 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     }
 
     /**
-     * 重新加载指定文件(文件被删除或者文件更新之后调用)
-     *
-     * @param xmlPath       sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”
-     * @param skipException 是否跳过异常
-     */
-    protected void reloadFile(final String xmlPath, boolean skipException) {
-        final boolean exists = fileExists(xmlPath);
-        final String extName = FilenameUtils.getExtension(xmlPath);
-        Assert.isTrue("xml".equals(extName), String.format("sql.xml文件后缀名必须是“.xml”：%s", xmlPath));
-        final String name = FilenameUtils.getBaseName(xmlPath);
-        Assert.isNotBlank(name, String.format("文件名不能为空：%s", xmlPath));
-        final String path = FilenameUtils.getFullPath(xmlPath);
-        final String stdName = StringUtils.split(name, '.')[0];
-        final String stdXmlPath = FilenameUtils.concat(path, String.format("%s.xml", stdName));
-        final String projectOrBbType = StringUtils.trim(name.substring(Math.min(stdName.length() + 1, name.length())));
-        final DbType dbType = DbType.getDbType(projectOrBbType);
-        SqlSourceGroup sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
-        if (exists && sqlSourceGroup == null) {
-            synchronized (allSqlSourceGroupMap) {
-                sqlSourceGroup = getSqlSourceGroup(stdXmlPath);
-                if (sqlSourceGroup == null) {
-                    sqlSourceGroup = new SqlSourceGroup();
-                    putSqlSourceGroup(stdXmlPath, sqlSourceGroup);
-                }
-            }
-        }
-        if (!exists && sqlSourceGroup == null) {
-            return;
-        }
-        if (exists) {
-            // 文件存在
-            Map<String, SqlSource> sqlSourceMap = null;
-            boolean hasException = false;
-            try (InputStream inputStream = openInputStream(xmlPath)) {
-                TupleTwo<Map<String, SqlSource>, Boolean> tupleTwo = loadSqlSource(inputStream, xmlPath);
-                sqlSourceMap = tupleTwo.getValue1();
-                hasException = tupleTwo.getValue2();
-            } catch (Exception ignored) {
-            }
-            if (sqlSourceMap != null && (!hasException || skipException)) {
-                if (dbType != null) {
-                    sqlSourceGroup.clearAndSetDbTypeMap(dbType, sqlSourceMap);
-                } else if (StringUtils.isNotBlank(projectOrBbType)) {
-                    sqlSourceGroup.clearAndSetProjectMap(projectOrBbType, sqlSourceMap);
-                } else {
-                    sqlSourceGroup.clearAndSetStdSqlSource(sqlSourceMap);
-                }
-            }
-        } else {
-            // 文件被删除
-            if (dbType != null) {
-                sqlSourceGroup.removeDbTypeMap(dbType);
-            } else if (StringUtils.isNotBlank(projectOrBbType)) {
-                sqlSourceGroup.removeProjectMap(projectOrBbType);
-            } else {
-                sqlSourceGroup.clearStdSqlSource();
-            }
-        }
-    }
-
-    /**
-     * 加载变化的sql.xml文件
-     */
-    public void loadChange() {
-//        TODO 加载变化的sql.xml文件
-    }
-
-    /**
-     * 获取文件的绝对路径(仅仅只为了打印日志，不影响sql.xml文件解析)
-     *
-     * @param xmlPath sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”
-     */
-    public abstract String getAbsolutePath(String xmlPath);
-
-    /**
      * 文件是否存在
      *
      * @param xmlPath sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”
@@ -337,9 +347,9 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     public abstract InputStream openInputStream(String xmlPath);
 
     /**
-     * 加载所有文件
+     * 把绝对路径转换成xmlPath路径(“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”)
      */
-    public abstract void reloadAll();
+    public abstract String getXmlPath(String absolutePath);
 
     /**
      * 返回所有sql.xml文件的最后修改时间 {@code ConcurrentMap<AbsolutePath, LastModified>}
@@ -347,15 +357,9 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     public abstract Map<String, Long> getAllLastModified();
 
     /**
-     * 初始化加载所有配置
+     * 获取文件的绝对路径(仅仅只为了打印日志，不影响sql.xml文件解析)
+     *
+     * @param xmlPath sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”、“org/clever/biz/dao/UserDao.mysql.xml”
      */
-    protected void initLoad() {
-        log.info("# ==========================================================================");
-        log.info("# === 初始化读取sql.xml文件 ===");
-        long startTime = SystemClock.now();
-        reloadAll();
-        long endTime = SystemClock.now();
-        log.info("# === 读取sql.xml文件完成 | 耗时: {}ms ===", (endTime - startTime));
-        log.info("# ==========================================================================");
-    }
+    public abstract String getAbsolutePath(String xmlPath);
 }

@@ -8,10 +8,14 @@ import org.clever.core.io.support.PathMatchingResourcePatternResolver;
 import org.clever.util.Assert;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * TODO: 深度测试，支持多个path
+ * 从classpath中读取sql.xml文件
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2020/09/30 15:51 <br/>
  */
@@ -72,12 +76,6 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
     public ClassPathMyBatisMapperSql(String locationPattern) {
         Assert.isNotBlank(locationPattern, "参数locationPattern不能为空");
         this.locationPattern = locationPattern;
-        initLoad();
-    }
-
-    @Override
-    public String getAbsolutePath(String xmlPath) {
-        return xmlPath;
     }
 
     @Override
@@ -112,53 +110,7 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
     }
 
     @Override
-    public void reloadAll() {
-        Set<Resource> resourceSet = initResource();
-        for (Resource resource : resourceSet) {
-            try {
-                final String absolutePath = resource.getURL().toExternalForm();
-                log.info("# 解析文件: {}", absolutePath);
-                reloadFile(getXmlPath(absolutePath), true);
-            } catch (Exception e) {
-                log.error("解析sql.xml文件失败 | path={}", resource, e);
-            }
-        }
-    }
-
-    @SneakyThrows
-    @Override
-    public Map<String, Long> getAllLastModified() {
-        Map<String, Long> result = new HashMap<>();
-        Set<Resource> resourceSet = initResource();
-        for (Resource resource : resourceSet) {
-            if (resource.isFile()) {
-                result.put(resource.getFile().getAbsolutePath(), resource.lastModified());
-            } else {
-                result.put(resource.getURL().toExternalForm(), resource.lastModified());
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 解析sql.xml资源文件
-     */
-    @SneakyThrows
-    protected synchronized Set<Resource> initResource() {
-        Set<Resource> resourceSet = new HashSet<>();
-        Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
-        for (Resource resource : resources) {
-            if (resource.isReadable() && resource.getURL().toExternalForm().toLowerCase().endsWith(".xml")) {
-                resourceSet.add(resource);
-            }
-        }
-        return resourceSet;
-    }
-
-    /**
-     * 把绝对路径转换成class path路径
-     */
-    protected String getXmlPath(String absolutePath) {
+    public String getXmlPath(String absolutePath) {
         String classPath = absolutePath;
         for (String prefix : CLASS_URL_PREFIX) {
             int idx = classPath.indexOf(prefix);
@@ -169,5 +121,27 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
         }
         classPath = FilenameUtils.normalize(classPath, true);
         return classPath;
+    }
+
+    @SneakyThrows
+    @Override
+    public Map<String, Long> getAllLastModified() {
+        Map<String, Long> result = new HashMap<>();
+        Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
+        for (Resource resource : resources) {
+            if (resource.isReadable() && resource.getURL().toExternalForm().toLowerCase().endsWith(".xml")) {
+                if (resource.isFile()) {
+                    result.put(resource.getFile().getAbsolutePath(), resource.lastModified());
+                } else {
+                    result.put(resource.getURL().toExternalForm(), resource.lastModified());
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String getAbsolutePath(String xmlPath) {
+        return xmlPath;
     }
 }
