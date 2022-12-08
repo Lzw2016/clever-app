@@ -33,7 +33,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
             2, 8, 60, TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(16),
             new BasicThreadFactory.Builder()
-                    .namingPattern("load-mybatis-xml-%d")
+                    .namingPattern("load-mybatis-%d")
                     .daemon(true)
                     .build(),
             new ThreadPoolExecutor.CallerRunsPolicy()
