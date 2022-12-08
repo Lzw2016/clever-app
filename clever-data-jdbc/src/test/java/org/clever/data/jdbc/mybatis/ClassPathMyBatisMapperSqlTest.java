@@ -114,7 +114,7 @@ public class ClassPathMyBatisMapperSqlTest {
         }
         final long endTime = System.currentTimeMillis();
         ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
-        // 552ms/次 | 第一次:1127ms | 总时间:5521ms | sql.xml文件数量:157
+        // 198ms/次 | 第一次:434ms | 总时间:1989ms | sql.xml文件数量:157
         log.info("{}ms/次 | 第一次:{}ms | 总时间:{}ms | sql.xml文件数量:{}",
                 (endTime - startTime) / count,
                 firstTime,

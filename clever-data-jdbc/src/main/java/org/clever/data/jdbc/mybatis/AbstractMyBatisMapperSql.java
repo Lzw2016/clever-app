@@ -3,6 +3,7 @@ package org.clever.data.jdbc.mybatis;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.DynamicSqlParser;
@@ -19,8 +20,7 @@ import org.xml.sax.SAXParseException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -29,6 +29,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     private static final AtomicInteger EXECUTOR_COUNT = new AtomicInteger(0);
+    private static final ThreadPoolExecutor LOAD_XML_EXECUTOR = new ThreadPoolExecutor(
+            2, 8, 60, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(16),
+            new BasicThreadFactory.Builder()
+                    .namingPattern("load-mybatis-xml-%d")
+                    .daemon(true)
+                    .build(),
+            new ThreadPoolExecutor.CallerRunsPolicy()
+    );
     protected final Logger log = LoggerFactory.getLogger(getClass());
     /**
      * 所有的mybatis动态sql信息 {@code Map<stdXmlPath, SqlSourceGroup>}
@@ -173,12 +182,23 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
             }
         });
         // 加载文件
+        List<Future<?>> futures = new ArrayList<>(needLoad.size());
         for (String absolutePath : needLoad) {
-            log.info("# 解析文件: {}", absolutePath);
+            Future<?> future = LOAD_XML_EXECUTOR.submit(() -> {
+                log.info("# 解析文件: {}", absolutePath);
+                try {
+                    reloadFile(getXmlPath(absolutePath), true);
+                } catch (Exception e) {
+                    log.error("# 解析sql.xml文件失败 | path={}", absolutePath);
+                }
+            });
+            futures.add(future);
+        }
+        // 等待reload结束
+        for (Future<?> future : futures) {
             try {
-                reloadFile(getXmlPath(absolutePath), true);
-            } catch (Exception e) {
-                log.error("# 解析sql.xml文件失败 | path={}", absolutePath);
+                future.get();
+            } catch (Exception ignored) {
             }
         }
         // 更新 sqlXmlLastModifiedMap
