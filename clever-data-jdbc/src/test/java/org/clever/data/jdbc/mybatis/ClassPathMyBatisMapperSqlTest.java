@@ -93,8 +93,12 @@ public class ClassPathMyBatisMapperSqlTest {
         ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql("classpath:dao/*.xml");
         myBatisMapperSql.reloadAll();
         log.info("加载完成");
+        SqlSource sqlSource = myBatisMapperSql.getSqlSource("t01", "dao/UserDao.xml", DbType.MYSQL);
+        log.info("SQL = {}", sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql());
         myBatisMapperSql.startWatch(100);
-        Thread.sleep(20_000);
+        Thread.sleep(10_000);
+        sqlSource = myBatisMapperSql.getSqlSource("t01", "dao/UserDao.xml", DbType.MYSQL);
+        log.info("SQL = {}", sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql());
     }
 
     @Test

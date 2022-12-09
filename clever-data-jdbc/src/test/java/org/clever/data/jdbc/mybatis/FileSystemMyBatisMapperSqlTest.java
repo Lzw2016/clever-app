@@ -22,8 +22,12 @@ public class FileSystemMyBatisMapperSqlTest {
         FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(absolutePath);
         myBatisMapperSql.reloadAll();
         log.info("加载完成");
+        SqlSource sqlSource = myBatisMapperSql.getSqlSource("t01", "UserDao.xml", DbType.MYSQL);
+        log.info("SQL = {}", sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql());
         myBatisMapperSql.startWatch(100);
-        Thread.sleep(20_000);
+        Thread.sleep(10_000);
+        sqlSource = myBatisMapperSql.getSqlSource("t01", "UserDao.xml", DbType.MYSQL);
+        log.info("SQL = {}", sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql());
     }
 
     @Test
