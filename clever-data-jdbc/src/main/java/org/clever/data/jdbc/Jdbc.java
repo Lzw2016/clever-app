@@ -2719,7 +2719,8 @@ public class Jdbc extends AbstractDataSource {
     public <T> T lock(String lockName, Supplier<T> syncBlock) {
         Assert.isNotBlank(lockName, "参数 lockName 不能为空");
         Assert.notNull(syncBlock, "参数 syncBlock 不能为空");
-        return jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<T>) connection -> {
+        final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
+        return jdbcOperations.execute((ConnectionCallback<T>) connection -> {
             final String lockSql = "UPDATE sys_lock SET lock_count=lock_count+1, update_at=? WHERE lock_name=?";
             final String insertSql = "INSERT INTO sys_lock (id, lock_name, lock_count, description, create_at) VALUES (?, ?, ?, ?, ?)";
             final String selectSql = "SELECT id FROM sys_lock WHERE lock_name=?";
@@ -2736,7 +2737,7 @@ public class Jdbc extends AbstractDataSource {
                 if (lock <= 0) {
                     try {
                         // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
-                        jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) innerCon -> {
+                        jdbcOperations.execute((ConnectionCallback<Integer>) innerCon -> {
                             long id = SnowFlake.SNOW_FLAKE.nextId();
                             int change = executeUpdate(innerCon, insertSql, new Object[]{id, lockName, 0, "系统自动生成", new Date()});
                             innerCon.commit();
