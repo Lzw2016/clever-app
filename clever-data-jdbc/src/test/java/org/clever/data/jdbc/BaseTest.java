@@ -24,5 +24,21 @@ public class BaseTest {
     public static Jdbc newMysql() {
         return new Jdbc(mysqlConfig());
     }
+
+    public static HikariConfig postgresqlConfig() {
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName("org.postgresql.Driver");
+        hikariConfig.setJdbcUrl("jdbc:postgresql://192.168.1.201:30010/test");
+        hikariConfig.setUsername("admin");
+        hikariConfig.setPassword("admin123456");
+        hikariConfig.setAutoCommit(false);
+        hikariConfig.setMinimumIdle(1);
+        hikariConfig.setMaximumPoolSize(512);
+        return hikariConfig;
+    }
+
+    public static Jdbc newPostgresql() {
+        return new Jdbc(postgresqlConfig());
+    }
 }
 

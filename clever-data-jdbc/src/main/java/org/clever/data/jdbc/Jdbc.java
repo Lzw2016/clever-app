@@ -3051,9 +3051,8 @@ public class Jdbc extends AbstractDataSource {
         preparedStatement = con.prepareStatement(sql);
         // 绑定参数设置sql占位符中的值
         if (params != null) {
-            for (int i = 1; i <= params.length; i++) {
-                preparedStatement.setObject(i, params[i - 1]);
-            }
+            ArgumentPreparedStatementSetter pss = new ArgumentPreparedStatementSetter(params);
+            pss.setValues(preparedStatement);
         }
         // 执行sql
         return preparedStatement.executeUpdate();
@@ -3069,11 +3068,10 @@ public class Jdbc extends AbstractDataSource {
     private static List<Map<String, Object>> executeQuery(Connection con, String sql, Object[] params) throws SQLException {
         // 执行SQL预编译
         PreparedStatement preparedStatement = con.prepareStatement(sql);
+        // 设置sql占位符中的值
         if (params != null) {
-            // 设置sql占位符中的值
-            for (int i = 1; i <= params.length; i++) {
-                preparedStatement.setObject(i, params[i - 1]);
-            }
+            ArgumentPreparedStatementSetter pss = new ArgumentPreparedStatementSetter(params);
+            pss.setValues(preparedStatement);
         }
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             MapRowMapper mapRowMapper = new MapRowMapper(RenameStrategy.None);
