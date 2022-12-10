@@ -2736,10 +2736,10 @@ public class Jdbc extends AbstractDataSource {
                 if (lock <= 0) {
                     try {
                         // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
-                        jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) con -> {
+                        jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) innerCon -> {
                             long id = SnowFlake.SNOW_FLAKE.nextId();
-                            int change = executeUpdate(con, insertSql, new Object[]{id, lockName, 0, "系统自动生成", new Date()});
-                            con.commit();
+                            int change = executeUpdate(innerCon, insertSql, new Object[]{id, lockName, 0, "系统自动生成", new Date()});
+                            innerCon.commit();
                             return change;
                         });
                     } catch (DuplicateKeyException e) {
