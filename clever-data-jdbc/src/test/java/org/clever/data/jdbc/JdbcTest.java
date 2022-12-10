@@ -156,7 +156,6 @@ public class JdbcTest {
                     jdbc.beginTX(status -> {
                         jdbc.lock(lockName);
                         sum.setValue1(sum.getValue1() + 1);
-                        return null;
                     }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
                 }
             });

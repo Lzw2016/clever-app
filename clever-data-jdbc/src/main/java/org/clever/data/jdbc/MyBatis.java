@@ -1054,12 +1054,12 @@ public class MyBatis extends AbstractDataSource {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
-     * @param isolationLevel      设置事务隔离级别 {@link org.springframework.transaction.TransactionDefinition#ISOLATION_DEFAULT}
+     * @param isolationLevel      设置事务隔离级别 {@link org.clever.transaction.TransactionDefinition#ISOLATION_DEFAULT}
      * @param readOnly            设置事务是否只读
      * @param <T>                 返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout, int isolationLevel, boolean readOnly) {
         return jdbc.beginTX(action, propagationBehavior, timeout, isolationLevel, readOnly);
@@ -1069,11 +1069,11 @@ public class MyBatis extends AbstractDataSource {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间(单位：秒)
-     * @param isolationLevel      设置事务隔离级别 {@link org.springframework.transaction.TransactionDefinition#ISOLATION_DEFAULT}
+     * @param isolationLevel      设置事务隔离级别 {@link org.clever.transaction.TransactionDefinition#ISOLATION_DEFAULT}
      * @param <T>                 返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout, int isolationLevel) {
         return jdbc.beginTX(action, propagationBehavior, timeout, isolationLevel);
@@ -1083,10 +1083,10 @@ public class MyBatis extends AbstractDataSource {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间(单位：秒)
      * @param <T>                 返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout) {
         return jdbc.beginTX(action, propagationBehavior, timeout);
@@ -1096,9 +1096,9 @@ public class MyBatis extends AbstractDataSource {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param <T>                 返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior) {
         return jdbc.beginTX(action, propagationBehavior);
@@ -1109,7 +1109,7 @@ public class MyBatis extends AbstractDataSource {
      *
      * @param action 事务内数据库操作
      * @param <T>    返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action) {
         return jdbc.beginTX(action);
@@ -1119,11 +1119,11 @@ public class MyBatis extends AbstractDataSource {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
-     * @param isolationLevel      设置事务隔离级别 {@link org.springframework.transaction.TransactionDefinition#ISOLATION_DEFAULT}
+     * @param isolationLevel      设置事务隔离级别 {@link org.clever.transaction.TransactionDefinition#ISOLATION_DEFAULT}
      * @param <T>                 返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action, int propagationBehavior, int timeout, int isolationLevel) {
         return jdbc.beginReadOnlyTX(action, propagationBehavior, timeout, isolationLevel);
@@ -1133,10 +1133,10 @@ public class MyBatis extends AbstractDataSource {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
      * @param <T>                 返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action, int propagationBehavior, int timeout) {
         return jdbc.beginReadOnlyTX(action, propagationBehavior, timeout);
@@ -1146,9 +1146,9 @@ public class MyBatis extends AbstractDataSource {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param <T>                 返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action, int propagationBehavior) {
         return jdbc.beginReadOnlyTX(action, propagationBehavior);
@@ -1159,7 +1159,7 @@ public class MyBatis extends AbstractDataSource {
      *
      * @param action 事务内数据库操作
      * @param <T>    返回值类型
-     * @see org.springframework.transaction.TransactionDefinition
+     * @see org.clever.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action) {
         return jdbc.beginReadOnlyTX(action);
