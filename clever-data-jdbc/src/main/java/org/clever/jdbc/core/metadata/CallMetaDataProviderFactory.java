@@ -1,10 +1,10 @@
 package org.clever.jdbc.core.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.clever.dao.DataAccessResourceFailureException;
 import org.clever.jdbc.support.JdbcUtils;
 import org.clever.jdbc.support.MetaDataAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
@@ -17,7 +17,7 @@ import java.util.List;
  * 创建时间：2022/12/05 17:07 <br/>
  */
 public final class CallMetaDataProviderFactory {
-    private static final Log logger = LogFactory.getLog(CallMetaDataProviderFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(CallMetaDataProviderFactory.class);
     /**
      * 过程调用支持的数据库产品列表。
      */

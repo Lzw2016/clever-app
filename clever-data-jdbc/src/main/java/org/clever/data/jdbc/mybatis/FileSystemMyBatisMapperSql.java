@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.util.Assert;
+import org.clever.util.Assert;
 
 import java.io.File;
 import java.io.InputStream;

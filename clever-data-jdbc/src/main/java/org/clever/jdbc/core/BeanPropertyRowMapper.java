@@ -1,7 +1,5 @@
 package org.clever.jdbc.core;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.clever.beans.*;
 import org.clever.core.convert.ConversionService;
 import org.clever.core.convert.support.DefaultConversionService;
@@ -11,6 +9,8 @@ import org.clever.jdbc.support.JdbcUtils;
 import org.clever.util.Assert;
 import org.clever.util.ClassUtils;
 import org.clever.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyDescriptor;
 import java.sql.ResultSet;
@@ -45,7 +45,7 @@ import java.util.*;
  * @see DataClassRowMapper
  */
 public class BeanPropertyRowMapper<T> implements RowMapper<T> {
-    protected final Log logger = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 我们要映射到的类
      */

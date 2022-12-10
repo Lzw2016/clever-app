@@ -1,13 +1,13 @@
 package org.clever.jdbc.core.simple;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.clever.dao.InvalidDataAccessApiUsageException;
 import org.clever.jdbc.core.*;
 import org.clever.jdbc.core.metadata.CallMetaDataContext;
 import org.clever.jdbc.core.namedparam.SqlParameterSource;
 import org.clever.util.Assert;
 import org.clever.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.*;
@@ -23,7 +23,7 @@ public abstract class AbstractJdbcCall {
     /**
      * 子类可用的记录器。
      */
-    protected final Log logger = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * 用于执行 SQL 的低级类。
      */

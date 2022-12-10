@@ -1,9 +1,9 @@
 package org.clever.transaction.support;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.clever.transaction.*;
 import org.clever.util.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.UndeclaredThrowableException;
 
@@ -26,10 +26,10 @@ import java.lang.reflect.UndeclaredThrowableException;
  *
  * @see #execute
  * @see #setTransactionManager
- * @see org.springframework.transaction.PlatformTransactionManager
+ * @see org.clever.transaction.PlatformTransactionManager
  */
 public class TransactionTemplate extends DefaultTransactionDefinition implements TransactionOperations {
-    protected final Log logger = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private PlatformTransactionManager transactionManager;
 

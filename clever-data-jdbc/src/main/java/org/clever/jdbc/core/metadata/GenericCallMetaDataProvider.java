@@ -1,13 +1,12 @@
 package org.clever.jdbc.core.metadata;
 
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.clever.dao.InvalidDataAccessApiUsageException;
 import org.clever.jdbc.core.SqlInOutParameter;
 import org.clever.jdbc.core.SqlOutParameter;
 import org.clever.jdbc.core.SqlParameter;
 import org.clever.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -27,7 +26,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
     /**
      * 子类可用的记录器。
      */
-    protected static final Log logger = LogFactory.getLog(CallMetaDataProvider.class);
+    protected static final Logger logger = LoggerFactory.getLogger(CallMetaDataProvider.class);
     private final String userName;
     private boolean supportsCatalogsInProcedureCalls = true;
     private boolean supportsSchemasInProcedureCalls = true;
@@ -361,7 +360,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
         } catch (SQLException ex) {
             if (logger.isWarnEnabled()) {
                 logger.warn("Error while retrieving meta-data for procedure columns. " +
-                                "Consider declaring explicit parameters -- for example, via SimpleJdbcCall#addDeclaredParameter().", ex
+                        "Consider declaring explicit parameters -- for example, via SimpleJdbcCall#addDeclaredParameter().", ex
                 );
             }
             // Although we could invoke `this.callParameterMetaData.clear()` so that

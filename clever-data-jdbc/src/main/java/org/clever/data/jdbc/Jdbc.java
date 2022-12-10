@@ -2413,7 +2413,7 @@ public class Jdbc extends AbstractDataSource {
             params.put("size", size);
             params.put("id", rowId.getValue1());
             params.put("update_at", new Date());
-            update("update auto_increment_id set current_value=current_value+:size update_at=:update_at where id=:id", params);
+            update("update auto_increment_id set current_value=current_value+:size, update_at=:update_at where id=:id", params);
             // 查询更新之后的值
             params.clear();
             params.put("id", rowId.getValue1());
@@ -2436,6 +2436,19 @@ public class Jdbc extends AbstractDataSource {
     public Long nextId(String idName) {
         List<Long> ids = nextIds(idName, 1);
         return ids.get(0);
+    }
+
+    /**
+     * 返回当前唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     */
+    public Long currentId(String idName) {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("sequence_name", idName);
+        Long id = queryLong("select current_value from auto_increment_id where sequence_name=:sequence_name", params);
+        return id == null ? -1L : id;
     }
 
     /**

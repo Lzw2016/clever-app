@@ -1,7 +1,5 @@
 package org.clever.jdbc.core.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.clever.dao.InvalidDataAccessApiUsageException;
 import org.clever.jdbc.core.*;
 import org.clever.jdbc.core.namedparam.SqlParameterSource;
@@ -10,6 +8,8 @@ import org.clever.jdbc.support.JdbcUtils;
 import org.clever.util.Assert;
 import org.clever.util.CollectionUtils;
 import org.clever.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.DatabaseMetaData;
@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class CallMetaDataContext {
     // 子类可用的记录器
-    protected final Log logger = LogFactory.getLog(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     // 要调用的过程的名称
     private String procedureName;
     // 调用目录名称
