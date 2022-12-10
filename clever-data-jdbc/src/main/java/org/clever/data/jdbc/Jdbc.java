@@ -5,12 +5,14 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import lombok.Data;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
 import org.clever.core.codec.EncodeDecodeUtils;
+import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.BusinessCodeUtils;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.BeanCopyUtils;
@@ -22,6 +24,7 @@ import org.clever.core.model.request.page.Page;
 import org.clever.core.tuples.TupleOne;
 import org.clever.core.tuples.TupleThree;
 import org.clever.core.tuples.TupleTwo;
+import org.clever.dao.DataAccessException;
 import org.clever.dao.DuplicateKeyException;
 import org.clever.dao.support.DataAccessUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
@@ -49,14 +52,15 @@ import org.clever.util.Assert;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.util.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Jdbc 数据库操作封装
@@ -2702,66 +2706,101 @@ public class Jdbc extends AbstractDataSource {
      * 借助数据库表实现的排他锁 <br/>
      * <b>此功能需要数据库表支持</b>
      * <pre>{@code
-     *   jdbc.beginTX(status -> {
-     *       jdbc.lock(lockName);
-     *       // 业务逻辑处理...
-     *       return null;
-     *   }, TransactionDefinition.PROPAGATION_REQUIRES_NEW, lockTimeout);
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *      return result;
+     *   })
      * }</pre>
      *
-     * @param lockName 锁名称
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块
      */
-    public void lock(String lockName) {
+    @SneakyThrows
+    public <T> T lock(String lockName, Supplier<T> syncBlock) {
         Assert.isNotBlank(lockName, "参数 lockName 不能为空");
-        final Map<String, Object> params = new HashMap<>();
-        params.put("lock_name", lockName);
-        Long existsId = queryLong("select id from sys_lock where lock_name=:lock_name", params);
-        if (existsId == null) {
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为空");
+        return jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<T>) connection -> {
+            final String lockSql = "UPDATE sys_lock SET lock_count=lock_count+1, update_at=? WHERE lock_name=?";
+            final String insertSql = "INSERT INTO sys_lock (id, lock_name, lock_count, description, create_at) VALUES (?, ?, ?, ?, ?)";
+            final String selectSql = "SELECT id FROM sys_lock WHERE lock_name=?";
+            // 备份连接状态
+            int transactionIsolation = connection.getTransactionIsolation();
+            boolean autoCommit = connection.getAutoCommit();
             try {
-                Long id = SnowFlake.SNOW_FLAKE.nextId();
-                params.clear();
-                params.put("id", id);
-                params.put("lock_name", lockName);
-                params.put("lock_count", 0);
-                params.put("description", "系统自动生成");
-                params.put("create_at", new Date());
-                insertTable("sys_lock", params, RenameStrategy.None);
-//                // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
-//                beginTX(status -> {
-//                    return null;
-//                }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-            } catch (DuplicateKeyException e) {
-                // 插入数据失败: 唯一约束错误
-                log.warn("插入 sys_lock 表失败: {}", e.getMessage());
+                // 这里使用新的连接获取数据库行级锁
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                connection.setAutoCommit(false);
+                // 使用数据库行级锁保证并发性
+                int lock = executeUpdate(connection, lockSql, new Object[]{new Date(), lockName});
+                // 锁数据不存在就创建锁数据
+                if (lock <= 0) {
+                    try {
+                        // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
+                        jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) con -> {
+                            long id = SnowFlake.SNOW_FLAKE.nextId();
+                            int change = executeUpdate(con, insertSql, new Object[]{id, lockName, 0, "系统自动生成", new Date()});
+                            con.commit();
+                            return change;
+                        });
+                    } catch (DuplicateKeyException e) {
+                        // 插入数据失败: 唯一约束错误
+                        log.warn("插入 sys_lock 表失败: {}", e.getMessage());
+                    } catch (DataAccessException e) {
+                        log.warn("插入 sys_lock 表失败", e);
+                    }
+                    // 等待锁数据插入完成
+                    final int maxRetryCount = 32;
+                    for (int i = 0; i < maxRetryCount; i++) {
+                        List<Map<String, Object>> list = executeQuery(connection, selectSql, new Object[]{lockName});
+                        if (list != null && !list.isEmpty()) {
+                            break;
+                        }
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException ignored) {
+                        }
+                    }
+                    // 使用数据库行级锁保证并发性
+                    lock = executeUpdate(connection, lockSql, new Object[]{new Date(), lockName});
+                    if (lock <= 0) {
+                        throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
+                    }
+                }
+                // 执行同步代码块
+                T result = syncBlock.get();
+                connection.commit();
+                return result;
             } catch (Exception e) {
-                log.warn("插入 sys_lock 表失败", e);
+                // 异常回滚事务
+                connection.rollback();
+                throw ExceptionUtils.unchecked(e);
+            } finally {
+                // 还原连接状态后关闭连接
+                connection.setTransactionIsolation(transactionIsolation);
+                connection.setAutoCommit(autoCommit);
+                connection.close();
             }
-            // 等待锁数据插入完成
-            final int maxRetryCount = 32;
-            params.clear();
-            params.put("lock_name", lockName);
-            for (int i = 0; i < maxRetryCount; i++) {
-                existsId = queryLong("select id from sys_lock where lock_name=:lock_name", params);
-                if (existsId != null) {
-                    break;
-                }
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException ignored) {
-                }
-            }
-            if (existsId == null) {
-                throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
-            }
-        }
-        // 使用数据库行级锁保证并发性
-        params.clear();
-        params.put("lock_name", lockName);
-        params.put("update_at", new Date());
-        int lock = update("update sys_lock set lock_count=lock_count+1, update_at=:update_at where lock_name=:lock_name", params);
-        if (lock <= 0) {
-            throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
-        }
+        });
+    }
+
+    /**
+     * 借助数据库表实现的排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块
+     */
+    @SneakyThrows
+    public void lock(String lockName, Runnable syncBlock) {
+        lock(lockName, () -> {
+            syncBlock.run();
+            return null;
+        });
     }
 
     // --------------------------------------------------------------------------------------------
@@ -2968,7 +3007,7 @@ public class Jdbc extends AbstractDataSource {
     /**
      * 获取下一个事务名称
      */
-    public String getNextTransactionName() {
+    private String getNextTransactionName() {
         int nextSerialNumber = transactionSerialNumber.incrementAndGet();
         String transactionName;
         if (nextSerialNumber < 0) {
@@ -2995,6 +3034,51 @@ public class Jdbc extends AbstractDataSource {
                     return procedure;
                 }
         );
+    }
+
+    /**
+     * 执行更新操作(需要调用方控制事务和资源的释放)
+     *
+     * @param con    数据库连接对象
+     * @param sql    sql脚本，参数格式[?]
+     * @param params sql参数
+     * @return 影响的行数
+     */
+    private static int executeUpdate(Connection con, String sql, Object[] params) throws SQLException {
+        PreparedStatement preparedStatement = null;
+        // 执行SQL预编译
+        preparedStatement = con.prepareStatement(sql);
+        // 绑定参数设置sql占位符中的值
+        if (params != null) {
+            for (int i = 1; i <= params.length; i++) {
+                preparedStatement.setObject(i, params[i - 1]);
+            }
+        }
+        // 执行sql
+        return preparedStatement.executeUpdate();
+    }
+
+    /**
+     * 执行查询操作(需要调用方控制事务和资源的释放)
+     *
+     * @param con    数据库连接对象
+     * @param sql    sql脚本，参数格式[?]
+     * @param params sql参数
+     */
+    private static List<Map<String, Object>> executeQuery(Connection con, String sql, Object[] params) throws SQLException {
+        // 执行SQL预编译
+        PreparedStatement preparedStatement = con.prepareStatement(sql);
+        if (params != null) {
+            // 设置sql占位符中的值
+            for (int i = 1; i <= params.length; i++) {
+                preparedStatement.setObject(i, params[i - 1]);
+            }
+        }
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            MapRowMapper mapRowMapper = new MapRowMapper(RenameStrategy.None);
+            RowMapperResultSetExtractor<Map<String, Object>> resultExtractor = new RowMapperResultSetExtractor<>(mapRowMapper);
+            return resultExtractor.extractData(resultSet);
+        }
     }
 
     // --------------------------------------------------------------------------------------------

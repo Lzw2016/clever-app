@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.tuples.TupleOne;
-import org.clever.transaction.TransactionDefinition;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -153,10 +152,13 @@ public class JdbcTest {
         for (int i = 0; i < count; i++) {
             Future<?> future = EXECUTOR.submit(() -> {
                 for (int j = 0; j < 100; j++) {
-                    jdbc.beginTX(status -> {
-                        jdbc.lock(lockName);
+                    jdbc.lock(lockName, () -> {
                         sum.setValue1(sum.getValue1() + 1);
-                    }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException ignored) {
+                        }
+                    });
                 }
             });
             futures.add(future);
@@ -168,7 +170,7 @@ public class JdbcTest {
             } catch (Exception ignored) {
             }
         }
-        // sum ->
+        // sum -> 10000
         log.info("sum -> {}", sum.getValue1());
         jdbc.close();
     }

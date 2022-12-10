@@ -52,7 +52,7 @@ create table sys_lock
     update_at           datetime(3)                             on update current_timestamp(3)          comment '更新时间',
     primary key (id)
 ) comment = '自增长id表';
-create index sys_lock_lock_name on sys_lock (lock_name);
+create unique index sys_lock_lock_name on sys_lock (lock_name);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/

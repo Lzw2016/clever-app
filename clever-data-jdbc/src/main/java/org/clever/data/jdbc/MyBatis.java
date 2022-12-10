@@ -1,6 +1,7 @@
 package org.clever.data.jdbc;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.clever.core.RenameStrategy;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
@@ -21,6 +22,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 作者：lizw <br/>
@@ -1414,17 +1416,35 @@ public class MyBatis extends AbstractDataSource {
      * 借助数据库表实现的排他锁 <br/>
      * <b>此功能需要数据库表支持</b>
      * <pre>{@code
-     *   mybatis.beginTX(status -> {
-     *       mybatis.lock(lockName);
-     *       // 业务逻辑处理...
-     *       return null;
-     *   }, TransactionDefinition.PROPAGATION_REQUIRES_NEW, lockTimeout);
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *      return result;
+     *   })
      * }</pre>
      *
-     * @param lockName 锁名称
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块
      */
-    public void lock(String lockName) {
-        jdbc.lock(lockName);
+    @SneakyThrows
+    public <T> T lock(String lockName, Supplier<T> syncBlock) {
+        return jdbc.lock(lockName, syncBlock);
+    }
+
+    /**
+     * 借助数据库表实现的排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块
+     */
+    @SneakyThrows
+    public void lock(String lockName, Runnable syncBlock) {
+        jdbc.lock(lockName, syncBlock);
     }
 
     // --------------------------------------------------------------------------------------------
