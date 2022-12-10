@@ -2,8 +2,11 @@ package org.clever.data.jdbc;
 
 import com.querydsl.sql.*;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.querydsl.SQLCoreListener;
+import org.clever.data.jdbc.support.JdbcDataSourceStatus;
+import org.clever.data.jdbc.support.JdbcInfo;
 import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.TransactionStatus;
 import org.clever.transaction.support.TransactionCallback;
@@ -11,6 +14,7 @@ import org.clever.util.Assert;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -261,6 +265,178 @@ public class QueryDSL extends SQLQueryFactory {
      */
     public void beginReadOnlyTX(Consumer<TransactionStatus> action) {
         jdbc.beginReadOnlyTX(action);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  其它 操作
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 获取SQLWarning输出(支持Oracle的dbms_output输出)
+     *
+     * @param clear 是否清空SQLWarning缓存
+     */
+    public String getSqlWarning(boolean clear) {
+        return jdbc.getSqlWarning(clear);
+    }
+
+    /**
+     * 获取SQLWarning输出(支持Oracle的dbms_output输出)
+     */
+    public String getSqlWarning() {
+        return jdbc.getSqlWarning();
+    }
+
+    /**
+     * 启用收集SQLWarning输出(支持Oracle的dbms_output输出)
+     */
+    public void enableSqlWarning() {
+        jdbc.enableSqlWarning();
+    }
+
+    /**
+     * 禁用收集SQLWarning输出(支持Oracle的dbms_output输出)
+     *
+     * @return 返回之前输出的数据 & 清空数据
+     */
+    public String disableSqlWarning() {
+        return jdbc.disableSqlWarning();
+    }
+
+    /**
+     * 获取数据源信息
+     */
+    public JdbcInfo getInfo() {
+        return jdbc.getInfo();
+    }
+
+    /**
+     * 获取数据源状态
+     */
+    public JdbcDataSourceStatus getStatus() {
+        return jdbc.getStatus();
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  业务含义操作
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 返回下一个主键值
+     *
+     * @param primaryKeyName 主键名称
+     */
+    public Long nextPK(String primaryKeyName) {
+        return jdbc.nextPK(primaryKeyName);
+    }
+
+    /***
+     * 批量获取唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     * @param size 唯一id值数量(1 ~ 10W)
+     */
+    public List<Long> nextIds(String idName, int size) {
+        return jdbc.nextIds(idName, size);
+    }
+
+    /**
+     * 返回下一个唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     */
+    public Long nextId(String idName) {
+        return jdbc.nextId(idName);
+    }
+
+    /**
+     * 返回当前唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     */
+    public Long currentId(String idName) {
+        return jdbc.currentId(idName);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>
+     * 支持: ${date_format_pattern}、${seq_size}、${id_size}，例如：
+     * CK${yyMMddHHmm}${seq}    -> CK22120108301、CK221201083023
+     * CK${yyyyMMdd}_${seq3}    -> CK20221201_001、CK20221201_023
+     * CK${yy}-${MMdd}-${seq3}  -> CK22-1201-001、CK22-1201-023
+     * </pre>
+     *
+     * @param codeName code名称
+     * @param size     唯一 code 值数量(1 ~ 10W)
+     */
+    public List<String> nextCodes(String codeName, int size) {
+        return jdbc.nextCodes(codeName, size);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>
+     * 支持: ${date_format_pattern}、${seq_size}、${id_size}，例如：
+     * CK${yyMMddHHmm}${seq}    -> CK22120108301、CK221201083023
+     * CK${yyyyMMdd}_${seq3}    -> CK20221201_001、CK20221201_023
+     * CK${yy}-${MMdd}-${seq3}  -> CK22-1201-001、CK22-1201-023
+     * </pre>
+     *
+     * @param codeName code名称
+     */
+    public String nextCode(String codeName) {
+        return jdbc.nextCode(codeName);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param codeName code名称
+     */
+    public String currentCode(String codeName) {
+        return jdbc.currentCode(codeName);
+    }
+
+    /**
+     * 借助数据库表实现的排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *      return result;
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块
+     */
+    @SneakyThrows
+    public <T> T lock(String lockName, Supplier<T> syncBlock) {
+        return jdbc.lock(lockName, syncBlock);
+    }
+
+    /**
+     * 借助数据库表实现的排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块
+     */
+    @SneakyThrows
+    public void lock(String lockName, Runnable syncBlock) {
+        jdbc.lock(lockName, syncBlock);
     }
 
     // --------------------------------------------------------------------------------------------
