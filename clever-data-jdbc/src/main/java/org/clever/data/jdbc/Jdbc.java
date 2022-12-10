@@ -2401,9 +2401,20 @@ public class Jdbc extends AbstractDataSource {
                 } catch (Exception e) {
                     log.warn("插入 auto_increment_id 表失败", e);
                 }
+                // 等待数据插入成功
+                final int maxRetryCount = 32;
                 params.clear();
                 params.put("sequence_name", idName);
-                rowId.setValue1(queryLong("select id from auto_increment_id where sequence_name=:sequence_name", params));
+                for (int i = 0; i < maxRetryCount; i++) {
+                    rowId.setValue1(queryLong("select id from auto_increment_id where sequence_name=:sequence_name", params));
+                    if (rowId.getValue1() != null) {
+                        break;
+                    }
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
             }
             if (rowId.getValue1() == null) {
                 throw new RuntimeException("auto_increment_id 表数据不存在(未知的异常)");
@@ -2447,13 +2458,21 @@ public class Jdbc extends AbstractDataSource {
     public Long currentId(String idName) {
         final Map<String, Object> params = new HashMap<>();
         params.put("sequence_name", idName);
-        Long id = queryLong("select current_value from auto_increment_id where sequence_name=:sequence_name", params);
-        return id == null ? -1L : id;
+        return beginTX(status -> {
+            Long id = queryLong("select current_value from auto_increment_id where sequence_name=:sequence_name", params);
+            return id == null ? -1L : id;
+        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     /**
      * 批量获取唯一的 code 值 <br/>
      * <b>此功能需要数据库表支持</b>
+     * <pre>
+     * 支持: ${date_format_pattern}、${seq_size}、${id_size}，例如：
+     * CK${yyMMddHHmm}${seq}    -> CK22120108301、CK221201083023
+     * CK${yyyyMMdd}_${seq3}    -> CK20221201_001、CK20221201_023
+     * CK${yy}-${MMdd}-${seq3}  -> CK22-1201-001、CK22-1201-023
+     * </pre>
      *
      * @param codeName code名称
      * @param size     唯一 code 值数量(1 ~ 10W)
@@ -2496,7 +2515,7 @@ public class Jdbc extends AbstractDataSource {
             fields.put("sequence", newSequence);
             fields.put("reset_flag", newResetFlag);
             fields.put("update_at", now);
-            updateTable("auto_increment_id", fields, params, RenameStrategy.None);
+            updateTable("biz_code", fields, params, RenameStrategy.None);
             return TupleThree.creat(pattern, now, newSequence);
         }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         long oldValue = res.getValue3() - size;
@@ -2510,12 +2529,37 @@ public class Jdbc extends AbstractDataSource {
     /**
      * 批量获取唯一的 code 值 <br/>
      * <b>此功能需要数据库表支持</b>
+     * <pre>
+     * 支持: ${date_format_pattern}、${seq_size}、${id_size}，例如：
+     * CK${yyMMddHHmm}${seq}    -> CK22120108301、CK221201083023
+     * CK${yyyyMMdd}_${seq3}    -> CK20221201_001、CK20221201_023
+     * CK${yy}-${MMdd}-${seq3}  -> CK22-1201-001、CK22-1201-023
+     * </pre>
      *
      * @param codeName code名称
      */
     public String nextCode(String codeName) {
         List<String> codes = nextCodes(codeName, 1);
         return codes.get(0);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param codeName code名称
+     */
+    public String currentCode(String codeName) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("code_name", codeName);
+        return beginTX(status -> {
+            Map<String, Object> result = queryOne("select pattern, sequence from biz_code where code_name=:code_name", params, RenameStrategy.None);
+            String code = null;
+            if (result != null) {
+                code = BusinessCodeUtils.create(Conv.asString(result.get("pattern")), new Date(), Conv.asLong(result.get("sequence")));
+            }
+            return code;
+        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     /**
@@ -2535,10 +2579,8 @@ public class Jdbc extends AbstractDataSource {
         Assert.isNotBlank(lockName, "参数 lockName 不能为空");
         final Map<String, Object> params = new HashMap<>();
         params.put("lock_name", lockName);
-        params.put("update_at", new Date());
-        // 使用数据库行级锁保证并发性
-        int lock = update("update sys_lock set lock_count=lock_count+1, update_at=:update_at where lock_name=:lock_name", params);
-        if (lock <= 0) {
+        Long existsId = queryLong("select id from sys_lock where lock_name=:lock_name", params);
+        if (existsId == null) {
             try {
                 Long id = SnowFlake.SNOW_FLAKE.nextId();
                 params.clear();
@@ -2548,20 +2590,41 @@ public class Jdbc extends AbstractDataSource {
                 params.put("description", "系统自动生成");
                 params.put("create_at", new Date());
                 insertTable("sys_lock", params, RenameStrategy.None);
+//                // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
+//                beginTX(status -> {
+//                    return null;
+//                }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             } catch (DuplicateKeyException e) {
                 // 插入数据失败: 唯一约束错误
                 log.warn("插入 sys_lock 表失败: {}", e.getMessage());
             } catch (Exception e) {
                 log.warn("插入 sys_lock 表失败", e);
             }
-            // 使用数据库行级锁保证并发性
+            // 等待锁数据插入完成
+            final int maxRetryCount = 32;
             params.clear();
             params.put("lock_name", lockName);
-            params.put("update_at", new Date());
-            lock = update("update sys_lock set lock_count=lock_count+1, update_at=:update_at where lock_name=:lock_name", params);
-            if (lock <= 0) {
+            for (int i = 0; i < maxRetryCount; i++) {
+                existsId = queryLong("select id from sys_lock where lock_name=:lock_name", params);
+                if (existsId != null) {
+                    break;
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignored) {
+                }
+            }
+            if (existsId == null) {
                 throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
             }
+        }
+        // 使用数据库行级锁保证并发性
+        params.clear();
+        params.put("lock_name", lockName);
+        params.put("update_at", new Date());
+        int lock = update("update sys_lock set lock_count=lock_count+1, update_at=:update_at where lock_name=:lock_name", params);
+        if (lock <= 0) {
+            throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
         }
     }
 

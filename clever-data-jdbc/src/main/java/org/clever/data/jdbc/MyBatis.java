@@ -1250,8 +1250,24 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
+     * 返回当前唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param idName 唯一id名称
+     */
+    public Long currentId(String idName) {
+        return jdbc.currentId(idName);
+    }
+
+    /**
      * 批量获取唯一的 code 值 <br/>
      * <b>此功能需要数据库表支持</b>
+     * <pre>
+     * 支持: ${date_format_pattern}、${seq_size}、${id_size}，例如：
+     * CK${yyMMddHHmm}${seq}    -> CK22120108301、CK221201083023
+     * CK${yyyyMMdd}_${seq3}    -> CK20221201_001、CK20221201_023
+     * CK${yy}-${MMdd}-${seq3}  -> CK22-1201-001、CK22-1201-023
+     * </pre>
      *
      * @param codeName code名称
      * @param size     唯一 code 值数量(1 ~ 10W)
@@ -1263,11 +1279,27 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 批量获取唯一的 code 值 <br/>
      * <b>此功能需要数据库表支持</b>
+     * <pre>
+     * 支持: ${date_format_pattern}、${seq_size}、${id_size}，例如：
+     * CK${yyMMddHHmm}${seq}    -> CK22120108301、CK221201083023
+     * CK${yyyyMMdd}_${seq3}    -> CK20221201_001、CK20221201_023
+     * CK${yy}-${MMdd}-${seq3}  -> CK22-1201-001、CK22-1201-023
+     * </pre>
      *
      * @param codeName code名称
      */
     public String nextCode(String codeName) {
         return jdbc.nextCode(codeName);
+    }
+
+    /**
+     * 批量获取唯一的 code 值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param codeName code名称
+     */
+    public String currentCode(String codeName) {
+        return jdbc.currentCode(codeName);
     }
 
     /**
