@@ -2542,7 +2542,7 @@ public class Jdbc extends AbstractDataSource {
                     log.warn("插入 auto_increment_id 表失败", e);
                 }
                 // 等待数据插入成功
-                final int maxRetryCount = 32;
+                final int maxRetryCount = 128;
                 params.clear();
                 params.put("sequence_name", idName);
                 for (int i = 0; i < maxRetryCount; i++) {
@@ -2750,7 +2750,7 @@ public class Jdbc extends AbstractDataSource {
                         log.warn("插入 sys_lock 表失败", e);
                     }
                     // 等待锁数据插入完成
-                    final int maxRetryCount = 32;
+                    final int maxRetryCount = 128;
                     for (int i = 0; i < maxRetryCount; i++) {
                         List<Map<String, Object>> list = executeQuery(connection, selectSql, new Object[]{lockName});
                         if (list != null && !list.isEmpty()) {
