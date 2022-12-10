@@ -42,8 +42,12 @@ public class JdbcTest {
         List<Future<?>> futures = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             Future<?> future = EXECUTOR.submit(() -> {
-                for (int j = 0; j < 100; j++) {
-                    jdbc.nextId(idName);
+                try {
+                    for (int j = 0; j < 100; j++) {
+                        jdbc.nextId(idName);
+                    }
+                } catch (Exception e) {
+                    log.info("", e);
                 }
             });
             futures.add(future);

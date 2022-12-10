@@ -2528,13 +2528,16 @@ public class Jdbc extends AbstractDataSource {
         Long currentValue = beginTX(status -> {
             if (rowId.getValue1() == null) {
                 try {
-                    Long id = SnowFlake.SNOW_FLAKE.nextId();
-                    params.clear();
-                    params.put("id", id);
-                    params.put("sequence_name", idName);
-                    params.put("description", "系统自动生成");
-                    params.put("create_at", new Date());
-                    insertTable("auto_increment_id", params, RenameStrategy.None);
+                    // 在一个新事物里新增数据(尽可能让其他事务能使用这条数据) 也可以避免postgresql的on_error_rollback问题
+                    beginTX(innerStatus -> {
+                        Long id = SnowFlake.SNOW_FLAKE.nextId();
+                        params.clear();
+                        params.put("id", id);
+                        params.put("sequence_name", idName);
+                        params.put("description", "系统自动生成");
+                        params.put("create_at", new Date());
+                        insertTable("auto_increment_id", params, RenameStrategy.None);
+                    }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
                 } catch (DuplicateKeyException e) {
                     // 插入数据失败: 唯一约束错误
                     log.warn("插入 auto_increment_id 表失败: {}", e.getMessage());
