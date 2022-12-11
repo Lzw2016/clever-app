@@ -8,7 +8,10 @@ clever-data-dynamic-sql 实现类似mybatis的sql模版,实现动态sql能力
 clever-data-jdbc        参考spring-jdbc实现对JDBC操作的轻度封装
 clever-data-jdbc-meta   基于schemacrawler实现读取数据库表结构信息的功能
 
-clever-data-redis   基于spring-data-redis实现对Redis操作的轻度封装
+clever-data-redis       基于spring-data-redis实现对Redis操作的轻度封装
+clever-data-rabbitmq    实现对rabbitmq操作的轻度封装
+clever-data-rocketmq    实现对rocketmq操作的轻度封装
+clever-data-kafka       实现对kafka操作的轻度封装
 
 clever-security     实现一套RBAC模型的权限认证功能
 
