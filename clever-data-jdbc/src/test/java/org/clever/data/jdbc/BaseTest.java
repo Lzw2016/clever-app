@@ -2,6 +2,7 @@ package org.clever.data.jdbc;
 
 import com.zaxxer.hikari.HikariConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
 
 /**
  * 作者：lizw <br/>
@@ -40,5 +41,13 @@ public class BaseTest {
     public static Jdbc newPostgresql() {
         return new Jdbc(postgresqlConfig());
     }
-}
 
+    public static FileSystemMyBatisMapperSql newFileSystemMyBatisMapperSql(String rootPath, String filter) {
+        // final String rootPath = new File("./src/test/resources").getAbsolutePath();
+        FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(rootPath, filter);
+        myBatisMapperSql.reloadAll();
+        myBatisMapperSql.startWatch(200);
+        log.info("sqlSourceCount->{}", myBatisMapperSql.getSqlSourceCount());
+        return myBatisMapperSql;
+    }
+}

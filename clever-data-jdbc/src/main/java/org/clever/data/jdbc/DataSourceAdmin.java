@@ -49,20 +49,25 @@ public class DataSourceAdmin {
     private static final ConcurrentMap<String, QueryDSL> DSL_FACTORY_MAP = new ConcurrentHashMap<>();
 
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            for (DataSource dataSource : DATASOURCE_MAP.values()) {
-                if (!(dataSource instanceof HikariDataSource)) {
-                    continue;
-                }
-                HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
-                try {
-                    if (!hikariDataSource.isClosed()) {
-                        hikariDataSource.close();
-                    }
-                } catch (Exception ignored) {
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(DataSourceAdmin::closeAllDataSource));
+    }
+
+    /**
+     * 关闭所有的数据源
+     */
+    public static void closeAllDataSource() {
+        for (DataSource dataSource : DATASOURCE_MAP.values()) {
+            if (!(dataSource instanceof HikariDataSource)) {
+                continue;
             }
-        }));
+            HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
+            try {
+                if (!hikariDataSource.isClosed()) {
+                    hikariDataSource.close();
+                }
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     /**

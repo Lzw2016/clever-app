@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.clever.util.AntPathMatcher;
 import org.clever.util.Assert;
 
 import java.io.File;
@@ -19,6 +21,8 @@ import java.util.Map;
  * 创建时间：2020/09/02 15:56 <br/>
  */
 public class FileSystemMyBatisMapperSql extends AbstractMyBatisMapperSql {
+    private static final AntPathMatcher FILTER_MATCHER = new AntPathMatcher();
+
     /**
      * 根文件
      */
@@ -29,11 +33,27 @@ public class FileSystemMyBatisMapperSql extends AbstractMyBatisMapperSql {
      */
     @Getter
     private final String rootAbsolutePath;
+    /**
+     * ant风格的过滤器(为空则不过滤)
+     */
+    private final String filter;
 
-    public FileSystemMyBatisMapperSql(String absolutePath) {
-        rootPath = new File(absolutePath);
-        rootAbsolutePath = FilenameUtils.normalize(rootPath.getAbsolutePath(), true);
-        Assert.isTrue(rootPath.isDirectory(), "路径：" + rootAbsolutePath + "不存在或者不是一个文件夹");
+    /**
+     * @param rootPath sql.xml文件根路径
+     * @param filter   ant风格的过滤字符串
+     */
+    public FileSystemMyBatisMapperSql(String rootPath, String filter) {
+        this.rootPath = new File(rootPath);
+        this.rootAbsolutePath = FilenameUtils.normalize(this.rootPath.getAbsolutePath(), true);
+        Assert.isTrue(this.rootPath.isDirectory(), "路径：" + rootAbsolutePath + "不存在或者不是一个文件夹");
+        this.filter = StringUtils.trim(filter);
+    }
+
+    /**
+     * @param rootPath sql.xml文件根路径
+     */
+    public FileSystemMyBatisMapperSql(String rootPath) {
+        this(rootPath, null);
     }
 
     @Override
@@ -60,7 +80,10 @@ public class FileSystemMyBatisMapperSql extends AbstractMyBatisMapperSql {
         Map<String, Long> result = new HashMap<>();
         Collection<File> files = FileUtils.listFiles(rootPath, new String[]{"xml"}, true);
         for (File file : files) {
-            result.put(file.getAbsolutePath(), file.lastModified());
+            String xmlPath = getXmlPath(file.getAbsolutePath());
+            if (StringUtils.isBlank(filter) || FILTER_MATCHER.match(filter, xmlPath)) {
+                result.put(file.getAbsolutePath(), file.lastModified());
+            }
         }
         return result;
     }

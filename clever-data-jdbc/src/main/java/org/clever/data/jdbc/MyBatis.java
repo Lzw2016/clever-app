@@ -203,7 +203,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个Map
      *
      * @param sqlId        SQL ID
-     * @param param        参数，参数格式
+     * @param param        参数
      * @param resultRename 返回数据字段名重命名策略
      */
     public Map<String, Object> queryFirst(String sqlId, Object param, RenameStrategy resultRename) {
@@ -214,7 +214,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个Map
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public Map<String, Object> queryFirst(String sqlId, Object param) {
         return jdbc.queryFirst(getSql(sqlId), param);
@@ -234,7 +234,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个Map
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      * @param clazz 查询对象类型
      */
     public <T> T queryFirst(String sqlId, Object param, Class<T> clazz) {
@@ -449,7 +449,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个 String
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public String queryFirstString(String sqlId, Object param) {
         return jdbc.queryFirstString(getSql(sqlId), param);
@@ -468,7 +468,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个 Long
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public Long queryFirstLong(String sqlId, Object param) {
         return jdbc.queryFirstLong(getSql(sqlId), param);
@@ -487,7 +487,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个 Double
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public Double queryFirstDouble(String sqlId, Object param) {
         return jdbc.queryFirstDouble(getSql(sqlId), param);
@@ -506,7 +506,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个 BigDecimal
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public BigDecimal queryFirstBigDecimal(String sqlId, Object param) {
         return jdbc.queryFirstBigDecimal(getSql(sqlId), param);
@@ -525,7 +525,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个 Boolean
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public Boolean queryFirstBoolean(String sqlId, Object param) {
         return jdbc.queryFirstBoolean(getSql(sqlId), param);
@@ -544,7 +544,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个 Date
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public Date queryFirstDate(String sqlId, Object param) {
         return jdbc.queryFirstDate(getSql(sqlId), param);
@@ -563,7 +563,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询sql执行结果的第一条数据，返回一个 Timestamp
      *
      * @param sqlId SQL ID
-     * @param param 参数，参数格式
+     * @param param 参数
      */
     public Timestamp queryFirstTimestamp(String sqlId, Object param) {
         return jdbc.queryFirstTimestamp(getSql(sqlId), param);
@@ -742,7 +742,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询多条数据(大量数据)，使用游标读取
      *
      * @param sqlId        SQL ID
-     * @param param        参数，参数格式
+     * @param param        参数
      * @param batchSize    一个批次的数据量
      * @param callback     游标批次读取数据回调(返回true则中断数据读取)
      * @param resultRename 返回数据字段名重命名策略
@@ -756,7 +756,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询多条数据(大量数据)，使用游标读取
      *
      * @param sqlId     SQL ID
-     * @param param     参数，参数格式
+     * @param param     参数
      * @param batchSize 一个批次的数据量
      * @param callback  游标批次读取数据回调(返回true则中断数据读取)
      */
@@ -842,7 +842,7 @@ public class MyBatis extends AbstractDataSource {
      * 查询多条数据(大量数据)，使用游标读取
      *
      * @param sqlId        SQL ID
-     * @param param        参数，参数格式
+     * @param param        参数
      * @param callback     游标读取数据回调(返回true则中断数据读取)
      * @param resultRename 返回数据字段名重命名策略
      */
@@ -1448,10 +1448,17 @@ public class MyBatis extends AbstractDataSource {
     }
 
     // --------------------------------------------------------------------------------------------
-    //  内部函数
+    //  获取 mybatis sql
     // --------------------------------------------------------------------------------------------
 
-    private TupleTwo<String, Map<String, Object>> getSql(String sqlId, Object parameter) {
+    /**
+     * 根据SQL ID获取sql和参数
+     *
+     * @param sqlId     SQL ID
+     * @param parameter 参数
+     * @return {@code TupleTwo<sql, parameterMap>}
+     */
+    public TupleTwo<String, Map<String, Object>> getSql(String sqlId, Object parameter) {
         Assert.hasText(sqlId, "参数sqlId不能为空");
         if (parameter == null) {
             parameter = new HashMap<>();
@@ -1461,7 +1468,12 @@ public class MyBatis extends AbstractDataSource {
         return TupleTwo.creat(boundSql.getNamedParameterSql(), boundSql.getParameterMap());
     }
 
-    private String getSql(String sqlId) {
+    /**
+     * 根据SQL ID获取sql
+     *
+     * @param sqlId SQL ID
+     */
+    public String getSql(String sqlId) {
         Assert.hasText(sqlId, "参数sqlId不能为空");
         BoundSql boundSql = getBoundSql(sqlId, new HashMap<>());
         return boundSql.getNamedParameterSql();
