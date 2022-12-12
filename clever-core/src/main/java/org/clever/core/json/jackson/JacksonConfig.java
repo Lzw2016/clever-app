@@ -81,7 +81,7 @@ public class JacksonConfig {
     private Map<JsonGenerator.Feature, Boolean> generator = new EnumMap<>(JsonGenerator.Feature.class);
 
     /**
-     * 应用当前配置
+     * 应用当前配置到 ObjectMapper
      */
     public void apply(ObjectMapper mapper) {
         Assert.notNull(mapper, "参数 mapper 不能为空");

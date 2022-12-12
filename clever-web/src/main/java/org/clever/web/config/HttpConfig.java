@@ -1,9 +1,11 @@
 package org.clever.web.config;
 
+import io.javalin.core.JavalinConfig;
 import io.javalin.core.util.Header;
 import io.javalin.http.ContentType;
 import io.javalin.http.staticfiles.Location;
 import lombok.Data;
+import org.clever.util.Assert;
 import org.clever.util.unit.DataSize;
 
 import java.time.Duration;
@@ -100,5 +102,48 @@ public class HttpConfig {
         private Map<String, String> headers = new HashMap<String, String>(1) {{
             put(Header.CACHE_CONTROL, "max-age=0");
         }};
+    }
+
+    /**
+     * 应用当前配置到 JavalinConfig
+     */
+    public void apply(JavalinConfig config) {
+        Assert.notNull(config, "参数 config 不能为空");
+        HttpConfig http = this;
+        config.autogenerateEtags = http.isAutogenerateEtags();
+        config.prefer405over404 = http.isPrefer405over404();
+        config.enforceSsl = http.isEnforceSsl();
+        config.defaultContentType = http.getDefaultContentType();
+        if (http.getMaxRequestSize() != null) {
+            config.maxRequestSize = http.getMaxRequestSize().toBytes();
+        }
+        if (http.getAsyncRequestTimeout() != null) {
+            config.asyncRequestTimeout = http.getAsyncRequestTimeout().toMillis();
+        }
+        if (http.getSinglePageRoot() != null) {
+            for (HttpConfig.SinglePageRoot singlePageRoot : http.getSinglePageRoot()) {
+                config.addSinglePageRoot(singlePageRoot.getHostedPath(), singlePageRoot.getFilePath(), singlePageRoot.getLocation());
+            }
+        }
+        if (http.getStaticFile() != null) {
+            for (HttpConfig.StaticFile staticFile : http.getStaticFile()) {
+                config.addStaticFiles(staticFileConfig -> {
+                    staticFileConfig.hostedPath = staticFile.getHostedPath();
+                    staticFileConfig.directory = staticFile.getDirectory();
+                    staticFileConfig.location = staticFile.getLocation();
+                    staticFileConfig.precompress = staticFile.isPreCompress();
+                    staticFileConfig.headers = staticFile.getHeaders();
+                });
+            }
+        }
+        if (http.isEnableWebjars()) {
+            config.enableWebjars();
+        }
+        if (http.isEnableCorsForAllOrigins()) {
+            config.enableCorsForAllOrigins();
+        }
+        if (http.getEnableCorsForOrigin() != null && !http.getEnableCorsForOrigin().isEmpty()) {
+            config.enableCorsForOrigin(http.getEnableCorsForOrigin().toArray(new String[0]));
+        }
     }
 }

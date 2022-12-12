@@ -1,8 +1,15 @@
 package org.clever.web.config;
 
+import io.javalin.core.JavalinConfig;
+import io.javalin.jetty.JettyUtil;
 import lombok.Data;
+import org.clever.util.Assert;
+import org.eclipse.jetty.util.BlockingArrayQueue;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import java.time.Duration;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * 作者：lizw <br/>
@@ -46,5 +53,55 @@ public class ServerConfig {
          * 最大线程空闲时间。默认：60s
          */
         private Duration idleTimeout = Duration.ofSeconds(60);
+    }
+
+    /**
+     * 应用当前配置到 JavalinConfig
+     */
+    public void apply(JavalinConfig config) {
+        Assert.notNull(config, "参数 config 不能为空");
+        ServerConfig server = this;
+        config.contextPath = server.getContextPath();
+        config.ignoreTrailingSlashes = server.isIgnoreTrailingSlashes();
+        if (server.isEnableDevLogging()) {
+            config.enableDevLogging();
+        }
+        // TODO 注册一个请求记录器
+        // config.requestLogger((ctx, executionTimeMs) -> {});
+
+        // 自定义 Jetty Server
+        ServerConfig.Threads threads = server.getThreads();
+        if (threads != null) {
+            config.server(() -> {
+                BlockingQueue<Runnable> queue = null;
+                if (threads.getMaxQueueCapacity() == 0) {
+                    queue = new SynchronousQueue<>();
+                } else if (threads.getMaxQueueCapacity() > 0) {
+                    queue = new BlockingArrayQueue<>(threads.getMaxQueueCapacity());
+                }
+                int maxThreadCount = (threads.getMax() > 0) ? threads.getMax() : 250;
+                int minThreadCount = (threads.getMin() > 0) ? threads.getMin() : 8;
+                int threadIdleTimeout = (threads.getIdleTimeout() != null) ? (int) threads.getIdleTimeout().toMillis() : 60_000;
+                QueuedThreadPool queuedThreadPool = new QueuedThreadPool(maxThreadCount, minThreadCount, threadIdleTimeout, queue);
+                queuedThreadPool.setName("JettyServerThreadPool");
+                org.eclipse.jetty.server.Server jettyServer = new org.eclipse.jetty.server.Server(queuedThreadPool);
+                jettyServer = JettyUtil.getOrDefault(jettyServer);
+                return jettyServer;
+            });
+        }
+
+        // TODO 自定义 Jetty SessionHandler
+        // config.sessionHandler(() -> {
+        //     SessionHandler sessionHandler = new SessionHandler();
+        //     sessionHandler.set
+        //     return sessionHandler;
+        // });
+
+        // TODO 自定义 Jetty ServletContextHandler
+        // config.configureServletContextHandler(handler -> {
+        //     handler.addFilter()
+        //     handler.addServlet()
+        //     handler.addEventListener();
+        // });
     }
 }

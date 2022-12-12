@@ -1,7 +1,10 @@
 package org.clever.web.config;
 
+import io.javalin.Javalin;
+import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
 import lombok.Data;
+import org.clever.util.Assert;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -58,5 +61,19 @@ public class MvcConfig {
                 "./build/classes/groovy",
                 "./out/production/classes"
         );
+    }
+
+    /**
+     * 应用当前配置到 Javalin
+     */
+    public void apply(Javalin javalin) {
+        Assert.notNull(javalin, "参数 javalin 不能为空");
+        MvcConfig mvc = this;
+        Handler handler = ctx -> {
+        };
+        for (HandlerType handlerType : mvc.getHttpMethod()) {
+            javalin.addHandler(handlerType, mvc.getPath(), handler);
+        }
+        // TODO 注入MVC处理功能
     }
 }
