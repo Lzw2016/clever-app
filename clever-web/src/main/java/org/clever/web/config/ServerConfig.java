@@ -9,7 +9,7 @@ import java.time.Duration;
  * 创建时间：2022/07/17 13:34 <br/>
  */
 @Data
-public class Server {
+public class ServerConfig {
     /**
      * web server 的 context path，默认："/"
      */

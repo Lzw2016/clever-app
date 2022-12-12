@@ -14,7 +14,7 @@ import java.util.*;
  * 创建时间：2022/07/17 13:33 <br/>
  */
 @Data
-public class HTTP {
+public class HttpConfig {
     /**
      * 为响应生成 etag，默认：false (ETag是HTTP协议提供的一种Web缓存验证机制，并且允许客户端进行缓存协商。这就使得缓存变得更加高效，而且节省带宽)
      */

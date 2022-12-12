@@ -1,4 +1,4 @@
-[  ] jackson配置
+[OK] jackson配置
 [  ]
 [  ]
 [  ]

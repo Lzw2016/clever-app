@@ -7,7 +7,7 @@ import lombok.Data;
  * 创建时间：2022/07/17 13:34 <br/>
  */
 @Data
-public class Misc {
+public class MiscConfig {
     /**
      * 是否输出 Javalin Banner 日志
      */

@@ -1,8 +1,6 @@
 package org.clever.web;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
 import io.javalin.http.Handler;
@@ -10,22 +8,15 @@ import io.javalin.http.HandlerType;
 import io.javalin.jetty.JettyUtil;
 import io.javalin.plugin.json.JavalinJackson;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-import org.clever.beans.BeanUtils;
-import org.clever.beans.FatalBeanException;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.env.Environment;
+import org.clever.core.json.jackson.JacksonConfig;
 import org.clever.core.mapper.JacksonMapper;
-import org.clever.core.tuples.TupleThree;
 import org.clever.util.Assert;
-import org.clever.util.ClassUtils;
-import org.clever.util.ReflectionUtils;
 import org.clever.web.config.*;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
@@ -53,19 +44,19 @@ public class WebServerBootstrap {
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
         Javalin javalin = Javalin.create(config -> {
             // 初始化http相关配置
-            HTTP http = webConfig.getHttp();
+            HttpConfig http = webConfig.getHttp();
             initHTTP(config, http);
             // 初始化Server相关配置
-            Server server = webConfig.getServer();
+            ServerConfig server = webConfig.getServer();
             initServer(config, server);
             // 初始化WebSocket相关配置
-            WebSocket webSocket = webConfig.getWebSocketConfig();
+            WebSocketConfig webSocket = webConfig.getWebSocketConfig();
             initWebSocket(config, webSocket);
             // 初始化杂项配置
-            Misc misc = webConfig.getMisc();
+            MiscConfig misc = webConfig.getMisc();
             initMisc(config, misc);
             // 自定义 JsonMapper
-            Jackson jackson = webConfig.getJackson();
+            JacksonConfig jackson = webConfig.getJackson();
             config.jsonMapper(new JavalinJackson(initJackson(jackson)));
             // 注册自定义插件
             pluginRegistrar.init(config);
@@ -77,7 +68,7 @@ public class WebServerBootstrap {
         // 注册自定义Handler
         handlerRegistrar.init(javalin);
         // 注入MVC处理功能
-        MVC mvc = webConfig.getMvc();
+        MvcConfig mvc = webConfig.getMvc();
         initMVC(javalin, mvc);
         // 自定义配置
         if (javalinCallback != null) {
@@ -101,9 +92,9 @@ public class WebServerBootstrap {
         return init(environment, null, null);
     }
 
-    private void initHTTP(JavalinConfig config, HTTP http) {
+    private void initHTTP(JavalinConfig config, HttpConfig http) {
         if (http == null) {
-            http = new HTTP();
+            http = new HttpConfig();
         }
         config.autogenerateEtags = http.isAutogenerateEtags();
         config.prefer405over404 = http.isPrefer405over404();
@@ -116,12 +107,12 @@ public class WebServerBootstrap {
             config.asyncRequestTimeout = http.getAsyncRequestTimeout().toMillis();
         }
         if (http.getSinglePageRoot() != null) {
-            for (HTTP.SinglePageRoot singlePageRoot : http.getSinglePageRoot()) {
+            for (HttpConfig.SinglePageRoot singlePageRoot : http.getSinglePageRoot()) {
                 config.addSinglePageRoot(singlePageRoot.getHostedPath(), singlePageRoot.getFilePath(), singlePageRoot.getLocation());
             }
         }
         if (http.getStaticFile() != null) {
-            for (HTTP.StaticFile staticFile : http.getStaticFile()) {
+            for (HttpConfig.StaticFile staticFile : http.getStaticFile()) {
                 config.addStaticFiles(staticFileConfig -> {
                     staticFileConfig.hostedPath = staticFile.getHostedPath();
                     staticFileConfig.directory = staticFile.getDirectory();
@@ -142,9 +133,9 @@ public class WebServerBootstrap {
         }
     }
 
-    private void initServer(JavalinConfig config, Server server) {
+    private void initServer(JavalinConfig config, ServerConfig server) {
         if (server == null) {
-            server = new Server();
+            server = new ServerConfig();
         }
         config.contextPath = server.getContextPath();
         config.ignoreTrailingSlashes = server.isIgnoreTrailingSlashes();
@@ -155,7 +146,7 @@ public class WebServerBootstrap {
         // config.requestLogger((ctx, executionTimeMs) -> {});
 
         // 自定义 Jetty Server
-        Server.Threads threads = server.getThreads();
+        ServerConfig.Threads threads = server.getThreads();
         if (threads != null) {
             config.server(() -> {
                 BlockingQueue<Runnable> queue = null;
@@ -190,9 +181,9 @@ public class WebServerBootstrap {
         // });
     }
 
-    private void initWebSocket(JavalinConfig config, WebSocket webSocket) {
+    private void initWebSocket(JavalinConfig config, WebSocketConfig webSocket) {
         if (webSocket == null) {
-            webSocket = new WebSocket();
+            webSocket = new WebSocketConfig();
         }
         // 自定义 Jetty WebSocketServletFactory
         // config.wsFactoryConfig(factory -> {
@@ -202,9 +193,9 @@ public class WebServerBootstrap {
         // config.wsLogger(ws -> {});
     }
 
-    private void initMVC(Javalin javalin, MVC mvc) {
+    private void initMVC(Javalin javalin, MvcConfig mvc) {
         if (mvc == null) {
-            mvc = new MVC();
+            mvc = new MvcConfig();
         }
         Handler handler = ctx -> {
         };
@@ -214,93 +205,18 @@ public class WebServerBootstrap {
         // TODO 注入MVC处理功能
     }
 
-    private ObjectMapper initJackson(Jackson jackson) {
+    private ObjectMapper initJackson(JacksonConfig jackson) {
         if (jackson == null) {
-            jackson = new Jackson();
+            jackson = new JacksonConfig();
         }
         ObjectMapper mapper = JacksonMapper.newObjectMapper();
-        // dateFormat
-        if (StringUtils.isNotBlank(jackson.getDateFormat())) {
-            mapper.setDateFormat(new SimpleDateFormat(jackson.getDateFormat()));
-        }
-        // locale
-        if (jackson.getLocale() != null) {
-            mapper.setLocale(jackson.getLocale());
-        }
-        // timeZone
-        if (jackson.getTimeZone() != null) {
-            mapper.setTimeZone(jackson.getTimeZone());
-        }
-        // propertyNamingStrategy
-        String strategy = jackson.getPropertyNamingStrategy();
-        if (strategy != null) {
-            PropertyNamingStrategy propertyNamingStrategy;
-            try {
-                propertyNamingStrategy = (PropertyNamingStrategy) BeanUtils.instantiateClass(ClassUtils.forName(strategy, null));
-            } catch (ClassNotFoundException ex) {
-                Field field = ReflectionUtils.findField(PropertyNamingStrategy.class, strategy, PropertyNamingStrategy.class);
-                Assert.notNull(field, () -> "Constant named '" + strategy + "' not found on " + PropertyNamingStrategy.class.getName());
-                try {
-                    propertyNamingStrategy = (PropertyNamingStrategy) field.get(null);
-                } catch (Exception ex2) {
-                    throw new IllegalStateException(ex2);
-                }
-            }
-            mapper.setPropertyNamingStrategy(propertyNamingStrategy);
-        }
-        // defaultPropertyInclusion
-        if (jackson.getDefaultPropertyInclusion() != null) {
-            mapper.setDefaultPropertyInclusion(jackson.getDefaultPropertyInclusion());
-        }
-        // visibility
-        if (jackson.getVisibility() != null) {
-            jackson.getVisibility().forEach(mapper::setVisibility);
-        }
-        Consumer<TupleThree<ObjectMapper, Object, Boolean>> configureFeature = tuple -> {
-            ObjectMapper objectMapper = tuple.getValue1();
-            Object feature = tuple.getValue2();
-            Boolean enabled = tuple.getValue3();
-            if (feature instanceof JsonParser.Feature) {
-                objectMapper.configure((JsonParser.Feature) feature, enabled);
-            } else if (feature instanceof JsonGenerator.Feature) {
-                objectMapper.configure((JsonGenerator.Feature) feature, enabled);
-            } else if (feature instanceof SerializationFeature) {
-                objectMapper.configure((SerializationFeature) feature, enabled);
-            } else if (feature instanceof DeserializationFeature) {
-                objectMapper.configure((DeserializationFeature) feature, enabled);
-            } else if (feature instanceof MapperFeature) {
-                // noinspection deprecation
-                objectMapper.configure((MapperFeature) feature, enabled);
-            } else {
-                throw new FatalBeanException("Unknown feature class: " + feature.getClass().getName());
-            }
-        };
-        // serialization
-        if (jackson.getSerialization() != null) {
-            jackson.getSerialization().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
-        }
-        // deserialization
-        if (jackson.getSerialization() != null) {
-            jackson.getSerialization().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
-        }
-        // mapper
-        if (jackson.getMapper() != null) {
-            jackson.getMapper().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
-        }
-        // parser
-        if (jackson.getParser() != null) {
-            jackson.getParser().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
-        }
-        // generator
-        if (jackson.getGenerator() != null) {
-            jackson.getGenerator().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
-        }
+        jackson.apply(mapper);
         return mapper;
     }
 
-    private void initMisc(JavalinConfig config, Misc misc) {
+    private void initMisc(JavalinConfig config, MiscConfig misc) {
         if (misc == null) {
-            misc = new Misc();
+            misc = new MiscConfig();
         }
         config.showJavalinBanner = misc.isShowJavalinBanner();
     }

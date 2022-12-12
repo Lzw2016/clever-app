@@ -15,7 +15,7 @@ import java.util.Set;
  * 创建时间：2022/07/24 16:06 <br/>
  */
 @Data
-public class MVC {
+public class MvcConfig {
     /**
      * MVC接口前缀
      */

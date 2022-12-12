@@ -1,6 +1,7 @@
 package org.clever.web.config;
 
 import lombok.Data;
+import org.clever.core.json.jackson.JacksonConfig;
 
 /**
  * Web 服务器配置项
@@ -26,25 +27,25 @@ public class WebConfig {
     /**
      * HTTP 配置
      */
-    private HTTP http = new HTTP();
+    private HttpConfig http = new HttpConfig();
     /**
      * Server 配置
      */
-    private Server server = new Server();
+    private ServerConfig server = new ServerConfig();
     /**
      * WebSocket 配置
      */
-    private WebSocket webSocketConfig = new WebSocket();
+    private WebSocketConfig webSocketConfig = new WebSocketConfig();
     /**
      * MVC 配置
      */
-    private MVC mvc = new MVC();
+    private MvcConfig mvc = new MvcConfig();
     /**
      * Jackson 配置
      */
-    private Jackson jackson = new Jackson();
+    private JacksonConfig jackson = new JacksonConfig();
     /**
      * Misc(杂项) 配置
      */
-    private Misc misc = new Misc();
+    private MiscConfig misc = new MiscConfig();
 }
