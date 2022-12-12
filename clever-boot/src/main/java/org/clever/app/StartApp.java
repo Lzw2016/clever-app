@@ -35,11 +35,11 @@ public class StartApp {
         startupInfoLogger.logStarting(log);
         // 启动web服务
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
-        webServerBootstrap.getHandlerRegistrar()
-                .addBeforeHandler("*", ctx-> {
-                    ctx.result("OK");
-                    ctx.res.getOutputStream().close();
-                });
+//        webServerBootstrap.getHandlerRegistrar()
+//                .addBeforeHandler("*", ctx-> {
+//                    ctx.result("OK");
+//                    ctx.res.getOutputStream().close();
+//                })
 //                .addBeforeHandler("*", ctx -> {
 //                    log.info("### 1 start");
 //                    Thread.sleep(1000 * 3);
