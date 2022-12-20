@@ -70,9 +70,9 @@ public class StartApp {
             throw new BusinessException("服务端异常");
         });
 //        javalin.error()
-        // 优雅停机
+        // 系统关闭时的任务处理
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");
-        AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Integer.MAX_VALUE, "停止日志模块");
+        AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Double.MAX_VALUE, "停止日志模块");
         // 系统启动完成日志
         startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
     }
