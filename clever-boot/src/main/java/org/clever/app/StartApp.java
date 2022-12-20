@@ -50,7 +50,13 @@ public class StartApp {
 //                .addBeforeHandler("*", ctx -> log.info("### 1"))
 //                .addBeforeHandler("*", ctx -> log.info("### 2"));
         // 注册http后置(After)处理器
-        // OrderIncrement afterHandlerOrder = new OrderIncrement();
+        OrderIncrement afterHandlerOrder = new OrderIncrement();
+        webServerBootstrap.getHandlerRegistrar()
+                .addAfterHandler("*", afterHandlerOrder.incrL1(), "测试_1", ctx -> {
+                    log.info("### 1 start");
+                    // Thread.sleep(1000 * 3);
+                    log.info("### 1 end");
+                });
         // 注册websocket前置(Before)处理器
         // 注册websocket后置(After)处理器
         // 注册插件

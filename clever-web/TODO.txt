@@ -6,3 +6,31 @@
 [  ]
 [  ]
 [  ]
+
+--------------------------
+请求
+🡓
+Javalin#before
+🡓
+CorsHandler (可参考: https://javalin.io/plugins/cors)
+🡓
+EchoHandler (JavalinConfig#requestLogger)
+🡓
+CaptureHandler
+🡓
+StaticFileHandler
+🡓
+CustomMVCInterceptorChain(before | after | exception)
+🡓
+CustomMVC#invokeMethod
+🡓
+...
+🡓
+Javalin#endpoint-handler
+🡓
+Javalin#error
+Javalin#after
+🡓
+Javalin#exception
+🡓
+Javalin#requestLogger
