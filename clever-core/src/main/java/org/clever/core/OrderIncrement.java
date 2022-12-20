@@ -23,6 +23,9 @@ public class OrderIncrement {
     private int level5Count = 0;
     private int level6Count = 0;
 
+    /**
+     * 获取当前排序值
+     */
     public synchronized double order() {
         double order = LEVEL1 * level1Count
                 + LEVEL2 * level2Count
@@ -33,6 +36,9 @@ public class OrderIncrement {
         return NumberScaleUtils.round(order, 8);
     }
 
+    /**
+     * 自增第一层(第一层自增值最大，第六层最小)
+     */
     public synchronized double incrL1() {
         level1Count++;
         if (level1Count > 99) {
@@ -42,6 +48,9 @@ public class OrderIncrement {
         return order();
     }
 
+    /**
+     * 自增第二层(第一层自增值最大，第六层最小)
+     */
     public synchronized double incrL2() {
         level2Count++;
         if (level2Count > 99) {
@@ -51,6 +60,9 @@ public class OrderIncrement {
         return order();
     }
 
+    /**
+     * 自增第三层(第一层自增值最大，第六层最小)
+     */
     public synchronized double incrL3() {
         level3Count++;
         if (level3Count > 99) {
@@ -60,6 +72,9 @@ public class OrderIncrement {
         return order();
     }
 
+    /**
+     * 自增第四层(第一层自增值最大，第六层最小)
+     */
     public synchronized double incrL4() {
         level4Count++;
         if (level4Count > 99) {
@@ -69,6 +84,9 @@ public class OrderIncrement {
         return order();
     }
 
+    /**
+     * 自增第五层(第一层自增值最大，第六层最小)
+     */
     public synchronized double incrL5() {
         level5Count++;
         if (level5Count > 99) {
@@ -78,6 +96,9 @@ public class OrderIncrement {
         return order();
     }
 
+    /**
+     * 自增第六层(第一层自增值最大，第六层最小)
+     */
     public synchronized double incrL6() {
         level6Count++;
         if (level6Count > 99) {

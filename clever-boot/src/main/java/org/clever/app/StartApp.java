@@ -33,23 +33,31 @@ public class StartApp {
         AppContextHolder.registerBean("loggingBootstrap", loggingBootstrap, true);
         StartupInfoLogger startupInfoLogger = new StartupInfoLogger(StartApp.class);
         startupInfoLogger.logStarting(log);
-        // 启动web服务
+        // 创建web服务
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
-//        webServerBootstrap.getHandlerRegistrar()
+        // 注册http前置(Before)处理器
+        OrderIncrement beforeHandlerOrder = new OrderIncrement();
+        webServerBootstrap.getHandlerRegistrar()
 //                .addBeforeHandler("*", ctx-> {
 //                    ctx.result("OK");
 //                    ctx.res.getOutputStream().close();
 //                })
-//                .addBeforeHandler("*", ctx -> {
-//                    log.info("### 1 start");
-//                    Thread.sleep(1000 * 3);
-//                    log.info("### 1 end");
-//                })
+                .addBeforeHandler("*", beforeHandlerOrder.incrL1(), "测试_1", ctx -> {
+                    log.info("### 1 start");
+                    // Thread.sleep(1000 * 3);
+                    log.info("### 1 end");
+                });
 //                .addBeforeHandler("*", ctx -> log.info("### 1"))
 //                .addBeforeHandler("*", ctx -> log.info("### 2"));
-        OrderIncrement orderIncrement = new OrderIncrement();
+        // 注册http后置(After)处理器
+        // OrderIncrement afterHandlerOrder = new OrderIncrement();
+        // 注册websocket前置(Before)处理器
+        // 注册websocket后置(After)处理器
+        // 注册插件
+        OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
-                .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", orderIncrement.incrL1());
+                .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1());
+        // 初始化并启动web服务
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
