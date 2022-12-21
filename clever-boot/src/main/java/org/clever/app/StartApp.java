@@ -42,20 +42,19 @@ public class StartApp {
 //                    ctx.result("OK");
 //                    ctx.res.getOutputStream().close();
 //                })
-                .addBeforeHandler("*", beforeHandlerOrder.incrL1(), "测试_1", ctx -> {
-                    log.info("### 1 start");
-                    // Thread.sleep(1000 * 3);
-                    log.info("### 1 end");
+                .addBeforeHandler("*", beforeHandlerOrder.incrL1(), "Before_测试_1", ctx -> {
+                    // 这里无法直接响应客户端请求(直接返回响应数据)
+                    log.info("### Before_测试_1");
                 });
 //                .addBeforeHandler("*", ctx -> log.info("### 1"))
 //                .addBeforeHandler("*", ctx -> log.info("### 2"));
         // 注册http后置(After)处理器
         OrderIncrement afterHandlerOrder = new OrderIncrement();
         webServerBootstrap.getHandlerRegistrar()
-                .addAfterHandler("*", afterHandlerOrder.incrL1(), "测试_1", ctx -> {
-                    log.info("### 1 start");
-                    // Thread.sleep(1000 * 3);
-                    log.info("### 1 end");
+                .addAfterHandler("*", afterHandlerOrder.incrL1(), "After_测试_1", ctx -> {
+                    log.info("### After_测试_1");
+                    ctx.status(200);
+                    ctx.result("After_测试_1");
                 });
         // 注册websocket前置(Before)处理器
         // 注册websocket后置(After)处理器
@@ -67,7 +66,8 @@ public class StartApp {
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
-        javalin.post("/test", ctx -> {
+        javalin.get("/test", ctx -> {
+            // 可多次读取body
             log.info("body --> {}", ctx.body());
             log.info("body --> {}", ctx.body());
             ctx.result("test,中文");
@@ -75,6 +75,7 @@ public class StartApp {
         javalin.get("/test2", ctx -> {
             throw new BusinessException("服务端异常");
         });
+//        log.info("body --> {}", javalin._conf.inner.appAttributes);
 //        javalin.error()
         // 系统关闭时的任务处理
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");

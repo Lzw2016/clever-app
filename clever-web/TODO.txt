@@ -10,27 +10,44 @@
 --------------------------
 请求
 🡓
-Javalin#before
+CustomFilter
+    🡓
+    EchoFilter (JavalinConfig#requestLogger)
+    🡓
+    CorsFilter (可参考: https://javalin.io/plugins/cors)
+    🡓
+    CaptureHandler
+    🡓
+    SecurityFilter (一系列Filter)
+    🡓
+    StaticFileFilter
+    🡓
+    CustomMVCInterceptorChain(before | after | exception)
+        🡓
+        before (可提前响应请求)
+        🡓
+        invokeMethod (自定义MVC: 响应请求)
+        🡓
+        after
+        🡓
+        exception (仅 invokeMethod 异常时执行)
+        🡓
+    🡓
 🡓
-CorsHandler (可参考: https://javalin.io/plugins/cors)
+CustomServlet
 🡓
-EchoHandler (JavalinConfig#requestLogger)
+JavalinJettyServlet
+    🡓
+    Javalin#before (不能提前响应请求)
+    🡓
+    Javalin#endpoint-handler (响应请求)
+    🡓
+    Javalin#error
+    🡓
+    Javalin#after (不能响应请求)
+    🡓
+    Javalin#exception (仅异常时执行)
+    🡓
+    Javalin#requestLogger
+    🡓
 🡓
-CaptureHandler
-🡓
-StaticFileHandler
-🡓
-CustomMVCInterceptorChain(before | after | exception)
-🡓
-CustomMVC#invokeMethod
-🡓
-...
-🡓
-Javalin#endpoint-handler
-🡓
-Javalin#error
-Javalin#after
-🡓
-Javalin#exception
-🡓
-Javalin#requestLogger

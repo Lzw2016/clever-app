@@ -3,15 +3,23 @@ package org.clever.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
+import io.javalin.http.ContentType;
 import io.javalin.plugin.json.JavalinJackson;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.env.Environment;
 import org.clever.core.json.jackson.JacksonConfig;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.util.Assert;
 import org.clever.web.config.*;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletHolder;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -21,6 +29,7 @@ import java.util.function.Consumer;
  * 作者：lizw <br/>
  * 创建时间：2022/07/17 12:35 <br/>
  */
+@Slf4j
 public class WebServerBootstrap {
     protected volatile boolean initialized = false;
     @Getter
@@ -37,6 +46,61 @@ public class WebServerBootstrap {
         Assert.notNull(environment, "environment 不能为空");
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
         Javalin javalin = Javalin.create(config -> {
+            // TODO 配置 Filter
+            // TODO 配置 Servlet
+            // TODO 配置 EventListener
+            config.configureServletContextHandler(servletContextHandler -> {
+                servletContextHandler.addFilter(new FilterHolder((request, response, chain) -> {
+                    log.info("### Filter_之前");
+                    chain.doFilter(request, response);
+                    log.info("### Filter_之后");
+                }), "/*", EnumSet.of(DispatcherType.REQUEST));
+
+//                servletContextHandler.addFilter(new FilterHolder((request, response, chain) -> {
+//                    log.info("### Filter_2_之前");
+//                    response.setContentType(ContentType.TEXT_PLAIN.getMimeType());
+//                    response.getWriter().println("提前结束请求");
+//                    ((HttpServletResponse) response).setStatus(200);
+//                    response.getWriter().flush();
+//                    log.info("### Filter_2_之后");
+//                }), "/*", EnumSet.of(DispatcherType.REQUEST));
+
+                servletContextHandler.addFilter(new FilterHolder((request, response, chain) -> {
+                    log.info("### Filter_3_之前");
+                    chain.doFilter(request, response);
+                    log.info("### Filter_3_之后");
+                }), "/*", EnumSet.of(DispatcherType.REQUEST));
+
+                servletContextHandler.addServlet(new ServletHolder(new Servlet() {
+                    @Override
+                    public void init(ServletConfig config) throws ServletException {
+
+                    }
+
+                    @Override
+                    public ServletConfig getServletConfig() {
+                        return null;
+                    }
+
+                    @Override
+                    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+                        res.setContentType(ContentType.TEXT_PLAIN.getMimeType());
+                        res.getWriter().println("自定义Servlet");
+                        ((HttpServletResponse) res).setStatus(200);
+                        res.getWriter().flush();
+                    }
+
+                    @Override
+                    public String getServletInfo() {
+                        return "";
+                    }
+
+                    @Override
+                    public void destroy() {
+
+                    }
+                }), "/servlet/*");
+            });
             // 初始化http相关配置
             HttpConfig http = webConfig.getHttp();
             Optional.of(http).orElse(new HttpConfig()).apply(config);
@@ -70,6 +134,10 @@ public class WebServerBootstrap {
         if (javalinCallback != null) {
             javalinCallback.accept(javalin);
         }
+
+//        javalin.jettyServer().getConfig()
+//        javalin.javalinServlet()
+
         javalin.start(webConfig.getHost(), webConfig.getPort());
         return javalin;
     }
