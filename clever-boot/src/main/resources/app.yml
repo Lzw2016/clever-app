@@ -7,6 +7,24 @@ logging:
     root: info
     #org.eclipse.jetty.util.log: warn
 
+web:
+  echo:
+    ignorePaths:
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/*.pdf'
+
 clever:
   profiles.active: dev
   application.name: clever-boot
