@@ -141,7 +141,7 @@ public class ServletRegistrar {
         public void service(ServletRequest req, ServletResponse res) {
             Context ctx = new Context((HttpServletRequest) req, (HttpServletResponse) res, appAttributes);
             // 参考 io.javalin.http.util.ContextUtil#update
-            String requestUri = StringUtils.removeStart(ctx.req.getRequestURI(), ctx.req.getContextPath());
+            // String requestUri = StringUtils.removeStart(ctx.req.getRequestURI(), ctx.req.getContextPath());
             ReflectionsUtils.setFieldValue(ctx, "matchedPath", pathSpec);
             // ReflectionsUtils.setFieldValue(ctx, "pathParamMap", Collections.emptyMap());
             ReflectionsUtils.setFieldValue(ctx, "handlerType", HandlerType.Companion.fromServletRequest(ctx.req));
