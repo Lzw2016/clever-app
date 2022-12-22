@@ -31,6 +31,8 @@ public class WebServerBootstrap {
     @Getter
     private final JavalinHandlerRegistrar handlerRegistrar = new JavalinHandlerRegistrar();
     @Getter
+    private final JavalinEventListenerRegistrar javalinEventListenerRegistrar = new JavalinEventListenerRegistrar();
+    @Getter
     private final FilterRegistrar filterRegistrar = new FilterRegistrar();
     @Getter
     private final ServletRegistrar servletRegistrar = new ServletRegistrar();
@@ -79,9 +81,7 @@ public class WebServerBootstrap {
             }
         });
         // 注册自定义 Event
-        // javalin.events(eventListener -> {
-        //     eventListener.serverStarted();
-        // });
+        javalin.events(javalinEventListenerRegistrar::init);
         // 注册自定义 Handler
         handlerRegistrar.init(javalin);
         // 注入MVC处理功能
@@ -93,7 +93,6 @@ public class WebServerBootstrap {
         }
         return javalin;
     }
-
 
     /**
      * 初始化Web服务
