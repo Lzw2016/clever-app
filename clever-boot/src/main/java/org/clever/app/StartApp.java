@@ -44,14 +44,14 @@ public class StartApp {
                     ctx.next();
                     log.info("### Filter_1_之后");
                 }, "/*", "Filter_1", filterOrder.incrL1())
-//                .addFilter(ctx -> {
-//                    log.info("### Filter_2_之前");
-//                    ctx.res.setContentType(ContentType.TEXT_PLAIN.getMimeType());
-//                    ctx.res.getWriter().println("提前结束请求");
-//                    ctx.res.setStatus(200);
-//                    ctx.res.getWriter().flush();
-//                    log.info("### Filter_2_之后");
-//                }, "/*", "Filter_2", filterOrder.incrL1())
+                // .addFilter(ctx -> {
+                //     log.info("### Filter_2_之前");
+                //     ctx.res.setContentType(ContentType.TEXT_PLAIN.getMimeType());
+                //     ctx.res.getWriter().println("提前结束请求");
+                //     ctx.res.setStatus(200);
+                //     ctx.res.getWriter().flush();
+                //     log.info("### Filter_2_之后");
+                // }, "/*", "Filter_2", filterOrder.incrL1())
                 .addFilter(ctx -> {
                     log.info("### Filter_3_之前");
                     ctx.next();
@@ -67,6 +67,8 @@ public class StartApp {
                     ctx.res.getWriter().flush();
                 }, "/servlet/*", "Servlet_1", servletOrder.incrL1());
         // 注册 EventListener
+        //  webServerBootstrap.getEventListenerRegistrar()
+        //          .addEventListener()
         // 注册http前置(Before)处理器
         OrderIncrement beforeHandlerOrder = new OrderIncrement();
         webServerBootstrap.getHandlerRegistrar()
@@ -92,6 +94,9 @@ public class StartApp {
         OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
                 .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1());
+        // 注册 JavalinEventListener
+        // webServerBootstrap.getJavalinEventListenerRegistrar()
+        //         .addListener()
         // 初始化web服务
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);

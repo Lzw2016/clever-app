@@ -27,17 +27,17 @@ public class WebServerBootstrap {
     protected WebConfig webConfig;
     protected Javalin javalin;
     @Getter
-    private final JavalinPluginRegistrar pluginRegistrar = new JavalinPluginRegistrar();
-    @Getter
-    private final JavalinHandlerRegistrar handlerRegistrar = new JavalinHandlerRegistrar();
-    @Getter
-    private final JavalinEventListenerRegistrar javalinEventListenerRegistrar = new JavalinEventListenerRegistrar();
-    @Getter
     private final FilterRegistrar filterRegistrar = new FilterRegistrar();
     @Getter
     private final ServletRegistrar servletRegistrar = new ServletRegistrar();
     @Getter
     private final EventListenerRegistrar eventListenerRegistrar = new EventListenerRegistrar();
+    @Getter
+    private final JavalinHandlerRegistrar handlerRegistrar = new JavalinHandlerRegistrar();
+    @Getter
+    private final JavalinPluginRegistrar pluginRegistrar = new JavalinPluginRegistrar();
+    @Getter
+    private final JavalinEventListenerRegistrar javalinEventListenerRegistrar = new JavalinEventListenerRegistrar();
 
     /**
      * 初始化Web服务
