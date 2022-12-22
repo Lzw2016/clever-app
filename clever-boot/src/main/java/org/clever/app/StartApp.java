@@ -55,7 +55,7 @@ public class StartApp {
                 .addFilter(ctx -> {
                     log.info("### Filter_3_之前");
                     ctx.next();
-                    log.info("### Filter_3_之前");
+                    log.info("### Filter_3_之后");
                 }, "/*", "Filter_3", filterOrder.incrL1());
         // 注册 Servlet
         OrderIncrement servletOrder = new OrderIncrement();

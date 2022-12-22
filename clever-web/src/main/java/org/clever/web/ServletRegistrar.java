@@ -2,10 +2,12 @@ package org.clever.web;
 
 import io.javalin.core.JavalinConfig;
 import io.javalin.http.Context;
+import io.javalin.http.HandlerType;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.util.Assert;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -59,7 +61,7 @@ public class ServletRegistrar {
     public ServletRegistrar addServlet(ServletFuc servlet, String pathSpec, String name, double order) {
         Assert.notNull(servlet, "servlet 不能为 null");
         Assert.isNotBlank(pathSpec, "pathSpec 不能为空");
-        servlets.add(new OrderServlet(new ServletAdapter(servlet) {
+        servlets.add(new OrderServlet(new ServletAdapter(pathSpec, servlet) {
         }, pathSpec, order, name));
         return this;
     }
@@ -117,11 +119,13 @@ public class ServletRegistrar {
     }
 
     public class ServletAdapter implements Servlet {
+        private final String pathSpec;
         private final ServletFuc fuc;
 
-        public ServletAdapter(ServletFuc fuc) {
+        public ServletAdapter(String pathSpec, ServletFuc fuc) {
             Assert.notNull(fuc, "fuc 不能为 null");
             this.fuc = fuc;
+            this.pathSpec = pathSpec;
         }
 
         @Override
@@ -136,10 +140,12 @@ public class ServletRegistrar {
         @Override
         public void service(ServletRequest req, ServletResponse res) {
             Context ctx = new Context((HttpServletRequest) req, (HttpServletResponse) res, appAttributes);
-//            ctx.matchedPath = "";
-//            ctx.pathParamMap = "";
-//            ctx.handlerType = "";
-//            ctx.endpointHandlerPath = "";
+            // 参考 io.javalin.http.util.ContextUtil#update
+            String requestUri = StringUtils.removeStart(ctx.req.getRequestURI(), ctx.req.getContextPath());
+            ReflectionsUtils.setFieldValue(ctx, "matchedPath", pathSpec);
+            // ReflectionsUtils.setFieldValue(ctx, "pathParamMap", Collections.emptyMap());
+            ReflectionsUtils.setFieldValue(ctx, "handlerType", HandlerType.Companion.fromServletRequest(ctx.req));
+            ReflectionsUtils.setFieldValue(ctx, "endpointHandlerPath", pathSpec);
             try {
                 fuc.service(ctx);
             } catch (Exception e) {
