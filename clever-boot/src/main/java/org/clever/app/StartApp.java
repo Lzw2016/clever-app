@@ -1,6 +1,7 @@
 package org.clever.app;
 
 import io.javalin.Javalin;
+import io.javalin.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.boot.StartupInfoLogger;
 import org.clever.boot.context.config.ConfigDataBootstrap;
@@ -35,34 +36,63 @@ public class StartApp {
         startupInfoLogger.logStarting(log);
         // 创建web服务
         WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
+        // 注册 Filter
+        OrderIncrement filterOrder = new OrderIncrement();
+        webServerBootstrap.getFilterRegistrar()
+                .addFilter(ctx -> {
+                    log.info("### Filter_1_之前");
+                    ctx.next();
+                    log.info("### Filter_1_之后");
+                }, "/*", "Filter_1", filterOrder.incrL1())
+//                .addFilter(ctx -> {
+//                    log.info("### Filter_2_之前");
+//                    ctx.res.setContentType(ContentType.TEXT_PLAIN.getMimeType());
+//                    ctx.res.getWriter().println("提前结束请求");
+//                    ctx.res.setStatus(200);
+//                    ctx.res.getWriter().flush();
+//                    log.info("### Filter_2_之后");
+//                }, "/*", "Filter_2", filterOrder.incrL1())
+                .addFilter(ctx -> {
+                    log.info("### Filter_3_之前");
+                    ctx.next();
+                    log.info("### Filter_3_之前");
+                }, "/*", "Filter_3", filterOrder.incrL1());
+        // 注册 Servlet
+        OrderIncrement servletOrder = new OrderIncrement();
+        webServerBootstrap.getServletRegistrar()
+                .addServlet(ctx -> {
+                    ctx.res.setContentType(ContentType.TEXT_PLAIN.getMimeType());
+                    ctx.res.getWriter().println("自定义Servlet");
+                    ctx.res.setStatus(200);
+                    ctx.res.getWriter().flush();
+                }, "/servlet/*", "Servlet_1", servletOrder.incrL1());
+        // 注册 EventListener
         // 注册http前置(Before)处理器
         OrderIncrement beforeHandlerOrder = new OrderIncrement();
         webServerBootstrap.getHandlerRegistrar()
-//                .addBeforeHandler("*", ctx-> {
-//                    ctx.result("OK");
-//                    ctx.res.getOutputStream().close();
-//                })
                 .addBeforeHandler("*", beforeHandlerOrder.incrL1(), "Before_测试_1", ctx -> {
                     // 这里无法直接响应客户端请求(直接返回响应数据)
                     log.info("### Before_测试_1");
                 });
-//                .addBeforeHandler("*", ctx -> log.info("### 1"))
-//                .addBeforeHandler("*", ctx -> log.info("### 2"));
         // 注册http后置(After)处理器
         OrderIncrement afterHandlerOrder = new OrderIncrement();
         webServerBootstrap.getHandlerRegistrar()
                 .addAfterHandler("*", afterHandlerOrder.incrL1(), "After_测试_1", ctx -> {
                     log.info("### After_测试_1");
-                    ctx.status(200);
-                    ctx.result("After_测试_1");
+                    // ctx.status(200);
+                    // ctx.result("After_测试_1");
                 });
         // 注册websocket前置(Before)处理器
+        // webServerBootstrap.getHandlerRegistrar()
+        //         .addWsBeforeHandler()
         // 注册websocket后置(After)处理器
+        // webServerBootstrap.getHandlerRegistrar()
+        //         .addWsAfterHandler()
         // 注册插件
         OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
                 .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1());
-        // 初始化并启动web服务
+        // 初始化web服务
         Javalin javalin = webServerBootstrap.init(environment);
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
@@ -75,8 +105,9 @@ public class StartApp {
         javalin.get("/test2", ctx -> {
             throw new BusinessException("服务端异常");
         });
-//        log.info("body --> {}", javalin._conf.inner.appAttributes);
-//        javalin.error()
+        // javalin.error()
+        // 启动web服务
+        webServerBootstrap.start();
         // 系统关闭时的任务处理
         AppShutdownHook.addShutdownHook(javalin::stop, 0, "停止WebServer");
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Double.MAX_VALUE, "停止日志模块");

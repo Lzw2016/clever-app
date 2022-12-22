@@ -47,7 +47,7 @@ public class JavalinHandlerRegistrar {
      * @param handler 拦截器
      */
     public synchronized JavalinHandlerRegistrar addBeforeHandler(String path, double order, String name, Handler handler) {
-        Assert.notNull(handler, "handler 不能为 nul");
+        Assert.notNull(handler, "handler 不能为 null");
         Assert.isNotBlank(path, "path 不能为空");
         beforeHandler.add(new OrderItem<>(handler, path, order, name));
         return this;
@@ -83,7 +83,7 @@ public class JavalinHandlerRegistrar {
      * @param handler 拦截器
      */
     public synchronized JavalinHandlerRegistrar addAfterHandler(String path, double order, String name, Handler handler) {
-        Assert.notNull(handler, "handler 不能为 nul");
+        Assert.notNull(handler, "handler 不能为 null");
         Assert.isNotBlank(path, "path 不能为空");
         afterHandler.add(new OrderItem<>(handler, path, order, name));
         return this;
@@ -119,7 +119,7 @@ public class JavalinHandlerRegistrar {
      * @param handler 拦截器
      */
     public synchronized JavalinHandlerRegistrar addWsBeforeHandler(String path, double order, String name, Consumer<WsConfig> handler) {
-        Assert.notNull(handler, "handler 不能为 nul");
+        Assert.notNull(handler, "handler 不能为 null");
         Assert.isNotBlank(path, "path 不能为空");
         wsBeforeHandler.add(new OrderItem<>(handler, path, order, name));
         return this;
@@ -155,7 +155,7 @@ public class JavalinHandlerRegistrar {
      * @param handler 拦截器
      */
     public synchronized JavalinHandlerRegistrar addWsAfterHandler(String path, double order, String name, Consumer<WsConfig> handler) {
-        Assert.notNull(handler, "handler 不能为 nul");
+        Assert.notNull(handler, "handler 不能为 null");
         Assert.isNotBlank(path, "path 不能为空");
         wsBeforeHandler.add(new OrderItem<>(handler, path, order, name));
         return this;

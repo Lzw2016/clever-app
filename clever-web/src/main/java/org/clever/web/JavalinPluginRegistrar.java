@@ -32,7 +32,7 @@ public class JavalinPluginRegistrar {
      * @param order  顺序，值越小，优先级越高
      */
     public JavalinPluginRegistrar addPlugin(Plugin plugin, String name, double order) {
-        Assert.notNull(plugin, "plugin 不能为 nul");
+        Assert.notNull(plugin, "plugin 不能为 null");
         plugins.add(new OrderPlugin(plugin, order, name));
         return this;
     }
