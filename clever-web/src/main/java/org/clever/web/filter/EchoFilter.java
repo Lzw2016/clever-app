@@ -28,7 +28,13 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
     }
 
     public static EchoFilter create(Environment environment) {
-        return create(Binder.get(environment).bind(EchoConfig.PREFIX, EchoConfig.class).orElseGet(EchoConfig::new));
+        EchoConfig echoConfig = Binder.get(environment).bind(EchoConfig.PREFIX, EchoConfig.class).orElseGet(EchoConfig::new);
+        BannerUtils.printConfig(log, "Echo配置",
+                new String[]{
+                        "ignorePaths: " + StringUtils.join(echoConfig.getIgnorePaths(), " | ")
+                }
+        );
+        return create(echoConfig);
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger("ECHO");
@@ -38,12 +44,6 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
 
     public EchoFilter(EchoConfig echoConfig) {
         this.echoConfig = echoConfig;
-        BannerUtils.printBanner(
-                log, "Echo配置",
-                new String[]{
-                        "ignorePaths: " + StringUtils.join(echoConfig.getIgnorePaths(), " | ")
-                }
-        );
     }
 
     @Override

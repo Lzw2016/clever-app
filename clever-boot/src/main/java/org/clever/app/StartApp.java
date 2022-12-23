@@ -13,6 +13,7 @@ import org.clever.core.OrderIncrement;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.core.exception.BusinessException;
 import org.clever.web.WebServerBootstrap;
+import org.clever.web.filter.CorsFilter;
 import org.clever.web.filter.EchoFilter;
 import org.clever.web.plugin.ExceptionHandlerPlugin;
 
@@ -44,7 +45,8 @@ public class StartApp {
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
-                .addFilter(EchoFilter.create(environment), "/*", "EchoFilter")
+                .addFilter(EchoFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
+                .addFilter(CorsFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
                 .addFilter(ctx -> {
                     log.info("### Filter_1_之前");
                     ctx.next();

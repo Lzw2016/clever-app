@@ -10,7 +10,7 @@ import org.clever.core.env.Environment;
 import org.clever.core.json.jackson.JacksonConfig;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.util.Assert;
-import org.clever.web.config.*;
+import org.clever.web.config.WebConfig;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -49,17 +49,17 @@ public class WebServerBootstrap {
         webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
         javalin = Javalin.create(config -> {
             // 初始化http相关配置
-            HttpConfig http = webConfig.getHttp();
-            Optional.of(http).orElse(new HttpConfig()).apply(config);
+            WebConfig.HttpConfig http = webConfig.getHttp();
+            Optional.of(http).orElse(new WebConfig.HttpConfig()).apply(config);
             // 初始化Server相关配置
-            ServerConfig server = webConfig.getServer();
-            Optional.of(server).orElse(new ServerConfig()).apply(config);
+            WebConfig.ServerConfig server = webConfig.getServer();
+            Optional.of(server).orElse(new WebConfig.ServerConfig()).apply(config);
             // 初始化WebSocket相关配置
-            WebSocketConfig webSocket = webConfig.getWebSocketConfig();
-            Optional.of(webSocket).orElse(new WebSocketConfig()).apply(config);
+            WebConfig.WebSocketConfig webSocket = webConfig.getWebSocketConfig();
+            Optional.of(webSocket).orElse(new WebConfig.WebSocketConfig()).apply(config);
             // 初始化杂项配置
-            MiscConfig misc = webConfig.getMisc();
-            Optional.of(misc).orElse(new MiscConfig()).apply(config);
+            WebConfig.MiscConfig misc = webConfig.getMisc();
+            Optional.of(misc).orElse(new WebConfig.MiscConfig()).apply(config);
             // 自定义 JsonMapper
             JacksonConfig jackson = webConfig.getJackson();
             ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
@@ -85,8 +85,8 @@ public class WebServerBootstrap {
         // 注册自定义 Handler
         handlerRegistrar.init(javalin);
         // 注入MVC处理功能
-        MvcConfig mvc = webConfig.getMvc();
-        Optional.of(mvc).orElse(new MvcConfig()).apply(javalin);
+        WebConfig.MvcConfig mvc = webConfig.getMvc();
+        Optional.of(mvc).orElse(new WebConfig.MvcConfig()).apply(javalin);
         // 自定义配置
         if (javalinCallback != null) {
             javalinCallback.accept(javalin);

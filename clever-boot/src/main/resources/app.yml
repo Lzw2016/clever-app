@@ -24,6 +24,15 @@ web:
       - '/**/*.woff'
       - '/**/*.woff2'
       - '/**/*.pdf'
+  cors:
+    pathPattern: [ '/**' ]
+    allowedOriginPatterns: [ '*' ]
+    allowedOrigins: [ ]
+    allowedMethods: [ '*' ]
+    allowedHeaders: [ '*' ]
+    exposedHeaders: [ ]
+    allowCredentials: true
+    maxAge: 3600
 
 clever:
   profiles.active: dev

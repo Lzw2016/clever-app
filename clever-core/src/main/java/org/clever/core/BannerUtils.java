@@ -17,7 +17,7 @@ public class BannerUtils {
     public static final String LINE_LAST /*  */ = "╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════";
     public static final String LINE_START /* */ = "║ ";
 
-    protected static void printBanner(Logger log, String title, Object props) {
+    protected static void printConfig(Logger log, String title, Object props) {
         String sb = "\n" + LINE_FIRST + "\n" +
                 "╠═════ " + StringUtils.trim(title) + " ═════\n" +
                 JacksonMapper.getInstance().toJsonPretty(props) + "\n" +
@@ -25,7 +25,7 @@ public class BannerUtils {
         log.info(sb);
     }
 
-    public static void printBanner(Logger log, String title, String[] props) {
+    public static void printConfig(Logger log, String title, String[] props) {
         List<String> lines = Arrays.stream(props).map(line -> LINE_START + line).collect(Collectors.toList());
         String sb = "\n" + LINE_FIRST + "\n" +
                 "╠═════ " + StringUtils.trim(title) + " ═════\n" +
