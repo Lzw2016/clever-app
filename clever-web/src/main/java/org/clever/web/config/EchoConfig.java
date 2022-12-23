@@ -14,6 +14,10 @@ public class EchoConfig {
     public static final String PREFIX = WebConfig.PREFIX + ".echo";
 
     /**
+     * 启用 EchoFilter
+     */
+    private boolean enable = true;
+    /**
      * 忽略地址(支持AntPath风格)
      */
     private List<String> ignorePaths = new ArrayList<String>() {{

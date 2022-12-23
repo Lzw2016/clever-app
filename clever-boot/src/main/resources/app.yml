@@ -9,6 +9,7 @@ logging:
 
 web:
   echo:
+    enable: true
     ignorePaths:
       - '/**/*.png'
       - '/**/*.ico'
@@ -25,6 +26,7 @@ web:
       - '/**/*.woff2'
       - '/**/*.pdf'
   cors:
+    enable: true
     pathPattern: [ '/**' ]
     allowedOriginPatterns: [ '*' ]
     allowedOrigins: [ ]
@@ -33,6 +35,18 @@ web:
     exposedHeaders: [ ]
     allowCredentials: true
     maxAge: 3600
+  resources:
+    enable: true
+    mappings:
+      - hostedPath: '/xml/'
+        location: './clever-boot/src/main/resources/logback-app.xml'
+        cachePeriod: 30d
+      - hostedPath: '/static/'
+        location: './clever-boot/src/main/resources/'
+        cachePeriod: 30d
+      - hostedPath: '/static/'
+        location: 'classpath:/resources/'
+        cachePeriod: 30d
 
 clever:
   profiles.active: dev

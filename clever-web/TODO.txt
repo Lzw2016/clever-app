@@ -12,17 +12,17 @@
 🡓
 CustomFilter
     🡓
-    EchoFilter (JavalinConfig#requestLogger)
+    [-200] EchoFilter (JavalinConfig#requestLogger)
     🡓
-    CorsFilter (可参考: https://javalin.io/plugins/cors)
+    [-100] CorsFilter (可参考: https://javalin.io/plugins/cors)
     🡓
-    CaptureHandler
+    [0] CaptureHandler
     🡓
-    SecurityFilter (一系列Filter)
+    [100] SecurityFilter (一系列Filter)
     🡓
-    StaticFileFilter
+    [200] StaticResourceFilter
     🡓
-    CustomMVCInterceptorChain(before | after | exception)
+    [300] CustomMVCInterceptorChain(before | after | exception)
         🡓
         before (可提前响应请求)
         🡓

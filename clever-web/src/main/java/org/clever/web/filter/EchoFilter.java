@@ -1,5 +1,6 @@
 package org.clever.web.filter;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
@@ -31,6 +32,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
         EchoConfig echoConfig = Binder.get(environment).bind(EchoConfig.PREFIX, EchoConfig.class).orElseGet(EchoConfig::new);
         BannerUtils.printConfig(log, "Echo配置",
                 new String[]{
+                        "enable     : " + echoConfig.isEnable(),
                         "ignorePaths: " + StringUtils.join(echoConfig.getIgnorePaths(), " | ")
                 }
         );
@@ -40,6 +42,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
     private static final Logger LOGGER = LoggerFactory.getLogger("ECHO");
     private static final PathMatcher MATCHER = new AntPathMatcher();
 
+    @Getter
     private final EchoConfig echoConfig;
 
     public EchoFilter(EchoConfig echoConfig) {
@@ -48,8 +51,13 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) {
-        List<String> ignore = echoConfig.getIgnorePaths();
+        // 是否启用
+        if (!echoConfig.isEnable()) {
+            ctx.next();
+            return;
+        }
         // 在 ignore 出现的路径，忽略掉
+        List<String> ignore = echoConfig.getIgnorePaths();
         if (ignore != null && !ignore.isEmpty()) {
             for (String path : ignore) {
                 if (MATCHER.match(path, ctx.req.getRequestURI())) {
@@ -58,7 +66,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
                 }
             }
         }
-        // ECHO
+        // ECHO 逻辑
         StringBuilder sb = new StringBuilder();
         sb.append(StringUtils.rightPad(ctx.req.getMethod(), 8)).append(ctx.req.getRequestURI());
         if (ctx.req.getQueryString() != null) {

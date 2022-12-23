@@ -36,6 +36,12 @@ public class CorsConfig {
     );
 
     /**
+     * 启用 CorsFilter
+     */
+    @Setter
+    @Getter
+    private boolean enable = false;
+    /**
      * 支持跨域的path(支持AntPath风格，默认：“/**”)
      */
     @Setter

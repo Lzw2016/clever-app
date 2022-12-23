@@ -13,8 +13,10 @@ import org.clever.core.OrderIncrement;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.core.exception.BusinessException;
 import org.clever.web.WebServerBootstrap;
+import org.clever.web.config.WebConfig;
 import org.clever.web.filter.CorsFilter;
 import org.clever.web.filter.EchoFilter;
+import org.clever.web.filter.StaticResourceFilter;
 import org.clever.web.plugin.ExceptionHandlerPlugin;
 
 import java.time.Duration;
@@ -41,12 +43,14 @@ public class StartApp {
         // 初始化非web资源
 
         // 创建web服务
-        WebServerBootstrap webServerBootstrap = new WebServerBootstrap();
+        WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(environment);
+        final WebConfig webConfig = webServerBootstrap.getWebConfig();
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
                 .addFilter(EchoFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
-                .addFilter(CorsFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
+                .addFilter(CorsFilter.create(environment), "/*", "CorsFilter", filterOrder.incrL1())
+                .addFilter(StaticResourceFilter.create(webConfig.getRootPath(), environment), "/*", "StaticResourceFilter", filterOrder.incrL1())
                 .addFilter(ctx -> {
                     log.info("### Filter_1_之前");
                     ctx.next();
@@ -106,7 +110,7 @@ public class StartApp {
         // webServerBootstrap.getJavalinEventListenerRegistrar()
         //         .addListener()
         // 初始化web服务
-        Javalin javalin = webServerBootstrap.init(environment);
+        Javalin javalin = webServerBootstrap.init();
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
         javalin.get("/test", ctx -> {

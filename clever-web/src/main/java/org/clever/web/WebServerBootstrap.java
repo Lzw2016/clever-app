@@ -5,6 +5,7 @@ import io.javalin.Javalin;
 import io.javalin.core.JavalinConfig;
 import io.javalin.plugin.json.JavalinJackson;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.env.Environment;
 import org.clever.core.json.jackson.JacksonConfig;
@@ -21,11 +22,26 @@ import java.util.function.Consumer;
  * 作者：lizw <br/>
  * 创建时间：2022/07/17 12:35 <br/>
  */
+@Slf4j
 public class WebServerBootstrap {
-    protected volatile boolean initialized = false;
-    protected volatile boolean started = false;
-    protected WebConfig webConfig;
-    protected Javalin javalin;
+    public static WebServerBootstrap create(WebConfig webConfig) {
+        Assert.notNull(webConfig, "参数 webConfig 不能为 null");
+        return new WebServerBootstrap(webConfig);
+    }
+
+    public static WebServerBootstrap create(Environment environment) {
+        WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
+        return create(webConfig);
+    }
+
+    @Getter
+    private final WebConfig webConfig;
+    @Getter
+    private Javalin javalin;
+    @Getter
+    private volatile boolean initialized = false;
+    @Getter
+    private volatile boolean started = false;
     @Getter
     private final FilterRegistrar filterRegistrar = new FilterRegistrar();
     @Getter
@@ -39,14 +55,16 @@ public class WebServerBootstrap {
     @Getter
     private final JavalinEventListenerRegistrar javalinEventListenerRegistrar = new JavalinEventListenerRegistrar();
 
+    public WebServerBootstrap(WebConfig webConfig) {
+        this.webConfig = webConfig;
+    }
+
     /**
      * 初始化Web服务
      */
-    public Javalin init(Environment environment, Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
+    public Javalin init(Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
         Assert.isTrue(!initialized, "不能多次初始化");
         initialized = true;
-        Assert.notNull(environment, "environment 不能为空");
-        webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
         javalin = Javalin.create(config -> {
             // 初始化http相关配置
             WebConfig.HttpConfig http = webConfig.getHttp();
@@ -97,15 +115,15 @@ public class WebServerBootstrap {
     /**
      * 初始化Web服务
      */
-    public Javalin init(Environment environment, Consumer<JavalinConfig> configCallback) {
-        return init(environment, configCallback, null);
+    public Javalin init(Consumer<JavalinConfig> configCallback) {
+        return init(configCallback, null);
     }
 
     /**
      * 初始化Web服务
      */
-    public Javalin init(Environment environment) {
-        return init(environment, null, null);
+    public Javalin init() {
+        return init(null, null);
     }
 
     /**
@@ -121,8 +139,8 @@ public class WebServerBootstrap {
     /**
      * 初始化并启动Web服务
      */
-    public Javalin initAndStart(Environment environment, Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
-        Javalin javalin = init(environment, configCallback, javalinCallback);
+    public Javalin initAndStart(Consumer<JavalinConfig> configCallback, Consumer<Javalin> javalinCallback) {
+        Javalin javalin = init(configCallback, javalinCallback);
         start();
         return javalin;
     }
@@ -130,14 +148,14 @@ public class WebServerBootstrap {
     /**
      * 初始化并启动Web服务
      */
-    public Javalin initAndStart(Environment environment, Consumer<JavalinConfig> configCallback) {
-        return initAndStart(environment, configCallback, null);
+    public Javalin initAndStart(Consumer<JavalinConfig> configCallback) {
+        return initAndStart(configCallback, null);
     }
 
     /**
      * 初始化并启动Web服务
      */
-    public Javalin initAndStart(Environment environment) {
-        return initAndStart(environment, null, null);
+    public Javalin initAndStart() {
+        return initAndStart(null, null);
     }
 }

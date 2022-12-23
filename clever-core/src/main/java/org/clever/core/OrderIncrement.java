@@ -24,6 +24,16 @@ public class OrderIncrement {
     private int level6Count = 0;
 
     /**
+     * @param initOrder 初始化order值
+     */
+    public OrderIncrement(int initOrder) {
+        this.level2Count = initOrder;
+    }
+
+    public OrderIncrement() {
+    }
+
+    /**
      * 获取当前排序值
      */
     public synchronized double order() {

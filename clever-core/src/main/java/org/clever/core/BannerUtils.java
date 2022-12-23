@@ -27,6 +27,9 @@ public class BannerUtils {
 
     public static void printConfig(Logger log, String title, String[] props) {
         List<String> lines = Arrays.stream(props).map(line -> LINE_START + line).collect(Collectors.toList());
+        if (lines.isEmpty()) {
+            lines.add(LINE_START);
+        }
         String sb = "\n" + LINE_FIRST + "\n" +
                 "╠═════ " + StringUtils.trim(title) + " ═════\n" +
                 StringUtils.join(lines, "\n") + "\n" +
