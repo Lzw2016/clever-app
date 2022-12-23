@@ -3,6 +3,7 @@ package org.clever.app;
 import io.javalin.Javalin;
 import io.javalin.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.StartupInfoLogger;
 import org.clever.boot.context.config.ConfigDataBootstrap;
 import org.clever.boot.context.logging.LoggingBootstrap;
@@ -35,6 +36,7 @@ public class StartApp {
         AppContextHolder.registerBean("loggingBootstrap", loggingBootstrap, true);
         StartupInfoLogger startupInfoLogger = new StartupInfoLogger(StartApp.class);
         startupInfoLogger.logStarting(log);
+        log.info("The following profiles are active: {}", StringUtils.join(environment.getActiveProfiles(), ", "));
         // 初始化非web资源
 
         // 创建web服务
