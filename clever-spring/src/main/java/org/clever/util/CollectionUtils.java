@@ -1,9 +1,6 @@
 package org.clever.util;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 集合工具
@@ -66,5 +63,33 @@ public class CollectionUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * 返回指定多值Map的不可修改视图
+     *
+     * @param targetMap 返回不可修改视图的Map
+     * @return 指定多值Map的不可修改视图
+     */
+    @SuppressWarnings("unchecked")
+    public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> targetMap) {
+        Assert.notNull(targetMap, "'targetMap' must not be null");
+        Map<K, List<V>> result = newLinkedHashMap(targetMap.size());
+        targetMap.forEach((key, value) -> {
+            List<? extends V> values = Collections.unmodifiableList(value);
+            result.put(key, (List<V>) values);
+        });
+        Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
+        return toMultiValueMap(unmodifiableMap);
+    }
+
+    /**
+     * 将 {@code Map<K, List<V>>} 调整为 {@code MultiValueMap<K, V>}.
+     *
+     * @param targetMap 原始Map
+     * @return 调整后的多值Map（包装原始Map）
+     */
+    public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> targetMap) {
+        return new MultiValueMapAdapter<>(targetMap);
     }
 }

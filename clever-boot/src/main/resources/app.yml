@@ -38,14 +38,14 @@ web:
   resources:
     enable: true
     mappings:
-      - hostedPath: '/xml/'
+      - hostedPath: '/xml/logback.xml'
         location: './clever-boot/src/main/resources/logback-app.xml'
         cachePeriod: 30d
       - hostedPath: '/static/'
-        location: './clever-boot/src/main/resources/'
+        location: './clever-boot/src/main/resources/static'
         cachePeriod: 30d
       - hostedPath: '/static/'
-        location: 'classpath:/resources/'
+        location: 'classpath:static/'
         cachePeriod: 30d
 
 clever:

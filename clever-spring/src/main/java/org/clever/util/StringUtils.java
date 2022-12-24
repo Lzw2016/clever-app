@@ -1,5 +1,7 @@
 package org.clever.util;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -397,6 +399,24 @@ public class StringUtils {
     }
 
     /**
+     * 通过{@link StringTokenizer}将给定的{@code String}标记为{@code String} 数组。
+     * <p>修剪标记并省略空标记。
+     * <p>给定的{@code delimiters}字符串可以由任意数量的分隔符组成。
+     * 这些字符中的每一个都可以用来分隔标记。
+     * 分隔符始终是单个字符；对于多字符分隔符，请考虑使用{@link #delimitedListToStringArray}.
+     *
+     * @param str        要标记化的{@code String}（可能为{@code null}或空）
+     * @param delimiters 分隔符字符，组合为{@code String}（每个字符单独被视为分隔符）
+     * @return 令牌数组
+     * @see java.util.StringTokenizer
+     * @see String#trim()
+     * @see #delimitedListToStringArray
+     */
+    public static String[] tokenizeToStringArray(String str, String delimiters) {
+        return tokenizeToStringArray(str, delimiters, true, true);
+    }
+
+    /**
      * 删除给定字符串的前导空格
      *
      * @see java.lang.Character#isWhitespace
@@ -659,8 +679,9 @@ public class StringUtils {
 
     /**
      * 删除所有出现的给定子字符串
+     *
      * @param inString 原始的{@code String}
-     * @param pattern 删除所有出现的模式
+     * @param pattern  删除所有出现的模式
      * @return 结果 {@code String}
      */
     public static String delete(String inString, String pattern) {
@@ -730,5 +751,52 @@ public class StringUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * 解码给定的编码URI组件值。基于以下规则：
+     * <ul>
+     * <li>字母数字字符{@code "a"}到{@code "z"}、 {@code "A"}到{@code "Z"}, 以及{@code "0"}到{@code "9"}保持不变。</li>
+     * <li>特殊字符{@code "-"}, {@code "_"}, {@code "."}和{@code "*"}保持不变。</li>
+     * <li>序列"{@code %<i>xy</i>}"被解释为字符的十六进制表示。</li>
+     * </ul>
+     *
+     * @param source  编码的字符串
+     * @param charset 字符集
+     * @return 解码值
+     * @throws IllegalArgumentException 当给定源包含无效编码序列时
+     * @see java.net.URLDecoder#decode(String, String)
+     */
+    @SuppressWarnings("DuplicatedCode")
+    public static String uriDecode(String source, Charset charset) {
+        int length = source.length();
+        if (length == 0) {
+            return source;
+        }
+        Assert.notNull(charset, "Charset must not be null");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(length);
+        boolean changed = false;
+        for (int i = 0; i < length; i++) {
+            int ch = source.charAt(i);
+            if (ch == '%') {
+                if (i + 2 < length) {
+                    char hex1 = source.charAt(i + 1);
+                    char hex2 = source.charAt(i + 2);
+                    int u = Character.digit(hex1, 16);
+                    int l = Character.digit(hex2, 16);
+                    if (u == -1 || l == -1) {
+                        throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
+                    }
+                    baos.write((char) ((u << 4) + l));
+                    i += 2;
+                    changed = true;
+                } else {
+                    throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
+                }
+            } else {
+                baos.write(ch);
+            }
+        }
+        return (changed ? StreamUtils.copyToString(baos, charset) : source);
     }
 }

@@ -5,12 +5,12 @@ web:
   http:
     autogenerateEtags: true
     maxRequestSize: 10MB
-    singlePageRoot:
-      - hostedPath: '/xml'
-        filePath: 'logback-app.xml'
-        location: CLASSPATH
-    staticFile:
-      - hostedPath: '/static'
-        directory: 'clever-boot/src/main/resources'
-        preCompress: true
-        location: EXTERNAL
+#    singlePageRoot:
+#      - hostedPath: '/xml'
+#        filePath: 'logback-app.xml'
+#        location: CLASSPATH
+#    staticFile:
+#      - hostedPath: '/static'
+#        directory: 'clever-boot/src/main/resources'
+#        preCompress: true
+#        location: EXTERNAL

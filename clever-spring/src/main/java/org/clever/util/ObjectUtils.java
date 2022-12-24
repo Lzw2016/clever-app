@@ -507,4 +507,13 @@ public class ObjectUtils {
     public static String getIdentityHexString(Object obj) {
         return Integer.toHexString(System.identityHashCode(obj));
     }
+
+    /**
+     * 确定给定对象是数组：object数组还是基元数组。
+     *
+     * @param obj 要检查的对象
+     */
+    public static boolean isArray(Object obj) {
+        return (obj != null && obj.getClass().isArray());
+    }
 }
