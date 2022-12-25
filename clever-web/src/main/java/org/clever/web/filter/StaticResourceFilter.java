@@ -7,23 +7,32 @@ import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.BannerUtils;
 import org.clever.core.env.Environment;
 import org.clever.core.io.Resource;
+import org.clever.core.io.support.ResourceRegion;
 import org.clever.util.Assert;
+import org.clever.util.MimeTypeUtils;
 import org.clever.util.StreamUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.StaticResourceConfig;
 import org.clever.web.http.HttpHeaders;
+import org.clever.web.http.HttpRange;
+import org.clever.web.http.MediaType;
 import org.clever.web.http.StaticResourceHandler;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 处理静态资源的访问，参考Spring {@code ResourceHttpRequestHandler}
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 22:00 <br/>
  */
@@ -63,23 +72,6 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         }
         return handlers;
     }
-
-//    /**
-//     * {@code Map<资源后缀名, ContentType>}
-//     */
-//    public static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<>(4);
-//
-//    static {
-//        for (ContentType contentType : ContentType.values()) {
-//            String[] extensions = contentType.getExtensions();
-//            if (extensions == null || extensions.length == 0) {
-//                continue;
-//            }
-//            for (String extension : extensions) {
-//                CONTENT_TYPE_MAP.put(extension, contentType.getMimeType());
-//            }
-//        }
-//    }
 
     @Getter
     private final boolean enable;
@@ -127,10 +119,21 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         if (ctx.req.getHeader(HttpHeaders.RANGE) == null) {
             write(ctx.res, resource);
         } else {
+            try {
+                List<HttpRange> httpRanges = new HttpHeaders(ctx.req).getRange();
+                ctx.res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+                List<ResourceRegion> resourceRegions = HttpRange.toResourceRegions(httpRanges, resource);
+                if (resourceRegions.size() == 1) {
+                    writeResourceRegion(ctx.res, resourceRegions.get(0));
+                } else {
+                    writeResourceRegions(ctx.res, resourceRegions);
+                }
 
+            } catch (IllegalArgumentException ex) {
+                ctx.res.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
+                ctx.res.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+            }
         }
-//        log.trace("HttpHeaders.EMPTY -> {}", HttpHeaders.EMPTY);
-//        ctx.next();
     }
 
     private void write(HttpServletResponse response, Resource resource) throws IOException {
@@ -144,5 +147,82 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         } catch (FileNotFoundException ex) {
             // ignore, see SPR-12999
         }
+    }
+
+    private void writeResourceRegion(HttpServletResponse response, ResourceRegion region) throws IOException {
+        Assert.notNull(region, "ResourceRegion must not be null");
+        long start = region.getPosition();
+        long end = start + region.getCount() - 1;
+        long resourceLength = region.getResource().contentLength();
+        end = Math.min(end, resourceLength - 1);
+        long rangeLength = end - start + 1;
+        response.addHeader("Content-Range", "bytes " + start + '-' + end + '/' + resourceLength);
+        response.setContentLength((int) rangeLength);
+        try (InputStream in = region.getResource().getInputStream()) {
+            StreamUtils.copyRange(in, response.getOutputStream(), start, end);
+        }
+        response.getOutputStream().flush();
+    }
+
+    private void writeResourceRegions(HttpServletResponse response, Collection<ResourceRegion> resourceRegions) throws IOException {
+        Assert.notNull(resourceRegions, "Collection of ResourceRegion should not be null");
+        MediaType contentType = MediaType.tryParseMediaType(response.getContentType());
+        String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
+        response.setHeader(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
+        OutputStream out = response.getOutputStream();
+        Resource resource = null;
+        InputStream in = null;
+        long inputStreamPosition = 0;
+        try {
+            for (ResourceRegion region : resourceRegions) {
+                long start = region.getPosition() - inputStreamPosition;
+                if (start < 0 || resource != region.getResource()) {
+                    if (in != null) {
+                        in.close();
+                    }
+                    resource = region.getResource();
+                    in = resource.getInputStream();
+                    inputStreamPosition = 0;
+                    start = region.getPosition();
+                }
+                long end = start + region.getCount() - 1;
+                // Writing MIME header.
+                println(out);
+                print(out, "--" + boundaryString);
+                println(out);
+                if (contentType != null) {
+                    print(out, "Content-Type: " + contentType);
+                    println(out);
+                }
+                long resourceLength = region.getResource().contentLength();
+                end = Math.min(end, resourceLength - inputStreamPosition - 1);
+                print(out, "Content-Range: bytes " + region.getPosition() + '-' + (region.getPosition() + region.getCount() - 1) + '/' + resourceLength);
+                println(out);
+                println(out);
+                // Printing content
+                StreamUtils.copyRange(in, out, start, end);
+                inputStreamPosition += (end + 1);
+            }
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+                // ignore
+            }
+        }
+        println(out);
+        print(out, "--" + boundaryString + "--");
+        out.flush();
+    }
+
+    private static void println(OutputStream os) throws IOException {
+        os.write('\r');
+        os.write('\n');
+    }
+
+    private static void print(OutputStream os, String buf) throws IOException {
+        os.write(buf.getBytes(StandardCharsets.US_ASCII));
     }
 }

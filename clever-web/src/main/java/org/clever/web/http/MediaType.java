@@ -500,6 +500,23 @@ public class MediaType extends MimeType implements Serializable {
     }
 
     /**
+     * 尝试将给定的字符串解析为单个 {@code MediaType}，解析失败返回 null
+     *
+     * @param mediaType 要解析的字符串
+     * @return 媒体类型，解析失败返回 null
+     */
+    public static MediaType tryParseMediaType(String mediaType) {
+        if (StringUtils.isBlank(mediaType)) {
+            return null;
+        }
+        try {
+            return parseMediaType(mediaType);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * 将给定的字符串解析为单个 {@code MediaType}
      *
      * @param mediaType 要解析的字符串

@@ -76,14 +76,9 @@ public class StaticResourceHandler {
     @Getter
     private final ResourceCacheControl resourceCacheControl;
     /**
-     * {@code Map<资源后缀名(全小写), MediaType>}
+     * 用于自定义“Content-Type” {@code Map<资源后缀名(全小写), MediaType>}
      */
     private final Map<String, MediaType> mediaTypes = new HashMap<>(4);
-    /**
-     *
-     */
-    @Getter
-    private boolean optimizeLocations = false;
 
     public StaticResourceHandler(String rootPath, StaticResourceConfig.ResourceMapping resourceMapping) {
         Assert.notNull(rootPath, "参数 rootPath 不能为 null");

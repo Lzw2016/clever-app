@@ -2,6 +2,7 @@ package org.clever.web.http;
 
 import org.clever.util.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -453,6 +454,51 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     }
 
     /**
+     * 把HttpServletRequest中的Header数据转换成当前 HttpHeaders 对象
+     */
+    public HttpHeaders(HttpServletRequest request) {
+        this();
+        for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
+            String headerName = (String) names.nextElement();
+            for (Enumeration<?> headerValues = request.getHeaders(headerName);
+                 headerValues.hasMoreElements(); ) {
+                String headerValue = (String) headerValues.nextElement();
+                this.add(headerName, headerValue);
+            }
+        }
+        // HttpServletRequest exposes some headers as properties: we should include those if not already present
+        try {
+            MediaType contentType = this.getContentType();
+            if (contentType == null) {
+                String requestContentType = request.getContentType();
+                if (StringUtils.hasLength(requestContentType)) {
+                    contentType = MediaType.parseMediaType(requestContentType);
+                    this.setContentType(contentType);
+                }
+            }
+            if (contentType != null && contentType.getCharset() == null) {
+                String requestEncoding = request.getCharacterEncoding();
+                if (StringUtils.hasLength(requestEncoding)) {
+                    Charset charSet = Charset.forName(requestEncoding);
+                    Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+                    params.putAll(contentType.getParameters());
+                    params.put("charset", charSet.toString());
+                    MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+                    this.setContentType(mediaType);
+                }
+            }
+        } catch (InvalidMediaTypeException ex) {
+            // Ignore: simply not exposing an invalid content type in HttpHeaders...
+        }
+        if (this.getContentLength() < 0) {
+            int requestContentLength = request.getContentLength();
+            if (requestContentLength != -1) {
+                this.setContentLength(requestContentLength);
+            }
+        }
+    }
+
+    /**
      * Get the list of header values for the given header name, if any.
      *
      * @param headerName the header name
@@ -872,7 +918,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
      * and then pass that to the {@code RestTemplate} or {@code WebClient}.
      *
      * @param name     the control name
-     * @param filename the filename (may be {@code null})
+     * @param filename the filename (maybe {@code null})
      * @see #getContentDisposition()
      */
     public void setContentDispositionFormData(String name, String filename) {
@@ -998,7 +1044,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     /**
      * Set the date and time at which the message was created, as specified
      * by the {@code Date} header.
-     * <p>The date should be specified as the number of milliseconds since January 1, 1970 GMT.
+     * <p>The date should be specified as the number of milliseconds since January 1, 1970, GMT.
      */
     public void setDate(long date) {
         setDate(DATE, date);
@@ -1008,7 +1054,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
      * Return the date and time at which the message was created, as specified
      * by the {@code Date} header.
      * <p>The date is returned as the number of milliseconds since
-     * January 1, 1970 GMT. Returns -1 when the date is unknown.
+     * January 1, 1970, GMT. Returns -1 when the date is unknown.
      *
      * @throws IllegalArgumentException if the value cannot be converted to a date
      */
@@ -1056,7 +1102,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
      * Set the date and time at which the message is no longer valid,
      * as specified by the {@code Expires} header.
      * <p>The date should be specified as the number of milliseconds since
-     * January 1, 1970 GMT.
+     * January 1, 1970, GMT.
      */
     public void setExpires(long expires) {
         setDate(EXPIRES, expires);
@@ -1066,7 +1112,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
      * Return the date and time at which the message is no longer valid,
      * as specified by the {@code Expires} header.
      * <p>The date is returned as the number of milliseconds since
-     * January 1, 1970 GMT. Returns -1 when the date is unknown.
+     * January 1, 1970, GMT. Returns -1 when the date is unknown.
      *
      * @see #getFirstZonedDateTime(String)
      */
@@ -1164,7 +1210,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     /**
      * Set the (new) value of the {@code If-Modified-Since} header.
      * <p>The date should be specified as the number of milliseconds since
-     * January 1, 1970 GMT.
+     * January 1, 1970, GMT.
      */
     public void setIfModifiedSince(long ifModifiedSince) {
         setDate(IF_MODIFIED_SINCE, ifModifiedSince);
@@ -1173,7 +1219,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     /**
      * Return the value of the {@code If-Modified-Since} header.
      * <p>The date is returned as the number of milliseconds since
-     * January 1, 1970 GMT. Returns -1 when the date is unknown.
+     * January 1, 1970, GMT. Returns -1 when the date is unknown.
      *
      * @see #getFirstZonedDateTime(String)
      */
@@ -1223,7 +1269,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     /**
      * Set the (new) value of the {@code If-Unmodified-Since} header.
      * <p>The date should be specified as the number of milliseconds since
-     * January 1, 1970 GMT.
+     * January 1, 1970, GMT.
      */
     public void setIfUnmodifiedSince(long ifUnmodifiedSince) {
         setDate(IF_UNMODIFIED_SINCE, ifUnmodifiedSince);
@@ -1232,7 +1278,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     /**
      * Return the value of the {@code If-Unmodified-Since} header.
      * <p>The date is returned as the number of milliseconds since
-     * January 1, 1970 GMT. Returns -1 when the date is unknown.
+     * January 1, 1970, GMT. Returns -1 when the date is unknown.
      *
      * @see #getFirstZonedDateTime(String)
      */
@@ -1260,7 +1306,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
      * Set the time the resource was last changed, as specified by the
      * {@code Last-Modified} header.
      * <p>The date should be specified as the number of milliseconds since
-     * January 1, 1970 GMT.
+     * January 1, 1970, GMT.
      */
     public void setLastModified(long lastModified) {
         setDate(LAST_MODIFIED, lastModified);
@@ -1270,7 +1316,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
      * Return the time the resource was last changed, as specified by the
      * {@code Last-Modified} header.
      * <p>The date is returned as the number of milliseconds since
-     * January 1, 1970 GMT. Returns -1 when the date is unknown.
+     * January 1, 1970, GMT. Returns -1 when the date is unknown.
      *
      * @see #getFirstZonedDateTime(String)
      */
