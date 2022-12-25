@@ -25,33 +25,27 @@ public class ErrorResponse extends BaseResponse {
     /**
      * 时间戳
      */
-    private Date timestamp;
-
+    private final Date timestamp = new Date();
     /**
      * 异常消息(exception.message)
      */
     private String error;
-
     /**
      * 响应状态码(HTTP 状态码)
      */
     private int status;
-
     /**
      * 异常类型，异常的具体类型
      */
     private String exception;
-
     /**
      * 错误消息，用于前端显示
      */
     private String message;
-
     /**
      * 请求路径，当前请求的路径
      */
     private String path;
-
     /**
      * 表单数据验证的错误消息
      */
@@ -109,7 +103,6 @@ public class ErrorResponse extends BaseResponse {
      * @param path      请求路径
      */
     public ErrorResponse(String message, Throwable exception, int status, String path) {
-        this.timestamp = new Date();
         this.message = message;
         this.status = status;
         if (exception != null) {
@@ -120,17 +113,6 @@ public class ErrorResponse extends BaseResponse {
         }
         this.path = path;
     }
-
-//    /**
-//     * 添加请求参数校验错误
-//     */
-//    public ErrorResponse addValidMessage(FieldError fieldError) {
-//        if (validMessageList == null) {
-//            validMessageList = new ArrayList<>();
-//        }
-//        validMessageList.add(new ValidMessage(fieldError));
-//        return this;
-//    }
 
     /**
      * 添加请求参数校验错误

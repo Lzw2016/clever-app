@@ -12,7 +12,7 @@ import org.clever.util.ResourceUtils;
  * 创建时间：2022/12/23 22:02 <br/>
  */
 @Slf4j
-public class PathUtils {
+public class ResourcePathUtils {
     private static final DefaultResourceLoader RESOURCE_LOADER = new DefaultResourceLoader();
 
     /**

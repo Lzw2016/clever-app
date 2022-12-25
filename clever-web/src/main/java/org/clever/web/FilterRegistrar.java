@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.exception.ExceptionUtils;
 import org.clever.util.Assert;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -12,6 +11,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -186,18 +186,14 @@ public class FilterRegistrar {
         /**
          * 执行下一个过滤器
          */
-        public void next() {
-            try {
-                chain.doFilter(req, res);
-            } catch (Exception e) {
-                throw ExceptionUtils.unchecked(e);
-            }
+        public void next() throws ServletException, IOException {
+            chain.doFilter(req, res);
         }
     }
 
     @FunctionalInterface
     public interface FilterFuc {
-        void doFilter(Context ctx) throws Exception;
+        void doFilter(Context ctx) throws IOException, ServletException;
     }
 
     public static class FilterAdapter implements Filter {
@@ -213,12 +209,8 @@ public class FilterRegistrar {
         }
 
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
-            try {
-                fuc.doFilter(new Context((HttpServletRequest) request, (HttpServletResponse) response, chain));
-            } catch (Exception e) {
-                throw ExceptionUtils.unchecked(e);
-            }
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
+            fuc.doFilter(new Context((HttpServletRequest) request, (HttpServletResponse) response, chain));
         }
 
         @Override

@@ -9,18 +9,18 @@ import org.junit.jupiter.api.Test;
  * 创建时间：2022/12/24 21:25 <br/>
  */
 @Slf4j
-public class PathUtilsTest {
+public class ResourcePathUtilsTest {
     @Test
     public void t01() {
         final String basePath = "./src/test/resources/static";
-        Resource resource = PathUtils.getResource(basePath, "index.html");
-        log.info("-> {}", PathUtils.getAbsolutePath(resource));
+        Resource resource = ResourcePathUtils.getResource(basePath, "index.html");
+        log.info("-> {}", ResourcePathUtils.getAbsolutePath(resource));
     }
 
     @Test
     public void t02() {
         final String basePath = "classpath:static";
-        Resource resource = PathUtils.getResource(basePath, "index.html");
-        log.info("-> {}", PathUtils.getAbsolutePath(resource));
+        Resource resource = ResourcePathUtils.getResource(basePath, "index.html");
+        log.info("-> {}", ResourcePathUtils.getAbsolutePath(resource));
     }
 }

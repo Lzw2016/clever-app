@@ -12,7 +12,7 @@ import org.clever.util.ResourceUtils;
 import org.clever.util.StringUtils;
 import org.clever.web.config.StaticResourceConfig;
 import org.clever.web.servlet.resource.HttpResource;
-import org.clever.web.utils.PathUtils;
+import org.clever.web.utils.ResourcePathUtils;
 import org.clever.web.utils.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,19 +37,6 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public class StaticResourceHandler {
-    /**
-     * HTTP method "GET".
-     */
-    public static final String METHOD_GET = "GET";
-    /**
-     * HTTP method "HEAD".
-     */
-    public static final String METHOD_HEAD = "HEAD";
-    /**
-     * HTTP method "POST".
-     */
-    public static final String METHOD_POST = "POST";
-
     public static final String HEADER_PRAGMA = "Pragma";
     public static final String HEADER_EXPIRES = "Expires";
     public static final String HEADER_CACHE_CONTROL = "Cache-Control";
@@ -84,7 +71,7 @@ public class StaticResourceHandler {
         Assert.notNull(rootPath, "参数 rootPath 不能为 null");
         Assert.notNull(resourceMapping, "参数 resourceMapping 不能为 null");
         this.hostedPath = resourceMapping.getHostedPath();
-        this.location = PathUtils.getResource(rootPath, resourceMapping.getLocation());
+        this.location = ResourcePathUtils.getResource(rootPath, resourceMapping.getLocation());
         Duration cachePeriod = Optional.of(resourceMapping.getCachePeriod()).orElse(Duration.ofSeconds(0));
         CacheControl cacheControl = cachePeriod.isZero() ? CacheControl.noStore() : CacheControl.maxAge(cachePeriod);
         this.resourceCacheControl = new ResourceCacheControl(cacheControl);
@@ -94,7 +81,7 @@ public class StaticResourceHandler {
      * 静态资源绝对路径
      */
     public String getLocationAbsPath() {
-        return PathUtils.getAbsolutePath(location);
+        return ResourcePathUtils.getAbsolutePath(location);
     }
 
     /**
@@ -110,7 +97,7 @@ public class StaticResourceHandler {
      * @param request http请求
      * @return 不匹配或者不存在则返回 null
      */
-    public Resource getResource(HttpServletRequest request) throws Exception {
+    public Resource getResource(HttpServletRequest request) throws IOException {
         String path = request.getPathInfo();
         // 判断请求前缀是否满足配置
         if (StringUtils.isBlank(path) || !path.startsWith(hostedPath)) {
@@ -128,7 +115,7 @@ public class StaticResourceHandler {
         }
         String resourcePath = encodeOrDecodeIfNecessary(path);
         // 如果path完全匹配且location就是一个存在的文件就直接返回location
-        if (StringUtils.isBlank(path) && PathUtils.isExistsFile(location)) {
+        if (StringUtils.isBlank(path) && ResourcePathUtils.isExistsFile(location)) {
             return location;
         }
         Resource resource = location.createRelative(resourcePath);

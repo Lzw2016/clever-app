@@ -15,6 +15,8 @@ import org.clever.web.config.EchoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -50,7 +52,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
     }
 
     @Override
-    public void doFilter(FilterRegistrar.Context ctx) {
+    public void doFilter(FilterRegistrar.Context ctx) throws ServletException, IOException {
         // 是否启用
         if (!echoConfig.isEnable()) {
             ctx.next();

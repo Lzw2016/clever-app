@@ -16,6 +16,7 @@ import org.clever.web.WebServerBootstrap;
 import org.clever.web.config.WebConfig;
 import org.clever.web.filter.CorsFilter;
 import org.clever.web.filter.EchoFilter;
+import org.clever.web.filter.ExceptionHandlerFilter;
 import org.clever.web.filter.StaticResourceFilter;
 import org.clever.web.plugin.ExceptionHandlerPlugin;
 
@@ -48,6 +49,7 @@ public class StartApp {
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
+                .addFilter(ExceptionHandlerFilter.INSTANCE, "/*", "ExceptionHandlerFilter", filterOrder.incrL1())
                 .addFilter(EchoFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
                 .addFilter(CorsFilter.create(environment), "/*", "CorsFilter", filterOrder.incrL1())
                 .addFilter(StaticResourceFilter.create(webConfig.getRootPath(), environment), "/*", "StaticResourceFilter", filterOrder.incrL1())

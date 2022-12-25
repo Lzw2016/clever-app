@@ -13,21 +13,18 @@ import org.clever.util.MimeTypeUtils;
 import org.clever.util.StreamUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.StaticResourceConfig;
-import org.clever.web.http.HttpHeaders;
-import org.clever.web.http.HttpRange;
-import org.clever.web.http.MediaType;
-import org.clever.web.http.StaticResourceHandler;
+import org.clever.web.exception.GenericHttpException;
+import org.clever.web.http.*;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -73,6 +70,11 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         return handlers;
     }
 
+    public static final Set<String> SUPPORTED_METHODS = new HashSet<String>() {{
+        add("GET");
+        add("HEAD");
+    }};
+
     @Getter
     private final boolean enable;
     @Getter
@@ -84,7 +86,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
     }
 
     @Override
-    public void doFilter(FilterRegistrar.Context ctx) throws Exception {
+    public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
         // 是否启用
         if (!enable) {
             ctx.next();
@@ -106,6 +108,8 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         // transformer(EncodedResourceResolver.EncodedResource | GzipResourceResolver.GzippedResource)
+        // Supported methods
+        checkRequest(ctx.req);
         // Header phase 判断资源是否发生变化
         if (useHandler.checkNotModified(ctx.req, ctx.res, resource.lastModified())) {
             log.trace("Resource not modified");
@@ -133,6 +137,17 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
                 ctx.res.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
                 ctx.res.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
             }
+        }
+    }
+
+    private void checkRequest(HttpServletRequest request) throws ServletException {
+        // Check whether we should support the request method.
+        String method = request.getMethod();
+        if (!SUPPORTED_METHODS.contains(method.toUpperCase())) {
+            throw new GenericHttpException(
+                    HttpStatus.METHOD_NOT_ALLOWED.value(),
+                    "Method Not Allowed, Allowed Methods: " + StringUtils.join(SUPPORTED_METHODS, ", ")
+            );
         }
     }
 

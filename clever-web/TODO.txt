@@ -1,4 +1,5 @@
 [OK] 静态资源问题
+[OK] 全局异常处理
 [  ] MVC拦截问题
 [  ] 跨域问题
 [  ]
@@ -12,13 +13,13 @@
 🡓
 CustomFilter
     🡓
-    [0] ExceptionFilter
+    [0] ExceptionHandlerFilter
     🡓
     [100] EchoFilter (JavalinConfig#requestLogger)
     🡓
     [200] CorsFilter (可参考: https://javalin.io/plugins/cors)
     🡓
-    [300] CaptureHandler
+    [300] CaptureHandlerFilter
     🡓
     [400] SecurityFilter (一系列Filter)
     🡓

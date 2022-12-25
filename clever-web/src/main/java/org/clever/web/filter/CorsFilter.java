@@ -10,6 +10,9 @@ import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.CorsConfig;
 
+import javax.servlet.ServletException;
+import java.io.IOException;
+
 /**
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 21:58 <br/>
@@ -48,7 +51,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
     }
 
     @Override
-    public void doFilter(FilterRegistrar.Context ctx) throws Exception {
+    public void doFilter(FilterRegistrar.Context ctx) throws ServletException, IOException {
         // 是否启用
         if (!corsConfig.isEnable()) {
             ctx.next();
