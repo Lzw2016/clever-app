@@ -8,11 +8,16 @@ import org.clever.core.BannerUtils;
 import org.clever.core.env.Environment;
 import org.clever.core.io.Resource;
 import org.clever.util.Assert;
+import org.clever.util.StreamUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.StaticResourceConfig;
+import org.clever.web.http.HttpHeaders;
 import org.clever.web.http.StaticResourceHandler;
-import org.clever.web.utils.CheckResourceModified;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -59,6 +64,23 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         return handlers;
     }
 
+//    /**
+//     * {@code Map<资源后缀名, ContentType>}
+//     */
+//    public static final Map<String, String> CONTENT_TYPE_MAP = new HashMap<>(4);
+//
+//    static {
+//        for (ContentType contentType : ContentType.values()) {
+//            String[] extensions = contentType.getExtensions();
+//            if (extensions == null || extensions.length == 0) {
+//                continue;
+//            }
+//            for (String extension : extensions) {
+//                CONTENT_TYPE_MAP.put(extension, contentType.getMimeType());
+//            }
+//        }
+//    }
+
     @Getter
     private final boolean enable;
     @Getter
@@ -93,16 +115,34 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         }
         // transformer(EncodedResourceResolver.EncodedResource | GzipResourceResolver.GzippedResource)
         // Header phase 判断资源是否发生变化
-        if (useHandler.isUseLastModified() && new CheckResourceModified(ctx.req, ctx.res).checkNotModified(resource.lastModified())) {
+        if (useHandler.checkNotModified(ctx.req, ctx.res, resource.lastModified())) {
             log.trace("Resource not modified");
             return;
         }
         // Apply cache settings, if any
-
+        useHandler.applyCacheControl(ctx.res);
         // Check the media type for the resource
-
+        useHandler.setMediaType(ctx.req, ctx.res, resource);
         // Content phase
+        if (ctx.req.getHeader(HttpHeaders.RANGE) == null) {
+            write(ctx.res, resource);
+        } else {
 
-        ctx.next();
+        }
+//        log.trace("HttpHeaders.EMPTY -> {}", HttpHeaders.EMPTY);
+//        ctx.next();
+    }
+
+    private void write(HttpServletResponse response, Resource resource) throws IOException {
+        try {
+            try (InputStream in = resource.getInputStream()) {
+                StreamUtils.copy(in, response.getOutputStream());
+                response.getOutputStream().flush();
+            } catch (NullPointerException ex) {
+                // ignore, see SPR-13620
+            }
+        } catch (FileNotFoundException ex) {
+            // ignore, see SPR-12999
+        }
     }
 }

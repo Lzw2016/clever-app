@@ -1,27 +1,33 @@
 package org.clever.web.http;
 
-import io.javalin.http.ContentType;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.io.ClassPathResource;
 import org.clever.core.io.Resource;
 import org.clever.core.io.UrlResource;
+import org.clever.util.Assert;
+import org.clever.util.CollectionUtils;
 import org.clever.util.ResourceUtils;
 import org.clever.util.StringUtils;
 import org.clever.web.config.StaticResourceConfig;
+import org.clever.web.servlet.resource.HttpResource;
 import org.clever.web.utils.PathUtils;
 import org.clever.web.utils.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 服务端静态资源处理
@@ -43,13 +49,10 @@ public class StaticResourceHandler {
      * HTTP method "POST".
      */
     public static final String METHOD_POST = "POST";
+
     public static final String HEADER_PRAGMA = "Pragma";
     public static final String HEADER_EXPIRES = "Expires";
     public static final String HEADER_CACHE_CONTROL = "Cache-Control";
-    /**
-     * {@code Map<资源后缀名, ContentType>}
-     */
-    public static final Map<String, ContentType> CONTENT_TYPE_MAP = new HashMap<>(4);
 
     /**
      * 服务端路径前缀
@@ -62,15 +65,20 @@ public class StaticResourceHandler {
     @Getter
     private final Resource location;
     /**
-     *
+     * 是否需要检查资源被修改(checkNotModified)
      */
-    @Getter
-    private final CacheControl cacheControl;
-    /**
-     *
-     */
+    @Setter
     @Getter
     private boolean useLastModified = true;
+    /**
+     * 服务端资源缓存控制
+     */
+    @Getter
+    private final ResourceCacheControl resourceCacheControl;
+    /**
+     * {@code Map<资源后缀名(全小写), MediaType>}
+     */
+    private final Map<String, MediaType> mediaTypes = new HashMap<>(4);
     /**
      *
      */
@@ -78,14 +86,27 @@ public class StaticResourceHandler {
     private boolean optimizeLocations = false;
 
     public StaticResourceHandler(String rootPath, StaticResourceConfig.ResourceMapping resourceMapping) {
+        Assert.notNull(rootPath, "参数 rootPath 不能为 null");
+        Assert.notNull(resourceMapping, "参数 resourceMapping 不能为 null");
         this.hostedPath = resourceMapping.getHostedPath();
         this.location = PathUtils.getResource(rootPath, resourceMapping.getLocation());
-        Duration cachePeriod = resourceMapping.getCachePeriod();
-        if (cachePeriod != null && !cachePeriod.isZero()) {
-            cacheControl = CacheControl.maxAge(cachePeriod);
-        } else {
-            cacheControl = CacheControl.noStore();
-        }
+        Duration cachePeriod = Optional.of(resourceMapping.getCachePeriod()).orElse(Duration.ofSeconds(0));
+        CacheControl cacheControl = cachePeriod.isZero() ? CacheControl.noStore() : CacheControl.maxAge(cachePeriod);
+        this.resourceCacheControl = new ResourceCacheControl(cacheControl);
+    }
+
+    /**
+     * 静态资源绝对路径
+     */
+    public String getLocationAbsPath() {
+        return PathUtils.getAbsolutePath(location);
+    }
+
+    /**
+     * 自定义MediaType: {@code Map<资源后缀名(全小写), MediaType>}
+     */
+    public void setMediaTypes(Map<String, MediaType> mediaTypes) {
+        mediaTypes.forEach((ext, mediaType) -> this.mediaTypes.put(ext.toLowerCase(Locale.ENGLISH), mediaType));
     }
 
     /**
@@ -123,24 +144,92 @@ public class StaticResourceHandler {
     }
 
     /**
-     * 静态资源绝对路径
+     * 判断资源是否发生变化，如果未发送变化直接响应客户端
      */
-    public String getLocationAbsPath() {
-        return PathUtils.getAbsolutePath(location);
+    public boolean checkNotModified(HttpServletRequest req, HttpServletResponse res, long lastModifiedTimestamp) {
+        return useLastModified && new CheckResourceModified(req, res).checkNotModified(lastModifiedTimestamp);
     }
 
+    /**
+     * 根据此生成器的设置准备给定的响应。应用为此生成器指定的缓存秒数。
+     */
+    public void applyCacheControl(HttpServletResponse res) {
+        resourceCacheControl.prepareResponse(res);
+    }
 
+    /**
+     * 为当前请求设置 MediaType
+     *
+     * @param request  http请求
+     * @param response http响应
+     * @param resource 已识别的资源
+     */
+    public void setMediaType(HttpServletRequest request, HttpServletResponse response, Resource resource) {
+        MediaType mediaType = getMediaType(request, resource);
+        if (mediaType != null) {
+            setHeaders(response, resource, mediaType);
+        }
+    }
 
+    /**
+     * 获取当前Resource对应的MediaType
+     *
+     * @param request  http请求
+     * @param resource 已识别的资源
+     */
+    private MediaType getMediaType(HttpServletRequest request, Resource resource) {
+        MediaType result = null;
+        String mimeType = request.getServletContext().getMimeType(resource.getFilename());
+        if (StringUtils.hasText(mimeType)) {
+            result = MediaType.parseMediaType(mimeType);
+        }
+        if (result == null || MediaType.APPLICATION_OCTET_STREAM.equals(result)) {
+            MediaType mediaType = null;
+            String filename = resource.getFilename();
+            String ext = StringUtils.getFilenameExtension(filename);
+            if (ext != null) {
+                mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ENGLISH));
+            }
+            if (mediaType == null) {
+                List<MediaType> mediaTypes = MediaTypeFactory.getMediaTypes(filename);
+                if (!CollectionUtils.isEmpty(mediaTypes)) {
+                    mediaType = mediaTypes.get(0);
+                }
+            }
+            if (mediaType != null) {
+                result = mediaType;
+            }
+        }
+        return result;
+    }
 
-
-
-
-
-
-
-
-
-
+    /**
+     * 在给定的 servlet 响应上设置标头。为 GET 请求和 HEAD 请求调用
+     *
+     * @param response  当前 http 响应
+     * @param resource  已识别的资源
+     * @param mediaType 资源的媒体类型
+     */
+    private void setHeaders(HttpServletResponse response, Resource resource, MediaType mediaType) {
+        if (mediaType != null) {
+            response.setContentType(mediaType.toString());
+        }
+        if (resource instanceof HttpResource) {
+            HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
+            resourceHeaders.forEach((headerName, headerValues) -> {
+                boolean first = true;
+                for (String headerValue : headerValues) {
+                    if (first) {
+                        response.setHeader(headerName, headerValue);
+                    } else {
+                        response.addHeader(headerName, headerValue);
+                    }
+                    first = false;
+                }
+            });
+        }
+        response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+    }
 
     private boolean isResourceUnderLocation(Resource location, Resource resource) throws IOException {
         if (resource.getClass() != location.getClass()) {
@@ -278,5 +367,273 @@ public class StaticResourceHandler {
             }
         }
         return (slash ? "/" : "");
+    }
+
+    /**
+     * 检查资源是否被修改过
+     */
+    public static class CheckResourceModified {
+        private static final List<String> SAFE_METHODS = Arrays.asList("GET", "HEAD");
+        /**
+         * 模式匹配ETag标题中的多个字段值，如 "If-Match", "If-None-Match".
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
+         */
+        private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W/)?(\"[^\"]*\"))\\s*,?");
+        /**
+         * HTTP RFC中指定的日期格式
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+         */
+        private static final String[] DATE_FORMATS = new String[]{
+                "EEE, dd MMM yyyy HH:mm:ss zzz",
+                "EEE, dd-MMM-yy HH:mm:ss zzz",
+                "EEE MMM dd HH:mm:ss yyyy"
+        };
+        private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+
+        private boolean notModified = false;
+        private final HttpServletRequest req;
+        private final HttpServletResponse res;
+
+        public CheckResourceModified(HttpServletRequest req, HttpServletResponse res) {
+            Assert.notNull(req, "参数 req 不能为 null");
+            Assert.notNull(res, "参数 res 不能为 null");
+            this.req = req;
+            this.res = res;
+        }
+
+        /**
+         * 判断资源是否发生变化
+         */
+        public boolean checkNotModified(long lastModifiedTimestamp) {
+            return checkNotModified(null, lastModifiedTimestamp);
+        }
+
+        /**
+         * 判断资源是否发生变化
+         */
+        public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
+            if (this.notModified || HttpStatus.OK.value() != res.getStatus()) {
+                return this.notModified;
+            }
+            // Evaluate conditions in order of precedence. See https://tools.ietf.org/html/rfc7232#section-6
+            if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
+                if (this.notModified) {
+                    res.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+                }
+                return this.notModified;
+            }
+            boolean validated = validateIfNoneMatch(etag);
+            if (!validated) {
+                validateIfModifiedSince(lastModifiedTimestamp);
+            }
+            // Update response
+            boolean isHttpGetOrHead = SAFE_METHODS.contains(req.getMethod());
+            if (this.notModified) {
+                res.setStatus(isHttpGetOrHead ? HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
+            }
+            if (isHttpGetOrHead) {
+                if (lastModifiedTimestamp > 0 && parseDateValue(res.getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
+                    res.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
+                }
+                if (StringUtils.hasLength(etag) && res.getHeader(HttpHeaders.ETAG) == null) {
+                    res.setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
+                }
+            }
+            return this.notModified;
+        }
+
+        private boolean validateIfUnmodifiedSince(long lastModifiedTimestamp) {
+            if (lastModifiedTimestamp < 0) {
+                return false;
+            }
+            long ifUnmodifiedSince = parseDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
+            if (ifUnmodifiedSince == -1) {
+                return false;
+            }
+            // We will perform this validation...
+            this.notModified = (ifUnmodifiedSince < (lastModifiedTimestamp / 1000 * 1000));
+            return true;
+        }
+
+        private boolean validateIfNoneMatch(String etag) {
+            if (!StringUtils.hasLength(etag)) {
+                return false;
+            }
+            Enumeration<String> ifNoneMatch;
+            try {
+                ifNoneMatch = req.getHeaders(HttpHeaders.IF_NONE_MATCH);
+            } catch (IllegalArgumentException ex) {
+                return false;
+            }
+            if (!ifNoneMatch.hasMoreElements()) {
+                return false;
+            }
+            // We will perform this validation...
+            etag = padEtagIfNecessary(etag);
+            if (etag.startsWith("W/")) {
+                etag = etag.substring(2);
+            }
+            while (ifNoneMatch.hasMoreElements()) {
+                String clientETags = ifNoneMatch.nextElement();
+                Matcher etagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
+                // Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
+                while (etagMatcher.find()) {
+                    if (StringUtils.hasLength(etagMatcher.group()) && etag.equals(etagMatcher.group(3))) {
+                        this.notModified = true;
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private String padEtagIfNecessary(String etag) {
+            if (!StringUtils.hasLength(etag)) {
+                return etag;
+            }
+            if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
+                return etag;
+            }
+            return "\"" + etag + "\"";
+        }
+
+        @SuppressWarnings("UnusedReturnValue")
+        private boolean validateIfModifiedSince(long lastModifiedTimestamp) {
+            if (lastModifiedTimestamp < 0) {
+                return false;
+            }
+            long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
+            if (ifModifiedSince == -1) {
+                return false;
+            }
+            // We will perform this validation...
+            this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
+            return true;
+        }
+
+        private long parseDateHeader(String headerName) {
+            long dateValue = -1;
+            try {
+                dateValue = req.getDateHeader(headerName);
+            } catch (IllegalArgumentException ex) {
+                String headerValue = req.getHeader(headerName);
+                // Possibly an IE 10 style value: "Wed, 09 Apr 2014 09:57:42 GMT; length=13774"
+                if (headerValue != null) {
+                    int separatorIndex = headerValue.indexOf(';');
+                    if (separatorIndex != -1) {
+                        String datePart = headerValue.substring(0, separatorIndex);
+                        dateValue = parseDateValue(datePart);
+                    }
+                }
+            }
+            return dateValue;
+        }
+
+        private long parseDateValue(String headerValue) {
+            if (headerValue == null) {
+                // No header value sent at all
+                return -1;
+            }
+            if (headerValue.length() >= 3) {
+                // Short "0" or "-1" like values are never valid HTTP date headers...
+                // Let's only bother with SimpleDateFormat parsing for long enough values.
+                for (String dateFormat : DATE_FORMATS) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+                    simpleDateFormat.setTimeZone(GMT);
+                    try {
+                        return simpleDateFormat.parse(headerValue).getTime();
+                    } catch (ParseException ex) {
+                        // ignore
+                    }
+                }
+            }
+            return -1;
+        }
+    }
+
+    /**
+     * 客户端资源缓存控制
+     */
+    public static class ResourceCacheControl {
+        private final CacheControl cacheControl;
+        private String[] varyByRequestHeaders;
+
+        public ResourceCacheControl(CacheControl cacheControl) {
+            Assert.notNull(cacheControl, "参数 cacheControl 不能为 null");
+            this.cacheControl = cacheControl;
+        }
+
+        /**
+         * 根据此生成器的设置准备给定的响应。应用为此生成器指定的缓存秒数。
+         *
+         * @param res 当前HTTP响应
+         */
+        public void prepareResponse(HttpServletResponse res) {
+            if (log.isTraceEnabled()) {
+                log.trace("Applying default " + this.cacheControl);
+            }
+            applyCacheControl(res, this.cacheControl);
+            if (this.varyByRequestHeaders != null) {
+                for (String value : getVaryRequestHeadersToAdd(res, this.varyByRequestHeaders)) {
+                    res.addHeader("Vary", value);
+                }
+            }
+        }
+
+        /**
+         * 配置一个或多个请求标头名称（例如“Accept-Language”）以添加到“Vary”响应标头，
+         * 以通知客户端响应受内容协商和基于给定请求标头值的差异的影响。
+         * 只有在响应“Vary”标头中不存在时，才会添加已配置的请求标头名称。
+         *
+         * @param varyByRequestHeaders 一个或多个请求头名称
+         */
+        public void setVaryByRequestHeaders(String... varyByRequestHeaders) {
+            this.varyByRequestHeaders = varyByRequestHeaders;
+        }
+
+        /**
+         * 根据给定设置设置HTTP Cache-Control标头
+         *
+         * @param response     当前HTTP响应
+         * @param cacheControl 预配置的缓存控制设置
+         */
+        private void applyCacheControl(HttpServletResponse response, CacheControl cacheControl) {
+            String ccValue = cacheControl.getHeaderValue();
+            if (ccValue != null) {
+                // Set computed HTTP 1.1 Cache-Control header
+                response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+                if (response.containsHeader(HEADER_PRAGMA)) {
+                    // Reset HTTP 1.0 Pragma header if present
+                    response.setHeader(HEADER_PRAGMA, "");
+                }
+                if (response.containsHeader(HEADER_EXPIRES)) {
+                    // Reset HTTP 1.0 Expires header if present
+                    response.setHeader(HEADER_EXPIRES, "");
+                }
+            }
+        }
+
+        private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response, String[] varyByRequestHeaders) {
+            if (!response.containsHeader(HttpHeaders.VARY)) {
+                return Arrays.asList(varyByRequestHeaders);
+            }
+            Collection<String> result = new ArrayList<>(varyByRequestHeaders.length);
+            Collections.addAll(result, varyByRequestHeaders);
+            for (String header : response.getHeaders(HttpHeaders.VARY)) {
+                for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
+                    if ("*".equals(existing)) {
+                        return Collections.emptyList();
+                    }
+                    for (String value : varyByRequestHeaders) {
+                        if (value.equalsIgnoreCase(existing)) {
+                            result.remove(value);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
     }
 }

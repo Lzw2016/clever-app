@@ -28,7 +28,7 @@ public abstract class UriComponents implements Serializable {
     /**
      * 捕获 URI 模板变量名称
      */
-    private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
+    private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)}");
     private final String scheme;
     private final String fragment;
 
