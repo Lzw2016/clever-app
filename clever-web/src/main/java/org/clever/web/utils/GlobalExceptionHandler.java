@@ -44,7 +44,6 @@ public class GlobalExceptionHandler {
             res.setMessage("业务处理失败");
             return res;
         }));
-        // RuntimeException 往上找到其真实的异常类型
         // ValidationException 请求参数校验异常
         // HttpMessageConversionException 请求参数转换异常
         // BindException 请求参数校验失败
@@ -85,6 +84,18 @@ public class GlobalExceptionHandler {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void handle(Throwable exception, HttpServletRequest request, HttpServletResponse response) {
+        // RuntimeException 找到实的异常类型
+        if (exception instanceof RuntimeException) {
+            Throwable cause = exception;
+            for (int i = 0; i < 64; i++) {
+                cause = cause.getCause();
+                if (!(cause instanceof RuntimeException)) {
+                    exception = cause;
+                    break;
+                }
+            }
+        }
+        // 异常处理
         ExceptionHandler handler = HANDLERS.get(exception.getClass());
         if (handler == null) {
             handler = DEFAULT_HANDLER;

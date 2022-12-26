@@ -2,6 +2,8 @@ package org.clever.app;
 
 import io.javalin.Javalin;
 import io.javalin.http.ContentType;
+import io.javalin.plugin.json.JsonMapper;
+import io.javalin.plugin.json.JsonMapperKt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.StartupInfoLogger;
@@ -114,6 +116,10 @@ public class StartApp {
         // 初始化web服务
         Javalin javalin = webServerBootstrap.init();
         AppContextHolder.registerBean("javalin", javalin, true);
+        JsonMapper jsonMapper = javalin.attribute(JsonMapperKt.JSON_MAPPER_KEY);
+        if (jsonMapper != null) {
+            AppContextHolder.registerBean("jsonMapper", jsonMapper, true);
+        }
         // 自定义请求处理
         javalin.get("/test", ctx -> {
             // 可多次读取body

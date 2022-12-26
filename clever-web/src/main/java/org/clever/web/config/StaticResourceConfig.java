@@ -55,13 +55,4 @@ public class StaticResourceConfig {
          */
         private Duration cachePeriod = Duration.ofSeconds(0);
     }
-
-//    private  String[] pathPatterns;
-//    private  List<String> locationValues = new ArrayList<>();
-//    private  List<Resource> locationsResources = new ArrayList<>();
-//    private Integer cachePeriod;
-//    private CacheControl cacheControl;
-//    private ResourceChainRegistration resourceChainRegistration;
-//    private boolean useLastModified = true;
-//    private boolean optimizeLocations = false;
 }
