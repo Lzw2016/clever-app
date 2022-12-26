@@ -84,6 +84,8 @@ public class CorsConfig {
     }
 
     public CorsConfig(CorsConfig other) {
+        this.enable = other.enable;
+        this.pathPattern = other.pathPattern;
         this.allowedOrigins = other.allowedOrigins;
         this.allowedOriginPatterns = other.allowedOriginPatterns;
         this.allowedMethods = other.allowedMethods;

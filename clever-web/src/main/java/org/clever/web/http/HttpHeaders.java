@@ -460,8 +460,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
         this();
         for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
             String headerName = (String) names.nextElement();
-            for (Enumeration<?> headerValues = request.getHeaders(headerName);
-                 headerValues.hasMoreElements(); ) {
+            for (Enumeration<?> headerValues = request.getHeaders(headerName); headerValues.hasMoreElements(); ) {
                 String headerValue = (String) headerValues.nextElement();
                 this.add(headerName, headerValue);
             }

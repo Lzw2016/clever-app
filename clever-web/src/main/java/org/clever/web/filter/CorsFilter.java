@@ -6,12 +6,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.BannerUtils;
 import org.clever.core.env.Environment;
+import org.clever.util.AntPathMatcher;
 import org.clever.util.Assert;
+import org.clever.util.PathMatcher;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.CorsConfig;
+import org.clever.web.cors.CorsProcessor;
+import org.clever.web.cors.CorsUtils;
+import org.clever.web.cors.DefaultCorsProcessor;
+import org.clever.web.http.HttpStatus;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 作者：lizw <br/>
@@ -43,8 +50,11 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
         return create(corsConfig);
     }
 
+    private static final PathMatcher MATCHER = new AntPathMatcher();
+
     @Getter
     private final CorsConfig corsConfig;
+    private final CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
     public CorsFilter(CorsConfig corsConfig) {
         this.corsConfig = corsConfig;
@@ -55,6 +65,35 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
         // 是否启用
         if (!corsConfig.isEnable()) {
             ctx.next();
+            return;
+        }
+        // 当前请求路径是否支持跨域
+        boolean match = false;
+        List<String> pathPattern = corsConfig.getPathPattern();
+        if (pathPattern != null && !pathPattern.isEmpty()) {
+            for (String path : pathPattern) {
+                if (MATCHER.match(path, ctx.req.getRequestURI())) {
+                    match = true;
+                    break;
+                }
+            }
+        }
+        if (!match) {
+            ctx.next();
+            return;
+        }
+        // 跨域处理
+        boolean supportCors = corsProcessor.processRequest(corsConfig, ctx.req, ctx.res);
+        if (supportCors) {
+            boolean preFlightRequest = CorsUtils.isPreFlightRequest(ctx.req);
+            if (preFlightRequest) {
+                // 是预检请求(OPTIONS)
+                ctx.res.setStatus(HttpStatus.OK.value());
+                ctx.res.getWriter().flush();
+                return;
+            }
+        } else {
+            // 不支持跨域
             return;
         }
         ctx.next();

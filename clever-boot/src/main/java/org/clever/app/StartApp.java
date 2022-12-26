@@ -118,7 +118,7 @@ public class StartApp {
         AppContextHolder.registerBean("javalin", javalin, true);
         JsonMapper jsonMapper = javalin.attribute(JsonMapperKt.JSON_MAPPER_KEY);
         if (jsonMapper != null) {
-            AppContextHolder.registerBean("jsonMapper", jsonMapper, true);
+            AppContextHolder.registerBean("javalinJsonMapper", jsonMapper, true);
         }
         // 自定义请求处理
         javalin.get("/test", ctx -> {
