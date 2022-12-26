@@ -9,7 +9,8 @@ val localProperty = Properties().apply {
 }
 
 val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVersion"]
-val buildSnapshot: Boolean = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
+val buildSnapshot: Boolean =
+    (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
     const val springBootVersion = "2.6.12"
@@ -204,12 +205,22 @@ subprojects {
         testImplementation("org.junit.jupiter:junit-jupiter")
     }
 
+    tasks.withType<Copy>().all {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    tasks.withType<Jar>().all {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
     java {
-        // withJavadocJar()
+        withJavadocJar()
         withSourcesJar()
     }
+
     tasks.javadoc {
         options.encoding = "UTF-8"
+        (options as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
     }
 
     tasks.jar {

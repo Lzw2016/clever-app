@@ -7,7 +7,7 @@ import org.clever.jdbc.InvalidResultSetAccessException;
  *
  * <p>与标准JDBC ResultSetMetaData的主要区别在于这里从不抛出{@link java.sql.SQLException}。
  * 这允许使用SqlRowSetMetaData，而不必处理已检查的异常。
- * SqlRowSetMetaData将抛出{@link InvalidResultSetAccessException（如果合适）。
+ * SqlRowSetMetaData将抛出{@link InvalidResultSetAccessException 如果合适}。
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/06/27 22:34 <br/>

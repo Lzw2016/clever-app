@@ -17,18 +17,22 @@ dependencies {
     // api("org.jetbrains.kotlin:kotlin-reflect")
 }
 
-//sourceSets {
-//    main {
-//        java {
-//            setSrcDirs(listOf<String>())
-//        }
-//        withConvention(GroovySourceSet::class) {
-//            groovy {
-//                setSrcDirs(listOf("src/main/java", "src/main/groovy"))
-//            }
-//        }
-//    }
-//}
+sourceSets {
+    main {
+        // java {
+        //     setSrcDirs(listOf<String>())
+        // }
+        // withConvention(GroovySourceSet::class) {
+        //     groovy {
+        //         setSrcDirs(listOf("src/main/java", "src/main/groovy"))
+        //     }
+        // }
+        resources {
+            setSrcDirs(listOf("src/main/java", "src/main/kotlin", "src/main/resources"))
+            exclude(listOf("**/*.java", "**/*.kt", "**/*.kts"))
+        }
+    }
+}
 
 //tasks.compileJava {
 //    enabled = false
@@ -59,7 +63,8 @@ tasks.create("copyResources", Copy::class) {
 tasks.jar {
     enabled = true
     manifest.attributes["Main-Class"] = "org.clever.app.StartApp"
-    val classPaths = project.configurations.runtimeClasspath.get().files.map { file -> "lib/${file.name}" }.toMutableList()
+    val classPaths =
+        project.configurations.runtimeClasspath.get().files.map { file -> "lib/${file.name}" }.toMutableList()
     val resourcesPath = File(projectDir.absolutePath, "src/main/resources").absolutePath
     file("src/main/resources").listFiles { file -> file.isFile }?.forEach { file ->
         var path = file.absolutePath

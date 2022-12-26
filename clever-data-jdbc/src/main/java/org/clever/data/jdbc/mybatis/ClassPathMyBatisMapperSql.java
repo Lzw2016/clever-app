@@ -3,8 +3,10 @@ package org.clever.data.jdbc.mybatis;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.clever.core.io.Resource;
 import org.clever.core.io.support.PathMatchingResourcePatternResolver;
+import org.clever.util.AntPathMatcher;
 import org.clever.util.Assert;
 
 import java.io.InputStream;
@@ -20,6 +22,8 @@ import java.util.Map;
  * 创建时间：2020/09/30 15:51 <br/>
  */
 public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
+    private static final AntPathMatcher FILTER_MATCHER = new AntPathMatcher();
+
     /**
      * Resource.getURL().toExternalForm()返回的路径例如: <br/>
      * <pre>{@code
@@ -69,13 +73,26 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
      */
     @Getter
     private final String locationPattern;
+    /**
+     * ant风格的过滤器(为空则不过滤)
+     */
+    private final String filter;
+
+    /**
+     * @param locationPattern classpath路径模式
+     * @param filter          ant风格的过滤字符串
+     */
+    public ClassPathMyBatisMapperSql(String locationPattern, String filter) {
+        Assert.isNotBlank(locationPattern, "参数locationPattern不能为空");
+        this.locationPattern = locationPattern;
+        this.filter = StringUtils.trim(filter);
+    }
 
     /**
      * @param locationPattern classpath路径模式
      */
     public ClassPathMyBatisMapperSql(String locationPattern) {
-        Assert.isNotBlank(locationPattern, "参数locationPattern不能为空");
-        this.locationPattern = locationPattern;
+        this(locationPattern, null);
     }
 
     @Override
@@ -130,10 +147,14 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
         Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
         for (Resource resource : resources) {
             if (resource.isReadable() && resource.getURL().toExternalForm().toLowerCase().endsWith(".xml")) {
+                String absolutePath;
                 if (resource.isFile()) {
-                    result.put(resource.getFile().getAbsolutePath(), resource.lastModified());
+                    absolutePath = resource.getFile().getAbsolutePath();
                 } else {
-                    result.put(resource.getURL().toExternalForm(), resource.lastModified());
+                    absolutePath = resource.getURL().toExternalForm();
+                }
+                if (StringUtils.isBlank(filter) || FILTER_MATCHER.match(filter, StringUtils.replace(absolutePath, "\\", "/"))) {
+                    result.put(absolutePath, resource.lastModified());
                 }
             }
         }
