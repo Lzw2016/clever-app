@@ -2,6 +2,8 @@ package org.clever.data.jdbc;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.clever.core.AppShutdownHook;
+import org.clever.core.OrderIncrement;
 import org.clever.data.jdbc.mybatis.MyBatisMapperSql;
 import org.clever.data.jdbc.support.JdbcDataSourceStatus;
 import org.clever.data.jdbc.support.JdbcInfo;
@@ -45,7 +47,7 @@ public class DataSourceAdmin {
     private static final ConcurrentMap<String, QueryDSL> DSL_FACTORY_MAP = new ConcurrentHashMap<>();
 
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(DataSourceAdmin::closeAllDataSource));
+        AppShutdownHook.addShutdownHook(DataSourceAdmin::closeAllDataSource, OrderIncrement.MAX, "关闭数据库连接池");
     }
 
     /**

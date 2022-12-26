@@ -9,6 +9,19 @@ import org.clever.core.number.NumberScaleUtils;
  * 创建时间：2022/07/28 09:20 <br/>
  */
 public class OrderIncrement {
+    /**
+     * 典型值(一般值)
+     */
+    public static final double NORMAL = 0;
+    /**
+     * 建议的最大值
+     */
+    public static final double MAX = 10000;
+    /**
+     * 建议的最小值
+     */
+    public static final double MIN = -10000;
+
     private static final double LEVEL1 = 100;
     private static final double LEVEL2 = 1;
     private static final double LEVEL3 = 0.01;
