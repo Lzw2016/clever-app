@@ -197,7 +197,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     }
 
     @Override
-    public void startWatch(int period) {
+    public void startWatch(long period) {
         if (watch) {
             return;
         }

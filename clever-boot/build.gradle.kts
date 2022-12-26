@@ -9,12 +9,16 @@ plugins {
 dependencies {
     api(project(":clever-web"))
     api(project(":clever-security"))
+    api(project(":clever-data-jdbc"))
     // api(project(":clever-groovy"))
     // api("org.jetbrains.kotlin:kotlin-stdlib-common")
     // api("org.jetbrains.kotlin:kotlin-stdlib")
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk7")
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     // api("org.jetbrains.kotlin:kotlin-reflect")
+
+    api("org.postgresql:postgresql")
+    api("mysql:mysql-connector-java")
 }
 
 sourceSets {

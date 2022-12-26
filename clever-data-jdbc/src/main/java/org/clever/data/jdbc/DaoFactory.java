@@ -48,13 +48,12 @@ public class DaoFactory {
      *
      * @param stdXmlPath     标准的sql.xml文件同路径，如：“org/clever/biz/dao/UserDao.xml”
      * @param dataSourceName 数据源名称
-     * @param mapperSqlName  MyBatisMapperSql名称
      * @param projects       项目列表
      */
-    public static MyBatis getMyBatis(String stdXmlPath, String dataSourceName, String mapperSqlName, List<String> projects) {
+    public static MyBatis getMyBatis(String stdXmlPath, String dataSourceName, List<String> projects) {
         Jdbc jdbc = DataSourceAdmin.getJdbc(dataSourceName);
         Collections.reverse(projects);
-        MyBatisMapperSql mapperSql = DataSourceAdmin.getMyBatisMapperSql(mapperSqlName);
+        MyBatisMapperSql mapperSql = DataSourceAdmin.getMyBatisMapperSql();
         return new MyBatis(jdbc, stdXmlPath, projects, mapperSql);
     }
 
@@ -65,7 +64,7 @@ public class DaoFactory {
      * @param dataSourceName 数据源名称
      */
     public static MyBatis getMyBatis(String stdXmlPath, String dataSourceName) {
-        return getMyBatis(stdXmlPath, dataSourceName, DataSourceAdmin.getDefaultMapperSqlName(), DataSourceAdmin.getDefaultProjects());
+        return getMyBatis(stdXmlPath, dataSourceName, DataSourceAdmin.getProjects());
     }
 
     /**
@@ -77,8 +76,7 @@ public class DaoFactory {
         return getMyBatis(
                 stdXmlPath,
                 DataSourceAdmin.getDefaultDataSourceName(),
-                DataSourceAdmin.getDefaultMapperSqlName(),
-                DataSourceAdmin.getDefaultProjects()
+                DataSourceAdmin.getProjects()
         );
     }
 
@@ -87,12 +85,11 @@ public class DaoFactory {
      *
      * @param clazz          SQL文件基础路径对应的class
      * @param dataSourceName 数据源名称
-     * @param mapperSqlName  MyBatisMapperSql名称
      * @param projects       项目列表
      */
-    public static MyBatis getMyBatis(Class<?> clazz, String dataSourceName, String mapperSqlName, List<String> projects) {
+    public static MyBatis getMyBatis(Class<?> clazz, String dataSourceName, List<String> projects) {
         String stdXmlPath = StringUtils.replace(clazz.getName(), ".", "/") + ".xml";
-        return getMyBatis(stdXmlPath, dataSourceName, mapperSqlName, projects);
+        return getMyBatis(stdXmlPath, dataSourceName, projects);
     }
 
     /**
@@ -102,7 +99,7 @@ public class DaoFactory {
      * @param dataSourceName 数据源名称
      */
     public static MyBatis getMyBatis(Class<?> clazz, String dataSourceName) {
-        return getMyBatis(clazz, dataSourceName, DataSourceAdmin.getDefaultMapperSqlName(), DataSourceAdmin.getDefaultProjects());
+        return getMyBatis(clazz, dataSourceName, DataSourceAdmin.getProjects());
     }
 
     /**
@@ -114,8 +111,7 @@ public class DaoFactory {
         return getMyBatis(
                 clazz,
                 DataSourceAdmin.getDefaultDataSourceName(),
-                DataSourceAdmin.getDefaultMapperSqlName(),
-                DataSourceAdmin.getDefaultProjects()
+                DataSourceAdmin.getProjects()
         );
     }
 }

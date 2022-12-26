@@ -32,17 +32,13 @@ public class DataSourceAdmin {
      */
     private static final ConcurrentMap<String, Jdbc> JDBC_MAP = new ConcurrentHashMap<>();
     /**
-     * 默认的项目列表
+     * 项目列表
      */
-    private static List<String> DEFAULT_PROJECTS = new ArrayList<>();
+    private static List<String> PROJECTS = new ArrayList<>();
     /**
-     * 默认的 MyBatisMapperSql
+     * 全局的 MyBatisMapperSql
      */
-    private static String DEFAULT_MAPPER_SQL_NAME;
-    /**
-     * MyBatisMapperSql集合 {@code ConcurrentMap<absolutePath or locationPattern, MyBatisMapperSql>}
-     */
-    private static final ConcurrentMap<String, MyBatisMapperSql> MAPPER_SQL_CONCURRENT_MAP = new ConcurrentHashMap<>();
+    private static MyBatisMapperSql MYBATIS_MAPPER_SQL;
     /**
      * QueryDSL查询对象集合 {@code ConcurrentMap<dataSourceName, SQLQueryFactory>}
      */
@@ -165,61 +161,33 @@ public class DataSourceAdmin {
     /**
      * 设置默认的项目列表
      */
-    public static void setDefaultProjects(List<String> defaultProjects) {
-        if (defaultProjects == null) {
-            defaultProjects = new ArrayList<>();
+    public static void setPROJECTS(List<String> projects) {
+        if (projects == null) {
+            projects = new ArrayList<>();
         }
-        DEFAULT_PROJECTS = defaultProjects;
+        PROJECTS = projects;
     }
 
     /**
      * 默认的项目列表
      */
-    public static List<String> getDefaultProjects() {
-        return Collections.unmodifiableList(DEFAULT_PROJECTS);
+    public static List<String> getProjects() {
+        return Collections.unmodifiableList(PROJECTS);
     }
 
     /**
-     * 设置默认的 MyBatisMapperSql
+     * 设置全局的 MyBatisMapperSql
      */
-    public static void setDefaultMapperSqlName(String defaultMapperSqlName) {
-        Assert.hasText(defaultMapperSqlName, "参数defaultMapperSql不能为空");
-        DEFAULT_MAPPER_SQL_NAME = defaultMapperSqlName;
+    public static void setMyBatisMapperSql(MyBatisMapperSql mybatisMapperSql) {
+        Assert.notNull(mybatisMapperSql, "参数 mybatisMapperSql 不能为 null");
+        MYBATIS_MAPPER_SQL = mybatisMapperSql;
     }
 
     /**
-     * 默认的 MyBatisMapperSql
+     * 获取全局的 MyBatisMapperSql
      */
-    public static String getDefaultMapperSqlName() {
-        return DEFAULT_MAPPER_SQL_NAME;
-    }
-
-    /**
-     * 新增 MyBatisMapperSql
-     *
-     * @param mapperSql        名称(absolutePath or locationPattern)
-     * @param myBatisMapperSql MyBatisMapperSql
-     */
-    public static void addMyBatisMapperSql(String mapperSql, MyBatisMapperSql myBatisMapperSql) {
-        Assert.hasText(mapperSql, "参数mapperSql不能为空");
-        Assert.isTrue(myBatisMapperSql != null, "参数myBatisMapperSql不能为空");
-        MAPPER_SQL_CONCURRENT_MAP.put(mapperSql, myBatisMapperSql);
-    }
-
-    /**
-     * 获取 MyBatisMapperSql
-     *
-     * @param mapperSqlName 名称(absolutePath or locationPattern)
-     */
-    public static MyBatisMapperSql getMyBatisMapperSql(String mapperSqlName) {
-        return MAPPER_SQL_CONCURRENT_MAP.get(mapperSqlName);
-    }
-
-    /**
-     * 获取默认的 MyBatisMapperSql
-     */
-    public static MyBatisMapperSql getDefaultMyBatisMapperSql() {
-        return MAPPER_SQL_CONCURRENT_MAP.get(DEFAULT_MAPPER_SQL_NAME);
+    public static MyBatisMapperSql getMyBatisMapperSql() {
+        return MYBATIS_MAPPER_SQL;
     }
 
     /**

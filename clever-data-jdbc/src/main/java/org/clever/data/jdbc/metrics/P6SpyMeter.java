@@ -17,7 +17,7 @@ public class P6SpyMeter implements MessageFormattingStrategy {
     private static volatile boolean ENABLE_JDBC_METRICS = false;
 
     /**
-     * 初始化 JdbcMetrics 配置
+     * 初始化
      */
     public static void init(JdbcConfig.JdbcMetrics config) {
         Assert.notNull(config, "参数 config 不能为 null");

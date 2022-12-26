@@ -14,7 +14,10 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
     private final Logger log = LoggerFactory.getLogger("p6spy");
     private static volatile JdbcConfig.JdbcMetrics CONFIG;
 
-    public void init(JdbcConfig.JdbcMetrics config) {
+    /**
+     * 初始化
+     */
+    public static void init(JdbcConfig.JdbcMetrics config) {
         Assert.notNull(config, "参数 config 不能为 null");
         CONFIG = config;
     }

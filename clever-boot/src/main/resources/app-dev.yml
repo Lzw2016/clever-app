@@ -17,17 +17,15 @@ web:
 
 mybatis:
   enable: true
-  locations:
-    - fileType: filesystem
-      location: ''
-      filter: ''
-      watcher: true
-      interval: 1s
-    - fileType: jar
-      location: ''
-      filter: ''
-      watcher: true
-      interval: 1s
+  watcher: true
+  interval: 1s
+#  locations:
+#    - fileType: filesystem
+#      location: ''
+#      filter: ''
+#    - fileType: jar
+#      location: ''
+#      filter: ''
 
 jdbc:
   enable: true

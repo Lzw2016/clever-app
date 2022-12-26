@@ -21,8 +21,7 @@ public class MyBatisTest {
         DataSourceAdmin.setDefaultDataSourceName("def");
         DataSourceAdmin.addDataSource("def", BaseTest.mysqlConfig());
         FileSystemMyBatisMapperSql mapperSql = BaseTest.newFileSystemMyBatisMapperSql("./src/test/java", "");
-        DataSourceAdmin.setDefaultMapperSqlName("def");
-        DataSourceAdmin.addMyBatisMapperSql("def", mapperSql);
+        DataSourceAdmin.setMyBatisMapperSql(mapperSql);
         MyBatis myBatis = DaoFactory.getMyBatis(LocationClass.class);
 
         Map<String, Object> paramMap = new HashMap<>();
@@ -38,8 +37,7 @@ public class MyBatisTest {
         DataSourceAdmin.setDefaultDataSourceName("def");
         DataSourceAdmin.addDataSource("def", BaseTest.mysqlConfig());
         FileSystemMyBatisMapperSql mapperSql = BaseTest.newFileSystemMyBatisMapperSql("./src/test/resources", "dao/**/*.xml");
-        DataSourceAdmin.setDefaultMapperSqlName("def");
-        DataSourceAdmin.addMyBatisMapperSql("def", mapperSql);
+        DataSourceAdmin.setMyBatisMapperSql(mapperSql);
         MyBatis myBatis = DaoFactory.getMyBatis(LocationClass.class);
 
         DataSourceAdmin.closeAllDataSource();

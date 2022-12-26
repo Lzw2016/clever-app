@@ -49,7 +49,7 @@ public class ComposeMyBatisMapperSql implements MyBatisMapperSql {
     }
 
     @Override
-    public void startWatch(int period) {
+    public void startWatch(long period) {
         for (MyBatisMapperSql target : targets) {
             target.startWatch(period);
         }

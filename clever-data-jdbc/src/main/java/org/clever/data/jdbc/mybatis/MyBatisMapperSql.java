@@ -37,7 +37,7 @@ public interface MyBatisMapperSql {
      *
      * @param period 两次执行任务的时间间隔(单位：毫秒)
      */
-    void startWatch(int period);
+    void startWatch(long period);
 
     /**
      * 停止监听sql.xml文件变化

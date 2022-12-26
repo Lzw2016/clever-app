@@ -3,7 +3,7 @@ package org.clever.data.jdbc.config;
 import lombok.Data;
 
 import java.time.Duration;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,9 +19,17 @@ public class MybatisConfig {
      */
     private boolean enable = false;
     /**
+     * 是否实时动态加载 mapper.xml
+     */
+    private boolean watcher = false;
+    /**
+     * 文件检查时间间隔(默认1秒)
+     */
+    private Duration interval = Duration.ofSeconds(1);
+    /**
      * mapper.xml文件路径配置
      */
-    private List<MapperLocation> locations = new ArrayList<>();
+    private List<MapperLocation> locations = Collections.emptyList();
 
     /**
      * 文件类型
@@ -51,13 +59,5 @@ public class MybatisConfig {
          * ant风格的过滤器(为空则不过滤)
          */
         private String filter;
-        /**
-         * 是否实时动态加载 mapper.xml
-         */
-        private boolean watcher = false;
-        /**
-         * 文件检查时间间隔(默认1秒)
-         */
-        private Duration interval = Duration.ofSeconds(1);
     }
 }

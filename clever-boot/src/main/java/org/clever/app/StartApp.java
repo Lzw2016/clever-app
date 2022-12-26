@@ -9,11 +9,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.StartupInfoLogger;
 import org.clever.boot.context.config.ConfigDataBootstrap;
 import org.clever.boot.context.logging.LoggingBootstrap;
+import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.OrderIncrement;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.core.exception.BusinessException;
+import org.clever.data.jdbc.JdbcBootstrap;
+import org.clever.data.jdbc.config.JdbcConfig;
+import org.clever.data.jdbc.config.MybatisConfig;
 import org.clever.web.WebServerBootstrap;
 import org.clever.web.config.WebConfig;
 import org.clever.web.filter.CorsFilter;
@@ -44,7 +48,10 @@ public class StartApp {
         startupInfoLogger.logStarting(log);
         log.info("The following profiles are active: {}", StringUtils.join(environment.getActiveProfiles(), ", "));
         // 初始化非web资源
-
+        MybatisConfig mybatisConfig = Binder.get(environment).bind(MybatisConfig.PREFIX, MybatisConfig.class).orElseGet(MybatisConfig::new);
+        JdbcConfig jdbcConfig = Binder.get(environment).bind(JdbcConfig.PREFIX, JdbcConfig.class).orElseGet(JdbcConfig::new);
+        JdbcBootstrap jdbcBootstrap = new JdbcBootstrap(jdbcConfig, mybatisConfig);
+        jdbcBootstrap.init();
         // 创建web服务
         WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(environment);
         final WebConfig webConfig = webServerBootstrap.getWebConfig();
