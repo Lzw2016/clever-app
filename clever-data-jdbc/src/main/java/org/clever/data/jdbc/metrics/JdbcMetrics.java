@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class JdbcMetrics {
     private final ArrayBlockingQueue<SqlExecEvent> sqlExecEventQueue = new ArrayBlockingQueue<>(4096);
     private final Thread executor;
-    private final JdbcConfig.JdbcMetrics jdbcMetrics;
+    private final JdbcConfig.JdbcMetrics config;
     /**
      * 指标数据
      * <pre>{@code
@@ -34,15 +34,16 @@ public class JdbcMetrics {
      */
     private final ConcurrentMap<String, ConcurrentMap<String, SqlMetric>> metrics = new ConcurrentHashMap<>();
 
-    public JdbcMetrics(JdbcConfig.JdbcMetrics jdbcMetrics) {
-        this.jdbcMetrics = jdbcMetrics;
+    public JdbcMetrics(JdbcConfig.JdbcMetrics config) {
+        Assert.notNull(config, "参数 config 不能为 null");
+        this.config = config;
         this.executor = new Thread(this::statistics, "jdbc-metrics");
         this.executor.setDaemon(true);
         this.executor.start();
     }
 
     public List<Map<String, Object>> getAllMetrics() {
-        List<Map<String, Object>> res = new ArrayList<>(jdbcMetrics.getMaxSqlCount());
+        List<Map<String, Object>> res = new ArrayList<>(config.getMaxSqlCount());
         metrics.forEach((dataSourceName, metricsItem) -> metricsItem.forEach((sql, sqlMetric) -> {
             Map<String, Object> map = BeanCopyUtils.toMap(sqlMetric);
             map.put("dataSourceName", dataSourceName);
@@ -105,15 +106,15 @@ public class JdbcMetrics {
                 topList.add(new SqlInfo(sql, cost, now));
                 topList.sort(Comparator.comparingInt(o -> o.cost));
                 histogramInfo.topN.clear();
-                if (topList.size() > jdbcMetrics.getHistogramTopN()) {
-                    histogramInfo.topN.addAll(topList.subList(0, jdbcMetrics.getHistogramTopN()));
+                if (topList.size() > config.getHistogramTopN()) {
+                    histogramInfo.topN.addAll(topList.subList(0, config.getHistogramTopN()));
                 } else {
                     histogramInfo.topN.addAll(topList);
                 }
             }
         }
         // 控制 metricsItem 的大小
-        if (metricsItem.size() > jdbcMetrics.getMaxSqlCount()) {
+        if (metricsItem.size() > config.getMaxSqlCount()) {
             // TODO 根据执行平均时间，删除执行平均时间最小的数据
         }
     }
@@ -122,7 +123,7 @@ public class JdbcMetrics {
      * 创建一个新的 SqlMetric
      */
     private SqlMetric createSqlMetric(String prepared) {
-        List<Integer> histogram = jdbcMetrics.getHistogram();
+        List<Integer> histogram = config.getHistogram();
         Assert.notNull(histogram, "histogram 配置不能为null");
         histogram.sort(Integer::compareTo);
         Assert.notEmpty(histogram, "histogram 配置不能为空");
