@@ -64,7 +64,7 @@ public class JdbcMetrics {
     private void statistics() {
         while (true) {
             try {
-                // 取出数据(线程阻塞，指定中断或被唤醒)
+                // 取出数据(线程阻塞，直到中断或被唤醒)
                 SqlExecEvent sqlExecEvent = sqlExecEventQueue.take();
                 addMetrics(sqlExecEvent);
             } catch (Exception e) {
