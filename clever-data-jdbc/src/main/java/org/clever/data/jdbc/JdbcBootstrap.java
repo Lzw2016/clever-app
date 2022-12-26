@@ -54,18 +54,22 @@ public class JdbcBootstrap {
     }
 
     private void initP6Spy() {
+        // TODO 打印配置日志
         final JdbcConfig.JdbcMetrics metrics = Optional.of(jdbcConfig.getMetrics()).orElse(new JdbcConfig.JdbcMetrics());
         P6SpyMeter.init(metrics);
         Slf4JLogger.init(metrics);
     }
 
     private void initMybatis() {
+        // TODO 打印配置日志
         if (!mybatisConfig.isEnable()) {
             return;
         }
-        // TODO 打印配置日志
         final Duration interval = Optional.of(mybatisConfig.getInterval()).orElse(Duration.ZERO);
         final List<MybatisConfig.MapperLocation> locations = Optional.of(mybatisConfig.getLocations()).orElse(Collections.emptyList());
+        if (locations.isEmpty()) {
+            return;
+        }
         List<MyBatisMapperSql> mybatisMapperSqlList = new ArrayList<>(locations.size());
         for (MybatisConfig.MapperLocation location : locations) {
             MyBatisMapperSql mybatisMapperSql;
@@ -96,10 +100,10 @@ public class JdbcBootstrap {
     }
 
     private void initJdbc() {
+        // TODO 打印配置日志
         if (!jdbcConfig.isEnable()) {
             return;
         }
-        // TODO 打印配置日志
         final HikariConfig global = Optional.of(jdbcConfig.getGlobal()).orElse(new HikariConfig());
         final Map<String, HikariConfig> dataSource = Optional.of(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
         final Map<String, DataSource> dataSourceMap = new HashMap<>(dataSource.size());
