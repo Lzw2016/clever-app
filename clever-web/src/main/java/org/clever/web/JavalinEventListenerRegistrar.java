@@ -5,6 +5,7 @@ import io.javalin.core.event.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.BannerUtils;
 import org.clever.util.Assert;
 
 import java.util.*;
@@ -175,18 +176,19 @@ public class JavalinEventListenerRegistrar {
 
     synchronized void init(EventListener eventListener) {
         Assert.notNull(eventListener, "eventListener 不能为 null");
+        List<String> logs = new ArrayList<>();
         for (Map.Entry<JavalinEvent, LinkedList<OrderEventHandler>> entry : eventHandlerMap.entrySet()) {
             JavalinEvent event = entry.getKey();
             LinkedList<OrderEventHandler> items = entry.getValue();
             items.sort(Comparator.comparingDouble(o -> o.order));
             int idx = 1;
             for (OrderEventHandler item : items) {
-                log.info(
-                        "# JavalinEventListener({}) {}{}",
+                logs.add(String.format(
+                        "%2s. %s%s",
+                        idx++,
                         event,
-                        String.format("%-2s", idx++),
                         StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
-                );
+                ));
                 switch (event) {
                     case SERVER_STARTING:
                         eventListener.serverStarting(item.eventHandler);
@@ -209,25 +211,36 @@ public class JavalinEventListenerRegistrar {
                 }
             }
         }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "JavalinEventListener监听", logs.toArray(new String[0]));
+        }
         handlerMetaInfos.sort(Comparator.comparingDouble(o -> o.order));
+        logs.clear();
         int idx = 1;
         for (OrderHandlerMetaInfo item : handlerMetaInfos) {
-            log.info(
-                    "# JavalinEventListener(HandlerAdded) {}{}",
-                    String.format("%-2s", idx++),
+            logs.add(String.format(
+                    "%2s. HandlerAdded%s",
+                    idx++,
                     StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
-            );
+            ));
             eventListener.handlerAdded(item.callback);
         }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Javalin新增Http Handler监听", logs.toArray(new String[0]));
+        }
         wsHandlerMetaInfos.sort(Comparator.comparingDouble(o -> o.order));
+        logs.clear();
         idx = 1;
         for (OrderWsHandlerMetaInfo item : wsHandlerMetaInfos) {
-            log.info(
-                    "# JavalinEventListener(WsHandlerAdded) {}{}",
-                    String.format("%-2s", idx++),
+            logs.add(String.format(
+                    "%2s. WsHandlerAdded%s",
+                    idx++,
                     StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
-            );
+            ));
             eventListener.wsHandlerAdded(item.callback);
+        }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Javalin新增Websocket Handler监听", logs.toArray(new String[0]));
         }
     }
 

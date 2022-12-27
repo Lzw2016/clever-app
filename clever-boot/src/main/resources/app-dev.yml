@@ -22,9 +22,9 @@ mybatis:
     - fileType: filesystem
       location: './clever-boot/src/main/kotlin'
       filter: '**/*.xml'
-    - fileType: jar
-      location: 'classpath*:org/clever/app/**/*.xml'
-      filter: ''
+#    - fileType: jar
+#      location: 'classpath*:org/clever/app/**/*.xml'
+#      filter: ''
 #    - fileType: filesystem
 #      location: './clever-data-jdbc/src/test/resources/performance_test'
 #      filter: '**/*.xml'

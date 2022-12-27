@@ -6,6 +6,7 @@ import io.javalin.http.HandlerType;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.BannerUtils;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.util.Assert;
@@ -93,15 +94,19 @@ public class ServletRegistrar {
         Assert.notNull(inner, "inner 不能为 null");
         appAttributes = inner.appAttributes;
         servlets.sort(Comparator.comparingDouble(o -> o.order));
+        List<String> logs = new ArrayList<>();
         int idx = 1;
         for (OrderServlet item : servlets) {
-            log.info(
-                    "# Servlet {} | path={}{}",
-                    String.format("%-2s", idx++),
+            logs.add(String.format(
+                    "%2s. path=%s%s",
+                    idx++,
                     item.pathSpec,
                     StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
-            );
+            ));
             servletContextHandler.addServlet(new ServletHolder(item.servlet), item.pathSpec);
+        }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "自定义Servlet", logs.toArray(new String[0]));
         }
     }
 

@@ -6,8 +6,10 @@ import io.javalin.websocket.WsConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.BannerUtils;
 import org.clever.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -187,49 +189,65 @@ public class JavalinHandlerRegistrar {
      */
     synchronized void init(Javalin javalin) {
         Assert.notNull(javalin, "javalin 不能为 null");
+        List<String> logs = new ArrayList<>();
         beforeHandler.sort(Comparator.comparingDouble(o -> o.order));
         int idx = 1;
         for (OrderItem<Handler> handler : beforeHandler) {
-            log.info(
-                    "# BeforeHandler {} | path={}{}",
-                    String.format("%-2s", idx++),
+            logs.add(String.format(
+                    "%2s. path=%s%s",
+                    idx++,
                     handler.path,
                     StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
-            );
+            ));
             javalin.before(handler.path, handler.item);
         }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Javalin BeforeHandler", logs.toArray(new String[0]));
+        }
         afterHandler.sort(Comparator.comparingDouble(o -> o.order));
+        logs.clear();
         idx = 1;
         for (OrderItem<Handler> handler : afterHandler) {
-            log.info(
-                    "# AfterHandler {} | path={}{}",
-                    String.format("%-2s", idx++),
+            logs.add(String.format(
+                    "%2s. path=%s%s",
+                    idx++,
                     handler.path,
                     StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
-            );
+            ));
             javalin.after(handler.path, handler.item);
         }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Javalin AfterHandler", logs.toArray(new String[0]));
+        }
         wsBeforeHandler.sort(Comparator.comparingDouble(o -> o.order));
+        logs.clear();
         idx = 1;
         for (OrderItem<Consumer<WsConfig>> handler : wsBeforeHandler) {
-            log.info(
-                    "# WebSocket BeforeHandler {} | path={}{}",
-                    String.format("%-2s", idx++),
+            logs.add(String.format(
+                    "%2s. path=%s%s",
+                    idx++,
                     handler.path,
                     StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
-            );
+            ));
             javalin.wsBefore(handler.path, handler.item);
         }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Javalin WebSocket BeforeHandler", logs.toArray(new String[0]));
+        }
         wsAfterHandler.sort(Comparator.comparingDouble(o -> o.order));
+        logs.clear();
         idx = 1;
         for (OrderItem<Consumer<WsConfig>> handler : wsAfterHandler) {
-            log.info(
-                    "# WebSocket AfterHandler {} | path={}{}",
-                    String.format("%-2s", idx++),
+            logs.add(String.format(
+                    "%2s. path=%s%s",
+                    idx++,
                     handler.path,
                     StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
-            );
+            ));
             javalin.wsAfter(handler.path, handler.item);
+        }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Javalin WebSocket AfterHandler", logs.toArray(new String[0]));
         }
     }
 

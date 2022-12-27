@@ -5,8 +5,10 @@ import io.javalin.core.plugin.Plugin;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.BannerUtils;
 import org.clever.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,14 +52,18 @@ public class JavalinPluginRegistrar {
     synchronized void init(JavalinConfig config) {
         Assert.notNull(config, "config 不能为 null");
         plugins.sort(Comparator.comparingDouble(o -> o.order));
+        List<String> logs = new ArrayList<>();
         int idx = 1;
         for (OrderPlugin item : plugins) {
-            log.info(
-                    "# Plugin {}{}",
-                    String.format("%-2s", idx++),
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
-            );
+            logs.add(String.format(
+                    "%2s. %s",
+                    idx++,
+                    StringUtils.isNoneBlank(item.name) ? item.name.trim() : "JavalinPlugin"
+            ));
             config.registerPlugin(item.plugin);
+        }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Javalin Plugin", logs.toArray(new String[0]));
         }
     }
 

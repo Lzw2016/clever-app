@@ -3,13 +3,11 @@ package org.clever.web;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.BannerUtils;
 import org.clever.util.Assert;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-import java.util.Comparator;
-import java.util.EventListener;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * EventListener 注册器
@@ -66,14 +64,18 @@ public class EventListenerRegistrar {
     synchronized void init(ServletContextHandler servletContextHandler) {
         Assert.notNull(servletContextHandler, "servletContextHandler 不能为 null");
         eventListeners.sort(Comparator.comparingDouble(o -> o.order));
+        List<String> logs = new ArrayList<>();
         int idx = 1;
         for (OrderEventListener item : eventListeners) {
-            log.info(
-                    "# EventListener {}{}",
-                    String.format("%-2s", idx++),
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
-            );
+            logs.add(String.format(
+                    "%2s. %s",
+                    idx++,
+                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : "EventListener"
+            ));
             servletContextHandler.addEventListener(item.eventListener);
+        }
+        if (!logs.isEmpty()) {
+            BannerUtils.printConfig(log, "Servlet EventListener", logs.toArray(new String[0]));
         }
     }
 

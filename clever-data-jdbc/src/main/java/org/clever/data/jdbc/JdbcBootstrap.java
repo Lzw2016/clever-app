@@ -149,10 +149,6 @@ public class JdbcBootstrap {
         final Map<String, DataSource> dataSourceMap = new HashMap<>(dataSource.size());
         // 初始化配置的数据源
         final long startTime = SystemClock.now();
-        if (!dataSource.isEmpty()) {
-            log.info("# ==============================================================");
-            log.info("# === 初始化数据源 ===");
-        }
         dataSource.forEach((name, hikariConfig) -> {
             if (dataSourceMap.containsKey(name)) {
                 throw new RuntimeException("DataSource 名称重复: " + name);
@@ -174,8 +170,7 @@ public class JdbcBootstrap {
         DataSourceAdmin.setDefaultDataSourceName(jdbcConfig.getDefaultName());
         log.info("默认的 DataSource: {}", jdbcConfig.getDefaultName());
         if (!dataSource.isEmpty()) {
-            log.info("# === 数据源初始化完成 | 耗时: {}ms ===", SystemClock.now() - startTime);
-            log.info("# ==============================================================");
+            log.info("jdbc数据源初始化完成 | 耗时: {}ms", SystemClock.now() - startTime);
         }
         // DataSource、Jdbc 等对象注入到IOC容器
         for (String datasourceName : DataSourceAdmin.allDatasourceNames()) {
