@@ -25,6 +25,9 @@ mybatis:
     - fileType: jar
       location: 'classpath*:org/clever/app/**/*.xml'
       filter: ''
+#    - fileType: filesystem
+#      location: './clever-data-jdbc/src/test/resources/performance_test'
+#      filter: '**/*.xml'
 
 jdbc:
   enable: true
