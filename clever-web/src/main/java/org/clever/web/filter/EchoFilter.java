@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
+import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
 import org.clever.core.SystemClock;
 import org.clever.core.env.Environment;
@@ -32,6 +33,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
 
     public static EchoFilter create(Environment environment) {
         EchoConfig echoConfig = Binder.get(environment).bind(EchoConfig.PREFIX, EchoConfig.class).orElseGet(EchoConfig::new);
+        AppContextHolder.registerBean("echoConfig", echoConfig, true);
         BannerUtils.printConfig(log, "Echo配置",
                 new String[]{
                         "enable     : " + echoConfig.isEnable(),

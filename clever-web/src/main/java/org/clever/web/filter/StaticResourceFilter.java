@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
+import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
 import org.clever.core.env.Environment;
 import org.clever.core.io.Resource;
@@ -44,6 +45,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         StaticResourceConfig staticResourceConfig = Binder.get(environment)
                 .bind(StaticResourceConfig.PREFIX, StaticResourceConfig.class)
                 .orElseGet(StaticResourceConfig::new);
+        AppContextHolder.registerBean("staticResourceConfig", staticResourceConfig, true);
         List<StaticResourceHandler> handlers = createHandler(rootPath, staticResourceConfig.getMappings());
         int maxLength = handlers.stream().map(StaticResourceHandler::getHostedPath)
                 .max(Comparator.comparingInt(String::length))

@@ -1,6 +1,7 @@
 package org.clever.web.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.ResourcePathUtils;
 import org.clever.core.io.Resource;
 import org.junit.jupiter.api.Test;
 

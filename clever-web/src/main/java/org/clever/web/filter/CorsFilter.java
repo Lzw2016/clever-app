@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
+import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
 import org.clever.core.env.Environment;
 import org.clever.util.AntPathMatcher;
@@ -33,6 +34,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
 
     public static CorsFilter create(Environment environment) {
         CorsConfig corsConfig = Binder.get(environment).bind(CorsConfig.PREFIX, CorsConfig.class).orElseGet(CorsConfig::new);
+        AppContextHolder.registerBean("corsConfig", corsConfig, true);
         BannerUtils.printConfig(log, "cors浏览器跨域配置",
                 new String[]{
                         "cors",

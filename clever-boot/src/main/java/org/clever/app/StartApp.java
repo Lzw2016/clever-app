@@ -19,7 +19,6 @@ import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
 import org.clever.web.WebServerBootstrap;
-import org.clever.web.config.WebConfig;
 import org.clever.web.filter.CorsFilter;
 import org.clever.web.filter.EchoFilter;
 import org.clever.web.filter.ExceptionHandlerFilter;
@@ -47,21 +46,25 @@ public class StartApp {
         StartupInfoLogger startupInfoLogger = new StartupInfoLogger(StartApp.class);
         startupInfoLogger.logStarting(log);
         log.info("The following profiles are active: {}", StringUtils.join(environment.getActiveProfiles(), ", "));
+        // 全局的资源根路径
+        final String rootPath = environment.getProperty("rootPath");
+        AppContextHolder.registerBean("rootPath", rootPath, true);
         // 初始化非web资源
         MybatisConfig mybatisConfig = Binder.get(environment).bind(MybatisConfig.PREFIX, MybatisConfig.class).orElseGet(MybatisConfig::new);
         JdbcConfig jdbcConfig = Binder.get(environment).bind(JdbcConfig.PREFIX, JdbcConfig.class).orElseGet(JdbcConfig::new);
-        JdbcBootstrap jdbcBootstrap = new JdbcBootstrap(jdbcConfig, mybatisConfig);
+        AppContextHolder.registerBean("mybatisConfig", mybatisConfig, true);
+        AppContextHolder.registerBean("jdbcConfig", jdbcConfig, true);
+        JdbcBootstrap jdbcBootstrap = new JdbcBootstrap(rootPath, jdbcConfig, mybatisConfig);
         jdbcBootstrap.init();
         // 创建web服务
         WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(environment);
-        final WebConfig webConfig = webServerBootstrap.getWebConfig();
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
                 .addFilter(ExceptionHandlerFilter.INSTANCE, "/*", "ExceptionHandlerFilter", filterOrder.incrL1())
                 .addFilter(EchoFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
                 .addFilter(CorsFilter.create(environment), "/*", "CorsFilter", filterOrder.incrL1())
-                .addFilter(StaticResourceFilter.create(webConfig.getRootPath(), environment), "/*", "StaticResourceFilter", filterOrder.incrL1())
+                .addFilter(StaticResourceFilter.create(rootPath, environment), "/*", "StaticResourceFilter", filterOrder.incrL1())
                 .addFilter(ctx -> {
                     log.info("### Filter_1_之前");
                     ctx.next();

@@ -38,10 +38,6 @@ public class WebConfig {
      */
     private int port = 9090;
     /**
-     * 全局的资源根路径
-     */
-    private String rootPath = "";
-    /**
      * HTTP 配置
      */
     private HttpConfig http = new HttpConfig();

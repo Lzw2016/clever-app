@@ -7,6 +7,7 @@ import io.javalin.plugin.json.JavalinJackson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.boot.context.properties.bind.Binder;
+import org.clever.core.AppContextHolder;
 import org.clever.core.env.Environment;
 import org.clever.core.json.jackson.JacksonConfig;
 import org.clever.core.mapper.JacksonMapper;
@@ -31,6 +32,7 @@ public class WebServerBootstrap {
 
     public static WebServerBootstrap create(Environment environment) {
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
+        AppContextHolder.registerBean("webConfig", webConfig, true);
         return create(webConfig);
     }
 

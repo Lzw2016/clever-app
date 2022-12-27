@@ -32,13 +32,17 @@ import java.util.*;
 public class JdbcBootstrap {
     private volatile boolean initialized = false;
     @Getter
+    private final String rootPath;
+    @Getter
     private final JdbcConfig jdbcConfig;
     @Getter
     private final MybatisConfig mybatisConfig;
 
-    public JdbcBootstrap(JdbcConfig jdbcConfig, MybatisConfig mybatisConfig) {
+    public JdbcBootstrap(String rootPath, JdbcConfig jdbcConfig, MybatisConfig mybatisConfig) {
+        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(jdbcConfig, "参数 jdbcConfig 不能为 null");
         Assert.notNull(mybatisConfig, "参数 mybatisConfig 不能为 null");
+        this.rootPath = rootPath;
         this.jdbcConfig = jdbcConfig;
         this.mybatisConfig = mybatisConfig;
     }

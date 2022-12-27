@@ -3,6 +3,7 @@ package org.clever.web.http;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.ResourcePathUtils;
 import org.clever.core.io.ClassPathResource;
 import org.clever.core.io.Resource;
 import org.clever.core.io.UrlResource;
@@ -12,7 +13,6 @@ import org.clever.util.ResourceUtils;
 import org.clever.util.StringUtils;
 import org.clever.web.config.StaticResourceConfig;
 import org.clever.web.servlet.resource.HttpResource;
-import org.clever.web.utils.ResourcePathUtils;
 import org.clever.web.utils.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
