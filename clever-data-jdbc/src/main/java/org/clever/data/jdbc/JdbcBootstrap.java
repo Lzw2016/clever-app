@@ -5,9 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.AppContextHolder;
-import org.clever.core.AppShutdownHook;
-import org.clever.core.SystemClock;
+import org.clever.core.*;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
 import org.clever.data.jdbc.metrics.P6SpyMeter;
@@ -17,12 +15,14 @@ import org.clever.data.jdbc.mybatis.ComposeMyBatisMapperSql;
 import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
 import org.clever.data.jdbc.mybatis.MyBatisMapperSql;
 import org.clever.data.jdbc.support.MergeDataSourceConfig;
+import org.clever.data.jdbc.support.SqlLoggerUtils;
 import org.clever.jdbc.datasource.DataSourceTransactionManager;
 import org.clever.util.Assert;
 
 import javax.sql.DataSource;
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 作者：lizw <br/>
@@ -58,19 +58,44 @@ public class JdbcBootstrap {
     }
 
     private void initP6Spy() {
-        // TODO 打印配置日志
         final JdbcConfig.JdbcMetrics metrics = Optional.of(jdbcConfig.getMetrics()).orElse(new JdbcConfig.JdbcMetrics());
+        BannerUtils.printConfig(log, "jdbc性能监控配置",
+                new String[]{
+                        "metrics: ",
+                        "  enable       : " + metrics.isEnable(),
+                        "  ignoreSql    : " + metrics.getIgnoreSql().stream().map(sql -> String.format("\"%s\"", SqlLoggerUtils.deleteWhitespace(sql))).collect(Collectors.toList()),
+                        "  maxSqlCount  : " + metrics.getMaxSqlCount(),
+                        "  histogram    : " + metrics.getHistogram(),
+                        "  histogramTopN: " + metrics.getHistogramTopN(),
+                }
+        );
         P6SpyMeter.init(metrics);
         Slf4JLogger.init(metrics);
     }
 
     private void initMybatis() {
-        // TODO 打印配置日志
+        final Duration interval = Optional.of(mybatisConfig.getInterval()).orElse(Duration.ZERO);
+        final List<MybatisConfig.MapperLocation> locations = Optional.of(mybatisConfig.getLocations()).orElse(Collections.emptyList());
+        // 打印配置日志
+        List<String> props = new ArrayList<>();
+        props.add("mybatis: ");
+        props.add("  enable   : " + mybatisConfig.isEnable());
+        props.add("  watcher  : " + mybatisConfig.isWatcher());
+        props.add("  interval : " + interval.toMillis() + "ms");
+        props.add("  locations: ");
+        for (MybatisConfig.MapperLocation location : locations) {
+            String path = location.getLocation();
+            if (MybatisConfig.FileType.FileSystem.equals(location.getFileType())) {
+                path = ResourcePathUtils.getAbsolutePath(rootPath, path);
+            }
+            props.add("    - fileType: " + location.getFileType());
+            props.add("      location: " + path);
+            props.add("      filter  : " + location.getFilter());
+        }
+        BannerUtils.printConfig(log, "mybatis配置", props.toArray(new String[0]));
         if (!mybatisConfig.isEnable()) {
             return;
         }
-        final Duration interval = Optional.of(mybatisConfig.getInterval()).orElse(Duration.ZERO);
-        final List<MybatisConfig.MapperLocation> locations = Optional.of(mybatisConfig.getLocations()).orElse(Collections.emptyList());
         if (locations.isEmpty()) {
             return;
         }
@@ -78,9 +103,8 @@ public class JdbcBootstrap {
         for (MybatisConfig.MapperLocation location : locations) {
             MyBatisMapperSql mybatisMapperSql;
             if (MybatisConfig.FileType.FileSystem.equals(location.getFileType())) {
-                // TODO rootPath
                 mybatisMapperSql = new FileSystemMyBatisMapperSql(
-                        location.getLocation(),
+                        ResourcePathUtils.getAbsolutePath(rootPath, location.getLocation()),
                         location.getFilter()
                 );
             } else if (MybatisConfig.FileType.Jar.equals(location.getFileType())) {
@@ -97,19 +121,31 @@ public class JdbcBootstrap {
         composeMyBatisMapperSql.reloadAll();
         if (mybatisConfig.isWatcher() && !interval.isZero()) {
             composeMyBatisMapperSql.startWatch(interval.toMillis());
-            AppShutdownHook.addShutdownHook(composeMyBatisMapperSql::stopWatch, 100, "停止监听mapper(sql.xml)文件");
+            AppShutdownHook.addShutdownHook(composeMyBatisMapperSql::stopWatch, OrderIncrement.NORMAL, "停止监听mapper(sql.xml)文件");
         }
         DataSourceAdmin.setMyBatisMapperSql(composeMyBatisMapperSql);
         AppContextHolder.registerBean("mybatisMapperSql", composeMyBatisMapperSql, true);
     }
 
     private void initJdbc() {
-        // TODO 打印配置日志
+        final HikariConfig global = Optional.of(jdbcConfig.getGlobal()).orElse(new HikariConfig());
+        final Map<String, HikariConfig> dataSource = Optional.of(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
+        // 打印配置日志
+        List<String> props = new ArrayList<>();
+        props.add("jdbc: ");
+        props.add("  enable     : " + jdbcConfig.isEnable());
+        props.add("  defaultName: " + jdbcConfig.getDefaultName());
+        props.add("  dataSource : ");
+        dataSource.forEach((name, config) -> {
+            props.add("    " + name + ": ");
+            props.add("      jdbcUrl        : " + config.getJdbcUrl());
+            props.add("      minimumIdle    : " + config.getMinimumIdle());
+            props.add("      maximumPoolSize: " + config.getMaximumPoolSize());
+        });
+        BannerUtils.printConfig(log, "jdbc数据源配置", props.toArray(new String[0]));
         if (!jdbcConfig.isEnable()) {
             return;
         }
-        final HikariConfig global = Optional.of(jdbcConfig.getGlobal()).orElse(new HikariConfig());
-        final Map<String, HikariConfig> dataSource = Optional.of(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
         final Map<String, DataSource> dataSourceMap = new HashMap<>(dataSource.size());
         // 初始化配置的数据源
         final long startTime = SystemClock.now();

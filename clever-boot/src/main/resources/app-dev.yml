@@ -1,7 +1,6 @@
 web:
   host: '0.0.0.0'
   port: 9090
-  rootPath: "./"
   http:
     autogenerateEtags: true
     maxRequestSize: 10MB
@@ -19,13 +18,13 @@ mybatis:
   enable: true
   watcher: true
   interval: 1s
-#  locations:
-#    - fileType: filesystem
-#      location: ''
-#      filter: ''
-#    - fileType: jar
-#      location: ''
-#      filter: ''
+  locations:
+    - fileType: filesystem
+      location: './clever-boot/src/main/kotlin'
+      filter: '**/*.xml'
+    - fileType: jar
+      location: 'classpath*:org/clever/app/**/*.xml'
+      filter: ''
 
 jdbc:
   enable: true

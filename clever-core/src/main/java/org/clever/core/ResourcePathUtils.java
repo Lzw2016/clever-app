@@ -69,6 +69,17 @@ public class ResourcePathUtils {
     }
 
     /**
+     * 返回相对于 {@code basePath} 的资源的绝对路径
+     *
+     * @param basePath     基础路径
+     * @param relativePath 相对路径
+     */
+    public static String getAbsolutePath(String basePath, String relativePath) {
+        Resource resource = getResource(basePath, relativePath);
+        return getAbsolutePath(resource);
+    }
+
+    /**
      * 判断Resource是否是一个存在的文件
      */
     public static boolean isExistsFile(Resource resource) {

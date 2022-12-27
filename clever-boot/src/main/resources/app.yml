@@ -5,8 +5,10 @@ logging:
     path: './logs/${logging.file.name}'
   level:
     root: info
-    com.zaxxer.hikari.HikariConfig: debug
+    #com.zaxxer.hikari.HikariConfig: debug
     #org.eclipse.jetty.util.log: warn
+
+rootPath: "./"
 
 clever:
   profiles.active: dev

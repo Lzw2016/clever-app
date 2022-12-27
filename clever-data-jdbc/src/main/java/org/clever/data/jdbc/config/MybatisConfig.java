@@ -53,10 +53,26 @@ public class MybatisConfig {
         private FileType fileType = FileType.FileSystem;
         /**
          * mapper.xml文件路径
+         * <pre>
+         * 1.classpath路径
+         *   classpath:com/mycompany/**&#47;*.xml
+         *   classpath*:com/mycompany/**&#47;*.xml
+         * 2.本机绝对路径
+         *   file:/home/www/public/
+         *   file:D:/resources/static/
+         * 3.本机相对路径
+         *   ../public/static
+         *   ./public
+         *   ../../dist
+         * </pre>
          */
         private String location;
         /**
          * ant风格的过滤器(为空则不过滤)
+         * <pre>
+         *  1.dao/**&#47;*.xml
+         *  2.**&#47;*.xml
+         * </pre>
          */
         private String filter;
     }

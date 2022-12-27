@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.ResourcePathUtils;
 import org.clever.core.io.Resource;
 import org.clever.core.io.support.PathMatchingResourcePatternResolver;
 import org.clever.util.AntPathMatcher;
@@ -65,10 +66,10 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
     /**
      * 扫描资源文件的表达式,如:<br/>
      * <pre>
-     * /WEB-INF/*-context.xml
-     * com/mycompany/**&#47;applicationContext.xml
-     * file:C:/some/path/*-context.xml
-     * classpath:com/mycompany/**&#47;applicationContext.xml
+     * /WEB-INF/*.xml
+     * com/mycompany/**&#47;*.xml
+     * file:C:/some/path/*.xml
+     * classpath:com/mycompany/**&#47;*.xml
      * </pre>
      */
     @Getter
@@ -98,25 +99,7 @@ public class ClassPathMyBatisMapperSql extends AbstractMyBatisMapperSql {
     @Override
     public boolean fileExists(String xmlPath) {
         final Resource resource = PATH_MATCHING_RESOLVER.getResource(xmlPath);
-        if (resource.isFile()) {
-            try {
-                if (!resource.getFile().isFile()) {
-                    return false;
-                }
-            } catch (Exception e) {
-                log.warn("Resource.getFile()异常", e);
-            }
-        }
-        boolean exists = resource.exists() && resource.isReadable();
-        if (!exists) {
-            return false;
-        }
-        long contentLength = -1L;
-        try {
-            contentLength = resource.contentLength();
-        } catch (Exception ignored) {
-        }
-        return contentLength > 0L;
+        return ResourcePathUtils.isExistsFile(resource);
     }
 
     @SneakyThrows
