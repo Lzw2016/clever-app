@@ -14,7 +14,7 @@ public class BaseTest {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
         hikariConfig.setJdbcUrl("jdbc:mysql://192.168.1.201:30011/test");
-        hikariConfig.setUsername("root");
+        hikariConfig.setUsername("admin");
         hikariConfig.setPassword("admin123456");
         hikariConfig.setAutoCommit(false);
         hikariConfig.setMinimumIdle(1);
