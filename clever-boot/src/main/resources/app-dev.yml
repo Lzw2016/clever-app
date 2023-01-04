@@ -47,36 +47,3 @@ jdbc:
       minimumIdle: 2
       maximumPoolSize: 100
       connectionTestQuery: 'select 1'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
