@@ -29,6 +29,15 @@ web:
         directory: 'clever-boot/src/main/resources'
         preCompress: true
         location: EXTERNAL
+  server:
+    contextPath: '/'
+    enableDevLogging: false
+    ignoreTrailingSlashes: true
+    threads:
+      min: 8
+      max: 250
+      maxQueueCapacity: 100
+      idleTimeout: 60d
   echo:
     enable: true
     ignorePaths:

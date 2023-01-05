@@ -9,9 +9,40 @@
   "properties": {
     "logging": {
       "$ref": "#/definitions/loggingDefinition"
+    },
+    "clever": {
+      "$ref": "#/definitions/cleverDefinition"
+    },
+    "rootPath": {
+      "type": "string",
+      "description": "全局基础路径"
+    },
+    "web": {
+      "$ref": "#/definitions/webDefinition"
     }
   },
   "definitions": {
+    "//------------------------------------------------------------------------------自定义类型": {},
+    "logLevel": {
+      "enum": [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "fatal",
+        "off"
+      ]
+    },
+    "duration": {
+      "type": "string",
+      "pattern": "^\\d+(ns|us|ms|s|m|h|d)$"
+    },
+    "dataSize": {
+      "type": "string",
+      "pattern": "^\\d+(B|KB|MB|GB|TB)$"
+    },
+    "//------------------------------------------------------------------------------配置Definition": {},
     "loggingDefinition": {
       "type": "object",
       "description": "系统日志配置",
@@ -41,30 +72,276 @@
             "root": {
               "type": "string",
               "description": "root logger日志级别",
-              "enum": [
-                "trace",
-                "debug",
-                "info",
-                "warn",
-                "error",
-                "fatal",
-                "off"
-              ]
+              "$ref": "#/definitions/logLevel"
             }
           },
           "patternProperties": {
             "^\\S+$": {
               "type": "string",
               "description": "root logger日志级别",
-              "enum": [
-                "trace",
-                "debug",
-                "info",
-                "warn",
-                "error",
-                "fatal",
-                "off"
-              ]
+              "$ref": "#/definitions/logLevel"
+            }
+          }
+        }
+      }
+    },
+    "cleverDefinition": {
+      "type": "object",
+      "description": "clever 配置",
+      "properties": {
+        "profiles": {
+          "type": "object",
+          "description": "profiles配置",
+          "properties": {
+            "active": {
+              "type": [
+                "array",
+                "string"
+              ],
+              "description": "活动的配置",
+              "uniqueItems": true
+            }
+          }
+        },
+        "profiles.active": {
+          "type": [
+            "array",
+            "string"
+          ],
+          "description": "活动的配置",
+          "uniqueItems": true
+        },
+        "application": {
+          "type": "object",
+          "description": "应用配置",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "应用名称"
+            }
+          }
+        },
+        "application.name": {
+          "type": "string",
+          "description": "应用名称"
+        }
+      }
+    },
+    "webDefinition": {
+      "type": "object",
+      "description": "web相关配置",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "web服务要绑定的主机IP，默认：'0.0.0.0'"
+        },
+        "port": {
+          "type": "integer",
+          "description": "web服务端口，默认：9090"
+        },
+        "http": {
+          "$ref": "#/definitions/webDefinition/definitions/httpDefinition"
+        },
+        "server": {
+          "$ref": "#/definitions/webDefinition/definitions/serverDefinition"
+        },
+        "webSocketConfig": {
+          "$ref": "#/definitions/webDefinition/definitions/webSocketConfigDefinition"
+        },
+        "mvc": {
+          "$ref": "#/definitions/webDefinition/definitions/mvcDefinition"
+        },
+        "jackson": {
+          "$ref": "#/definitions/webDefinition/definitions/jacksonDefinition"
+        },
+        "misc": {
+          "$ref": "#/definitions/webDefinition/definitions/miscDefinition"
+        }
+      },
+      "definitions": {
+        "httpDefinition": {
+          "type": "object",
+          "description": "HTTP 配置",
+          "properties": {
+            "autogenerateEtags": {
+              "type": "boolean",
+              "description": "为响应生成 etag，默认：false (ETag是HTTP协议提供的一种Web缓存验证机制，并且允许客户端进行缓存协商。这就使得缓存变得更加高效，而且节省带宽)"
+            },
+            "prefer405over404": {
+              "type": "boolean",
+              "description": "如果路径映射到不同的 HTTP 方法，则返回 405 而不是 404，默认：true"
+            },
+            "enforceSsl": {
+              "type": "boolean",
+              "description": "将所有 http 请求重定向到 https，默认：false"
+            },
+            "defaultContentType": {
+              "type": "string",
+              "description": "默认内容类型，默认：'application/json'"
+            },
+            "maxRequestSize": {
+              "description": "最大请求大小，默认：1MB (要么增加这个，要么使用 InputStream 来处理大的请求)",
+              "$ref": "#/definitions/dataSize"
+            },
+            "asyncRequestTimeout": {
+              "description": "异步请求超时时间，默认：0s (0表示不超时)",
+              "$ref": "#/definitions/duration"
+            },
+            "singlePageRoot": {
+              "type": "array",
+              "description": "花哨的 404 处理程序，在 '/path' 上返回 404 的指定文件(常用于单页面应用)",
+              "items": {
+                "type": "object",
+                "description": "单页面资源配置",
+                "properties": {
+                  "hostedPath": {
+                    "type": "string",
+                    "description": "服务端路径"
+                  },
+                  "filePath": {
+                    "type": "string",
+                    "description": "文件路径"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "文件位置，默认：“CLASSPATH”",
+                    "enum": [
+                      "CLASSPATH",
+                      "EXTERNAL"
+                    ]
+                  }
+                }
+              },
+              "uniqueItems": true
+            },
+            "staticFile": {
+              "type": "array",
+              "description": "静态资源映射配置",
+              "items": {
+                "type": "object",
+                "description": "静态资源映射",
+                "properties": {
+                  "hostedPath": {
+                    "type": "string",
+                    "description": "服务端路径"
+                  },
+                  "directory": {
+                    "type": "string",
+                    "description": "文件路径"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "文件位置，默认：“CLASSPATH”",
+                    "enum": [
+                      "CLASSPATH",
+                      "EXTERNAL"
+                    ]
+                  },
+                  "preCompress": {
+                    "type": "boolean",
+                    "description": "预压缩，默认：false"
+                  },
+                  "headers": {
+                    "type": "object",
+                    "description": "自定义响应头，默认：['Cache-Control': 'max-age=0']",
+                    "patternProperties": {
+                      "^.+$": {
+                        "type": "string",
+                        "description": "自定义响应头"
+                      }
+                    }
+                  }
+                }
+              },
+              "uniqueItems": true
+            },
+            "enableWebjars": {
+              "type": "boolean",
+              "description": "通过 webjars 添加静态文件，默认：false"
+            },
+            "enableCorsForAllOrigins": {
+              "type": "boolean",
+              "description": "为所有源启用 CORS，默认：false"
+            },
+            "enableCorsForOrigin": {
+              "type": "array",
+              "description": "为指定源启用 CORS，默认：[]",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "serverDefinition": {
+          "type": "object",
+          "description": "Server 配置",
+          "properties": {
+            "contextPath": {
+              "type": "string",
+              "description": "web server 的 context path，默认：'/'"
+            },
+            "ignoreTrailingSlashes": {
+              "type": "boolean",
+              "description": "将“/path”和“/path/”视为同一路径，默认：true"
+            },
+            "enableDevLogging": {
+              "type": "boolean",
+              "description": "启用开发日志（用于开发的广泛调试日志），默认：false"
+            },
+            "threads": {
+              "type": "object",
+              "description": "Server 线程池配置，默认：null",
+              "properties": {
+                "max": {
+                  "type": "integer",
+                  "description": "最大线程数。默认：250"
+                },
+                "min": {
+                  "type": "integer",
+                  "description": "最小线程数。默认：8"
+                },
+                "maxQueueCapacity": {
+                  "type": "integer",
+                  "description": "线程池的后备队列的最大容量。根据线程配置计算默认值"
+                },
+                "idleTimeout": {
+                  "type": "string",
+                  "description": "最大线程空闲时间。默认：60s",
+                  "$ref": "#/definitions/duration"
+                }
+              }
+            }
+          }
+        },
+        "webSocketConfigDefinition": {
+          "type": "object",
+          "description": "WebSocket 配置",
+          "properties": {
+            "TODO": {}
+          }
+        },
+        "mvcDefinition": {
+          "type": "object",
+          "description": "MVC 配置",
+          "properties": {
+            "TODO": {}
+          }
+        },
+        "jacksonDefinition":{
+          "type": "object",
+          "description": "Jackson 配置",
+          "properties": {
+            "TODO": {}
+          }
+        },
+        "miscDefinition":{
+          "type": "object",
+          "description": "Misc(杂项) 配置",
+          "properties": {
+            "showJavalinBanner": {
+              "type": "boolean",
+              "description": "是否输出 Javalin Banner 日志"
             }
           }
         }

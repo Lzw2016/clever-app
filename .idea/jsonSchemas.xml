@@ -12,7 +12,13 @@
               <option name="patterns">
                 <list>
                   <Item>
+                    <option name="path" value="clever-boot/src/main/resources/app-dev.yml" />
+                  </Item>
+                  <Item>
                     <option name="path" value="clever-boot/src/main/resources/app-example.yml" />
+                  </Item>
+                  <Item>
+                    <option name="path" value="clever-boot/src/main/resources/app.yml" />
                   </Item>
                 </list>
               </option>
