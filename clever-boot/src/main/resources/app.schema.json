@@ -1,2 +1,59 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "id": "https://raw.githubusercontent.com/Lzw2016/clever-app/main/clever-boot/src/main/resources/app.schema.json",
+  "title": "配置文件",
+  "description": "app.yml 配置文件",
+  "type": "object",
+  "required": [
+  ],
+  "properties": {
+    "logging": {
+      "$ref": "#/definitions/loggingDefinition"
+    }
+  },
+  "definitions": {
+    "loggingDefinition": {
+      "type": "object",
+      "description": "系统日志配置",
+      "properties": {
+        "config": {
+          "type": "string",
+          "description": "logback配置文件位置"
+        },
+        "file": {
+          "type": "object",
+          "description": "系统日志文件位置",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "日志文件存储路径"
+            },
+            "name": {
+              "type": "string",
+              "description": "日志文件名称"
+            }
+          }
+        },
+        "level": {
+          "type": "object",
+          "description": "logger日志级别配置",
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "root logger日志级别",
+              "enum": [
+                "trace",
+                "debug",
+                "info",
+                "warn",
+                "error",
+                "fatal",
+                "off"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
 }
