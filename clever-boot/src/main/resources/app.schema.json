@@ -51,6 +51,21 @@
                 "off"
               ]
             }
+          },
+          "patternProperties": {
+            "^\\S+$": {
+              "type": "string",
+              "description": "root logger日志级别",
+              "enum": [
+                "trace",
+                "debug",
+                "info",
+                "warn",
+                "error",
+                "fatal",
+                "off"
+              ]
+            }
           }
         }
       }
