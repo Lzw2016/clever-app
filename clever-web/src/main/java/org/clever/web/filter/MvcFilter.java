@@ -1,5 +1,6 @@
 package org.clever.web.filter;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
@@ -10,6 +11,8 @@ import org.clever.core.env.Environment;
 import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.MvcConfig;
+import org.clever.web.support.mvc.HandlerMethod;
+import org.clever.web.support.mvc.HandlerMethodResolver;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -63,6 +66,8 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
 //    private Map<String, Object> appAttributes = Collections.emptyMap();
     private final MvcConfig mvcConfig;
     private final Map<String, String> locationMap;
+    @Getter
+    private HandlerMethodResolver handlerMethodResolver;
 
     public MvcFilter(String rootPath, MvcConfig mvcConfig) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
@@ -73,9 +78,10 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
+        // 获取 HandlerMethod
+        HandlerMethod handlerMethod = handlerMethodResolver.getHandleMethod(ctx.req, ctx.res, mvcConfig);
 
 
-        // 1.获取 HandlerMethod
         // 2.解析 HandlerMethod args
         // 3.获取 HandlerContext
         // 4.执行 HandlerInterceptor
@@ -90,5 +96,10 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
 //        ReflectionsUtils.setFieldValue(ctx, "handlerType", HandlerType.Companion.fromServletRequest(ctx.req));
 //        ReflectionsUtils.setFieldValue(ctx, "endpointHandlerPath", pathSpec);
         ctx.next();
+    }
+
+    public void setHandlerMethodResolver(HandlerMethodResolver handlerMethodResolver) {
+        Assert.notNull(handlerMethodResolver,"参数 handlerMethodResolver 不能为 null");
+        this.handlerMethodResolver = handlerMethodResolver;
     }
 }
