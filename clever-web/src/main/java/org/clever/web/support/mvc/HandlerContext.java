@@ -51,13 +51,19 @@ public class HandlerContext {
             super(request, response, handleMethod, args);
             this.result = result;
         }
+
+        public After(HandlerContext context, Object result) {
+            // Assert.notNull(context, "参数 context 不能为 null");
+            super(context.request, context.response, context.handleMethod, context.args);
+            this.result = result;
+        }
     }
 
     @Setter
     @Getter
     public static class Finally extends HandlerContext {
         /**
-         * Handler Method的返回值()
+         * Handler Method的返回值
          */
         private final Object result;
         /**
@@ -67,6 +73,13 @@ public class HandlerContext {
 
         public Finally(HttpServletRequest request, HttpServletResponse response, HandlerMethod handleMethod, Object[] args, Object result, Throwable exception) {
             super(request, response, handleMethod, args);
+            this.result = result;
+            this.exception = exception;
+        }
+
+        public Finally(HandlerContext context, Object result, Throwable exception) {
+            // Assert.notNull(context, "参数 context 不能为 null");
+            super(context.request, context.response, context.handleMethod, context.args);
             this.result = result;
             this.exception = exception;
         }

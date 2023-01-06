@@ -6,13 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
+import org.clever.core.MethodParameter;
 import org.clever.core.ResourcePathUtils;
 import org.clever.core.env.Environment;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.util.Assert;
+import org.clever.util.ObjectUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.MvcConfig;
-import org.clever.web.support.mvc.HandlerMethod;
-import org.clever.web.support.mvc.HandlerMethodResolver;
+import org.clever.web.support.mvc.*;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -62,12 +64,16 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
         return locationMap;
     }
 
+    private static final Object[] EMPTY_ARGS = new Object[0];
+
     // 保存 JavalinConfig.inner.appAttributes
 //    private Map<String, Object> appAttributes = Collections.emptyMap();
     private final MvcConfig mvcConfig;
     private final Map<String, String> locationMap;
     @Getter
-    private HandlerMethodResolver handlerMethodResolver;
+    private HandlerMethodResolver handlerMethodResolver; // TODO 初始默认值
+    private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
+    private final List<HandlerInterceptor> interceptors = new ArrayList<>();
 
     public MvcFilter(String rootPath, MvcConfig mvcConfig) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
@@ -79,15 +85,145 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
         // 获取 HandlerMethod
-        HandlerMethod handlerMethod = handlerMethodResolver.getHandleMethod(ctx.req, ctx.res, mvcConfig);
+        final HandlerMethod handlerMethod = handlerMethodResolver.getHandleMethod(ctx.req, ctx.res, mvcConfig);
+        if (handlerMethod == null) {
+            ctx.next();
+            return;
+        }
+        try {
+            // 解析 HandlerMethod args
+            final Object[] args = getMethodArgumentValues(ctx, handlerMethod);
+            // 创建 HandlerContext
+            final HandlerContext handlerContext = new HandlerContext(ctx.req, ctx.res, handlerMethod, args);
+            // 执行 HandlerInterceptor
+            TupleTwo<Object, Throwable> result = executeInterceptor(handlerContext);
+            // 处理返回值
+            Object returnValue = result.getValue1();
+            Throwable exception = result.getValue2();
+            if (exception != null) {
+                // TODO 上抛异常
+            }
+            if (returnValue != null && !ctx.res.isCommitted()) {
+                // TODO 响应客户端数据
+//                response.setContentType(CONTENT_TYPE);
+//                String json = serializeRes(result);
+//                response.getWriter().println(json);
+            }
+        } catch (Exception e) {
+            // TODO 异常类型
+            throw new RuntimeException(e);
+        }
+    }
 
+    protected Object[] getMethodArgumentValues(FilterRegistrar.Context ctx, HandlerMethod handlerMethod) throws Exception {
+        Object[] args = EMPTY_ARGS;
+        MethodParameter[] parameters = handlerMethod.getParameters();
+        if (!ObjectUtils.isEmpty(parameters)) {
+            args = new Object[parameters.length];
+            for (int i = 0; i < parameters.length; i++) {
+                MethodParameter parameter = parameters[i];
+//                // TODO 从IOC容器中获取参数值(实现一个 HandlerMethodArgumentResolver???)
+//                String parameterName = parameter.getParameterName();
+//                args[i] = AppContextHolder.getBean(parameterName, parameter.getParameterType(), false);
+//                if (args[i] != null && !parameter.getParameterType().isInstance(args[i])) {
+//                    args[i] = AppContextHolder.getBean(parameterName, false);
+//                    if (args[i] != null && !parameter.getParameterType().isInstance(args[i])) {
+//                        args[i] = AppContextHolder.getBean(parameter.getParameterType(), false);
+//                        if (args[i] != null && !parameter.getParameterType().isInstance(args[i])) {
+//                            args[i] = null;
+//                        }
+//                    }
+//                }
+                for (HandlerMethodArgumentResolver argumentResolver : argumentResolvers) {
+                    if (!argumentResolver.supportsParameter(parameter, ctx.req)) {
+                        continue;
+                    }
+                    args[i] = argumentResolver.resolveArgument(parameter, ctx.req);
+                    break;
+                }
+            }
+        }
+        return args;
+    }
 
-        // 2.解析 HandlerMethod args
-        // 3.获取 HandlerContext
-        // 4.执行 HandlerInterceptor
-        // 5.响应
+    /**
+     * 执行mvc拦截器 和
+     *
+     * @return {@code TupleTwo<Handler Method返回值, 出现的异常>}
+     */
+    protected TupleTwo<Object, Throwable> executeInterceptor(HandlerContext handlerContext) {
+        boolean goOn = true;
+        Object returnValue = null;
+        Throwable exception = null;
+        List<HandlerInterceptor> excInterceptor = new ArrayList<>(interceptors.size());
+        // 执行 HandlerInterceptor-before
+        for (HandlerInterceptor interceptor : interceptors) {
+            try {
+                excInterceptor.add(interceptor);
+                goOn = interceptor.beforeHandle(handlerContext);
+            } catch (Throwable e) {
+                exception = e;
+                break;
+            }
+            // 中断执行
+            if (!goOn) {
+                break;
+            }
+        }
+        Collections.reverse(excInterceptor);
+        // 异常处理
+        if (exception != null) {
+            triggerFinallyHandle(excInterceptor, handlerContext, null, exception);
+            return TupleTwo.creat(null, exception);
+        }
+        // 执行 Handler Method | 未中断 & 未异常
+        if (goOn) {
+            try {
+                returnValue = invokeHandlerMethod(handlerContext);
+            } catch (Exception e) {
+                exception = e;
+            }
+        }
+        // 异常处理
+        if (exception != null) {
+            triggerFinallyHandle(excInterceptor, handlerContext, null, exception);
+            return TupleTwo.creat(null, exception);
+        }
+        // 执行 HandlerInterceptor-after
+        final HandlerContext.After afterContext = new HandlerContext.After(handlerContext, returnValue);
+        for (HandlerInterceptor interceptor : excInterceptor) {
+            try {
+                interceptor.afterHandle(afterContext);
+            } catch (Throwable e) {
+                exception = e;
+                break;
+            }
+        }
+        // 更新 Handler Method 返回值
+        returnValue = afterContext.getResult();
+        // 执行 HandlerInterceptor-finally
+        triggerFinallyHandle(excInterceptor, handlerContext, returnValue, exception);
+        return TupleTwo.creat(returnValue, exception);
+    }
 
+    /**
+     * 执行 HandlerInterceptor-finally
+     */
+    protected void triggerFinallyHandle(List<HandlerInterceptor> interceptors, HandlerContext handlerContext, Object returnValue, Throwable exception) {
+        final HandlerContext.Finally finallyContext = new HandlerContext.Finally(handlerContext, returnValue, exception);
+        for (HandlerInterceptor interceptor : interceptors) {
+            try {
+                interceptor.finallyHandle(finallyContext);
+            } catch (Throwable e) {
+                log.error("HandlerInterceptor.afterCompletion threw exception", e);
+            }
+        }
+    }
 
+    /**
+     * 执行 Handler Method
+     */
+    protected Object invokeHandlerMethod(HandlerContext handlerContext) throws Exception {
 //        Context context = new Context(ctx.req, ctx.res, appAttributes);
 //        // 参考 io.javalin.http.util.ContextUtil#update
 //        // String requestUri = StringUtils.removeStart(ctx.req.getRequestURI(), ctx.req.getContextPath());
@@ -95,11 +231,47 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
 //        // ReflectionsUtils.setFieldValue(ctx, "pathParamMap", Collections.emptyMap());
 //        ReflectionsUtils.setFieldValue(ctx, "handlerType", HandlerType.Companion.fromServletRequest(ctx.req));
 //        ReflectionsUtils.setFieldValue(ctx, "endpointHandlerPath", pathSpec);
-        ctx.next();
+
+//        Method method = getBridgedMethod();
+//        try {
+//            if (KotlinDetector.isSuspendingFunction(method)) {
+//                return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+//            }
+//            return method.invoke(getBean(), args);
+//        } catch (IllegalArgumentException ex) {
+//            assertTargetBean(method, getBean(), args);
+//            String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+//            throw new IllegalStateException(formatInvokeError(text, args), ex);
+//        } catch (InvocationTargetException ex) {
+//            // Unwrap for HandlerExceptionResolvers ...
+//            Throwable targetException = ex.getTargetException();
+//            if (targetException instanceof RuntimeException) {
+//                throw (RuntimeException) targetException;
+//            } else if (targetException instanceof Error) {
+//                throw (Error) targetException;
+//            } else if (targetException instanceof Exception) {
+//                throw (Exception) targetException;
+//            } else {
+//                throw new IllegalStateException(formatInvokeError("Invocation failure", args), targetException);
+//            }
+//        }
+        return null;
     }
 
     public void setHandlerMethodResolver(HandlerMethodResolver handlerMethodResolver) {
-        Assert.notNull(handlerMethodResolver,"参数 handlerMethodResolver 不能为 null");
+        Assert.notNull(handlerMethodResolver, "参数 handlerMethodResolver 不能为 null");
         this.handlerMethodResolver = handlerMethodResolver;
+    }
+
+    public void addArgumentResolver(HandlerMethodArgumentResolver argumentResolver) {
+        Assert.notNull(argumentResolver, "参数 argumentResolver 不能为 null");
+        argumentResolvers.add(argumentResolver);
+        argumentResolvers.sort(Comparator.comparingDouble(HandlerMethodArgumentResolver::getOrder));
+    }
+
+    public void addInterceptor(HandlerInterceptor interceptor) {
+        Assert.notNull(interceptor, "参数 interceptor 不能为 null");
+        interceptors.add(interceptor);
+        interceptors.sort(Comparator.comparingDouble(HandlerInterceptor::getOrder));
     }
 }

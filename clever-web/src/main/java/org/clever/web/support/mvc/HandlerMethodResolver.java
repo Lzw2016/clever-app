@@ -1,6 +1,5 @@
 package org.clever.web.support.mvc;
 
-import org.clever.core.Ordered;
 import org.clever.web.config.MvcConfig;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
  * 作者：lizw <br/>
  * 创建时间：2022/07/24 15:45 <br/>
  */
-public interface HandlerMethodResolver extends Ordered {
+public interface HandlerMethodResolver {
     /**
      * 获取 HandlerMethod 对象
      *
@@ -21,9 +20,4 @@ public interface HandlerMethodResolver extends Ordered {
      * @param mvcConfig mvc配置
      */
     HandlerMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, MvcConfig mvcConfig);
-
-    @Override
-    default double getOrder() {
-        return 0;
-    }
 }
