@@ -77,22 +77,22 @@ public class JdbcBootstrap {
         final Duration interval = Optional.of(mybatisConfig.getInterval()).orElse(Duration.ZERO);
         final List<MybatisConfig.MapperLocation> locations = Optional.of(mybatisConfig.getLocations()).orElse(Collections.emptyList());
         // 打印配置日志
-        List<String> props = new ArrayList<>();
-        props.add("mybatis: ");
-        props.add("  enable   : " + mybatisConfig.isEnable());
-        props.add("  watcher  : " + mybatisConfig.isWatcher());
-        props.add("  interval : " + interval.toMillis() + "ms");
-        props.add("  locations: ");
+        List<String> logs = new ArrayList<>();
+        logs.add("mybatis: ");
+        logs.add("  enable   : " + mybatisConfig.isEnable());
+        logs.add("  watcher  : " + mybatisConfig.isWatcher());
+        logs.add("  interval : " + interval.toMillis() + "ms");
+        logs.add("  locations: ");
         for (MybatisConfig.MapperLocation location : locations) {
             String path = location.getLocation();
             if (MybatisConfig.FileType.FileSystem.equals(location.getFileType())) {
                 path = ResourcePathUtils.getAbsolutePath(rootPath, path);
             }
-            props.add("    - fileType: " + location.getFileType());
-            props.add("      location: " + path);
-            props.add("      filter  : " + location.getFilter());
+            logs.add("    - fileType: " + location.getFileType());
+            logs.add("      location: " + path);
+            logs.add("      filter  : " + location.getFilter());
         }
-        BannerUtils.printConfig(log, "mybatis配置", props.toArray(new String[0]));
+        BannerUtils.printConfig(log, "mybatis配置", logs.toArray(new String[0]));
         if (!mybatisConfig.isEnable()) {
             return;
         }
@@ -131,18 +131,18 @@ public class JdbcBootstrap {
         final HikariConfig global = Optional.of(jdbcConfig.getGlobal()).orElse(new HikariConfig());
         final Map<String, HikariConfig> dataSource = Optional.of(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
         // 打印配置日志
-        List<String> props = new ArrayList<>();
-        props.add("jdbc: ");
-        props.add("  enable     : " + jdbcConfig.isEnable());
-        props.add("  defaultName: " + jdbcConfig.getDefaultName());
-        props.add("  dataSource : ");
+        List<String> logs = new ArrayList<>();
+        logs.add("jdbc: ");
+        logs.add("  enable     : " + jdbcConfig.isEnable());
+        logs.add("  defaultName: " + jdbcConfig.getDefaultName());
+        logs.add("  dataSource : ");
         dataSource.forEach((name, config) -> {
-            props.add("    " + name + ": ");
-            props.add("      jdbcUrl        : " + config.getJdbcUrl());
-            props.add("      minimumIdle    : " + config.getMinimumIdle());
-            props.add("      maximumPoolSize: " + config.getMaximumPoolSize());
+            logs.add("    " + name + ": ");
+            logs.add("      jdbcUrl        : " + config.getJdbcUrl());
+            logs.add("      minimumIdle    : " + config.getMinimumIdle());
+            logs.add("      maximumPoolSize: " + config.getMaximumPoolSize());
         });
-        BannerUtils.printConfig(log, "jdbc数据源配置", props.toArray(new String[0]));
+        BannerUtils.printConfig(log, "jdbc数据源配置", logs.toArray(new String[0]));
         if (!jdbcConfig.isEnable()) {
             return;
         }

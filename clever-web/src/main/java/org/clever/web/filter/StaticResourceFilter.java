@@ -54,15 +54,13 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         int maxLength = handlers.stream().map(StaticResourceHandler::getHostedPath)
                 .max(Comparator.comparingInt(String::length))
                 .orElse("").length();
-        List<String> props = new ArrayList<>();
-        props.add(StringUtils.rightPad("enable", maxLength) + ": " + staticResourceConfig.isEnable());
-        props.addAll(handlers.stream()
+        List<String> logs = new ArrayList<>();
+        logs.add(StringUtils.rightPad("enable", maxLength) + ": " + staticResourceConfig.isEnable());
+        logs.addAll(handlers.stream()
                 .map(handler -> StringUtils.rightPad(handler.getHostedPath(), maxLength) + ": " + handler.getLocationAbsPath())
                 .collect(Collectors.toList())
         );
-        BannerUtils.printConfig(log, "StaticResource配置",
-                props.toArray(new String[0])
-        );
+        BannerUtils.printConfig(log, "StaticResource配置", logs.toArray(new String[0]));
         return create(rootPath, staticResourceConfig);
     }
 

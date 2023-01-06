@@ -1,6 +1,7 @@
 package org.clever.web.support.mvc.handler;
 
 import org.clever.core.Ordered;
+import org.clever.web.support.mvc.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +20,7 @@ public interface HandleMethodResolver extends Ordered {
      * @param response    响应对象
      * @param matcherPath 匹配的url path
      */
-    HandleMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, String matcherPath);
+    HandlerMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, String matcherPath);
 
     @Override
     default double getOrder() {

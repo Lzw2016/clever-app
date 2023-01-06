@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.intercept;
+package org.clever.web.support.mvc;
 
 import org.clever.core.Ordered;
 import org.clever.web.support.mvc.handler.HandlerContext;

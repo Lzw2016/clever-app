@@ -25,7 +25,7 @@ CustomFilter
     🡓
     [500] StaticResourceFilter
     🡓
-    [600] CustomMVCInterceptorChain(before | after | exception)
+    [600] MvcFilter(before | after | exception)
         🡓
         before (可提前响应请求)
         🡓

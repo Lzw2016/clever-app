@@ -1,6 +1,7 @@
 package org.clever.web.support.mvc.handler;
 
 import lombok.Data;
+import org.clever.web.support.mvc.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,10 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 @Data
 public class HandlerContext {
     /**
-     * mvc请求处理器
-     */
-    private final HandleMethod handleMethod;
-    /**
      * 请求 request
      */
     private final HttpServletRequest request;
@@ -26,14 +23,18 @@ public class HandlerContext {
      */
     private final HttpServletResponse response;
     /**
+     * mvc请求处理器
+     */
+    private final HandlerMethod handleMethod;
+    /**
      * 处理请求程序method的参数值
      */
     private final Object[] args;
 
-    public HandlerContext(HandleMethod handleMethod, HttpServletRequest request, HttpServletResponse response, Object[] args) {
-        this.handleMethod = handleMethod;
+    public HandlerContext(HttpServletRequest request, HttpServletResponse response, HandlerMethod handleMethod, Object[] args) {
         this.request = request;
         this.response = response;
+        this.handleMethod = handleMethod;
         this.args = args;
     }
 }

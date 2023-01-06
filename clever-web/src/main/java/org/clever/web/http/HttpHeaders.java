@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
  * 创建时间：2022/12/24 23:28 <br/>
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
-    private static final long serialVersionUID = -8578554704772377436L;
-
     /**
      * The HTTP {@code Accept} header field name.
      *

@@ -1,6 +1,7 @@
 package org.clever.web.support.mvc.handler;
 
 import org.clever.core.Ordered;
+import org.clever.web.support.mvc.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,7 +20,7 @@ public interface HandlerContextArgsResolver extends Ordered {
      * @param response     响应对象
      * @param handleMethod HandleMethod
      */
-    HandlerContext getHandlerContext(HttpServletRequest request, HttpServletResponse response, HandleMethod handleMethod);
+    HandlerContext getHandlerContext(HttpServletRequest request, HttpServletResponse response, HandlerMethod handleMethod);
 
     @Override
     default double getOrder() {

@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.handler;
+package org.clever.web.support.mvc;
 
 import lombok.Data;
 import org.clever.core.MethodParameter;
@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
  * 创建时间：2022/07/24 15:54 <br/>
  */
 @Data
-public class HandleMethod {
+public class HandlerMethod {
     /**
      * 匹配的url path
      */
@@ -33,7 +33,7 @@ public class HandleMethod {
 //    private HandlerMethod resolvedFromHandlerMethod;
 //    private volatile List<Annotation[][]> interfaceParameterAnnotations;
 
-    public HandleMethod(String matcherPath, Class<?> handlerClass, Method method, MethodParameter[] parameters) {
+    public HandlerMethod(String matcherPath, Class<?> handlerClass, Method method, MethodParameter[] parameters) {
         this.matcherPath = matcherPath;
         this.handlerClass = handlerClass;
         this.method = method;

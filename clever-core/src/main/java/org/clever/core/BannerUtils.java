@@ -17,16 +17,16 @@ public class BannerUtils {
     public static final String LINE_LAST /*  */ = "╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════";
     public static final String LINE_START /* */ = "║ ";
 
-    protected static void printConfig(Logger log, String title, Object props) {
+    protected static void printConfig(Logger log, String title, Object logs) {
         String sb = "\n" + LINE_FIRST + "\n" +
                 "╠═════ " + StringUtils.trim(title) + " ═════\n" +
-                JacksonMapper.getInstance().toJsonPretty(props) + "\n" +
+                JacksonMapper.getInstance().toJsonPretty(logs) + "\n" +
                 LINE_LAST;
         log.info(sb);
     }
 
-    public static void printConfig(Logger log, String title, String[] props) {
-        List<String> lines = Arrays.stream(props).map(line -> LINE_START + line).collect(Collectors.toList());
+    public static void printConfig(Logger log, String title, String[] logs) {
+        List<String> lines = Arrays.stream(logs).map(line -> LINE_START + line).collect(Collectors.toList());
         if (lines.isEmpty()) {
             lines.add(LINE_START);
         }
