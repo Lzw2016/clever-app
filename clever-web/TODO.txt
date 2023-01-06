@@ -27,6 +27,8 @@ CustomFilter
     🡓
     [600] MvcFilter(before | after | exception)
         🡓
+        HandlerInterceptor
+        🡓
         before (可提前响应请求)
         🡓
         invokeMethod (自定义MVC: 响应请求)

@@ -77,6 +77,18 @@ web:
       - hostedPath: '/static/'
         location: 'classpath:static/'
         cachePeriod: 30d
+  mvc:
+    path: '/api/'
+    httpMethod: [ 'POST', 'GET' ]
+    allowPackages: [  ]
+    hotReload:
+      enable: true
+      interval: 1s
+      excludePackages: []
+      locations:
+        - './clever-boot/out/production/classes'
+        - './clever-boot/build/classes/java'
+        - './clever-boot/build/classes/kotlin'
 
 mybatis:
   enable: true

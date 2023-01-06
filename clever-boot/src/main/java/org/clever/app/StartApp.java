@@ -19,10 +19,7 @@ import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
 import org.clever.web.WebServerBootstrap;
-import org.clever.web.filter.CorsFilter;
-import org.clever.web.filter.EchoFilter;
-import org.clever.web.filter.ExceptionHandlerFilter;
-import org.clever.web.filter.StaticResourceFilter;
+import org.clever.web.filter.*;
 import org.clever.web.plugin.ExceptionHandlerPlugin;
 
 import java.time.Duration;
@@ -65,6 +62,7 @@ public class StartApp {
                 .addFilter(EchoFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
                 .addFilter(CorsFilter.create(environment), "/*", "CorsFilter", filterOrder.incrL1())
                 .addFilter(StaticResourceFilter.create(rootPath, environment), "/*", "StaticResourceFilter", filterOrder.incrL1())
+                .addFilter(MvcFilter.create(rootPath, environment), "/*", "MvcFilter", filterOrder.incrL1())
                 .addFilter(ctx -> {
                     log.info("### Filter_1_之前");
                     ctx.next();

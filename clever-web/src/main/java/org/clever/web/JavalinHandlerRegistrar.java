@@ -32,7 +32,7 @@ public class JavalinHandlerRegistrar {
      */
     private final List<OrderItem<Handler>> afterHandler = new LinkedList<>();
     /**
-     * WebSocket  before 拦截器 {@code Map<path, List<Handler>}
+     * WebSocket before 拦截器 {@code Map<path, List<Handler>}
      */
     private final List<OrderItem<Consumer<WsConfig>>> wsBeforeHandler = new LinkedList<>();
     /**

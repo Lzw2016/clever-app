@@ -104,9 +104,6 @@ public class WebServerBootstrap {
         javalin.events(javalinEventListenerRegistrar::init);
         // 注册自定义 Handler
         handlerRegistrar.init(javalin);
-        // 注入MVC处理功能
-        WebConfig.MvcConfig mvc = webConfig.getMvc();
-        Optional.of(mvc).orElse(new WebConfig.MvcConfig()).apply(javalin);
         // 自定义配置
         if (javalinCallback != null) {
             javalinCallback.accept(javalin);

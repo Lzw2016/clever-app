@@ -1,7 +1,6 @@
-package org.clever.web.support.mvc.handler;
+package org.clever.web.support.mvc;
 
 import org.clever.core.Ordered;
-import org.clever.web.support.mvc.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

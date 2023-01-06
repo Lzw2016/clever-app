@@ -1,7 +1,6 @@
 package org.clever.web.support.mvc;
 
 import org.clever.core.Ordered;
-import org.clever.web.support.mvc.handler.HandlerContext;
 
 /**
  * 请求处理拦截器
@@ -13,29 +12,27 @@ public interface HandlerInterceptor extends Ordered {
     /**
      * 拦截器前置处理
      *
-     * @param context 处理器上下文
+     * @param context 上下文
      * @return true: 继续执行下面的拦截器逻辑, false: 中断执行
      */
-    default boolean preHandle(HandlerContext context) throws Exception {
+    default boolean beforeHandle(HandlerContext context) throws Exception {
         return true;
     }
 
     /**
      * 拦截器后置处理
      *
-     * @param context 处理器上下文
-     * @param result  Handler Method的返回值
+     * @param context 上下文
      */
-    default void postHandle(HandlerContext context, Object result) throws Exception {
+    default void afterHandle(HandlerContext.After context) throws Exception {
     }
 
     /**
-     * 异常时的处理(执行 preHandle、handlerMethod、postHandle 时的异常处理)
+     * beforeHandle、handlerMethod、afterHandle 执行完成后的回调(支持后面Handler的异常处理)
      *
-     * @param context 处理器上下文
-     * @param ex      异常对象
+     * @param context 上下文
      */
-    default void onException(HandlerContext context, Exception ex) throws Exception {
+    default void finallyHandle(HandlerContext.Finally context) throws Exception {
     }
 
     /**

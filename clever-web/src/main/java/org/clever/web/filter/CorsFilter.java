@@ -28,7 +28,6 @@ import java.util.List;
 @Slf4j
 public class CorsFilter implements FilterRegistrar.FilterFuc {
     public static CorsFilter create(CorsConfig corsConfig) {
-        Assert.notNull(corsConfig, "参数 corsConfig 不能为 null");
         return new CorsFilter(corsConfig);
     }
 
@@ -37,7 +36,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
         AppContextHolder.registerBean("corsConfig", corsConfig, true);
         BannerUtils.printConfig(log, "cors浏览器跨域配置",
                 new String[]{
-                        "cors",
+                        "cors:",
                         "  enable               : " + corsConfig.isEnable(),
                         "  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "),
                         "  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "),
@@ -59,6 +58,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
     private final CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
     public CorsFilter(CorsConfig corsConfig) {
+        Assert.notNull(corsConfig, "参数 corsConfig 不能为 null");
         this.corsConfig = corsConfig;
     }
 
