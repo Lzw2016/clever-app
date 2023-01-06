@@ -1,4 +1,4 @@
-package org.clever.web.servlet.resource;
+package org.clever.web.support.resource;
 
 import org.clever.core.io.Resource;
 import org.clever.web.http.HttpHeaders;

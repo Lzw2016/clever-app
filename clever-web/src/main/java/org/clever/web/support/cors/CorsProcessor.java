@@ -1,4 +1,4 @@
-package org.clever.web.cors;
+package org.clever.web.support.cors;
 
 import org.clever.web.config.CorsConfig;
 

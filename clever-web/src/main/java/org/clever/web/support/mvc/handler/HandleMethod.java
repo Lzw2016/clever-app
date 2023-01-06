@@ -1,4 +1,4 @@
-package org.clever.web.handler;
+package org.clever.web.support.mvc.handler;
 
 import lombok.Data;
 import org.clever.core.MethodParameter;

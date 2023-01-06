@@ -1,4 +1,4 @@
-package org.clever.web.http;
+package org.clever.web.support.resource;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +12,7 @@ import org.clever.util.CollectionUtils;
 import org.clever.util.ResourceUtils;
 import org.clever.util.StringUtils;
 import org.clever.web.config.StaticResourceConfig;
-import org.clever.web.servlet.resource.HttpResource;
+import org.clever.web.http.*;
 import org.clever.web.utils.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;

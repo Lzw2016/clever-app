@@ -1,7 +1,7 @@
-package org.clever.web.intercept;
+package org.clever.web.support.mvc.intercept;
 
 import org.clever.core.Ordered;
-import org.clever.web.handler.HandlerContext;
+import org.clever.web.support.mvc.handler.HandlerContext;
 
 /**
  * 请求处理拦截器

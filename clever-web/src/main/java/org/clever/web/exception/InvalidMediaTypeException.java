@@ -1,6 +1,7 @@
-package org.clever.web.http;
+package org.clever.web.exception;
 
 import org.clever.util.InvalidMimeTypeException;
+import org.clever.web.http.MediaType;
 
 /**
  * 如果遇到无效的媒体类型规范字符串，则从 {@link MediaType#parseMediaType(String)} 抛出异常。
@@ -25,7 +26,7 @@ public class InvalidMediaTypeException extends IllegalArgumentException {
     /**
      * 允许包装 {@link InvalidMimeTypeException} 的构造函数
      */
-    InvalidMediaTypeException(InvalidMimeTypeException ex) {
+    public InvalidMediaTypeException(InvalidMimeTypeException ex) {
         super(ex.getMessage(), ex);
         this.mediaType = ex.getMimeType();
     }

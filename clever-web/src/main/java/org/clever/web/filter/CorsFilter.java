@@ -12,10 +12,10 @@ import org.clever.util.Assert;
 import org.clever.util.PathMatcher;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.CorsConfig;
-import org.clever.web.cors.CorsProcessor;
-import org.clever.web.cors.CorsUtils;
-import org.clever.web.cors.DefaultCorsProcessor;
 import org.clever.web.http.HttpStatus;
+import org.clever.web.support.cors.CorsProcessor;
+import org.clever.web.support.cors.DefaultCorsProcessor;
+import org.clever.web.utils.CorsUtils;
 
 import javax.servlet.ServletException;
 import java.io.IOException;

@@ -1,6 +1,7 @@
 package org.clever.web.http;
 
 import org.clever.util.*;
+import org.clever.web.exception.InvalidMediaTypeException;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;

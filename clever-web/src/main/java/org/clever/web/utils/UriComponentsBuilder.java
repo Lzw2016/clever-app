@@ -103,7 +103,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
         this.charset = other.charset;
     }
 
-
     // Factory methods
 
     /**
@@ -317,11 +316,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
      * @throws IllegalArgumentException 如果任何组件包含本应编码的非法字符
      */
     public UriComponents build(boolean encoded) {
-        return buildInternal(
-                encoded ?
-                        EncodingHint.FULLY_ENCODED :
-                        (this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE)
-        );
+        return buildInternal(encoded ? EncodingHint.FULLY_ENCODED : (this.encodeTemplate ? EncodingHint.ENCODE_TEMPLATE : EncodingHint.NONE));
     }
 
     private UriComponents buildInternal(EncodingHint hint) {
@@ -678,6 +673,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
     /**
      * Object的{@code clone()}方法的公共声明。委托给 {@link #cloneBuilder()}
      */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Object clone() {
         return cloneBuilder();

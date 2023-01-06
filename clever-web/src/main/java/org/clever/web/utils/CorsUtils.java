@@ -1,10 +1,8 @@
-package org.clever.web.cors;
+package org.clever.web.utils;
 
 import org.clever.util.ObjectUtils;
 import org.clever.web.http.HttpHeaders;
 import org.clever.web.http.HttpMethod;
-import org.clever.web.utils.UriComponents;
-import org.clever.web.utils.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 

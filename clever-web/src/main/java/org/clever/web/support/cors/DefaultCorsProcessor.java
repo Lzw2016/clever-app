@@ -1,4 +1,4 @@
-package org.clever.web.cors;
+package org.clever.web.support.cors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.clever.util.CollectionUtils;
@@ -7,6 +7,7 @@ import org.clever.web.config.CorsConfig;
 import org.clever.web.http.HttpHeaders;
 import org.clever.web.http.HttpMethod;
 import org.clever.web.http.HttpStatus;
+import org.clever.web.utils.CorsUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

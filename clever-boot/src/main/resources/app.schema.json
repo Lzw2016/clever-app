@@ -156,6 +156,15 @@
         },
         "misc": {
           "$ref": "#/definitions/webDefinition/definitions/miscDefinition"
+        },
+        "echo": {
+          "$ref": "#/definitions/webDefinition/definitions/echoDefinition"
+        },
+        "cors": {
+          "$ref": "#/definitions/webDefinition/definitions/corsDefinition"
+        },
+        "resources": {
+          "$ref": "#/definitions/webDefinition/definitions/resourcesDefinition"
         }
       },
       "definitions": {
@@ -343,6 +352,27 @@
               "type": "boolean",
               "description": "是否输出 Javalin Banner 日志"
             }
+          }
+        },
+        "echoDefinition": {
+          "type": "object",
+          "description": "",
+          "properties": {
+            "TODO": {}
+          }
+        },
+        "corsDefinition": {
+          "type": "object",
+          "description": "",
+          "properties": {
+            "TODO": {}
+          }
+        },
+        "resourcesDefinition": {
+          "type": "object",
+          "description": "",
+          "properties": {
+            "TODO": {}
           }
         }
       }

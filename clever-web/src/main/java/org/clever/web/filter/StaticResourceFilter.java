@@ -15,7 +15,11 @@ import org.clever.util.StreamUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.StaticResourceConfig;
 import org.clever.web.exception.GenericHttpException;
-import org.clever.web.http.*;
+import org.clever.web.http.HttpHeaders;
+import org.clever.web.http.HttpRange;
+import org.clever.web.http.HttpStatus;
+import org.clever.web.http.MediaType;
+import org.clever.web.support.resource.StaticResourceHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
