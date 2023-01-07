@@ -180,7 +180,7 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
         if (goOn) {
             try {
                 returnValue = invokeHandlerMethod(handlerContext);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 exception = e;
             }
         }
