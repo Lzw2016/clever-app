@@ -19,5 +19,5 @@ public interface HandlerMethodResolver {
      * @param response  响应对象
      * @param mvcConfig mvc配置
      */
-    HandlerMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, MvcConfig mvcConfig);
+    HandlerMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, MvcConfig mvcConfig) throws Exception;
 }

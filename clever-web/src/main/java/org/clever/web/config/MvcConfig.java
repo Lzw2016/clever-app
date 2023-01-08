@@ -20,9 +20,13 @@ public class MvcConfig {
     public static final String PREFIX = WebConfig.PREFIX + ".mvc";
 
     /**
+     * 是否启用mvc功能
+     */
+    private boolean enable = true;
+    /**
      * mvc接口前缀
      */
-    private String path = "/api/";
+    private String path = "/";
     /**
      * mvc支持的Http Method
      */
@@ -36,6 +40,10 @@ public class MvcConfig {
         add(HttpMethod.TRACE);
         add(HttpMethod.OPTIONS);
     }};
+    /**
+     * mvc映射的 Method 的 package 默认前缀
+     */
+    private String packagePrefix = "";
     /**
      * 允许mvc调用的package前缀
      */

@@ -69,12 +69,13 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
             return;
         }
+        final String reqPath = ctx.req.getPathInfo();
         // 当前请求路径是否支持跨域
         boolean match = false;
         List<String> pathPattern = corsConfig.getPathPattern();
         if (pathPattern != null && !pathPattern.isEmpty()) {
             for (String path : pathPattern) {
-                if (MATCHER.match(path, ctx.req.getRequestURI())) {
+                if (MATCHER.match(path, reqPath)) {
                     match = true;
                     break;
                 }

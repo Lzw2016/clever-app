@@ -39,7 +39,7 @@ public class HotReloadClassLoader extends ClassLoader {
                 Reference<?> phantomReference = REFERENCE_QUEUE.poll();
                 if (phantomReference != null) {
                     Long serialNumber = PHANTOM_REFERENCE_MAP.remove(phantomReference);
-                    log.info("[#{}]InnerClassLoader被GC回收，当前size={}", serialNumber, INNER_CLASS_LOADER_COUNT.decrementAndGet());
+                    log.debug("[#{}]InnerClassLoader被GC回收，当前size={}", serialNumber, INNER_CLASS_LOADER_COUNT.decrementAndGet());
                 }
                 try {
                     // noinspection BusyWait
@@ -180,7 +180,7 @@ public class HotReloadClassLoader extends ClassLoader {
             PHANTOM_REFERENCE_MAP.put(new PhantomReference<>(this, REFERENCE_QUEUE), serialNumber);
             // InnerClassLoader对象计数
             final Integer count = INNER_CLASS_LOADER_COUNT.incrementAndGet();
-            log.info("[#{}]InnerClassLoader被创建 size={},", serialNumber, count);
+            log.debug("[#{}]InnerClassLoader被创建 size={},", serialNumber, count);
         }
 
         @Override
@@ -217,7 +217,7 @@ public class HotReloadClassLoader extends ClassLoader {
 
         @Override
         protected Class<?> findClass(String name) throws ClassNotFoundException {
-            // log.info("findClass -> {}", name);
+            // log.debug("findClass -> {}", name);
             byte[] bytes = classCache.get(name);
             if (bytes == null) {
                 File clazzFile = null;

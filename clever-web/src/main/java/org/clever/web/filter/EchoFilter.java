@@ -60,11 +60,12 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
             return;
         }
+        final String reqPath = ctx.req.getPathInfo();
         // 在 ignore 出现的路径，忽略掉
         List<String> ignore = echoConfig.getIgnorePaths();
         if (ignore != null && !ignore.isEmpty()) {
             for (String path : ignore) {
-                if (MATCHER.match(path, ctx.req.getRequestURI())) {
+                if (MATCHER.match(path, reqPath)) {
                     ctx.next();
                     return;
                 }

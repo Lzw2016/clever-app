@@ -80,15 +80,16 @@ web:
   mvc:
     path: '/api/'
     httpMethod: [ 'POST', 'GET' ]
-    allowPackages: [  ]
+    packagePrefix: 'org.clever.app.'
+    allowPackages: [ ]
     hotReload:
       enable: true
       interval: 1s
-      excludePackages: []
+      excludePackages: [ ]
       locations:
         - './clever-boot/out/production/classes'
-        - './clever-boot/build/classes/java'
-        - './clever-boot/build/classes/kotlin'
+        - './clever-boot/build/classes/java/main'
+        - './clever-boot/build/classes/kotlin/main'
 
 mybatis:
   enable: true

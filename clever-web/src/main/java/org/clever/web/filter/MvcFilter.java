@@ -14,6 +14,7 @@ import org.clever.util.Assert;
 import org.clever.util.ObjectUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.MvcConfig;
+import org.clever.web.http.HttpMethod;
 import org.clever.web.support.mvc.*;
 
 import javax.servlet.ServletException;
@@ -39,9 +40,11 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
         AppContextHolder.registerBean("mvcConfig", mvcConfig, true);
         List<String> logs = new ArrayList<>();
         logs.add("mvc: ");
+        logs.add("  enable           : " + mvcConfig.isEnable());
         logs.add("  path             : " + mvcConfig.getPath());
         logs.add("  httpMethod       : " + StringUtils.join(mvcConfig.getHttpMethod(), " | "));
         logs.add("  allowPackages    : " + StringUtils.join(mvcConfig.getAllowPackages(), " | "));
+        logs.add("  packagePrefix    : " + mvcConfig.getPackagePrefix());
         logs.add("  hotReload: ");
         logs.add("    enable         : " + hotReload.isEnable());
         logs.add("    interval       : " + hotReload.getInterval().toMillis() + "ms");
@@ -71,26 +74,39 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
     private final MvcConfig mvcConfig;
     private final Map<String, String> locationMap;
     @Getter
-    private HandlerMethodResolver handlerMethodResolver; // TODO 初始默认值
+    private HandlerMethodResolver handlerMethodResolver;
     private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
     private final List<HandlerInterceptor> interceptors = new ArrayList<>();
 
     public MvcFilter(String rootPath, MvcConfig mvcConfig) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        locationMap = Collections.unmodifiableMap(fixedLocations(rootPath, mvcConfig));
+        this.locationMap = Collections.unmodifiableMap(fixedLocations(rootPath, mvcConfig));
         this.mvcConfig = mvcConfig;
+        this.handlerMethodResolver = new DefaultHandlerMethodResolver(mvcConfig.getHotReload());
     }
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
-        // 获取 HandlerMethod
-        final HandlerMethod handlerMethod = handlerMethodResolver.getHandleMethod(ctx.req, ctx.res, mvcConfig);
-        if (handlerMethod == null) {
+        // 是否启用
+        if (!mvcConfig.isEnable()) {
+            ctx.next();
+            return;
+        }
+        // 当前请求是否满足mvc拦截配置
+        final String reqPath = ctx.req.getPathInfo();
+        final HttpMethod httpMethod = HttpMethod.resolve(ctx.req.getMethod());
+        if (!reqPath.startsWith(mvcConfig.getPath()) || !mvcConfig.getHttpMethod().contains(httpMethod)) {
             ctx.next();
             return;
         }
         try {
+            // 获取 HandlerMethod
+            final HandlerMethod handlerMethod = handlerMethodResolver.getHandleMethod(ctx.req, ctx.res, mvcConfig);
+            if (handlerMethod == null) {
+                ctx.next();
+                return;
+            }
             // 解析 HandlerMethod args
             final Object[] args = getMethodArgumentValues(ctx, handlerMethod);
             // 创建 HandlerContext
