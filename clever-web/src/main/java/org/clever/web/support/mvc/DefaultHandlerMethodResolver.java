@@ -13,6 +13,7 @@ import org.clever.web.config.MvcConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -22,13 +23,14 @@ import java.util.Set;
 public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
     private final HotReloadClassLoader hotReloadClassLoader;
 
-    public DefaultHandlerMethodResolver(MvcConfig.HotReload hotReload) {
+    public DefaultHandlerMethodResolver(MvcConfig.HotReload hotReload, Map<String, String> locationMap) {
         Assert.notNull(hotReload, "参数 hotReload 不能为 null");
+        Assert.notNull(locationMap, "参数 locationMap 不能为 null");
         if (hotReload.isEnable()) {
             hotReloadClassLoader = new HotReloadClassLoader(
                     Thread.currentThread().getContextClassLoader(),
 //                    new Launcher().getClassLoader(),
-                    hotReload.getLocations().toArray(new String[0])
+                    hotReload.getLocations().stream().map(location -> locationMap.getOrDefault(location, location)).toArray(String[]::new)
             );
             // 监听 class 文件变化
             DaemonExecutor daemonWatch = new DaemonExecutor("hot-reload-class");
