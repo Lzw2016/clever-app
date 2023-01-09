@@ -73,7 +73,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         if (!allowInvoke) {
             return null;
         }
-        // 加载 handlerClass 以及 method
+        // 加载 handlerClass 以及 method TODO 使用缓存
         final Class<?> handlerClass = loadClass(className, mvcConfig.getHotReload().getExcludePackages());
         if (handlerClass == null) {
             return null;
