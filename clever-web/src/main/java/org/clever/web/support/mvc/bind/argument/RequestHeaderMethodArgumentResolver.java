@@ -56,10 +56,10 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
         throw new MissingRequestHeaderException(name, parameter);
     }
 
-//    @Override
-//    protected void handleMissingValueAfterConversion(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
-//        throw new MissingRequestHeaderException(name, parameter, true);
-//    }
+    @Override
+    protected void handleMissingValueAfterConversion(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
+        throw new MissingRequestHeaderException(name, parameter, true);
+    }
 
     private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
         private RequestHeaderNamedValueInfo(RequestHeader annotation) {

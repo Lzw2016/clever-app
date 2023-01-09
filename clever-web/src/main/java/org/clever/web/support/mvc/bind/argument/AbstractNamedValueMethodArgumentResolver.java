@@ -45,7 +45,17 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
             arg = namedValueInfo.defaultValue;
         }
         // TODO 数据类型转换???
-
+//        try {
+//
+//        } catch (ConversionNotSupportedException e) {
+//            throw new MethodArgumentConversionNotSupportedException(arg, e.getRequiredType(), namedValueInfo.name, parameter, e.getCause());
+//        } catch (TypeMismatchException e) {
+//            throw new MethodArgumentTypeMismatchException(arg, e.getRequiredType(), namedValueInfo.name, parameter, e.getCause());
+//        }
+        // 传入参数值转换后检查空值
+        if (arg == null && namedValueInfo.defaultValue == null && namedValueInfo.required && !nestedParameter.isOptional()) {
+            handleMissingValueAfterConversion(namedValueInfo.name, nestedParameter, request);
+        }
         // 解析值的后置处理
         handleResolvedValue(arg, namedValueInfo.name, parameter, request);
         return arg;
@@ -106,6 +116,17 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
                         + "' for method parameter of type "
                         + parameter.getNestedParameterType().getSimpleName()
         );
+    }
+
+    /**
+     * 当命名值存在但在转换后变为 {@code null} 时调用。
+     *
+     * @param name      值的名称
+     * @param parameter 方法参数
+     * @param request   当前请求
+     */
+    protected void handleMissingValueAfterConversion(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
+        handleMissingValue(name, parameter, request);
     }
 
     /**
