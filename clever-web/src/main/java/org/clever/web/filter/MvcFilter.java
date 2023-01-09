@@ -81,14 +81,14 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
             return;
         }
-        // 当前请求是否满足mvc拦截配置
-        final String reqPath = ctx.req.getPathInfo();
-        final HttpMethod httpMethod = HttpMethod.resolve(ctx.req.getMethod());
-        if (!reqPath.startsWith(mvcConfig.getPath()) || !mvcConfig.getHttpMethod().contains(httpMethod)) {
-            ctx.next();
-            return;
-        }
         try {
+            // 当前请求是否满足mvc拦截配置
+            final String reqPath = ctx.req.getPathInfo();
+            final HttpMethod httpMethod = HttpMethod.resolve(ctx.req.getMethod());
+            if (!reqPath.startsWith(mvcConfig.getPath()) || !mvcConfig.getHttpMethod().contains(httpMethod)) {
+                ctx.next();
+                return;
+            }
             // 获取 HandlerMethod
             final HandlerMethod handlerMethod = handlerMethodResolver.getHandleMethod(ctx.req, ctx.res, mvcConfig);
             if (handlerMethod == null) {

@@ -39,9 +39,6 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         } else {
             hotReloadClassLoader = null;
         }
-        // TODO
-        //ComposeMyBatisMapperSql
-        //HotReloadClassLoader
     }
 
     @Override
