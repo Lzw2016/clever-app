@@ -15,7 +15,12 @@ import org.clever.util.ObjectUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.http.HttpMethod;
-import org.clever.web.support.mvc.*;
+import org.clever.web.support.mvc.HandlerContext;
+import org.clever.web.support.mvc.HandlerInterceptor;
+import org.clever.web.support.mvc.bind.HandlerMethod;
+import org.clever.web.support.mvc.bind.argument.HandlerMethodArgumentResolver;
+import org.clever.web.support.mvc.bind.method.DefaultHandlerMethodResolver;
+import org.clever.web.support.mvc.bind.method.HandlerMethodResolver;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -69,9 +74,11 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
     public MvcFilter(String rootPath, MvcConfig mvcConfig) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        this.locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, mvcConfig.getHotReload().getLocations()));
+        MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
+        mvcConfig.setHotReload(hotReload);
+        this.locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations()));
         this.mvcConfig = mvcConfig;
-        this.handlerMethodResolver = new DefaultHandlerMethodResolver(mvcConfig.getHotReload(), this.locationMap);
+        this.handlerMethodResolver = new DefaultHandlerMethodResolver(hotReload, this.locationMap);
     }
 
     @Override

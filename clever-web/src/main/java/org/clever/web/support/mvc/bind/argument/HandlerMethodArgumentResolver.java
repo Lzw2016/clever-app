@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc;
+package org.clever.web.support.mvc.bind.argument;
 
 import org.clever.core.MethodParameter;
 import org.clever.core.Ordered;
