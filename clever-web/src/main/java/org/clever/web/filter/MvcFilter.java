@@ -33,10 +33,9 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
 
     public static MvcFilter create(String rootPath, Environment environment) {
         MvcConfig mvcConfig = Binder.get(environment).bind(MvcConfig.PREFIX, MvcConfig.class).orElseGet(MvcConfig::new);
-        fixedLocations(rootPath, mvcConfig);
         MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
         mvcConfig.setHotReload(hotReload);
-        Map<String, String> locationMap = fixedLocations(rootPath, mvcConfig);
+        Map<String, String> locationMap = ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations());
         AppContextHolder.registerBean("mvcConfig", mvcConfig, true);
         List<String> logs = new ArrayList<>();
         logs.add("mvc: ");
@@ -54,19 +53,6 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
         return create(rootPath, mvcConfig);
     }
 
-    private static Map<String, String> fixedLocations(String rootPath, MvcConfig mvcConfig) {
-        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
-        Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        Map<String, String> locationMap = new LinkedHashMap<>();
-        MvcConfig.HotReload hotReload = mvcConfig.getHotReload();
-        if (hotReload != null && hotReload.getLocations() != null) {
-            for (String location : hotReload.getLocations()) {
-                locationMap.put(location, ResourcePathUtils.getAbsolutePath(rootPath, location));
-            }
-        }
-        return locationMap;
-    }
-
     private static final Object[] EMPTY_ARGS = new Object[0];
 
     // 保存 JavalinConfig.inner.appAttributes
@@ -80,7 +66,7 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
     public MvcFilter(String rootPath, MvcConfig mvcConfig) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        Map<String, String> locationMap = Collections.unmodifiableMap(fixedLocations(rootPath, mvcConfig));
+        Map<String, String> locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, mvcConfig.getHotReload().getLocations()));
         this.mvcConfig = mvcConfig;
         this.handlerMethodResolver = new DefaultHandlerMethodResolver(mvcConfig.getHotReload(), locationMap);
     }

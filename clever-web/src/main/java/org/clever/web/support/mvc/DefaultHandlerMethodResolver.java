@@ -117,6 +117,6 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
      * 监听class文件变化
      */
     protected void hotReloadClass() {
-        // TODO 监听class文件变化
+        // TODO 监听class文件变化 & 编译任务
     }
 }

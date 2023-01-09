@@ -7,6 +7,10 @@ import org.clever.core.io.DefaultResourceLoader;
 import org.clever.core.io.Resource;
 import org.clever.util.ResourceUtils;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * 作者：lizw <br/>
  * 创建时间：2022/12/23 22:02 <br/>
@@ -77,6 +81,23 @@ public class ResourcePathUtils {
     public static String getAbsolutePath(String basePath, String relativePath) {
         Resource resource = getResource(basePath, relativePath);
         return getAbsolutePath(resource);
+    }
+
+    /**
+     * 返回相对于 {@code basePath} 的资源的绝对路径
+     *
+     * @param basePath      基础路径
+     * @param relativePaths 相对路径
+     * @return {@code Map<relativePath, absolutePath>}
+     */
+    public static Map<String, String> getAbsolutePath(String basePath, Collection<String> relativePaths) {
+        Map<String, String> locationMap = new LinkedHashMap<>();
+        if (relativePaths != null) {
+            for (String relativePath : relativePaths) {
+                locationMap.put(relativePath, ResourcePathUtils.getAbsolutePath(basePath, relativePath));
+            }
+        }
+        return locationMap;
     }
 
     /**
