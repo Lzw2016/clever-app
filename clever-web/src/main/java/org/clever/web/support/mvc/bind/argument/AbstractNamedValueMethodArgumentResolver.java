@@ -62,8 +62,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
     protected abstract Object resolveValue(String name, MethodParameter parameter, HttpServletRequest request) throws Exception;
 
     /**
-     * Create the {@link NamedValueInfo} object for the given method parameter. Implementations typically
-     * retrieve the method annotation by means of {@link MethodParameter#getParameterAnnotation(Class)}.
+     * 为给定的方法参数创建 {@link NamedValueInfo} 对象。
+     * 实现通常通过 {@link MethodParameter#getParameterAnnotation(Class)} 检索方法注释。
      *
      * @param parameter the method parameter
      * @return the named value information
@@ -127,7 +127,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
     }
 
     /**
-     * Obtain the named value for the given method parameter.
+     * 获取给定方法参数的命名值
      */
     private NamedValueInfo getNamedValueInfo(MethodParameter parameter) {
         NamedValueInfo namedValueInfo = this.namedValueInfoCache.get(parameter);
@@ -140,7 +140,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
     }
 
     /**
-     * Create a new NamedValueInfo based on the given NamedValueInfo with sanitized values.
+     * 基于给定的 NamedValueInfo 和经过清理的值创建一个新的 NamedValueInfo
      */
     private NamedValueInfo updateNamedValueInfo(MethodParameter parameter, NamedValueInfo info) {
         String name = info.name;
