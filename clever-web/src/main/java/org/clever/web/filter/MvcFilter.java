@@ -57,7 +57,10 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
 
     // 保存 JavalinConfig.inner.appAttributes
 //    private Map<String, Object> appAttributes = Collections.emptyMap();
+    @Getter
     private final MvcConfig mvcConfig;
+    @Getter
+    private final Map<String, String> locationMap;
     @Getter
     private HandlerMethodResolver handlerMethodResolver;
     private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
@@ -66,9 +69,9 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
     public MvcFilter(String rootPath, MvcConfig mvcConfig) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        Map<String, String> locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, mvcConfig.getHotReload().getLocations()));
+        this.locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, mvcConfig.getHotReload().getLocations()));
         this.mvcConfig = mvcConfig;
-        this.handlerMethodResolver = new DefaultHandlerMethodResolver(mvcConfig.getHotReload(), locationMap);
+        this.handlerMethodResolver = new DefaultHandlerMethodResolver(mvcConfig.getHotReload(), this.locationMap);
     }
 
     @Override
