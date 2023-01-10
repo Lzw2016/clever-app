@@ -13,21 +13,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Resolves method arguments annotated with {@code @RequestHeader} except for
- * {@link Map} arguments. See {@link RequestHeaderMapMethodArgumentResolver} for
- * details on {@link Map} arguments annotated with {@code @RequestHeader}.
- *
- * <p>An {@code @RequestHeader} is a named value resolved from a request header.
- * It has a required flag and a default value to fall back on when the request
- * header does not exist.
- *
- * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved
- * request header values that don't yet match the method parameter type.
+ * 解析使用 {@code @RequestHeader} 注释的方法参数，{@link Map} 参数除外。
+ * 有关使用 {@code @RequestHeader} 注释的 {@link Map} 参数的详细信息，请参阅 {@link RequestHeaderMapMethodArgumentResolver}。
+ * <p>{@code @RequestHeader} 是从请求标头解析的命名值。
+ * 当请求标头不存在时，它有一个必需的标志和一个默认值可以回退。
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/01/09 21:49 <br/>
  */
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+    public RequestHeaderMethodArgumentResolver() {
+        super();
+    }
+
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
         return (parameter.hasParameterAnnotation(RequestHeader.class) && !Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));

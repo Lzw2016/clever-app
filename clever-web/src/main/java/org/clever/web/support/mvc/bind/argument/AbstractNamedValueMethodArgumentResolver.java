@@ -1,8 +1,15 @@
 package org.clever.web.support.mvc.bind.argument;
 
+import org.clever.beans.ConversionNotSupportedException;
+import org.clever.beans.SimpleTypeConverter;
+import org.clever.beans.TypeMismatchException;
 import org.clever.core.MethodParameter;
+import org.clever.web.exception.MethodArgumentConversionNotSupportedException;
+import org.clever.web.exception.MethodArgumentTypeMismatchException;
 import org.clever.web.exception.ServletRequestBindingException;
 import org.clever.web.support.mvc.bind.annotation.ValueConstants;
+import org.clever.web.support.mvc.format.DateTimeFormatters;
+import org.clever.web.support.mvc.format.WebConversionService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +33,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * 创建时间：2023/01/04 22:28 <br/>
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
-    private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
+    public static WebConversionService CONVERSION = new WebConversionService(
+            new DateTimeFormatters().dateFormat("yyyy-MM-dd")
+                    .timeFormat("HH:mm:ss")
+                    .dateTimeFormat("yyyy-MM-dd HH:mm:ss")
+    );
+    protected final SimpleTypeConverter typeConverter;
+    protected final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
+
+    protected AbstractNamedValueMethodArgumentResolver() {
+        this.typeConverter = new SimpleTypeConverter();
+        this.typeConverter.setConversionService(CONVERSION);
+    }
 
     @Override
     public Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
@@ -44,14 +62,14 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
         } else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
             arg = namedValueInfo.defaultValue;
         }
-        // TODO 数据类型转换???
-//        try {
-//
-//        } catch (ConversionNotSupportedException e) {
-//            throw new MethodArgumentConversionNotSupportedException(arg, e.getRequiredType(), namedValueInfo.name, parameter, e.getCause());
-//        } catch (TypeMismatchException e) {
-//            throw new MethodArgumentTypeMismatchException(arg, e.getRequiredType(), namedValueInfo.name, parameter, e.getCause());
-//        }
+        // 数据类型转换
+        try {
+            arg = typeConverter.convertIfNecessary(arg, parameter.getParameterType(), parameter);
+        } catch (ConversionNotSupportedException e) {
+            throw new MethodArgumentConversionNotSupportedException(arg, e.getRequiredType(), namedValueInfo.name, parameter, e.getCause());
+        } catch (TypeMismatchException e) {
+            throw new MethodArgumentTypeMismatchException(arg, e.getRequiredType(), namedValueInfo.name, parameter, e.getCause());
+        }
         // 传入参数值转换后检查空值
         if (arg == null && namedValueInfo.defaultValue == null && namedValueInfo.required && !nestedParameter.isOptional()) {
             handleMissingValueAfterConversion(namedValueInfo.name, nestedParameter, request);
