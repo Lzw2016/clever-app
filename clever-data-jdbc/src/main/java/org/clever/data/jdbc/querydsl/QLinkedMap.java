@@ -1,6 +1,5 @@
 package org.clever.data.jdbc.querydsl;
 
-import com.google.common.collect.ImmutableList;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.FactoryExpressionBase;
 import com.querydsl.core.types.Path;
@@ -45,7 +44,7 @@ public class QLinkedMap extends FactoryExpressionBase<LinkedHashMap<String, ?>> 
 
     @Override
     public List<Expression<?>> getArgs() {
-        return ImmutableList.copyOf(args);
+        return Collections.unmodifiableList(args);
     }
 
     @Nullable

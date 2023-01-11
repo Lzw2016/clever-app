@@ -1,6 +1,5 @@
 package org.clever.data.jdbc.querydsl;
 
-import com.google.common.collect.ImmutableList;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.FactoryExpressionBase;
 import com.querydsl.core.types.Visitor;
@@ -8,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,7 +26,7 @@ public class QArray extends FactoryExpressionBase<Object[]> {
 
     @Override
     public List<Expression<?>> getArgs() {
-        return ImmutableList.copyOf(args);
+        return Collections.unmodifiableList(args);
     }
 
     @Nullable
