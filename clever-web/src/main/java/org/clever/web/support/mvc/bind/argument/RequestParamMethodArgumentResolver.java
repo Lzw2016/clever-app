@@ -2,10 +2,7 @@ package org.clever.web.support.mvc.bind.argument;
 
 import org.clever.beans.BeanUtils;
 import org.clever.core.MethodParameter;
-import org.clever.core.convert.ConversionService;
-import org.clever.core.convert.TypeDescriptor;
 import org.clever.core.convert.converter.Converter;
-import org.clever.util.Assert;
 import org.clever.util.StringUtils;
 import org.clever.web.exception.MissingServletRequestParameterException;
 import org.clever.web.exception.MissingServletRequestPartException;
@@ -13,20 +10,15 @@ import org.clever.web.exception.MultipartException;
 import org.clever.web.http.multipart.MultipartFile;
 import org.clever.web.http.multipart.MultipartRequest;
 import org.clever.web.http.multipart.support.MultipartResolutionDelegate;
-import org.clever.web.spring.method.support.UriComponentsContributor;
 import org.clever.web.support.mvc.bind.annotation.RequestParam;
 import org.clever.web.support.mvc.bind.annotation.RequestPart;
 import org.clever.web.support.mvc.bind.annotation.ValueConstants;
-import org.clever.web.utils.UriComponentsBuilder;
 import org.clever.web.utils.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
 import java.beans.PropertyEditor;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * 解析使用 @{@link RequestParam} 注释的方法参数，
@@ -45,8 +37,7 @@ import java.util.Optional;
  *
  * @see RequestParamMapMethodArgumentResolver
  */
-public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver implements UriComponentsContributor {
-    private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
+public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
     private final boolean useDefaultResolution;
 
     /**
@@ -57,11 +48,6 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
     public RequestParamMethodArgumentResolver(boolean useDefaultResolution) {
         super();
         this.useDefaultResolution = useDefaultResolution;
-    }
-
-    @Override
-    public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
-        return supportsParameter(parameter);
     }
 
     /**
@@ -76,7 +62,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
      * </ul>
      */
     @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+    public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
         if (parameter.hasParameterAnnotation(RequestParam.class)) {
             if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
                 RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
@@ -147,46 +133,6 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
             }
         } else {
             throw new MissingServletRequestParameterException(name, parameter.getNestedParameterType().getSimpleName(), missingAfterConversion);
-        }
-    }
-
-    @Override
-    public void contributeMethodArgument(MethodParameter parameter, Object value, UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
-        Class<?> paramType = parameter.getNestedParameterType();
-        if (Map.class.isAssignableFrom(paramType) || MultipartFile.class == paramType || Part.class == paramType) {
-            return;
-        }
-        RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
-        String name = (requestParam != null && StringUtils.hasLength(requestParam.name()) ? requestParam.name() : parameter.getParameterName());
-        Assert.state(name != null, "Unresolvable parameter name");
-        parameter = parameter.nestedIfOptional();
-        if (value instanceof Optional) {
-            value = ((Optional<?>) value).orElse(null);
-        }
-        if (value == null) {
-            if (requestParam != null && (!requestParam.required() || !requestParam.defaultValue().equals(ValueConstants.DEFAULT_NONE))) {
-                return;
-            }
-            builder.queryParam(name);
-        } else if (value instanceof Collection) {
-            for (Object element : (Collection<?>) value) {
-                element = formatUriValue(conversionService, TypeDescriptor.nested(parameter, 1), element);
-                builder.queryParam(name, element);
-            }
-        } else {
-            builder.queryParam(name, formatUriValue(conversionService, new TypeDescriptor(parameter), value));
-        }
-    }
-
-    protected String formatUriValue(ConversionService cs, TypeDescriptor sourceType, Object value) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof String) {
-            return (String) value;
-        } else if (cs != null) {
-            return (String) cs.convert(value, sourceType, STRING_TYPE_DESCRIPTOR);
-        } else {
-            return value.toString();
         }
     }
 

@@ -2,7 +2,6 @@ package org.clever.web.support.mvc.bind.argument;
 
 import org.clever.core.MethodParameter;
 import org.clever.core.Ordered;
-import org.clever.web.spring.method.support.HandlerMethodReturnValueHandler;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,8 +10,6 @@ import javax.servlet.http.HttpServletRequest;
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/01/01 21:10 <br/>
- *
- * @see HandlerMethodReturnValueHandler
  */
 public interface HandlerMethodArgumentResolver extends Ordered {
     /**
