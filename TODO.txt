@@ -1,2 +1,14 @@
 打包体积瘦身(保证在25MB内)
-org.antlr:antlr4
+[  ] org.antlr:antlr4
+
+升级核心依赖包版本(最新稳定版)
+kotlin
+groovy
+javalin
+jmh
+querydsl
+schemacrawler
+poi
+p6spy
+
+

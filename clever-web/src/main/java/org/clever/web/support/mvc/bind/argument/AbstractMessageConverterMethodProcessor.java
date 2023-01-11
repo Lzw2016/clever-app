@@ -10,8 +10,10 @@
 //import org.clever.util.Assert;
 //import org.clever.util.CollectionUtils;
 //import org.clever.util.StringUtils;
+//import org.clever.web.http.MediaType;
 //import org.clever.web.spring.context.request.NativeWebRequest;
 //import org.clever.web.spring.method.support.HandlerMethodReturnValueHandler;
+//import org.clever.web.support.mvc.HandlerMapping;
 //
 //import javax.servlet.ServletRequest;
 //import javax.servlet.http.HttpServletRequest;
@@ -28,28 +30,21 @@
 // * 创建时间：2023/01/06 11:21 <br/>
 // */
 //public abstract class AbstractMessageConverterMethodProcessor extends AbstractMessageConverterMethodArgumentResolver implements HandlerMethodReturnValueHandler {
-//
-//    /* Extensions associated with the built-in message converters */
+//    /**
+//     * 与内置消息转换器关联的扩展
+//     */
 //    private static final Set<String> SAFE_EXTENSIONS = new HashSet<>(Arrays.asList(
 //            "txt", "text", "yml", "properties", "csv",
 //            "json", "xml", "atom", "rss",
-//            "png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
-//
-//    private static final Set<String> SAFE_MEDIA_BASE_TYPES = new HashSet<>(
-//            Arrays.asList("audio", "image", "video"));
-//
-//    private static final List<MediaType> ALL_APPLICATION_MEDIA_TYPES =
-//            Arrays.asList(MediaType.ALL, new MediaType("application"));
-//
-//    private static final Type RESOURCE_REGION_LIST_TYPE =
-//            new ParameterizedTypeReference<List<ResourceRegion>>() {
-//            }.getType();
-//
+//            "png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"
+//    ));
+//    private static final Set<String> SAFE_MEDIA_BASE_TYPES = new HashSet<>(Arrays.asList("audio", "image", "video"));
+//    private static final List<MediaType> ALL_APPLICATION_MEDIA_TYPES = Arrays.asList(MediaType.ALL, new MediaType("application"));
+//    private static final Type RESOURCE_REGION_LIST_TYPE = new ParameterizedTypeReference<List<ResourceRegion>>() {
+//    }.getType();
 //
 //    private final ContentNegotiationManager contentNegotiationManager;
-//
 //    private final Set<String> safeExtensions = new HashSet<>();
-//
 //
 //    /**
 //     * Constructor with list of converters only.
@@ -61,9 +56,7 @@
 //    /**
 //     * Constructor with list of converters and ContentNegotiationManager.
 //     */
-//    protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
-//                                                      ContentNegotiationManager contentNegotiationManager) {
-//
+//    protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters, ContentNegotiationManager contentNegotiationManager) {
 //        this(converters, contentNegotiationManager, null);
 //    }
 //
@@ -71,16 +64,12 @@
 //     * Constructor with list of converters and ContentNegotiationManager as well
 //     * as request/response body advice instances.
 //     */
-//    protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters,
-//                                                      ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
-//
+//    protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> converters, ContentNegotiationManager manager, List<Object> requestResponseBodyAdvice) {
 //        super(converters, requestResponseBodyAdvice);
-//
 //        this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 //        this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
 //        this.safeExtensions.addAll(SAFE_EXTENSIONS);
 //    }
-//
 //
 //    /**
 //     * Creates a new {@link HttpOutputMessage} from the given {@link NativeWebRequest}.
@@ -98,9 +87,7 @@
 //     * Writes the given return value to the given web request. Delegates to
 //     * {@link #writeWithMessageConverters(Object, MethodParameter, ServletServerHttpRequest, ServletServerHttpResponse)}
 //     */
-//    protected <T> void writeWithMessageConverters(T value, MethodParameter returnType, NativeWebRequest webRequest)
-//            throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
-//
+//    protected <T> void writeWithMessageConverters(T value, MethodParameter returnType, NativeWebRequest webRequest) throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 //        ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 //        ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 //        writeWithMessageConverters(value, returnType, inputMessage, outputMessage);
@@ -121,14 +108,10 @@
 //     *                                             has no compatible converter.
 //     */
 //    @SuppressWarnings({"rawtypes", "unchecked"})
-//    protected <T> void writeWithMessageConverters(T value, MethodParameter returnType,
-//                                                  ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
-//            throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
-//
+//    protected <T> void writeWithMessageConverters(T value, MethodParameter returnType, ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 //        Object body;
 //        Class<?> valueType;
 //        Type targetType;
-//
 //        if (value instanceof CharSequence) {
 //            body = value.toString();
 //            valueType = String.class;
@@ -138,11 +121,9 @@
 //            valueType = getReturnValueType(body, returnType);
 //            targetType = GenericTypeResolver.resolveType(getGenericType(returnType), returnType.getContainingClass());
 //        }
-//
 //        if (isResourceType(value, returnType)) {
 //            outputMessage.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
-//            if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null &&
-//                    outputMessage.getServletResponse().getStatus() == 200) {
+//            if (value != null && inputMessage.getHeaders().getFirst(HttpHeaders.RANGE) != null && outputMessage.getServletResponse().getStatus() == 200) {
 //                Resource resource = (Resource) value;
 //                try {
 //                    List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
@@ -156,7 +137,6 @@
 //                }
 //            }
 //        }
-//
 //        MediaType selectedMediaType = null;
 //        MediaType contentType = outputMessage.getHeaders().getContentType();
 //        boolean isContentTypePreset = contentType != null && contentType.isConcrete();
@@ -181,10 +161,8 @@
 //                throw ex;
 //            }
 //            List<MediaType> producibleTypes = getProducibleMediaTypes(request, valueType, targetType);
-//
 //            if (body != null && producibleTypes.isEmpty()) {
-//                throw new HttpMessageNotWritableException(
-//                        "No converter found for return value of type: " + valueType);
+//                throw new HttpMessageNotWritableException("No converter found for return value of type: " + valueType);
 //            }
 //            List<MediaType> mediaTypesToUse = new ArrayList<>();
 //            for (MediaType requestedType : acceptableTypes) {
@@ -203,9 +181,7 @@
 //                }
 //                return;
 //            }
-//
 //            MediaType.sortBySpecificityAndQuality(mediaTypesToUse);
-//
 //            for (MediaType mediaType : mediaTypesToUse) {
 //                if (mediaType.isConcrete()) {
 //                    selectedMediaType = mediaType;
@@ -215,28 +191,19 @@
 //                    break;
 //                }
 //            }
-//
 //            if (logger.isDebugEnabled()) {
-//                logger.debug("Using '" + selectedMediaType + "', given " +
-//                        acceptableTypes + " and supported " + producibleTypes);
+//                logger.debug("Using '" + selectedMediaType + "', given " + acceptableTypes + " and supported " + producibleTypes);
 //            }
 //        }
-//
 //        if (selectedMediaType != null) {
 //            selectedMediaType = selectedMediaType.removeQualityValue();
 //            for (HttpMessageConverter<?> converter : this.messageConverters) {
-//                GenericHttpMessageConverter genericConverter = (converter instanceof GenericHttpMessageConverter ?
-//                        (GenericHttpMessageConverter<?>) converter : null);
-//                if (genericConverter != null ?
-//                        ((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) :
-//                        converter.canWrite(valueType, selectedMediaType)) {
-//                    body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType,
-//                            (Class<? extends HttpMessageConverter<?>>) converter.getClass(),
-//                            inputMessage, outputMessage);
+//                GenericHttpMessageConverter genericConverter = (converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
+//                if (genericConverter != null ? ((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) : converter.canWrite(valueType, selectedMediaType)) {
+//                    body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType, (Class<? extends HttpMessageConverter<?>>) converter.getClass(), inputMessage, outputMessage);
 //                    if (body != null) {
 //                        Object theBody = body;
-//                        LogFormatUtils.traceDebug(logger, traceOn ->
-//                                "Writing [" + LogFormatUtils.formatValue(theBody, !traceOn) + "]");
+//                        // LogFormatUtils.traceDebug(logger, traceOn -> "Writing [" + LogFormatUtils.formatValue(theBody, !traceOn) + "]");
 //                        addContentDispositionHeader(inputMessage, outputMessage);
 //                        if (genericConverter != null) {
 //                            genericConverter.write(body, targetType, selectedMediaType, outputMessage);
@@ -252,15 +219,10 @@
 //                }
 //            }
 //        }
-//
 //        if (body != null) {
-//            Set<MediaType> producibleMediaTypes =
-//                    (Set<MediaType>) inputMessage.getServletRequest()
-//                            .getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-//
+//            Set<MediaType> producibleMediaTypes = (Set<MediaType>) inputMessage.getServletRequest().getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 //            if (isContentTypePreset || !CollectionUtils.isEmpty(producibleMediaTypes)) {
-//                throw new HttpMessageNotWritableException(
-//                        "No converter for [" + valueType + "] with preset Content-Type '" + contentType + "'");
+//                throw new HttpMessageNotWritableException("No converter for [" + valueType + "] with preset Content-Type '" + contentType + "'");
 //            }
 //            throw new HttpMediaTypeNotAcceptableException(getSupportedMediaTypes(body.getClass()));
 //        }
@@ -317,11 +279,8 @@
 //     * @since 4.2
 //     */
 //    @SuppressWarnings("unchecked")
-//    protected List<MediaType> getProducibleMediaTypes(
-//            HttpServletRequest request, Class<?> valueClass, Type targetType) {
-//
-//        Set<MediaType> mediaTypes =
-//                (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+//    protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> valueClass, Type targetType) {
+//        Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 //        if (!CollectionUtils.isEmpty(mediaTypes)) {
 //            return new ArrayList<>(mediaTypes);
 //        }
@@ -338,9 +297,7 @@
 //        return (result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result);
 //    }
 //
-//    private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request)
-//            throws HttpMediaTypeNotAcceptableException {
-//
+//    private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
 //        return this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
 //    }
 //
@@ -366,7 +323,6 @@
 //        if (headers.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
 //            return;
 //        }
-//
 //        try {
 //            int status = response.getServletResponse().getStatus();
 //            if (status < 200 || (status > 299 && status < 400)) {
@@ -375,23 +331,18 @@
 //        } catch (Throwable ex) {
 //            // ignore
 //        }
-//
 //        HttpServletRequest servletRequest = request.getServletRequest();
 //        String requestUri = UrlPathHelper.rawPathInstance.getOriginatingRequestUri(servletRequest);
-//
 //        int index = requestUri.lastIndexOf('/') + 1;
 //        String filename = requestUri.substring(index);
 //        String pathParams = "";
-//
 //        index = filename.indexOf(';');
 //        if (index != -1) {
 //            pathParams = filename.substring(index);
 //            filename = filename.substring(0, index);
 //        }
-//
 //        filename = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, filename);
 //        String ext = StringUtils.getFilenameExtension(filename);
-//
 //        pathParams = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, pathParams);
 //        String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 //
@@ -424,7 +375,6 @@
 //        return (mediaType != null && (safeMediaType(mediaType)));
 //    }
 //
-//
 //    private MediaType resolveMediaType(ServletRequest request, String extension) {
 //        MediaType result = null;
 //        String rawMimeType = request.getServletContext().getMimeType("file." + extension);
@@ -438,8 +388,6 @@
 //    }
 //
 //    private boolean safeMediaType(MediaType mediaType) {
-//        return (SAFE_MEDIA_BASE_TYPES.contains(mediaType.getType()) ||
-//                mediaType.getSubtype().endsWith("+xml"));
+//        return (SAFE_MEDIA_BASE_TYPES.contains(mediaType.getType()) || mediaType.getSubtype().endsWith("+xml"));
 //    }
-//
 //}

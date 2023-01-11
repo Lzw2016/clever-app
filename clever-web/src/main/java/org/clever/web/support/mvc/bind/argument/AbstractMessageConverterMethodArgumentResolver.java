@@ -1,13 +1,15 @@
-//package org.clever.web.servlet.mvc.method.annotation;
+//package org.clever.web.support.mvc.bind.argument;
 //
 //import org.clever.core.MethodParameter;
 //import org.clever.core.ResolvableType;
 //import org.clever.util.Assert;
 //import org.clever.util.StreamUtils;
 //import org.clever.validation.Errors;
+//import org.clever.web.exception.InvalidMediaTypeException;
+//import org.clever.web.http.HttpHeaders;
 //import org.clever.web.http.HttpMethod;
-//import org.clever.web.spring.context.request.NativeWebRequest;
-//import org.clever.web.support.mvc.bind.argument.HandlerMethodArgumentResolver;
+//import org.clever.web.http.MediaType;
+//import org.clever.web.support.mvc.converter.HttpMessageConverter;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 //
@@ -20,8 +22,7 @@
 //import java.util.*;
 //
 ///**
-// * A base class for resolving method argument values by reading from the body of
-// * a request with {@link HttpMessageConverter HttpMessageConverters}.
+// * 通过使用 {@link HttpMessageConverter HttpMessageConverters} 从请求正文中读取来解析方法参数值的基类。
 // * <p>
 // * 作者：lizw <br/>
 // * 创建时间：2023/01/06 11:22 <br/>
@@ -33,34 +34,12 @@
 //
 //    protected final List<HttpMessageConverter<?>> messageConverters;
 //
-//    private final RequestResponseBodyAdviceChain advice;
-//
 //    /**
-//     * Basic constructor with converters only.
+//     * 带有转换器和 {@code Request~}
 //     */
 //    public AbstractMessageConverterMethodArgumentResolver(List<HttpMessageConverter<?>> converters) {
-//        this(converters, null);
-//    }
-//
-//    /**
-//     * Constructor with converters and {@code Request~} and {@code ResponseBodyAdvice}.
-//     *
-//     * @since 4.2
-//     */
-//    public AbstractMessageConverterMethodArgumentResolver(List<HttpMessageConverter<?>> converters, List<Object> requestResponseBodyAdvice) {
 //        Assert.notEmpty(converters, "'messageConverters' must not be empty");
 //        this.messageConverters = converters;
-//        this.advice = new RequestResponseBodyAdviceChain(requestResponseBodyAdvice);
-//    }
-//
-//
-//    /**
-//     * Return the configured {@link RequestBodyAdvice} and
-//     * {@link RequestBodyAdvice} where each instance may be wrapped as a
-//     * {@link org.springframework.web.method.ControllerAdviceBean ControllerAdviceBean}.
-//     */
-//    RequestResponseBodyAdviceChain getAdvice() {
-//        return this.advice;
 //    }
 //
 //    /**
@@ -69,16 +48,13 @@
 //     *
 //     * @param <T>        the expected type of the argument value to be created
 //     * @param webRequest the current request
-//     * @param parameter  the method parameter descriptor (may be {@code null})
+//     * @param parameter  the method parameter descriptor (maybe {@code null})
 //     * @param paramType  the type of the argument value to be created
 //     * @return the created method argument value
 //     * @throws IOException                        if the reading from the request fails
 //     * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 //     */
-//
-//    protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
-//                                                   Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
-//
+//    protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter, Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 //        HttpInputMessage inputMessage = createInputMessage(webRequest);
 //        return readWithMessageConverters(inputMessage, parameter, paramType);
 //    }
@@ -90,15 +66,13 @@
 //     * @param <T>          the expected type of the argument value to be created
 //     * @param inputMessage the HTTP input message representing the current request
 //     * @param parameter    the method parameter descriptor
-//     * @param targetType   the target type, not necessarily the same as the method
-//     *                     parameter type, e.g. for {@code HttpEntity<String>}.
+//     * @param targetType   the target type, not necessarily the same as the method parameter type, e.g. for {@code HttpEntity<String>}.
 //     * @return the created method argument value
 //     * @throws IOException                        if the reading from the request fails
 //     * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 //     */
 //    @SuppressWarnings("unchecked")
-//
-//    protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter parameter, Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
+//    protected <T> Object readWithMessageConverters(HttpServletRequest request, MethodParameter parameter, Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 //        MediaType contentType;
 //        boolean noContentType = false;
 //        try {
@@ -110,32 +84,24 @@
 //            noContentType = true;
 //            contentType = MediaType.APPLICATION_OCTET_STREAM;
 //        }
-//
 //        Class<?> contextClass = parameter.getContainingClass();
 //        Class<T> targetClass = (targetType instanceof Class ? (Class<T>) targetType : null);
 //        if (targetClass == null) {
 //            ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
 //            targetClass = (Class<T>) resolvableType.resolve();
 //        }
-//
 //        HttpMethod httpMethod = (inputMessage instanceof HttpRequest ? ((HttpRequest) inputMessage).getMethod() : null);
 //        Object body = NO_VALUE;
-//
 //        EmptyBodyCheckingHttpInputMessage message = null;
 //        try {
 //            message = new EmptyBodyCheckingHttpInputMessage(inputMessage);
-//
 //            for (HttpMessageConverter<?> converter : this.messageConverters) {
 //                Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
-//                GenericHttpMessageConverter<?> genericConverter =
-//                        (converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
-//                if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
-//                        (targetClass != null && converter.canRead(targetClass, contentType))) {
+//                GenericHttpMessageConverter<?> genericConverter = (converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
+//                if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) : (targetClass != null && converter.canRead(targetClass, contentType))) {
 //                    if (message.hasBody()) {
-//                        HttpInputMessage msgToUse =
-//                                getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
-//                        body = (genericConverter != null ? genericConverter.read(targetType, contextClass, msgToUse) :
-//                                ((HttpMessageConverter<T>) converter).read(targetClass, msgToUse));
+//                        HttpInputMessage msgToUse = getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
+//                        body = (genericConverter != null ? genericConverter.read(targetType, contextClass, msgToUse) : ((HttpMessageConverter<T>) converter).read(targetClass, msgToUse));
 //                        body = getAdvice().afterBodyRead(body, msgToUse, parameter, targetType, converterType);
 //                    } else {
 //                        body = getAdvice().handleEmptyBody(null, message, parameter, targetType, converterType);
@@ -150,37 +116,32 @@
 //                closeStreamIfNecessary(message.getBody());
 //            }
 //        }
-//
 //        if (body == NO_VALUE) {
-//            if (httpMethod == null || !SUPPORTED_METHODS.contains(httpMethod) ||
-//                    (noContentType && !message.hasBody())) {
+//            if (httpMethod == null || !SUPPORTED_METHODS.contains(httpMethod) || (noContentType && !message.hasBody())) {
 //                return null;
 //            }
-//            throw new HttpMediaTypeNotSupportedException(contentType,
-//                    getSupportedMediaTypes(targetClass != null ? targetClass : Object.class));
+//            throw new HttpMediaTypeNotSupportedException(contentType, getSupportedMediaTypes(targetClass != null ? targetClass : Object.class));
 //        }
-//
 //        MediaType selectedContentType = contentType;
 //        Object theBody = body;
-//        LogFormatUtils.traceDebug(logger, traceOn -> {
-//            String formatted = LogFormatUtils.formatValue(theBody, !traceOn);
-//            return "Read \"" + selectedContentType + "\" to [" + formatted + "]";
-//        });
-//
+////        LogFormatUtils.traceDebug(logger, traceOn -> {
+////            String formatted = LogFormatUtils.formatValue(theBody, !traceOn);
+////            return "Read \"" + selectedContentType + "\" to [" + formatted + "]";
+////        });
 //        return body;
 //    }
 //
-//    /**
-//     * Create a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.
-//     *
-//     * @param webRequest the web request to create an input message from
-//     * @return the input message
-//     */
-//    protected ServletServerHttpRequest createInputMessage(NativeWebRequest webRequest) {
-//        HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-//        Assert.state(servletRequest != null, "No HttpServletRequest");
-//        return new ServletServerHttpRequest(servletRequest);
-//    }
+////    /**
+////     * Create a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.
+////     *
+////     * @param webRequest the web request to create an input message from
+////     * @return the input message
+////     */
+////    protected ServletServerHttpRequest createInputMessage(NativeWebRequest webRequest) {
+////        HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+////        Assert.state(servletRequest != null, "No HttpServletRequest");
+////        return new ServletServerHttpRequest(servletRequest);
+////    }
 //
 //    /**
 //     * Validate the binding target if applicable.
@@ -236,14 +197,13 @@
 //    }
 //
 //    /**
-//     * Adapt the given argument against the method parameter, if necessary.
+//     * 如有必要，根据方法参数调整给定的参数。
 //     *
 //     * @param arg       the resolved argument
 //     * @param parameter the method parameter descriptor
 //     * @return the adapted argument, or the original resolved argument as-is
 //     * @since 4.3.5
 //     */
-//
 //    protected Object adaptArgumentIfNecessary(Object arg, MethodParameter parameter) {
 //        if (parameter.getParameterType() == Optional.class) {
 //            if (arg == null || (arg instanceof Collection && ((Collection<?>) arg).isEmpty()) ||
@@ -267,10 +227,7 @@
 //
 //
 //    private static class EmptyBodyCheckingHttpInputMessage implements HttpInputMessage {
-//
 //        private final HttpHeaders headers;
-//
-//
 //        private final InputStream body;
 //
 //        public EmptyBodyCheckingHttpInputMessage(HttpInputMessage inputMessage) throws IOException {
@@ -306,5 +263,4 @@
 //            return (this.body != null);
 //        }
 //    }
-//
 //}
