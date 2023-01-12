@@ -1,15 +1,29 @@
 package org.clever.web.support.mvc.bind.argument;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.clever.core.GenericTypeResolver;
 import org.clever.core.MethodParameter;
+import org.clever.util.Assert;
 import org.clever.web.exception.MissingServletRequestPartException;
 import org.clever.web.exception.MultipartException;
+import org.clever.web.http.MediaType;
 import org.clever.web.http.multipart.MultipartFile;
+import org.clever.web.http.multipart.support.MultipartHttpServletRequest;
 import org.clever.web.http.multipart.support.MultipartResolutionDelegate;
 import org.clever.web.support.mvc.bind.annotation.RequestBody;
 import org.clever.web.support.mvc.bind.annotation.RequestParam;
 import org.clever.web.support.mvc.bind.annotation.RequestPart;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * 解析以下方法参数：
@@ -26,6 +40,13 @@ import javax.servlet.http.HttpServletRequest;
  * 创建时间：2023/01/04 23:05 <br/>
  */
 public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentResolver {
+    private final ObjectMapper objectMapper;
+
+    public RequestPartMethodArgumentResolver(ObjectMapper objectMapper) {
+        Assert.notNull(objectMapper, "参数 objectMapper 不能为 null");
+        this.objectMapper = objectMapper;
+    }
+
     /**
      * 给定的 {@linkplain MethodParameter MethodParameter} 是否支持多部分。支持以下方法参数：
      * <ul>
@@ -57,20 +78,51 @@ public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentR
         if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
             arg = mpArg;
         } else {
-//            try {
-//                arg = readWithMessageConverters(request, parameter, parameter.getNestedGenericParameterType());
-//                WebDataBinder binder = binderFactory.createBinder(request, arg, name);
-//                if (arg != null) {
-//                    validateIfApplicable(binder, parameter);
-//                    if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
-//                        throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
-//                    }
-//                }
-//            } catch (MissingServletRequestPartException | MultipartException ex) {
-//                if (isRequired) {
-//                    throw ex;
-//                }
-//            }
+            try {
+                InputStream body = null;
+                MultipartHttpServletRequest multipartRequest = MultipartResolutionDelegate.asMultipartHttpServletRequest(request);
+                Part part = multipartRequest.getPart(name);
+                if (part != null) {
+                    body = part.getInputStream();
+                }
+                if (body == null) {
+                    MultipartFile file = multipartRequest.getFile(name);
+                    if (file != null) {
+                        body = file.getInputStream();
+                    }
+                }
+                if (body == null) {
+                    String paramValue = multipartRequest.getParameter(name);
+                    if (paramValue != null) {
+                        Charset charset = null;
+                        MediaType contentType = multipartRequest.getMultipartHeaders(name).getContentType();
+                        if (contentType != null) {
+                            charset = contentType.getCharset();
+                        }
+                        if (charset == null) {
+                            String encoding = multipartRequest.getCharacterEncoding();
+                            if (encoding != null) {
+                                charset = Charset.forName(encoding);
+                            }
+                        }
+                        if (charset == null) {
+                            charset = StandardCharsets.UTF_8;
+                        }
+                        body = new ByteArrayInputStream(paramValue.getBytes(charset));
+                    }
+                }
+                if (body == null) {
+                    throw new IllegalStateException("No body available for request part '" + name + "'");
+                }
+                Type targetType = parameter.getNestedGenericParameterType();
+                Class<?> contextClass = parameter.getContainingClass();
+                JavaType javaType = objectMapper.constructType(GenericTypeResolver.resolveType(targetType, contextClass));
+                arg = objectMapper.readValue(body, javaType);
+            } catch (MissingServletRequestPartException | MultipartException ex) {
+                if (isRequired) {
+                    throw ex;
+                }
+            }
         }
         if (arg == null && isRequired) {
             if (!MultipartResolutionDelegate.isMultipartRequest(request)) {
@@ -79,7 +131,22 @@ public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentR
                 throw new MissingServletRequestPartException(name);
             }
         }
-//        return adaptArgumentIfNecessary(arg, parameter);
+        return adaptArgumentIfNecessary(arg, parameter);
+    }
+
+    /**
+     * 如有必要，根据方法参数调整给定参数
+     */
+    protected Object adaptArgumentIfNecessary(Object arg, MethodParameter parameter) {
+        if (parameter.getParameterType() == Optional.class) {
+            if (arg == null
+                    || (arg instanceof Collection && ((Collection<?>) arg).isEmpty())
+                    || (arg instanceof Object[] && ((Object[]) arg).length == 0)) {
+                return Optional.empty();
+            } else {
+                return Optional.of(arg);
+            }
+        }
         return arg;
     }
 

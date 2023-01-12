@@ -47,7 +47,7 @@ public final class MultipartResolutionDelegate {
         return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
     }
 
-    static MultipartHttpServletRequest asMultipartHttpServletRequest(HttpServletRequest request) {
+    public static MultipartHttpServletRequest asMultipartHttpServletRequest(HttpServletRequest request) {
         MultipartHttpServletRequest unwrapped = WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
         if (unwrapped != null) {
             return unwrapped;
