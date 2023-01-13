@@ -30,207 +30,188 @@ import java.util.Map;
  */
 public abstract class UriUtils {
     /**
-     * Encode the given URI scheme with the given encoding.
+     * 使用给定的编码对给定的 URI 方案进行编码。
      *
-     * @param scheme   the scheme to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded scheme
+     * @param scheme   要编码的scheme
+     * @param encoding 要编码到的字符编码
      */
     public static String encodeScheme(String scheme, String encoding) {
         return encode(scheme, encoding, HierarchicalUriComponents.Type.SCHEME);
     }
 
     /**
-     * Encode the given URI scheme with the given encoding.
+     * 使用给定的编码对给定的 URI scheme进行编码。
      *
-     * @param scheme  the scheme to be encoded
-     * @param charset the character encoding to encode to
-     * @return the encoded scheme
+     * @param scheme  要编码的scheme
+     * @param charset 要编码到的字符编码
      */
     public static String encodeScheme(String scheme, Charset charset) {
         return encode(scheme, charset, HierarchicalUriComponents.Type.SCHEME);
     }
 
     /**
-     * Encode the given URI authority with the given encoding.
+     * 使用给定的编码对给定的 URI authority进行编码
      *
-     * @param authority the authority to be encoded
-     * @param encoding  the character encoding to encode to
-     * @return the encoded authority
+     * @param authority 被编码的authority
+     * @param encoding  要编码到的字符编码
      */
     public static String encodeAuthority(String authority, String encoding) {
         return encode(authority, encoding, HierarchicalUriComponents.Type.AUTHORITY);
     }
 
     /**
-     * Encode the given URI authority with the given encoding.
+     * 使用给定的编码对给定的 URI authority进行编码。
      *
-     * @param authority the authority to be encoded
-     * @param charset   the character encoding to encode to
-     * @return the encoded authority
+     * @param authority 被编码的authority
+     * @param charset   要编码到的字符编码
      */
     public static String encodeAuthority(String authority, Charset charset) {
         return encode(authority, charset, HierarchicalUriComponents.Type.AUTHORITY);
     }
 
     /**
-     * Encode the given URI user info with the given encoding.
+     * 使用给定的编码对给定的 URI userInfo进行编码。
      *
-     * @param userInfo the user info to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded user info
+     * @param userInfo 要编码的userInfo
+     * @param encoding 要编码到的字符编码
      */
     public static String encodeUserInfo(String userInfo, String encoding) {
         return encode(userInfo, encoding, HierarchicalUriComponents.Type.USER_INFO);
     }
 
     /**
-     * Encode the given URI user info with the given encoding.
+     * 使用给定的编码对给定的 URI userInfo进行编码。
      *
-     * @param userInfo the user info to be encoded
-     * @param charset  the character encoding to encode to
-     * @return the encoded user info
+     * @param userInfo 要编码的userInfo
+     * @param charset  要编码到的字符编码
      */
     public static String encodeUserInfo(String userInfo, Charset charset) {
         return encode(userInfo, charset, HierarchicalUriComponents.Type.USER_INFO);
     }
 
     /**
-     * Encode the given URI host with the given encoding.
+     * 使用给定的编码对给定的 URI host进行编码。
      *
-     * @param host     the host to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded host
+     * @param host     要编码的host
+     * @param encoding 要编码到的字符编码
      */
     public static String encodeHost(String host, String encoding) {
         return encode(host, encoding, HierarchicalUriComponents.Type.HOST_IPV4);
     }
 
     /**
-     * Encode the given URI host with the given encoding.
+     * 使用给定的编码对给定的 URI host进行编码。
      *
-     * @param host    the host to be encoded
-     * @param charset the character encoding to encode to
-     * @return the encoded host
+     * @param host    要编码的host
+     * @param charset 要编码到的字符编码
      */
     public static String encodeHost(String host, Charset charset) {
         return encode(host, charset, HierarchicalUriComponents.Type.HOST_IPV4);
     }
 
     /**
-     * Encode the given URI port with the given encoding.
+     * 使用给定的编码对给定的 URI port进行编码。
      *
-     * @param port     the port to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded port
+     * @param port     要编码的port
+     * @param encoding 要编码到的字符编码
      */
     public static String encodePort(String port, String encoding) {
         return encode(port, encoding, HierarchicalUriComponents.Type.PORT);
     }
 
     /**
-     * Encode the given URI port with the given encoding.
+     * 使用给定的编码对给定的 URI port进行编码。
      *
-     * @param port    the port to be encoded
-     * @param charset the character encoding to encode to
-     * @return the encoded port
+     * @param port    要编码的port
+     * @param charset 要编码到的字符编码
      */
     public static String encodePort(String port, Charset charset) {
         return encode(port, charset, HierarchicalUriComponents.Type.PORT);
     }
 
     /**
-     * Encode the given URI path with the given encoding.
+     * 使用给定的编码对给定的 URI path进行编码。
      *
-     * @param path     the path to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded path
+     * @param path     要编码的path
+     * @param encoding 要编码到的字符编码
      */
     public static String encodePath(String path, String encoding) {
         return encode(path, encoding, HierarchicalUriComponents.Type.PATH);
     }
 
     /**
-     * Encode the given URI path with the given encoding.
+     * 使用给定的编码对给定的 URI path进行编码。
      *
-     * @param path    the path to be encoded
-     * @param charset the character encoding to encode to
-     * @return the encoded path
+     * @param path    要编码的path
+     * @param charset 要编码到的字符编码
      */
     public static String encodePath(String path, Charset charset) {
         return encode(path, charset, HierarchicalUriComponents.Type.PATH);
     }
 
     /**
-     * Encode the given URI path segment with the given encoding.
+     * 使用给定的编码对给定的 URI segment进行编码。
      *
-     * @param segment  the segment to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded segment
+     * @param segment  要编码的segment
+     * @param encoding 要编码到的字符编码
      */
     public static String encodePathSegment(String segment, String encoding) {
         return encode(segment, encoding, HierarchicalUriComponents.Type.PATH_SEGMENT);
     }
 
     /**
-     * Encode the given URI path segment with the given encoding.
+     * 使用给定的编码对给定的 URI segment进行编码。
      *
-     * @param segment the segment to be encoded
-     * @param charset the character encoding to encode to
-     * @return the encoded segment
+     * @param segment 要编码的segment
+     * @param charset 要编码到的字符编码
      */
     public static String encodePathSegment(String segment, Charset charset) {
         return encode(segment, charset, HierarchicalUriComponents.Type.PATH_SEGMENT);
     }
 
     /**
-     * Encode the given URI query with the given encoding.
+     * 使用给定的编码对给定的 URI query进行编码。
      *
-     * @param query    the query to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded query
+     * @param query    要编码的 query
+     * @param encoding 要编码到的字符编码
      */
     public static String encodeQuery(String query, String encoding) {
         return encode(query, encoding, HierarchicalUriComponents.Type.QUERY);
     }
 
     /**
-     * Encode the given URI query with the given encoding.
+     * 使用给定的编码对给定的 URI query进行编码。
      *
-     * @param query   the query to be encoded
-     * @param charset the character encoding to encode to
-     * @return the encoded query
+     * @param query   要编码的 query
+     * @param charset 要编码到的字符编码
      */
     public static String encodeQuery(String query, Charset charset) {
         return encode(query, charset, HierarchicalUriComponents.Type.QUERY);
     }
 
     /**
-     * Encode the given URI query parameter with the given encoding.
+     * 使用给定的编码对给定的 URI queryParam进行编码。
      *
-     * @param queryParam the query parameter to be encoded
-     * @param encoding   the character encoding to encode to
-     * @return the encoded query parameter
+     * @param queryParam 要编码的 queryParam
+     * @param encoding   要编码到的字符编码
      */
     public static String encodeQueryParam(String queryParam, String encoding) {
         return encode(queryParam, encoding, HierarchicalUriComponents.Type.QUERY_PARAM);
     }
 
     /**
-     * Encode the given URI query parameter with the given encoding.
+     * 使用给定的编码对给定的 URI queryParam进行编码。
      *
-     * @param queryParam the query parameter to be encoded
-     * @param charset    the character encoding to encode to
-     * @return the encoded query parameter
+     * @param queryParam 要编码的 queryParam
+     * @param charset    要编码到的字符编码
      */
     public static String encodeQueryParam(String queryParam, Charset charset) {
         return encode(queryParam, charset, HierarchicalUriComponents.Type.QUERY_PARAM);
     }
 
     /**
-     * Encode the query parameters from the given {@code MultiValueMap} with UTF-8.
-     * <p>This can be used with {@link UriComponentsBuilder#queryParams(MultiValueMap)}
-     * when building a URI from an already encoded template.
+     * 使用 UTF-8 对来自给定 {@code MultiValueMap} 的查询参数进行编码。
+     * <p>当从已经编码的模板构建 URI 时，这可以与 {@link UriComponentsBuilder#queryParams(MultiValueMap)} 一起使用。
      * <pre>{@code
      * MultiValueMap<String, String> params = new LinkedMultiValueMap<>(2);
      * // add to params...
@@ -240,8 +221,8 @@ public abstract class UriUtils {
      *         .toUriString();
      * }</pre>
      *
-     * @param params the parameters to encode
-     * @return a new {@code MultiValueMap} with the encoded names and values
+     * @param params 要编码的 params
+     * @return 带有编码名称和值的新 {@code MultiValueMap}
      */
     public static MultiValueMap<String, String> encodeQueryParams(MultiValueMap<String, String> params) {
         Charset charset = StandardCharsets.UTF_8;
@@ -255,59 +236,50 @@ public abstract class UriUtils {
     }
 
     /**
-     * Encode the given URI fragment with the given encoding.
+     * 使用给定的编码对给定的 URI fragment进行编码。
      *
-     * @param fragment the fragment to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded fragment
+     * @param fragment 要编码的 fragment
+     * @param encoding 要编码到的字符编码
      */
     public static String encodeFragment(String fragment, String encoding) {
         return encode(fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
     }
 
     /**
-     * Encode the given URI fragment with the given encoding.
+     * 使用给定的编码对给定的 URI fragment进行编码。
      *
-     * @param fragment the fragment to be encoded
-     * @param charset  the character encoding to encode to
-     * @return the encoded fragment
+     * @param fragment 要编码的 fragment
+     * @param charset  要编码到的字符编码
      */
     public static String encodeFragment(String fragment, Charset charset) {
         return encode(fragment, charset, HierarchicalUriComponents.Type.FRAGMENT);
     }
 
     /**
-     * Variant of {@link #encode(String, Charset)} with a String charset.
+     * {@link #encode(String, Charset)} 的变体，带有 String 字符集。
      *
-     * @param source   the String to be encoded
-     * @param encoding the character encoding to encode to
-     * @return the encoded String
+     * @param source   要编码的字符串
+     * @param encoding 要编码到的字符编码
      */
     public static String encode(String source, String encoding) {
         return encode(source, encoding, HierarchicalUriComponents.Type.URI);
     }
 
     /**
-     * Encode all characters that are either illegal, or have any reserved
-     * meaning, anywhere within a URI, as defined in
-     * <a href="https://tools.ietf.org/html/rfc3986">RFC 3986</a>.
-     * This is useful to ensure that the given String will be preserved as-is
-     * and will not have any o impact on the structure or meaning of the URI.
+     * 对 URI 内任意位置的所有非法字符或具有任何保留含义的字符进行编码，如<a href="https://tools.ietf.org/html/rfc3986">RFC 3986</a>中所定义.
+     * 这有助于确保给定的 String 将按原样保留并且不会对 URI 的结构或含义产生任何影响。
      *
-     * @param source  the String to be encoded
-     * @param charset the character encoding to encode to
-     * @return the encoded String
+     * @param source  要编码的字符串
+     * @param charset 要编码到的字符编码
      */
     public static String encode(String source, Charset charset) {
         return encode(source, charset, HierarchicalUriComponents.Type.URI);
     }
 
     /**
-     * Convenience method to apply {@link #encode(String, Charset)} to all
-     * given URI variable values.
+     * 将 {@link #encode(String, Charset)} 应用于所有给定 URI 变量值的便捷方法。
      *
-     * @param uriVariables the URI variable values to be encoded
-     * @return the encoded String
+     * @param uriVariables 要编码的 URI 变量值
      */
     public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
         Map<String, String> result = CollectionUtils.newLinkedHashMap(uriVariables.size());
@@ -319,11 +291,9 @@ public abstract class UriUtils {
     }
 
     /**
-     * Convenience method to apply {@link #encode(String, Charset)} to all
-     * given URI variable values.
+     * 将 {@link #encode(String, Charset)} 应用于所有给定 URI 变量值的便捷方法。
      *
-     * @param uriVariables the URI variable values to be encoded
-     * @return the encoded String
+     * @param uriVariables 要编码的 URI 变量值
      */
     public static Object[] encodeUriVariables(Object... uriVariables) {
         return Arrays.stream(uriVariables).map(value -> {
@@ -341,13 +311,13 @@ public abstract class UriUtils {
     }
 
     /**
-     * Decode the given encoded URI component.
-     * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
+     * 解码给定的编码 URI 组件。
+     * <p>有关解码规则，请参阅 {@link StringUtils#uriDecode(String, Charset)}。
      *
-     * @param source   the encoded String
-     * @param encoding the character encoding to use
-     * @return the decoded value
-     * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+     * @param source   编码的字符串
+     * @param encoding 要使用的字符编码
+     * @return 解码值
+     * @throws IllegalArgumentException 当给定的源包含无效的编码序列时
      * @see StringUtils#uriDecode(String, Charset)
      * @see java.net.URLDecoder#decode(String, String)
      */
@@ -356,13 +326,13 @@ public abstract class UriUtils {
     }
 
     /**
-     * Decode the given encoded URI component.
-     * <p>See {@link StringUtils#uriDecode(String, Charset)} for the decoding rules.
+     * 解码给定的编码 URI 组件。
+     * <p>有关解码规则，请参阅 {@link StringUtils#uriDecode(String, Charset)}。
      *
-     * @param source  the encoded String
-     * @param charset the character encoding to use
-     * @return the decoded value
-     * @throws IllegalArgumentException when the given source contains invalid encoded sequences
+     * @param source  编码的字符串
+     * @param charset 要使用的字符编码
+     * @return 解码值
+     * @throws IllegalArgumentException 当给定的源包含无效的编码序列时
      * @see StringUtils#uriDecode(String, Charset)
      * @see java.net.URLDecoder#decode(String, String)
      */
@@ -371,10 +341,10 @@ public abstract class UriUtils {
     }
 
     /**
-     * Extract the file extension from the given URI path.
+     * 从给定的 URI 路径中提取文件扩展名。
      *
-     * @param path the URI path (e.g. "/products/index.html")
-     * @return the extracted file extension (e.g. "html")
+     * @param path URI 路径（例如“products/index.html”）
+     * @return 提取的文件扩展名（例如“html”）
      */
     public static String extractFileExtension(String path) {
         int end = path.indexOf('?');

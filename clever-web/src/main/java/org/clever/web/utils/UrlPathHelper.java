@@ -60,13 +60,11 @@ public class UrlPathHelper {
     }
 
     /**
-     * Determine the encoding for the given request.
-     * Can be overridden in subclasses.
-     * <p>The default implementation checks the request encoding,
-     * falling back to the default encoding specified for this resolver.
+     * 确定给定请求的编码。可以在子类中被覆盖。
+     * <p>默认实现检查请求编码，回退到为此解析器指定的默认编码。
      *
-     * @param request current HTTP request
-     * @return the encoding for the request (never {@code null})
+     * @param request 当前 HTTP 请求
+     * @return 请求的编码（从不{@code null}）
      * @see javax.servlet.ServletRequest#getCharacterEncoding()
      */
     protected String determineEncoding(HttpServletRequest request) {
@@ -77,18 +75,16 @@ public class UrlPathHelper {
         return enc;
     }
 
+    @SuppressWarnings("deprecation")
     private String decodeInternal(HttpServletRequest request, String source) {
         String enc = determineEncoding(request);
         try {
             return UriUtils.decode(source, enc);
         } catch (UnsupportedCharsetException ex) {
             if (logger.isDebugEnabled()) {
-                logger.debug(
-                        "Could not decode request string [" + source + "] with encoding '" + enc
-                                + "': falling back to platform default encoding; exception message: " + ex.getMessage()
-                );
+                logger.debug("Could not decode request string [" + source + "] with encoding '" + enc
+                        + "': falling back to platform default encoding; exception message: " + ex.getMessage());
             }
-            // noinspection deprecation
             return URLDecoder.decode(source);
         }
     }
