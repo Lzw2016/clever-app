@@ -1,6 +1,5 @@
 package org.clever.transaction.support;
 
-import org.clever.aop.scope.ScopedObject;
 import org.clever.core.InfrastructureProxy;
 import org.clever.util.Assert;
 import org.clever.util.ClassUtils;
@@ -46,7 +45,7 @@ public abstract class TransactionSynchronizationUtils {
         }
         if (aopAvailable) {
             // now unwrap scoped proxy
-            resourceRef = ScopedProxyUnwrapper.unwrapIfNecessary(resourceRef);
+            resourceRef = ScopedProxyUnWrapper.unwrapIfNecessary(resourceRef);
         }
         return resourceRef;
     }
@@ -156,13 +155,9 @@ public abstract class TransactionSynchronizationUtils {
     /**
      * 内部类，以避免对AOP模块的硬编码依赖。
      */
-    private static class ScopedProxyUnwrapper {
+    private static class ScopedProxyUnWrapper {
         public static Object unwrapIfNecessary(Object resource) {
-            if (resource instanceof ScopedObject) {
-                return ((ScopedObject) resource).getTargetObject();
-            } else {
-                return resource;
-            }
+            return resource;
         }
     }
 }
