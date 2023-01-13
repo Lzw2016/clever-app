@@ -30,9 +30,6 @@ public class HandlerMethod {
      */
     private final MethodParameter[] parameters;
 
-//    private HandlerMethod resolvedFromHandlerMethod;
-//    private volatile List<Annotation[][]> interfaceParameterAnnotations;
-
     public HandlerMethod(String matcherPath, Class<?> handlerClass, Method method, MethodParameter[] parameters) {
         this.matcherPath = matcherPath;
         this.handlerClass = handlerClass;

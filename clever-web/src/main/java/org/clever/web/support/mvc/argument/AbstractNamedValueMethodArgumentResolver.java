@@ -110,6 +110,17 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
     }
 
     /**
+     * 当命名值存在但在转换后变为 {@code null} 时调用。
+     *
+     * @param name      值的名称
+     * @param parameter 方法参数
+     * @param request   当前请求
+     */
+    protected void handleMissingValueAfterConversion(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
+        handleMissingValue(name, parameter, request);
+    }
+
+    /**
      * 当需要命名值时调用，但 {@link #resolveValue(String, MethodParameter, HttpServletRequest)} 返回 {@code null} 并且没有默认值。
      * 在这种情况下，子类通常会抛出异常。
      *
@@ -137,17 +148,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
     }
 
     /**
-     * 当命名值存在但在转换后变为 {@code null} 时调用。
-     *
-     * @param name      值的名称
-     * @param parameter 方法参数
-     * @param request   当前请求
-     */
-    protected void handleMissingValueAfterConversion(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
-        handleMissingValue(name, parameter, request);
-    }
-
-    /**
      * {@code null} 导致 {@code boolean} 的 {@code false} 值或其他原语的异常
      */
     private Object handleNullValue(String name, Object value, Class<?> paramType) {
@@ -156,8 +156,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
                 return Boolean.FALSE;
             } else if (paramType.isPrimitive()) {
                 throw new IllegalStateException(
-                        "Optional " + paramType.getSimpleName() + " parameter '"
-                                + name + "' is present but cannot be translated into a null value due to being declared as a "
+                        "Optional " + paramType.getSimpleName() + " parameter '" + name
+                                + "' is present but cannot be translated into a null value due to being declared as a "
                                 + "primitive type. Consider declaring it as object wrapper for the corresponding primitive type."
                 );
             }

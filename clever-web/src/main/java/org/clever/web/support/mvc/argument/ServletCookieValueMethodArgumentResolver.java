@@ -1,24 +1,34 @@
 package org.clever.web.support.mvc.argument;
 
 import org.clever.core.MethodParameter;
+import org.clever.util.Assert;
+import org.clever.web.exception.MissingRequestCookieException;
+import org.clever.web.exception.ServletRequestBindingException;
+import org.clever.web.support.mvc.annotation.CookieValue;
 import org.clever.web.utils.UrlPathHelper;
 import org.clever.web.utils.WebUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-
 /**
- * {@link AbstractCookieValueMethodArgumentResolver} 从 {@link HttpServletRequest} 解析 cookie 值
+ * 用于解析用 {@code @CookieValue} 注释的方法参数。从 {@link HttpServletRequest} 请求中提取 cookie 值
+ * <p>{@code @CookieValue} 是从 cookie 解析的命名值。
+ * 当 cookie 不存在时，它有一个必需的标志和一个默认值可以回退。
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/01/04 22:57 <br/>
  */
-public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValueMethodArgumentResolver {
+public class ServletCookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
     private final UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
     public ServletCookieValueMethodArgumentResolver() {
         super();
+    }
+
+    @Override
+    public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
+        return parameter.hasParameterAnnotation(CookieValue.class);
     }
 
     @Override
@@ -30,6 +40,29 @@ public class ServletCookieValueMethodArgumentResolver extends AbstractCookieValu
             return this.urlPathHelper.decodeRequestString(request, cookieValue.getValue());
         } else {
             return null;
+        }
+    }
+
+    @Override
+    protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+        CookieValue annotation = parameter.getParameterAnnotation(CookieValue.class);
+        Assert.state(annotation != null, "No CookieValue annotation");
+        return new CookieValueNamedValueInfo(annotation);
+    }
+
+    @Override
+    protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
+        throw new MissingRequestCookieException(name, parameter);
+    }
+
+    @Override
+    protected void handleMissingValueAfterConversion(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
+        throw new MissingRequestCookieException(name, parameter, true);
+    }
+
+    private static final class CookieValueNamedValueInfo extends NamedValueInfo {
+        private CookieValueNamedValueInfo(CookieValue annotation) {
+            super(annotation.name(), annotation.required(), annotation.defaultValue());
         }
     }
 }
