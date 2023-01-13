@@ -1,6 +1,8 @@
 package org.clever.core.exception;
 
 /**
+ * 功能未实现异常
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2021/12/01 14:43 <br/>
  */

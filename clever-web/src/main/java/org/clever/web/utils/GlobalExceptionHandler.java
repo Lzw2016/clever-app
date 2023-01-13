@@ -6,7 +6,6 @@ import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.model.response.ErrorResponse;
 import org.clever.util.Assert;
 import org.clever.web.exception.GenericHttpException;
-import org.clever.web.http.HttpStatus;
 import org.clever.web.http.MediaType;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +39,7 @@ public class GlobalExceptionHandler {
         // BusinessException.class
         setHandle(BusinessException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
             ErrorResponse res = newErrorResponse(request, exception);
-            res.setStatus(HttpStatus.BAD_REQUEST.value());
+            res.setStatus(exception.getStatus());
             res.setMessage("业务处理失败");
             return res;
         }));

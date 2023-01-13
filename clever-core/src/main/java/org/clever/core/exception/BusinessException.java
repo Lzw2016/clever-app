@@ -17,7 +17,7 @@ public class BusinessException extends RuntimeException {
     /**
      * 请求响应状态吗
      */
-    private Integer status;
+    private int status = 500;
 
     public BusinessException() {
         super();
