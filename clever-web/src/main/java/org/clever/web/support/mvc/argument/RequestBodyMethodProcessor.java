@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.argument;
+package org.clever.web.support.mvc.argument;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +8,7 @@ import org.clever.util.Assert;
 import org.clever.web.exception.HttpMessageNotReadableException;
 import org.clever.web.http.HttpMethod;
 import org.clever.web.http.MediaType;
-import org.clever.web.support.mvc.bind.annotation.RequestBody;
+import org.clever.web.support.mvc.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;

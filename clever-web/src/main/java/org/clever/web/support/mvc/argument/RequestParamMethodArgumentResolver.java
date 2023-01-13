@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.argument;
+package org.clever.web.support.mvc.argument;
 
 import org.clever.beans.BeanUtils;
 import org.clever.core.MethodParameter;
@@ -10,9 +10,9 @@ import org.clever.web.exception.MultipartException;
 import org.clever.web.http.multipart.MultipartFile;
 import org.clever.web.http.multipart.MultipartRequest;
 import org.clever.web.http.multipart.support.MultipartResolutionDelegate;
-import org.clever.web.support.mvc.bind.annotation.RequestParam;
-import org.clever.web.support.mvc.bind.annotation.RequestPart;
-import org.clever.web.support.mvc.bind.annotation.ValueConstants;
+import org.clever.web.support.mvc.annotation.RequestParam;
+import org.clever.web.support.mvc.annotation.RequestPart;
+import org.clever.web.support.mvc.annotation.ValueConstants;
 import org.clever.web.utils.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;

@@ -3,7 +3,6 @@ package org.clever.web.support.mvc;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.clever.web.support.mvc.bind.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

@@ -17,10 +17,10 @@ import org.clever.web.config.MvcConfig;
 import org.clever.web.http.HttpMethod;
 import org.clever.web.support.mvc.HandlerContext;
 import org.clever.web.support.mvc.HandlerInterceptor;
-import org.clever.web.support.mvc.bind.HandlerMethod;
-import org.clever.web.support.mvc.bind.argument.HandlerMethodArgumentResolver;
-import org.clever.web.support.mvc.bind.method.DefaultHandlerMethodResolver;
-import org.clever.web.support.mvc.bind.method.HandlerMethodResolver;
+import org.clever.web.support.mvc.HandlerMethod;
+import org.clever.web.support.mvc.argument.HandlerMethodArgumentResolver;
+import org.clever.web.support.mvc.method.DefaultHandlerMethodResolver;
+import org.clever.web.support.mvc.method.HandlerMethodResolver;
 
 import javax.servlet.ServletException;
 import java.io.IOException;

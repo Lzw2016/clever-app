@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.argument;
+package org.clever.web.support.mvc.argument;
 
 import org.clever.beans.ConversionNotSupportedException;
 import org.clever.beans.SimpleTypeConverter;
@@ -7,7 +7,7 @@ import org.clever.core.MethodParameter;
 import org.clever.web.exception.MethodArgumentConversionNotSupportedException;
 import org.clever.web.exception.MethodArgumentTypeMismatchException;
 import org.clever.web.exception.ServletRequestBindingException;
-import org.clever.web.support.mvc.bind.annotation.ValueConstants;
+import org.clever.web.support.mvc.annotation.ValueConstants;
 import org.clever.web.support.mvc.format.DateTimeFormatters;
 import org.clever.web.support.mvc.format.WebConversionService;
 

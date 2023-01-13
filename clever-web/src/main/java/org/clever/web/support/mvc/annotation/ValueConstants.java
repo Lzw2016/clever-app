@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.annotation;
+package org.clever.web.support.mvc.annotation;
 
 /**
  * 绑定注释之间共享的公共值常量。

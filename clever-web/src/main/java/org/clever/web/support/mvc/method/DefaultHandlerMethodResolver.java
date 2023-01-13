@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.method;
+package org.clever.web.support.mvc.method;
 
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppShutdownHook;
@@ -9,7 +9,7 @@ import org.clever.core.job.DaemonExecutor;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.util.Assert;
 import org.clever.web.config.MvcConfig;
-import org.clever.web.support.mvc.bind.HandlerMethod;
+import org.clever.web.support.mvc.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

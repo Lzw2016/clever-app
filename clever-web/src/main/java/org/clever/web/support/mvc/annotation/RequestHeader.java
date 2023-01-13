@@ -1,22 +1,23 @@
-package org.clever.web.support.mvc.bind.annotation;
+package org.clever.web.support.mvc.annotation;
 
 import org.clever.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
 /**
- * 将请求parameter数据绑定到参数
+ * 将请求header数据绑定到参数
  * <p>
  * 作者：lizw <br/>
- * 创建时间：2023/01/04 22:36 <br/>
+ * 创建时间：2023/01/04 22:39 <br/>
  *
- * @see RequestHeader
+ * @see RequestParam
  * @see CookieValue
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RequestParam {
+public @interface RequestHeader {
+
     /**
      * {@link #name} 的别名。
      */
@@ -24,7 +25,7 @@ public @interface RequestParam {
     String value() default "";
 
     /**
-     * 要绑定到的 parameter 的名称
+     * 要绑定到的请求 header 的名称
      */
     @AliasFor("value")
     String name() default "";

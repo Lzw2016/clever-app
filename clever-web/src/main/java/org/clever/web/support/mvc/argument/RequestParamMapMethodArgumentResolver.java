@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.argument;
+package org.clever.web.support.mvc.argument;
 
 import org.clever.core.MethodParameter;
 import org.clever.core.ResolvableType;
@@ -9,7 +9,7 @@ import org.clever.util.StringUtils;
 import org.clever.web.http.multipart.MultipartFile;
 import org.clever.web.http.multipart.MultipartRequest;
 import org.clever.web.http.multipart.support.MultipartResolutionDelegate;
-import org.clever.web.support.mvc.bind.annotation.RequestParam;
+import org.clever.web.support.mvc.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;

@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.argument;
+package org.clever.web.support.mvc.argument;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,9 +11,9 @@ import org.clever.web.http.MediaType;
 import org.clever.web.http.multipart.MultipartFile;
 import org.clever.web.http.multipart.support.MultipartHttpServletRequest;
 import org.clever.web.http.multipart.support.MultipartResolutionDelegate;
-import org.clever.web.support.mvc.bind.annotation.RequestBody;
-import org.clever.web.support.mvc.bind.annotation.RequestParam;
-import org.clever.web.support.mvc.bind.annotation.RequestPart;
+import org.clever.web.support.mvc.annotation.RequestBody;
+import org.clever.web.support.mvc.annotation.RequestParam;
+import org.clever.web.support.mvc.annotation.RequestPart;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;

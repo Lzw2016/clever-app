@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.bind.annotation;
+package org.clever.web.support.mvc.annotation;
 
 import org.clever.core.annotation.AliasFor;
 

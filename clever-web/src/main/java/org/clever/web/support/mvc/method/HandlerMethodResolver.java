@@ -1,7 +1,7 @@
-package org.clever.web.support.mvc.bind.method;
+package org.clever.web.support.mvc.method;
 
 import org.clever.web.config.MvcConfig;
-import org.clever.web.support.mvc.bind.HandlerMethod;
+import org.clever.web.support.mvc.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

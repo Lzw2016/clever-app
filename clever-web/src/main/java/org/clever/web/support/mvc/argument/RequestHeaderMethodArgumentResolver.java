@@ -1,10 +1,10 @@
-package org.clever.web.support.mvc.bind.argument;
+package org.clever.web.support.mvc.argument;
 
 import org.clever.core.MethodParameter;
 import org.clever.util.Assert;
 import org.clever.web.exception.MissingRequestHeaderException;
 import org.clever.web.exception.ServletRequestBindingException;
-import org.clever.web.support.mvc.bind.annotation.RequestHeader;
+import org.clever.web.support.mvc.annotation.RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
