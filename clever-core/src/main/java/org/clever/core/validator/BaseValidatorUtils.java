@@ -1,26 +1,68 @@
 package org.clever.core.validator;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
-import java.util.*;
+import org.hibernate.validator.HibernateValidator;
+import org.hibernate.validator.HibernateValidatorConfiguration;
+
+import javax.validation.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * JSR303 Validator工具类<br/>
- * ConstraintViolation 中包含propertyPath, message 和invalidValue等信息<br/>
- * 1.List&lt;String&gt;, String内容为message<br/>
- * 2.List&lt;String&gt;, String内容为propertyPath + separator + message<br/>
- * 3.Map&lt;propertyPath, message&gt;<br/>
  *
  * @author LiZW
  * @version 2015年5月28日 下午3:43:21
  */
 public class BaseValidatorUtils {
+    /**
+     * Hibernate实现的ValidatorFactory
+     */
+    public static final ValidatorFactory HIBERNATE_VALIDATOR_FACTORY;
+    /**
+     * 全局共享的Bean验证器
+     */
+    private static final Validator INSTANCE;
+
+    static {
+        Configuration<HibernateValidatorConfiguration> configure = Validation.byProvider(HibernateValidator.class).configure();
+        HIBERNATE_VALIDATOR_FACTORY = configure.buildValidatorFactory();
+        INSTANCE = createHibernateValidator();
+    }
 
     /**
-     * 调用JSR303的validate方法, 验证失败时抛出异常
+     * 返回Hibernate实现的Validator单例(验证器实例是线程安全的，可以多次重用)
+     */
+    public static Validator getValidatorInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * 创建一个新的Hibernate实现的Validator
      *
-     * @param validator JSR303验证类，可以使用不同的实现
+     * @return Hibernate实现的Validator
+     */
+    public static Validator createHibernateValidator() {
+        return HIBERNATE_VALIDATOR_FACTORY.getValidator();
+    }
+
+    /**
+     * 验证Bean对象，验证失败时抛出异常
+     *
+     * @param bean   待验证的bean对象
+     * @param groups 验证的组
+     * @param <T>    待验证的bean对象类型
+     * @throws ConstraintViolationException 验证失败
+     */
+    public static <T> void validateThrowException(T bean, Class<?>... groups) throws ConstraintViolationException {
+        validateThrowException(INSTANCE, bean, groups);
+    }
+
+    /**
+     * 验证Bean对象，验证失败时抛出异常
+     *
+     * @param validator JSR303验证器，可以使用不同的实现
      * @param bean      待验证的bean对象
      * @param groups    验证的组
      * @param <T>       待验证的bean对象类型
@@ -34,78 +76,41 @@ public class BaseValidatorUtils {
     }
 
     /**
-     * 转换 Set&lt;ConstraintViolation&gt; 为 List&lt;message&gt;，验证结果信息转换成字符串
+     * 验证Bean对象，返回验证结果
      *
-     * @param constraintViolations 验证结果信息
-     * @return 验证异常信息集合
+     * @param bean   待验证的bean对象
+     * @param groups 验证的组
+     * @param <T>    待验证的bean对象类型
      */
-    public static List<String> extractMessage(Set<? extends ConstraintViolation<?>> constraintViolations) {
-        List<String> errorMessages = new ArrayList<>();
-        for (ConstraintViolation<?> violation : constraintViolations) {
-            errorMessages.add(violation.getMessage());
+    public static <T> List<FieldError> validate(T bean, Class<?>... groups) {
+        return validate(INSTANCE, bean, groups);
+    }
+
+    /**
+     * 验证Bean对象，返回验证结果
+     *
+     * @param validator JSR303验证器，可以使用不同的实现
+     * @param bean      待验证的bean对象
+     * @param groups    验证的组
+     * @param <T>       待验证的bean对象类型
+     */
+    public static <T> List<FieldError> validate(Validator validator, T bean, Class<?>... groups) {
+        Set<ConstraintViolation<T>> constraints = validator.validate(bean, groups);
+        if (constraints.isEmpty()) {
+            return new ArrayList<>();
         }
-        return errorMessages;
+        return constraints.stream().map(BaseValidatorUtils::createFieldError).collect(Collectors.toList());
     }
 
     /**
-     * 获取验证异常(ConstraintViolationException)中的验证错误信息<br/>
-     * 获取Set&lt;ConstraintViolations&gt;转换成为List&lt;message&gt;<br/>
-     *
-     * @param e Bean验证异常
-     * @return 验证异常信息List集合
+     * 把验证的约束信息转换成FieldError对象
      */
-    public static List<String> extractMessage(ConstraintViolationException e) {
-        return extractMessage(e.getConstraintViolations());
-    }
-
-    /**
-     * 转换 Set&lt;ConstraintViolation&gt; 为 Map&lt;property, message&gt;，验证结果信息转换成字符串
-     *
-     * @param constraintViolations 验证结果信息
-     * @return 验证异常信息集合
-     */
-    public static Map<String, String> extractPropertyAndMessage(Set<? extends ConstraintViolation<?>> constraintViolations) {
-        Map<String, String> errorMessages = new HashMap<>();
-        for (ConstraintViolation<?> violation : constraintViolations) {
-            errorMessages.put(violation.getPropertyPath().toString(), violation.getMessage());
-        }
-        return errorMessages;
-    }
-
-    /**
-     * 获取验证异常(ConstraintViolationException)中的验证错误信息<br/>
-     * 获取Set&lt;ConstraintViolations&gt;转换成为Map&lt;property, message&gt;<br/>
-     *
-     * @param e Bean验证异常
-     * @return 验证异常信息Map集合
-     */
-    public static Map<String, String> extractPropertyAndMessage(ConstraintViolationException e) {
-        return extractPropertyAndMessage(e.getConstraintViolations());
-    }
-
-    /**
-     * 转换 Set&lt;ConstraintViolation&gt; 为 List&lt;propertyPath +separator+ message&gt;，验证结果信息转换成字符串
-     *
-     * @param constraintViolations 验证结果信息
-     * @param separator            分隔符号，Bean字段与其验证失败的错误信息间的分隔符号
-     * @return 验证异常信息List集合
-     */
-    public static List<String> extractPropertyAndMessageAsList(Set<? extends ConstraintViolation<?>> constraintViolations, String separator) {
-        List<String> errorMessages = new ArrayList<>();
-        for (ConstraintViolation<?> violation : constraintViolations) {
-            errorMessages.add(violation.getPropertyPath() + separator + violation.getMessage());
-        }
-        return errorMessages;
-    }
-
-    /**
-     * 获取验证异常(ConstraintViolationException)中的验证错误信息<br/>
-     * 获取Set&lt;ConstraintViolations&gt;转换成为List&lt;property +separator+ message&gt;<br/>
-     *
-     * @param e Bean验证异常
-     * @return 验证异常信息Map集合
-     */
-    public static List<String> extractPropertyAndMessageAsList(ConstraintViolationException e, String separator) {
-        return extractPropertyAndMessageAsList(e.getConstraintViolations(), separator);
+    public static <T> FieldError createFieldError(ConstraintViolation<T> constraint) {
+        return new FieldError(
+                constraint.getPropertyPath().toString(),
+                constraint.getInvalidValue(),
+                constraint.getMessage(),
+                constraint.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName()
+        );
     }
 }

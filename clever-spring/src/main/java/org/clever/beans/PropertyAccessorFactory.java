@@ -21,4 +21,14 @@ public final class PropertyAccessorFactory {
     public static BeanWrapper forBeanPropertyAccess(Object target) {
         return new BeanWrapperImpl(target);
     }
+
+    /**
+     * 获取给定目标对象的PropertyAccessor，以直接字段样式访问属性。
+     * @param target 要包装的目标对象
+     * @return 属性访问器
+     * @see DirectFieldAccessor
+     */
+    public static ConfigurablePropertyAccessor forDirectFieldAccess(Object target) {
+        return new DirectFieldAccessor(target);
+    }
 }

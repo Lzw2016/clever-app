@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.clever.core.model.ValidMessage;
+import org.clever.core.validator.FieldError;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -64,9 +64,9 @@ public class AjaxResponse<T> extends BaseResponse {
      */
     private String exceptionStack;
     /**
-     * 表单数据验证的错误消息
+     * 请求数据验证的错误消息
      */
-    private List<ValidMessage> validMessageList;
+    private List<FieldError> fieldErrors;
 
     /**
      * 默认构造，默认请求操作失败 success=false
@@ -138,28 +138,14 @@ public class AjaxResponse<T> extends BaseResponse {
 
     /**
      * 增加验证错误消息<br/>
-     *
-     * @param validMessage 服务端数据验证错误消息
-     * @return 当前对象
      */
-    public AjaxResponse<?> addValidMessage(ValidMessage validMessage) {
-        if (this.validMessageList == null) {
-            this.validMessageList = new ArrayList<>();
+    public AjaxResponse<?> addFieldError(FieldError fieldError) {
+        if (this.fieldErrors == null) {
+            this.fieldErrors = new ArrayList<>();
         }
-        this.validMessageList.add(validMessage);
+        this.fieldErrors.add(fieldError);
         return this;
     }
-
-//    /**
-//     * 增加验证错误消息<br/>
-//     *
-//     * @param fieldError Spring的验证错误消息
-//     * @return 当前对象
-//     */
-//    public AjaxMessage<?> addValidMessage(FieldError fieldError) {
-//        ValidMessage validMessage = new ValidMessage(fieldError);
-//        return addValidMessage(validMessage);
-//    }
 
     /**
      * 设置异常信息<br/>

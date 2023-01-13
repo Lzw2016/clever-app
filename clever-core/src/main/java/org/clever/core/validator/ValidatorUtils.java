@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 /**
  * 字段验证器
  */
+@SuppressWarnings("JavadocLinkAsPlainText")
 public class ValidatorUtils {
     /**
      * 英文字母 、数字和下划线

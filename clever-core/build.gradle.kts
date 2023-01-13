@@ -20,4 +20,7 @@ dependencies {
     compileOnly("com.github.axet:kaptcha")
     compileOnly("com.github.bingoohuang:patchca")
     compileOnly("com.belerweb:pinyin4j")
+    // 单元测试
+    testImplementation("org.hibernate.validator:hibernate-validator")
+    testImplementation("org.glassfish:javax.el")
 }

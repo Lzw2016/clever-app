@@ -26,11 +26,7 @@ public class ConfigDataBootstrap {
     private final ConfigDataEnvironmentUpdateListener environmentUpdateListener;
 
     public ConfigDataBootstrap() {
-        this(
-                new DefaultResourceLoader(),
-                new ArrayList<>(),
-                ConfigDataEnvironmentUpdateListener.NONE
-        );
+        this(new DefaultResourceLoader(), new ArrayList<>(), ConfigDataEnvironmentUpdateListener.NONE);
     }
 
     public ConfigDataBootstrap(ResourceLoader resourceLoader,

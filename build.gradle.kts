@@ -107,10 +107,10 @@ subprojects {
             dependency("javax.persistence:persistence-api:1.0.2")
             dependency("jakarta.persistence:jakarta.persistence-api:2.2.3")
             dependency("com.google.code.findbugs:jsr305:3.0.2")
-            dependency("org.glassfish:javax.el:3.0.1-b09")
+            dependency("org.glassfish:javax.el:3.0.0")
             // validation
             dependency("javax.validation:validation-api:2.0.1.Final")
-            dependency("org.hibernate.validator:hibernate-validator:6.2.3.Final")
+            dependency("org.hibernate.validator:hibernate-validator:6.2.5.Final")
             // time
             dependency("joda-time:joda-time:2.10.14")
             dependency("org.joda:joda-convert:2.2.2")

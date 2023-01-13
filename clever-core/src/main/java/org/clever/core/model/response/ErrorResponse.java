@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.clever.core.exception.BusinessException;
-import org.clever.core.model.ValidMessage;
+import org.clever.core.validator.FieldError;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,9 +47,9 @@ public class ErrorResponse extends BaseResponse {
      */
     private String path;
     /**
-     * 表单数据验证的错误消息
+     * 请求数据验证的错误消息
      */
-    private List<ValidMessage> validMessageList;
+    private List<FieldError> fieldErrors;
 
     public ErrorResponse() {
         this(null, null, 500, null);
@@ -115,13 +115,13 @@ public class ErrorResponse extends BaseResponse {
     }
 
     /**
-     * 添加请求参数校验错误
+     * 增加验证错误消息<br/>
      */
-    public ErrorResponse addValidMessage(ValidMessage validMessage) {
-        if (validMessageList == null) {
-            validMessageList = new ArrayList<>();
+    public ErrorResponse addFieldError(FieldError fieldError) {
+        if (this.fieldErrors == null) {
+            this.fieldErrors = new ArrayList<>();
         }
-        validMessageList.add(validMessage);
+        this.fieldErrors.add(fieldError);
         return this;
     }
 }

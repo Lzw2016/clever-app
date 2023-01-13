@@ -39,6 +39,57 @@ public abstract class PropertyAccessorUtils {
     }
 
     /**
+     * 确定给定属性路径的规范名称。从映射键中删除周围引号：<br>
+     * {@code map['key']} &rarr; {@code map[key]}<br>
+     * {@code map["key"]} &rarr; {@code map[key]}
+     *
+     * @param propertyName bean属性路径
+     * @return 属性路径的规范表示
+     */
+    public static String canonicalPropertyName(String propertyName) {
+        if (propertyName == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(propertyName);
+        int searchIndex = 0;
+        while (searchIndex != -1) {
+            int keyStart = sb.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX, searchIndex);
+            searchIndex = -1;
+            if (keyStart != -1) {
+                int keyEnd = sb.indexOf(PropertyAccessor.PROPERTY_KEY_SUFFIX, keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length());
+                if (keyEnd != -1) {
+                    String key = sb.substring(keyStart + PropertyAccessor.PROPERTY_KEY_PREFIX.length(), keyEnd);
+                    if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
+                        sb.delete(keyStart + 1, keyStart + 2);
+                        sb.delete(keyEnd - 2, keyEnd - 1);
+                        keyEnd = keyEnd - 2;
+                    }
+                    searchIndex = keyEnd + PropertyAccessor.PROPERTY_KEY_SUFFIX.length();
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 确定给定属性路径的规范名称。
+     *
+     * @param propertyNames bean属性路径（作为数组）
+     * @return 属性路径的规范表示（作为相同大小的数组）
+     * @see #canonicalPropertyName(String)
+     */
+    public static String[] canonicalPropertyNames(String[] propertyNames) {
+        if (propertyNames == null) {
+            return null;
+        }
+        String[] result = new String[propertyNames.length];
+        for (int i = 0; i < propertyNames.length; i++) {
+            result[i] = canonicalPropertyName(propertyNames[i]);
+        }
+        return result;
+    }
+
+    /**
      * 确定给定属性路径中的第一个嵌套属性分隔符，忽略键中的点(如"map[my.key]")
      *
      * @param propertyPath 要检查的属性路径
