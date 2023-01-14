@@ -16,6 +16,7 @@ import org.clever.web.support.mvc.annotation.RequestParam;
 import org.clever.web.support.mvc.annotation.RequestPart;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -68,7 +69,7 @@ public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentR
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception {
         RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
         boolean isRequired = ((requestPart == null || requestPart.required()) && !parameter.isOptional());
         String name = getPartName(parameter, requestPart);

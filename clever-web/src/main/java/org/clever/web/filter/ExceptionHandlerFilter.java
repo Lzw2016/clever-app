@@ -5,6 +5,8 @@ import org.clever.web.FilterRegistrar;
 import org.clever.web.utils.GlobalExceptionHandler;
 
 /**
+ * 全局异常处理 Filter
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/12/25 21:31 <br/>
  */

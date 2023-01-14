@@ -17,7 +17,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RequestHeader {
-
     /**
      * {@link #name} 的别名。
      */

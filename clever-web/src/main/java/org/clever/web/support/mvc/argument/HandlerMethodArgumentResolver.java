@@ -1,9 +1,9 @@
 package org.clever.web.support.mvc.argument;
 
 import org.clever.core.MethodParameter;
-import org.clever.core.Ordered;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 用于在给定请求的上下文中将方法参数解析为参数值的策略接口
@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
  * 作者：lizw <br/>
  * 创建时间：2023/01/01 21:10 <br/>
  */
-public interface HandlerMethodArgumentResolver extends Ordered {
+public interface HandlerMethodArgumentResolver {
     /**
      * 此解析器是否支持给定的 {@linkplain MethodParameter 方法参数}
      *
@@ -25,13 +25,9 @@ public interface HandlerMethodArgumentResolver extends Ordered {
      *
      * @param parameter 要解析的方法参数
      * @param request   当前请求
+     * @param response  当前响应
      * @return 已解析的参数值，如果不可解析，则为 {@code null}
      * @throws Exception 如果参数值的准备出错
      */
-    Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception;
-
-    @Override
-    default double getOrder() {
-        return 0;
-    }
+    Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception;
 }

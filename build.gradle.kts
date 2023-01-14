@@ -17,6 +17,7 @@ object Ver {
     const val springCloudVersion = "2021.0.4"
     const val javalinVersion = "4.6.7"
     const val kotlinVersion = "1.6.21"
+    const val kotlinxCoroutinesVersion = "1.6.4"
     const val groovyVersion = "4.0.5"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.32"
@@ -95,6 +96,7 @@ subprojects {
         imports {
             mavenBom("org.springframework.boot:spring-boot-dependencies:${Ver.springBootVersion}")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:${Ver.springCloudVersion}")
+            mavenBom("org.jetbrains.kotlinx:kotlinx-coroutines-bom:${Ver.kotlinxCoroutinesVersion}")
         }
 
         dependencies {

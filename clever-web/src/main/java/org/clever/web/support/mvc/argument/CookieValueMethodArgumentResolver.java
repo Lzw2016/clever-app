@@ -19,10 +19,10 @@ import javax.servlet.http.HttpServletRequest;
  * 作者：lizw <br/>
  * 创建时间：2023/01/04 22:57 <br/>
  */
-public class ServletCookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
     private final UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
-    public ServletCookieValueMethodArgumentResolver() {
+    public CookieValueMethodArgumentResolver() {
         super();
     }
 

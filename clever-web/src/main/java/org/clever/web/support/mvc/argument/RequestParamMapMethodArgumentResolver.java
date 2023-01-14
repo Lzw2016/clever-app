@@ -12,6 +12,7 @@ import org.clever.web.http.multipart.support.MultipartResolutionDelegate;
 import org.clever.web.support.mvc.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -44,7 +45,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception {
         ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
         if (MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
             // MultiValueMap

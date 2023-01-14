@@ -11,6 +11,7 @@ import org.clever.web.http.MediaType;
 import org.clever.web.support.mvc.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
@@ -44,7 +45,7 @@ public class RequestBodyMethodProcessor implements HandlerMethodArgumentResolver
      * @throws HttpMessageNotReadableException 如果 {@link RequestBody#required()} 是 {@code true} 并且没有内容或者没有合适的转换器来读取内容
      */
     @Override
-    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception {
         parameter = parameter.nestedIfOptional();
         InputStream body = getBody(request);
         Type targetType = parameter.getNestedGenericParameterType();

@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * 跨域处理 Filter
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 21:58 <br/>
  */

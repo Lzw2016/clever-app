@@ -6,6 +6,7 @@ import org.clever.util.MultiValueMap;
 import org.clever.web.support.mvc.annotation.RequestHeader;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
@@ -29,7 +30,7 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Class<?> paramType = parameter.getParameterType();
         if (MultiValueMap.class.isAssignableFrom(paramType)) {
             MultiValueMap<String, String> result = new LinkedMultiValueMap<>();

@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * 简单输出请求访问日志(仅记录请求路径和耗时)
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 21:56 <br/>
  */

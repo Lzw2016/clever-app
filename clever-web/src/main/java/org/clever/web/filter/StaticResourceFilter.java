@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 处理静态资源的访问，参考Spring {@code ResourceHttpRequestHandler}
+ * 静态资源的访问Filter，参考Spring {@code ResourceHttpRequestHandler}
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 22:00 <br/>

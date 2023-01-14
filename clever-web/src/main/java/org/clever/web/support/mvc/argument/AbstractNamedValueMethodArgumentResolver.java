@@ -13,6 +13,7 @@ import org.clever.web.support.mvc.format.WebConversionService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,7 +48,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception {
         NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
         String resolvedName = namedValueInfo.name;
         MethodParameter nestedParameter = parameter.nestedIfOptional();
