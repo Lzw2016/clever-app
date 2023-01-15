@@ -29,7 +29,7 @@ public abstract class PropertiesLoaderUtils {
      * 由{@code clever.xml.ignore}系统属性控制的布尔标志，指示框架忽略XML，即不初始化与XML相关的基础结构。
      * <p>默认值为 "false".
      */
-    private static final boolean shouldIgnoreXml = false; // SpringProperties.getFlag("clever.xml.ignore");
+    public static boolean SHOULD_IGNORE_XML = false;
 
     /**
      * 从给定的EncodedResource加载属性，可能会为属性文件定义特定的编码。
@@ -68,7 +68,7 @@ public abstract class PropertiesLoaderUtils {
         try {
             String filename = resource.getResource().getFilename();
             if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
-                if (shouldIgnoreXml) {
+                if (SHOULD_IGNORE_XML) {
                     throw new UnsupportedOperationException("XML support disabled");
                 }
                 stream = resource.getInputStream();
@@ -115,7 +115,7 @@ public abstract class PropertiesLoaderUtils {
         try (InputStream is = resource.getInputStream()) {
             String filename = resource.getFilename();
             if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
-                if (shouldIgnoreXml) {
+                if (SHOULD_IGNORE_XML) {
                     throw new UnsupportedOperationException("XML support disabled");
                 }
                 props.loadFromXML(is);
@@ -163,7 +163,7 @@ public abstract class PropertiesLoaderUtils {
             ResourceUtils.useCachesIfNecessary(con);
             try (InputStream is = con.getInputStream()) {
                 if (resourceName.endsWith(XML_FILE_EXTENSION)) {
-                    if (shouldIgnoreXml) {
+                    if (SHOULD_IGNORE_XML) {
                         throw new UnsupportedOperationException("XML support disabled");
                     }
                     props.loadFromXML(is);

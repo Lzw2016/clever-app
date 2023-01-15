@@ -25,11 +25,11 @@ public class ResourcePropertiesPersister extends DefaultPropertiesPersister {
      * 由{@code clever.xml.ignore}系统属性控制的布尔标志，指示框架忽略XML，即不初始化与XML相关的基础结构。
      * <p>默认值为 "false".
      */
-    private static final boolean shouldIgnoreXml = false; // SpringProperties.getFlag("clever.xml.ignore");
+    public static boolean SHOULD_IGNORE_XML = false;
 
     @Override
     public void loadFromXml(Properties props, InputStream is) throws IOException {
-        if (shouldIgnoreXml) {
+        if (SHOULD_IGNORE_XML) {
             throw new UnsupportedOperationException("XML support disabled");
         }
         super.loadFromXml(props, is);
@@ -37,7 +37,7 @@ public class ResourcePropertiesPersister extends DefaultPropertiesPersister {
 
     @Override
     public void storeToXml(Properties props, OutputStream os, String header) throws IOException {
-        if (shouldIgnoreXml) {
+        if (SHOULD_IGNORE_XML) {
             throw new UnsupportedOperationException("XML support disabled");
         }
         super.storeToXml(props, os, header);
@@ -45,7 +45,7 @@ public class ResourcePropertiesPersister extends DefaultPropertiesPersister {
 
     @Override
     public void storeToXml(Properties props, OutputStream os, String header, String encoding) throws IOException {
-        if (shouldIgnoreXml) {
+        if (SHOULD_IGNORE_XML) {
             throw new UnsupportedOperationException("XML support disabled");
         }
         super.storeToXml(props, os, header, encoding);

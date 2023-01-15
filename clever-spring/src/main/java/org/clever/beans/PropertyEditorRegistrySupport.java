@@ -36,7 +36,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
     /**
      * 不初始化与XML相关的基础结构，默认值为“false”
      */
-    private static final boolean shouldIgnoreXml = false; // SpringProperties.getFlag("clever.xml.ignore");
+    public static boolean SHOULD_IGNORE_XML = false;
 
     private ConversionService conversionService;
     private boolean defaultEditorsActive = false;
@@ -130,7 +130,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
         this.defaultEditors.put(Currency.class, new CurrencyEditor());
         this.defaultEditors.put(File.class, new FileEditor());
         this.defaultEditors.put(InputStream.class, new InputStreamEditor());
-        if (!shouldIgnoreXml) {
+        if (!SHOULD_IGNORE_XML) {
             this.defaultEditors.put(InputSource.class, new InputSourceEditor());
         }
         this.defaultEditors.put(Locale.class, new LocaleEditor());

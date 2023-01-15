@@ -27,7 +27,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
      *
      * @see #suppressGetenvAccess()
      */
-    public static final String IGNORE_GETENV_PROPERTY_NAME = "clever.getenv.ignore";
+    public static boolean IGNORE_GETENV_PROPERTY_NAME = false;
     /**
      * 要设置以指定活动profile的属性名称：{@value}。值可以用逗号分隔。
      * 请注意，某些shell环境（如Bash）不允许在变量名中使用句点字符。
@@ -403,8 +403,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
      * @see #IGNORE_GETENV_PROPERTY_NAME
      */
     protected boolean suppressGetenvAccess() {
-        return false;
-        // return SpringProperties.getFlag(IGNORE_GETENV_PROPERTY_NAME);
+        return IGNORE_GETENV_PROPERTY_NAME;
     }
 
     @Override

@@ -43,8 +43,10 @@ import java.util.logging.LogManager;
  * 创建时间：2022/07/14 21:57 <br/>
  */
 public class LogbackLoggingSystem extends Slf4JLoggingSystem {
-    // 静态final字段，便于Graal删除代码
-    private static final boolean XML_ENABLED = true; // !SpringProperties.getFlag("clever.xml.ignore");
+    /**
+     * 静态final字段，便于Graal删除代码
+     */
+    public static boolean XML_ENABLED = true;
     private static final String CONFIGURATION_FILE_PROPERTY = "logback.configurationFile";
     private static final LogLevels<Level> LEVELS = new LogLevels<>();
 

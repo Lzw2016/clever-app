@@ -50,7 +50,7 @@ springframework
 [OK] TimeZoneAwareLocaleContext
 [OK] SimpleLocaleContext
 [OK] SimpleTimeZoneAwareLocaleContext
-[删] SpringProperties -- ???
+[OK] 删除SpringProperties
 [  ]
 
 --- 注解扩展

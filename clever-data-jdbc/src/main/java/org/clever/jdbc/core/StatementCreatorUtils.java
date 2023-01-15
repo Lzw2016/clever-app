@@ -35,8 +35,7 @@ public abstract class StatementCreatorUtils {
      * <p>如果您在运行时遇到错误行为，例如{@code getParameterType}引发异常（JBoss as 7报告）或性能问题（PostgreSQL报告）时出现连接池问题，
      * 请考虑将此标志切换为“true”。
      */
-    public static final String IGNORE_GETPARAMETERTYPE_PROPERTY_NAME = "clever.jdbc.getParameterType.ignore";
-    static boolean shouldIgnoreGetParameterType = false; // SpringProperties.getFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
+    public static boolean SHOULD_IGNORE_GET_PARAMETER_TYPE = false;
     private static final Logger logger = LoggerFactory.getLogger(StatementCreatorUtils.class);
     private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<>(32);
 
@@ -196,7 +195,7 @@ public abstract class StatementCreatorUtils {
         if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER && typeName == null)) {
             boolean useSetObject = false;
             Integer sqlTypeToUse = null;
-            if (!shouldIgnoreGetParameterType) {
+            if (!SHOULD_IGNORE_GET_PARAMETER_TYPE) {
                 try {
                     sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
                 } catch (SQLException ex) {
