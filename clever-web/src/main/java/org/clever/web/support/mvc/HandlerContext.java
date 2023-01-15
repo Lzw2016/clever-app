@@ -63,7 +63,7 @@ public class HandlerContext {
     @Getter
     public static class Finally extends HandlerContext {
         /**
-         * mvc的返回值
+         * mvc 执行 HandlerMethod 的返回值
          */
         private final Object result;
         /**
