@@ -18,6 +18,7 @@ import org.clever.core.exception.BusinessException;
 import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
+import org.clever.web.JavalinAttrKey;
 import org.clever.web.WebServerBootstrap;
 import org.clever.web.filter.*;
 import org.clever.web.plugin.ExceptionHandlerPlugin;
@@ -129,6 +130,7 @@ public class StartApp {
         JsonMapper jsonMapper = javalin.attribute(JsonMapperKt.JSON_MAPPER_KEY);
         if (jsonMapper != null) {
             AppContextHolder.registerBean("javalinJsonMapper", jsonMapper, true);
+            AppContextHolder.registerBean("javalinObjectMapper", javalin._conf.inner.appAttributes.get(JavalinAttrKey.JACKSON_OBJECT_MAPPER), true);
         }
         // 自定义请求处理
         javalin.get("/test", ctx -> {

@@ -38,6 +38,11 @@ web:
       max: 250
       maxQueueCapacity: 100
       idleTimeout: 60d
+  webSocketConfig: {}
+  jackson:
+    dateFormat: 'yyyy-MM-dd HH:mm:ss'
+  misc:
+    showJavalinBanner: false
   echo:
     enable: true
     ignorePaths:

@@ -80,7 +80,7 @@ public class WebServerBootstrap {
             // 初始化杂项配置
             WebConfig.MiscConfig misc = webConfig.getMisc();
             Optional.of(misc).orElse(new WebConfig.MiscConfig()).apply(config);
-            // 自定义 JsonMapper TODO 配置化 ObjectMapper
+            // 自定义 JsonMapper
             JacksonConfig jackson = webConfig.getJackson();
             ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
             Optional.of(jackson).orElse(new JacksonConfig()).apply(webServerMapper);
