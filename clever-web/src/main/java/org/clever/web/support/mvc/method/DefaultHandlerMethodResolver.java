@@ -28,9 +28,10 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         Assert.notNull(hotReload, "参数 hotReload 不能为 null");
         Assert.notNull(locationMap, "参数 locationMap 不能为 null");
         if (hotReload.isEnable()) {
+            // TODO 这里的 ClassLoader 需要全新的？
             hotReloadClassLoader = new HotReloadClassLoader(
                     Thread.currentThread().getContextClassLoader(),
-//                    new Launcher().getClassLoader(),
+                    // new Launcher().getClassLoader(),
                     hotReload.getLocations().stream().map(location -> locationMap.getOrDefault(location, location)).toArray(String[]::new)
             );
             // 监听 class 文件变化

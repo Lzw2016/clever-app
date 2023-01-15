@@ -112,11 +112,11 @@ public class HttpServletRequestUtils {
      */
     @SneakyThrows
     public static String getRequestParams(HttpServletRequest request) {
-//        if (request instanceof MultipartHttpServletRequest) {
-//            // TODO 用户上传文件请求[系统判断]
-//            return "";
-//        }
         if (request == null) {
+            return "";
+        }
+        // 用户上传文件请求[系统判断]
+        if (request.getClass().getName().contains("MultipartHttpServletRequest")) {
             return "";
         }
         StringBuilder paramStr = new StringBuilder();
