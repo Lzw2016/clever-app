@@ -17,7 +17,9 @@ import java.util.Map;
  * 创建时间：2023/01/14 13:22 <br/>
  */
 public class ContextMethodArgumentResolver implements HandlerMethodArgumentResolver {
-    // 保存 JavalinConfig.inner.appAttributes
+    /**
+     * 保存 JavalinConfig.inner.appAttributes
+     */
     private final Map<String, Object> appAttributes;
 
     /**

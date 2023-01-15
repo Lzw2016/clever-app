@@ -79,13 +79,13 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
     /**
      * 空的 HandlerMethod 参数
      */
-    private static final Object[] EMPTY_ARGS = new Object[0];
+    protected static final Object[] EMPTY_ARGS = new Object[0];
     @Getter
-    private final MvcConfig mvcConfig;
+    protected final MvcConfig mvcConfig;
     @Getter
-    private final Map<String, String> locationMap;
+    protected final Map<String, String> locationMap;
     @Getter
-    private HandlerMethodResolver handlerMethodResolver;
+    protected HandlerMethodResolver handlerMethodResolver;
     protected final List<HandlerMethodArgumentResolver> argumentResolvers = new CopyOnWriteArrayList<>();
     protected final List<HandlerInterceptor> interceptors = new CopyOnWriteArrayList<>();
 
