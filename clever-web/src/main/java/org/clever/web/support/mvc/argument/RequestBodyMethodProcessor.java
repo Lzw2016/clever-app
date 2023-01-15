@@ -17,7 +17,10 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -55,20 +58,7 @@ public class RequestBodyMethodProcessor implements HandlerMethodArgumentResolver
         if (arg == null && checkRequired(parameter)) {
             throw new HttpMessageNotReadableException("Required request body is missing: " + parameter.getExecutable().toGenericString());
         }
-        return adaptArgumentIfNecessary(arg, parameter);
-    }
-
-    protected Object adaptArgumentIfNecessary(Object arg, MethodParameter parameter) {
-        if (parameter.getParameterType() == Optional.class) {
-            if (arg == null
-                    || (arg instanceof Collection && ((Collection<?>) arg).isEmpty())
-                    || (arg instanceof Object[] && ((Object[]) arg).length == 0)) {
-                return Optional.empty();
-            } else {
-                return Optional.of(arg);
-            }
-        }
-        return arg;
+        return HandlerMethodArgumentResolver.adaptArgumentIfNecessary(arg, parameter);
     }
 
     public InputStream getBody(HttpServletRequest request) throws IOException {

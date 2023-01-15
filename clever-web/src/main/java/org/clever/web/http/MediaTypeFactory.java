@@ -24,7 +24,7 @@ import java.util.Optional;
  */
 public final class MediaTypeFactory {
     private static final String MIME_TYPES_FILE_NAME = "/org/clever/http/mime.types";
-    private static final MultiValueMap<String, MediaType> fileExtensionToMediaTypes = parseMimeTypes();
+    private static final MultiValueMap<String, MediaType> FILE_EXTENSION_TO_MEDIA_TYPES = parseMimeTypes();
 
     private MediaTypeFactory() {
     }
@@ -94,7 +94,7 @@ public final class MediaTypeFactory {
         List<MediaType> mediaTypes = null;
         String ext = StringUtils.getFilenameExtension(filename);
         if (ext != null) {
-            mediaTypes = fileExtensionToMediaTypes.get(ext.toLowerCase(Locale.ENGLISH));
+            mediaTypes = FILE_EXTENSION_TO_MEDIA_TYPES.get(ext.toLowerCase(Locale.ENGLISH));
         }
         return (mediaTypes != null ? mediaTypes : Collections.emptyList());
     }

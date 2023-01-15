@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Optional;
 
 /**
  * 解析以下方法参数：
@@ -132,23 +130,7 @@ public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentR
                 throw new MissingServletRequestPartException(name);
             }
         }
-        return adaptArgumentIfNecessary(arg, parameter);
-    }
-
-    /**
-     * 如有必要，根据方法参数调整给定参数
-     */
-    protected Object adaptArgumentIfNecessary(Object arg, MethodParameter parameter) {
-        if (parameter.getParameterType() == Optional.class) {
-            if (arg == null
-                    || (arg instanceof Collection && ((Collection<?>) arg).isEmpty())
-                    || (arg instanceof Object[] && ((Object[]) arg).length == 0)) {
-                return Optional.empty();
-            } else {
-                return Optional.of(arg);
-            }
-        }
-        return arg;
+        return HandlerMethodArgumentResolver.adaptArgumentIfNecessary(arg, parameter);
     }
 
     private String getPartName(MethodParameter methodParam, RequestPart requestPart) {

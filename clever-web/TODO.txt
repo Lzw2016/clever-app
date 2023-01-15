@@ -1,10 +1,10 @@
 [OK] 全局异常处理
 [OK] 跨域问题
 [OK] 静态资源问题
-[  ] MVC参数绑定
+[80] MVC参数绑定
 [  ] MVC数据验证@Validated
 [  ] MVC拦截问题
-[  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码
+[  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
 [  ]
 [  ]
 [  ]
