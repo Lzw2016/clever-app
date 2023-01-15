@@ -18,7 +18,15 @@ import java.util.Map;
  */
 public class ContextMethodArgumentResolver implements HandlerMethodArgumentResolver {
     // 保存 JavalinConfig.inner.appAttributes
-    private Map<String, Object> appAttributes = Collections.emptyMap();
+    private final Map<String, Object> appAttributes;
+
+    /**
+     * @param appAttributes JavalinConfig.inner.appAttributes
+     */
+    public ContextMethodArgumentResolver(Map<String, Object> appAttributes) {
+        super();
+        this.appAttributes = appAttributes;
+    }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {

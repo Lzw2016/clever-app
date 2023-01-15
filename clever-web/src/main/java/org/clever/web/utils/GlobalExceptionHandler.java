@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentMap;
  * 创建时间：2022/12/25 21:44 <br/>
  */
 @Slf4j
-public class GlobalExceptionHandler {
+public abstract class GlobalExceptionHandler {
     private static final ConcurrentMap<Class<? extends Throwable>, ExceptionHandler<? extends Throwable>> HANDLERS = new ConcurrentHashMap<>();
     private static final ExceptionHandler<Throwable> DEFAULT_HANDLER;
 

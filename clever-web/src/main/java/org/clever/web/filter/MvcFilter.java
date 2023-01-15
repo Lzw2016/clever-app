@@ -1,5 +1,8 @@
 package org.clever.web.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.javalin.Javalin;
+import io.javalin.core.plugin.Plugin;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +16,7 @@ import org.clever.core.tuples.TupleTwo;
 import org.clever.util.Assert;
 import org.clever.util.ObjectUtils;
 import org.clever.web.FilterRegistrar;
+import org.clever.web.JavalinAttrKey;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.http.HttpMethod;
 import org.clever.web.support.mvc.HandlerContext;
@@ -21,6 +25,7 @@ import org.clever.web.support.mvc.HandlerMethod;
 import org.clever.web.support.mvc.argument.*;
 import org.clever.web.support.mvc.method.DefaultHandlerMethodResolver;
 import org.clever.web.support.mvc.method.HandlerMethodResolver;
+import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +45,7 @@ import java.util.stream.IntStream;
  * 创建时间：2023/01/06 13:29 <br/>
  */
 @Slf4j
-public class MvcFilter implements FilterRegistrar.FilterFuc {
+public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
     public static MvcFilter create(String rootPath, MvcConfig mvcConfig) {
         return new MvcFilter(rootPath, mvcConfig);
     }
@@ -68,6 +73,10 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
     }
 
     /**
+     * 当前 Javalin 实例
+     */
+    protected Javalin javalin;
+    /**
      * 空的 HandlerMethod 参数
      */
     private static final Object[] EMPTY_ARGS = new Object[0];
@@ -88,19 +97,20 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
         this.locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations()));
         this.mvcConfig = mvcConfig;
         this.handlerMethodResolver = new DefaultHandlerMethodResolver(hotReload, this.locationMap);
-        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
     }
 
     /**
      * 返回要使用的参数解析器列表
      */
     protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
+        ObjectMapper objectMapper = javalin.attribute(JavalinAttrKey.JACKSON_OBJECT_MAPPER);
+        // 设置默认的 HandlerMethodArgumentResolver
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>(16);
         // Annotation-based argument resolution
         resolvers.add(new RequestParamMethodArgumentResolver(false));
         resolvers.add(new RequestParamMapMethodArgumentResolver());
-        resolvers.add(new RequestBodyMethodProcessor(null));
-        resolvers.add(new RequestPartMethodArgumentResolver(null));
+        resolvers.add(new RequestBodyMethodProcessor(objectMapper));
+        resolvers.add(new RequestPartMethodArgumentResolver(objectMapper));
         resolvers.add(new RequestHeaderMethodArgumentResolver());
         resolvers.add(new RequestHeaderMapMethodArgumentResolver());
         resolvers.add(new CookieValueMethodArgumentResolver());
@@ -109,9 +119,15 @@ public class MvcFilter implements FilterRegistrar.FilterFuc {
         resolvers.add(new ServletResponseMethodArgumentResolver());
         // Catch-all
         resolvers.add(new PrincipalMethodArgumentResolver());
-        resolvers.add(new ContextMethodArgumentResolver());
+        resolvers.add(new ContextMethodArgumentResolver(javalin._conf.inner.appAttributes));
         resolvers.add(new RequestParamMethodArgumentResolver(true));
         return resolvers;
+    }
+
+    @Override
+    public void apply(@NotNull Javalin app) {
+        this.javalin = app;
+        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
     }
 
     @Override

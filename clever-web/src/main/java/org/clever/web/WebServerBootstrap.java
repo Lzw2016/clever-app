@@ -80,11 +80,12 @@ public class WebServerBootstrap {
             // 初始化杂项配置
             WebConfig.MiscConfig misc = webConfig.getMisc();
             Optional.of(misc).orElse(new WebConfig.MiscConfig()).apply(config);
-            // 自定义 JsonMapper
+            // 自定义 JsonMapper TODO 配置化 ObjectMapper
             JacksonConfig jackson = webConfig.getJackson();
             ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
             Optional.of(jackson).orElse(new JacksonConfig()).apply(webServerMapper);
             config.jsonMapper(new JavalinJackson(webServerMapper));
+            config.inner.appAttributes.put(JavalinAttrKey.JACKSON_OBJECT_MAPPER, webServerMapper);
             config.configureServletContextHandler(servletContextHandler -> {
                 // 注册自定义 Filter
                 filterRegistrar.init(servletContextHandler);

@@ -116,7 +116,7 @@ public class HttpServletRequestUtils {
             return "";
         }
         // 用户上传文件请求[系统判断]
-        if (request.getClass().getName().contains("MultipartHttpServletRequest")) {
+        if (isMultipartRequest(request)) {
             return "";
         }
         StringBuilder paramStr = new StringBuilder();
@@ -131,6 +131,17 @@ public class HttpServletRequestUtils {
         String result = paramStr.toString();
         result = URLDecoder.decode(result, "UTF-8");
         return result;
+    }
+
+    /**
+     * 判断当前请求是否是上传文件请求
+     */
+    public static boolean isMultipartRequest(HttpServletRequest request) {
+        final String contentType = request.getContentType();
+        if ((contentType != null && contentType.toLowerCase().startsWith("multipart/"))) {
+            return true;
+        }
+        return request.getClass().getName().contains("MultipartHttpServletRequest");
     }
 
     public static String getIpAddress(HttpServletRequest request) {

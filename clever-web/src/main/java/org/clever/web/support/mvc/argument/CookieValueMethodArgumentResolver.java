@@ -1,11 +1,11 @@
 package org.clever.web.support.mvc.argument;
 
 import org.clever.core.MethodParameter;
+import org.clever.core.http.CookieUtils;
 import org.clever.util.Assert;
 import org.clever.web.exception.MissingRequestCookieException;
 import org.clever.web.exception.ServletRequestBindingException;
 import org.clever.web.support.mvc.annotation.CookieValue;
-import org.clever.web.utils.UrlPathHelper;
 import org.clever.web.utils.WebUtils;
 
 import javax.servlet.http.Cookie;
@@ -20,8 +20,6 @@ import javax.servlet.http.HttpServletRequest;
  * 创建时间：2023/01/04 22:57 <br/>
  */
 public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
-    private final UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
-
     public CookieValueMethodArgumentResolver() {
         super();
     }
@@ -37,7 +35,7 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodA
         if (Cookie.class.isAssignableFrom(parameter.getNestedParameterType())) {
             return cookieValue;
         } else if (cookieValue != null) {
-            return this.urlPathHelper.decodeRequestString(request, cookieValue.getValue());
+            return CookieUtils.decodeRequestString(request, cookieValue.getValue());
         } else {
             return null;
         }

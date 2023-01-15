@@ -57,12 +57,13 @@ public class StartApp {
         WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(environment);
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
+        MvcFilter mvcFilter = MvcFilter.create(rootPath, environment);
         webServerBootstrap.getFilterRegistrar()
                 .addFilter(ExceptionHandlerFilter.INSTANCE, "/*", "ExceptionHandlerFilter", filterOrder.incrL1())
                 .addFilter(EchoFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
                 .addFilter(CorsFilter.create(environment), "/*", "CorsFilter", filterOrder.incrL1())
                 .addFilter(StaticResourceFilter.create(rootPath, environment), "/*", "StaticResourceFilter", filterOrder.incrL1())
-                .addFilter(MvcFilter.create(rootPath, environment), "/*", "MvcFilter", filterOrder.incrL1())
+                .addFilter(mvcFilter, "/*", "MvcFilter", filterOrder.incrL1())
                 .addFilter(ctx -> {
                     log.info("### Filter_1_之前");
                     ctx.next();
@@ -117,7 +118,8 @@ public class StartApp {
         // 注册插件
         OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
-                .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1());
+                .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1())
+                .addPlugin(mvcFilter, "MVC插件", pluginOrder.incrL1());
         // 注册 JavalinEventListener
         // webServerBootstrap.getJavalinEventListenerRegistrar()
         //         .addListener()

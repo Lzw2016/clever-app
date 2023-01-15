@@ -1,27 +1,28 @@
 package org.clever.core.http;
 
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.clever.util.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 
 /**
  * 作者：LiZW <br/>
  * 创建时间：2016-5-8 16:31 <br/>
  */
+@Slf4j
 public class CookieUtils {
     /**
      * Cookie的默认编码格式
      */
-    private final static String Default_Cookie_Encode = "UTF-8";
-    /**
-     * Cookie的默认路径，为根目录，其所有子目录都能访问
-     */
-    public final static String Default_Cookie_Path = "/";
+    public static String DEFAULT_COOKIE_ENCODE = "ISO-8859-1";
 
     /**
      * 设置Cookie
@@ -41,7 +42,7 @@ public class CookieUtils {
         if (maxAge >= 0) {
             cookie.setMaxAge(maxAge);
         }
-        cookie.setValue(URLEncoder.encode(value, Default_Cookie_Encode));
+        cookie.setValue(encodeRequestString(response, value));
         response.addCookie(cookie);
     }
 
@@ -91,7 +92,7 @@ public class CookieUtils {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(name)) {
                     try {
-                        value = URLDecoder.decode(cookie.getValue(), Default_Cookie_Encode);
+                        value = decodeRequestString(request, cookie.getValue());
                     } catch (Exception ignored) {
                         value = cookie.getValue();
                     }
@@ -143,6 +144,60 @@ public class CookieUtils {
      * @param name     名称
      */
     public static void delCookieForRooPath(HttpServletRequest request, HttpServletResponse response, String name) {
-        delCookie(request, response, name, Default_Cookie_Path);
+        delCookie(request, response, name, "/");
+    }
+
+    /**
+     * 使用 URLDecoder 解码给定的源字符串。编码将从请求中获取，回退到默认的“ISO-8859-1”。
+     * <p>默认实现使用 {@code URLDecoder.decode(input, enc)}。
+     *
+     * @param request 当前 HTTP 请求
+     * @param source  要解码的字符串
+     * @return 解码后的字符串
+     * @see javax.servlet.ServletRequest#getCharacterEncoding
+     * @see java.net.URLDecoder#decode(String, String)
+     */
+    @SuppressWarnings("deprecation")
+    public static String decodeRequestString(HttpServletRequest request, String source) {
+        String enc = request.getCharacterEncoding();
+        if (enc == null) {
+            enc = DEFAULT_COOKIE_ENCODE;
+        }
+        try {
+            return StringUtils.uriDecode(source, Charset.forName(enc));
+        } catch (UnsupportedCharsetException ex) {
+            if (log.isDebugEnabled()) {
+                log.debug("Could not decode request string [" + source + "] with encoding '" + enc
+                        + "': falling back to platform default encoding; exception message: " + ex.getMessage());
+            }
+            return URLDecoder.decode(source);
+        }
+    }
+
+    /**
+     * 使用 URLEncoder 编码给定的源字符串。编码将从响应中获取，回退到默认的“ISO-8859-1”。
+     * <p>默认实现使用 {@code URLEncoder.encode(input, enc)}。
+     *
+     * @param response 当前 HTTP 响应
+     * @param source  要解码的字符串
+     * @return 解码后的字符串
+     * @see javax.servlet.ServletResponse#getCharacterEncoding
+     * @see java.net.URLEncoder#encode(String, String)
+     */
+    @SuppressWarnings("deprecation")
+    public static String encodeRequestString(HttpServletResponse response, String source) {
+        String enc = response.getCharacterEncoding();
+        if (enc == null) {
+            enc = DEFAULT_COOKIE_ENCODE;
+        }
+        try {
+            return URLEncoder.encode(source, enc);
+        } catch (UnsupportedEncodingException ex) {
+            if (log.isDebugEnabled()) {
+                log.debug("Could not encode request string [" + source + "] with encoding '" + enc
+                        + "': falling back to platform default encoding; exception message: " + ex.getMessage());
+            }
+            return URLEncoder.encode(source);
+        }
     }
 }
