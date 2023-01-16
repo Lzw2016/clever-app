@@ -83,6 +83,9 @@ public abstract class GlobalExceptionHandler {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void handle(Throwable exception, HttpServletRequest request, HttpServletResponse response) {
+        if (response.isCommitted()) {
+            return;
+        }
         // RuntimeException 找到实的异常类型
         if (exception instanceof RuntimeException) {
             Throwable cause = exception;

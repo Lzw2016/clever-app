@@ -12,6 +12,7 @@ import org.clever.core.BannerUtils;
 import org.clever.core.MethodParameter;
 import org.clever.core.ResourcePathUtils;
 import org.clever.core.env.Environment;
+import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.util.Assert;
 import org.clever.util.ObjectUtils;
@@ -19,6 +20,8 @@ import org.clever.web.FilterRegistrar;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.http.HttpMethod;
+import org.clever.web.http.HttpStatus;
+import org.clever.web.http.MediaType;
 import org.clever.web.support.mvc.HandlerContext;
 import org.clever.web.support.mvc.HandlerInterceptor;
 import org.clever.web.support.mvc.HandlerMethod;
@@ -88,6 +91,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
     protected HandlerMethodResolver handlerMethodResolver;
     protected final List<HandlerMethodArgumentResolver> argumentResolvers = new CopyOnWriteArrayList<>();
     protected final List<HandlerInterceptor> interceptors = new CopyOnWriteArrayList<>();
+    protected ObjectMapper objectMapper = JacksonMapper.getInstance().getMapper();
 
     public MvcFilter(String rootPath, MvcConfig mvcConfig) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
@@ -103,7 +107,10 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
      * 返回要使用的参数解析器列表
      */
     protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
-        ObjectMapper objectMapper = javalin.attribute(JavalinAttrKey.JACKSON_OBJECT_MAPPER);
+        ObjectMapper mapper = javalin.attribute(JavalinAttrKey.JACKSON_OBJECT_MAPPER);
+        if (mapper != null) {
+            objectMapper = mapper;
+        }
         // 设置默认的 HandlerMethodArgumentResolver
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>(16);
         // Annotation-based argument resolution
@@ -163,14 +170,22 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
             if (exception != null) {
                 throw exception;
             }
+            // 响应客户端数据
             if (returnValue != null && !ctx.res.isCommitted()) {
-                // 响应客户端数据
-                serializeRes(returnValue, ctx.req, ctx.res);
+                handleReturnValue(returnValue, ctx.req, ctx.res);
                 ctx.res.flushBuffer();
             }
         } catch (Throwable e) {
-            // TODO 异常类型
-            throw new RuntimeException(e);
+            if (e instanceof IOException) {
+                throw (IOException) e;
+            }
+            if (e instanceof ServletException) {
+                throw (ServletException) e;
+            }
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new ServletException(e);
         }
     }
 
@@ -337,12 +352,12 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
     }
 
     /**
-     *
+     * 响应客户端数据
      */
-    protected void serializeRes(Object returnValue, HttpServletRequest request, HttpServletResponse response) {
-//                response.setContentType(CONTENT_TYPE);
-//                String json = serializeRes(result);
-//                response.getWriter().println(json);
+    protected void handleReturnValue(Object returnValue, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getWriter(), returnValue);
     }
 
     /**
