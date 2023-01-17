@@ -13,6 +13,10 @@ import java.io.IOException;
  * 创建时间：2023/01/17 17:42 <br/>
  */
 public class DefSettingFilter implements FilterRegistrar.FilterFuc {
+    public static DefSettingFilter create(WebConfig.HttpConfig http) {
+        return new DefSettingFilter(http);
+    }
+
     private final WebConfig.HttpConfig http;
 
     public DefSettingFilter(WebConfig.HttpConfig http) {
@@ -22,9 +26,11 @@ public class DefSettingFilter implements FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
+        // 统一 ContentType
         if (StringUtils.isNotBlank(http.getDefaultContentType())) {
             ctx.res.setContentType(http.getDefaultContentType());
         }
+        // 统一 CharacterEncoding
         if (StringUtils.isNotBlank(http.getDefaultCharacterEncoding())) {
             ctx.res.setCharacterEncoding(http.getDefaultCharacterEncoding());
         }
