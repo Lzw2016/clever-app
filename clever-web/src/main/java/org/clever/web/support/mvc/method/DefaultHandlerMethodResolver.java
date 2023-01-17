@@ -1,10 +1,7 @@
 package org.clever.web.support.mvc.method;
 
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.AppShutdownHook;
-import org.clever.core.HotReloadClassLoader;
-import org.clever.core.MethodParameter;
-import org.clever.core.OrderIncrement;
+import org.clever.core.*;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.util.Assert;
@@ -23,6 +20,7 @@ import java.util.Set;
  * 创建时间：2023/01/08 19:09 <br/>
  */
 public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
+    private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
     private final HotReloadClassLoader hotReloadClassLoader;
 
     public DefaultHandlerMethodResolver(MvcConfig.HotReload hotReload, Map<String, String> locationMap) {
@@ -85,7 +83,9 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         // 创建 HandlerMethod
         MethodParameter[] parameters = new MethodParameter[method.getParameterCount()];
         for (int idx = 0; idx < parameters.length; idx++) {
-            parameters[idx] = new MethodParameter(method, idx);
+            MethodParameter methodParameter = new MethodParameter(method, idx);
+            methodParameter.initParameterNameDiscovery(parameterNameDiscoverer);
+            parameters[idx] = methodParameter;
         }
         return new HandlerMethod(reqPath, handlerClass, method, parameters);
     }
