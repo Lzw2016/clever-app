@@ -219,12 +219,16 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
      * 从IOC容器中获取参数值
      */
     protected Object resolveArgumentFromIOC(MethodParameter parameter) {
-        Object arg;
+        Object arg = null;
         final String parameterName = parameter.getParameterName();
         final Class<?> parameterType = parameter.getParameterType();
-        arg = AppContextHolder.getBean(parameterName, parameterType, false);
+        if (StringUtils.isNotBlank(parameterName)) {
+            arg = AppContextHolder.getBean(parameterName, parameterType, false);
+        }
         if (arg == null) {
-            arg = AppContextHolder.getBean(parameterName, false);
+            if (StringUtils.isNotBlank(parameterName)) {
+                arg = AppContextHolder.getBean(parameterName, false);
+            }
             if (!parameterType.isInstance(arg)) {
                 arg = AppContextHolder.getBean(parameterType, false);
             }

@@ -14,6 +14,7 @@ import org.clever.web.support.mvc.HandlerMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Set;
 
@@ -78,7 +79,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
             return null;
         }
         Method method = ReflectionsUtils.getStaticMethod(handlerClass, methodName);
-        if (method == null) {
+        if (method == null || !Modifier.isPublic(method.getModifiers())) {
             return null;
         }
         // 创建 HandlerMethod

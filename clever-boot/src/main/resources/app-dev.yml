@@ -16,8 +16,8 @@ web:
   mvc:
     path: '/api/'
     httpMethod: [ 'POST', 'GET' ]
-    packagePrefix: 'org.clever.app.'
-    allowPackages: [ ]
+    packagePrefix: 'org.clever.app.mvc.'
+    allowPackages: [ 'org.clever.app.mvc.' ]
     hotReload:
       enable: true
       interval: 1s
