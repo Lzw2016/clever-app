@@ -84,6 +84,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         MethodParameter[] parameters = new MethodParameter[method.getParameterCount()];
         for (int idx = 0; idx < parameters.length; idx++) {
             MethodParameter methodParameter = new MethodParameter(method, idx);
+            // TODO ParameterNameDiscoverer 参数不支持热重载 | LocalVariableTableParameterNameDiscoverer 有缓存！
             methodParameter.initParameterNameDiscovery(parameterNameDiscoverer);
             parameters[idx] = methodParameter;
         }

@@ -359,7 +359,9 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
      * 响应客户端数据
      */
     protected void handleReturnValue(Object returnValue, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setStatus(HttpStatus.OK.value());
+        if (response.getStatus() == 0) {
+            response.setStatus(HttpStatus.OK.value());
+        }
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(response.getWriter(), returnValue);
     }

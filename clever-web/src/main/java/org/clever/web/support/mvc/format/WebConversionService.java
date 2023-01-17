@@ -71,6 +71,13 @@ public class WebConversionService extends DefaultFormattingConversionService {
         String datePattern = dateTimeFormatters.getDatePattern();
         if (datePattern != null) {
             DateFormatter dateFormatter = new DateFormatter(datePattern);
+            dateFormatter.setFallbackPatterns(
+                    "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd",
+                    "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM/dd",
+                    "yyyyMMdd HH:mm:ss", "yyyyMMdd HH:mm", "yyyyMMdd",
+                    "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+            );
             dateFormatterRegistrar.setFormatter(dateFormatter);
         }
         dateFormatterRegistrar.registerFormatters(this);

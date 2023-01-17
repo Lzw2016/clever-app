@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
     public static WebConversionService CONVERSION = new WebConversionService(
-            new DateTimeFormatters().dateFormat("yyyy-MM-dd")
+            new DateTimeFormatters().dateFormat("yyyy-MM-dd HH:mm:ss")
                     .timeFormat("HH:mm:ss")
                     .dateTimeFormat("yyyy-MM-dd HH:mm:ss")
     );
