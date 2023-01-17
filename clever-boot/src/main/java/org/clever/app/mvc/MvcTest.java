@@ -1,10 +1,12 @@
 package org.clever.app.mvc;
 
 import io.javalin.http.Context;
+import io.javalin.http.UploadedFile;
 import lombok.Data;
 import org.clever.core.http.CookieUtils;
 import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
+import org.clever.web.http.multipart.MultipartFile;
 import org.clever.web.support.mvc.annotation.CookieValue;
 import org.clever.web.support.mvc.annotation.RequestBody;
 import org.clever.web.support.mvc.annotation.RequestHeader;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,6 +71,21 @@ public class MvcTest {
         return res;
     }
 
+    public static Object t06_1(Context ctx) {
+        List<UploadedFile> list = ctx.uploadedFiles();
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", list.size());
+        return res;
+    }
+
+    // RequestParam | -> RequestParamMapMethodArgumentResolver
+    public static Object t06_2(@RequestParam Map<String, MultipartFile> map) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", map.keySet());
+        res.put("b", map.size());
+        return res;
+    }
+
     @Data
     public static final class BodyParam {
         private String a;
@@ -104,7 +122,7 @@ public class MvcTest {
 
     // CookieValue | CookieValueMethodArgumentResolver
     public static Object t11(@CookieValue(required = false) String a, Context ctx) {
-        CookieUtils.setCookieForCurrentPath(ctx.res, "a", "时间: " + System.currentTimeMillis() + "| 特殊字符: ':, '");
+        CookieUtils.setCookieForCurrentPath(ctx.res, "a", "时间: " + System.currentTimeMillis() + " | 特殊字符: ':, '");
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", a);
         return res;

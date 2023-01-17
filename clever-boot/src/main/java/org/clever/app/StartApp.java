@@ -62,7 +62,7 @@ public class StartApp {
         OrderIncrement filterOrder = new OrderIncrement();
         MvcFilter mvcFilter = MvcFilter.create(rootPath, environment);
         webServerBootstrap.getFilterRegistrar()
-                .addFilter(DefSettingFilter.create(webConfig.getHttp()), "/*", "DefSettingFilter", filterOrder.incrL1())
+                .addFilter(DefSettingFilter.create(rootPath, webConfig.getHttp()), "/*", "DefSettingFilter", filterOrder.incrL1())
                 .addFilter(ExceptionHandlerFilter.INSTANCE, "/*", "ExceptionHandlerFilter", filterOrder.incrL1())
                 .addFilter(EchoFilter.create(environment), "/*", "EchoFilter", filterOrder.incrL1())
                 .addFilter(CorsFilter.create(environment), "/*", "CorsFilter", filterOrder.incrL1())

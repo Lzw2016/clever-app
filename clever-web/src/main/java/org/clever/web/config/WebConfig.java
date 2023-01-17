@@ -12,6 +12,7 @@ import org.clever.util.unit.DataSize;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
+import javax.servlet.MultipartConfigElement;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -86,6 +87,10 @@ public class WebConfig {
          */
         private Duration asyncRequestTimeout = Duration.ofSeconds(0);
         /**
+         * 用于配置 {@link MultipartConfigElement} 的属性
+         */
+        private Multipart multipart = new Multipart();
+        /**
          * 花哨的 404 处理程序，在 "/path" 上返回 404 的指定文件(常用于单页面应用)
          */
         private List<SinglePageRoot> singlePageRoot = new ArrayList<>();
@@ -105,6 +110,34 @@ public class WebConfig {
          * 为指定源启用 CORS，默认：[]
          */
         private Set<String> enableCorsForOrigin = new HashSet<>();
+
+        @Data
+        public static class Multipart {
+            /**
+             * 是否启用分段上传支持
+             */
+            private boolean enabled = true;
+            /**
+             * 上传文件的临时位置，默认值：“System.getProperty("java.io.tmpdir")”
+             */
+            private String location = System.getProperty("java.io.tmpdir");
+            /**
+             * 最大文件大小，默认值：“10MB”
+             */
+            private DataSize maxFileSize = DataSize.ofMegabytes(10);
+            /**
+             * 最大请求大小，默认值：“50MB”
+             */
+            private DataSize maxRequestSize = DataSize.ofMegabytes(50);
+            /**
+             * 将文件写入磁盘的阈值，，默认值：“4KB”
+             */
+            private DataSize fileSizeThreshold = DataSize.ofKilobytes(4);
+            /**
+             * 是否在文件或参数访问时延迟解析多部分请求
+             */
+            private boolean resolveLazily = false;
+        }
 
         @Data
         public static class SinglePageRoot {

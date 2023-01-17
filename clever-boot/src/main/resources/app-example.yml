@@ -21,6 +21,13 @@ web:
     autogenerateEtags: true
     maxRequestSize: 10MB
     defaultCharacterEncoding: 'utf-8'
+    multipart:
+      enabled: true
+      location: 'data/tmp'
+      maxFileSize: 10MB
+      maxRequestSize: 50MB
+      fileSizeThreshold: 4KB
+      resolveLazily: false
     singlePageRoot:
       - hostedPath: '/xml'
         filePath: 'logback-app.xml'
