@@ -7,10 +7,7 @@ import org.clever.core.http.CookieUtils;
 import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.http.multipart.MultipartFile;
-import org.clever.web.support.mvc.annotation.CookieValue;
-import org.clever.web.support.mvc.annotation.RequestBody;
-import org.clever.web.support.mvc.annotation.RequestHeader;
-import org.clever.web.support.mvc.annotation.RequestParam;
+import org.clever.web.support.mvc.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,6 +83,14 @@ public class MvcTest {
         return res;
     }
 
+    // RequestParam | -> RequestParamMapMethodArgumentResolver
+    public static Object t06_3(@RequestParam MultiValueMap<String, MultipartFile> map) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", map.keySet());
+        res.put("b", map.size());
+        return res;
+    }
+
     @Data
     public static final class BodyParam {
         private String a;
@@ -98,10 +103,10 @@ public class MvcTest {
     }
 
     // RequestPart | RequestPartMethodArgumentResolver
-    public static Object t08() {
-        // TODO 文件上传
+    public static Object t08(@RequestPart MultipartFile a) {
         Map<String, Object> res = new LinkedHashMap<>();
-        res.put("a", 1);
+        res.put("a", a.getName());
+        res.put("b", a.getSize());
         return res;
     }
 
