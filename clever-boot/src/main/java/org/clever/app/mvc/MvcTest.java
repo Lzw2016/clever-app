@@ -1,6 +1,7 @@
 package org.clever.app.mvc;
 
 import io.javalin.http.Context;
+import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.support.mvc.annotation.RequestParam;
 
@@ -51,6 +52,14 @@ public class MvcTest {
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", a);
         res.put("b", b);
+        return res;
+    }
+
+    // RequestParam | -> RequestParamMethodArgumentResolver
+    public static Object t06(@RequestParam MultiValueMap<String, String> map_1, @RequestParam Map<String, String> map_2) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", map_1);
+        res.put("b", map_2);
         return res;
     }
 }

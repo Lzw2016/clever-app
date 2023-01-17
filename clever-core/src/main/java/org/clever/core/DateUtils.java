@@ -22,7 +22,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 
     /**
      * 定义可能出现的时间日期格式<br />
-     * 参考 https://www.jianshu.com/p/cf2f1f26dd0a
+     * 参考: <a href="https://www.jianshu.com/p/cf2f1f26dd0a">连接</a>
      */
     private static final String[] parsePatterns = {
             yyyy_MM_dd, yyyy_MM_dd_HH_mm_ss, yyyy_MM_dd_HH_mm,
