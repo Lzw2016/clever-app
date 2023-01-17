@@ -1,8 +1,13 @@
 package org.clever.app.mvc;
 
 import io.javalin.http.Context;
+import lombok.Data;
+import org.clever.core.http.CookieUtils;
 import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
+import org.clever.web.support.mvc.annotation.CookieValue;
+import org.clever.web.support.mvc.annotation.RequestBody;
+import org.clever.web.support.mvc.annotation.RequestHeader;
 import org.clever.web.support.mvc.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,11 +60,53 @@ public class MvcTest {
         return res;
     }
 
-    // RequestParam | -> RequestParamMethodArgumentResolver
+    // RequestParam | -> RequestParamMapMethodArgumentResolver
     public static Object t06(@RequestParam MultiValueMap<String, String> map_1, @RequestParam Map<String, String> map_2) {
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", map_1);
         res.put("b", map_2);
+        return res;
+    }
+
+    @Data
+    public static final class BodyParam {
+        private String a;
+        private Date b;
+    }
+
+    // RequestBody | RequestBodyMethodProcessor
+    public static Object t07(@RequestBody BodyParam bodyParam) {
+        return bodyParam;
+    }
+
+    // RequestPart | RequestPartMethodArgumentResolver
+    public static Object t08() {
+        // TODO 文件上传
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", 1);
+        return res;
+    }
+
+    // RequestHeader | RequestHeaderMethodArgumentResolver
+    public static Object t09(@RequestHeader String a) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", a);
+        return res;
+    }
+
+    // RequestHeader | RequestHeaderMapMethodArgumentResolver
+    public static Object t10(@RequestHeader MultiValueMap<String, String> map_1, @RequestHeader Map<String, String> map_2) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", map_1);
+        res.put("b", map_2);
+        return res;
+    }
+
+    // CookieValue | CookieValueMethodArgumentResolver
+    public static Object t11(@CookieValue(required = false) String a, Context ctx) {
+        CookieUtils.setCookieForCurrentPath(ctx.res, "a", "时间: " + System.currentTimeMillis() + "| 特殊字符: ':, '");
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", a);
         return res;
     }
 }

@@ -199,16 +199,17 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
             args = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
                 MethodParameter parameter = parameters[i];
-                args[i] = resolveArgumentFromIOC(parameter);
-                if (args[i] != null) {
-                    continue;
-                }
+                boolean resolved = false;
                 for (HandlerMethodArgumentResolver argumentResolver : argumentResolvers) {
                     if (!argumentResolver.supportsParameter(parameter, ctx.req)) {
                         continue;
                     }
                     args[i] = argumentResolver.resolveArgument(parameter, ctx.req, ctx.res);
+                    resolved = true;
                     break;
+                }
+                if (!resolved) {
+                    args[i] = resolveArgumentFromIOC(parameter);
                 }
             }
         }

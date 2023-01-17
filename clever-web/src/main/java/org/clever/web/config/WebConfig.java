@@ -70,9 +70,13 @@ public class WebConfig {
          */
         private boolean enforceSsl = false;
         /**
-         * 默认内容类型，默认："application/json"
+         * 默认响应内容类型，默认："application/json"
          */
         private String defaultContentType = ContentType.JSON;
+        /**
+         * 默认响应字符编码，默认："utf-8"
+         */
+        private String defaultCharacterEncoding = "utf-8";
         /**
          * 最大请求大小，默认：1MB (要么增加这个，要么使用 InputStream 来处理大的请求)
          */

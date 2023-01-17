@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
 
 /**
  * 作者：LiZW <br/>
@@ -22,7 +20,7 @@ public class CookieUtils {
     /**
      * Cookie的默认编码格式
      */
-    public static String DEFAULT_COOKIE_ENCODE = "ISO-8859-1";
+    public static String DEFAULT_COOKIE_ENCODE = "UTF-8";
 
     /**
      * 设置Cookie
@@ -148,7 +146,7 @@ public class CookieUtils {
     }
 
     /**
-     * 使用 URLDecoder 解码给定的源字符串。编码将从请求中获取，回退到默认的“ISO-8859-1”。
+     * 使用 URLDecoder 解码给定的源字符串。编码将从请求中获取，回退到默认的“UTF-8”。
      * <p>默认实现使用 {@code URLDecoder.decode(input, enc)}。
      *
      * @param request 当前 HTTP 请求
@@ -164,8 +162,8 @@ public class CookieUtils {
             enc = DEFAULT_COOKIE_ENCODE;
         }
         try {
-            return StringUtils.uriDecode(source, Charset.forName(enc));
-        } catch (UnsupportedCharsetException ex) {
+            return URLDecoder.decode(source, enc);
+        } catch (UnsupportedEncodingException ex) {
             if (log.isDebugEnabled()) {
                 log.debug("Could not decode request string [" + source + "] with encoding '" + enc
                         + "': falling back to platform default encoding; exception message: " + ex.getMessage());
@@ -175,11 +173,11 @@ public class CookieUtils {
     }
 
     /**
-     * 使用 URLEncoder 编码给定的源字符串。编码将从响应中获取，回退到默认的“ISO-8859-1”。
+     * 使用 URLEncoder 编码给定的源字符串。编码将从响应中获取，回退到默认的“UTF-8”。
      * <p>默认实现使用 {@code URLEncoder.encode(input, enc)}。
      *
      * @param response 当前 HTTP 响应
-     * @param source  要解码的字符串
+     * @param source   要解码的字符串
      * @return 解码后的字符串
      * @see javax.servlet.ServletResponse#getCharacterEncoding
      * @see java.net.URLEncoder#encode(String, String)
