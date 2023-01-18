@@ -45,8 +45,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
      *
      * @param useDefaultResolution 在默认解析模式下，作为简单类型的方法参数被视为请求参数，即使它没有被注释，请求参数名称是从方法参数名称派生的。
      */
-    public RequestParamMethodArgumentResolver(boolean useDefaultResolution) {
-        super();
+    public RequestParamMethodArgumentResolver(boolean useCache, boolean useDefaultResolution) {
+        super(useCache);
         this.useDefaultResolution = useDefaultResolution;
     }
 

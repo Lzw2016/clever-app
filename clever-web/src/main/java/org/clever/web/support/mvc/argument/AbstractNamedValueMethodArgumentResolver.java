@@ -40,11 +40,14 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
                     .dateTimeFormat("yyyy-MM-dd HH:mm:ss")
     );
     protected final SimpleTypeConverter typeConverter;
+    // 是否使用 namedValueInfoCache
+    protected final boolean useCache;
     protected final ConcurrentMap<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
 
-    protected AbstractNamedValueMethodArgumentResolver() {
+    protected AbstractNamedValueMethodArgumentResolver(boolean useCache) {
         this.typeConverter = new SimpleTypeConverter();
         this.typeConverter.setConversionService(CONVERSION);
+        this.useCache = useCache;
     }
 
     @Override
@@ -170,11 +173,16 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
      * 获取给定方法参数的命名值
      */
     private NamedValueInfo getNamedValueInfo(MethodParameter parameter) {
-        NamedValueInfo namedValueInfo = this.namedValueInfoCache.get(parameter);
+        NamedValueInfo namedValueInfo = null;
+        if (useCache) {
+            namedValueInfo = this.namedValueInfoCache.get(parameter);
+        }
         if (namedValueInfo == null) {
             namedValueInfo = createNamedValueInfo(parameter);
             namedValueInfo = updateNamedValueInfo(parameter, namedValueInfo);
-            this.namedValueInfoCache.put(parameter, namedValueInfo);
+            if (useCache) {
+                this.namedValueInfoCache.put(parameter, namedValueInfo);
+            }
         }
         return namedValueInfo;
     }

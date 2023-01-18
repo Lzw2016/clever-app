@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServletRequest;
  * 创建时间：2023/01/04 22:57 <br/>
  */
 public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
-    public CookieValueMethodArgumentResolver() {
-        super();
+    public CookieValueMethodArgumentResolver(boolean useCache) {
+        super(useCache);
     }
 
     @Override

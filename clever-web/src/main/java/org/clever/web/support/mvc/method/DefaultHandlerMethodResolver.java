@@ -37,6 +37,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
     /**
      * 是否使用热重载
      */
+    @Getter
     protected final boolean enableHotReload;
     /**
      * 支持读取 Method 原始参数名

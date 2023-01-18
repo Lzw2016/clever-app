@@ -89,23 +89,4 @@ public class MvcConfig {
                 "./out/production/classes"
         );
     }
-
-//    /**
-//     * 应用当前配置到 Javalin
-//     */
-//    public void apply(Javalin javalin) {
-//        // 注入MVC处理功能
-//        WebConfig.MvcConfig mvc = webConfig.getMvc();
-//        Optional.of(mvc).orElse(new WebConfig.MvcConfig()).apply(javalin);
-//
-//        Assert.notNull(javalin, "参数 javalin 不能为空");
-//        MvcConfig mvc = this;
-//        Handler handler = ctx -> {
-//            // TODO 处理请求
-//        };
-//        for (HandlerType handlerType : mvc.getHttpMethod()) {
-//            javalin.addHandler(handlerType, mvc.getPath(), handler);
-//        }
-//        // TODO 注入MVC处理功能
-//    }
 }

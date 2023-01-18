@@ -111,23 +111,24 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         if (mapper != null) {
             objectMapper = mapper;
         }
+        final boolean useCache = !handlerMethodResolver.isEnableHotReload();
         // 设置默认的 HandlerMethodArgumentResolver
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>(16);
         // Annotation-based argument resolution
-        resolvers.add(new RequestParamMethodArgumentResolver(false));
+        resolvers.add(new RequestParamMethodArgumentResolver(useCache, false));
         resolvers.add(new RequestParamMapMethodArgumentResolver());
         resolvers.add(new RequestBodyMethodProcessor(objectMapper));
         resolvers.add(new RequestPartMethodArgumentResolver(objectMapper));
-        resolvers.add(new RequestHeaderMethodArgumentResolver());
+        resolvers.add(new RequestHeaderMethodArgumentResolver(useCache));
         resolvers.add(new RequestHeaderMapMethodArgumentResolver());
-        resolvers.add(new CookieValueMethodArgumentResolver());
+        resolvers.add(new CookieValueMethodArgumentResolver(useCache));
         // Type-based argument resolution
         resolvers.add(new ServletRequestMethodArgumentResolver());
         resolvers.add(new ServletResponseMethodArgumentResolver());
         // Catch-all
         resolvers.add(new PrincipalMethodArgumentResolver());
         resolvers.add(new ContextMethodArgumentResolver(javalin._conf.inner.appAttributes));
-        resolvers.add(new RequestParamMethodArgumentResolver(true));
+        resolvers.add(new RequestParamMethodArgumentResolver(useCache, true));
         return resolvers;
     }
 

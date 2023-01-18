@@ -21,4 +21,9 @@ public interface HandlerMethodResolver {
      * @param mvcConfig mvc配置
      */
     HandlerMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, MvcConfig mvcConfig) throws Exception;
+
+    /**
+     * 是否启用了热重载
+     */
+    boolean isEnableHotReload();
 }

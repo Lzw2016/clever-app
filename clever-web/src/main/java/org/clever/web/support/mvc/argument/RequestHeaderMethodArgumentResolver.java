@@ -22,8 +22,8 @@ import java.util.Map;
  * 创建时间：2023/01/09 21:49 <br/>
  */
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
-    public RequestHeaderMethodArgumentResolver() {
-        super();
+    public RequestHeaderMethodArgumentResolver(boolean useCache) {
+        super(useCache);
     }
 
     @Override
