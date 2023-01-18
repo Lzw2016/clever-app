@@ -13,19 +13,21 @@ import java.io.IOException;
 import java.util.Optional;
 
 /**
+ * 应用web配置过滤器
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/01/17 17:42 <br/>
  */
-public class DefSettingFilter implements FilterRegistrar.FilterFuc {
-    public static DefSettingFilter create(String rootPath, WebConfig.HttpConfig http) {
-        return new DefSettingFilter(rootPath, http);
+public class ApplyConfigFilter implements FilterRegistrar.FilterFuc {
+    public static ApplyConfigFilter create(String rootPath, WebConfig.HttpConfig http) {
+        return new ApplyConfigFilter(rootPath, http);
     }
 
     public static final String MULTIPART_CONFIG_ATTRIBUTE = "org.eclipse.jetty.multipartConfig";
     private final String rootPath;
     private final WebConfig.HttpConfig http;
 
-    public DefSettingFilter(String rootPath, WebConfig.HttpConfig http) {
+    public ApplyConfigFilter(String rootPath, WebConfig.HttpConfig http) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(http, "参数 http 不能为null");
         this.rootPath = rootPath;
