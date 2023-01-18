@@ -66,9 +66,9 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         this.rootPath = rootPath;
         this.locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations()));
         if (hotReload.isEnable()) {
-            // TODO 这里的 ClassLoader 需要全新的？
             hotReloadClassLoader = new HotReloadClassLoader(
-                    Thread.currentThread().getContextClassLoader(),
+                    this.getClass().getClassLoader(),
+                    // Thread.currentThread().getContextClassLoader(),
                     // new Launcher().getClassLoader(),
                     hotReload.getLocations().stream().map(location -> locationMap.getOrDefault(location, location)).toArray(String[]::new)
             );
@@ -195,6 +195,9 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         // 变化的文件(包含删除的文件)
         classLastModifiedMap.forEach((absolutePath, lastModified) -> {
             Long last = newLastModifiedMap.get(absolutePath);
+            // if (last == null) {
+            //     return;
+            // }
             if (!Objects.equals(last, lastModified)) {
                 changedClass.add(absolutePath);
             }

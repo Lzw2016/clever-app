@@ -112,7 +112,7 @@ public class MvcTest {
         return res;
     }
 
-//    public static final String abc = "@@@###";
+    public static final String abc = "@@@###";
 
     // RequestHeader | RequestHeaderMethodArgumentResolver
     @SneakyThrows
@@ -120,7 +120,7 @@ public class MvcTest {
         Thread.sleep(100);
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", a);
-//        res.put("abc", abc);
+        res.put("abc", abc);
         return res;
     }
 
