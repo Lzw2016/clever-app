@@ -30,8 +30,18 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
     private static final Logger logger = LoggerFactory.getLogger(LocalVariableTableParameterNameDiscoverer.class);
     // marker object for classes that do not have any debug info
     private static final Map<Executable, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();
-    // the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
+    // 是否使用 parameterNamesCache
+    private final boolean useCache;
+    // the cache uses a nested index (value is a map) to keep the top level cache relatively small(in size)
     private final Map<Class<?>, Map<Executable, String[]>> parameterNamesCache = new ConcurrentHashMap<>(32);
+
+    public LocalVariableTableParameterNameDiscoverer(boolean useCache) {
+        this.useCache = useCache;
+    }
+
+    public LocalVariableTableParameterNameDiscoverer() {
+        this(true);
+    }
 
     @Override
     public String[] getParameterNames(Method method) {
@@ -46,7 +56,12 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
     private String[] doGetParameterNames(Executable executable) {
         Class<?> declaringClass = executable.getDeclaringClass();
-        Map<Executable, String[]> map = this.parameterNamesCache.computeIfAbsent(declaringClass, this::inspectClass);
+        Map<Executable, String[]> map;
+        if (useCache) {
+            map = this.parameterNamesCache.computeIfAbsent(declaringClass, this::inspectClass);
+        } else {
+            map = inspectClass(declaringClass);
+        }
         return (map != NO_DEBUG_INFO_MAP ? map.get(executable) : null);
     }
 

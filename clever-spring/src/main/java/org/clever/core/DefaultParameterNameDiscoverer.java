@@ -14,12 +14,16 @@ package org.clever.core;
  * @see KotlinReflectionParameterNameDiscoverer
  */
 public class DefaultParameterNameDiscoverer extends PrioritizedParameterNameDiscoverer {
-    public DefaultParameterNameDiscoverer() {
+    public DefaultParameterNameDiscoverer(boolean useCache) {
         // 升级到Kotlin 1.5时删除此条件包含, see https://youtrack.jetbrains.com/issue/KT-44594
         if (KotlinDetector.isKotlinReflectPresent() && !NativeDetector.inNativeImage()) {
             addDiscoverer(new KotlinReflectionParameterNameDiscoverer());
         }
         addDiscoverer(new StandardReflectionParameterNameDiscoverer());
-        addDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+        addDiscoverer(new LocalVariableTableParameterNameDiscoverer(useCache));
+    }
+
+    public DefaultParameterNameDiscoverer() {
+        this(true);
     }
 }

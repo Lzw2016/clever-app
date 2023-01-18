@@ -84,9 +84,9 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
      */
     protected static final Object[] EMPTY_ARGS = new Object[0];
     @Getter
-    protected final MvcConfig mvcConfig;
+    protected final String rootPath;
     @Getter
-    protected final Map<String, String> locationMap;
+    protected final MvcConfig mvcConfig;
     @Getter
     protected HandlerMethodResolver handlerMethodResolver;
     protected final List<HandlerMethodArgumentResolver> argumentResolvers = new CopyOnWriteArrayList<>();
@@ -98,9 +98,9 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
         MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
         mvcConfig.setHotReload(hotReload);
-        this.locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations()));
+        this.rootPath = rootPath;
         this.mvcConfig = mvcConfig;
-        this.handlerMethodResolver = new DefaultHandlerMethodResolver(hotReload, this.locationMap);
+        this.handlerMethodResolver = new DefaultHandlerMethodResolver(rootPath, hotReload);
     }
 
     /**

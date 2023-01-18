@@ -24,8 +24,8 @@ web:
       excludePackages: [ ]
       locations:
         - './clever-boot/out/production/classes'
-        - './clever-boot/build/classes/java/main'
-        - './clever-boot/build/classes/kotlin/main'
+        #- './clever-boot/build/classes/java/main'
+        #- './clever-boot/build/classes/kotlin/main'
 
 mybatis:
   enable: true

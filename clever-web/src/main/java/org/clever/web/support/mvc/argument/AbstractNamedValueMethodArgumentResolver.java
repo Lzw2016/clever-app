@@ -14,8 +14,8 @@ import org.clever.web.support.mvc.format.WebConversionService;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 用于从命名值解析方法参数的抽象基类。
@@ -40,7 +40,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
                     .dateTimeFormat("yyyy-MM-dd HH:mm:ss")
     );
     protected final SimpleTypeConverter typeConverter;
-    protected final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
+    protected final ConcurrentMap<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
 
     protected AbstractNamedValueMethodArgumentResolver() {
         this.typeConverter = new SimpleTypeConverter();

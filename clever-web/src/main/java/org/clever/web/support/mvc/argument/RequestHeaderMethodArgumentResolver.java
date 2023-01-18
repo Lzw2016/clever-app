@@ -34,7 +34,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
     @Override
     protected Object resolveValue(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
         Enumeration<String> headerValues = request.getHeaders(name);
-        if (headerValues != null) {
+        if (headerValues != null && headerValues.hasMoreElements()) {
             List<String> list = Collections.list(headerValues);
             return (list.size() == 1 ? list.get(0) : list.toArray(new String[0]));
         } else {

@@ -26,7 +26,7 @@ public class ClassTest {
         for (Parameter parameter : method.getParameters()) {
             log.info("###--> {}: {}", parameter.getType().getName(), parameter.getName());
         }
-        String[] parameterNames = new LocalVariableTableParameterNameDiscoverer().getParameterNames(method);
+        String[] parameterNames = new LocalVariableTableParameterNameDiscoverer(true).getParameterNames(method);
         log.info("###--> {}", Arrays.toString(parameterNames));
     }
 }
