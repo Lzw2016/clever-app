@@ -60,3 +60,14 @@ jdbc:
       minimumIdle: 2
       maximumPoolSize: 100
       connectionTestQuery: 'select 1'
+
+startup-cmd-task:
+  - name: 定时编译项目
+    workDir: './'
+    cmd:
+      windows: 'gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+      linux: ''
+      macos: ''
+    enable: true
+    async: true
+    interval: 1s
