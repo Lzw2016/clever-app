@@ -3,6 +3,7 @@ package org.clever.app.mvc;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.clever.core.http.CookieUtils;
 import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
@@ -27,6 +28,7 @@ public class MvcTest {
         res.put("a", 1);
         res.put("b", "abc");
         res.put("c", true);
+        res.put("d", new Date());
         return res;
     }
 
@@ -110,10 +112,15 @@ public class MvcTest {
         return res;
     }
 
+//    public static final String abc = "@@@###";
+
     // RequestHeader | RequestHeaderMethodArgumentResolver
+    @SneakyThrows
     public static Object t09(@RequestHeader String a) {
+        Thread.sleep(100);
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", a);
+//        res.put("abc", abc);
         return res;
     }
 

@@ -157,16 +157,16 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
 
     @Override
     public synchronized void reloadAll() {
-        Map<String, Long> fileLastModifiedMap = getAllLastModified();
-        List<String> needLoad = new ArrayList<>(fileLastModifiedMap.size());
+        Map<String, Long> newLastModifiedMap = getAllLastModified();
+        List<String> needLoad = new ArrayList<>(32);
         // 变化的文件(包含删除的文件)
         sqlXmlLastModifiedMap.forEach((absolutePath, lastModified) -> {
-            if (!Objects.equals(fileLastModifiedMap.get(absolutePath), lastModified)) {
+            if (!Objects.equals(newLastModifiedMap.get(absolutePath), lastModified)) {
                 needLoad.add(absolutePath);
             }
         });
         // 新增的文件
-        fileLastModifiedMap.forEach((absolutePath, lastModified) -> {
+        newLastModifiedMap.forEach((absolutePath, lastModified) -> {
             if (!sqlXmlLastModifiedMap.containsKey(absolutePath)) {
                 needLoad.add(absolutePath);
             }
@@ -193,7 +193,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
         }
         // 更新 sqlXmlLastModifiedMap
         sqlXmlLastModifiedMap.clear();
-        sqlXmlLastModifiedMap.putAll(fileLastModifiedMap);
+        sqlXmlLastModifiedMap.putAll(newLastModifiedMap);
     }
 
     @Override

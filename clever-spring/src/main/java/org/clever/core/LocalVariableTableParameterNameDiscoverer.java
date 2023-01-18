@@ -71,6 +71,14 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
      */
     private Map<Executable, String[]> inspectClass(Class<?> clazz) {
         InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
+        if (is == null && !useCache) {
+            // 热重载编译时，class文件可能会被删除
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+            is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
+        }
         if (is == null) {
             // We couldn't load the class file, which is not fatal as it
             // simply means this method of discovering parameter names won't work.

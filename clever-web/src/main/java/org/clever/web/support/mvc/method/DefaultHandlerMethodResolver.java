@@ -2,6 +2,7 @@ package org.clever.web.support.mvc.method;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.*;
 import org.clever.core.job.DaemonExecutor;
@@ -12,11 +13,10 @@ import org.clever.web.support.mvc.HandlerMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -55,6 +55,10 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
      * Handler Method 缓存 {@code Map<className@methodName, Method>}
      */
     protected final ConcurrentMap<String, Method> handlerMethodCache = new ConcurrentHashMap<>();
+    /**
+     * class文件的最后修改时间搓 {@code ConcurrentMap<AbsolutePath, LastModified>}
+     */
+    protected final ConcurrentMap<String, Long> classLastModifiedMap = new ConcurrentHashMap<>();
 
     public DefaultHandlerMethodResolver(String rootPath, MvcConfig.HotReload hotReload) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
@@ -182,8 +186,43 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
      * 监听class文件变化
      */
     protected void hotReloadClass() {
-        // TODO 监听class文件变化 & 编译任务
+        if (classLastModifiedMap.isEmpty()) {
+            classLastModifiedMap.putAll(getAllLastModified());
+            return;
+        }
+        final Map<String, Long> newLastModifiedMap = getAllLastModified();
+        final List<String> changedClass = new ArrayList<>(128);
+        // 变化的文件(包含删除的文件)
+        classLastModifiedMap.forEach((absolutePath, lastModified) -> {
+            Long last = newLastModifiedMap.get(absolutePath);
+            if (!Objects.equals(last, lastModified)) {
+                changedClass.add(absolutePath);
+            }
+        });
+        // 新增的文件
+        newLastModifiedMap.forEach((absolutePath, lastModified) -> {
+            if (!classLastModifiedMap.containsKey(absolutePath)) {
+                changedClass.add(absolutePath);
+            }
+        });
+        if (!changedClass.isEmpty()) {
+            log.info("class文件更新,文件: {}", changedClass);
+            hotReloadClassLoader.unloadAllClass();
+            classLastModifiedMap.clear();
+            classLastModifiedMap.putAll(newLastModifiedMap);
+        }
+    }
 
-//        hotReloadClassLoader.unloadAllClass();
+    protected Map<String, Long> getAllLastModified() {
+        final Map<String, Long> fileLastModifiedMap = new HashMap<>(classLastModifiedMap.size());
+        locationMap.forEach((location, absolutePath) -> {
+            File dir = new File(absolutePath);
+            if (!dir.isDirectory()) {
+                return;
+            }
+            Collection<File> files = FileUtils.listFiles(dir, new String[]{"class"}, true);
+            files.forEach(file -> fileLastModifiedMap.put(file.getAbsolutePath(), file.lastModified()));
+        });
+        return fileLastModifiedMap;
     }
 }
