@@ -1,18 +1,36 @@
+startup-task:
+  timedTask:
+    - name: '定时任务1'
+      enable: true
+      interval: 1s
+      clazz: 'org.clever.app.task.TaskTest'
+      method: 'job01'
+#  cmdTask:
+#    - name: '定时编译项目'
+#      workDir: './'
+#      cmd:
+#        windows: 'gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+#        linux: 'gradlew clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+#        macos: 'gradlew clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+#      enable: true
+#      async: true
+#      interval: 1s
+
 web:
   host: '0.0.0.0'
   port: 9090
   http:
     autogenerateEtags: true
     maxRequestSize: 10MB
-#    singlePageRoot:
-#      - hostedPath: '/xml'
-#        filePath: 'logback-app.xml'
-#        location: CLASSPATH
-#    staticFile:
-#      - hostedPath: '/static'
-#        directory: 'clever-boot/src/main/resources'
-#        preCompress: true
-#        location: EXTERNAL
+  #    singlePageRoot:
+  #      - hostedPath: '/xml'
+  #        filePath: 'logback-app.xml'
+  #        location: CLASSPATH
+  #    staticFile:
+  #      - hostedPath: '/static'
+  #        directory: 'clever-boot/src/main/resources'
+  #        preCompress: true
+  #        location: EXTERNAL
   mvc:
     path: '/api/'
     httpMethod: [ 'POST', 'GET' ]
@@ -23,8 +41,8 @@ web:
       interval: 1s
       excludePackages: [ ]
       locations:
-        #- './clever-boot/out/production/classes'
-        - './clever-boot/build/classes/java/main'
+        - './clever-boot/out/production/classes'
+        #- './clever-boot/build/classes/java/main'
         #- './clever-boot/build/classes/kotlin/main'
 
 mybatis:
@@ -61,13 +79,4 @@ jdbc:
       maximumPoolSize: 100
       connectionTestQuery: 'select 1'
 
-startup-cmd-task:
-  - name: 定时编译项目
-    workDir: './'
-    cmd:
-      windows: 'gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
-      linux: ''
-      macos: ''
-    enable: true
-    async: true
-    interval: 1s
+

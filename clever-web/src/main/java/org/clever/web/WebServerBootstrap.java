@@ -26,7 +26,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class WebServerBootstrap {
     public static WebServerBootstrap create(WebConfig webConfig) {
-        Assert.notNull(webConfig, "参数 webConfig 不能为 null");
         return new WebServerBootstrap(webConfig);
     }
 
@@ -58,6 +57,7 @@ public class WebServerBootstrap {
     private final JavalinEventListenerRegistrar javalinEventListenerRegistrar = new JavalinEventListenerRegistrar();
 
     public WebServerBootstrap(WebConfig webConfig) {
+        Assert.notNull(webConfig, "参数 webConfig 不能为 null");
         this.webConfig = webConfig;
     }
 

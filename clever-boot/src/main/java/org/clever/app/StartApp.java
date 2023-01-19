@@ -13,6 +13,7 @@ import org.clever.core.AppContextHolder;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.OrderIncrement;
 import org.clever.core.env.StandardEnvironment;
+import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
@@ -116,6 +117,9 @@ public class StartApp {
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Double.MAX_VALUE, "停止日志模块");
         // 系统启动完成日志
         startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
-        // 启动 AppBootstrap
+        // 启动开机任务
+        StartupTaskBootstrap startupTaskBootstrap = StartupTaskBootstrap.create(rootPath, environment);
+        // startupTaskBootstrap.setClassLoader();
+        startupTaskBootstrap.start();
     }
 }

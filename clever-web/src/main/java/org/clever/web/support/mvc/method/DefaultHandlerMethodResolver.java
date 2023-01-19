@@ -46,6 +46,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
     /**
      * 支持热重载的 ClassLoader
      */
+    @Getter
     protected final HotReloadClassLoader hotReloadClassLoader;
     /**
      * Handler Class 缓存 {@code Map<className, Method>}
@@ -76,6 +77,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
             DaemonExecutor daemonWatch = new DaemonExecutor("hot-reload-class");
             daemonWatch.scheduleAtFixedRate(this::hotReloadClass, hotReload.getInterval().toMillis());
             AppShutdownHook.addShutdownHook(daemonWatch::stop, OrderIncrement.NORMAL, "停止class热重载");
+            AppContextHolder.registerBean("hotReloadClassLoader", hotReloadClassLoader, true);
         } else {
             hotReloadClassLoader = null;
         }

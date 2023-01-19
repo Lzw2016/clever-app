@@ -7,7 +7,7 @@ package org.clever.core.job;
  * 创建时间：2018-11-10 19:03 <br/>
  */
 public abstract class GlobalJob {
-    private static volatile boolean LOCK = false;
+    private volatile boolean lock = false;
 
     /**
      * 全局执行的任务(JVM内同一时刻只有一个线程执行)
@@ -26,17 +26,17 @@ public abstract class GlobalJob {
      */
     public boolean execute() {
         boolean success = false;
-        if (LOCK) {
+        if (lock) {
             return false;
         }
         try {
-            LOCK = true;
+            lock = true;
             internalExecute();
             success = true;
         } catch (Exception e) {
             exceptionHandle(e);
         } finally {
-            LOCK = false;
+            lock = false;
         }
         return success;
     }

@@ -3,6 +3,7 @@ package org.clever.core.reflection;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.util.Assert;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class ReflectionsUtils {
      */
     private static final String GETTER_PREFIX = "get";
     private static final String CGLIB_CLASS_SEPARATOR = "$$";
-    
+
     /**
      * 改变private/protected的方法为public，尽量不调用实际改动的语句，避免JDK的SecurityManager抱怨。
      *
@@ -345,33 +346,48 @@ public class ReflectionsUtils {
         return fieldList.toArray(result);
     }
 
+    public static Method getMethod(Class<?> clazz, String methodName) {
+        return getMethod(clazz, methodName, false);
+    }
+
+    public static Method getMethod(Class<?> clazz, String methodName, boolean mustOnlyOne) {
+        List<Method> methods = getMethods(clazz, methodName);
+        String msg = String.format("class=%s 包含%s个 method=%s", clazz.getName(), methods.size(), methodName);
+        return getMethod(methods, mustOnlyOne, msg);
+    }
+
     public static List<Method> getMethods(Class<?> clazz, String methodName) {
         Method[] methods = clazz.getDeclaredMethods();
         return Arrays.stream(methods).filter(m -> Objects.equals(methodName, m.getName())).collect(Collectors.toList());
     }
 
-    public static Method getMethod(Class<?> clazz, String methodName) {
-        Method method = null;
-        List<Method> methods = getMethods(clazz, methodName);
-        if (!methods.isEmpty()) {
-            method = methods.get(0);
-        }
-        if (methods.size() > 1) {
-            log.warn("class={} 包含{}个 method={}", clazz.getName(), methods.size(), methodName);
-        }
-        return method;
+    public static Method getStaticMethod(Class<?> clazz, String methodName) {
+        return getStaticMethod(clazz, methodName, false);
     }
 
-    public static Method getStaticMethod(Class<?> clazz, String methodName) {
-        List<Method> methods = getMethods(clazz, methodName).stream()
+    public static Method getStaticMethod(Class<?> clazz, String methodName, boolean mustOnlyOne) {
+        List<Method> methods = getStaticMethods(clazz, methodName);
+        String msg = String.format("class=%s 包含%s个 static method=%s", clazz.getName(), methods.size(), methodName);
+        return getMethod(methods, mustOnlyOne, msg);
+    }
+
+    public static List<Method> getStaticMethods(Class<?> clazz, String methodName) {
+        return getMethods(clazz, methodName).stream()
                 .filter(m -> Modifier.isStatic(m.getModifiers()))
                 .collect(Collectors.toList());
+    }
+
+    private static Method getMethod(List<Method> methods, boolean mustOnlyOne, String errMsg) {
+        if (mustOnlyOne) {
+            Assert.isTrue(methods.size() == 1, errMsg);
+            return methods.get(0);
+        }
         Method method = null;
         if (!methods.isEmpty()) {
             method = methods.get(0);
         }
         if (methods.size() > 1) {
-            log.warn("class={} 包含{}个 method={}", clazz.getName(), methods.size(), methodName);
+            log.warn(errMsg);
         }
         return method;
     }

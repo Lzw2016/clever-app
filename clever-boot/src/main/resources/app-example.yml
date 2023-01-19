@@ -14,6 +14,24 @@ clever:
 
 rootPath: "./"
 
+startup-task:
+  timedTask:
+    - name: '定时任务1'
+      enable: true
+      interval: 1s
+      clazz: 'org.clever.app.task.TaskTest'
+      method: 'job01'
+  cmdTask:
+    - name: '定时编译项目'
+      workDir: './'
+      cmd:
+        windows: 'gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+        linux: ''
+        macos: ''
+      enable: true
+      async: true
+      interval: 1s
+
 web:
   host: '0.0.0.0'
   port: 9090

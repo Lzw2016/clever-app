@@ -3,6 +3,7 @@ package org.clever.core;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.clever.core.io.DefaultResourceLoader;
 import org.clever.core.io.Resource;
 import org.clever.util.ResourceUtils;
@@ -30,7 +31,7 @@ public class ResourcePathUtils {
             basePath = "./";
         }
         if (relativePath == null) {
-            relativePath = "./";
+            relativePath = ".";
         }
         String path;
         // 处理相对路径
@@ -42,7 +43,7 @@ public class ResourcePathUtils {
             path = FilenameUtils.concat(basePath, relativePath);
         }
         path = FilenameUtils.normalizeNoEndSeparator(path, true);
-        if (path == null) {
+        if (StringUtils.isBlank(path)) {
             path = "./";
         }
         if (!path.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)
@@ -94,7 +95,7 @@ public class ResourcePathUtils {
         Map<String, String> locationMap = new LinkedHashMap<>();
         if (relativePaths != null) {
             for (String relativePath : relativePaths) {
-                locationMap.put(relativePath, ResourcePathUtils.getAbsolutePath(basePath, relativePath));
+                locationMap.put(relativePath, getAbsolutePath(basePath, relativePath));
             }
         }
         return locationMap;
