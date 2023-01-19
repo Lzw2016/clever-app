@@ -16,13 +16,13 @@ rootPath: "./"
 
 startup-task:
   timedTask:
-    - name: '定时任务1'
+    - name: '测试定时任务'
       enable: true
       interval: 1s
       clazz: 'org.clever.app.task.TaskTest'
       method: 'job01'
   cmdTask:
-    - name: '定时编译项目'
+    - name: '源码热编译'
       workDir: './'
       cmd:
         windows: 'gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
