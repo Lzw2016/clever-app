@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.SystemClock;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.util.Assert;
 
@@ -64,6 +65,7 @@ public class CmdTask {
         Assert.isFalse(started, "任务已经启动，不可重复启动");
         started = true;
         Runnable runnable = () -> {
+            long startTime = SystemClock.now();
             try {
                 doStart();
             } catch (Throwable e) {
@@ -77,6 +79,10 @@ public class CmdTask {
                     log.error("命令行任务: [{}], 退出码: {}", this.name, exitValue);
                 }
                 proc.destroy();
+            }
+            long cost = SystemClock.now() - startTime;
+            if (daemonExecutor != null && cost > 8_000) {
+                log.info("任务: [{}]执行完成,耗时: {}ms", name, cost);
             }
         };
         if (daemonExecutor == null) {
