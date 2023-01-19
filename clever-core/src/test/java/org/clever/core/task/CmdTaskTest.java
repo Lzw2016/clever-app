@@ -16,8 +16,9 @@ public class CmdTaskTest {
     @Test
     public void t01() {
         StartupTaskConfig.CmdConfig cmd = new StartupTaskConfig.CmdConfig();
-        cmd.setCmd("gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon");
-//        cmd.setCmd("dir");
+        // cmd.setCmd("gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon");
+        // cmd.setCmd("gradlew.bat clever-boot:classes --continuous");
+        cmd.setCmd("dir");
         CmdTask cmdTask = new CmdTask(
                 "测试",
                 false,
@@ -36,8 +37,9 @@ public class CmdTaskTest {
                         "cmd",
                         "/q",
                         "/c",
-                        "dir",
                         // "gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon",
+                        "gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon",
+                        // "dir",
                 },
                 null,
                 workDir

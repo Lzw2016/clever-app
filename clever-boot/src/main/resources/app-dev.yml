@@ -9,12 +9,11 @@ startup-task:
     - name: '源码热编译'
       workDir: './'
       cmd:
-        windows: 'gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
-        linux: 'gradlew clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
-        macos: 'gradlew clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+        windows: 'gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+        linux: 'gradlew clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+        macos: 'gradlew clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
       enable: true
       async: true
-      interval: 1s
 
 web:
   host: '0.0.0.0'
