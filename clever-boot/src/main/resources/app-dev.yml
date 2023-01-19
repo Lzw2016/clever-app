@@ -1,10 +1,10 @@
 startup-task:
-  timedTask:
-    - name: '定时任务1'
-      enable: true
-      interval: 1s
-      clazz: 'org.clever.app.task.TaskTest'
-      method: 'job01'
+  #timedTask:
+  #  - name: '定时任务1'
+  #    enable: true
+  #    interval: 1s
+  #    clazz: 'org.clever.app.task.TaskTest'
+  #    method: 'job01'
   cmdTask:
     - name: '定时编译项目'
       workDir: './'
