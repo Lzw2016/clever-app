@@ -26,6 +26,16 @@ CustomFilter
     [400] CaptureHandlerFilter
     🡓
     [500] SecurityFilter (一系列Filter)
+        🡓
+        AuthenticationFilter - 身份认证拦截 (读取请求token -> 使用刷新token -> 验证token(自定义) -> 加载SecurityContext并绑定到当前线程)
+        🡓
+        LoginFilter          - 登录拦截 (收集登录数据(自定义) -> 校验登录数据(自定义) -> 加载用户信息(自定义) -> 校验用户信息(自定义) -> 创建token(自定义) -> 缓存SecurityContext(自定义))
+        🡓
+        LogoutFilter         - 登出拦截 (删除Token)
+        🡓
+        AuthorizationFilter  - 权限授权拦截 (获取SecurityContext -> 授权投票器开始投票(自定义) -> 根据投票结果判断是否授权通过)
+            AuthorizationVoter(授权投票器)
+        🡓
     🡓
     [600] StaticResourceFilter
     🡓
@@ -39,7 +49,7 @@ CustomFilter
         🡓
         after
         🡓
-        exception (仅 invokeMethod 异常时执行)
+        finally (执行before后一定会执行, 可以处理异常)
         🡓
     🡓
 🡓
