@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Conv;
 import org.clever.core.SystemClock;
 import org.clever.core.mapper.BeanCopyUtils;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.util.Assert;
 
@@ -114,8 +115,21 @@ public class JdbcMetrics {
             }
         }
         // 控制 metricsItem 的大小
-        if (metricsItem.size() > config.getMaxSqlCount()) {
-            // TODO 根据执行平均时间，删除执行平均时间最小的数据
+        final int precision = 32;
+        if (metricsItem.size() > (config.getMaxSqlCount() + precision)) {
+            // 根据执行平均时间，删除执行平均时间最小的数据
+            final List<TupleTwo<String, Long>> avgCostList = new ArrayList<>(metricsItem.size());
+            metricsItem.forEach((sqlStr, metric) -> avgCostList.add(TupleTwo.creat(sqlStr, metric.getAvgCost())));
+            avgCostList.sort(Comparator.comparingLong(TupleTwo::getValue2));
+            final int delCount = metricsItem.size() - config.getMaxSqlCount() + precision;
+            int idx = 0;
+            for (TupleTwo<String, Long> tuple : avgCostList) {
+                idx++;
+                if (idx > delCount || metricsItem.size() <= precision) {
+                    break;
+                }
+                metricsItem.remove(tuple.getValue1());
+            }
         }
     }
 
