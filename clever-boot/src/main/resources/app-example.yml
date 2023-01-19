@@ -26,8 +26,8 @@ startup-task:
       workDir: './'
       cmd:
         windows: 'gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
-        linux: ''
-        macos: ''
+        linux: 'gradlew clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
+        macos: 'gradlew clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
       enable: true
       async: true
       interval: 1s

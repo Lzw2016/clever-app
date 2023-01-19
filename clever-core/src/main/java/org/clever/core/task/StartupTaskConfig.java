@@ -90,5 +90,11 @@ public class StartupTaskConfig {
          * macos 系统的命令行
          */
         private String macos;
+
+        public void setCmd(String cmd) {
+            this.windows = cmd;
+            this.linux = cmd;
+            this.macos = cmd;
+        }
     }
 }

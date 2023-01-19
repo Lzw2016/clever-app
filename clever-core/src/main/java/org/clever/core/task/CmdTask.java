@@ -22,9 +22,13 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class CmdTask {
-    public static String[] MACOS_CMD = new String[]{"/bin/sh", "-c", "UTF-8"};
-    public static String[] WINDOWS_CMD = new String[]{"cmd", "/C", "GBK"};
-    public static String[] LINUX_CMD = new String[]{"/bin/sh", "-c", "UTF-8"};
+    public static String[] MACOS_CMD = new String[]{"/bin/sh", "-c"};
+    public static String[] WINDOWS_CMD = new String[]{"cmd", "/q", "/c"};
+    public static String[] LINUX_CMD = new String[]{"/bin/sh", "-c"};
+
+    public static String MACOS_CHARSET = "UTF-8";
+    public static String WINDOWS_CHARSET = "GBK";
+    public static String LINUX_CHARSET = "UTF-8";
 
     private final File workDir;
     @Getter
@@ -95,8 +99,8 @@ public class CmdTask {
         params.addAll(getCmdArray());
         params.add(getCmd());
         proc = Runtime.getRuntime().exec(params.toArray(new String[0]), null, workDir);
-        in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        err = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+        in = new BufferedReader(new InputStreamReader(proc.getInputStream(), getCharset()));
+        err = new BufferedReader(new InputStreamReader(proc.getErrorStream(), getCharset()));
         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(proc.getOutputStream())), true);
         String inLine, errLine;
         while ((inLine = StringUtils.trim(in.readLine())) != null | (errLine = StringUtils.trim(err.readLine())) != null) {
@@ -129,6 +133,22 @@ public class CmdTask {
             cmdArray = LINUX_CMD;
         }
         return Arrays.stream(cmdArray).collect(Collectors.toList());
+    }
+
+    protected String getCharset() {
+        String charset;
+        String osInfo = System.getProperty("os.name").toLowerCase();
+        if (osInfo.contains("mac os")) {
+            charset = MACOS_CHARSET;
+        } else if (osInfo.contains("windows")) {
+            charset = WINDOWS_CHARSET;
+        } else {
+            charset = LINUX_CHARSET;
+        }
+        if (StringUtils.isBlank(charset)) {
+            charset = "UTF-8";
+        }
+        return charset;
     }
 
     public static String getCmd(StartupTaskConfig.CmdConfig cmdConfig) {
