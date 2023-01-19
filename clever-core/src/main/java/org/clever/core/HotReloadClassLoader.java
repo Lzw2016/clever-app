@@ -30,7 +30,13 @@ public class HotReloadClassLoader extends ClassLoader {
      */
     private static final ReferenceQueue<ClassLoader> REFERENCE_QUEUE = new ReferenceQueue<>();
     private static final ConcurrentMap<Reference<ClassLoader>, Long> PHANTOM_REFERENCE_MAP = new ConcurrentHashMap<>(8);
+    /**
+     * 当前进程中存在的 InnerClassLoader 数量计数器
+     */
     private static final AtomicInteger INNER_CLASS_LOADER_COUNT = new AtomicInteger(0);
+    /**
+     * 当前进程创建 InnerClassLoader 的总数
+     */
     private static final AtomicLong SERIAL_NUMBER = new AtomicLong(0);
 
     static {
