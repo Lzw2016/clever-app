@@ -211,10 +211,16 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
             }
         });
         if (!changedClass.isEmpty()) {
+            try {
+                // 休眠一下防止抖动(编译时class文件连续的变化)
+                Thread.sleep(300);
+            } catch (InterruptedException ignored) {
+            }
             log.info("class文件更新,文件: {}", changedClass);
+            final Map<String, Long> latest = getAllLastModified();
             hotReloadClassLoader.unloadAllClass();
             classLastModifiedMap.clear();
-            classLastModifiedMap.putAll(newLastModifiedMap);
+            classLastModifiedMap.putAll(latest);
         }
     }
 

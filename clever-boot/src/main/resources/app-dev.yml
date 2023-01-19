@@ -1,10 +1,10 @@
 startup-task:
-  #timedTask:
-  #  - name: '测试定时任务'
-  #    enable: true
-  #    interval: 1s
-  #    clazz: 'org.clever.app.task.TaskTest'
-  #    method: 'job01'
+  timedTask:
+    - name: '测试定时任务'
+      enable: true
+      interval: 120s
+      clazz: 'org.clever.app.task.TaskTest'
+      method: 'job01'
   cmdTask:
     - name: '源码热编译'
       workDir: './'

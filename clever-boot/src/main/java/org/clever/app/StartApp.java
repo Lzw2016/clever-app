@@ -119,7 +119,10 @@ public class StartApp {
         startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
         // 启动开机任务
         StartupTaskBootstrap startupTaskBootstrap = StartupTaskBootstrap.create(rootPath, environment);
-        // startupTaskBootstrap.setClassLoader();
+        ClassLoader classLoader = AppContextHolder.getBean("hotReloadClassLoader", ClassLoader.class);
+        if (classLoader != null) {
+            startupTaskBootstrap.setClassLoader(classLoader);
+        }
         startupTaskBootstrap.start();
     }
 }
