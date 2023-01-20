@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.SystemClock;
+import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.util.Assert;
 
@@ -109,31 +110,33 @@ public class CmdTask {
         err = new BufferedReader(new InputStreamReader(proc.getErrorStream(), getCharset()));
         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(proc.getOutputStream())), true);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
-        String inLine, errLine;
-        while ((inLine = StringUtils.trim(in.readLine())) != null | (errLine = StringUtils.trim(err.readLine())) != null) {
-            if (Thread.interrupted()) {
-                break;
+        final BufferedReader inTmp = in;
+        final BufferedReader errTmp = err;
+        Thread thread = new Thread(()-> {
+            try {
+                String inLine, errLine;
+                while ((inLine = StringUtils.trim(inTmp.readLine())) != null | (errLine = StringUtils.trim(errTmp.readLine())) != null) {
+                    if(Thread.interrupted()) {
+                        break;
+                    }
+                    if (StringUtils.isNotBlank(inLine)) {
+                        log.debug(inLine);
+                    }
+                    if (StringUtils.isNotBlank(errLine)) {
+                        log.error(errLine);
+                    }
+                }
+            }catch (Throwable e) {
+                throw ExceptionUtils.unchecked(e);
             }
-            if (StringUtils.isNotBlank(inLine)) {
-                log.debug(inLine);
-            }
-            if (StringUtils.isNotBlank(errLine)) {
-                log.error(errLine);
-            }
-        }
+        });
+        thread.setName("CmdTask-in/out");
+        thread.setDaemon(true);
+        thread.start();
         proc.waitFor();
     }
 
     private void stop() {
-        // 给进程发送 ctr-c 信号
-        try {
-            char ctrlBreak = (char) 3;
-            out.write(ctrlBreak);
-            out.flush();
-            out.write(ctrlBreak + "\n");
-            out.flush();
-        } catch (Throwable ignored) {
-        }
         // 停止进程
         proc.destroyForcibly();
         int exitValue = proc.exitValue();
