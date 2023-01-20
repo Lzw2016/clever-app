@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.SystemClock;
-import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.util.Assert;
 
@@ -69,9 +68,6 @@ public class CmdTask {
             long startTime = SystemClock.now();
             try {
                 doStart();
-                IOUtils.closeQuietly(in);
-                IOUtils.closeQuietly(err);
-                IOUtils.closeQuietly(out);
             } catch (Throwable e) {
                 log.error(e.getMessage(), e);
             } finally {
@@ -80,6 +76,12 @@ public class CmdTask {
                 if (exitValue != 0) {
                     log.error("命令行任务: [{}], 退出码: {}", this.name, exitValue);
                 }
+                IOUtils.closeQuietly(proc.getInputStream());
+                IOUtils.closeQuietly(proc.getErrorStream());
+                IOUtils.closeQuietly(proc.getOutputStream());
+                IOUtils.closeQuietly(in);
+                IOUtils.closeQuietly(err);
+                IOUtils.closeQuietly(out);
             }
             long cost = SystemClock.now() - startTime;
             if (daemonExecutor != null && cost > 8_000) {
@@ -109,40 +111,26 @@ public class CmdTask {
         in = new BufferedReader(new InputStreamReader(proc.getInputStream(), getCharset()));
         err = new BufferedReader(new InputStreamReader(proc.getErrorStream(), getCharset()));
         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(proc.getOutputStream())), true);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
-        final BufferedReader inTmp = in;
-        final BufferedReader errTmp = err;
-        Thread thread = new Thread(()-> {
-            try {
-                String inLine, errLine;
-                while ((inLine = StringUtils.trim(inTmp.readLine())) != null | (errLine = StringUtils.trim(errTmp.readLine())) != null) {
-                    if(Thread.interrupted()) {
-                        break;
-                    }
-                    if (StringUtils.isNotBlank(inLine)) {
-                        log.debug(inLine);
-                    }
-                    if (StringUtils.isNotBlank(errLine)) {
-                        log.error(errLine);
-                    }
-                }
-            }catch (Throwable e) {
-                throw ExceptionUtils.unchecked(e);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            proc.destroyForcibly();
+            int exitValue = proc.exitValue();
+            if (exitValue != 0) {
+                log.error("命令行任务: [{}], 退出码: {}", this.name, exitValue);
             }
-        });
-        thread.setName("CmdTask-in/out");
-        thread.setDaemon(true);
-        thread.start();
-        proc.waitFor();
-    }
-
-    private void stop() {
-        // 停止进程
-        proc.destroyForcibly();
-        int exitValue = proc.exitValue();
-        if (exitValue != 0) {
-            log.error("命令行任务: [{}], 退出码: {}", this.name, exitValue);
+        }));
+        String inLine, errLine;
+        while ((inLine = StringUtils.trim(in.readLine())) != null | (errLine = StringUtils.trim(err.readLine())) != null) {
+            if (Thread.interrupted()) {
+                break;
+            }
+            if (StringUtils.isNotBlank(inLine)) {
+                log.debug(inLine);
+            }
+            if (StringUtils.isNotBlank(errLine)) {
+                log.error(errLine);
+            }
         }
+        proc.waitFor();
     }
 
     public String getWorkDir() {
