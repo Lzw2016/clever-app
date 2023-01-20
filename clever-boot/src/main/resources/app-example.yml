@@ -18,19 +18,18 @@ startup-task:
   timedTask:
     - name: '测试定时任务'
       enable: true
-      interval: 1s
+      interval: 120s
       clazz: 'org.clever.app.task.TaskTest'
       method: 'job01'
   cmdTask:
-    - name: '源码热编译'
+    - name: '持续编译源码'
+      enable: false
+      async: true
       workDir: './'
       cmd:
-        windows: 'gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
-        linux: 'gradlew clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
-        macos: 'gradlew clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon'
-      enable: true
-      async: true
-      interval: 1s
+        windows: 'gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        linux: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        macos: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
 
 web:
   host: '0.0.0.0'

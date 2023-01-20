@@ -9,11 +9,11 @@ logging:
     #com.zaxxer.hikari.HikariConfig: debug
     #org.eclipse.jetty.util.log: warn
 
-rootPath: "./"
-
 clever:
   profiles.active: dev
   application.name: clever-boot
+
+rootPath: "./"
 
 web:
   echo:
@@ -76,5 +76,5 @@ jdbc:
     connectionTimeout: 30000
     connectionTestQuery: 'select 1'
     exceptionOverrideClassName: 'org.clever.data.jdbc.hikari.HikariPreventQueryTimeoutEviction'
-#    dataSourceProperties:
-#      stringtype: unspecified
+    #dataSourceProperties:
+    #  stringtype: unspecified
