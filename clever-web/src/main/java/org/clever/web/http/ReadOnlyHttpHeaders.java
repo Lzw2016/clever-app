@@ -119,6 +119,7 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
         return this.headers.entrySet().stream().map(AbstractMap.SimpleImmutableEntry::new)
                 .collect(Collectors.collectingAndThen(
                         Collectors.toCollection(LinkedHashSet::new), // Retain original ordering of entries
-                        Collections::unmodifiableSet));
+                        Collections::unmodifiableSet)
+                );
     }
 }
