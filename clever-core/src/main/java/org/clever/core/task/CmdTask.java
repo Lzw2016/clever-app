@@ -68,17 +68,17 @@ public class CmdTask {
             long startTime = SystemClock.now();
             try {
                 doStart();
-            } catch (Throwable e) {
-                log.error(e.getMessage(), e);
-            } finally {
                 IOUtils.closeQuietly(in);
                 IOUtils.closeQuietly(err);
                 IOUtils.closeQuietly(out);
+            } catch (Throwable e) {
+                log.error(e.getMessage(), e);
+            } finally {
+                proc.destroyForcibly();
                 int exitValue = proc.exitValue();
                 if (exitValue != 0) {
                     log.error("命令行任务: [{}], 退出码: {}", this.name, exitValue);
                 }
-                proc.destroy();
             }
             long cost = SystemClock.now() - startTime;
             if (daemonExecutor != null && cost > 8_000) {
@@ -108,8 +108,12 @@ public class CmdTask {
         in = new BufferedReader(new InputStreamReader(proc.getInputStream(), getCharset()));
         err = new BufferedReader(new InputStreamReader(proc.getErrorStream(), getCharset()));
         out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(proc.getOutputStream())), true);
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
         String inLine, errLine;
         while ((inLine = StringUtils.trim(in.readLine())) != null | (errLine = StringUtils.trim(err.readLine())) != null) {
+            if (Thread.interrupted()) {
+                break;
+            }
             if (StringUtils.isNotBlank(inLine)) {
                 log.debug(inLine);
             }
@@ -118,6 +122,24 @@ public class CmdTask {
             }
         }
         proc.waitFor();
+    }
+
+    private void stop() {
+        // 给进程发送 ctr-c 信号
+        try {
+            char ctrlBreak = (char) 3;
+            out.write(ctrlBreak);
+            out.flush();
+            out.write(ctrlBreak + "\n");
+            out.flush();
+        } catch (Throwable ignored) {
+        }
+        // 停止进程
+        proc.destroyForcibly();
+        int exitValue = proc.exitValue();
+        if (exitValue != 0) {
+            log.error("命令行任务: [{}], 退出码: {}", this.name, exitValue);
+        }
     }
 
     public String getWorkDir() {
