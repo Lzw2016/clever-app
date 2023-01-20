@@ -67,16 +67,18 @@ web:
         preCompress: true
         location: EXTERNAL
   websocket:
-    #path: '/ws/'
-    - enable: true
-      path: ''
-      handler: ''
-      clazz: ''
-      onConnect: ''
-      onMessage: ''
-      onBinaryMessage: ''
-      onClose: ''
-      onError: ''
+    path: '/ws/'
+    packagePrefix: 'org.clever.app.websocket.'
+    allowPackages: [ 'org.clever.app.websocket.' ]
+    #- enable: true
+    #  path: ''
+    #  handler: ''
+    #  clazz: ''
+    #  onConnect: ''
+    #  onMessage: ''
+    #  onBinaryMessage: ''
+    #  onClose: ''
+    #  onError: ''
   misc:
     showJavalinBanner: false
   echo:
@@ -121,8 +123,8 @@ web:
   mvc:
     path: '/api/'
     httpMethod: [ 'POST', 'GET' ]
-    packagePrefix: 'org.clever.app.'
-    allowPackages: [ ]
+    packagePrefix: 'org.clever.app.mvc.'
+    allowPackages: [ 'org.clever.app.mvc.' ]
     hotReload:
       enable: true
       interval: 1s
