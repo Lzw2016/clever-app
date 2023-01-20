@@ -6,14 +6,14 @@ startup-task:
       clazz: 'org.clever.app.task.TaskTest'
       method: 'job01'
   cmdTask:
-    - name: '源码热编译'
+    - name: '持续编译源码'
+      enable: false
+      async: true
       workDir: './'
       cmd:
         windows: 'gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
         linux: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
         macos: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
-      enable: true
-      async: true
 
 web:
   host: '0.0.0.0'
