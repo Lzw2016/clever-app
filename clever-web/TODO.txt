@@ -6,6 +6,7 @@
 [  ] MVC拦截问题
 [  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
 [  ] [配置化]MVC处理时默认开启(多个)数据源事务
+[  ] WebSocket支持(配置在mvc下,验证:new对象后ClassLoader对象是否会被GC回收)
 [  ]
 [  ]
 [  ]
