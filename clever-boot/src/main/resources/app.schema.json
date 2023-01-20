@@ -139,20 +139,17 @@
           "type": "integer",
           "description": "web服务端口，默认：9090"
         },
-        "http": {
-          "$ref": "#/definitions/webDefinition/definitions/httpDefinition"
-        },
         "server": {
           "$ref": "#/definitions/webDefinition/definitions/serverDefinition"
         },
-        "webSocketConfig": {
-          "$ref": "#/definitions/webDefinition/definitions/webSocketConfigDefinition"
-        },
-        "mvc": {
-          "$ref": "#/definitions/webDefinition/definitions/mvcDefinition"
-        },
         "jackson": {
           "$ref": "#/definitions/webDefinition/definitions/jacksonDefinition"
+        },
+        "http": {
+          "$ref": "#/definitions/webDefinition/definitions/httpDefinition"
+        },
+        "websocket": {
+          "$ref": "#/definitions/webDefinition/definitions/webSocketConfigDefinition"
         },
         "misc": {
           "$ref": "#/definitions/webDefinition/definitions/miscDefinition"
@@ -165,9 +162,60 @@
         },
         "resources": {
           "$ref": "#/definitions/webDefinition/definitions/resourcesDefinition"
+        },
+        "mvc": {
+          "$ref": "#/definitions/webDefinition/definitions/mvcDefinition"
         }
       },
       "definitions": {
+        "serverDefinition": {
+          "type": "object",
+          "description": "Server 配置",
+          "properties": {
+            "contextPath": {
+              "type": "string",
+              "description": "web server 的 context path，默认：'/'"
+            },
+            "ignoreTrailingSlashes": {
+              "type": "boolean",
+              "description": "将“/path”和“/path/”视为同一路径，默认：true"
+            },
+            "enableDevLogging": {
+              "type": "boolean",
+              "description": "启用开发日志（用于开发的广泛调试日志），默认：false"
+            },
+            "threads": {
+              "type": "object",
+              "description": "Server 线程池配置，默认：null",
+              "properties": {
+                "max": {
+                  "type": "integer",
+                  "description": "最大线程数。默认：250"
+                },
+                "min": {
+                  "type": "integer",
+                  "description": "最小线程数。默认：8"
+                },
+                "maxQueueCapacity": {
+                  "type": "integer",
+                  "description": "线程池的后备队列的最大容量。根据线程配置计算默认值"
+                },
+                "idleTimeout": {
+                  "type": "string",
+                  "description": "最大线程空闲时间。默认：60s",
+                  "$ref": "#/definitions/duration"
+                }
+              }
+            }
+          }
+        },
+        "jacksonDefinition": {
+          "type": "object",
+          "description": "Jackson 配置",
+          "properties": {
+            "TODO": {}
+          }
+        },
         "httpDefinition": {
           "type": "object",
           "description": "HTTP 配置",
@@ -282,69 +330,14 @@
             }
           }
         },
-        "serverDefinition": {
-          "type": "object",
-          "description": "Server 配置",
-          "properties": {
-            "contextPath": {
-              "type": "string",
-              "description": "web server 的 context path，默认：'/'"
-            },
-            "ignoreTrailingSlashes": {
-              "type": "boolean",
-              "description": "将“/path”和“/path/”视为同一路径，默认：true"
-            },
-            "enableDevLogging": {
-              "type": "boolean",
-              "description": "启用开发日志（用于开发的广泛调试日志），默认：false"
-            },
-            "threads": {
-              "type": "object",
-              "description": "Server 线程池配置，默认：null",
-              "properties": {
-                "max": {
-                  "type": "integer",
-                  "description": "最大线程数。默认：250"
-                },
-                "min": {
-                  "type": "integer",
-                  "description": "最小线程数。默认：8"
-                },
-                "maxQueueCapacity": {
-                  "type": "integer",
-                  "description": "线程池的后备队列的最大容量。根据线程配置计算默认值"
-                },
-                "idleTimeout": {
-                  "type": "string",
-                  "description": "最大线程空闲时间。默认：60s",
-                  "$ref": "#/definitions/duration"
-                }
-              }
-            }
-          }
-        },
         "webSocketConfigDefinition": {
-          "type": "object",
+          "type": "array",
           "description": "WebSocket 配置",
           "properties": {
             "TODO": {}
           }
         },
-        "mvcDefinition": {
-          "type": "object",
-          "description": "MVC 配置",
-          "properties": {
-            "TODO": {}
-          }
-        },
-        "jacksonDefinition":{
-          "type": "object",
-          "description": "Jackson 配置",
-          "properties": {
-            "TODO": {}
-          }
-        },
-        "miscDefinition":{
+        "miscDefinition": {
           "type": "object",
           "description": "Misc(杂项) 配置",
           "properties": {
@@ -371,6 +364,13 @@
         "resourcesDefinition": {
           "type": "object",
           "description": "",
+          "properties": {
+            "TODO": {}
+          }
+        },
+        "mvcDefinition": {
+          "type": "object",
+          "description": "MVC 配置",
           "properties": {
             "TODO": {}
           }

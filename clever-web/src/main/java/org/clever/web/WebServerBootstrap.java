@@ -68,24 +68,25 @@ public class WebServerBootstrap {
         Assert.isTrue(!initialized, "不能多次初始化");
         initialized = true;
         javalin = Javalin.create(config -> {
-            // 初始化http相关配置
-            WebConfig.HttpConfig http = webConfig.getHttp();
-            Optional.of(http).orElse(new WebConfig.HttpConfig()).apply(config);
             // 初始化Server相关配置
             WebConfig.ServerConfig server = webConfig.getServer();
             Optional.of(server).orElse(new WebConfig.ServerConfig()).apply(config);
-            // 初始化WebSocket相关配置
-            WebConfig.WebSocketConfig webSocket = webConfig.getWebSocketConfig();
-            Optional.of(webSocket).orElse(new WebConfig.WebSocketConfig()).apply(config);
-            // 初始化杂项配置
-            WebConfig.MiscConfig misc = webConfig.getMisc();
-            Optional.of(misc).orElse(new WebConfig.MiscConfig()).apply(config);
             // 自定义 JsonMapper
             JacksonConfig jackson = webConfig.getJackson();
             ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
             Optional.of(jackson).orElse(new JacksonConfig()).apply(webServerMapper);
             config.jsonMapper(new JavalinJackson(webServerMapper));
             config.inner.appAttributes.put(JavalinAttrKey.JACKSON_OBJECT_MAPPER, webServerMapper);
+            // 初始化http相关配置
+            WebConfig.HttpConfig http = webConfig.getHttp();
+            Optional.of(http).orElse(new WebConfig.HttpConfig()).apply(config);
+            // 初始化WebSocket相关配置
+            WebConfig.WebSocketConfig websocket = webConfig.getWebsocket();
+            Optional.of(websocket).orElse(new WebConfig.WebSocketConfig()).apply(config);
+            // 初始化杂项配置
+            WebConfig.MiscConfig misc = webConfig.getMisc();
+            Optional.of(misc).orElse(new WebConfig.MiscConfig()).apply(config);
+            // 配置Filter Servlet EventListener
             config.configureServletContextHandler(servletContextHandler -> {
                 // 注册自定义 Filter
                 filterRegistrar.init(servletContextHandler);

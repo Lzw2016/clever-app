@@ -35,6 +35,17 @@ startup-task:
 web:
   host: '0.0.0.0'
   port: 9090
+  server:
+    contextPath: '/'
+    enableDevLogging: false
+    ignoreTrailingSlashes: true
+    threads:
+      min: 8
+      max: 250
+      maxQueueCapacity: 100
+      idleTimeout: 60d
+  jackson:
+    dateFormat: 'yyyy-MM-dd HH:mm:ss'
   http:
     autogenerateEtags: true
     maxRequestSize: 10MB
@@ -55,18 +66,17 @@ web:
         directory: 'clever-boot/src/main/resources'
         preCompress: true
         location: EXTERNAL
-  server:
-    contextPath: '/'
-    enableDevLogging: false
-    ignoreTrailingSlashes: true
-    threads:
-      min: 8
-      max: 250
-      maxQueueCapacity: 100
-      idleTimeout: 60d
-  webSocketConfig: {}
-  jackson:
-    dateFormat: 'yyyy-MM-dd HH:mm:ss'
+  websocket:
+    #path: '/ws/'
+    - enable: true
+      path: ''
+      handler: ''
+      clazz: ''
+      onConnect: ''
+      onMessage: ''
+      onBinaryMessage: ''
+      onClose: ''
+      onError: ''
   misc:
     showJavalinBanner: false
   echo:
