@@ -14,6 +14,8 @@ import org.clever.data.jdbc.mybatis.MyBatisMapperSql;
 import org.clever.data.jdbc.support.*;
 import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.TransactionStatus;
+import org.clever.transaction.annotation.Isolation;
+import org.clever.transaction.annotation.Propagation;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
@@ -1072,6 +1074,21 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 在事务内支持操作
      *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间，-1表示不超时(单位：秒)
+     * @param isolation   设置事务隔离级别 {@link TransactionDefinition#ISOLATION_DEFAULT}
+     * @param readOnly    设置事务是否只读
+     * @param <T>         返回值类型
+     * @see TransactionDefinition
+     */
+    public <T> T beginTX(TransactionCallback<T> action, Propagation propagation, int timeout, Isolation isolation, boolean readOnly) {
+        return jdbc.beginTX(action, propagation.value(), timeout, isolation.value(), readOnly);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
      * @param action              事务内数据库操作
      * @param propagationBehavior 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
@@ -1081,6 +1098,20 @@ public class MyBatis extends AbstractDataSource {
      */
     public void beginTX(Consumer<TransactionStatus> action, int propagationBehavior, int timeout, int isolationLevel, boolean readOnly) {
         jdbc.beginTX(action, propagationBehavior, timeout, isolationLevel, readOnly);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间，-1表示不超时(单位：秒)
+     * @param isolation   设置事务隔离级别 {@link TransactionDefinition#ISOLATION_DEFAULT}
+     * @param readOnly    设置事务是否只读
+     * @see TransactionDefinition
+     */
+    public void beginTX(Consumer<TransactionStatus> action, Propagation propagation, int timeout, Isolation isolation, boolean readOnly) {
+        jdbc.beginTX(action, propagation.value(), timeout, isolation.value(), readOnly);
     }
 
     /**
@@ -1100,6 +1131,20 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 在事务内支持操作
      *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间(单位：秒)
+     * @param isolation   设置事务隔离级别 {@link TransactionDefinition#ISOLATION_DEFAULT}
+     * @param <T>         返回值类型
+     * @see TransactionDefinition
+     */
+    public <T> T beginTX(TransactionCallback<T> action, Propagation propagation, int timeout, Isolation isolation) {
+        return jdbc.beginTX(action, propagation.value(), timeout, isolation.value());
+    }
+
+    /**
+     * 在事务内支持操作
+     *
      * @param action              事务内数据库操作
      * @param propagationBehavior 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
@@ -1108,6 +1153,19 @@ public class MyBatis extends AbstractDataSource {
      */
     public void beginTX(Consumer<TransactionStatus> action, int propagationBehavior, int timeout, int isolationLevel) {
         jdbc.beginTX(action, propagationBehavior, timeout, isolationLevel);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间(单位：秒)
+     * @param isolation   设置事务隔离级别 {@link TransactionDefinition#ISOLATION_DEFAULT}
+     * @see TransactionDefinition
+     */
+    public void beginTX(Consumer<TransactionStatus> action, Propagation propagation, int timeout, Isolation isolation) {
+        jdbc.beginTX(action, propagation.value(), timeout, isolation.value());
     }
 
     /**
@@ -1126,6 +1184,19 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 在事务内支持操作
      *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间(单位：秒)
+     * @param <T>         返回值类型
+     * @see TransactionDefinition
+     */
+    public <T> T beginTX(TransactionCallback<T> action, Propagation propagation, int timeout) {
+        return jdbc.beginTX(action, propagation.value(), timeout);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
      * @param action              事务内数据库操作
      * @param propagationBehavior 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
@@ -1133,6 +1204,18 @@ public class MyBatis extends AbstractDataSource {
      */
     public void beginTX(Consumer<TransactionStatus> action, int propagationBehavior, int timeout) {
         jdbc.beginTX(action, propagationBehavior, timeout);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间(单位：秒)
+     * @see TransactionDefinition
+     */
+    public void beginTX(Consumer<TransactionStatus> action, Propagation propagation, int timeout) {
+        jdbc.beginTX(action, propagation.value(), timeout);
     }
 
     /**
@@ -1150,12 +1233,35 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 在事务内支持操作
      *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param <T>         返回值类型
+     * @see TransactionDefinition
+     */
+    public <T> T beginTX(TransactionCallback<T> action, Propagation propagation) {
+        return jdbc.beginTX(action, propagation.value());
+    }
+
+    /**
+     * 在事务内支持操作
+     *
      * @param action              事务内数据库操作
      * @param propagationBehavior 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
      * @see TransactionDefinition
      */
     public void beginTX(Consumer<TransactionStatus> action, int propagationBehavior) {
         jdbc.beginTX(action, propagationBehavior);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @see TransactionDefinition
+     */
+    public void beginTX(Consumer<TransactionStatus> action, Propagation propagation) {
+        jdbc.beginTX(action, propagation.value());
     }
 
     /**
@@ -1196,6 +1302,20 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 在事务内支持操作
      *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间，-1表示不超时(单位：秒)
+     * @param isolation   设置事务隔离级别 {@link TransactionDefinition#ISOLATION_DEFAULT}
+     * @param <T>         返回值类型
+     * @see TransactionDefinition
+     */
+    public <T> T beginReadOnlyTX(TransactionCallback<T> action, Propagation propagation, int timeout, Isolation isolation) {
+        return jdbc.beginReadOnlyTX(action, propagation.value(), timeout, isolation.value());
+    }
+
+    /**
+     * 在事务内支持操作
+     *
      * @param action              事务内数据库操作
      * @param propagationBehavior 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
@@ -1204,6 +1324,19 @@ public class MyBatis extends AbstractDataSource {
      */
     public void beginReadOnlyTX(Consumer<TransactionStatus> action, int propagationBehavior, int timeout, int isolationLevel) {
         jdbc.beginReadOnlyTX(action, propagationBehavior, timeout, isolationLevel);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间，-1表示不超时(单位：秒)
+     * @param isolation   设置事务隔离级别 {@link TransactionDefinition#ISOLATION_DEFAULT}
+     * @see TransactionDefinition
+     */
+    public void beginReadOnlyTX(Consumer<TransactionStatus> action, Propagation propagation, int timeout, Isolation isolation) {
+        jdbc.beginReadOnlyTX(action, propagation.value(), timeout, isolation.value());
     }
 
     /**
@@ -1222,6 +1355,19 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 在事务内支持操作
      *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间，-1表示不超时(单位：秒)
+     * @param <T>         返回值类型
+     * @see TransactionDefinition
+     */
+    public <T> T beginReadOnlyTX(TransactionCallback<T> action, Propagation propagation, int timeout) {
+        return jdbc.beginReadOnlyTX(action, propagation.value(), timeout);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
      * @param action              事务内数据库操作
      * @param propagationBehavior 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
@@ -1229,6 +1375,18 @@ public class MyBatis extends AbstractDataSource {
      */
     public void beginReadOnlyTX(Consumer<TransactionStatus> action, int propagationBehavior, int timeout) {
         jdbc.beginReadOnlyTX(action, propagationBehavior, timeout);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param timeout     设置事务超时时间，-1表示不超时(单位：秒)
+     * @see TransactionDefinition
+     */
+    public void beginReadOnlyTX(Consumer<TransactionStatus> action, Propagation propagation, int timeout) {
+        jdbc.beginReadOnlyTX(action, propagation.value(), timeout);
     }
 
     /**
@@ -1246,12 +1404,35 @@ public class MyBatis extends AbstractDataSource {
     /**
      * 在事务内支持操作
      *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param <T>         返回值类型
+     * @see TransactionDefinition
+     */
+    public <T> T beginReadOnlyTX(TransactionCallback<T> action, Propagation propagation) {
+        return jdbc.beginReadOnlyTX(action, propagation.value());
+    }
+
+    /**
+     * 在事务内支持操作
+     *
      * @param action              事务内数据库操作
      * @param propagationBehavior 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
      * @see TransactionDefinition
      */
     public void beginReadOnlyTX(Consumer<TransactionStatus> action, int propagationBehavior) {
         jdbc.beginReadOnlyTX(action, propagationBehavior);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action      事务内数据库操作
+     * @param propagation 设置事务传递性 {@link TransactionDefinition#PROPAGATION_REQUIRED}
+     * @see TransactionDefinition
+     */
+    public void beginReadOnlyTX(Consumer<TransactionStatus> action, Propagation propagation) {
+        jdbc.beginReadOnlyTX(action, propagation.value());
     }
 
     /**
