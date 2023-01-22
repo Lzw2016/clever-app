@@ -7,6 +7,8 @@ import lombok.SneakyThrows;
 import org.clever.core.http.CookieUtils;
 import org.clever.core.validator.annotation.IntStatus;
 import org.clever.core.validator.annotation.NotBlank;
+import org.clever.data.jdbc.DataSourceAdmin;
+import org.clever.data.jdbc.Jdbc;
 import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.http.multipart.MultipartFile;
@@ -169,6 +171,20 @@ public class MvcTest {
     public static Object t14(Context ctx) {
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", ctx.path());
+        return res;
+    }
+
+    private static final Jdbc jdbc = DataSourceAdmin.getJdbc("mysql");
+
+    @Transactional(datasource = {"mysql"})
+    public static Object t15(Context ctx) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        // code_name, pattern,sequence,reset_flag
+        res.put("code_name", "biz001");
+        res.put("pattern", "CK${yyMMddHHmm}${seq}");
+        res.put("sequence", 0);
+        res.put("reset_flag", "yyMMdd");
+        jdbc.insertTable("biz_code", res);
         return res;
     }
 }

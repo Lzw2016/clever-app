@@ -10,6 +10,7 @@ import org.clever.transaction.TransactionStatus;
 import org.clever.transaction.support.DefaultTransactionDefinition;
 import org.clever.util.Assert;
 import org.clever.web.config.MvcConfig;
+import org.clever.web.exception.MultiExceptionWrapper;
 import org.clever.web.support.mvc.HandlerContext;
 import org.clever.web.support.mvc.annotation.Transactional;
 
@@ -109,6 +110,7 @@ public class TransactionInterceptor implements HandlerInterceptor {
         TX_INFO.remove();
         // 提交事务时需要反转,以开启事务相反的顺序提交事务(先提交内层的事务,再提交外层事务)
         Collections.reverse(txInfos);
+        final List<Throwable> errList = new ArrayList<>(txInfos.size());
         final boolean commit = context.getException() == null;
         if (commit) {
             // 需要提交事务
@@ -116,6 +118,7 @@ public class TransactionInterceptor implements HandlerInterceptor {
                 try {
                     txInfo.tryCommit();
                 } catch (Throwable e) {
+                    errList.add(e);
                     log.info("提交事务失败,数据源: [{}]", txInfo.datasource, e);
                 }
             }
@@ -125,9 +128,13 @@ public class TransactionInterceptor implements HandlerInterceptor {
                 try {
                     txInfo.rollback();
                 } catch (Throwable e) {
+                    errList.add(e);
                     log.info("回滚事务失败,数据源: [{}]", txInfo.datasource, e);
                 }
             }
+        }
+        if (!errList.isEmpty()) {
+            throw new MultiExceptionWrapper(errList.toArray(new Throwable[0]));
         }
     }
 

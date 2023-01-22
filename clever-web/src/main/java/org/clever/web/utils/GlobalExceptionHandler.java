@@ -6,6 +6,7 @@ import org.clever.core.exception.NotImplementedException;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.model.response.ErrorResponse;
 import org.clever.core.validator.BaseValidatorUtils;
+import org.clever.dao.DuplicateKeyException;
 import org.clever.util.Assert;
 import org.clever.web.exception.*;
 import org.clever.web.http.HttpStatus;
@@ -105,8 +106,14 @@ public abstract class GlobalExceptionHandler {
             }
             return res;
         }));
+        // DuplicateKeyException.class
+        setHandle(DuplicateKeyException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            res.setMessage("保存数据失败，存在重复的数据");
+            return res;
+        }));
         // ExcelAnalysisException 解析Excel文件异常
-        // DuplicateKeyException 保存数据失败，数据已经存在
     }
 
     /**

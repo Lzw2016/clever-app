@@ -32,7 +32,7 @@ public interface HandlerInterceptor extends Ordered {
 
     /**
      * beforeHandle、handlerMethod、afterHandle 执行完成后的回调(支持后面Handler的异常处理)<br/>
-     * 执行当前 beforeHandle 后一定会执行此函数，当前函数生产的异常会被忽略
+     * 执行当前 beforeHandle 后<b>一定会执行</b>此函数，当前函数生产的异常<b>不会中断</b>Interceptor调用链
      *
      * @param context 上下文
      */

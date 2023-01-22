@@ -9,7 +9,7 @@
 [  ] WebSocket支持(配置在mvc下,验证:new对象后ClassLoader对象是否会被GC回收)
 [  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
 [  ]
-[  ] 事务提交或者回滚异常后不会向上抛出异常
+[OK] 事务提交或者回滚异常后不会向上抛出异常
 [  ] 全局的404默认返回处理
 [  ]
 

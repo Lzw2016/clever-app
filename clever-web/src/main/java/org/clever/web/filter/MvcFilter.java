@@ -19,6 +19,7 @@ import org.clever.util.ObjectUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.config.MvcConfig;
+import org.clever.web.exception.MultiExceptionWrapper;
 import org.clever.web.http.HttpMethod;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.http.MediaType;
@@ -280,8 +281,8 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         Collections.reverse(excInterceptor);
         // 异常处理
         if (exception != null) {
-            triggerFinallyHandle(excInterceptor, handlerContext, null, exception);
-            return TupleTwo.creat(null, exception);
+            List<Throwable> errList = triggerFinallyHandle(excInterceptor, handlerContext, null, exception);
+            return TupleTwo.creat(null, getException(errList, exception));
         }
         // 执行 Handler Method | 未中断 & 未异常
         if (goOn) {
@@ -293,8 +294,8 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         }
         // 异常处理
         if (exception != null) {
-            triggerFinallyHandle(excInterceptor, handlerContext, null, exception);
-            return TupleTwo.creat(null, exception);
+            List<Throwable> errList = triggerFinallyHandle(excInterceptor, handlerContext, null, exception);
+            return TupleTwo.creat(null, getException(errList, exception));
         }
         // 执行 HandlerInterceptor-after
         final HandlerContext.After afterContext = new HandlerContext.After(handlerContext, returnValue);
@@ -309,22 +310,24 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         // 更新 Handler Method 返回值
         returnValue = afterContext.getResult();
         // 执行 HandlerInterceptor-finally
-        triggerFinallyHandle(excInterceptor, handlerContext, returnValue, exception);
-        return TupleTwo.creat(returnValue, exception);
+        List<Throwable> errList = triggerFinallyHandle(excInterceptor, handlerContext, returnValue, exception);
+        return TupleTwo.creat(returnValue, getException(errList, exception));
     }
 
     /**
      * 执行 HandlerInterceptor-finally
      */
-    protected void triggerFinallyHandle(List<HandlerInterceptor> interceptors, HandlerContext handlerContext, Object returnValue, Throwable exception) {
+    protected List<Throwable> triggerFinallyHandle(List<HandlerInterceptor> interceptors, HandlerContext handlerContext, Object returnValue, Throwable exception) {
+        final List<Throwable> errList = new ArrayList<>(interceptors.size());
         final HandlerContext.Finally finallyContext = new HandlerContext.Finally(handlerContext, returnValue, exception);
         for (HandlerInterceptor interceptor : interceptors) {
             try {
                 interceptor.finallyHandle(finallyContext);
             } catch (Throwable e) {
-                log.error("HandlerInterceptor.afterCompletion threw exception", e);
+                errList.add(e);
             }
         }
+        return errList;
     }
 
     /**
@@ -381,6 +384,26 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         }
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(response.getWriter(), returnValue);
+    }
+
+    protected Throwable getException(List<Throwable> errList, Throwable... errs) {
+        if (errList == null) {
+            errList = new ArrayList<>(errs == null ? 0 : errs.length);
+        }
+        if (errs != null) {
+            // 合并异常信息，errs优先!
+            List<Throwable> tmp = new ArrayList<>(errs.length);
+            tmp.addAll(Arrays.stream(errs).collect(Collectors.toList()));
+            tmp.addAll(errList);
+            errList = tmp;
+        }
+        if (errList.isEmpty()) {
+            return null;
+        }
+        if (errList.size() == 1) {
+            return errList.get(0);
+        }
+        return new MultiExceptionWrapper(errList.toArray(new Throwable[0]));
     }
 
     /**
