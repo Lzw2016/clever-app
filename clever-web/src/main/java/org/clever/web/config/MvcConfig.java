@@ -1,13 +1,13 @@
 package org.clever.web.config;
 
 import lombok.Data;
+import org.clever.transaction.TransactionDefinition;
+import org.clever.transaction.annotation.Isolation;
+import org.clever.transaction.annotation.Propagation;
 import org.clever.web.http.HttpMethod;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * mvc 配置
@@ -49,9 +49,37 @@ public class MvcConfig {
      */
     private Set<String> allowPackages = new HashSet<>();
     /**
+     * 默认的事务配置
+     */
+    private TransactionalConfig defTransactional = new TransactionalConfig();
+    /**
      * 热重载配置
      */
-    private MvcConfig.HotReload hotReload = new MvcConfig.HotReload();
+    private HotReload hotReload = new HotReload();
+
+    @Data
+    public static class TransactionalConfig {
+        /**
+         * 要启用事务的数据源
+         */
+        private List<String> datasource = new ArrayList<>();
+        /**
+         * 事务传播性
+         */
+        private Propagation propagation = Propagation.REQUIRED;
+        /**
+         * 事务隔离性
+         */
+        private Isolation isolation = Isolation.DEFAULT;
+        /**
+         * 事务超时时间
+         */
+        private int timeout = TransactionDefinition.TIMEOUT_DEFAULT;
+        /**
+         * 是否是只读事务
+         */
+        private boolean readOnly = false;
+    }
 
     @Data
     public static class HotReload {

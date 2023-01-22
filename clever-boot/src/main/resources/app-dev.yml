@@ -15,6 +15,40 @@ startup-task:
         linux: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
         macos: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
 
+mybatis:
+  enable: true
+  watcher: true
+  interval: 1s
+  locations:
+    - fileType: filesystem
+      location: './clever-boot/src/main/kotlin'
+      filter: '**/*.xml'
+    #- fileType: jar
+    #  location: 'classpath*:org/clever/app/**/*.xml'
+    #  filter: ''
+    #- fileType: filesystem
+    #  location: './clever-data-jdbc/src/test/resources/performance_test'
+    #  filter: '**/*.xml'
+
+jdbc:
+  enable: true
+  defaultName: 'mysql'
+  dataSource:
+    mysql:
+      jdbcUrl: jdbc:p6spy:mysql://192.168.1.201:30011/test
+      username: admin
+      password: admin123456
+      minimumIdle: 2
+      maximumPoolSize: 100
+      connectionTestQuery: 'select 1 from dual'
+    postgresql:
+      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.201:30010/test
+      username: admin
+      password: admin123456
+      minimumIdle: 2
+      maximumPoolSize: 100
+      connectionTestQuery: 'select 1'
+
 web:
   host: '0.0.0.0'
   port: 9090
@@ -35,6 +69,12 @@ web:
     httpMethod: [ 'POST', 'GET' ]
     packagePrefix: 'org.clever.app.mvc.'
     allowPackages: [ 'org.clever.app.mvc.' ]
+    defTransactional:
+      datasource: ['mysql', 'postgresql']
+      propagation: REQUIRED
+      isolation: DEFAULT
+      timeout: -1
+      readOnly: false
     hotReload:
       enable: true
       interval: 1s
@@ -43,37 +83,3 @@ web:
         #- './clever-boot/out/production/classes'
         - './clever-boot/build/classes/java/main'
         #- './clever-boot/build/classes/kotlin/main'
-
-mybatis:
-  enable: true
-  watcher: true
-  interval: 1s
-  locations:
-    - fileType: filesystem
-      location: './clever-boot/src/main/kotlin'
-      filter: '**/*.xml'
-    #- fileType: jar
-    #  location: 'classpath*:org/clever/app/**/*.xml'
-    #  filter: ''
-    #- fileType: filesystem
-    #  location: './clever-data-jdbc/src/test/resources/performance_test'
-    #  filter: '**/*.xml'
-
-jdbc:
-  enable: true
-  defaultName: 'default'
-  dataSource:
-    default:
-      jdbcUrl: jdbc:p6spy:mysql://192.168.1.201:30011/test
-      username: admin
-      password: admin123456
-      minimumIdle: 2
-      maximumPoolSize: 100
-      connectionTestQuery: 'select 1 from dual'
-    postgresql:
-      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.201:30010/test
-      username: admin
-      password: admin123456
-      minimumIdle: 2
-      maximumPoolSize: 100
-      connectionTestQuery: 'select 1'

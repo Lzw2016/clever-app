@@ -5,6 +5,8 @@ import io.javalin.http.UploadedFile;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.clever.core.http.CookieUtils;
+import org.clever.core.validator.annotation.IntStatus;
+import org.clever.core.validator.annotation.NotBlank;
 import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.http.multipart.MultipartFile;
@@ -12,6 +14,7 @@ import org.clever.web.support.mvc.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -137,6 +140,35 @@ public class MvcTest {
         CookieUtils.setCookieForCurrentPath(ctx.res, "a", "时间: " + System.currentTimeMillis() + " | 特殊字符: ':, '");
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", a);
+        return res;
+    }
+
+    @Data
+    public static final class ParamEntity {
+        @NotBlank
+        @NotNull
+        private String a;
+        @IntStatus({1, 2, 3})
+        private Integer b;
+    }
+
+    public static Object t12(@Validated @RequestBody ParamEntity param) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", param);
+        return res;
+    }
+
+    @Transactional(datasource = {"mysql"})
+    public static Object t13(Context ctx) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", ctx.path());
+        return res;
+    }
+
+    @Transactional(datasource = {"postgresql"})
+    public static Object t14(Context ctx) {
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("a", ctx.path());
         return res;
     }
 }

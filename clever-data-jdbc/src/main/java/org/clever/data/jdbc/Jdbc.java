@@ -3192,7 +3192,7 @@ public class Jdbc extends AbstractDataSource {
     /**
      * 获取下一个事务名称
      */
-    private String getNextTransactionName() {
+    public String getNextTransactionName() {
         int nextSerialNumber = transactionSerialNumber.incrementAndGet();
         String transactionName;
         if (nextSerialNumber < 0) {

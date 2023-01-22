@@ -31,6 +31,58 @@ startup-task:
         linux: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
         macos: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
 
+mybatis:
+  enable: true
+  watcher: true
+  interval: 1s
+  locations:
+    - fileType: filesystem
+      location: ''
+      filter: ''
+    - fileType: jar
+      location: ''
+      filter: ''
+
+jdbc:
+  enable: true
+  defaultName: 'mysql'
+  metrics:
+    enable: true
+    ignoreSql:
+      - 'begin dbms_output.enable(); end;'
+      - 'declare     num integer := 1000; begin     dbms_output.get_lines(?, num);     dbms_output.disable(); end;'
+      - 'select 1'
+      - 'select 1 from dual'
+    maxSqlCount: 200
+    histogram: [ 20, 50, 100, 200, 500, 1000, 2000, 5000, 20000 ]
+    histogramTopN: 3
+  global:
+    driverClassName: 'com.p6spy.engine.spy.P6SpyDriver'
+    autocommit: true
+    maximumPoolSize: 100
+    minimumIdle: 5
+    maxLifetime: 21600000
+    connectionTimeout: 30000
+    connectionTestQuery: 'select 1'
+    exceptionOverrideClassName: 'org.clever.data.jdbc.hikari.HikariPreventQueryTimeoutEviction'
+    #dataSourceProperties:
+    #  stringtype: unspecified
+  dataSource:
+    mysql:
+      jdbcUrl: jdbc:p6spy:mysql://192.168.1.201:30011/test
+      username: admin
+      password: admin123456
+      minimumIdle: 2
+      maximumPoolSize: 100
+      connectionTestQuery: 'select 1 from dual'
+    postgresql:
+      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.201:30010/test
+      username: admin
+      password: admin123456
+      minimumIdle: 2
+      maximumPoolSize: 100
+      connectionTestQuery: 'select 1'
+
 web:
   host: '0.0.0.0'
   port: 9090
@@ -124,6 +176,12 @@ web:
     httpMethod: [ 'POST', 'GET' ]
     packagePrefix: 'org.clever.app.mvc.'
     allowPackages: [ 'org.clever.app.mvc.' ]
+    defTransactional:
+      datasource: ['mysql', 'postgresql']
+      propagation: REQUIRED
+      isolation: DEFAULT
+      timeout: -1
+      readOnly: false
     hotReload:
       enable: true
       interval: 1s
@@ -132,55 +190,3 @@ web:
         - './clever-boot/out/production/classes'
         - './clever-boot/build/classes/java/main'
         - './clever-boot/build/classes/kotlin/main'
-
-mybatis:
-  enable: true
-  watcher: true
-  interval: 1s
-  locations:
-    - fileType: filesystem
-      location: ''
-      filter: ''
-    - fileType: jar
-      location: ''
-      filter: ''
-
-jdbc:
-  enable: true
-  defaultName: 'mysql'
-  metrics:
-    enable: true
-    ignoreSql:
-      - 'begin dbms_output.enable(); end;'
-      - 'declare     num integer := 1000; begin     dbms_output.get_lines(?, num);     dbms_output.disable(); end;'
-      - 'select 1'
-      - 'select 1 from dual'
-    maxSqlCount: 200
-    histogram: [ 20, 50, 100, 200, 500, 1000, 2000, 5000, 20000 ]
-    histogramTopN: 3
-  global:
-    driverClassName: 'com.p6spy.engine.spy.P6SpyDriver'
-    autocommit: true
-    maximumPoolSize: 100
-    minimumIdle: 5
-    maxLifetime: 21600000
-    connectionTimeout: 30000
-    connectionTestQuery: 'select 1'
-    exceptionOverrideClassName: 'org.clever.data.jdbc.hikari.HikariPreventQueryTimeoutEviction'
-    #dataSourceProperties:
-    #  stringtype: unspecified
-  dataSource:
-    mysql:
-      jdbcUrl: jdbc:p6spy:mysql://192.168.1.201:30011/test
-      username: admin
-      password: admin123456
-      minimumIdle: 2
-      maximumPoolSize: 100
-      connectionTestQuery: 'select 1 from dual'
-    postgresql:
-      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.201:30010/test
-      username: admin
-      password: admin123456
-      minimumIdle: 2
-      maximumPoolSize: 100
-      connectionTestQuery: 'select 1'

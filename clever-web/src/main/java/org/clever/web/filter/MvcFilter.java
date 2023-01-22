@@ -23,9 +23,11 @@ import org.clever.web.http.HttpMethod;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.http.MediaType;
 import org.clever.web.support.mvc.HandlerContext;
-import org.clever.web.support.mvc.HandlerInterceptor;
 import org.clever.web.support.mvc.HandlerMethod;
 import org.clever.web.support.mvc.argument.*;
+import org.clever.web.support.mvc.interceptor.ArgumentsValidated;
+import org.clever.web.support.mvc.interceptor.HandlerInterceptor;
+import org.clever.web.support.mvc.interceptor.TransactionInterceptor;
 import org.clever.web.support.mvc.method.DefaultHandlerMethodResolver;
 import org.clever.web.support.mvc.method.HandlerMethodResolver;
 import org.jetbrains.annotations.NotNull;
@@ -132,10 +134,23 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         return resolvers;
     }
 
+    /**
+     * 返回要使用的拦截器
+     */
+    protected List<HandlerInterceptor> getDefaultHandlerInterceptors() {
+        // 设置默认的 HandlerInterceptor
+        List<HandlerInterceptor> interceptors = new ArrayList<>(8);
+        interceptors.add(new ArgumentsValidated());
+        // TODO defDatasource
+        interceptors.add(new TransactionInterceptor("defDatasource", mvcConfig.getDefTransactional()));
+        return interceptors;
+    }
+
     @Override
     public void apply(@NotNull Javalin app) {
         this.javalin = app;
         this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
+        this.interceptors.addAll(this.getDefaultHandlerInterceptors());
     }
 
     @Override

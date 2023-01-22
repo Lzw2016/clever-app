@@ -2,15 +2,21 @@ package org.clever.web.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.exception.BusinessException;
+import org.clever.core.exception.NotImplementedException;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.model.response.ErrorResponse;
+import org.clever.core.validator.BaseValidatorUtils;
 import org.clever.util.Assert;
-import org.clever.web.exception.GenericHttpException;
+import org.clever.web.exception.*;
+import org.clever.web.http.HttpStatus;
 import org.clever.web.http.MediaType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -20,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
  * 作者：lizw <br/>
  * 创建时间：2022/12/25 21:44 <br/>
  */
+@SuppressWarnings("unchecked")
 @Slf4j
 public abstract class GlobalExceptionHandler {
     private static final ConcurrentMap<Class<? extends Throwable>, ExceptionHandler<? extends Throwable>> HANDLERS = new ConcurrentHashMap<>();
@@ -29,13 +36,6 @@ public abstract class GlobalExceptionHandler {
         DEFAULT_HANDLER = SimpleExceptionHandlerWrapper.create((exception, request, response) -> newErrorResponse(request, exception));
         // Throwable.class
         setHandle(Throwable.class, DEFAULT_HANDLER);
-        // GenericHttpException.class
-        setHandle(GenericHttpException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
-            ErrorResponse res = newErrorResponse(request, exception);
-            res.setStatus(exception.getStatus());
-            res.setMessage(exception.getMessage());
-            return res;
-        }));
         // BusinessException.class
         setHandle(BusinessException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
             ErrorResponse res = newErrorResponse(request, exception);
@@ -43,14 +43,69 @@ public abstract class GlobalExceptionHandler {
             res.setMessage("业务处理失败");
             return res;
         }));
-        // ValidationException 请求参数校验异常
-        // HttpMessageConversionException 请求参数转换异常
-        // BindException 请求参数校验失败
-        // MethodArgumentNotValidException 请求参数校验失败
-        // ConstraintViolationException 请求参数校验失败
-        // MaxUploadSizeExceededException 上传文件大小超限
+        // NotImplementedException.class
+        setHandle(NotImplementedException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
+            res.setMessage("功能未实现");
+            return res;
+        }));
+        // GenericHttpException.class
+        setHandle(GenericHttpException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(exception.getStatus());
+            res.setMessage(exception.getMessage());
+            return res;
+        }));
+        // HttpMessageNotReadableException
+        ExceptionHandler<?> mvcArgErrHandler = SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.BAD_REQUEST.value());
+            res.setMessage("缺少必须的请求数据");
+            return res;
+        });
+        setHandle(HttpMessageNotReadableException.class, (ExceptionHandler<HttpMessageNotReadableException>) mvcArgErrHandler);
+        setHandle(MissingRequestCookieException.class, (ExceptionHandler<MissingRequestCookieException>) mvcArgErrHandler);
+        setHandle(MissingRequestHeaderException.class, (ExceptionHandler<MissingRequestHeaderException>) mvcArgErrHandler);
+        setHandle(MissingRequestValueException.class, (ExceptionHandler<MissingRequestValueException>) mvcArgErrHandler);
+        setHandle(MissingServletRequestParameterException.class, (ExceptionHandler<MissingServletRequestParameterException>) mvcArgErrHandler);
+        setHandle(MissingServletRequestPartException.class, (ExceptionHandler<MissingServletRequestPartException>) mvcArgErrHandler);
+        setHandle(MultipartException.class, (ExceptionHandler<MultipartException>) mvcArgErrHandler);
+        setHandle(ServletRequestBindingException.class, (ExceptionHandler<ServletRequestBindingException>) mvcArgErrHandler);
+        // InvalidMediaTypeException.class
+        setHandle(InvalidMediaTypeException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value());
+            res.setMessage("不支持的Content-Type");
+            return res;
+        }));
+        // MaxUploadSizeExceededException.class
+        setHandle(MaxUploadSizeExceededException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.PAYLOAD_TOO_LARGE.value());
+            res.setMessage("上传数据大小超过最大限制");
+            return res;
+        }));
+        ExceptionHandler<?> mvcConvErrHandler = SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.BAD_REQUEST.value());
+            res.setMessage("请求数据类型转换错误");
+            return res;
+        });
+        setHandle(MethodArgumentConversionNotSupportedException.class, (ExceptionHandler<MethodArgumentConversionNotSupportedException>) mvcConvErrHandler);
+        setHandle(MethodArgumentTypeMismatchException.class, (ExceptionHandler<MethodArgumentTypeMismatchException>) mvcConvErrHandler);
+        // ConstraintViolationException.class 请求参数校验异常
+        setHandle(ConstraintViolationException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.BAD_REQUEST.value());
+            res.setMessage("请求数据验证失败");
+            Set<ConstraintViolation<?>> constraints = exception.getConstraintViolations();
+            if (constraints != null && !constraints.isEmpty()) {
+                constraints.stream().map(BaseValidatorUtils::createFieldError).forEach(res::addFieldError);
+            }
+            return res;
+        }));
         // ExcelAnalysisException 解析Excel文件异常
-        // ExcelAnalysisException 上传文件大小超限
         // DuplicateKeyException 保存数据失败，数据已经存在
     }
 

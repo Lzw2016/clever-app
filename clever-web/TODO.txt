@@ -1,15 +1,16 @@
 [OK] 全局异常处理
 [OK] 跨域问题
 [OK] 静态资源问题
-[80] MVC参数绑定
-[  ] MVC数据验证@Validated
-[  ] MVC拦截问题
-[  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
+[OK] MVC拦截问题
+[OK] MVC参数绑定
+[30] MVC数据验证@Validated
 [  ] [配置化]MVC处理时默认开启(多个)数据源事务
+[  ] MVC自定义事务@Transactional
 [  ] WebSocket支持(配置在mvc下,验证:new对象后ClassLoader对象是否会被GC回收)
+[  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
 [  ]
-[  ]
-[  ]
+[  ] 全局的404返回处理
+[  ] 事务提交或者回滚异常后不会向上抛出异常
 
 --------------------------
 请求
@@ -40,17 +41,14 @@ CustomFilter
     🡓
     [600] StaticResourceFilter
     🡓
-    [700] MvcFilter(before | after | exception)
+    [700] MvcFilter (before[可提前响应请求] -> invokeMethod[自定义MVC: 响应请求] -> after -> finally[执行before后一定会执行, 可以处理异常])
         🡓
         HandlerInterceptor
-        🡓
-        before (可提前响应请求)
-        🡓
-        invokeMethod (自定义MVC: 响应请求)
-        🡓
-        after
-        🡓
-        finally (执行before后一定会执行, 可以处理异常)
+            🡓
+            [-10000]ArgumentsValidated (MVC数据验证@Validated)
+            🡓
+            [0] TransactionInterceptor (JDBC事务处理)
+            🡓
         🡓
     🡓
 🡓
