@@ -103,11 +103,13 @@ public class TransactionInterceptor implements HandlerInterceptor {
     @Override
     public void finallyHandle(HandlerContext.Finally context) throws Exception {
         final List<TransactionInfo> txInfos = TX_INFO.get();
-        final boolean commit = context.getException() == null;
         if (txInfos == null) {
             return;
         }
         TX_INFO.remove();
+        // 提交事务时需要反转,以开启事务相反的顺序提交事务(先提交内层的事务,再提交外层事务)
+        Collections.reverse(txInfos);
+        final boolean commit = context.getException() == null;
         if (commit) {
             // 需要提交事务
             for (TransactionInfo txInfo : txInfos) {

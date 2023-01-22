@@ -3194,11 +3194,12 @@ public class Jdbc extends AbstractDataSource {
      */
     public String getNextTransactionName() {
         int nextSerialNumber = transactionSerialNumber.incrementAndGet();
+        String dsName = StringUtils.trimToEmpty(dataSourceName);
         String transactionName;
         if (nextSerialNumber < 0) {
-            transactionName = TRANSACTION_NAME_PREFIX + nextSerialNumber;
+            transactionName = TRANSACTION_NAME_PREFIX + nextSerialNumber + ":" + dsName;
         } else {
-            transactionName = TRANSACTION_NAME_PREFIX + "+" + nextSerialNumber;
+            transactionName = TRANSACTION_NAME_PREFIX + "+" + nextSerialNumber + ":" + dsName;
         }
         return transactionName;
     }
