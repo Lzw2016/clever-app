@@ -119,14 +119,14 @@ public class StartupTaskBootstrap {
         int idx = 1;
         for (StartupTask task : startupTasks) {
             log.info(
-                    "# 执行任务 {}{}",
+                    "# 执行开机任务 {}{}",
                     String.format("%-2s", idx++),
                     StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : ""
             );
             try {
                 task.runnable.run();
             } catch (Exception e) {
-                log.error("# 执行任务失败 {} | {}", idx++, e.getMessage(), e);
+                log.error("# 执行开机任务失败 {} | {}", idx++, e.getMessage(), e);
             }
         }
     }

@@ -1,7 +1,7 @@
 package org.clever.app.task;
 
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.SystemClock;
+import org.clever.core.DateUtils;
 
 /**
  * 作者：lizw <br/>
@@ -10,6 +10,6 @@ import org.clever.core.SystemClock;
 @Slf4j
 public class TaskTest {
     public static void job01() {
-        log.info("定时任务: {}", SystemClock.now());
+        log.info("定时任务: {}", DateUtils.getCurrentDate("yyyy-MM-dd HH:mm:ss.SSS"));
     }
 }
