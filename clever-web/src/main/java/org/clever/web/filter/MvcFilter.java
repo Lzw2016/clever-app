@@ -58,6 +58,8 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
 
     public static MvcFilter create(String rootPath, Environment environment) {
         MvcConfig mvcConfig = Binder.get(environment).bind(MvcConfig.PREFIX, MvcConfig.class).orElseGet(MvcConfig::new);
+        MvcConfig.TransactionalConfig defTransactional = Optional.of(mvcConfig.getDefTransactional()).orElse(new MvcConfig.TransactionalConfig());
+        mvcConfig.setDefTransactional(defTransactional);
         MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
         mvcConfig.setHotReload(hotReload);
         Map<String, String> locationMap = ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations());
@@ -69,6 +71,12 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         logs.add("  httpMethod       : " + StringUtils.join(mvcConfig.getHttpMethod(), " | "));
         logs.add("  allowPackages    : " + StringUtils.join(mvcConfig.getAllowPackages(), " | "));
         logs.add("  packagePrefix    : " + mvcConfig.getPackagePrefix());
+        logs.add("  defTransactional: ");
+        logs.add("    datasource     : " + StringUtils.join(defTransactional.getDatasource(), " | "));
+        logs.add("    propagation    : " + defTransactional.getPropagation());
+        logs.add("    isolation      : " + defTransactional.getIsolation());
+        logs.add("    timeout        : " + defTransactional.getTimeout());
+        logs.add("    readOnly       : " + defTransactional.isReadOnly());
         logs.add("  hotReload: ");
         logs.add("    enable         : " + hotReload.isEnable());
         logs.add("    interval       : " + hotReload.getInterval().toMillis() + "ms");
@@ -142,8 +150,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         // 设置默认的 HandlerInterceptor
         List<HandlerInterceptor> interceptors = new ArrayList<>(8);
         interceptors.add(new ArgumentsValidated());
-        // TODO defDatasource
-        interceptors.add(new TransactionInterceptor("defDatasource", mvcConfig.getDefTransactional()));
+        interceptors.add(new TransactionInterceptor(mvcConfig.getDefTransactional()));
         return interceptors;
     }
 

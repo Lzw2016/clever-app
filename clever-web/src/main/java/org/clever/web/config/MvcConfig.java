@@ -60,6 +60,10 @@ public class MvcConfig {
     @Data
     public static class TransactionalConfig {
         /**
+         * 使用 {@code Transactional} 时的默认 datasource 值
+         */
+        private List<String> defDatasource = new ArrayList<>();
+        /**
          * 要启用事务的数据源
          */
         private List<String> datasource = new ArrayList<>();

@@ -70,6 +70,7 @@ web:
     packagePrefix: 'org.clever.app.mvc.'
     allowPackages: [ 'org.clever.app.mvc.' ]
     defTransactional:
+      defDatasource: ['mysql']
       datasource: ['mysql', 'postgresql']
       propagation: REQUIRED
       isolation: DEFAULT

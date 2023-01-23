@@ -453,7 +453,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     }
 
     /**
-     * TODO 修改&删除??
+     * TODO 修改&删除?? 目前通过此类(HttpHeaders)无法真正修改请求头信息考虑使用(ReadOnlyHttpHeaders)或者把这个类工具化!
      * 把HttpServletRequest中的Header数据转换成当前 HttpHeaders 对象
      */
     public HttpHeaders(HttpServletRequest request) {

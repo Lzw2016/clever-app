@@ -176,7 +176,7 @@ public class MvcTest {
 
     private static final Jdbc jdbc = DataSourceAdmin.getJdbc("mysql");
 
-    @Transactional(datasource = {"mysql"})
+    @Transactional
     public static Object t15(Context ctx) {
         Map<String, Object> res = new LinkedHashMap<>();
         // code_name, pattern,sequence,reset_flag

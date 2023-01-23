@@ -3,9 +3,9 @@
 [OK] 静态资源问题
 [OK] MVC拦截问题
 [OK] MVC参数绑定
-[30] MVC数据验证@Validated
-[  ] [配置化]MVC处理时默认开启(多个)数据源事务
-[  ] MVC自定义事务@Transactional
+[OK] MVC数据验证@Validated
+[OK] [配置化]MVC处理时默认开启(多个)数据源事务
+[OK] MVC自定义事务@Transactional
 [  ] WebSocket支持(配置在mvc下,验证:new对象后ClassLoader对象是否会被GC回收)
 [  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
 [  ]

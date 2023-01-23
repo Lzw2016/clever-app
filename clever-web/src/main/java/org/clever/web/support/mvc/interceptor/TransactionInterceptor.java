@@ -1,7 +1,9 @@
 package org.clever.web.support.mvc.interceptor;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.clever.core.OrderIncrement;
 import org.clever.data.jdbc.DataSourceAdmin;
 import org.clever.data.jdbc.Jdbc;
@@ -28,13 +30,14 @@ import java.util.stream.Collectors;
 public class TransactionInterceptor implements HandlerInterceptor {
     private static final ThreadLocal<List<TransactionInfo>> TX_INFO = new ThreadLocal<>();
 
-    private final String defDatasource;
+    @Getter
+    private final List<String> defDatasource;
+    @Getter
     private final MvcConfig.TransactionalConfig defTransactional;
 
-    public TransactionInterceptor(String defDatasource, MvcConfig.TransactionalConfig defTransactional) {
-        Assert.isNotBlank(defDatasource, "参数 defDatasource 不能为空");
+    public TransactionInterceptor(MvcConfig.TransactionalConfig defTransactional) {
         Assert.notNull(defTransactional, "参数 defTransactional 不能为null");
-        this.defDatasource = defDatasource;
+        this.defDatasource = Collections.unmodifiableList(defTransactional.getDefDatasource());
         this.defTransactional = defTransactional;
     }
 
@@ -62,7 +65,7 @@ public class TransactionInterceptor implements HandlerInterceptor {
             txConfig.setDatasource(Arrays.stream(tx.datasource()).collect(Collectors.toList()));
             // 使用默认的数据源
             if (txConfig.getDatasource() == null || txConfig.getDatasource().isEmpty()) {
-                txConfig.setDatasource(Collections.singletonList(defDatasource));
+                txConfig.setDatasource(defDatasource);
             }
             txConfig.setPropagation(tx.propagation());
             txConfig.setIsolation(tx.isolation());
@@ -74,13 +77,20 @@ public class TransactionInterceptor implements HandlerInterceptor {
         if (disabledTX) {
             return true;
         }
-        // 保证datasource唯一且顺序不变
+        // 保证datasource非空、唯一、顺序不变
         final Set<String> unique = new HashSet<>(txConfig.getDatasource().size());
         final List<String> datasource = new ArrayList<>(txConfig.getDatasource().size());
         for (String ds : txConfig.getDatasource()) {
+            if (StringUtils.isBlank(ds)) {
+                continue;
+            }
             if (unique.add(ds)) {
                 datasource.add(ds);
             }
+        }
+        // datasource 为空则直接返回
+        if (datasource.isEmpty()) {
+            return true;
         }
         // 启用事务
         List<TransactionInfo> txInfos = new ArrayList<>(datasource.size());
