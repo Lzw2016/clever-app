@@ -85,7 +85,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
         } finally {
             long cost = SystemClock.now() - startTime;
-            LOGGER.info(sb.append(" | ").append(cost).append("ms").append(" | [").append(ctx.res.getStatus()).append("]").toString());
+            LOGGER.info(sb.append(" | [").append(cost).append("ms").append("] | [").append(ctx.res.getStatus()).append("]").toString());
         }
     }
 }

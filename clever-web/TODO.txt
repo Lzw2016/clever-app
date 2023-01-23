@@ -10,7 +10,7 @@
 [  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
 [  ]
 [OK] 事务提交或者回滚异常后不会向上抛出异常
-[  ] 全局的404默认返回处理
+[OK] 全局的404默认返回处理
 [  ]
 
 --------------------------
@@ -20,9 +20,9 @@ CustomFilter
     🡓
     [0] DefSettingFilter
     🡓
-    [100] ExceptionHandlerFilter
+    [100] EchoFilter (JavalinConfig#requestLogger)
     🡓
-    [200] EchoFilter (JavalinConfig#requestLogger)
+    [200] ExceptionHandlerFilter
     🡓
     [300] CorsFilter (可参考: https://javalin.io/plugins/cors)
     🡓
