@@ -23,6 +23,7 @@ import org.clever.web.WebServerBootstrap;
 import org.clever.web.config.WebConfig;
 import org.clever.web.filter.*;
 import org.clever.web.plugin.ExceptionHandlerPlugin;
+import org.clever.web.plugin.NotFoundResponsePlugin;
 
 import java.time.Duration;
 
@@ -94,7 +95,8 @@ public class StartApp {
         OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
                 .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1())
-                .addPlugin(mvcFilter, "MVC插件", pluginOrder.incrL1());
+                .addPlugin(mvcFilter, "MVC处理插件", pluginOrder.incrL1())
+                .addPlugin(NotFoundResponsePlugin.INSTANCE, "404处理插件", pluginOrder.incrL1());
         // 注册 JavalinEventListener
         // OrderIncrement javalinListenerOrder = new OrderIncrement();
         // webServerBootstrap.getJavalinEventListenerRegistrar()
