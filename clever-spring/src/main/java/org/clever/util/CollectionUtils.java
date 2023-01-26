@@ -92,4 +92,17 @@ public class CollectionUtils {
     public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> targetMap) {
         return new MultiValueMapAdapter<>(targetMap);
     }
+
+    /**
+     * 检索给定列表的第一个元素，访问零索引
+     *
+     * @param list 要检查的列表（可以是 {@code null} 或为空）
+     * @return 第一个元素，如果没有则为 {@code null}
+     */
+    public static <T> T firstElement(List<T> list) {
+        if (isEmpty(list)) {
+            return null;
+        }
+        return list.get(0);
+    }
 }

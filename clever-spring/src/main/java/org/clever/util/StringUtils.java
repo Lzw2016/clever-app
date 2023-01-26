@@ -799,4 +799,24 @@ public class StringUtils {
         }
         return (changed ? StreamUtils.copyToString(baos, charset) : source);
     }
+
+    /**
+     * 在第一次出现分隔符时拆分 {@code String}。结果中不包含分隔符。
+     *
+     * @param toSplit   要拆分的字符串（可能为 {@code null} 或空）
+     * @param delimiter 将字符串拆分为（可能为 {@code null} 或空）
+     * @return 两元素数组，索引0在分隔符之前，索引1在分隔符之后（两个元素都不包括分隔符）；或者 {@code null}，如果在给定的输入 {@code String} 中找不到分隔符
+     */
+    public static String[] split(String toSplit, String delimiter) {
+        if (!hasLength(toSplit) || !hasLength(delimiter)) {
+            return null;
+        }
+        int offset = toSplit.indexOf(delimiter);
+        if (offset < 0) {
+            return null;
+        }
+        String beforeDelimiter = toSplit.substring(0, offset);
+        String afterDelimiter = toSplit.substring(offset + delimiter.length());
+        return new String[]{beforeDelimiter, afterDelimiter};
+    }
 }
