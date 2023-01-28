@@ -1,4 +1,4 @@
-package org.clever.data.jdbc;
+package org.clever.data;
 
 /**
  * 作者：lizw <br/>
