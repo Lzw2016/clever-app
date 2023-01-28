@@ -27,9 +27,9 @@ startup-task:
       async: true
       workDir: './'
       cmd:
-        windows: 'gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
-        linux: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
-        macos: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        windows: 'gradlew.bat classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        linux: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        macos: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
 
 mybatis:
   enable: true
@@ -82,6 +82,46 @@ jdbc:
       minimumIdle: 2
       maximumPoolSize: 100
       connectionTestQuery: 'select 1'
+
+redis:
+  enable: true
+  defaultName: 'default'
+  global:
+    host: '192.168.1.201'
+    port: 30007
+    ssl: false
+    username:
+    password: 'admin123456'
+    database: 0
+    readTimeout: 8s
+    connectTimeout: 3s
+    clientName: 'clever-app-client'
+    sentinel:
+      master: ''
+      nodes: ['node_1', 'node_2', 'node_3']
+      password: ''
+    lettuce:
+      shutdownTimeout: 100ms
+      pool:
+        enabled: true
+        maxIdle: 8
+        minIdle: 0
+        maxActive: 9
+        maxWait: -1ms
+        timeBetweenEvictionRuns: 3m
+      cluster:
+        nodes: ['node_1', 'node_2', 'node_3']
+        maxRedirects: 16
+        refresh:
+          dynamicRefreshSources: true
+          period: 3m
+          adaptive: false
+  dataSource:
+    default:
+      host: '192.168.1.201'
+      port: 30007
+      password: 'admin123456'
+      database: 0
 
 web:
   host: '0.0.0.0'
@@ -183,6 +223,48 @@ web:
       isolation: DEFAULT
       timeout: -1
       readOnly: false
+    # TODO clever-security
+    security:
+      enable: true
+      ignore-paths:
+        # 静态资源
+        - '/favicon.ico'
+        - '/dist/**'
+        - '/static/**'
+        - '/**/*.png'
+        - '/**/*.ico'
+        - '/**/*.js'
+        - '/**/*.css'
+        - '/**/*.html'
+        - '/**/*.ts'
+        - '/**/*.tsx'
+        - '/**/*.map'
+        - '/**/*.png'
+        - '/**/*.jpg'
+        - '/**/*.gif'
+        - '/**/*.ttf'
+        - '/**/*.woff'
+        - '/**/*.woff2'
+        - '/**/.git'
+      ignore-auth-paths:
+        - /deviceApp/active
+      ignore-auth-failed-paths:
+        - '/api/com/galaxis/wms/report/Report@execute'
+      current-user-path: /current_user
+      login:
+        path: /login
+        allow-repeat-login: true
+        concurrent-login-count: -1
+      logout:
+        path: /logout
+        need-redirect: true
+        redirect-page: /login.html
+      redis:
+        enable: true
+      token:
+        jwt-token-name: auth
+        token-validity: 30d
+        refresh-token-validity: 60d
     hotReload:
       enable: true
       interval: 1s

@@ -7,7 +7,7 @@ import lombok.SneakyThrows;
 import org.clever.core.http.CookieUtils;
 import org.clever.core.validator.annotation.IntStatus;
 import org.clever.core.validator.annotation.NotBlank;
-import org.clever.data.jdbc.DataSourceAdmin;
+import org.clever.data.jdbc.DaoFactory;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.util.MultiValueMap;
 import org.clever.web.http.HttpStatus;
@@ -174,7 +174,7 @@ public class MvcTest {
         return res;
     }
 
-    private static final Jdbc jdbc = DataSourceAdmin.getJdbc("mysql");
+    private static final Jdbc jdbc = DaoFactory.getJdbc("mysql");
 
     @Transactional
     public static Object t15(Context ctx) {

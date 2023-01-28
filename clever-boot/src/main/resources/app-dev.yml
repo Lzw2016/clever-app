@@ -11,9 +11,9 @@ startup-task:
       async: true
       workDir: './'
       cmd:
-        windows: 'gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
-        linux: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
-        macos: './gradlew     clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        windows: 'gradlew.bat classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        linux: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        macos: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
 
 mybatis:
   enable: true
