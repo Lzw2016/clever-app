@@ -616,6 +616,21 @@ public class ClassUtils {
         return (lastDotIndex != -1 ? fqClassName.substring(0, lastDotIndex) : "");
     }
 
+    /**
+     * 为给定接口创建一个复合接口类，在一个类中实现给定接口。
+     * <p>这个实现为给定的接口构建一个JDK代理类。
+     *
+     * @param interfaces  要合并的接口
+     * @param classLoader ClassLoader在中创建复合类
+     * @return 合并的接口为Class
+     * @throws IllegalArgumentException 如果指定的接口暴露了冲突的方法签名（或违反了类似的约束）
+     * @see java.lang.reflect.Proxy#getProxyClass
+     */
+    public static Class<?> createCompositeInterface(Class<?>[] interfaces, ClassLoader classLoader) {
+        Assert.notEmpty(interfaces, "Interface array must not be empty");
+        return Proxy.getProxyClass(classLoader, interfaces);
+    }
+
     private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
         try {
             return clazz.getMethod(methodName, paramTypes);
