@@ -7,6 +7,7 @@ import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.IPage;
 import org.clever.core.tuples.TupleTwo;
+import org.clever.data.AbstractDataSource;
 import org.clever.data.dynamic.sql.BoundSql;
 import org.clever.data.dynamic.sql.builder.SqlSource;
 import org.clever.data.dynamic.sql.dialect.DbType;

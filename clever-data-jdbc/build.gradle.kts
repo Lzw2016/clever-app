@@ -1,5 +1,6 @@
 dependencies {
     api(project(":clever-core"))
+    api(project(":clever-data-commons"))
     api(project(":clever-data-dynamic-sql"))
     api("com.zaxxer:HikariCP")
     api("com.querydsl:querydsl-core")

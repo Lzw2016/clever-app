@@ -27,6 +27,7 @@ import org.clever.core.tuples.TupleTwo;
 import org.clever.dao.DataAccessException;
 import org.clever.dao.DuplicateKeyException;
 import org.clever.dao.support.DataAccessUtils;
+import org.clever.data.AbstractDataSource;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.dialects.DialectFactory;
 import org.clever.data.jdbc.listener.JdbcListeners;
