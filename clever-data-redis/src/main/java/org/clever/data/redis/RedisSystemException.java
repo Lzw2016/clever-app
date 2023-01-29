@@ -3,7 +3,7 @@ package org.clever.data.redis;
 import org.clever.core.NestedRuntimeException;
 
 /**
- * 当我们无法将Redis异常分类为Spring通用数据访问异常时引发异常
+ * 当我们无法将Redis异常分类时，当前异常类型表示通用数据访问异常时引发异常
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/01/27 21:22 <br/>
