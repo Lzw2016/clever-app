@@ -498,7 +498,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
             if (rawValue instanceof byte[] && valueSerializer != null) {
                 values.add(valueSerializer.deserialize((byte[]) rawValue));
             } else if (rawValue instanceof List) {
-                // Lists are the only potential Collections of mixed values....
+                // 列表是唯一可能的混合值集合...
                 values.add(deserializeMixedResults((List) rawValue, valueSerializer, hashKeySerializer, hashValueSerializer));
             } else if (rawValue instanceof Set && !(((Set) rawValue).isEmpty())) {
                 values.add(deserializeSet((Set) rawValue, valueSerializer));
@@ -678,7 +678,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
             try {
                 return connection.pTtl(rawKey, timeUnit);
             } catch (Exception e) {
-                // Driver may not support pTtl or we may be running on Redis 2.4
+                // 驱动程序可能不支持pTtl，或者我们可能在Redis 2.4上运行
                 return connection.ttl(rawKey, timeUnit);
             }
         }, true);
