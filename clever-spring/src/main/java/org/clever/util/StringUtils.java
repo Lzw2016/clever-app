@@ -819,4 +819,22 @@ public class StringUtils {
         String afterDelimiter = toSplit.substring(offset + delimiter.length());
         return new String[]{beforeDelimiter, afterDelimiter};
     }
+
+    /**
+     * 从给定的Java资源路径中删除文件扩展名，例如“mypath/myfile.txt” ->；“mypath/myfile”。
+     *
+     * @param path 文件路径
+     * @return 具有剥离文件扩展名的路径
+     */
+    public static String stripFilenameExtension(String path) {
+        int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+        if (extIndex == -1) {
+            return path;
+        }
+        int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR_CHAR);
+        if (folderIndex > extIndex) {
+            return path;
+        }
+        return path.substring(0, extIndex);
+    }
 }

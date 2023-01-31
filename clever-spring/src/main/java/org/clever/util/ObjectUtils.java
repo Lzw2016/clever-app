@@ -516,4 +516,49 @@ public class ObjectUtils {
     public static boolean isArray(Object obj) {
         return (obj != null && obj.getClass().isArray());
     }
+
+    /**
+     * {@link Enum#valueOf(Class, String)} 的不区分大小写替代方案
+     *
+     * @param <E>        具体Enum类型
+     * @param enumValues 所讨论的所有Enum常量的数组，通常按 {@code Enum.values()}
+     * @param constant   获取枚举值的常量
+     * @throws IllegalArgumentException 如果在给定的枚举值数组中找不到给定的常量。使用 {@link #containsConstant(Enum[], String)} 作为保护以避免此异常
+     */
+    public static <E extends Enum<?>> E caseInsensitiveValueOf(E[] enumValues, String constant) {
+        for (E candidate : enumValues) {
+            if (candidate.toString().equalsIgnoreCase(constant)) {
+                return candidate;
+            }
+        }
+        throw new IllegalArgumentException("Constant [" + constant + "] does not exist in enum type " + enumValues.getClass().getComponentType().getName());
+    }
+
+    /**
+     * 检查给定的枚举常量数组是否包含具有给定名称的常量，在确定匹配时忽略大小写
+     *
+     * @param enumValues 要检查的枚举值，通常通过 {@code MyEnum.values()}
+     * @param constant   要查找的常量名称（不能为null或空字符串）
+     * @return 是否在给定数组中找到常量
+     */
+    public static boolean containsConstant(Enum<?>[] enumValues, String constant) {
+        return containsConstant(enumValues, constant, false);
+    }
+
+    /**
+     * 检查给定的枚举常量数组是否包含具有给定名称的常量
+     *
+     * @param enumValues    要检查的枚举值，通常通过 {@code MyEnum.values()}
+     * @param constant      要查找的常量名称（不能为null或空字符串）
+     * @param caseSensitive 案例在确定匹配时是否重要
+     * @return 是否在给定数组中找到常量
+     */
+    public static boolean containsConstant(Enum<?>[] enumValues, String constant, boolean caseSensitive) {
+        for (Enum<?> candidate : enumValues) {
+            if (caseSensitive ? candidate.toString().equals(constant) : candidate.toString().equalsIgnoreCase(constant)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

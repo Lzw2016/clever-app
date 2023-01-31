@@ -245,6 +245,27 @@ public class Assert {
         }
     }
 
+    /**
+     * 断言集合不包含 {@code null} 元素
+     * <p>注意：如果集合为空，则无需投诉！
+     * <pre>{@code
+     * Assert.noNullElements(collection, "Collection must contain non-null elements");
+     * }</pre>
+     *
+     * @param collection 要检查的集合
+     * @param message    断言失败时要使用的异常消息
+     * @throws IllegalArgumentException 如果集合包含 {@code null} 元素
+     */
+    public static void noNullElements(Collection<?> collection, String message) {
+        if (collection != null) {
+            for (Object element : collection) {
+                if (element == null) {
+                    throw new IllegalArgumentException(message);
+                }
+            }
+        }
+    }
+
     private static String nullSafeGet(Supplier<String> messageSupplier) {
         return (messageSupplier != null ? messageSupplier.get() : null);
     }
