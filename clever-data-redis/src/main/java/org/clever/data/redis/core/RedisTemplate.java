@@ -48,12 +48,14 @@ import java.util.concurrent.TimeUnit;
  * @param <V> 模板适用的 Redis 值类型
  */
 public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperations<K, V> {
+    private boolean initialized = false;
     private boolean enableTransactionSupport = false;
     private boolean exposeConnection = false;
-    private boolean initialized = false;
     private boolean enableDefaultSerializer = true;
-    private RedisSerializer<?> defaultSerializer;
     private ClassLoader classLoader;
+    private RedisSerializer<?> defaultSerializer;
+    private RedisSerializer<String> stringSerializer = RedisSerializer.string();
+
     @SuppressWarnings("rawtypes")
     private RedisSerializer keySerializer = null;
     @SuppressWarnings("rawtypes")
@@ -62,19 +64,18 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     private RedisSerializer hashKeySerializer = null;
     @SuppressWarnings("rawtypes")
     private RedisSerializer hashValueSerializer = null;
-    private RedisSerializer<String> stringSerializer = RedisSerializer.string();
-    private ScriptExecutor<K> scriptExecutor;
 
+    private ScriptExecutor<K> scriptExecutor;
     private final ValueOperations<K, V> valueOps = new DefaultValueOperations<>(this);
     private final ListOperations<K, V> listOps = new DefaultListOperations<>(this);
     private final SetOperations<K, V> setOps = new DefaultSetOperations<>(this);
+    private final ZSetOperations<K, V> zSetOps = new DefaultZSetOperations<>(this);
+    private final HyperLogLogOperations<K, V> hllOps = new DefaultHyperLogLogOperations<>(this);
+    private final GeoOperations<K, V> geoOps = new DefaultGeoOperations<>(this);
     private final StreamOperations<K, ?, ?> streamOps = new DefaultStreamOperations<>(this,
             null
             // TODO     ObjectHashMapper.getSharedInstance()
     );
-    private final ZSetOperations<K, V> zSetOps = new DefaultZSetOperations<>(this);
-    private final GeoOperations<K, V> geoOps = new DefaultGeoOperations<>(this);
-    private final HyperLogLogOperations<K, V> hllOps = new DefaultHyperLogLogOperations<>(this);
     private final ClusterOperations<K, V> clusterOps = new DefaultClusterOperations<>(this);
 
     /**
@@ -83,7 +84,187 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     public RedisTemplate() {
     }
 
-    // TODO afterPropertiesSet
+    // --------------------------------------------------------------------------------------------
+    // RedisTemplate 配置
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 如果设置为 {@code true} {@link RedisTemplate} 将使用 {@literal MULTI...EXEC|DISCARD} 参与正在进行的事务，以跟踪操作
+     *
+     * @param enableTransactionSupport 是否参与正在进行的交易
+     * @see RedisConnectionUtils#getConnection(RedisConnectionFactory, boolean)
+     * @see TransactionSynchronizationManager#isActualTransactionActive()
+     */
+    public void setEnableTransactionSupport(boolean enableTransactionSupport) {
+        this.enableTransactionSupport = enableTransactionSupport;
+    }
+
+    /**
+     * 设置是否将 Redis 连接暴露给 {@link RedisCallback} 代码。
+     * 默认为“false”：将返回代理，抑制 {@code quit} 和 {@code disconnect} 调用。
+     */
+    public void setExposeConnection(boolean exposeConnection) {
+        this.exposeConnection = exposeConnection;
+    }
+
+    /**
+     * 返回是否将本机 Redis 连接公开给 RedisCallback 代码，或者更确切地说是连接代理（默认）
+     *
+     * @return 是否暴露原生Redis连接
+     */
+    public boolean isExposeConnection() {
+        return exposeConnection;
+    }
+
+    /**
+     * @param enableDefaultSerializer 是否应使用默认序列化程序。否则，任何未显式设置的序列化程序都将保持为 null，并且不会对值进行序列化或反序列化
+     */
+    public void setEnableDefaultSerializer(boolean enableDefaultSerializer) {
+        this.enableDefaultSerializer = enableDefaultSerializer;
+    }
+
+    /**
+     * @return 是否应使用默认序列化程序。否则，任何未显式设置的序列化程序都将保持为 null，并且不会对值进行序列化或反序列化。
+     */
+    public boolean isEnableDefaultSerializer() {
+        return enableDefaultSerializer;
+    }
+
+    /**
+     * 将 {@link ClassLoader} 设置为用于默认 {@link JdkSerializationRedisSerializer}，
+     * 以防没有其他 {@link RedisSerializer} 被明确设置为默认值。
+     *
+     * @param classLoader 可以是 {@literal null}
+     */
+    public void setBeanClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    /**
+     * 设置用于此模板的默认序列化程序。
+     * 除非明确设置，否则所有序列化程序（{@link #setStringSerializer(RedisSerializer)} 除外）都初始化为此值。
+     * 默认为 {@link JdkSerializationRedisSerializer}。
+     *
+     * @param serializer 使用的默认序列化程序
+     */
+    public void setDefaultSerializer(RedisSerializer<?> serializer) {
+        this.defaultSerializer = serializer;
+    }
+
+    /**
+     * 返回此模板使用的默认序列化程序
+     *
+     * @return 模板默认序列化器
+     */
+    public RedisSerializer<?> getDefaultSerializer() {
+        return defaultSerializer;
+    }
+
+    /**
+     * 设置此模板要使用的字符串值序列化程序（当参数或返回类型始终为字符串时）。默认为 {@link StringRedisSerializer}
+     *
+     * @param stringSerializer 要设置的 stringValueSerializer
+     * @see ValueOperations#get(Object, long, long)
+     */
+    public void setStringSerializer(RedisSerializer<String> stringSerializer) {
+        this.stringSerializer = stringSerializer;
+    }
+
+    /**
+     * 返回 stringSerializer
+     *
+     * @return 返回 stringSerializer
+     */
+    public RedisSerializer<String> getStringSerializer() {
+        return stringSerializer;
+    }
+
+    /**
+     * 设置此模板要使用的密钥序列化程序。默认为 {@link #getDefaultSerializer()}。
+     *
+     * @param serializer 此模板要使用的密钥序列化程序
+     */
+    public void setKeySerializer(RedisSerializer<?> serializer) {
+        this.keySerializer = serializer;
+    }
+
+    /**
+     * 返回此模板使用的密钥序列化程序
+     *
+     * @return 此模板使用的密钥序列化程序
+     */
+    @Override
+    public RedisSerializer<?> getKeySerializer() {
+        return keySerializer;
+    }
+
+    /**
+     * 设置此模板要使用的值序列化程序。默认为 {@link #getDefaultSerializer()}
+     *
+     * @param serializer 此模板要使用的值序列化程序
+     */
+    public void setValueSerializer(RedisSerializer<?> serializer) {
+        this.valueSerializer = serializer;
+    }
+
+    /**
+     * 返回此模板使用的值序列化程序
+     *
+     * @return 此模板使用的值序列化程序
+     */
+    @Override
+    public RedisSerializer<?> getValueSerializer() {
+        return valueSerializer;
+    }
+
+    /**
+     * 设置此模板要使用的哈希键（或字段）序列化程序。默认为 {@link #getDefaultSerializer()}
+     *
+     * @param hashKeySerializer 要设置的 hashKeySerializer
+     */
+    public void setHashKeySerializer(RedisSerializer<?> hashKeySerializer) {
+        this.hashKeySerializer = hashKeySerializer;
+    }
+
+    /**
+     * 返回 hashKeySerializer
+     *
+     * @return 返回 hashKeySerializer
+     */
+    @Override
+    public RedisSerializer<?> getHashKeySerializer() {
+        return hashKeySerializer;
+    }
+
+    /**
+     * 设置此模板要使用的哈希值序列化程序。默认为 {@link #getDefaultSerializer()}
+     *
+     * @param hashValueSerializer 要设置的 hashValueSerializer
+     */
+    public void setHashValueSerializer(RedisSerializer<?> hashValueSerializer) {
+        this.hashValueSerializer = hashValueSerializer;
+    }
+
+    /**
+     * 返回 hashValueSerializer
+     *
+     * @return 返回 hashValueSerializer
+     */
+    @Override
+    public RedisSerializer<?> getHashValueSerializer() {
+        return hashValueSerializer;
+    }
+
+    /**
+     * @param scriptExecutor 用于执行 Redis 脚本的 {@link ScriptExecutor}
+     */
+    public void setScriptExecutor(ScriptExecutor<K> scriptExecutor) {
+        this.scriptExecutor = scriptExecutor;
+    }
+
+    /**
+     * 初始化 RedisTemplate
+     */
     public void afterPropertiesSet() {
         boolean defaultUsed = false;
         if (defaultSerializer == null) {
@@ -117,6 +298,10 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         }
         initialized = true;
     }
+
+    // --------------------------------------------------------------------------------------------
+    // Redis execute
+    // --------------------------------------------------------------------------------------------
 
     @Override
     public <T> T execute(RedisCallback<T> action) {
@@ -173,7 +358,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         Assert.isTrue(initialized, "template not initialized; call afterPropertiesSet() before using it");
         Assert.notNull(session, "Callback object must not be null");
         RedisConnectionFactory factory = getRequiredConnectionFactory();
-        // bind connection
+        // noinspection resource | bind connection
         RedisConnectionUtils.bindConnection(factory, enableTransactionSupport);
         try {
             return session.execute(this);
@@ -192,7 +377,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         Assert.isTrue(initialized, "template not initialized; call afterPropertiesSet() before using it");
         Assert.notNull(session, "Callback object must not be null");
         RedisConnectionFactory factory = getRequiredConnectionFactory();
-        // bind connection
+        // noinspection resource | bind connection
         RedisConnectionUtils.bindConnection(factory, enableTransactionSupport);
         try {
             return execute((RedisCallback<List<Object>>) connection -> {
@@ -269,6 +454,10 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         return callback.doInRedis(connection);
     }
 
+    // --------------------------------------------------------------------------------------------
+    // 私有方法
+    // --------------------------------------------------------------------------------------------
+
     private Object executeSession(SessionCallback<?> session) {
         return session.execute(this);
     }
@@ -293,159 +482,6 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 
     protected <T> T postProcessResult(T result, RedisConnection conn, boolean existingConnection) {
         return result;
-    }
-
-    /**
-     * 返回是否将本机 Redis 连接公开给 RedisCallback 代码，或者更确切地说是连接代理（默认）
-     *
-     * @return 是否暴露原生Redis连接
-     */
-    public boolean isExposeConnection() {
-        return exposeConnection;
-    }
-
-    /**
-     * 设置是否将 Redis 连接暴露给 {@link RedisCallback} 代码。
-     * 默认为“false”：将返回代理，抑制 {@code quit} 和 {@code disconnect} 调用。
-     */
-    public void setExposeConnection(boolean exposeConnection) {
-        this.exposeConnection = exposeConnection;
-    }
-
-    /**
-     * @return 是否应使用默认序列化程序。否则，任何未显式设置的序列化程序都将保持为 null，并且不会对值进行序列化或反序列化。
-     */
-    public boolean isEnableDefaultSerializer() {
-        return enableDefaultSerializer;
-    }
-
-    /**
-     * @param enableDefaultSerializer 是否应使用默认序列化程序。否则，任何未显式设置的序列化程序都将保持为 null，并且不会对值进行序列化或反序列化
-     */
-    public void setEnableDefaultSerializer(boolean enableDefaultSerializer) {
-        this.enableDefaultSerializer = enableDefaultSerializer;
-    }
-
-    /**
-     * 返回此模板使用的默认序列化程序
-     *
-     * @return 模板默认序列化器
-     */
-    public RedisSerializer<?> getDefaultSerializer() {
-        return defaultSerializer;
-    }
-
-    /**
-     * 设置用于此模板的默认序列化程序。
-     * 除非明确设置，否则所有序列化程序（{@link #setStringSerializer(RedisSerializer)} 除外）都初始化为此值。
-     * 默认为 {@link JdkSerializationRedisSerializer}。
-     *
-     * @param serializer 使用的默认序列化程序
-     */
-    public void setDefaultSerializer(RedisSerializer<?> serializer) {
-        this.defaultSerializer = serializer;
-    }
-
-    /**
-     * 设置此模板要使用的密钥序列化程序。默认为 {@link #getDefaultSerializer()}。
-     *
-     * @param serializer 此模板要使用的密钥序列化程序
-     */
-    public void setKeySerializer(RedisSerializer<?> serializer) {
-        this.keySerializer = serializer;
-    }
-
-    /**
-     * 返回此模板使用的密钥序列化程序
-     *
-     * @return 此模板使用的密钥序列化程序
-     */
-    @Override
-    public RedisSerializer<?> getKeySerializer() {
-        return keySerializer;
-    }
-
-    /**
-     * 设置此模板要使用的值序列化程序。默认为 {@link #getDefaultSerializer()}
-     *
-     * @param serializer 此模板要使用的值序列化程序
-     */
-    public void setValueSerializer(RedisSerializer<?> serializer) {
-        this.valueSerializer = serializer;
-    }
-
-    /**
-     * 返回此模板使用的值序列化程序
-     *
-     * @return 此模板使用的值序列化程序
-     */
-    @Override
-    public RedisSerializer<?> getValueSerializer() {
-        return valueSerializer;
-    }
-
-    /**
-     * 返回 hashKeySerializer
-     *
-     * @return 返回 hashKeySerializer
-     */
-    @Override
-    public RedisSerializer<?> getHashKeySerializer() {
-        return hashKeySerializer;
-    }
-
-    /**
-     * 设置此模板要使用的哈希键（或字段）序列化程序。默认为 {@link #getDefaultSerializer()}
-     *
-     * @param hashKeySerializer 要设置的 hashKeySerializer
-     */
-    public void setHashKeySerializer(RedisSerializer<?> hashKeySerializer) {
-        this.hashKeySerializer = hashKeySerializer;
-    }
-
-    /**
-     * 返回 hashValueSerializer
-     *
-     * @return 返回 hashValueSerializer
-     */
-    @Override
-    public RedisSerializer<?> getHashValueSerializer() {
-        return hashValueSerializer;
-    }
-
-    /**
-     * 设置此模板要使用的哈希值序列化程序。默认为 {@link #getDefaultSerializer()}
-     *
-     * @param hashValueSerializer 要设置的 hashValueSerializer
-     */
-    public void setHashValueSerializer(RedisSerializer<?> hashValueSerializer) {
-        this.hashValueSerializer = hashValueSerializer;
-    }
-
-    /**
-     * 返回 stringSerializer
-     *
-     * @return 返回 stringSerializer
-     */
-    public RedisSerializer<String> getStringSerializer() {
-        return stringSerializer;
-    }
-
-    /**
-     * 设置此模板要使用的字符串值序列化程序（当参数或返回类型始终为字符串时）。默认为 {@link StringRedisSerializer}
-     *
-     * @param stringSerializer 要设置的 stringValueSerializer
-     * @see ValueOperations#get(Object, long, long)
-     */
-    public void setStringSerializer(RedisSerializer<String> stringSerializer) {
-        this.stringSerializer = stringSerializer;
-    }
-
-    /**
-     * @param scriptExecutor 用于执行 Redis 脚本的 {@link ScriptExecutor}
-     */
-    public void setScriptExecutor(ScriptExecutor<K> scriptExecutor) {
-        this.scriptExecutor = scriptExecutor;
     }
 
     @SuppressWarnings("unchecked")
@@ -540,12 +576,12 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         return set;
     }
 
-    //
-    // RedisOperations
-    //
+    // --------------------------------------------------------------------------------------------
+    // Redis 操作
+    // --------------------------------------------------------------------------------------------
 
     /**
-     * 执行事务，使用默认的 {@link RedisSerializer} 反序列化字节 [] 或字节 [] 的集合或映射或元组的任何结果。<br/>
+     * 执行事务，使用默认的 {@link RedisSerializer} 反序列化 byte[] 或 byte[] 的集合或映射或元组的任何结果。<br/>
      * 其他结果类型（长整型、布尔型等）在转换后的结果中保持原样。<br/>
      * 如果在 {@link RedisConnectionFactory} 中禁用了 tx 结果的转换，则 exec 的结果将在不反序列化的情况下返回。<br/>
      * 此检查主要是为了向后兼容 1.0。
@@ -578,6 +614,86 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         byte[] targetKey = rawKey(target);
         return execute(connection -> connection.copy(sourceKey, targetKey, replace), true);
     }
+
+    /**
+     * 执行 Redis 恢复命令。传入的值应该是从 {@link #dump(Object)} 返回的精确序列化数据，因为 Redis 使用非标准序列化机制。
+     *
+     * @param key        恢复的key
+     * @param value      要恢复的值，由 {@link #dump(Object)} 返回
+     * @param timeToLive 恢复密钥的过期时间，或 0 表示无过期时间
+     * @param unit       timeToLive 的时间单位
+     * @param replace    使用 {@literal true} 替换可能存在的值而不是错误。
+     * @throws RedisSystemException 如果您尝试恢复的密钥已经存在并且 {@code replace} 设置为 {@literal false}
+     */
+    @Override
+    public void restore(K key, final byte[] value, long timeToLive, TimeUnit unit, boolean replace) {
+        byte[] rawKey = rawKey(key);
+        long rawTimeout = TimeoutUtils.toMillis(timeToLive, unit);
+        execute(connection -> {
+            connection.restore(rawKey, rawTimeout, value, replace);
+            return null;
+        }, true);
+    }
+
+    @Override
+    public void multi() {
+        execute(connection -> {
+            connection.multi();
+            return null;
+        }, true);
+    }
+
+    @Override
+    public void discard() {
+        execute(connection -> {
+            connection.discard();
+            return null;
+        }, true);
+    }
+
+    @Override
+    public void convertAndSend(String channel, Object message) {
+        Assert.hasText(channel, "a non-empty channel is required");
+        byte[] rawChannel = rawString(channel);
+        byte[] rawMessage = rawValue(message);
+        execute(connection -> {
+            connection.publish(rawChannel, rawMessage);
+            return null;
+        }, true);
+    }
+
+    @Override
+    public void killClient(final String host, final int port) {
+        execute((RedisCallback<Void>) connection -> {
+            connection.killClient(host, port);
+            return null;
+        });
+    }
+
+    @Override
+    public List<RedisClientInfo> getClientList() {
+        return execute(RedisServerCommands::getClientList);
+    }
+
+    @Override
+    public void slaveOf(final String host, final int port) {
+        execute((RedisCallback<Void>) connection -> {
+            connection.slaveOf(host, port);
+            return null;
+        });
+    }
+
+    @Override
+    public void slaveOfNoOne() {
+        execute((RedisCallback<Void>) connection -> {
+            connection.slaveOfNoOne();
+            return null;
+        });
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // Key 操作
+    // --------------------------------------------------------------------------------------------
 
     @Override
     public Boolean delete(K key) {
@@ -649,21 +765,6 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
             }
         }, true);
     }
-
-    @Override
-    public void convertAndSend(String channel, Object message) {
-        Assert.hasText(channel, "a non-empty channel is required");
-        byte[] rawChannel = rawString(channel);
-        byte[] rawMessage = rawValue(message);
-        execute(connection -> {
-            connection.publish(rawChannel, rawMessage);
-            return null;
-        }, true);
-    }
-
-    //
-    // Value operations
-    //
 
     @Override
     public Long getExpire(K key) {
@@ -747,42 +848,6 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         return execute(connection -> connection.dump(rawKey), true);
     }
 
-    /**
-     * 执行 Redis 恢复命令。传入的值应该是从 {@link #dump(Object)} 返回的精确序列化数据，因为 Redis 使用非标准序列化机制。
-     *
-     * @param key        恢复的key
-     * @param value      要恢复的值，由 {@link #dump(Object)} 返回
-     * @param timeToLive 恢复密钥的过期时间，或 0 表示无过期时间
-     * @param unit       timeToLive 的时间单位
-     * @param replace    使用 {@literal true} 替换可能存在的值而不是错误。
-     * @throws RedisSystemException 如果您尝试恢复的密钥已经存在并且 {@code replace} 设置为 {@literal false}
-     */
-    @Override
-    public void restore(K key, final byte[] value, long timeToLive, TimeUnit unit, boolean replace) {
-        byte[] rawKey = rawKey(key);
-        long rawTimeout = TimeoutUtils.toMillis(timeToLive, unit);
-        execute(connection -> {
-            connection.restore(rawKey, rawTimeout, value, replace);
-            return null;
-        }, true);
-    }
-
-    @Override
-    public void multi() {
-        execute(connection -> {
-            connection.multi();
-            return null;
-        }, true);
-    }
-
-    @Override
-    public void discard() {
-        execute(connection -> {
-            connection.discard();
-            return null;
-        }, true);
-    }
-
     @Override
     public void watch(K key) {
         byte[] rawKey = rawKey(key);
@@ -809,7 +874,9 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         }, true);
     }
 
-    // Sort operations
+    // --------------------------------------------------------------------------------------------
+    // Sort 操作
+    // --------------------------------------------------------------------------------------------
 
     @Override
     @SuppressWarnings("unchecked")
@@ -859,63 +926,18 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         return execute(connection -> connection.sort(rawKey, params, rawStoreKey), true);
     }
 
+    // --------------------------------------------------------------------------------------------
+    // 返回 Redis 操作对象
+    // --------------------------------------------------------------------------------------------
+
     @Override
-    public void killClient(final String host, final int port) {
-        execute((RedisCallback<Void>) connection -> {
-            connection.killClient(host, port);
-            return null;
-        });
+    public ValueOperations<K, V> opsForValue() {
+        return valueOps;
     }
 
     @Override
-    public List<RedisClientInfo> getClientList() {
-        return execute(RedisServerCommands::getClientList);
-    }
-
-    @Override
-    public void slaveOf(final String host, final int port) {
-        execute((RedisCallback<Void>) connection -> {
-            connection.slaveOf(host, port);
-            return null;
-        });
-    }
-
-    @Override
-    public void slaveOfNoOne() {
-        execute((RedisCallback<Void>) connection -> {
-            connection.slaveOfNoOne();
-            return null;
-        });
-    }
-
-    @Override
-    public ClusterOperations<K, V> opsForCluster() {
-        return clusterOps;
-    }
-
-    @Override
-    public GeoOperations<K, V> opsForGeo() {
-        return geoOps;
-    }
-
-    @Override
-    public BoundGeoOperations<K, V> boundGeoOps(K key) {
-        return new DefaultBoundGeoOperations<>(key, this);
-    }
-
-    @Override
-    public <HK, HV> BoundHashOperations<K, HK, HV> boundHashOps(K key) {
-        return new DefaultBoundHashOperations<>(key, this);
-    }
-
-    @Override
-    public <HK, HV> HashOperations<K, HK, HV> opsForHash() {
-        return new DefaultHashOperations<>(this);
-    }
-
-    @Override
-    public HyperLogLogOperations<K, V> opsForHyperLogLog() {
-        return hllOps;
+    public BoundValueOperations<K, V> boundValueOps(K key) {
+        return new DefaultBoundValueOperations<>(key, this);
     }
 
     @Override
@@ -929,13 +951,48 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     }
 
     @Override
+    public SetOperations<K, V> opsForSet() {
+        return setOps;
+    }
+
+    @Override
     public BoundSetOperations<K, V> boundSetOps(K key) {
         return new DefaultBoundSetOperations<>(key, this);
     }
 
     @Override
-    public SetOperations<K, V> opsForSet() {
-        return setOps;
+    public ZSetOperations<K, V> opsForZSet() {
+        return zSetOps;
+    }
+
+    @Override
+    public BoundZSetOperations<K, V> boundZSetOps(K key) {
+        return new DefaultBoundZSetOperations<>(key, this);
+    }
+
+    @Override
+    public <HK, HV> HashOperations<K, HK, HV> opsForHash() {
+        return new DefaultHashOperations<>(this);
+    }
+
+    @Override
+    public <HK, HV> BoundHashOperations<K, HK, HV> boundHashOps(K key) {
+        return new DefaultBoundHashOperations<>(key, this);
+    }
+
+    @Override
+    public HyperLogLogOperations<K, V> opsForHyperLogLog() {
+        return hllOps;
+    }
+
+    @Override
+    public GeoOperations<K, V> opsForGeo() {
+        return geoOps;
+    }
+
+    @Override
+    public BoundGeoOperations<K, V> boundGeoOps(K key) {
+        return new DefaultBoundGeoOperations<>(key, this);
     }
 
     @SuppressWarnings("unchecked")
@@ -955,46 +1012,8 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     }
 
     @Override
-    public BoundValueOperations<K, V> boundValueOps(K key) {
-        return new DefaultBoundValueOperations<>(key, this);
+    public ClusterOperations<K, V> opsForCluster() {
+        return clusterOps;
     }
-
-    @Override
-    public ValueOperations<K, V> opsForValue() {
-        return valueOps;
-    }
-
-    @Override
-    public BoundZSetOperations<K, V> boundZSetOps(K key) {
-        return new DefaultBoundZSetOperations<>(key, this);
-    }
-
-    @Override
-    public ZSetOperations<K, V> opsForZSet() {
-        return zSetOps;
-    }
-
-    /**
-     * 如果设置为｛@code true｝｛@link RedisTemplate｝，将使用｛@literal MULTI…EXEC | DISCARD｝参与正在进行的事务，以跟踪操作
-     *
-     * @param enableTransactionSupport 是否参与正在进行的交易
-     * @see RedisConnectionUtils#getConnection(RedisConnectionFactory, boolean)
-     * @see TransactionSynchronizationManager#isActualTransactionActive()
-     */
-    public void setEnableTransactionSupport(boolean enableTransactionSupport) {
-        this.enableTransactionSupport = enableTransactionSupport;
-    }
-
-//    /**
-//     * Set the {@link ClassLoader} to be used for the default {@link JdkSerializationRedisSerializer} in case no other
-//     * {@link RedisSerializer} is explicitly set as the default one.
-//     *
-//     * @param classLoader can be {@literal null}.
-//     * @see org.springframework.beans.factory.BeanClassLoaderAware#setBeanClassLoader
-//     */
-//    @Override
-//    public void setBeanClassLoader(ClassLoader classLoader) {
-//       TODO  this.classLoader = classLoader;
-//    }
 }
 
