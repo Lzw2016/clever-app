@@ -265,6 +265,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     /**
      * 初始化 RedisTemplate
      */
+    @Override
     public void afterPropertiesSet() {
         boolean defaultUsed = false;
         if (defaultSerializer == null) {
