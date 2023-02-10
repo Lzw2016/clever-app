@@ -5,7 +5,7 @@ import org.clever.data.redis.core.ZSetOperations.TypedTuple;
 import java.util.Arrays;
 
 /**
- * TypedTouple 的默认实现
+ * TypedTuple 的默认实现
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/01/31 15:45 <br/>
