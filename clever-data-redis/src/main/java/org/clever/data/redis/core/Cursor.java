@@ -16,7 +16,6 @@ import org.clever.data.util.CloseableIterator;
  * 创建时间：2023/01/24 17:39 <br/>
  */
 public interface Cursor<T> extends CloseableIterator<T> {
-
     /**
      * Get the reference cursor. <br>
      * <strong>NOTE:</strong> the id might change while iterating items.
