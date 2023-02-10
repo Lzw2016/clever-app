@@ -1017,4 +1017,3 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
         return clusterOps;
     }
 }
-
