@@ -16,7 +16,7 @@ public interface Record<S, V> {
     /**
      * 流的 ID（又名 Redis 中的 {@literal key}）
      *
-     * @return can be {@literal null}.
+     * @return 可以是 {@literal null}。
      */
     S getStream();
 
