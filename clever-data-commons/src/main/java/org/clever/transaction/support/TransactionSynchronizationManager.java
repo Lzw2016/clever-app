@@ -18,7 +18,7 @@ import java.util.*;
  *
  * <p>事务管理器必须通过{@link #initSynchronization()}和{@link #clearSynchronization()}激活和停用事务同步。
  * {@link AbstractPlatformTransactionManager}自动支持这一点，
- * 因此所有标准的事务管理器(如{@link org.clever.jdbc.datasource.DataSourceTransactionManager})都支持这一点。
+ * 因此所有标准的事务管理器(如{@code org.clever.jdbc.datasource.DataSourceTransactionManager})都支持这一点。
  *
  * <p>资源管理代码应仅在该管理器处于活动状态时注册同步，可通过{@link #isSynchronizationActive}进行检查；它应该立即执行资源清理。
  * 如果事务同步未处于活动状态，则表示当前没有事务，或者事务管理器不支持事务同步。
