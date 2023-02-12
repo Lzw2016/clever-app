@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 生菜的 Redis 客户端配置。此配置提供可选的配置元素，例如特定于 Lettuce 客户端功能的 {@link ClientResources} 和 {@link ClientOptions}
+ * Lettuce的 Redis 客户端配置。此配置提供可选的配置元素，例如特定于 Lettuce 客户端功能的 {@link ClientResources} 和 {@link ClientOptions}
  * <p>
  * 提供可选元素允许对客户端进行更具体的配置：
  * <ul>
@@ -131,7 +131,6 @@ public interface LettuceClientConfiguration {
         return builder().build();
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     class LettuceClientConfigurationBuilder {
         boolean useSsl;
         boolean verifyPeer = true;
@@ -171,6 +170,7 @@ public interface LettuceClientConfiguration {
          *
          * @return {@link LettuceSslClientConfigurationBuilder}.
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceSslClientConfigurationBuilder useSsl() {
             this.useSsl = true;
             return new LettuceSslClientConfigurationBuilder(this);
@@ -183,6 +183,7 @@ public interface LettuceClientConfiguration {
          * @return {@literal this} builder
          * @throws IllegalArgumentException 如果 clientResources 是 {@literal null}
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceClientConfigurationBuilder clientResources(ClientResources clientResources) {
             Assert.notNull(clientResources, "ClientResources must not be null!");
             this.clientResources = clientResources;
@@ -196,6 +197,7 @@ public interface LettuceClientConfiguration {
          * @return {@literal this} builder
          * @throws IllegalArgumentException 如果 clientOptions 是 {@literal null}
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceClientConfigurationBuilder clientOptions(ClientOptions clientOptions) {
             Assert.notNull(clientOptions, "ClientOptions must not be null!");
             this.clientOptions = clientOptions;
@@ -210,6 +212,7 @@ public interface LettuceClientConfiguration {
          * @return {@literal this} builder
          * @throws IllegalArgumentException 如果 clientOptions 是 {@literal null}
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceClientConfigurationBuilder readFrom(ReadFrom readFrom) {
             Assert.notNull(readFrom, "ReadFrom must not be null!");
             this.readFrom = readFrom;
@@ -223,6 +226,7 @@ public interface LettuceClientConfiguration {
          * @return {@literal this} builder
          * @throws IllegalArgumentException 如果 clientName 是 {@literal null} 或为空
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceClientConfigurationBuilder clientName(String clientName) {
             Assert.hasText(clientName, "Client name must not be null or empty!");
             this.clientName = clientName;
@@ -236,6 +240,7 @@ public interface LettuceClientConfiguration {
          * @return {@literal this} builder
          * @throws IllegalArgumentException 如果超时是 {@literal null}
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceClientConfigurationBuilder commandTimeout(Duration timeout) {
             Assert.notNull(timeout, "Duration must not be null!");
             this.timeout = timeout;
@@ -249,6 +254,7 @@ public interface LettuceClientConfiguration {
          * @return {@literal this} builder
          * @throws IllegalArgumentException 如果 shutdownTimeout 是 {@literal null}
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceClientConfigurationBuilder shutdownTimeout(Duration shutdownTimeout) {
             Assert.notNull(shutdownTimeout, "Duration must not be null!");
             this.shutdownTimeout = shutdownTimeout;
@@ -262,6 +268,7 @@ public interface LettuceClientConfiguration {
          * @return {@literal this} builder
          * @throws IllegalArgumentException 如果 shutdownQuietPeriod 是 {@literal null}
          */
+        @SuppressWarnings("UnusedReturnValue")
         public LettuceClientConfigurationBuilder shutdownQuietPeriod(Duration shutdownQuietPeriod) {
             Assert.notNull(shutdownQuietPeriod, "Duration must not be null!");
             this.shutdownQuietPeriod = shutdownQuietPeriod;
