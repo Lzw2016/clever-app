@@ -120,7 +120,6 @@ public class GenericJackson2JsonRedisSerializer implements RedisSerializer<Objec
      * {@link StdSerializer} 添加默认输入所需的类信息。这允许反序列化 {@link NullValue}
      */
     private static class NullValueSerializer extends StdSerializer<NullValue> {
-        private static final long serialVersionUID = 1999052150548658808L;
         private final String classIdentifier;
 
         /**

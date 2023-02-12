@@ -14,8 +14,6 @@ import org.clever.util.ObjectUtils;
  * 创建时间：2023/01/27 14:35 <br/>
  */
 public class BoundingBox implements Shape {
-    private static final long serialVersionUID = 5215611530535947924L;
-
     private final Distance width;
     private final Distance height;
 

@@ -79,7 +79,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     private final ClusterOperations<K, V> clusterOps = new DefaultClusterOperations<>(this);
 
     /**
-     * 构造一个新的 <code>RedisTemplate<code> 实例
+     * 构造一个新的 <code>RedisTemplate</code> 实例
      */
     public RedisTemplate() {
     }

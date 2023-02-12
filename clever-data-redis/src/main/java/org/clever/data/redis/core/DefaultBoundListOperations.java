@@ -17,7 +17,7 @@ class DefaultBoundListOperations<K, V> extends DefaultBoundKeyOperations<K> impl
     private final ListOperations<K, V> ops;
 
     /**
-     * 构造一个新的 <code>DefaultBoundListOperations<code> 实例
+     * 构造一个新的 <code>DefaultBoundListOperations</code> 实例
      */
     DefaultBoundListOperations(K key, RedisOperations<K, V> operations) {
         super(key, operations);
