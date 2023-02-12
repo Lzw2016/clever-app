@@ -631,6 +631,22 @@ public class ClassUtils {
         return Proxy.getProxyClass(classLoader, interfaces);
     }
 
+    /**
+     * 返回给定类的用户定义类:通常只返回给定类，但如果是cglib生成的子类，则返回原始类。
+     *
+     * @param clazz 要检查的类
+     * @return 用户定义的类
+     */
+    public static Class<?> getUserClass(Class<?> clazz) {
+        if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+            Class<?> superclass = clazz.getSuperclass();
+            if (superclass != null && superclass != Object.class) {
+                return superclass;
+            }
+        }
+        return clazz;
+    }
+
     private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
         try {
             return clazz.getMethod(methodName, paramTypes);
