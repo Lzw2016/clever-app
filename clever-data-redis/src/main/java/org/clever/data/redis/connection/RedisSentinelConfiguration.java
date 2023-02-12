@@ -31,7 +31,7 @@ public class RedisSentinelConfiguration implements RedisConfiguration, SentinelC
     private RedisPassword sentinelPassword = RedisPassword.none();
 
     /**
-     * Creates new {@link RedisSentinelConfiguration}.
+     * 创建新的 {@link RedisSentinelConfiguration}
      */
     public RedisSentinelConfiguration() {
         this(new MapPropertySource("RedisSentinelConfiguration", Collections.emptyMap()));
