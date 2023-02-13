@@ -11,6 +11,11 @@ import org.clever.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
 /**
  * 提供从 {@link RedisConnectionFactory} 获取 {@link RedisConnection} 的静态方法的辅助类。
  * 包括对 Spring 管理的事务性 RedisConnections 的特殊支持，例如由 {@link AbstractPlatformTransactionManager} 管理。
@@ -170,12 +175,12 @@ public abstract class RedisConnectionUtils {
     }
 
     private static RedisConnection createConnectionSplittingProxy(RedisConnection connection, RedisConnectionFactory factory) {
-//        TODO ProxyFactory
-//        ProxyFactory proxyFactory = new ProxyFactory(connection);
-//        proxyFactory.addAdvice(new ConnectionSplittingInterceptor(factory));
-//        proxyFactory.addInterface(RedisConnectionProxy.class);
-//        return RedisConnection.class.cast(proxyFactory.getProxy());
-        return connection;
+        // TODO ProxyFactory
+        return (RedisConnection) Proxy.newProxyInstance(
+                connection.getClass().getClassLoader(),
+                new Class[]{RedisConnectionProxy.class},
+                new ConnectionSplittingInterceptor(connection, factory)
+        );
     }
 
     /**
@@ -339,6 +344,62 @@ public abstract class RedisConnectionUtils {
                 TransactionSynchronizationManager.unbindResource(factory);
                 connHolder.reset();
             }
+        }
+    }
+
+    /**
+     * {@link InvocationHandler} 在新的 {@link RedisConnection} 上调用只读命令，而读写命令在绑定连接上排队。
+     */
+    static class ConnectionSplittingInterceptor implements InvocationHandler {
+        private final RedisConnection target;
+        private final RedisConnectionFactory factory;
+
+        public ConnectionSplittingInterceptor(RedisConnection target, RedisConnectionFactory factory) {
+            this.target = target;
+            this.factory = factory;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return intercept(target, method, args);
+        }
+
+        public Object intercept(Object obj, Method method, Object[] args) throws Throwable {
+            if (method.getName().equals("getTargetConnection")) {
+                // Handle getTargetConnection method: return underlying RedisConnection.
+                return obj;
+            }
+            RedisCommand commandToExecute = RedisCommand.failsafeCommandLookup(method.getName());
+            if (isPotentiallyThreadBoundCommand(commandToExecute)) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Invoke '%s' on bound connection", method.getName()));
+                }
+                return invoke(method, obj, args);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Invoke '%s' on unbound connection", method.getName()));
+            }
+            RedisConnection connection = factory.getConnection();
+            try {
+                return invoke(method, connection, args);
+            } finally {
+                // 执行命令后正确关闭未绑定连接
+                if (!connection.isClosed()) {
+                    doCloseConnection(connection);
+                }
+            }
+        }
+
+        private Object invoke(Method method, Object target, Object[] args) throws Throwable {
+            try {
+                return method.invoke(target, args);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }
+
+        private boolean isPotentiallyThreadBoundCommand(RedisCommand command) {
+            return RedisCommand.UNKNOWN.equals(command) || !command.isReadonly();
         }
     }
 
