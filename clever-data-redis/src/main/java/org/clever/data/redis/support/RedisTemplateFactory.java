@@ -1,4 +1,4 @@
-package org.clever.data.redis;
+package org.clever.data.redis.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lettuce.core.ClientOptions;
@@ -9,6 +9,7 @@ import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.resource.ClientResources;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.clever.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.clever.data.redis.config.RedisProperties;
 import org.clever.data.redis.connection.*;
 import org.clever.data.redis.connection.lettuce.LettuceClientConfiguration;
@@ -28,9 +29,9 @@ import java.util.Objects;
  */
 public class RedisTemplateFactory {
     public static RedisTemplate<String, String> createRedisTemplate(RedisProperties properties,
-                                                             ClientResources clientResources,
-                                                             List<LettuceClientConfigurationBuilderCustomizer> builderCustomizers,
-                                                             ObjectMapper objectMapper) {
+                                                                    ClientResources clientResources,
+                                                                    List<LettuceClientConfigurationBuilderCustomizer> builderCustomizers,
+                                                                    ObjectMapper objectMapper) {
         Assert.notNull(objectMapper, "ObjectMapper不能为空");
         // 创建 RedisTemplate
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
@@ -72,10 +73,10 @@ public class RedisTemplateFactory {
         Assert.notNull(properties, "参数 properties 不能为 null");
         RedisProperties.Pool pool = properties.getPool();
         LettuceClientConfiguration.LettuceClientConfigurationBuilder builder;
-        if (pool == null || !pool.isEnabled()) {
-            builder = LettuceClientConfiguration.builder();
-        } else {
+        if (pool != null && pool.isEnabled()) {
             builder = LettucePoolingClientConfiguration.builder().poolConfig(createPoolConfig(pool));
+        } else {
+            builder = LettuceClientConfiguration.builder();
         }
         // 应用 properties 配置
         if (properties.isSsl()) {

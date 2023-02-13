@@ -47,7 +47,7 @@ import static org.clever.data.redis.connection.lettuce.LettuceConnection.Pipelin
  * <p>
  * {@link LettuceConnection} 永远不会关闭共享本机连接，因此默认情况下不会在 {@link #getConnection()} 上对其进行验证。
  * 如有必要，请使用 {@link #setValidateConnection(boolean)} 更改此行为。
- * 注入一个 {@link Pool} 来池化专用连接。如果 shareNativeConnection 为 true，则池将用于选择一个连接以仅用于阻塞和 tx 操作，不应共享连接。
+ * 注入一个 {@code Pool} 来池化专用连接。如果 shareNativeConnection 为 true，则池将用于选择一个连接以仅用于阻塞和 tx 操作，不应共享连接。
  * 如果禁用本机连接共享，则所选连接将用于所有操作。
  * <p>
  * {@link LettuceConnectionFactory} 应该使用环境配置和 {@link LettuceConnectionFactory 客户端配置} 进行配置。
