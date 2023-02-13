@@ -163,7 +163,7 @@ public class DataSourceAdmin {
     /**
      * 设置默认的项目列表
      */
-    public static void setPROJECTS(List<String> projects) {
+    public static void setProjects(List<String> projects) {
         if (projects == null) {
             projects = new ArrayList<>();
         }
