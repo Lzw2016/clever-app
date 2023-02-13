@@ -366,7 +366,7 @@ public abstract class RedisConnectionUtils {
 
         public Object intercept(Object obj, Method method, Object[] args) throws Throwable {
             if (method.getName().equals("getTargetConnection")) {
-                // Handle getTargetConnection method: return underlying RedisConnection.
+                // Handle getTargetConnection 方法：返回底层 RedisConnection。
                 return obj;
             }
             RedisCommand commandToExecute = RedisCommand.failsafeCommandLookup(method.getName());
