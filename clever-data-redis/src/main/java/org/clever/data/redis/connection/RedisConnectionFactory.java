@@ -1,12 +1,14 @@
 package org.clever.data.redis.connection;
 
+import org.clever.beans.factory.DisposableBean;
+
 /**
  * Redis 连接的线程安全工厂
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/01/24 16:42 <br/>
  */
-public interface RedisConnectionFactory {
+public interface RedisConnectionFactory extends DisposableBean {
     /**
      * 为与 Redis 交互提供合适的连接
      */
