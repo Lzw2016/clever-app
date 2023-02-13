@@ -207,7 +207,7 @@ public enum RedisCommand {
     }
 
     /**
-     * Returns the command represented by the given {@code key}. Returns {@link #UNKNOWN} if no matching command could be found.
+     * 返回由给定的 {@code key} 表示的命令。 如果找不到匹配的命令，则返回 {@link #UNKNOWN}。
      */
     public static RedisCommand failsafeCommandLookup(String key) {
         if (!StringUtils.hasText(key)) {
@@ -223,8 +223,8 @@ public enum RedisCommand {
     private boolean read = true;
     private boolean write = true;
     private final Set<String> alias = new HashSet<>(1);
-    private int minArgs = -1;
-    private int maxArgs = -1;
+    private final int minArgs;
+    private final int maxArgs;
 
     RedisCommand(String mode, int minArgs) {
         this(mode, minArgs, -1);
