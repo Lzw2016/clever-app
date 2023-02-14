@@ -52,7 +52,7 @@ public class RedisProperties {
     /**
      * Lettuce 连接池配置
      */
-    private final Pool pool = new Pool();
+    private Pool pool = new Pool();
 
     /**
      * Redis 连接模式
@@ -151,7 +151,7 @@ public class RedisProperties {
         /**
          * Redis 集群节点刷新配置
          */
-        private final Refresh refresh = new Refresh();
+        private Refresh refresh = new Refresh();
 
         @Data
         public static class Refresh {
