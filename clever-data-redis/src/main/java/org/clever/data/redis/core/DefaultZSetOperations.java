@@ -32,7 +32,7 @@ class DefaultZSetOperations<K, V> extends AbstractOperations<K, V> implements ZS
     /**
      * @param key   不得为 {@literal null}
      * @param value 不得为 {@literal null}
-     * @param args  never {@literal null}.
+     * @param args  从不为 {@literal null}
      * @return 可以是 {@literal null}
      */
     protected Boolean add(K key, V value, double score, ZAddArgs args) {
@@ -56,7 +56,7 @@ class DefaultZSetOperations<K, V> extends AbstractOperations<K, V> implements ZS
     /**
      * @param key    不得为 {@literal null}
      * @param tuples 不得为 {@literal null}
-     * @param args   never {@literal null}.
+     * @param args   从不为 {@literal null}
      * @return 可以是 {@literal null}。
      */
     protected Long add(K key, Set<TypedTuple<V>> tuples, ZAddArgs args) {
