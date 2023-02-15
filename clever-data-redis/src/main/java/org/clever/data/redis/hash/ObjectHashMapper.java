@@ -1,5 +1,6 @@
 package org.clever.data.redis.hash;
 
+import org.clever.data.convert.CustomConversions;
 import org.clever.data.redis.core.convert.*;
 import org.clever.data.redis.core.mapping.RedisMappingContext;
 import org.clever.data.util.TypeInformation;
@@ -44,7 +45,7 @@ public class ObjectHashMapper implements HashMapper<Object, byte[], byte[]> {
      *
      * @param customConversions 可以是 {@literal null}
      */
-    public ObjectHashMapper(org.clever.data.convert.CustomConversions customConversions) {
+    public ObjectHashMapper(CustomConversions customConversions) {
         MappingRedisConverter mappingConverter = new MappingRedisConverter(new RedisMappingContext(), new NoOpIndexResolver(), new NoOpReferenceResolver());
         mappingConverter.setCustomConversions(customConversions == null ? new RedisCustomConversions() : customConversions);
         mappingConverter.afterPropertiesSet();
