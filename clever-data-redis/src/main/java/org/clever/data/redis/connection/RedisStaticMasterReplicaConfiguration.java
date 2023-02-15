@@ -28,7 +28,7 @@ public class RedisStaticMasterReplicaConfiguration implements RedisConfiguration
     /**
      * 给定 {@code hostName} 创建一个新的 {@link StaticMasterReplicaConfiguration}
      *
-     * @param hostName must not be {@literal null} or empty.
+     * @param hostName 不能为 {@literal null} or empty.
      */
     public RedisStaticMasterReplicaConfiguration(String hostName) {
         this(hostName, DEFAULT_PORT);
