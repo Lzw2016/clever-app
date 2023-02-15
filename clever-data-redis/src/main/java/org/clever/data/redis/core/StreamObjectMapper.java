@@ -9,12 +9,14 @@ import org.clever.data.redis.connection.stream.Record;
 import org.clever.data.redis.connection.stream.StreamRecords;
 import org.clever.data.redis.core.convert.RedisCustomConversions;
 import org.clever.data.redis.hash.HashMapper;
+import org.clever.data.redis.hash.ObjectHashMapper;
 import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 为 Stream 对象转换提供 {@link HashMapper} 的实用程序。
@@ -50,29 +52,27 @@ class StreamObjectMapper {
     StreamObjectMapper(HashMapper<?, ?, ?> mapper) {
         Assert.notNull(mapper, "HashMapper must not be null");
         this.mapper = (HashMapper) mapper;
-//        TODO ObjectHashMapper
-//        if (mapper instanceof ObjectHashMapper) {
-//            ObjectHashMapper ohm = (ObjectHashMapper) mapper;
-//            this.objectHashMapper = new HashMapper<Object, Object, Object>() {
-//                @Override
-//                public Map<Object, Object> toHash(Object object) {
-//                    return (Map) ohm.toHash(object);
-//                }
-//
-//                @Override
-//                public Object fromHash(Map<Object, Object> hash) {
-//                    Map<byte[], byte[]> map = hash.entrySet().stream()
-//                            .collect(Collectors.toMap(
-//                                    e -> conversionService.convert(e.getKey(), byte[].class),
-//                                    e -> conversionService.convert(e.getValue(), byte[].class)
-//                            ));
-//                    return ohm.fromHash(map);
-//                }
-//            };
-//        } else {
-//            this.objectHashMapper = null;
-//        }
-        this.objectHashMapper = null;
+        if (mapper instanceof ObjectHashMapper) {
+            ObjectHashMapper ohm = (ObjectHashMapper) mapper;
+            this.objectHashMapper = new HashMapper<Object, Object, Object>() {
+                @Override
+                public Map<Object, Object> toHash(Object object) {
+                    return (Map) ohm.toHash(object);
+                }
+
+                @Override
+                public Object fromHash(Map<Object, Object> hash) {
+                    Map<byte[], byte[]> map = hash.entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    e -> conversionService.convert(e.getKey(), byte[].class),
+                                    e -> conversionService.convert(e.getValue(), byte[].class)
+                            ));
+                    return ohm.fromHash(map);
+                }
+            };
+        } else {
+            this.objectHashMapper = null;
+        }
     }
 
     /**
