@@ -814,7 +814,7 @@ public interface ZSetOperations<K, V> {
     Set<V> reverseRangeByLex(K key, Range range, Limit limit);
 
     /**
-     * @return never {@literal null}.
+     * @return 从不为 {@literal null}
      */
     RedisOperations<K, V> getOperations();
 }
