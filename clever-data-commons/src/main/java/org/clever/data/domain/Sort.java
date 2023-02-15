@@ -82,15 +82,6 @@ public class Sort implements Streamable<org.clever.data.domain.Sort.Order>, Seri
         return Sort.by(Arrays.stream(properties).map(it -> new Order(direction, it)).collect(Collectors.toList()));
     }
 
-//    /** TODO 删除
-//     * 为给定类型创建一个新的 {@link TypedSort}
-//     *
-//     * @param type 不能是 {@literal null}.
-//     */
-//    public static <T> TypedSort<T> sort(Class<T> type) {
-//        return new TypedSort<>(type);
-//    }
-
     /**
      * 返回一个 {@link Sort} 实例，表示根本没有排序设置
      */
@@ -467,62 +458,4 @@ public class Sort implements Streamable<org.clever.data.domain.Sort.Order>, Seri
             return result;
         }
     }
-
-//    /** TODO 删除
-//     * Sort 的扩展以使用方法句柄来定义要排序的属性。
-//     */
-//    public static class TypedSort<T> extends Sort {
-//        private static final long serialVersionUID = -3550403511206745880L;
-//        private final Recorded<T> recorded;
-//
-//        private TypedSort(Class<T> type) {
-//            this(MethodInvocationRecorder.forProxyOf(type));
-//        }
-//
-//        private TypedSort(Recorded<T> recorded) {
-//            super(Collections.emptyList());
-//            this.recorded = recorded;
-//        }
-//
-//        public <S> TypedSort<S> by(Function<T, S> property) {
-//            return new TypedSort<>(recorded.record(property));
-//        }
-//
-//        public <S> TypedSort<S> by(Recorded.ToCollectionConverter<T, S> collectionProperty) {
-//            return new TypedSort<>(recorded.record(collectionProperty));
-//        }
-//
-//        public <S> TypedSort<S> by(Recorded.ToMapConverter<T, S> mapProperty) {
-//            return new TypedSort<>(recorded.record(mapProperty));
-//        }
-//
-//        @Override
-//        public Sort ascending() {
-//            return withDirection(Sort::ascending);
-//        }
-//
-//        @Override
-//        public Sort descending() {
-//            return withDirection(Sort::descending);
-//        }
-//
-//        private Sort withDirection(Function<Sort, Sort> direction) {
-//            return recorded.getPropertyPath().map(Sort::by).map(direction).orElseGet(Sort::unsorted);
-//        }
-//
-//        @Override
-//        public Iterator<Order> iterator() {
-//            return recorded.getPropertyPath().map(Order::by).map(Collections::singleton).orElseGet(Collections::emptySet).iterator();
-//        }
-//
-//        @Override
-//        public boolean isEmpty() {
-//            return !recorded.getPropertyPath().isPresent();
-//        }
-//
-//        @Override
-//        public String toString() {
-//            return recorded.getPropertyPath().map(Sort::by).orElseGet(Sort::unsorted).toString();
-//        }
-//    }
 }
