@@ -131,7 +131,7 @@ public class LettuceConnectionFactory implements InitializingBean, DisposableBea
     /**
      * 给定 {@link LettuceClientConfiguration} 构造一个新的 {@link LettuceConnectionFactory} 实例
      *
-     * @param clientConfig must not be {@literal null}
+     * @param clientConfig 不能为 {@literal null}
      */
     private LettuceConnectionFactory(LettuceClientConfiguration clientConfig) {
         Assert.notNull(clientConfig, "LettuceClientConfiguration must not be null!");
