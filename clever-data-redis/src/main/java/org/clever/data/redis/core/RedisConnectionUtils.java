@@ -114,7 +114,7 @@ public abstract class RedisConnectionUtils {
         boolean bindSynchronization = TransactionSynchronizationManager.isActualTransactionActive() && transactionSupport;
         if (bind || bindSynchronization) {
             if (bindSynchronization && isActualNonReadonlyTransactionActive()) {
-                // noinspection ReassignedVariable,ConstantConditions
+                // noinspection ReassignedVariable
                 connection = createConnectionSplittingProxy(connection, factory);
             }
             try {
@@ -175,7 +175,6 @@ public abstract class RedisConnectionUtils {
     }
 
     private static RedisConnection createConnectionSplittingProxy(RedisConnection connection, RedisConnectionFactory factory) {
-        // TODO ProxyFactory
         return (RedisConnection) Proxy.newProxyInstance(
                 connection.getClass().getClassLoader(),
                 new Class[]{RedisConnectionProxy.class},
