@@ -16,6 +16,7 @@ import org.clever.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.clever.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.clever.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.clever.data.redis.core.RedisTemplate;
+import org.clever.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.clever.data.redis.serializer.RedisSerializer;
 import org.clever.util.Assert;
 
@@ -42,17 +43,18 @@ public class RedisTemplateFactory {
     }
 
     private static void initRedisTemplate(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
+        // redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
+        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        serializer.setObjectMapper(objectMapper);
         // 设置序列化规则
         redisTemplate.setStringSerializer(RedisSerializer.string());
         redisTemplate.setDefaultSerializer(RedisSerializer.string());
         redisTemplate.setKeySerializer(RedisSerializer.string());
         redisTemplate.setEnableDefaultSerializer(true);
-        // redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
-        // Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        // serializer.setObjectMapper(objectMapper);
         redisTemplate.setValueSerializer(RedisSerializer.string());
         redisTemplate.setHashKeySerializer(RedisSerializer.string());
-        redisTemplate.setHashValueSerializer(RedisSerializer.string());
+        redisTemplate.setHashValueSerializer(serializer);
+        // redisTemplate.setHashValueSerializer(RedisSerializer.string());
     }
 
     public static LettuceConnectionFactory createConnectionFactory(RedisProperties properties,

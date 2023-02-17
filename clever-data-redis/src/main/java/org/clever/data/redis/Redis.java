@@ -24,8 +24,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
+ * 包含 RedisTemplate 和 RedissonClient 的Redis客户端工具
+ * <p>
  * 作者： lzw<br/>
  * 创建时间：2019-10-06 22:01 <br/>
  */
@@ -655,7 +658,7 @@ public class Redis extends AbstractDataSource {
      * @param key      key
      * @param hashKeys hashKeys
      */
-    public Long hDelete(String key, Collection<Object> hashKeys) {
+    public Long hDelete(String key, Collection<?> hashKeys) {
         return redisTemplate.opsForHash().delete(key, hashKeys.toArray());
     }
 
@@ -761,12 +764,12 @@ public class Redis extends AbstractDataSource {
     }
 
     /**
-     * 同时将多个 field-value (域-值)对设置到哈希表 key 中
+     * 同时将多个 field-value (key-value)对设置到哈希表 key 中
      *
      * @param key key
      * @param m   field-value
      */
-    public void hPutAll(String key, Map<Object, Object> m) {
+    public void hPutAll(String key, Map<?, ?> m) {
         redisTemplate.opsForHash().putAll(key, m);
     }
 
@@ -2310,6 +2313,20 @@ public class Redis extends AbstractDataSource {
      */
     public <T> T execute(RedisScript<T> script, List<String> keys, Object... args) {
         return redisTemplate.execute(script, keys, args);
+    }
+
+    /**
+     * 基于当前的Redis连接配置创建新的RedisTemplate实例(共享底层连接池)
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <K, V> RedisTemplate<K, V> createRedisTemplate(Consumer<RedisTemplate<K, V>> customizer) {
+        RedisTemplate template = new RedisTemplate();
+        template.setConnectionFactory(connectionFactory);
+        if (customizer != null) {
+            customizer.accept(template);
+        }
+        template.afterPropertiesSet();
+        return template;
     }
 
     // --------------------------------------------------------------------------------------------

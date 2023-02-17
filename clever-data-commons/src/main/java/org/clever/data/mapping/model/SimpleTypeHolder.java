@@ -12,7 +12,6 @@ import java.util.Map.Entry;
  * 创建时间：2023/01/31 11:06 <br/>
  */
 public class SimpleTypeHolder {
-    public static final SimpleTypeHolder DEFAULT = new SimpleTypeHolder();
     private static final Set<Class<?>> DEFAULTS;
     static {
         Set<Class<?>> defaults = new HashSet<>();
@@ -47,6 +46,7 @@ public class SimpleTypeHolder {
         defaults.add(Enum.class);
         DEFAULTS = Collections.unmodifiableSet(defaults);
     }
+    public static final SimpleTypeHolder DEFAULT = new SimpleTypeHolder();
 
     private volatile Map<Class<?>, Boolean> simpleTypes;
 

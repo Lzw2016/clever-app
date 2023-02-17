@@ -12,7 +12,7 @@ import org.clever.data.redis.core.script.RedisScript;
 import org.clever.data.redis.core.script.ScriptExecutor;
 import org.clever.data.redis.core.types.RedisClientInfo;
 import org.clever.data.redis.hash.HashMapper;
-import org.clever.data.redis.hash.ObjectHashMapper;
+import org.clever.data.redis.hash.Jackson2HashMapper;
 import org.clever.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.clever.data.redis.serializer.RedisSerializer;
 import org.clever.data.redis.serializer.SerializationUtils;
@@ -73,7 +73,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     private final ZSetOperations<K, V> zSetOps = new DefaultZSetOperations<>(this);
     private final HyperLogLogOperations<K, V> hllOps = new DefaultHyperLogLogOperations<>(this);
     private final GeoOperations<K, V> geoOps = new DefaultGeoOperations<>(this);
-    private final StreamOperations<K, ?, ?> streamOps = new DefaultStreamOperations<>(this, ObjectHashMapper.getSharedInstance());
+    private final StreamOperations<K, ?, ?> streamOps = new DefaultStreamOperations<>(this, new Jackson2HashMapper(false));
     private final ClusterOperations<K, V> clusterOps = new DefaultClusterOperations<>(this);
 
     /**
