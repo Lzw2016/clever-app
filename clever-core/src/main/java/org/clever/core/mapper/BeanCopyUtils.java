@@ -159,10 +159,17 @@ public class BeanCopyUtils {
         if (source instanceof Map) {
             return (Map) source;
         }
+        final String[] ignoreClass = new String[]{
+                "java.lang.Class",
+                "groovy.lang.MetaClass",
+        };
         Map<String, Object> map = new HashMap<>();
         getBeanPropertyNames(source, (name, value) -> {
-            if (value instanceof Class && "class".equals(name)) {
-                return false;
+            if (value != null) {
+                String clazz = value.getClass().getName();
+                if (Arrays.stream(ignoreClass).anyMatch(clazz::startsWith)) {
+                    return false;
+                }
             }
             map.put(name, value);
             return false;
