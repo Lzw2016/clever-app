@@ -47,6 +47,7 @@ public class Redis extends AbstractDataSource {
     private final ClientResources clientResources;
     @Getter
     private final JacksonMapper jacksonMapper;
+    @Getter
     private final RedisConnectionFactory connectionFactory;
     @Getter
     private final RedisTemplate<String, String> redisTemplate;

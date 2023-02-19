@@ -520,7 +520,7 @@ public interface StreamMessageListenerContainer<K, V extends Record<K, ?>> exten
         private HashMapper<V, ?, ?> hashMapper;
         private Class<?> targetType;
         private ErrorHandler errorHandler = LoggingErrorHandler.INSTANCE;
-        private Executor executor = SharedThreadPoolExecutor.getSmall();
+        private Executor executor = SharedThreadPoolExecutor.getNormal();
 
         private StreamMessageListenerContainerOptionsBuilder() {
         }
@@ -541,7 +541,7 @@ public interface StreamMessageListenerContainer<K, V extends Record<K, ?>> exten
         /**
          * 在读取期间为 {@code COUNT} 选项配置批量大小
          *
-         * @param messagesPerPoll 不得大于零
+         * @param messagesPerPoll 必须大于零
          * @return {@code this} {@link StreamMessageListenerContainerOptionsBuilder}
          */
         public StreamMessageListenerContainerOptionsBuilder<K, V> batchSize(int messagesPerPoll) {

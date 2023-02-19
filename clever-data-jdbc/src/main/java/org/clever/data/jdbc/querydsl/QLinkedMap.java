@@ -4,6 +4,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.FactoryExpressionBase;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Visitor;
+import com.querydsl.sql.RelationalPathBase;
 import org.clever.core.NamingUtils;
 import org.clever.core.RenameStrategy;
 import org.clever.core.reflection.ReflectionsUtils;
@@ -25,7 +26,15 @@ public class QLinkedMap extends FactoryExpressionBase<LinkedHashMap<String, ?>> 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public QLinkedMap(Expression<?>... args) {
         super((Class) LinkedHashMap.class);
-        this.args = new ArrayList<>(Arrays.asList(args));
+        ArrayList<Expression<?>> paths = new ArrayList<>(args.length);
+        for (Expression<?> arg : args) {
+            if (arg instanceof RelationalPathBase) {
+                paths.addAll(Arrays.asList(((RelationalPathBase<?>) arg).all()));
+            } else {
+                paths.add(arg);
+            }
+        }
+        this.args = paths;
     }
 
     public QLinkedMap add(Expression<?>... args) {

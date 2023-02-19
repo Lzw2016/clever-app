@@ -108,8 +108,8 @@ import java.util.Map.Entry;
  * 创建时间：2023/02/15 22:57 <br/>
  */
 public class Jackson2HashMapper implements HashMapper<Object, String, Object> {
-    private static final Jackson2HashMapper INSTANCE = new Jackson2HashMapper(false);
     private static final HashMapperModule HASH_MAPPER_MODULE = new HashMapperModule();
+    private static final Jackson2HashMapper INSTANCE = new Jackson2HashMapper(false);
 
     public static Jackson2HashMapper getSharedInstance() {
         return INSTANCE;

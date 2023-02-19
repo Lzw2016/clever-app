@@ -3,6 +3,7 @@ package org.clever.data.jdbc.querydsl;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.FactoryExpressionBase;
 import com.querydsl.core.types.Visitor;
+import com.querydsl.sql.RelationalPathBase;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -22,7 +23,15 @@ public class QList extends FactoryExpressionBase<ArrayList<?>> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public QList(Expression<?>... args) {
         super((Class) ArrayList.class);
-        this.args = new ArrayList<>(Arrays.asList(args));
+        ArrayList<Expression<?>> paths = new ArrayList<>(args.length);
+        for (Expression<?> arg : args) {
+            if (arg instanceof RelationalPathBase) {
+                paths.addAll(Arrays.asList(((RelationalPathBase<?>) arg).all()));
+            } else {
+                paths.add(arg);
+            }
+        }
+        this.args = paths;
     }
 
     @Override

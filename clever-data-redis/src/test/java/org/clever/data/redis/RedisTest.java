@@ -1,9 +1,14 @@
 package org.clever.data.redis;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.DateUtils;
 import org.clever.core.SystemClock;
 import org.clever.data.redis.config.RedisProperties;
+import org.clever.data.redis.connection.DataType;
 import org.clever.data.redis.connection.stream.*;
+import org.clever.data.redis.hash.Jackson2HashMapper;
+import org.clever.data.redis.stream.StreamMessageListenerContainer;
+import org.clever.data.redis.stream.Subscription;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -43,6 +48,21 @@ public class RedisTest {
         data.put("data_07", "abc");
         data.put("data_08", false);
         data.put("data_09", new Date());
+        Map<String, Object> inner = new LinkedHashMap<>();
+        inner.put("inner_01", (byte) 1);
+        inner.put("inner_02", (short) 2);
+        inner.put("inner_03", 3);
+        inner.put("inner_04", 4.1F);
+        inner.put("inner_05", 5L);
+        inner.put("inner_06", 6.1D);
+        inner.put("inner_07", "abc");
+        inner.put("inner_08", false);
+        inner.put("inner_09", new Date());
+        data.put("data_10", inner);
+        // Jackson2HashMapper
+        Map<String, Object> map = Jackson2HashMapper.getSharedInstance().toHash(data);
+        log.info("### map -> {}", map);
+        log.info("### obj -> {}", Jackson2HashMapper.getSharedInstance().fromHash(map));
         long timeout = 600_000;
         // Redis
         Redis redis = new Redis("test", properties);
@@ -74,6 +94,7 @@ public class RedisTest {
         final int count = 100;
         final AtomicInteger countAtomic = new AtomicInteger(0);
         List<Thread> list = new ArrayList<>();
+        // 生成消息线程
         Thread thread = new Thread(() -> {
             for (int i = 0; i < count; i++) {
                 if (countAtomic.get() >= count) {
@@ -92,6 +113,7 @@ public class RedisTest {
             }
         });
         list.add(thread);
+        // 消费者
         StreamReadOptions streamReadOptions = StreamReadOptions.empty()
                 // 自动ACK
                 // .autoAcknowledge()
@@ -117,6 +139,7 @@ public class RedisTest {
                     log.info("@@@ -> getId={} | getValue={}", record.getId(), record.getValue());
                     readOffset = record.getId();
                     countAtomic.incrementAndGet();
+                    redis.getRedisTemplate().opsForStream().delete(streamKey, record.getId());
                     // redis.getRedisTemplate().opsForStream().acknowledge(streamKey, consumer.getGroup(), record.getId());
                 }
             }
@@ -127,7 +150,7 @@ public class RedisTest {
         while (countAtomic.get() < count) {
             Thread.sleep(100);
         }
-        redis.kDelete(streamKey);
+        // redis.kDelete(streamKey);
         redis.close();
     }
 
@@ -137,28 +160,51 @@ public class RedisTest {
         RedisProperties properties = getProperties();
         Redis redis = new Redis("test", properties);
         final String streamKey = "stream_002";
-        final int count = 100;
+        final int count = 30;
         final AtomicInteger countAtomic = new AtomicInteger(0);
-        List<Thread> list = new ArrayList<>();
+        Consumer consumer = Consumer.from("test", "test");
+        // 生成消息线程
         Thread thread = new Thread(() -> {
+            DataType dataType = redis.getRedisTemplate().type(streamKey);
+            if (dataType != DataType.STREAM) {
+                if (dataType != DataType.NONE) {
+                    redis.getRedisTemplate().delete(streamKey);
+                }
+                redis.getRedisTemplate().opsForStream().createGroup(streamKey, consumer.getGroup());
+            }
             for (int i = 0; i < count; i++) {
-                ObjectRecord<String, String> record = StreamRecords.newRecord()
-                        .in(streamKey)
-                        .ofObject(String.format("abc_%s", i))
-                        .withId(RecordId.autoGenerate());
-                RecordId recordId = redis.getRedisTemplate().opsForStream().add(record);
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("data_01", i);
+                data.put("data_02", DateUtils.getCurrentDate(DateUtils.HH_mm_ss));
+                RecordId recordId = redis.getRedisTemplate().opsForStream().add(streamKey, data);
                 log.info("### -> recordId={}", recordId);
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(1000);
                 } catch (InterruptedException ignored) {
                 }
             }
         });
-        list.add(thread);
-
-        list.forEach(Thread::start);
+        thread.start();
+        Thread.sleep(2000);
+        // 消费者
+        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, MapRecord<String, String, String>> options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions.builder()
+                .pollTimeout(Duration.ofSeconds(1))
+                .batchSize(10)
+                .build();
+        StreamMessageListenerContainer<String, MapRecord<String, String, String>> container = StreamMessageListenerContainer.create(redis.getConnectionFactory(), options);
+        Subscription subscription = container.receive(consumer, StreamOffset.create(streamKey, ReadOffset.lastConsumed()), message -> {
+            log.info("@@@ -> getId={} | getValue={}", message.getId(), message.getValue());
+            redis.getRedisTemplate().opsForStream().acknowledge(streamKey, consumer.getGroup(), message.getId());
+            countAtomic.incrementAndGet();
+        });
+        container.start();
+        log.info("### await -> {}", subscription.await(Duration.ofSeconds(3)));
         // 等待停止
         while (countAtomic.get() < count) {
+            Thread.sleep(100);
+        }
+        container.stop();
+        while (subscription.isActive()) {
             Thread.sleep(100);
         }
         redis.close();
