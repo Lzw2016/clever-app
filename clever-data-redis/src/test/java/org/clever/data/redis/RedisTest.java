@@ -178,8 +178,11 @@ public class RedisTest {
                 data.put("data_02", DateUtils.getCurrentDate(DateUtils.HH_mm_ss));
                 RecordId recordId = redis.getRedisTemplate().opsForStream().add(streamKey, data);
                 log.info("### -> recordId={}", recordId);
+                // Redis提供了一个定长Stream功能，通过 XADD 命令的 MAXLEN 选项或者 XTRIM 命令，限制Stream的长度
+                // 当达到限制的长度时，就会将老的消息干掉，从而使Stream保持恒定的长度
+                redis.getRedisTemplate().opsForStream().trim(streamKey, count, false);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(10);
                 } catch (InterruptedException ignored) {
                 }
             }
@@ -194,7 +197,7 @@ public class RedisTest {
         StreamMessageListenerContainer<String, MapRecord<String, String, String>> container = StreamMessageListenerContainer.create(redis.getConnectionFactory(), options);
         Subscription subscription = container.receive(consumer, StreamOffset.create(streamKey, ReadOffset.lastConsumed()), message -> {
             log.info("@@@ -> getId={} | getValue={}", message.getId(), message.getValue());
-            redis.getRedisTemplate().opsForStream().acknowledge(streamKey, consumer.getGroup(), message.getId());
+            // redis.getRedisTemplate().opsForStream().acknowledge(streamKey, consumer.getGroup(), message.getId());
             countAtomic.incrementAndGet();
         });
         container.start();
@@ -207,6 +210,9 @@ public class RedisTest {
         while (subscription.isActive()) {
             Thread.sleep(100);
         }
+        // 未ACK的数据
+        PendingMessagesSummary pendingMessagesSummary = redis.getRedisTemplate().opsForStream().pending(streamKey, consumer.getGroup());
+        log.info("### getTotalPendingMessages -> {}", pendingMessagesSummary.getTotalPendingMessages());
         redis.close();
     }
 }
