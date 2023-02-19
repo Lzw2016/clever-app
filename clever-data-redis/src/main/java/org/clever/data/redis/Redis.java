@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
 import org.clever.core.mapper.JacksonMapper;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.data.AbstractDataSource;
 import org.clever.data.geo.Distance;
 import org.clever.data.geo.Point;
@@ -19,12 +20,16 @@ import org.clever.data.redis.core.*;
 import org.clever.data.redis.core.script.RedisScript;
 import org.clever.data.redis.support.*;
 import org.clever.util.Assert;
+import org.redisson.Redisson;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * 包含 RedisTemplate 和 RedissonClient 的Redis客户端工具
@@ -51,6 +56,8 @@ public class Redis extends AbstractDataSource {
     private final RedisConnectionFactory connectionFactory;
     @Getter
     private final RedisTemplate<String, String> redisTemplate;
+    @Getter
+    private final RedissonClient redisson;
 
     /**
      * @param redisTemplate RedisTemplate
@@ -63,6 +70,7 @@ public class Redis extends AbstractDataSource {
         this.jacksonMapper = JacksonMapper.getInstance();
         this.connectionFactory = redisTemplate.getRequiredConnectionFactory();
         this.redisTemplate = redisTemplate;
+        this.redisson = null;
         initCheck();
     }
 
@@ -89,8 +97,9 @@ public class Redis extends AbstractDataSource {
         RedisTemplate<String, String> redisTemplate = RedisTemplateFactory.createRedisTemplate(
                 properties, clientResources, builderCustomizers, objectMapper
         );
-        this.redisTemplate = redisTemplate;
         this.connectionFactory = redisTemplate.getRequiredConnectionFactory();
+        this.redisTemplate = redisTemplate;
+        this.redisson = Redisson.create(RedissonClientFactory.createConfig(properties, null));
         initCheck();
     }
 
@@ -191,6 +200,11 @@ public class Redis extends AbstractDataSource {
             connectionFactory.destroy();
         } catch (Throwable e) {
             log.error("RedisConnectionFactory destroy 错误", e);
+        }
+        try {
+            redisson.shutdown();
+        } catch (Throwable e) {
+            log.error("Redisson shutdown 错误", e);
         }
     }
 
@@ -2328,6 +2342,141 @@ public class Redis extends AbstractDataSource {
         }
         template.afterPropertiesSet();
         return template;
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // Redisson 分布式锁功能
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 使用基于Redis实现的可重入锁，保证 {@code callback} 回调逻辑串行执行
+     *
+     * @param lockName 锁名称
+     * @param callback 保证串行执行的回调函数
+     */
+    public <T> T lock(String lockName, Supplier<T> callback) {
+        Assert.hasText(lockName, "参数 lockName 不能为空");
+        Assert.notNull(callback, "参数 callback 不能为null");
+        RLock lock = redisson.getFairLock(lockName);
+        try {
+            lock.lock();
+            return callback.get();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * 尝试获取锁，如果锁获取失败则不执行 {@code callback} <br />
+     * 使用基于Redis实现的可重入锁，保证 {@code callback} 回调逻辑串行执行
+     *
+     * @param lockName 锁名称
+     * @param callback 保证串行执行的回调函数
+     * @return 二元组对象 {@code TupleTwo<是否获取到Redis锁, callback函数的返回值>}
+     */
+    public <T> TupleTwo<Boolean, T> tryLock(String lockName, Supplier<T> callback) {
+        Assert.hasText(lockName, "参数 lockName 不能为空");
+        Assert.notNull(callback, "参数 callback 不能为null");
+        RLock lock = redisson.getFairLock(lockName);
+        boolean flag = false;
+        try {
+            flag = lock.tryLock();
+            T result = null;
+            if (flag) {
+                result = callback.get();
+            }
+            return TupleTwo.creat(flag, result);
+        } finally {
+            if (flag) {
+                lock.unlock();
+            }
+        }
+    }
+
+    /**
+     * 尝试获取锁，如果锁获取失败则不执行 {@code callback} <br />
+     * 使用基于Redis实现的可重入锁，保证 {@code callback} 回调逻辑串行执行
+     *
+     * @param lockName 锁名称
+     * @param waitTime 等待锁定的最长时间(毫秒)
+     * @param callback 保证串行执行的回调函数
+     * @return 二元组对象 {@code TupleTwo<是否获取到Redis锁, callback函数的返回值>}
+     */
+    public <T> TupleTwo<Boolean, T> tryLock(String lockName, long waitTime, Supplier<T> callback) {
+        Assert.hasText(lockName, "参数 lockName 不能为空");
+        Assert.notNull(callback, "参数 callback 不能为null");
+        RLock lock = redisson.getFairLock(lockName);
+        boolean flag = false;
+        try {
+            flag = lock.tryLock(waitTime, TimeUnit.MILLISECONDS);
+            T result = null;
+            if (flag) {
+                result = callback.get();
+            }
+            return TupleTwo.creat(flag, result);
+        } catch (InterruptedException e) {
+            log.warn("RLock.tryLock 被中断", e);
+            return TupleTwo.creat(false, null);
+        } finally {
+            if (flag) {
+                lock.unlock();
+            }
+        }
+    }
+
+    /**
+     * 使用基于Redis实现的可重入锁，可设置最大锁定时间
+     *
+     * @param lockName    锁名称
+     * @param lockMaxTime 最大的锁定时间(毫秒)
+     * @param callback    得到锁后需要执行的回调
+     */
+    public <T> T lockMaxTime(String lockName, long lockMaxTime, Supplier<T> callback) {
+        Assert.hasText(lockName, "参数 lockName 不能为空");
+        Assert.notNull(callback, "参数 callback 不能为null");
+        RLock lock = redisson.getFairLock(lockName);
+        try {
+            lock.lock(lockMaxTime, TimeUnit.MILLISECONDS);
+            return callback.get();
+        } finally {
+            try {
+                lock.unlock();
+            } catch (IllegalMonitorStateException e) {
+                log.warn("已经自动释放Redis锁: {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * 尝试获取锁，如果锁获取失败则不执行 {@code callback}，可设置最大锁定时间 <br />
+     *
+     * @param lockName    锁名称
+     * @param waitTime    等待锁定的最长时间(毫秒)
+     * @param lockMaxTime 最大的锁定时间(毫秒)
+     * @param callback    保证串行执行的回调函数
+     * @return 二元组对象 {@code TupleTwo<是否获取到Redis锁, callback函数的返回值>}
+     */
+    public <T> TupleTwo<Boolean, T> tryLockMaxTime(String lockName, long waitTime, long lockMaxTime, Supplier<T> callback) {
+        Assert.hasText(lockName, "参数 lockName 不能为空");
+        Assert.notNull(callback, "参数 callback 不能为null");
+        RLock lock = redisson.getFairLock(lockName);
+        try {
+            boolean flag = lock.tryLock(waitTime, lockMaxTime, TimeUnit.MILLISECONDS);
+            T result = null;
+            if (flag) {
+                result = callback.get();
+            }
+            return TupleTwo.creat(flag, result);
+        } catch (InterruptedException e) {
+            log.warn("RLock.tryLock 被中断", e);
+            return TupleTwo.creat(false, null);
+        } finally {
+            try {
+                lock.unlock();
+            } catch (IllegalMonitorStateException e) {
+                log.warn("已经自动释放Redis锁: {}", e.getMessage());
+            }
+        }
     }
 
     // --------------------------------------------------------------------------------------------
