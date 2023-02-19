@@ -1,7 +1,7 @@
 package org.clever.data.redis.connection;
 
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.beans.factory.DisposableBean;
+import org.clever.core.SharedThreadPoolExecutor;
 import org.clever.dao.DataAccessException;
 import org.clever.data.redis.ClusterRedirectException;
 import org.clever.data.redis.ClusterStateFailureException;
@@ -15,7 +15,10 @@ import org.clever.util.ObjectUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,20 +29,6 @@ import java.util.stream.Collectors;
  * 创建时间：2023/01/29 23:15 <br/>
  */
 public class ClusterCommandExecutor implements DisposableBean {
-    private static ExecutorService createExecutorService() {
-        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
-                2, 8, 16, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                new BasicThreadFactory.Builder()
-                        .namingPattern("redis-cluster-command-%d")
-                        .daemon(true)
-                        .build(),
-                new ThreadPoolExecutor.CallerRunsPolicy()
-        );
-        threadPool.allowCoreThreadTimeOut(true);
-        return threadPool;
-    }
-
     private final ExecutorService executor;
     private final ClusterTopologyProvider topologyProvider;
     private final ClusterNodeResourceProvider resourceProvider;
@@ -62,7 +51,7 @@ public class ClusterCommandExecutor implements DisposableBean {
         this.topologyProvider = topologyProvider;
         this.resourceProvider = resourceProvider;
         this.exceptionTranslationStrategy = exceptionTranslation;
-        this.executor = createExecutorService();
+        this.executor = SharedThreadPoolExecutor.getSmall();
     }
 
     /**
@@ -82,7 +71,7 @@ public class ClusterCommandExecutor implements DisposableBean {
         this.resourceProvider = resourceProvider;
         this.exceptionTranslationStrategy = exceptionTranslation;
         if (executor == null) {
-            executor = createExecutorService();
+            executor = SharedThreadPoolExecutor.getSmall();
         }
         this.executor = executor;
     }
