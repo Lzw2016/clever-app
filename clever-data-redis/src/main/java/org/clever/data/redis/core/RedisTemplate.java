@@ -1,5 +1,6 @@
 package org.clever.data.redis.core;
 
+import org.clever.core.proxy.JdkProxyUtils;
 import org.clever.dao.InvalidDataAccessApiUsageException;
 import org.clever.data.redis.RedisSystemException;
 import org.clever.data.redis.connection.*;
@@ -23,7 +24,6 @@ import org.clever.util.ClassUtils;
 import org.clever.util.CollectionUtils;
 
 import java.io.Closeable;
-import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -463,11 +463,11 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
 
     protected RedisConnection createRedisConnectionProxy(RedisConnection connection) {
         Class<?>[] ifcs = ClassUtils.getAllInterfacesForClass(connection.getClass(), getClass().getClassLoader());
-        return (RedisConnection) Proxy.newProxyInstance(
-                connection.getClass().getClassLoader(),
-                ifcs,
-                new CloseSuppressingInvocationHandler(connection)
-        );
+        return JdkProxyUtils.create()
+                .setClassLoader(connection.getClass().getClassLoader())
+                .addAllInterface(ifcs)
+                .setInterceptor(new CloseSuppressingInvocationHandler(connection))
+                .createProxy();
     }
 
     /**

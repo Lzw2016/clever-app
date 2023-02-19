@@ -1,5 +1,6 @@
 package org.clever.data.redis.core;
 
+import org.clever.core.proxy.JdkProxyUtils;
 import org.clever.dao.DataAccessException;
 import org.clever.data.redis.connection.RedisConnection;
 import org.clever.data.redis.connection.RedisConnectionFactory;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 
 /**
  * 提供从 {@link RedisConnectionFactory} 获取 {@link RedisConnection} 的静态方法的辅助类。
@@ -175,11 +175,11 @@ public abstract class RedisConnectionUtils {
     }
 
     private static RedisConnection createConnectionSplittingProxy(RedisConnection connection, RedisConnectionFactory factory) {
-        return (RedisConnection) Proxy.newProxyInstance(
-                connection.getClass().getClassLoader(),
-                new Class[]{RedisConnectionProxy.class},
-                new ConnectionSplittingInterceptor(connection, factory)
-        );
+        return JdkProxyUtils.create()
+                .setClassLoader(connection.getClass().getClassLoader())
+                .addInterface(RedisConnectionProxy.class)
+                .setInterceptor(new ConnectionSplittingInterceptor(connection, factory))
+                .createProxy();
     }
 
     /**
