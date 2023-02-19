@@ -103,7 +103,6 @@ public class JdkProxyFactory {
      */
     @SuppressWarnings("unchecked")
     public <T> T createProxy() {
-        Assert.notNull(target, "未设置 target");
         Assert.notNull(interceptor, "未设置 interceptor");
         return (T) Proxy.newProxyInstance(
                 classLoader,
