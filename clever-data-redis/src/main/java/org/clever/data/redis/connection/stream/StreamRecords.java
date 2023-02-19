@@ -165,7 +165,7 @@ public class StreamRecords {
          * @return {@link ByteRecord} 的新实例
          */
         public ByteRecord ofBytes(Map<byte[], byte[]> value) {
-            // todo auto conversion of known values (已知值的自动转换)
+            // auto conversion of known values (已知值的自动转换)
             return new ByteMapBackedRecord((byte[]) stream, id, value);
         }
 

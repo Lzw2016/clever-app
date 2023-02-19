@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="false" scanPeriod="60 seconds" debug="false">
-    <!-- 应用名称 -->
-    <appProperty scope="context" name="FILE_NAME" source="logging.file.name" defaultValue="server"/>
-    <!--日志文件的保存路径,首先查找系统属性-Dlog.dir,如果存在就使用其；否则，在当前目录下创建名为logs目录做日志存放的目录 -->
-    <appProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs/${FILE_NAME}"/>
+    <property name="FILE_NAME" value="logs"/>
+    <property name="LOG_PATH" value="./logs/${FILE_NAME}"/>
     <!-- 日志输出格式 -->
     <property name="ENCODER_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{80} - %msg%n"/>
     <property name="ENCODER_PATTERN_CONSOLE" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{80}) - %msg%n"/>

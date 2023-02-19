@@ -73,7 +73,7 @@ public class RedisTemplate<K, V> extends RedisAccessor implements RedisOperation
     private final ZSetOperations<K, V> zSetOps = new DefaultZSetOperations<>(this);
     private final HyperLogLogOperations<K, V> hllOps = new DefaultHyperLogLogOperations<>(this);
     private final GeoOperations<K, V> geoOps = new DefaultGeoOperations<>(this);
-    private final StreamOperations<K, ?, ?> streamOps = new DefaultStreamOperations<>(this, new Jackson2HashMapper(false));
+    private final StreamOperations<K, ?, ?> streamOps = new DefaultStreamOperations<>(this, Jackson2HashMapper.getSharedInstance());
     private final ClusterOperations<K, V> clusterOps = new DefaultClusterOperations<>(this);
 
     /**
