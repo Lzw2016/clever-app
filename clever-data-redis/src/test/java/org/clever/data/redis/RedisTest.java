@@ -117,7 +117,7 @@ public class RedisTest {
         StreamReadOptions streamReadOptions = StreamReadOptions.empty()
                 // 自动ACK
                 // .autoAcknowledge()
-                // 如果没有数据，则阻塞1s 阻塞时间需要小于`spring.redis.timeout`配置的时间
+                // 如果没有数据，则阻塞1s 阻塞时间需要小于`redis.timeout`配置的时间
                 .block(Duration.ofMillis(100))
                 // 一直阻塞直到获取数据，可能会报超时异常
                 // .block(Duration.ofMillis(0))

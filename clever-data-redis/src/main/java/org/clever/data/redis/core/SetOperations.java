@@ -89,7 +89,6 @@ public interface SetOperations<K, V> {
      * @param objects 不得为 {@literal null}
      * @return {@literal null} 在管道/事务中使用时。
      * @see <a href="https://redis.io/commands/smismember">Redis 文档: SMISMEMBER</a>
-     * @since 2.6
      */
     Map<Object, Boolean> isMember(K key, Object... objects);
 
