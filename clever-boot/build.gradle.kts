@@ -10,6 +10,7 @@ dependencies {
     api(project(":clever-web"))
     api(project(":clever-security"))
     api(project(":clever-data-jdbc"))
+    api(project(":clever-data-redis"))
     // api(project(":clever-groovy"))
     // api("org.jetbrains.kotlin:kotlin-stdlib-common")
     // api("org.jetbrains.kotlin:kotlin-stdlib")

@@ -450,7 +450,7 @@ public abstract class RedisConnectionUtils {
         /**
          * 设置此持有者是否代表一个活跃的托管交易
          *
-         * @see org.springframework.transaction.PlatformTransactionManager
+         * @see org.clever.transaction.PlatformTransactionManager
          */
         protected void setTransactionActive(boolean transactionActive) {
             this.transactionActive = transactionActive;

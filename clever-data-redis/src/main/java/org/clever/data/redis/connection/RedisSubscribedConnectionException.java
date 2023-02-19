@@ -8,7 +8,7 @@ import org.clever.dao.InvalidDataAccessApiUsageException;
  * 作者：lizw <br/>
  * 创建时间：2023/01/30 22:39 <br/>
  *
- * @see org.springframework.data.redis.connection.RedisPubSubCommands
+ * @see org.clever.data.redis.connection.RedisPubSubCommands
  */
 public class RedisSubscribedConnectionException extends InvalidDataAccessApiUsageException {
     /**

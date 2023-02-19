@@ -55,8 +55,6 @@ import static org.clever.data.redis.domain.geo.GeoReference.GeoMemberReference;
  */
 public abstract class LettuceConverters extends Converters {
     private static final Converter<Exception, DataAccessException> EXCEPTION_CONVERTER = new LettuceExceptionConverter();
-//    private static final ListConverter<GeoCoordinates, Point> GEO_COORDINATE_LIST_TO_POINT_LIST_CONVERTER;
-//    private static final ListConverter<KeyValue<Object, Object>, Object> KEY_VALUE_LIST_UN_WRAPPER;
 
     public static final byte[] PLUS_BYTES;
     public static final byte[] MINUS_BYTES;
@@ -71,27 +69,7 @@ public abstract class LettuceConverters extends Converters {
         MINUS_BYTES = toBytes("-");
         POSITIVE_INFINITY_BYTES = toBytes("+inf");
         NEGATIVE_INFINITY_BYTES = toBytes("-inf");
-//        GEO_COORDINATE_LIST_TO_POINT_LIST_CONVERTER = new ListConverter<>(LettuceConverters::geoCoordinatesToPoint);
-//        KEY_VALUE_LIST_UN_WRAPPER = new ListConverter<>(source -> source.getValueOrElse(null));
     }
-
-//    @Deprecated
-//    public static List<Tuple> toTuple(List<byte[]> source) {
-//        if (CollectionUtils.isEmpty(source)) {
-//            return Collections.emptyList();
-//        }
-//        List<Tuple> tuples = new ArrayList<>();
-//        Iterator<byte[]> it = source.iterator();
-//        while (it.hasNext()) {
-//            tuples.add(new DefaultTuple(it.next(), it.hasNext() ? Double.valueOf(toString(it.next())) : null));
-//        }
-//        return tuples;
-//    }
-//
-//    @Deprecated
-//    public static Converter<List<byte[]>, List<Tuple>> bytesListToTupleListConverter() {
-//        return LettuceConverters::toTuple;
-//    }
 
     public static Point geoCoordinatesToPoint(GeoCoordinates geoCoordinate) {
         return geoCoordinate != null ? new Point(geoCoordinate.getX().doubleValue(), geoCoordinate.getY().doubleValue()) : null;
@@ -100,41 +78,6 @@ public abstract class LettuceConverters extends Converters {
     public static Converter<String, List<RedisClientInfo>> stringToRedisClientListConverter() {
         return LettuceConverters::toListOfRedisClientInformation;
     }
-
-//    @Deprecated
-//    public static Converter<Date, Long> dateToLong() {
-//        return LettuceConverters::toLong;
-//    }
-//
-//    @Deprecated
-//    public static Converter<List<byte[]>, Set<byte[]>> bytesListToBytesSet() {
-//        return LettuceConverters::toBytesSet;
-//    }
-//
-//    @Deprecated
-//    public static Converter<byte[], String> bytesToString() {
-//        return LettuceConverters::toString;
-//    }
-//
-//    @Deprecated
-//    public static Converter<KeyValue<byte[], byte[]>, List<byte[]>> keyValueToBytesList() {
-//        return LettuceConverters::toBytesList;
-//    }
-//
-//    @Deprecated
-//    public static Converter<Collection<byte[]>, List<byte[]>> bytesSetToBytesList() {
-//        return LettuceConverters::toBytesList;
-//    }
-//
-//    @Deprecated
-//    public static Converter<Collection<byte[]>, List<byte[]>> bytesCollectionToBytesList() {
-//        return LettuceConverters::toBytesList;
-//    }
-//
-//    @Deprecated
-//    public static Converter<List<ScoredValue<byte[]>>, Set<Tuple>> scoredValuesToTupleSet() {
-//        return LettuceConverters::toTupleSet;
-//    }
 
     public static Converter<List<ScoredValue<byte[]>>, List<Tuple>> scoredValuesToTupleList() {
         return source -> {
@@ -148,11 +91,6 @@ public abstract class LettuceConverters extends Converters {
             return tuples;
         };
     }
-
-//    @Deprecated
-//    public static Converter<ScoredValue<byte[]>, Tuple> scoredValueToTuple() {
-//        return LettuceConverters::toTuple;
-//    }
 
     // @Deprecated
     public static Converter<Exception, DataAccessException> exceptionConverter() {
@@ -187,18 +125,6 @@ public abstract class LettuceConverters extends Converters {
         }
         return source != null ? new ArrayList<>(source) : null;
     }
-
-//    @Deprecated
-//    public static Set<Tuple> toTupleSet(List<ScoredValue<byte[]>> source) {
-//        if (source == null) {
-//            return null;
-//        }
-//        Set<Tuple> tuples = new LinkedHashSet<>(source.size());
-//        for (ScoredValue<byte[]> value : source) {
-//            tuples.add(LettuceConverters.toTuple(value));
-//        }
-//        return tuples;
-//    }
 
     public static Tuple toTuple(ScoredValue<byte[]> source) {
         return source != null && source.hasValue() ? new DefaultTuple(source.getValue(), source.getScore()) : null;
@@ -249,11 +175,6 @@ public abstract class LettuceConverters extends Converters {
         return target;
     }
 
-//    @Deprecated
-//    public static Converter<List<byte[]>, Map<byte[], byte[]>> bytesListToMapConverter() {
-//        return LettuceConverters::toMap;
-//    }
-
     public static SortArgs toSortArgs(SortParameters params) {
         SortArgs args = new SortArgs();
         if (params == null) {
@@ -291,24 +212,6 @@ public abstract class LettuceConverters extends Converters {
         }
         return StringToRedisClientInfoConverter.INSTANCE.convert(clientList.split("\\r?\\n"));
     }
-
-//    @Deprecated
-//    public static byte[][] subarray(byte[][] input, int index) {
-//        if (input.length > index) {
-//            byte[][] output = new byte[input.length - index][];
-//            System.arraycopy(input, index, output, 0, output.length);
-//            return output;
-//        }
-//        return null;
-//    }
-//
-//    @Deprecated
-//    public static String boundaryToStringForZRange(Boundary boundary, String defaultValue) {
-//        if (boundary == null || boundary.getValue() == null) {
-//            return defaultValue;
-//        }
-//        return boundaryToString(boundary, "", "(");
-//    }
 
     private static String boundaryToString(Boundary boundary, String inclPrefix, String exclPrefix) {
         String prefix = boundary.isIncluding() ? inclPrefix : exclPrefix;
@@ -506,28 +409,6 @@ public abstract class LettuceConverters extends Converters {
     public static byte[] toBytes(Double source) {
         return toBytes(String.valueOf(source));
     }
-
-//    /**
-//     * Converts a given {@link Boundary} to its binary representation suitable for {@literal ZRANGEBY*} commands, despite {@literal ZRANGEBYLEX}.
-//     */
-//    @Deprecated
-//    public static String boundaryToBytesForZRange(Boundary boundary, byte[] defaultValue) {
-//        if (boundary == null || boundary.getValue() == null) {
-//            return toString(defaultValue);
-//        }
-//        return boundaryToBytes(boundary, new byte[]{}, toBytes("("));
-//    }
-//
-//    /**
-//     * Converts a given {@link Boundary} to its binary representation suitable for ZRANGEBYLEX command.
-//     */
-//    @Deprecated
-//    public static String boundaryToBytesForZRangeByLex(Boundary boundary, byte[] defaultValue) {
-//        if (boundary == null || boundary.getValue() == null) {
-//            return toString(defaultValue);
-//        }
-//        return boundaryToBytes(boundary, toBytes("["), toBytes("("));
-//    }
 
     private static String boundaryToBytes(Boundary boundary, byte[] inclPrefix, byte[] exclPrefix) {
         byte[] prefix = boundary.isIncluding() ? inclPrefix : exclPrefix;
@@ -819,17 +700,6 @@ public abstract class LettuceConverters extends Converters {
     public static Converter<List<GeoWithin<byte[]>>, GeoResults<GeoLocation<byte[]>>> geoRadiusResponseToGeoResultsConverter(Metric metric) {
         return GeoResultsConverterFactory.INSTANCE.forMetric(metric);
     }
-
-//    @Deprecated
-//    public static ListConverter<io.lettuce.core.GeoCoordinates, Point> geoCoordinatesToPointConverter() {
-//        return GEO_COORDINATE_LIST_TO_POINT_LIST_CONVERTER;
-//    }
-//
-//    @SuppressWarnings({"unchecked", "rawtypes"})
-//    @Deprecated
-//    public static <K, V> ListConverter<KeyValue<K, V>, V> keyValueListUnwrapper() {
-//        return (ListConverter) KEY_VALUE_LIST_UN_WRAPPER;
-//    }
 
     public static Converter<TransactionResult, List<Object>> transactionResultUnwrapper() {
         return transactionResult -> transactionResult.stream().collect(Collectors.toList());
