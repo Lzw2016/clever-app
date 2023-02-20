@@ -43,6 +43,13 @@ sourceSets {
 //    enabled = false
 //}
 
+tasks.compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        javaParameters = true
+    }
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
