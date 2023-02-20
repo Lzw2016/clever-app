@@ -1,9 +1,13 @@
 package org.clever.app.mvc
 
+import org.clever.data.jdbc.DaoFactory
+import org.clever.data.jdbc.Jdbc
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import javax.servlet.http.HttpServletRequest
 
 val log: Logger = LoggerFactory.getLogger("test")
+val jdbc: Jdbc = DaoFactory.getJdbc()
 
 //@SneakyThrows
 fun t01() {
@@ -18,6 +22,6 @@ fun t01() {
 
 }
 
-fun t02(): String {
-    return "123abc"
+fun t02(request: HttpServletRequest): Any {
+    return jdbc.queryFirst("select * from auto_increment_id")
 }
