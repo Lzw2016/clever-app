@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 包含 RedisTemplate 和 RedissonClient 的Redis客户端工具
@@ -90,46 +91,54 @@ public class Redis extends AbstractDataSource {
     }
 
     /**
-     * @param redisName          Redis 名称
-     * @param properties         当前 Redis 配置
-     * @param clientResources    ClientResources
-     * @param objectMapper       JSON序列化反序列化对象
-     * @param builderCustomizers 自定义构建器
+     * @param redisName           Redis 名称
+     * @param properties          当前 Redis 配置
+     * @param clientResources     ClientResources
+     * @param objectMapper        JSON序列化反序列化对象
+     * @param redisCustomizers    Redis自定义构建器
+     * @param redissonCustomizers Redisson自定义构建器
      */
     public Redis(String redisName,
                  RedisProperties properties,
                  ClientResources clientResources,
                  ObjectMapper objectMapper,
-                 List<LettuceClientConfigurationBuilderCustomizer> builderCustomizers) {
+                 List<LettuceClientConfigurationBuilderCustomizer> redisCustomizers,
+                 List<RedissonClientConfigurationCustomizer> redissonCustomizers) {
         Assert.notNull(properties, "参数 properties 不能为 null");
         Assert.notNull(clientResources, "参数 clientResources 不能为 null");
         Assert.notNull(objectMapper, "参数 objectMapper 不能为 null");
-        Assert.notNull(builderCustomizers, "参数 builderCustomizers 不能为 null");
+        Assert.notNull(redisCustomizers, "参数 redisCustomizers 不能为 null");
+        Assert.notNull(redissonCustomizers, "参数 customizers 不能为 null");
+        redisCustomizers = redisCustomizers.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        redissonCustomizers = redissonCustomizers.stream().filter(Objects::nonNull).collect(Collectors.toList());
         this.redisName = redisName;
         this.properties = properties;
         this.clientResources = clientResources;
         this.jacksonMapper = new JacksonMapper(objectMapper);
         RedisTemplate<String, String> redisTemplate = RedisTemplateFactory.createRedisTemplate(
-                properties, clientResources, builderCustomizers, objectMapper
+                properties, clientResources, redisCustomizers, objectMapper
         );
         this.connectionFactory = redisTemplate.getRequiredConnectionFactory();
         this.redisTemplate = redisTemplate;
-        this.redisson = Redisson.create(RedissonClientFactory.createConfig(properties, null));
+        this.redisson = Redisson.create(RedissonClientFactory.createConfig(properties, redissonCustomizers));
         initCheck();
     }
 
     /**
-     * @param redisName       Redis 名称
-     * @param properties      当前 Redis 配置
-     * @param clientResources ClientResources
-     * @param objectMapper    JSON序列化反序列化对象
+     * @param redisName          Redis 名称
+     * @param properties         当前 Redis 配置
+     * @param clientResources    ClientResources
+     * @param objectMapper       JSON序列化反序列化对象
+     * @param redisCustomizer    Redis自定义构建器
+     * @param redissonCustomizer Redisson自定义构建器
      */
     public Redis(String redisName,
                  RedisProperties properties,
                  ClientResources clientResources,
                  ObjectMapper objectMapper,
-                 LettuceClientConfigurationBuilderCustomizer builderCustomizer) {
-        this(redisName, properties, clientResources, objectMapper, Collections.singletonList(builderCustomizer));
+                 LettuceClientConfigurationBuilderCustomizer redisCustomizer,
+                 RedissonClientConfigurationCustomizer redissonCustomizer) {
+        this(redisName, properties, clientResources, objectMapper, Collections.singletonList(redisCustomizer), Collections.singletonList(redissonCustomizer));
     }
 
     /**
@@ -139,7 +148,7 @@ public class Redis extends AbstractDataSource {
      * @param objectMapper    JSON序列化反序列化对象
      */
     public Redis(String redisName, RedisProperties properties, ClientResources clientResources, ObjectMapper objectMapper) {
-        this(redisName, properties, clientResources, objectMapper, Collections.emptyList());
+        this(redisName, properties, clientResources, objectMapper, Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -148,7 +157,7 @@ public class Redis extends AbstractDataSource {
      * @param clientResources ClientResources
      */
     public Redis(String redisName, RedisProperties properties, ClientResources clientResources) {
-        this(redisName, properties, clientResources, JacksonMapper.getInstance().getMapper(), Collections.emptyList());
+        this(redisName, properties, clientResources, JacksonMapper.getInstance().getMapper(), Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -156,7 +165,7 @@ public class Redis extends AbstractDataSource {
      * @param properties 当前 Redis 配置
      */
     public Redis(String redisName, RedisProperties properties) {
-        this(redisName, properties, DefaultClientResources.create(), JacksonMapper.getInstance().getMapper(), Collections.emptyList());
+        this(redisName, properties, DefaultClientResources.create(), JacksonMapper.getInstance().getMapper(), Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -165,7 +174,7 @@ public class Redis extends AbstractDataSource {
      * @param objectMapper JSON序列化反序列化对象
      */
     public Redis(String redisName, RedisProperties properties, ObjectMapper objectMapper) {
-        this(redisName, properties, DefaultClientResources.create(), objectMapper, Collections.emptyList());
+        this(redisName, properties, DefaultClientResources.create(), objectMapper, Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -173,14 +182,34 @@ public class Redis extends AbstractDataSource {
      * @param objectMapper JSON序列化反序列化对象
      */
     public Redis(RedisProperties properties, ObjectMapper objectMapper) {
-        this(null, properties, DefaultClientResources.create(), objectMapper, Collections.emptyList());
+        this(null, properties, DefaultClientResources.create(), objectMapper, Collections.emptyList(), Collections.emptyList());
     }
 
     /**
      * @param properties 当前 Redis 配置
      */
     public Redis(RedisProperties properties) {
-        this(null, properties, DefaultClientResources.create(), JacksonMapper.getInstance().getMapper(), Collections.emptyList());
+        this(null, properties, DefaultClientResources.create(), JacksonMapper.getInstance().getMapper(), Collections.emptyList(), Collections.emptyList());
+    }
+
+    /**
+     * @param redisName          Redis 名称
+     * @param properties         当前 Redis 配置
+     * @param redisCustomizer    Redis自定义构建器
+     * @param redissonCustomizer Redisson自定义构建器
+     */
+    public Redis(String redisName,
+                 RedisProperties properties,
+                 LettuceClientConfigurationBuilderCustomizer redisCustomizer,
+                 RedissonClientConfigurationCustomizer redissonCustomizer) {
+        this(
+                redisName,
+                properties,
+                DefaultClientResources.create(),
+                JacksonMapper.getInstance().getMapper(),
+                Collections.singletonList(redisCustomizer),
+                Collections.singletonList(redissonCustomizer)
+        );
     }
 
     /**

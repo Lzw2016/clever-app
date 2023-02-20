@@ -93,6 +93,7 @@ public class RedissonClientFactory {
         if (readTimeout != null) {
             config.setTimeout((int) readTimeout.toMillis());
         }
+        // TODO 支持 Redisson 复杂配置
         // BaseConfig
         // clientName
         // username

@@ -49,6 +49,31 @@ jdbc:
       maximumPoolSize: 100
       connectionTestQuery: 'select 1'
 
+redis:
+  enable: true
+  defaultName: 'default'
+  global:
+    ssl:  false
+    readTimeout: 30s
+    connectTimeout: 10s
+    shutdownTimeout: 100ms
+    clientName: 'clever-app'
+    pool:
+      enabled: true
+      maxIdle: 8
+      minIdle: 0
+      maxActive: 8
+      maxWait: 30s
+      timeBetweenEvictionRuns: 1m
+  dataSource:
+    default:
+      mode: Standalone
+      standalone:
+        host: '192.168.1.201'
+        port: 30007
+        database: 0
+        password: 'admin123456'
+
 web:
   host: '0.0.0.0'
   port: 9090

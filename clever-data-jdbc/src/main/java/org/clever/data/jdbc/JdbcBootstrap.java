@@ -130,6 +130,13 @@ public class JdbcBootstrap {
     private void initJdbc() {
         final HikariConfig global = Optional.of(jdbcConfig.getGlobal()).orElse(new HikariConfig());
         final Map<String, HikariConfig> dataSource = Optional.of(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
+        // 合并数据源配置
+        dataSource.forEach((name, config) -> {
+            config = MergeDataSourceConfig.mergeConfig(global, config);
+            if (StringUtils.isBlank(config.getPoolName())) {
+                config.setPoolName(name);
+            }
+        });
         // 打印配置日志
         List<String> logs = new ArrayList<>();
         logs.add("jdbc: ");
@@ -147,15 +154,11 @@ public class JdbcBootstrap {
             return;
         }
         final Map<String, DataSource> dataSourceMap = new HashMap<>(dataSource.size());
-        // 初始化配置的数据源
+        // 初始化 HikariDataSource
         final long startTime = SystemClock.now();
         dataSource.forEach((name, hikariConfig) -> {
             if (dataSourceMap.containsKey(name)) {
                 throw new RuntimeException("DataSource 名称重复: " + name);
-            }
-            hikariConfig = MergeDataSourceConfig.mergeConfig(global, hikariConfig);
-            if (StringUtils.isBlank(hikariConfig.getPoolName())) {
-                hikariConfig.setPoolName(name);
             }
             HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
             dataSourceMap.put(name, hikariDataSource);
@@ -175,16 +178,16 @@ public class JdbcBootstrap {
         // DataSource、Jdbc 等对象注入到IOC容器
         for (String datasourceName : DataSourceAdmin.allDatasourceNames()) {
             boolean primary = Objects.equals(datasourceName, jdbcConfig.getDefaultName());
-            // DataSource对象注入到Spring容器
+            // DataSource对象注入到IOC容器
             DataSource ds = DataSourceAdmin.getDataSource(datasourceName);
             AppContextHolder.registerBean(datasourceName, ds, primary);
-            // Jdbc对象注入到Spring容器
+            // Jdbc对象注入到IOC容器
             Jdbc jdbc = DataSourceAdmin.getJdbc(datasourceName);
             AppContextHolder.registerBean(datasourceName + "Jdbc", jdbc, primary);
-            // QueryDSL对象注入到Spring容器
+            // QueryDSL对象注入到IOC容器
             QueryDSL queryDSL = DataSourceAdmin.getQueryDSL(datasourceName);
             AppContextHolder.registerBean(datasourceName + "Dsl", queryDSL, primary);
-            // TransactionManager对象注入到Spring容器
+            // TransactionManager对象注入到IOC容器
             DataSourceTransactionManager transactionManager = jdbc.getTransactionManager();
             AppContextHolder.registerBean(datasourceName + "TX", transactionManager, primary);
         }
