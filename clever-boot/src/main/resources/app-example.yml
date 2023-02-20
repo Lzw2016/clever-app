@@ -231,48 +231,6 @@ web:
       isolation: DEFAULT
       timeout: -1
       readOnly: false
-    # TODO clever-security
-    security:
-      enable: true
-      ignore-paths:
-        # 静态资源
-        - '/favicon.ico'
-        - '/dist/**'
-        - '/static/**'
-        - '/**/*.png'
-        - '/**/*.ico'
-        - '/**/*.js'
-        - '/**/*.css'
-        - '/**/*.html'
-        - '/**/*.ts'
-        - '/**/*.tsx'
-        - '/**/*.map'
-        - '/**/*.png'
-        - '/**/*.jpg'
-        - '/**/*.gif'
-        - '/**/*.ttf'
-        - '/**/*.woff'
-        - '/**/*.woff2'
-        - '/**/.git'
-      ignore-auth-paths:
-        - /deviceApp/active
-      ignore-auth-failed-paths:
-        - '/api/com/galaxis/wms/report/Report@execute'
-      current-user-path: /current_user
-      login:
-        path: /login
-        allow-repeat-login: true
-        concurrent-login-count: -1
-      logout:
-        path: /logout
-        need-redirect: true
-        redirect-page: /login.html
-      redis:
-        enable: true
-      token:
-        jwt-token-name: auth
-        token-validity: 30d
-        refresh-token-validity: 60d
     hotReload:
       enable: true
       interval: 1s
@@ -281,3 +239,69 @@ web:
         - './clever-boot/out/production/classes'
         - './clever-boot/build/classes/java/main'
         - './clever-boot/build/classes/kotlin/main'
+  security:
+    enable: true
+    dataSource:
+      jdbcName: ""
+      enableRedis: false
+      redisName: ""
+      redisNamespace: "security"
+    ignorePaths:
+      # 静态资源
+      - '/favicon.ico'
+      - '/dist/**'
+      - '/static/**'
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.png'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/.git'
+    ignoreAuthPaths:
+      - '/deviceApp/active'
+    ignoreAuthFailedPaths:
+      - '/api/Report@execute'
+    notLoginNeedRedirect: false
+    notLoginRedirectPage: '/index.html'
+    forbiddenNeedRedirect: false
+    forbiddenRedirectPage: '/403.html'
+    currentUserPath: '/current_user'
+    login:
+      path: '/login'
+      postOnly: true
+      hideUserNotFoundException: true
+      successNeedRedirect: false
+      successRedirectPage: '/home.html'
+      failureNeedRedirect: false
+      failureRedirectPage: '/index.html'
+      allowRepeatLogin: true
+      concurrentLoginCount: -1
+      allowAfterLogin: true
+    logout:
+      path: '/logout'
+      needRedirect: true
+      redirectPage: '/login.html'
+    reqAesKey:
+      enable: true
+      reqPasswordAesKey: 'b9049bb512f6b776835b9bf9e6c44c45'
+      reqPasswordAesIv: '47e2cf4f8ee69fd9d7f3cad475682df8'
+    token:
+      secretKey: 'security'
+      useCookie: true
+      tokenValidity: 30d
+      hoursInDay: '03:45:00'
+      issuer: 'security'
+      audience: 'security'
+      jwtTokenName: 'authorization'
+      enableRefreshToken: true
+      refreshTokenValidity: 60d
+      refreshTokenName: 'refresh-token'
