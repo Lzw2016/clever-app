@@ -87,41 +87,49 @@ redis:
   enable: true
   defaultName: 'default'
   global:
-    host: '192.168.1.201'
-    port: 30007
-    ssl: false
-    username:
-    password: 'admin123456'
-    database: 0
-    readTimeout: 8s
-    connectTimeout: 3s
-    clientName: 'clever-app-client'
-    sentinel:
-      master: ''
-      nodes: ['node_1', 'node_2', 'node_3']
-      password: ''
-    lettuce:
-      shutdownTimeout: 100ms
-      pool:
-        enabled: true
-        maxIdle: 8
-        minIdle: 0
-        maxActive: 9
-        maxWait: -1ms
-        timeBetweenEvictionRuns: 3m
-      cluster:
-        nodes: ['node_1', 'node_2', 'node_3']
-        maxRedirects: 16
-        refresh:
-          dynamicRefreshSources: true
-          period: 3m
-          adaptive: false
-  dataSource:
-    default:
+    mode: Standalone
+    standalone:
       host: '192.168.1.201'
       port: 30007
-      password: 'admin123456'
       database: 0
+      username:
+      password: 'admin123456'
+    sentinel:
+      master: 'node_1'
+      nodes: ['node_1:6379', 'node_2:6379', 'node_3:6379']
+      database: 0
+      username:
+      password: 'admin123456'
+    cluster:
+      nodes: ['node_1:6379', 'node_2:6379', 'node_3:6379']
+      maxRedirects: 16
+      username:
+      password: 'admin123456'
+      refresh:
+        dynamicRefreshSources: true
+        period: 16s
+        adaptive: false
+    ssl:  false
+    readTimeout: 30s
+    connectTimeout: 10s
+    shutdownTimeout: 100ms
+    clientName: 'clever-app'
+    pool:
+      enabled: true
+      maxIdle: 8
+      minIdle: 0
+      maxActive: 8
+      maxWait: 30s
+      timeBetweenEvictionRuns: 1m
+  dataSource:
+    default:
+      mode: Standalone
+      standalone:
+        host: '192.168.1.201'
+        port: 30007
+        database: 0
+        username:
+        password: 'admin123456'
 
 web:
   host: '0.0.0.0'
