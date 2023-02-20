@@ -163,7 +163,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
                     handlerClassCache.put(className, handlerClass);
                 }
             }
-        } catch (ClassNotFoundException e) {
+        } catch (NoClassDefFoundError | ClassNotFoundException e) {
             log.warn("class不存在: {}", className);
         }
         return handlerClass;

@@ -1,4 +1,4 @@
-package org.clever.app
+package org.clever.app.mvc
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
