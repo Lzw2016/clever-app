@@ -195,6 +195,7 @@ subprojects {
             dependency("org.apache.commons:commons-math3:3.6.1")
             dependency("org.javassist:javassist:3.28.0-GA")
             dependency("org.redisson:redisson:3.19.3")
+            dependency("de.ruedigermoeller:fst:2.57")
         }
     }
 
