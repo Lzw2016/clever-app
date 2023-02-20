@@ -6,6 +6,7 @@ import io.lettuce.core.resource.DefaultClientResources;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
+import org.clever.core.io.ClassPathResource;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.AbstractDataSource;
@@ -17,8 +18,11 @@ import org.clever.data.redis.connection.RedisConnectionFactory;
 import org.clever.data.redis.connection.RedisGeoCommands;
 import org.clever.data.redis.connection.RedisZSetCommands;
 import org.clever.data.redis.core.*;
+import org.clever.data.redis.core.script.DefaultRedisScript;
 import org.clever.data.redis.core.script.RedisScript;
+import org.clever.data.redis.serializer.RedisSerializer;
 import org.clever.data.redis.support.*;
+import org.clever.scripting.support.ResourceScriptSource;
 import org.clever.util.Assert;
 import org.redisson.Redisson;
 import org.redisson.api.RLock;
@@ -26,6 +30,7 @@ import org.redisson.api.RedissonClient;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -39,6 +44,16 @@ import java.util.function.Supplier;
  */
 @Slf4j
 public class Redis extends AbstractDataSource {
+    @SuppressWarnings("rawtypes")
+    private static final DefaultRedisScript<List> RATE_LIMIT_SCRIPT = new DefaultRedisScript<>();
+
+    static {
+        RATE_LIMIT_SCRIPT.setScriptSource(new ResourceScriptSource(
+                new ClassPathResource("scripts/request_rate_limiter.lua")
+        ));
+        RATE_LIMIT_SCRIPT.setResultType(List.class);
+    }
+
     /**
      * Redis 名称
      */
@@ -2342,6 +2357,90 @@ public class Redis extends AbstractDataSource {
         }
         template.afterPropertiesSet();
         return template;
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // 全局限流
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 基于 Lua 脚本的限流实现
+     *
+     * @param reqId            请求ID
+     * @param rateLimitConfigs 限流配置
+     * @return 限流结果
+     */
+    public List<RateLimitState> rateLimit(String reqId, List<RateLimitConfig> rateLimitConfigs) {
+        return doRateLimit(reqId, rateLimitConfigs);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<RateLimitState> doRateLimit(String reqId, List<RateLimitConfig> rateLimitConfigs) {
+        checkConfig(rateLimitConfigs);
+        List<RateLimitState> resList = new ArrayList<>(rateLimitConfigs.size());
+        List<String> keys = new ArrayList<>(rateLimitConfigs.size() + 1);
+        List<String> args = new ArrayList<>(rateLimitConfigs.size() * 2 + 1);
+        keys.add(getTimestampKey(reqId, rateLimitConfigs));
+        args.add(String.valueOf(Instant.now().getEpochSecond()));
+        for (RateLimitConfig rateLimitConfig : rateLimitConfigs) {
+            keys.add(getTokensKey(reqId, rateLimitConfig));
+            args.add(String.valueOf(rateLimitConfig.getTimes()));
+            args.add(String.valueOf(rateLimitConfig.getLimit()));
+        }
+        List<List<Long>> results = null;
+        try {
+            results = (List<List<Long>>) redisTemplate.execute(RATE_LIMIT_SCRIPT, keys, args.toArray());
+        } catch (Exception e) {
+            log.error("执行限流lua脚本失败", e);
+            redisTemplate.executePipelined((RedisCallback<?>) connection -> {
+                for (String key : keys) {
+                    connection.del(RedisSerializer.string().serialize(key));
+                }
+                return null;
+            });
+        }
+        // if (log.isDebugEnabled()) {
+        //     log.debug("[{}] results -> {}", reqId, results);
+        // }
+        for (int i = 0; i < rateLimitConfigs.size(); i++) {
+            assert results != null;
+            List<Long> result = results.get(i);
+            RateLimitConfig rateLimiterConfig = rateLimitConfigs.get(i);
+            RateLimitState rateLimiterRes = new RateLimitState();
+            rateLimiterRes.setConfig(rateLimiterConfig);
+            rateLimiterRes.setLimited(Objects.equals(result.get(0), 1L));
+            rateLimiterRes.setLeft(result.get(1));
+            resList.add(rateLimiterRes);
+        }
+        return resList;
+    }
+
+    private void checkConfig(List<RateLimitConfig> rateLimitConfigs) {
+        if (rateLimitConfigs == null || rateLimitConfigs.isEmpty()) {
+            throw new IllegalArgumentException("参数 rateLimitConfigs 不能是null或空");
+        }
+        for (RateLimitConfig rateLimitConfig : rateLimitConfigs) {
+            if (rateLimitConfig == null) {
+                throw new IllegalArgumentException("参数 rateLimitConfigs 不能包含null元素");
+            }
+            if (rateLimitConfig.getLimit() <= 0 || rateLimitConfig.getTimes() <= 0) {
+                throw new IllegalArgumentException("RateLimitConfig 配置 times、limit 必须大于0");
+            }
+        }
+    }
+
+    private String getTimestampKey(String reqId, List<RateLimitConfig> rateLimiterConfigList) {
+        StringBuilder sb = new StringBuilder();
+        for (RateLimitConfig rateLimiterConfig : rateLimiterConfigList) {
+            sb.append(rateLimiterConfig.getTimes()).append("-").append(rateLimiterConfig.getLimit()).append(".");
+        }
+        // request_rate_limiter.%s.{%s}.timestamp
+        return String.format("rrl.%s{%s}.tt", sb, reqId);
+    }
+
+    private String getTokensKey(String reqId, RateLimitConfig config) {
+        // request_rate_limiter.%s-%s.{%s}.tokens
+        return String.format("rrl.%s-%s.{%s}.t", config.getTimes(), config.getLimit(), reqId);
     }
 
     // --------------------------------------------------------------------------------------------

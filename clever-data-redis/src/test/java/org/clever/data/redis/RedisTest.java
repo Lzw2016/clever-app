@@ -9,6 +9,8 @@ import org.clever.data.redis.connection.stream.*;
 import org.clever.data.redis.hash.Jackson2HashMapper;
 import org.clever.data.redis.stream.StreamMessageListenerContainer;
 import org.clever.data.redis.stream.Subscription;
+import org.clever.data.redis.support.RateLimitConfig;
+import org.clever.data.redis.support.RateLimitState;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -213,6 +215,21 @@ public class RedisTest {
         // 未ACK的数据
         PendingMessagesSummary pendingMessagesSummary = redis.getRedisTemplate().opsForStream().pending(streamKey, consumer.getGroup());
         log.info("### getTotalPendingMessages -> {}", pendingMessagesSummary.getTotalPendingMessages());
+        redis.close();
+    }
+
+    @Test
+    public void t04() throws InterruptedException {
+        RedisProperties properties = getProperties();
+        Redis redis = new Redis("test", properties);
+        final String reqId = "req_001";
+        List<RateLimitConfig> configs = new ArrayList<>();
+        configs.add(new RateLimitConfig(5, 10));
+        for (int i = 0; i < 30; i++) {
+            List<RateLimitState> list = redis.rateLimit(reqId, configs);
+            log.info("### list -> {}", list);
+            Thread.sleep(300);
+        }
         redis.close();
     }
 }
