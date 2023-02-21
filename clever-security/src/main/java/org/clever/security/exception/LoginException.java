@@ -11,7 +11,6 @@ public abstract class LoginException extends RuntimeException {
         super(msg, t);
     }
 
-
     public LoginException(String msg) {
         super(msg);
     }
