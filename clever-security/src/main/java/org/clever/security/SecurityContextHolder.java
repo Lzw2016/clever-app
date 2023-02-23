@@ -25,28 +25,6 @@ public class SecurityContextHolder {
         Assert.notNull(request, "参数 request 不能为 null");
         request.setAttribute(SECURITY_CONTEXT_ATTRIBUTE, securityContext);
         SECURITY_CONTEXT.set(securityContext);
-        // TODO setUserPrincipal
-//        if (request.getUserPrincipal() == null) {
-//            try {
-//                Object requestObj = request;
-//                while (true) {
-//                    Field requestField = ReflectionsUtils.getAccessibleField(requestObj, "request");
-//                    if (requestField == null) {
-//                        break;
-//                    }
-//                    requestObj = requestField.get(requestObj);
-//                    if (requestObj == null) {
-//                        break;
-//                    }
-//                    if (requestObj instanceof Request) {
-//                        Request req = (Request) requestObj;
-//                        req.setUserPrincipal(securityContext);
-//                        break;
-//                    }
-//                }
-//            } catch (Exception ignored) {
-//            }
-//        }
     }
 
     /**

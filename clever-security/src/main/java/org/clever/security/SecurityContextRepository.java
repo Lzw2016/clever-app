@@ -2,9 +2,9 @@ package org.clever.security;
 
 import io.jsonwebtoken.Claims;
 import org.clever.security.config.SecurityConfig;
+import org.clever.security.model.LoginContext;
 import org.clever.security.model.SecurityContext;
 
-import javax.security.auth.login.LoginContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
