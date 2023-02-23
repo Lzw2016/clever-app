@@ -20,7 +20,6 @@ import org.clever.web.FilterRegistrar;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.exception.MultiExceptionWrapper;
-import org.clever.web.http.HttpMethod;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.http.MediaType;
 import org.clever.web.support.mvc.HandlerContext;
@@ -163,21 +162,13 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
-        // 是否启用
-        if (!mvcConfig.isEnable()) {
-            ctx.next();
-            return;
-        }
-        // 当前请求是否满足mvc拦截配置
-        final String reqPath = ctx.req.getPathInfo();
-        final HttpMethod httpMethod = HttpMethod.resolve(ctx.req.getMethod());
-        if (!reqPath.startsWith(mvcConfig.getPath()) || !mvcConfig.getHttpMethod().contains(httpMethod)) {
+        if (!MvcHandlerMethodFilter.isMvcHandle(ctx.req)) {
             ctx.next();
             return;
         }
         try {
             // 获取 HandlerMethod
-            final HandlerMethod handlerMethod = handlerMethodResolver.getHandleMethod(ctx.req, ctx.res, mvcConfig);
+            final HandlerMethod handlerMethod = MvcHandlerMethodFilter.getHandleMethod(ctx.req);
             if (handlerMethod == null) {
                 ctx.next();
                 return;
@@ -411,6 +402,13 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
             return errList.get(0);
         }
         return new MultiExceptionWrapper(errList.toArray(new Throwable[0]));
+    }
+
+    /**
+     * 基于创建基于当前对象的 MvcHandlerMethodFilter
+     */
+    public MvcHandlerMethodFilter createMvcHandlerMethodFilter() {
+        return new MvcHandlerMethodFilter(mvcConfig, handlerMethodResolver);
     }
 
     /**

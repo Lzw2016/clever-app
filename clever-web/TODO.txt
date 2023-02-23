@@ -18,17 +18,19 @@
 🡓
 CustomFilter
     🡓
-    [0] DefSettingFilter
+    [0] ApplyConfigFilter (应用web配置,如: ContentType、CharacterEncoding 等等)
     🡓
     [100] EchoFilter (JavalinConfig#requestLogger)
     🡓
-    [200] ExceptionHandlerFilter
+    [200] ExceptionHandlerFilter (异常处理)
     🡓
     [300] CorsFilter (可参考: https://javalin.io/plugins/cors)
     🡓
-    [400] CaptureHandlerFilter
+    [400] CaptureHandlerFilter(未实现)
     🡓
-    [500] SecurityFilter (一系列Filter)
+    [500] MvcHandlerMethodFilter (解析获取MVC的HandlerMethod)
+    🡓
+    [600] SecurityFilter (一系列Filter)
         🡓
         AuthenticationFilter - 身份认证拦截 (读取请求token -> 使用刷新token -> 验证token(自定义) -> 加载SecurityContext并绑定到当前线程)
         🡓
@@ -40,9 +42,9 @@ CustomFilter
             AuthorizationVoter(授权投票器)
         🡓
     🡓
-    [600] StaticResourceFilter
+    [700] StaticResourceFilter
     🡓
-    [700] MvcFilter (before[可提前响应请求] -> invokeMethod[自定义MVC: 响应请求] -> after -> finally[执行before后一定会执行, 可以处理异常])
+    [800] MvcFilter (before[可提前响应请求] -> invokeMethod[自定义MVC: 响应请求] -> after -> finally[执行before后一定会执行, 可以处理异常])
         🡓
         HandlerInterceptor
             🡓
