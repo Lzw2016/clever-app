@@ -28,11 +28,15 @@ public class MvcHandlerMethodFilter implements FilterRegistrar.FilterFuc {
         return Objects.equals(request.getAttribute(IS_MVC_HANDLE_ATTRIBUTE), true);
     }
 
-    public static HandlerMethod getHandleMethod(HttpServletRequest request) throws Throwable {
+    public static HandlerMethod getHandleMethodAndCheckError(HttpServletRequest request) throws Throwable {
         Object exception = request.getAttribute(HANDLER_METHOD_EXCEPTION_ATTRIBUTE);
         if (exception instanceof Throwable) {
             throw (Throwable) exception;
         }
+        return getHandleMethod(request);
+    }
+
+    public static HandlerMethod getHandleMethod(HttpServletRequest request) {
         Object handlerMethod = request.getAttribute(HANDLER_METHOD_ATTRIBUTE);
         return handlerMethod instanceof HandlerMethod ? (HandlerMethod) handlerMethod : null;
     }

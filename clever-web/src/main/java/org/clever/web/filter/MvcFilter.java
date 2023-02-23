@@ -168,7 +168,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         }
         try {
             // 获取 HandlerMethod
-            final HandlerMethod handlerMethod = MvcHandlerMethodFilter.getHandleMethod(ctx.req);
+            final HandlerMethod handlerMethod = MvcHandlerMethodFilter.getHandleMethodAndCheckError(ctx.req);
             if (handlerMethod == null) {
                 ctx.next();
                 return;
