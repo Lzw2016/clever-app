@@ -7,7 +7,7 @@ set names utf8mb4;
 ==================================================================================================================== */
 create table sys_user
 (
-    user_id         bigint              not null        auto_increment                  comment '用户id',
+    id              bigint              not null        auto_increment                  comment '用户id',
     user_code       varchar(127)        not null        unique                          comment '用户编号',
     user_name       varchar(63)         not null                                        comment '登录名',
     is_enable       int                 not null        default 1                       comment '是否启用: 0:禁用，1:启用',
@@ -16,7 +16,7 @@ create table sys_user
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
     update_by       bigint                                                              comment '更新人',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
-    primary key (user_id)
+    primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '用户表';
 create index idx_sys_user_user_name on sys_user (user_name);
 /*------------------------------------------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ create index idx_sys_user_user_name on sys_user (user_name);
 ==================================================================================================================== */
 create table sys_role
 (
-    role_id         bigint              not null        auto_increment                  comment '角色id',
+    id              bigint              not null        auto_increment                  comment '角色id',
     role_code       varchar(63)         not null        unique                          comment '角色编号',
     role_name       varchar(63)         not null                                        comment '角色名称',
     is_enable       int                 not null        default 1                       comment '是否启用: 0:禁用，1:启用',
@@ -38,7 +38,7 @@ create table sys_role
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
     update_by       bigint                                                              comment '更新人',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
-    primary key (role_id)
+    primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '角色表';
 create index idx_sys_role_role_name on sys_role (role_name);
 /*------------------------------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ create index idx_sys_role_role_name on sys_role (role_name);
 ==================================================================================================================== */
 create table sys_resource
 (
-    resource_id     bigint              not null        auto_increment                  comment '资源id',
+    id              bigint              not null        auto_increment                  comment '资源id',
     permission      varchar(63)         not null        unique                          comment '权限编码',
     resource_type   int                 not null                                        comment '资源类型: 1:API权限，2:菜单权限，3:UI权限(如:按钮、表单、表格)',
     is_enable       int                 not null        default 1                       comment '是否启用: 0:禁用，1:启用',
@@ -60,7 +60,7 @@ create table sys_resource
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
     update_by       bigint                                                              comment '更新人',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
-    primary key (resource_id)
+    primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '资源表';
 /*------------------------------------------------------------------------------------------------------------------------
 
@@ -137,7 +137,7 @@ create index idx_sys_login_log_jwt_token_id on sys_login_log (jwt_token_id);
 ==================================================================================================================== */
 create table sys_jwt_token
 (
-    token_id            bigint              not null       auto_increment                   comment 'token id',
+    id                  bigint              not null       auto_increment                   comment 'token id',
     user_id             bigint              not null                                        comment '用户id',
     token               varchar(4095)       not null                                        comment 'token数据',
     expired_time        datetime(3)                                                         comment 'token过期时间(空表示永不过期)',
@@ -150,7 +150,7 @@ create table sys_jwt_token
     rt_create_token_id  bigint                                                              comment '刷新token创建的token id',
     create_at           datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
     update_at           datetime(3)                         on update current_timestamp(3)  comment '更新时间',
-    primary key (token_id)
+    primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '登录JWT Token(缓存表)';
 create index idx_sys_jwt_token_user_id on sys_jwt_token (user_id);
 create index idx_sys_jwt_token_rt_create_token_id on sys_jwt_token (rt_create_token_id);
