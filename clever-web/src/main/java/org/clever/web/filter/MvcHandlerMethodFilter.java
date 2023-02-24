@@ -24,10 +24,19 @@ public class MvcHandlerMethodFilter implements FilterRegistrar.FilterFuc {
     private final static String HANDLER_METHOD_ATTRIBUTE = MvcHandlerMethodFilter.class.getName() + "_Handler_Method";
     private final static String HANDLER_METHOD_EXCEPTION_ATTRIBUTE = MvcHandlerMethodFilter.class.getName() + "_Handler_Method_Exception";
 
+    /**
+     * 当前请求是否需要MVC处理
+     */
     public static boolean isMvcHandle(HttpServletRequest request) {
         return Objects.equals(request.getAttribute(IS_MVC_HANDLE_ATTRIBUTE), true);
     }
 
+    /**
+     * 获取当前请求对应的 HandlerMethod, 并检查是否存现异常
+     *
+     * @return 不存在返回 null
+     * @throws Throwable 如果解析 HandlerMethod 时出现异常则抛出异常
+     */
     public static HandlerMethod getHandleMethodAndCheckError(HttpServletRequest request) throws Throwable {
         Object exception = request.getAttribute(HANDLER_METHOD_EXCEPTION_ATTRIBUTE);
         if (exception instanceof Throwable) {
@@ -36,6 +45,11 @@ public class MvcHandlerMethodFilter implements FilterRegistrar.FilterFuc {
         return getHandleMethod(request);
     }
 
+    /**
+     * 获取当前请求对应的 HandlerMethod
+     *
+     * @return 解析失败或不存在返回 null
+     */
     public static HandlerMethod getHandleMethod(HttpServletRequest request) {
         Object handlerMethod = request.getAttribute(HANDLER_METHOD_ATTRIBUTE);
         return handlerMethod instanceof HandlerMethod ? (HandlerMethod) handlerMethod : null;

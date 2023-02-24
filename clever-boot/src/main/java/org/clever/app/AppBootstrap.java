@@ -75,10 +75,13 @@ public abstract class AppBootstrap {
         // 创建web服务
         WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(environment);
         final WebConfig webConfig = webServerBootstrap.getWebConfig();
-        // 注册 Filter
-        OrderIncrement filterOrder = new OrderIncrement();
+        // mvc功能
         MvcFilter mvcFilter = MvcFilter.create(rootPath, environment);
         MvcHandlerMethodFilter mvcHandlerMethodFilter = mvcFilter.createMvcHandlerMethodFilter();
+        // security功能
+
+        // 注册 Filter
+        OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
                 .addFilter(ApplyConfigFilter.create(rootPath, webConfig.getHttp()), PathConstants.ALL, "ApplyConfigFilter", filterOrder.incrL1())
                 .addFilter(EchoFilter.create(environment), PathConstants.ALL, "EchoFilter", filterOrder.incrL1())

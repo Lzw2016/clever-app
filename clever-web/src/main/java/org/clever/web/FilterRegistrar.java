@@ -143,12 +143,14 @@ public class FilterRegistrar {
         filters.sort(Comparator.comparingDouble(o -> o.order));
         List<String> logs = new ArrayList<>();
         int idx = 1;
+        int pathSpecMaxLength = filters.stream().map(item -> StringUtils.length(item.pathSpec)).max(Integer::compare).orElse(0) + 2;
+        int dispatchesMaxLength = filters.stream().map(item -> StringUtils.length(item.dispatches.toString())).max(Integer::compare).orElse(0) + 2;
         for (OrderFilter item : filters) {
             logs.add(String.format(
                     "%2s. path=%s | dispatches=%s%s",
                     idx++,
-                    item.pathSpec,
-                    item.dispatches,
+                    StringUtils.rightPad(item.pathSpec, pathSpecMaxLength),
+                    StringUtils.rightPad(item.dispatches.toString(), dispatchesMaxLength),
                     StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
             ));
             servletContextHandler.addFilter(new FilterHolder(item.filter), item.pathSpec, item.dispatches);
