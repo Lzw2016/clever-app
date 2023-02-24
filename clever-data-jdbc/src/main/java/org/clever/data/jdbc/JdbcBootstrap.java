@@ -5,7 +5,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.*;
+import org.clever.core.env.Environment;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
 import org.clever.data.jdbc.metrics.P6SpyMeter;
@@ -30,6 +32,18 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class JdbcBootstrap {
+    public static JdbcBootstrap create(String rootPath, JdbcConfig jdbcConfig, MybatisConfig mybatisConfig) {
+        return new JdbcBootstrap(rootPath, jdbcConfig, mybatisConfig);
+    }
+
+    public static JdbcBootstrap create(String rootPath, Environment environment) {
+        MybatisConfig mybatisConfig = Binder.get(environment).bind(MybatisConfig.PREFIX, MybatisConfig.class).orElseGet(MybatisConfig::new);
+        JdbcConfig jdbcConfig = Binder.get(environment).bind(JdbcConfig.PREFIX, JdbcConfig.class).orElseGet(JdbcConfig::new);
+        AppContextHolder.registerBean("mybatisConfig", mybatisConfig, true);
+        AppContextHolder.registerBean("jdbcConfig", jdbcConfig, true);
+        return create(rootPath, jdbcConfig, mybatisConfig);
+    }
+
     private volatile boolean initialized = false;
     @Getter
     private final String rootPath;

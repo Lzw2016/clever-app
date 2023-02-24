@@ -36,7 +36,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
     public static CorsFilter create(Environment environment) {
         CorsConfig corsConfig = Binder.get(environment).bind(CorsConfig.PREFIX, CorsConfig.class).orElseGet(CorsConfig::new);
         AppContextHolder.registerBean("corsConfig", corsConfig, true);
-        BannerUtils.printConfig(log, "cors浏览器跨域配置",
+        BannerUtils.printConfig(log, "cors跨域配置",
                 new String[]{
                         "cors:",
                         "  enable               : " + corsConfig.isEnable(),

@@ -3,9 +3,11 @@ package org.clever.data.redis;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
 import org.clever.core.SystemClock;
+import org.clever.core.env.Environment;
 import org.clever.data.redis.config.RedisConfig;
 import org.clever.data.redis.config.RedisProperties;
 import org.clever.data.redis.util.MergeRedisProperties;
@@ -19,6 +21,16 @@ import java.util.*;
  */
 @Slf4j
 public class RedisBootstrap {
+    public static RedisBootstrap create(RedisConfig redisConfig) {
+        return new RedisBootstrap(redisConfig);
+    }
+
+    public static RedisBootstrap create(Environment environment) {
+        RedisConfig redisConfig = Binder.get(environment).bind(RedisConfig.PREFIX, RedisConfig.class).orElseGet(RedisConfig::new);
+        AppContextHolder.registerBean("redisConfig", redisConfig, true);
+        return create(redisConfig);
+    }
+
     /**
      * 自定义创建 Redis 数据源 {@code Map<Redis数据源名称, LettuceClientConfigurationBuilderCustomizer>}
      */

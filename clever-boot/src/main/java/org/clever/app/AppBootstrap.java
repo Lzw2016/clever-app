@@ -8,17 +8,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.StartupInfoLogger;
 import org.clever.boot.context.config.ConfigDataBootstrap;
 import org.clever.boot.context.logging.LoggingBootstrap;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.OrderIncrement;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
-import org.clever.data.jdbc.config.JdbcConfig;
-import org.clever.data.jdbc.config.MybatisConfig;
 import org.clever.data.redis.RedisBootstrap;
-import org.clever.data.redis.config.RedisConfig;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.PathConstants;
 import org.clever.web.WebServerBootstrap;
@@ -39,7 +35,7 @@ public abstract class AppBootstrap {
         try {
             doStart();
         } catch (Throwable e) {
-            log.info("系统启动失败!!!", e);
+            log.info("启动失败!", e);
             System.exit(-1);
         }
     }
@@ -61,16 +57,10 @@ public abstract class AppBootstrap {
         final String rootPath = environment.getProperty("rootPath");
         AppContextHolder.registerBean("rootPath", rootPath, true);
         // Jdbc初始化
-        MybatisConfig mybatisConfig = Binder.get(environment).bind(MybatisConfig.PREFIX, MybatisConfig.class).orElseGet(MybatisConfig::new);
-        JdbcConfig jdbcConfig = Binder.get(environment).bind(JdbcConfig.PREFIX, JdbcConfig.class).orElseGet(JdbcConfig::new);
-        AppContextHolder.registerBean("mybatisConfig", mybatisConfig, true);
-        AppContextHolder.registerBean("jdbcConfig", jdbcConfig, true);
-        JdbcBootstrap jdbcBootstrap = new JdbcBootstrap(rootPath, jdbcConfig, mybatisConfig);
+        JdbcBootstrap jdbcBootstrap = JdbcBootstrap.create(rootPath, environment);
         jdbcBootstrap.init();
         // Redis初始化
-        RedisConfig redisConfig = Binder.get(environment).bind(RedisConfig.PREFIX, RedisConfig.class).orElseGet(RedisConfig::new);
-        AppContextHolder.registerBean("redisConfig", redisConfig, true);
-        RedisBootstrap redisBootstrap = new RedisBootstrap(redisConfig);
+        RedisBootstrap redisBootstrap = RedisBootstrap.create(environment);
         redisBootstrap.init();
         // 创建web服务
         WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(environment);
@@ -78,7 +68,7 @@ public abstract class AppBootstrap {
         // mvc功能
         MvcFilter mvcFilter = MvcFilter.create(rootPath, environment);
         MvcHandlerMethodFilter mvcHandlerMethodFilter = mvcFilter.createMvcHandlerMethodFilter();
-        // security功能
+        // security功能 security
 
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
