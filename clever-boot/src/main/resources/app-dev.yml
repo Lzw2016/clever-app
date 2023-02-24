@@ -109,3 +109,42 @@ web:
         #- './clever-boot/out/production/classes'
         - './clever-boot/build/classes/java/main'
         - './clever-boot/build/classes/kotlin/main'
+  security:
+    enable: true
+    dataSource:
+      jdbcName: ""
+      enableRedis: false
+      redisName: ""
+      redisNamespace: "security"
+    ignorePaths:
+      - '/favicon.ico'
+      - '/dist/**'
+      - '/static/**'
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.png'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/.git'
+    ignoreAuthPaths: []
+    ignoreAuthFailedPaths: []
+    currentUserPath: '/current_user'
+    login:
+      path: '/login'
+      postOnly: true
+    logout:
+      path: '/logout'
+    token:
+      secretKey: 'security'
+      tokenValidity: 30d
+      jwtTokenName: 'authorization'
+      refreshTokenName: 'refresh-token'

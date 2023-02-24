@@ -25,15 +25,15 @@ public class SecurityConfig implements Serializable {
     /**
      * 不需要认证和授权的Path(支持Ant风格的Path)
      */
-    private final List<String> ignorePaths = new ArrayList<>();
+    private List<String> ignorePaths = new ArrayList<>();
     /**
      * 不需要授权的Path(支持Ant风格的Path)
      */
-    private final List<String> ignoreAuthPaths = new ArrayList<>();
+    private List<String> ignoreAuthPaths = new ArrayList<>();
     /**
      * 认证或授权失败时不拦截的Path(支持Ant风格的Path)
      */
-    private final List<String> ignoreAuthFailedPaths = new ArrayList<>();
+    private List<String> ignoreAuthFailedPaths = new ArrayList<>();
     /**
      * 未登录时是否需要重定向到 401 页面
      */
@@ -57,17 +57,17 @@ public class SecurityConfig implements Serializable {
     /**
      * 用户登录相关配置
      */
-    private final LoginConfig login = new LoginConfig();
+    private LoginConfig login = new LoginConfig();
     /**
      * 用户登出相关配置
      */
-    private final LogoutConfig logout = new LogoutConfig();
+    private LogoutConfig logout = new LogoutConfig();
     /**
      * 用户请求参数加密配置AesKey(登录、注册等敏感接口使用)
      */
-    private final AesKeyConfig reqAesKey = new AesKeyConfig();
+    private AesKeyConfig reqAesKey = new AesKeyConfig();
     /**
      * token配置(JWT-Token有效)
      */
-    private final TokenConfig token = new TokenConfig();
+    private TokenConfig token = new TokenConfig();
 }

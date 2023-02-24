@@ -15,6 +15,7 @@ import org.clever.core.env.StandardEnvironment;
 import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.redis.RedisBootstrap;
+import org.clever.security.SecurityBootstrap;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.MvcBootstrap;
 import org.clever.web.PathConstants;
@@ -69,7 +70,8 @@ public abstract class AppBootstrap {
         // mvc功能
         MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, environment);
         // security功能
-
+        SecurityBootstrap.useDefaultSecurity();
+        SecurityBootstrap securityBootstrap = SecurityBootstrap.create(environment);
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
@@ -78,7 +80,11 @@ public abstract class AppBootstrap {
                 .addFilter(ExceptionHandlerFilter.INSTANCE, PathConstants.ALL, "ExceptionHandlerFilter", filterOrder.incrL1())
                 .addFilter(CorsFilter.create(environment), PathConstants.ALL, "CorsFilter", filterOrder.incrL1())
                 .addFilter(mvcBootstrap.getMvcHandlerMethodFilter(), PathConstants.ALL, "MvcHandlerMethodFilter", filterOrder.incrL1())
-                .addFilter(StaticResourceFilter.create(rootPath, environment), "/*", "StaticResourceFilter", filterOrder.incrL1())
+                .addFilter(securityBootstrap.getAuthenticationFilter(), PathConstants.ALL, "AuthenticationFilter", filterOrder.incrL1())
+                .addFilter(securityBootstrap.getLoginFilter(), PathConstants.ALL, "LoginFilter", filterOrder.incrL1())
+                .addFilter(securityBootstrap.getLogoutFilter(), PathConstants.ALL, "LogoutFilter", filterOrder.incrL1())
+                .addFilter(securityBootstrap.getAuthorizationFilter(), PathConstants.ALL, "AuthorizationFilter", filterOrder.incrL1())
+                .addFilter(StaticResourceFilter.create(rootPath, environment), PathConstants.ALL, "StaticResourceFilter", filterOrder.incrL1())
                 .addFilter(mvcBootstrap.getMvcFilter(), PathConstants.ALL, "MvcFilter", filterOrder.incrL1());
         // 注册 Servlet
         // OrderIncrement servletOrder = new OrderIncrement();

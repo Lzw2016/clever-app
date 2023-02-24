@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Data
 public class LoginConfig implements Serializable {
     /**
-     * 登录请求Path
+     * 登录请求Path TODO 多个登录地址区分登录渠道
      */
     private String path = "/login";
     /**
