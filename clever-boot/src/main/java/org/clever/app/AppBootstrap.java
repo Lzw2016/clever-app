@@ -16,6 +16,7 @@ import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.redis.RedisBootstrap;
 import org.clever.web.JavalinAttrKey;
+import org.clever.web.MvcBootstrap;
 import org.clever.web.PathConstants;
 import org.clever.web.WebServerBootstrap;
 import org.clever.web.config.WebConfig;
@@ -66,9 +67,8 @@ public abstract class AppBootstrap {
         WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(environment);
         final WebConfig webConfig = webServerBootstrap.getWebConfig();
         // mvc功能
-        MvcFilter mvcFilter = MvcFilter.create(rootPath, environment);
-        MvcHandlerMethodFilter mvcHandlerMethodFilter = mvcFilter.createMvcHandlerMethodFilter();
-        // security功能 security
+        MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, environment);
+        // security功能
 
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
@@ -77,9 +77,9 @@ public abstract class AppBootstrap {
                 .addFilter(EchoFilter.create(environment), PathConstants.ALL, "EchoFilter", filterOrder.incrL1())
                 .addFilter(ExceptionHandlerFilter.INSTANCE, PathConstants.ALL, "ExceptionHandlerFilter", filterOrder.incrL1())
                 .addFilter(CorsFilter.create(environment), PathConstants.ALL, "CorsFilter", filterOrder.incrL1())
-                .addFilter(mvcHandlerMethodFilter, PathConstants.ALL, "MvcHandlerMethodFilter", filterOrder.incrL1())
+                .addFilter(mvcBootstrap.getMvcHandlerMethodFilter(), PathConstants.ALL, "MvcHandlerMethodFilter", filterOrder.incrL1())
                 .addFilter(StaticResourceFilter.create(rootPath, environment), "/*", "StaticResourceFilter", filterOrder.incrL1())
-                .addFilter(mvcFilter, PathConstants.ALL, "MvcFilter", filterOrder.incrL1());
+                .addFilter(mvcBootstrap.getMvcFilter(), PathConstants.ALL, "MvcFilter", filterOrder.incrL1());
         // 注册 Servlet
         // OrderIncrement servletOrder = new OrderIncrement();
         // webServerBootstrap.getServletRegistrar()
@@ -106,7 +106,7 @@ public abstract class AppBootstrap {
         OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
                 .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1())
-                .addPlugin(mvcFilter, "MVC处理插件", pluginOrder.incrL1())
+                .addPlugin(mvcBootstrap.getMvcFilter(), "MVC处理插件", pluginOrder.incrL1())
                 .addPlugin(NotFoundResponsePlugin.INSTANCE, "404处理插件", pluginOrder.incrL1());
         // 注册 JavalinEventListener
         // OrderIncrement javalinListenerOrder = new OrderIncrement();

@@ -4,14 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.core.plugin.Plugin;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
-import org.clever.core.BannerUtils;
 import org.clever.core.MethodParameter;
-import org.clever.core.ResourcePathUtils;
-import org.clever.core.env.Environment;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.util.Assert;
@@ -49,42 +44,7 @@ import java.util.stream.IntStream;
  * 作者：lizw <br/>
  * 创建时间：2023/01/06 13:29 <br/>
  */
-@Slf4j
 public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
-    public static MvcFilter create(String rootPath, MvcConfig mvcConfig) {
-        return new MvcFilter(rootPath, mvcConfig);
-    }
-
-    public static MvcFilter create(String rootPath, Environment environment) {
-        MvcConfig mvcConfig = Binder.get(environment).bind(MvcConfig.PREFIX, MvcConfig.class).orElseGet(MvcConfig::new);
-        MvcConfig.TransactionalConfig defTransactional = Optional.of(mvcConfig.getDefTransactional()).orElse(new MvcConfig.TransactionalConfig());
-        mvcConfig.setDefTransactional(defTransactional);
-        MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
-        mvcConfig.setHotReload(hotReload);
-        Map<String, String> locationMap = ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations());
-        AppContextHolder.registerBean("mvcConfig", mvcConfig, true);
-        List<String> logs = new ArrayList<>();
-        logs.add("mvc: ");
-        logs.add("  enable           : " + mvcConfig.isEnable());
-        logs.add("  path             : " + mvcConfig.getPath());
-        logs.add("  httpMethod       : " + StringUtils.join(mvcConfig.getHttpMethod(), " | "));
-        logs.add("  allowPackages    : " + StringUtils.join(mvcConfig.getAllowPackages(), " | "));
-        logs.add("  packagePrefix    : " + mvcConfig.getPackagePrefix());
-        logs.add("  defTransactional: ");
-        logs.add("    datasource     : " + StringUtils.join(defTransactional.getDatasource(), " | "));
-        logs.add("    propagation    : " + defTransactional.getPropagation());
-        logs.add("    isolation      : " + defTransactional.getIsolation());
-        logs.add("    timeout        : " + defTransactional.getTimeout());
-        logs.add("    readOnly       : " + defTransactional.isReadOnly());
-        logs.add("  hotReload: ");
-        logs.add("    enable         : " + hotReload.isEnable());
-        logs.add("    interval       : " + hotReload.getInterval().toMillis() + "ms");
-        logs.add("    excludePackages: " + StringUtils.join(hotReload.getExcludePackages(), " | "));
-        logs.add("    locations      : " + StringUtils.join(hotReload.getLocations().stream().map(locationMap::get).toArray(), " | "));
-        BannerUtils.printConfig(log, "mvc配置", logs.toArray(new String[0]));
-        return create(rootPath, mvcConfig);
-    }
-
     /**
      * 当前 Javalin 实例
      */
