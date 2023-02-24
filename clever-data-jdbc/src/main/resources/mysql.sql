@@ -1,17 +1,20 @@
+# create database if not exists db_name default character set utf8mb4 collate utf8mb4_unicode_ci;
+# use db_name;
+set names utf8mb4;
+
 /* ====================================================================================================================
     auto_increment_id -- 自增长ID数据表
 ==================================================================================================================== */
 create table auto_increment_id
 (
     id                  bigint                  not null        auto_increment                          comment '主键id',
-    sequence_name       varchar(127)    binary  not null                                                comment '序列名称',
+    sequence_name       varchar(127)    binary  not null        unique                                  comment '序列名称',
     current_value       bigint                  not null        default -1                              comment '当前值',
     description         varchar(511)                                                                    comment '说明',
     create_at           datetime(3)             not null        default current_timestamp(3)            comment '创建时间',
     update_at           datetime(3)                             on update current_timestamp(3)          comment '更新时间',
     primary key (id)
-) comment = '自增长id表';
-create unique index idx_auto_increment_id_sequence_name on auto_increment_id (sequence_name);
+) engine=innodb default charset=utf8mb4 comment = '自增长id表';
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/
@@ -23,7 +26,7 @@ create unique index idx_auto_increment_id_sequence_name on auto_increment_id (se
 create table biz_code
 (
     id                  bigint                  not null        auto_increment                          comment '主键id',
-    code_name           varchar(127)    binary  not null                                                comment '编码名称',
+    code_name           varchar(127)    binary  not null        unique                                  comment '编码名称',
     pattern             varchar(127)    binary  not null                                                comment '编码规则表达式',
     sequence            bigint                  not null        default -1                              comment '序列值',
     reset_pattern       varchar(127)    binary                                                          comment '重置sequence值的表达式，使用Java日期格式化字符串',
@@ -32,8 +35,7 @@ create table biz_code
     create_at           datetime(3)             not null        default current_timestamp(3)            comment '创建时间',
     update_at           datetime(3)                             on update current_timestamp(3)          comment '更新时间',
     primary key (id)
-) comment = '业务编码表';
-create unique index biz_code_code_name on biz_code (code_name);
+) engine=innodb default charset=utf8mb4 comment = '业务编码表';
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/
@@ -45,14 +47,13 @@ create unique index biz_code_code_name on biz_code (code_name);
 create table sys_lock
 (
     id                  bigint                  not null        auto_increment                          comment '主键id',
-    lock_name           varchar(127)    binary  not null                                                comment '锁名称',
+    lock_name           varchar(127)    binary  not null        unique                                  comment '锁名称',
     lock_count          bigint                  not null        default 0                               comment '锁次数',
     description         varchar(511)                                                                    comment '说明',
     create_at           datetime(3)             not null        default current_timestamp(3)            comment '创建时间',
     update_at           datetime(3)                             on update current_timestamp(3)          comment '更新时间',
     primary key (id)
-) comment = '自增长id表';
-create unique index sys_lock_lock_name on sys_lock (lock_name);
+) engine=innodb default charset=utf8mb4 comment = '自增长id表';
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/
