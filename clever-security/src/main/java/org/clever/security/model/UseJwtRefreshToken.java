@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 作者：yz <br/>
+ * 作者：lizw <br/>
  * 创建时间：2020-12-24 21:28 <br/>
  */
 @Data

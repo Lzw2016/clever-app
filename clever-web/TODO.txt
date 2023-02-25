@@ -32,7 +32,7 @@ CustomFilter
     🡓
     [600] SecurityFilter (一系列Filter)
         🡓
-        AuthenticationFilter - 身份认证拦截 (读取请求token -> 使用刷新token -> 验证token(自定义) -> 加载SecurityContext并绑定到当前线程)
+        AuthenticationFilter - 身份认证拦截 (读取请求token -> 使用刷新token(RefreshJwtToken) -> 验证token(VerifyJwtToken) -> 加载SecurityContext并绑定到当前线程(SecurityContextRepository))
         🡓
         LoginFilter          - 登录拦截 (收集登录数据(LoginDataCollect) -> 校验登录数据(VerifyLoginData) -> 加载用户信息(LoadUser) -> 校验用户信息(VerifyUserInfo) -> 创建token(AddJwtTokenExtData) -> 缓存SecurityContext(SecurityContextRepository))
         🡓

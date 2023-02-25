@@ -12,6 +12,7 @@ import org.clever.security.authentication.AuthenticationFilter;
 import org.clever.security.authentication.token.RefreshJwtToken;
 import org.clever.security.authentication.token.VerifyJwtToken;
 import org.clever.security.authorization.AuthorizationFilter;
+import org.clever.security.authorization.MvcAuthorizationVoter;
 import org.clever.security.authorization.voter.AuthorizationVoter;
 import org.clever.security.config.*;
 import org.clever.security.crypto.AesPasswordEncoder;
@@ -20,6 +21,9 @@ import org.clever.security.crypto.PasswordEncoder;
 import org.clever.security.crypto.RawPassword;
 import org.clever.security.handler.*;
 import org.clever.security.impl.DefaultSecurityContextRepository;
+import org.clever.security.impl.authentication.DefaultRefreshJwtToken;
+import org.clever.security.impl.authentication.DefaultVerifyJwtToken;
+import org.clever.security.impl.login.*;
 import org.clever.security.login.*;
 import org.clever.security.logout.LogoutFilter;
 import org.clever.util.Assert;
@@ -111,9 +115,24 @@ public class SecurityBootstrap {
      */
     public static final List<AddJwtTokenExtData> ADD_JWT_TOKEN_EXT_DATA_LIST = new ArrayList<>(1);
 
-    public static void useDefaultSecurity() {
-        SECURITY_CONTEXT_REPOSITORY = new DefaultSecurityContextRepository();
+    static {
+        AUTHORIZATION_VOTER_LIST.add(new MvcAuthorizationVoter());
+    }
+
+    public static void useDefaultSecurity(SecurityConfig securityConfig) {
         // TODO 使用默认的“用户-角色-权限”逻辑实现
+        SECURITY_CONTEXT_REPOSITORY = new DefaultSecurityContextRepository();
+        // AuthenticationFilter
+        REFRESH_JWT_TOKEN = new DefaultRefreshJwtToken(securityConfig);
+        VERIFY_JWT_TOKEN_LIST.add(new DefaultVerifyJwtToken());
+        // LoginFilter
+        LOGIN_DATA_COLLECT_LIST.add(new DefaultLoginDataCollect());
+        VERIFY_LOGIN_DATA_LIST.add(new DefaultVerifyLoginData());
+        LOAD_USER_LIST.add(new DefaultLoadUser());
+        VERIFY_USER_INFO_LIST.add(new DefaultVerifyUserInfo(PASSWORD_ENCODER));
+        ADD_JWT_TOKEN_EXT_DATA_LIST.add(new DefaultAddJwtTokenExtData());
+        // LogoutFilter
+        // AuthorizationFilter
     }
 
     public static SecurityBootstrap create(SecurityConfig securityConfig) {
@@ -209,6 +228,7 @@ public class SecurityBootstrap {
         if (dataSource != null) {
             SecurityDataSource.JDBC_DATA_SOURCE_NAME = dataSource.getJdbcName();
             SecurityDataSource.REDIS_DATA_SOURCE_NAME = dataSource.getRedisName();
+            // TODO 验证数据源
         }
         // 创建Filter对象
         this.securityConfig = securityConfig;
