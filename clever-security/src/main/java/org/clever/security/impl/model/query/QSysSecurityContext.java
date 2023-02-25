@@ -20,7 +20,7 @@ import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 @SuppressWarnings("ALL")
 public class QSysSecurityContext extends RelationalPathBase<SysSecurityContext> {
     /** 用户security context(缓存表)(sys_security_context) */
-    public static final QSysSecurityContext sysUserSecurityContext = new QSysSecurityContext("sys_security_context");
+    public static final QSysSecurityContext sysSecurityContext = new QSysSecurityContext("sys_security_context");
 
     /** 主键id */
     public final NumberPath<Long> id = createNumber("id", Long.class);

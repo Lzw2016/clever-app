@@ -5,8 +5,8 @@ package org.clever.security.utils;
  * 创建时间：2021/12/31 14:50 <br/>
  */
 public class SecurityRedisKey {
-    public static String getSecurityContextKey(String redisNamespace, Long whId, String userId) {
-        return String.format("%s:context:wh_%s:uid_%s", redisNamespace, whId, userId);
+    public static String getSecurityContextKey(String redisNamespace, String userId) {
+        return String.format("%s:context:uid_%s", redisNamespace, userId);
     }
 
     public static String getTokenKey(String redisNamespace, String userId, String tokenId) {

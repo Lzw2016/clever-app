@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
+import org.clever.core.OrderComparator;
 import org.clever.core.env.Environment;
 import org.clever.security.authentication.AuthenticationFilter;
 import org.clever.security.authentication.token.RefreshJwtToken;
@@ -18,6 +19,7 @@ import org.clever.security.crypto.BCryptPasswordEncoder;
 import org.clever.security.crypto.PasswordEncoder;
 import org.clever.security.crypto.RawPassword;
 import org.clever.security.handler.*;
+import org.clever.security.impl.DefaultSecurityContextRepository;
 import org.clever.security.login.*;
 import org.clever.security.logout.LogoutFilter;
 import org.clever.util.Assert;
@@ -110,6 +112,7 @@ public class SecurityBootstrap {
     public static final List<AddJwtTokenExtData> ADD_JWT_TOKEN_EXT_DATA_LIST = new ArrayList<>(1);
 
     public static void useDefaultSecurity() {
+        SECURITY_CONTEXT_REPOSITORY = new DefaultSecurityContextRepository();
         // TODO 使用默认的“用户-角色-权限”逻辑实现
     }
 
@@ -184,12 +187,30 @@ public class SecurityBootstrap {
 
     public SecurityBootstrap(SecurityConfig securityConfig) {
         Assert.notNull(securityConfig, "参数 securityConfig 不能为 null");
+        // TODO 校验全局属性值配置
+        // 可扩展组件排序
+        OrderComparator.sort(LOGIN_SUCCESS_HANDLER_LIST);
+        OrderComparator.sort(LOGIN_FAILURE_HANDLER_LIST);
+        OrderComparator.sort(LOGOUT_SUCCESS_HANDLER_LIST);
+        OrderComparator.sort(LOGOUT_FAILURE_HANDLER_LIST);
+        OrderComparator.sort(AUTHORIZATION_SUCCESS_HANDLER_LIST);
+        OrderComparator.sort(AUTHORIZATION_FAILURE_HANDLER_LIST);
+        OrderComparator.sort(AUTHENTICATION_SUCCESS_HANDLER_LIST);
+        OrderComparator.sort(AUTHENTICATION_FAILURE_HANDLER_LIST);
+        OrderComparator.sort(AUTHORIZATION_VOTER_LIST);
+        OrderComparator.sort(VERIFY_JWT_TOKEN_LIST);
+        OrderComparator.sort(LOGIN_DATA_COLLECT_LIST);
+        OrderComparator.sort(VERIFY_LOGIN_DATA_LIST);
+        OrderComparator.sort(LOAD_USER_LIST);
+        OrderComparator.sort(VERIFY_USER_INFO_LIST);
+        OrderComparator.sort(ADD_JWT_TOKEN_EXT_DATA_LIST);
+        // 配置数据源
         DataSourceConfig dataSource = securityConfig.getDataSource();
         if (dataSource != null) {
             SecurityDataSource.JDBC_DATA_SOURCE_NAME = dataSource.getJdbcName();
             SecurityDataSource.REDIS_DATA_SOURCE_NAME = dataSource.getRedisName();
         }
-        // TODO 校验全局属性值配置
+        // 创建Filter对象
         this.securityConfig = securityConfig;
         this.authenticationFilter = new AuthenticationFilter(
                 securityConfig,

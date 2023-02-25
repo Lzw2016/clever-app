@@ -26,7 +26,7 @@ public interface VerifyJwtToken extends Ordered {
      * @param request        请求对象
      * @param response       响应对象
      */
-    void verify(String jwtToken, String userId, Claims claims, SecurityConfig securityConfig, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException;
+    void verify(String jwtToken, Long userId, Claims claims, SecurityConfig securityConfig, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException;
 
     @Override
     default double getOrder() {

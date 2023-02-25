@@ -14,7 +14,7 @@ public class NewJwtToken implements Serializable {
     /**
      * 用户id
      */
-    private String userId;
+    private Long userId;
     /**
      * token数据
      */

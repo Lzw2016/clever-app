@@ -18,13 +18,13 @@ public class AuthenticationFailureEvent implements Serializable {
     /**
      * 用户id (可能为空)
      */
-    private final String userId;
+    private final Long userId;
     /**
      * JWT-Token body 信息 (可能为空)
      */
     private final Claims claims;
 
-    public AuthenticationFailureEvent(String jwtToken, String userId, Claims claims) {
+    public AuthenticationFailureEvent(String jwtToken, Long userId, Claims claims) {
         this.jwtToken = jwtToken;
         this.userId = userId;
         this.claims = claims;

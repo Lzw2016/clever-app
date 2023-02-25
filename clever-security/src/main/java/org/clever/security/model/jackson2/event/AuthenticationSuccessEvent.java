@@ -19,7 +19,7 @@ public class AuthenticationSuccessEvent implements Serializable {
     /**
      * 用户id
      */
-    private final String userId;
+    private final Long userId;
     /**
      * JWT-Token body 信息
      */
@@ -29,7 +29,7 @@ public class AuthenticationSuccessEvent implements Serializable {
      */
     private final SecurityContext securityContext;
 
-    public AuthenticationSuccessEvent(String jwtToken, String userId, Claims claims, SecurityContext securityContext) {
+    public AuthenticationSuccessEvent(String jwtToken, Long userId, Claims claims, SecurityContext securityContext) {
         this.jwtToken = jwtToken;
         this.userId = userId;
         this.claims = claims;

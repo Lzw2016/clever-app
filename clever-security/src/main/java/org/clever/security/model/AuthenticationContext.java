@@ -31,7 +31,7 @@ public class AuthenticationContext {
     /**
      * 用户id
      */
-    private String userId;
+    private Long userId;
     /**
      * JWT-Token body 信息
      */

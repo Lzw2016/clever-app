@@ -109,7 +109,7 @@ public class JwtTokenUtils {
      *
      * @param userId 用户id
      */
-    public static String createRefreshToken(String userId) {
+    public static String createRefreshToken(Long userId) {
         return userId + ":" + IDCreateUtils.shortUuid();
     }
 

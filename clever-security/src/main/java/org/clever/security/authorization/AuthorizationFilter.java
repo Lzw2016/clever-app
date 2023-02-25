@@ -1,6 +1,7 @@
 package org.clever.security.authorization;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.OrderComparator;
 import org.clever.security.SecurityContextHolder;
 import org.clever.security.authorization.voter.AuthorizationVoter;
 import org.clever.security.authorization.voter.VoterResult;
@@ -14,7 +15,6 @@ import org.clever.security.model.jackson2.event.AuthorizationFailureEvent;
 import org.clever.security.model.jackson2.event.AuthorizationSuccessEvent;
 import org.clever.security.model.response.ForbiddenAccessRes;
 import org.clever.security.utils.HttpServletResponseUtils;
-import org.clever.security.utils.ListSortUtils;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
@@ -60,10 +60,13 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
         Assert.notNull(authorizationVoterList, "授权投票器(AuthorizationVoter)不能为null");
         Assert.notNull(authorizationSuccessHandlerList, "授权成功的处理(AuthorizationSuccessHandler)不能为null");
         Assert.notNull(authorizationFailureHandlerList, "授权成功的处理(AuthorizationFailureHandler)不能为null");
+        OrderComparator.sort(authorizationVoterList);
+        OrderComparator.sort(authorizationSuccessHandlerList);
+        OrderComparator.sort(authorizationFailureHandlerList);
         this.securityConfig = securityConfig;
-        this.authorizationVoterList = ListSortUtils.sort(authorizationVoterList);
-        this.authorizationSuccessHandlerList = ListSortUtils.sort(authorizationSuccessHandlerList);
-        this.authorizationFailureHandlerList = ListSortUtils.sort(authorizationFailureHandlerList);
+        this.authorizationVoterList = authorizationVoterList;
+        this.authorizationSuccessHandlerList = authorizationSuccessHandlerList;
+        this.authorizationFailureHandlerList = authorizationFailureHandlerList;
     }
 
     @Override

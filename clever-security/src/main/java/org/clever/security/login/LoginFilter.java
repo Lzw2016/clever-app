@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.DateUtils;
+import org.clever.core.OrderComparator;
 import org.clever.core.http.CookieUtils;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.security.SecurityContextHolder;
@@ -25,7 +26,6 @@ import org.clever.security.model.request.AbstractUserLoginReq;
 import org.clever.security.model.response.LoginRes;
 import org.clever.security.utils.HttpServletResponseUtils;
 import org.clever.security.utils.JwtTokenUtils;
-import org.clever.security.utils.ListSortUtils;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
@@ -97,14 +97,21 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         Assert.notEmpty(loadUserList, "用户信息加载器(LoadUser)不存在");
         Assert.notEmpty(verifyUserInfoList, "用户登录验证器(VerifyUserInfo)不存在");
         Assert.notNull(securityContextRepository, "安全上下文存取器(SecurityContextRepository)不能为null");
+        OrderComparator.sort(loginDataCollectList);
+        OrderComparator.sort(verifyLoginDataList);
+        OrderComparator.sort(loadUserList);
+        OrderComparator.sort(verifyUserInfoList);
+        OrderComparator.sort(addJwtTokenExtDataList);
+        OrderComparator.sort(loginSuccessHandlerList);
+        OrderComparator.sort(loginFailureHandlerList);
         this.securityConfig = securityConfig;
-        this.loginDataCollectList = ListSortUtils.sort(loginDataCollectList);
-        this.verifyLoginDataList = ListSortUtils.sort(verifyLoginDataList);
-        this.loadUserList = ListSortUtils.sort(loadUserList);
-        this.verifyUserInfoList = ListSortUtils.sort(verifyUserInfoList);
-        this.addJwtTokenExtDataList = ListSortUtils.sort(addJwtTokenExtDataList);
-        this.loginSuccessHandlerList = ListSortUtils.sort(loginSuccessHandlerList);
-        this.loginFailureHandlerList = ListSortUtils.sort(loginFailureHandlerList);
+        this.loginDataCollectList = loginDataCollectList;
+        this.verifyLoginDataList = verifyLoginDataList;
+        this.loadUserList = loadUserList;
+        this.verifyUserInfoList = verifyUserInfoList;
+        this.addJwtTokenExtDataList = addJwtTokenExtDataList;
+        this.loginSuccessHandlerList = loginSuccessHandlerList;
+        this.loginFailureHandlerList = loginFailureHandlerList;
         this.securityContextRepository = securityContextRepository;
     }
 
@@ -238,7 +245,7 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         final TupleTwo<String, Claims> tokenInfo = JwtTokenUtils.createJwtToken(context.getRequest(), tokenConfig, userInfo, addJwtTokenExtDataList);
         String refreshToken = null;
         if (tokenConfig.isEnableRefreshToken()) {
-            refreshToken = JwtTokenUtils.createRefreshToken(userInfo.strUserId());
+            refreshToken = JwtTokenUtils.createRefreshToken(userInfo.getUserId());
             context.setRefreshToken(refreshToken);
             context.setRefreshTokenExpiredTime(new Date(now.getTime() + tokenConfig.getRefreshTokenValidity().toMillis()));
         }

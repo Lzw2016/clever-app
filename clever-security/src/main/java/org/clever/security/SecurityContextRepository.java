@@ -34,5 +34,5 @@ public interface SecurityContextRepository {
      * @param request        请求对象
      * @param response       响应对象
      */
-    SecurityContext loadContext(String userId, Claims claims, SecurityConfig securityConfig, HttpServletRequest request, HttpServletResponse response);
+    SecurityContext loadContext(Long userId, Claims claims, SecurityConfig securityConfig, HttpServletRequest request, HttpServletResponse response);
 }

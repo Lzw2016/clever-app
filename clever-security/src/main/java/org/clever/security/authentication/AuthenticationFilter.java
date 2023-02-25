@@ -4,7 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Conv;
 import org.clever.core.DateUtils;
+import org.clever.core.OrderComparator;
 import org.clever.core.http.CookieUtils;
 import org.clever.security.JwtTokenHolder;
 import org.clever.security.SecurityContextHolder;
@@ -26,7 +28,6 @@ import org.clever.security.model.jackson2.event.AuthenticationFailureEvent;
 import org.clever.security.model.jackson2.event.AuthenticationSuccessEvent;
 import org.clever.security.utils.HttpServletResponseUtils;
 import org.clever.security.utils.JwtTokenUtils;
-import org.clever.security.utils.ListSortUtils;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
@@ -85,11 +86,14 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
         Assert.notNull(authenticationSuccessHandlerList, "参数authenticationSuccessHandlerList不能为null");
         Assert.notNull(authenticationFailureHandlerList, "参数authenticationFailureHandlerList不能为null");
         Assert.notNull(refreshJwtToken, "参数refreshJwtToken不能为null");
+        OrderComparator.sort(verifyJwtTokenList);
+        OrderComparator.sort(authenticationSuccessHandlerList);
+        OrderComparator.sort(authenticationFailureHandlerList);
         this.securityConfig = securityConfig;
-        this.verifyJwtTokenList = ListSortUtils.sort(verifyJwtTokenList);
+        this.verifyJwtTokenList = verifyJwtTokenList;
         this.securityContextRepository = securityContextRepository;
-        this.authenticationSuccessHandlerList = ListSortUtils.sort(authenticationSuccessHandlerList);
-        this.authenticationFailureHandlerList = ListSortUtils.sort(authenticationFailureHandlerList);
+        this.authenticationSuccessHandlerList = authenticationSuccessHandlerList;
+        this.authenticationFailureHandlerList = authenticationFailureHandlerList;
         this.refreshJwtToken = refreshJwtToken;
     }
 
@@ -234,7 +238,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
             useJwtRefreshToken.setUseRefreshToken(refreshToken);
             // 创建新的JWT-Token
             jwtToken = JwtTokenUtils.createJwtToken(tokenConfig, claims);
-            refreshToken = JwtTokenUtils.createRefreshToken(claims.getSubject());
+            refreshToken = JwtTokenUtils.createRefreshToken(Conv.asLong(claims.getSubject()));
             useJwtRefreshToken.setJwtId(Long.parseLong(claims.getId()));
             useJwtRefreshToken.setToken(jwtToken);
             useJwtRefreshToken.setExpiredTime(claims.getExpiration());
@@ -261,7 +265,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
         context.setJwtToken(jwtToken);
         context.setRefreshToken(refreshToken);
         context.setClaims(claims);
-        context.setUserId(claims.getSubject());
+        context.setUserId(Conv.asLong(claims.getSubject()));
         context.getRequest().setAttribute(JWT_OBJECT_REQUEST_ATTRIBUTE, claims);
         JwtTokenHolder.set(claims);
         // 验证JWT-Token

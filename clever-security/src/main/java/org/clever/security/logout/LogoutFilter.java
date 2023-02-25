@@ -2,6 +2,7 @@ package org.clever.security.logout;
 
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.OrderComparator;
 import org.clever.core.http.CookieUtils;
 import org.clever.security.SecurityContextHolder;
 import org.clever.security.authentication.AuthenticationFilter;
@@ -19,7 +20,6 @@ import org.clever.security.model.jackson2.event.LogoutFailureEvent;
 import org.clever.security.model.jackson2.event.LogoutSuccessEvent;
 import org.clever.security.model.response.LogoutRes;
 import org.clever.security.utils.HttpServletResponseUtils;
-import org.clever.security.utils.ListSortUtils;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
@@ -53,9 +53,11 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
             List<LogoutSuccessHandler> logoutSuccessHandlerList,
             List<LogoutFailureHandler> logoutFailureHandlerList) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
+        OrderComparator.sort(logoutSuccessHandlerList);
+        OrderComparator.sort(logoutFailureHandlerList);
         this.securityConfig = securityConfig;
-        this.logoutSuccessHandlerList = ListSortUtils.sort(logoutSuccessHandlerList);
-        this.logoutFailureHandlerList = ListSortUtils.sort(logoutFailureHandlerList);
+        this.logoutSuccessHandlerList = logoutSuccessHandlerList;
+        this.logoutFailureHandlerList = logoutFailureHandlerList;
     }
 
     @Override

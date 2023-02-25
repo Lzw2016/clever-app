@@ -5,6 +5,8 @@ package org.clever.core;
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/04/22 15:02 <br/>
+ *
+ * @see OrderComparator
  */
 public interface Ordered {
     /**
