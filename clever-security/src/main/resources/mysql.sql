@@ -7,15 +7,15 @@ set names utf8mb4;
 ==================================================================================================================== */
 create table sys_user
 (
-    id              bigint              not null        auto_increment                  comment '用户id',
+    id              bigint              not null                                        comment '用户id',
     login_name      varchar(63)         not null        unique                          comment '用户登录名(允许修改)',
     password        varchar(127)        not null                                        comment '登录密码',
     user_name       varchar(63)         not null                                        comment '登录名',
     is_enable       int                 not null        default 1                       comment '是否启用: 0:禁用，1:启用',
     -- 其它扩展字段
-    create_by       bigint              not null                                        comment '创建人',
+    create_by       bigint              not null                                        comment '创建人(用户id)',
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
-    update_by       bigint                                                              comment '更新人',
+    update_by       bigint                                                              comment '更新人(用户id)',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
     primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '用户表';
@@ -30,14 +30,14 @@ create index idx_sys_user_user_name on sys_user (user_name);
 ==================================================================================================================== */
 create table sys_role
 (
-    id              bigint              not null        auto_increment                  comment '角色id',
+    id              bigint              not null                                        comment '角色id',
     role_code       varchar(63)         not null        unique                          comment '角色编号',
     role_name       varchar(63)         not null                                        comment '角色名称',
     is_enable       int                 not null        default 1                       comment '是否启用: 0:禁用，1:启用',
     -- 其它扩展字段
-    create_by       bigint              not null                                        comment '创建人',
+    create_by       bigint              not null                                        comment '创建人(用户id)',
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
-    update_by       bigint                                                              comment '更新人',
+    update_by       bigint                                                              comment '更新人(用户id)',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
     primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '角色表';
@@ -52,14 +52,14 @@ create index idx_sys_role_role_name on sys_role (role_name);
 ==================================================================================================================== */
 create table sys_resource
 (
-    id              bigint              not null        auto_increment                  comment '资源id',
+    id              bigint              not null                                        comment '资源id',
     permission      varchar(63)         not null        unique                          comment '权限编码',
     resource_type   int                 not null                                        comment '资源类型: 1:API权限，2:菜单权限，3:UI权限(如:按钮、表单、表格)',
     is_enable       int                 not null        default 1                       comment '是否启用: 0:禁用，1:启用',
     -- 其它扩展字段
-    create_by       bigint              not null                                        comment '创建人',
+    create_by       bigint              not null                                        comment '创建人(用户id)',
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
-    update_by       bigint                                                              comment '更新人',
+    update_by       bigint                                                              comment '更新人(用户id)',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
     primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '资源表';
@@ -75,9 +75,9 @@ create table sys_user_role
 (
     user_id         bigint              not null                                        comment '用户id',
     role_id         bigint              not null                                        comment '角色id',
-    create_by       bigint              not null                                        comment '创建人',
+    create_by       bigint              not null                                        comment '创建人(用户id)',
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
-    update_by       bigint                                                              comment '更新人',
+    update_by       bigint                                                              comment '更新人(用户id)',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
     primary key (user_id, role_id)
 ) engine=innodb default charset=utf8mb4 comment = '用户角色关联表';
@@ -95,9 +95,9 @@ create table sys_role_resource
 (
     role_id         bigint              not null                                        comment '角色id',
     resource_id     bigint              not null                                        comment '资源id',
-    create_by       bigint              not null                                        comment '创建人',
+    create_by       bigint              not null                                        comment '创建人(用户id)',
     create_at       datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
-    update_by       bigint                                                              comment '更新人',
+    update_by       bigint                                                              comment '更新人(用户id)',
     update_at       datetime(3)                         on update current_timestamp(3)  comment '更新时间',
     primary key (role_id, resource_id)
 ) engine=innodb default charset=utf8mb4 comment = '角色资源关联表';
@@ -113,7 +113,7 @@ create index idx_sys_role_resource_resource_id on sys_role_resource (resource_id
 ==================================================================================================================== */
 create table sys_login_log
 (
-    id                  bigint              not null       auto_increment                   comment '主键id',
+    id                  bigint              not null                                        comment '主键id',
     user_id             bigint              not null                                        comment '用户id',
     login_time          datetime(3)         not null                                        comment '登录时间',
     login_ip            varchar(31)                                                         comment '登录ip',
@@ -138,7 +138,7 @@ create index idx_sys_login_log_jwt_token_id on sys_login_log (jwt_token_id);
 ==================================================================================================================== */
 create table sys_jwt_token
 (
-    id                  bigint              not null       auto_increment                   comment 'token id',
+    id                  bigint              not null                                        comment 'token id',
     user_id             bigint              not null                                        comment '用户id',
     token               varchar(4095)       not null                                        comment 'token数据',
     expired_time        datetime(3)                                                         comment 'token过期时间(空表示永不过期)',
@@ -166,7 +166,7 @@ create index idx_sys_jwt_token_rt_create_token_id on sys_jwt_token (rt_create_to
 ==================================================================================================================== */
 create table sys_login_failed_count
 (
-    id                  bigint              not null        auto_increment                  comment '主键id',
+    id                  bigint              not null                                        comment '主键id',
     user_id             bigint              not null                                        comment '用户id',
     login_type          int                 not null                                        comment '登录方式',
     failed_count        int                 not null                                        comment '登录失败次数',
@@ -187,7 +187,7 @@ create index idx_sys_login_failed_count_user_id on sys_login_failed_count (user_
 ==================================================================================================================== */
 create table sys_security_context
 (
-    id                  bigint              not null        auto_increment                  comment '主键id',
+    id                  bigint              not null                                        comment '主键id',
     user_id             bigint              not null                                        comment '用户id',
     security_context    varchar(16365)      not null                                        comment '用户security context',
     create_at           datetime(3)         not null        default current_timestamp(3)    comment '创建时间',

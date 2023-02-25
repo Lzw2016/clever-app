@@ -32,12 +32,12 @@ public class QSysUser extends RelationalPathBase<SysUser> {
     public final StringPath userName = createString("userName");
     /** 是否启用: 0:禁用，1:启用 */
     public final NumberPath<Integer> isEnable = createNumber("isEnable", Integer.class);
-    /** 创建人 */
-    public final StringPath createBy = createString("createBy");
+    /** 创建人(用户id) */
+    public final NumberPath<Long> createBy = createNumber("createBy", Long.class);
     /** 创建时间 */
     public final DateTimePath<Date> createAt = createDateTime("createAt", Date.class);
-    /** 更新人 */
-    public final StringPath updateBy = createString("updateBy");
+    /** 更新人(用户id) */
+    public final NumberPath<Long> updateBy = createNumber("updateBy", Long.class);
     /** 更新时间 */
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 

@@ -39,7 +39,7 @@ public class SecurityBootstrap {
      * @see AesPasswordEncoder AesPasswordEncoder 对称加密
      * @see BCryptPasswordEncoder BCryptPasswordEncoder 非对称加密
      */
-    public static PasswordEncoder PASSWORD_ENCODER = new AesPasswordEncoder();
+    public static PasswordEncoder PASSWORD_ENCODER = new RawPassword();
     /**
      * 安全上下文(SecurityContext)存取器
      */
