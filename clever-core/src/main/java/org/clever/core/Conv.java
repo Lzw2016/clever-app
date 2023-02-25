@@ -131,6 +131,21 @@ public class Conv extends Conversion {
         if (obj == null) {
             return def;
         }
+        if (obj instanceof Integer) {
+            return BigDecimal.valueOf((Integer) obj).toPlainString();
+        }
+        if (obj instanceof Float) {
+            return BigDecimal.valueOf((Float) obj).toPlainString();
+        }
+        if (obj instanceof Long) {
+            return BigDecimal.valueOf((Long) obj).toPlainString();
+        }
+        if (obj instanceof Double) {
+            return BigDecimal.valueOf((Double) obj).toPlainString();
+        }
+        if (obj instanceof Number) {
+            return new BigDecimal(String.valueOf(obj)).toPlainString();
+        }
         try {
             return String.valueOf(obj);
         } catch (Exception e) {
