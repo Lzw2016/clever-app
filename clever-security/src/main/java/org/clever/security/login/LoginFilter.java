@@ -238,11 +238,11 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         final TupleTwo<String, Claims> tokenInfo = JwtTokenUtils.createJwtToken(context.getRequest(), tokenConfig, userInfo, addJwtTokenExtDataList);
         String refreshToken = null;
         if (tokenConfig.isEnableRefreshToken()) {
-            refreshToken = JwtTokenUtils.createRefreshToken(userInfo.getUserId());
+            refreshToken = JwtTokenUtils.createRefreshToken(userInfo.strUserId());
             context.setRefreshToken(refreshToken);
             context.setRefreshTokenExpiredTime(new Date(now.getTime() + tokenConfig.getRefreshTokenValidity().toMillis()));
         }
-        log.debug("### 登录成功 | userId={} | jwt-token={} | refresh-token={}", userInfo.getUserId(), tokenInfo.getValue1(), refreshToken);
+        log.debug("### 登录成功 | userId={} | jwt-token={} | refresh-token={}", userInfo.strUserId(), tokenInfo.getValue1(), refreshToken);
         context.setJwtToken(tokenInfo.getValue1());
         context.setClaims(tokenInfo.getValue2());
         // 保存安全上下文(用户信息)
