@@ -16,7 +16,7 @@ public class SysUser implements Serializable {
     private String userCode;
     /** 登录名 */
     private String userName;
-    /** 是否启用;0:禁用，1:启用 */
+    /** 是否启用: 0:禁用，1:启用 */
     private Integer isEnable;
     /** 创建人 */
     private String createBy;

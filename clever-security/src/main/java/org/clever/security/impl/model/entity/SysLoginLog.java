@@ -6,11 +6,11 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户登录日志表(sys_login_log)
+ * 登录日志(sys_login_log)
  */
 @Data
 public class SysLoginLog implements Serializable {
-    /** 数据id */
+    /** 主键id */
     private Long id;
     /** 用户id */
     private Long userId;
@@ -22,7 +22,7 @@ public class SysLoginLog implements Serializable {
     private Integer loginType;
     /** 登录渠道 */
     private Integer loginChannel;
-    /** 登录状态;0:登录失败，1:登录成功 */
+    /** 登录状态: 0:登录失败，1:登录成功 */
     private Integer loginState;
     /** 登录请求数据 */
     private String requestData;

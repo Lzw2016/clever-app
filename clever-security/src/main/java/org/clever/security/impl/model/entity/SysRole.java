@@ -16,7 +16,7 @@ public class SysRole implements Serializable {
     private String roleCode;
     /** 角色名称 */
     private String roleName;
-    /** 是否启用;0:禁用，1:启用 */
+    /** 是否启用: 0:禁用，1:启用 */
     private Integer isEnable;
     /** 创建人 */
     private String createBy;
