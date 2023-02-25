@@ -18,12 +18,12 @@ public class SysRole implements Serializable {
     private String roleName;
     /** 是否启用: 0:禁用，1:启用 */
     private Integer isEnable;
-    /** 创建人 */
-    private String createBy;
+    /** 创建人(用户id) */
+    private Long createBy;
     /** 创建时间 */
     private Date createAt;
-    /** 更新人 */
-    private String updateBy;
+    /** 更新人(用户id) */
+    private Long updateBy;
     /** 更新时间 */
     private Date updateAt;
 }
