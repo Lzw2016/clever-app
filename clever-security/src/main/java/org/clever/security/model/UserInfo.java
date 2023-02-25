@@ -5,6 +5,7 @@ import lombok.Data;
 import org.clever.core.mapper.BeanMapper;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ public class UserInfo implements Serializable {
     /**
      * 用户id
      */
-    private String userId;
+    private Long userId;
     /**
      * 用户姓名/昵称
      */
@@ -42,5 +43,12 @@ public class UserInfo implements Serializable {
     @JsonAnyGetter
     public Map<String, Object> getExt() {
         return ext;
+    }
+
+    /**
+     * “用户id”的字符串形式
+     */
+    public String strUserId() {
+        return BigDecimal.valueOf(userId).toPlainString();
     }
 }
