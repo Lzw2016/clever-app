@@ -1,6 +1,6 @@
 package org.clever.security.impl.login;
 
-import org.clever.core.Ordered;
+import org.clever.core.OrderIncrement;
 import org.clever.core.validator.BaseValidatorUtils;
 import org.clever.security.config.SecurityConfig;
 import org.clever.security.exception.LoginDataValidateException;
@@ -32,7 +32,7 @@ public class DefaultVerifyLoginData implements VerifyLoginData {
 
     @Override
     public double getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return OrderIncrement.MAX;
     }
 
     /**

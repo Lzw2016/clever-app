@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
-import org.clever.core.OrderComparator;
 import org.clever.core.env.Environment;
 import org.clever.security.authentication.AuthenticationFilter;
 import org.clever.security.authentication.token.RefreshJwtToken;
@@ -23,6 +22,7 @@ import org.clever.security.handler.*;
 import org.clever.security.impl.DefaultSecurityContextRepository;
 import org.clever.security.impl.authentication.DefaultRefreshJwtToken;
 import org.clever.security.impl.authentication.DefaultVerifyJwtToken;
+import org.clever.security.impl.handler.*;
 import org.clever.security.impl.login.*;
 import org.clever.security.login.*;
 import org.clever.security.logout.LogoutFilter;
@@ -119,8 +119,10 @@ public class SecurityBootstrap {
         AUTHORIZATION_VOTER_LIST.add(new MvcAuthorizationVoter());
     }
 
+    /**
+     * 使用默认的“用户-角色-权限”逻辑实现
+     */
     public static void useDefaultSecurity(SecurityConfig securityConfig) {
-        // TODO 使用默认的“用户-角色-权限”逻辑实现
         SECURITY_CONTEXT_REPOSITORY = new DefaultSecurityContextRepository();
         // AuthenticationFilter
         REFRESH_JWT_TOKEN = new DefaultRefreshJwtToken(securityConfig);
@@ -131,8 +133,17 @@ public class SecurityBootstrap {
         LOAD_USER_LIST.add(new DefaultLoadUser());
         VERIFY_USER_INFO_LIST.add(new DefaultVerifyUserInfo(PASSWORD_ENCODER));
         ADD_JWT_TOKEN_EXT_DATA_LIST.add(new DefaultAddJwtTokenExtData());
-        // LogoutFilter
         // AuthorizationFilter
+        // AUTHORIZATION_VOTER_LIST.add();
+        // event handler
+        LOGIN_SUCCESS_HANDLER_LIST.add(new DefaultLoginSuccessHandler(securityConfig));
+        LOGIN_FAILURE_HANDLER_LIST.add(new DefaultLoginFailureHandler());
+        LOGOUT_SUCCESS_HANDLER_LIST.add(new DefaultLogoutSuccessHandler(securityConfig));
+        // LOGOUT_FAILURE_HANDLER_LIST.add();
+        // AUTHORIZATION_SUCCESS_HANDLER_LIST.add();
+        // AUTHORIZATION_FAILURE_HANDLER_LIST.add();
+        AUTHENTICATION_SUCCESS_HANDLER_LIST.add(new DefaultAuthenticationSuccessHandler());
+        AUTHENTICATION_FAILURE_HANDLER_LIST.add(new DefaultAuthenticationFailureHandler(securityConfig));
     }
 
     public static SecurityBootstrap create(SecurityConfig securityConfig) {
@@ -186,81 +197,87 @@ public class SecurityBootstrap {
     /**
      * 身份认证拦截
      */
-    @Getter
-    private final AuthenticationFilter authenticationFilter;
+    private AuthenticationFilter authenticationFilter;
     /**
      * 登录拦截
      */
-    @Getter
-    private final LoginFilter loginFilter;
+    private LoginFilter loginFilter;
     /**
      * 登出拦截
      */
-    @Getter
-    private final LogoutFilter logoutFilter;
+    private LogoutFilter logoutFilter;
     /**
      * 权限授权拦截
      */
-    @Getter
-    private final AuthorizationFilter authorizationFilter;
+    private AuthorizationFilter authorizationFilter;
 
     public SecurityBootstrap(SecurityConfig securityConfig) {
         Assert.notNull(securityConfig, "参数 securityConfig 不能为 null");
-        // TODO 校验全局属性值配置
-        // 可扩展组件排序
-        OrderComparator.sort(LOGIN_SUCCESS_HANDLER_LIST);
-        OrderComparator.sort(LOGIN_FAILURE_HANDLER_LIST);
-        OrderComparator.sort(LOGOUT_SUCCESS_HANDLER_LIST);
-        OrderComparator.sort(LOGOUT_FAILURE_HANDLER_LIST);
-        OrderComparator.sort(AUTHORIZATION_SUCCESS_HANDLER_LIST);
-        OrderComparator.sort(AUTHORIZATION_FAILURE_HANDLER_LIST);
-        OrderComparator.sort(AUTHENTICATION_SUCCESS_HANDLER_LIST);
-        OrderComparator.sort(AUTHENTICATION_FAILURE_HANDLER_LIST);
-        OrderComparator.sort(AUTHORIZATION_VOTER_LIST);
-        OrderComparator.sort(VERIFY_JWT_TOKEN_LIST);
-        OrderComparator.sort(LOGIN_DATA_COLLECT_LIST);
-        OrderComparator.sort(VERIFY_LOGIN_DATA_LIST);
-        OrderComparator.sort(LOAD_USER_LIST);
-        OrderComparator.sort(VERIFY_USER_INFO_LIST);
-        OrderComparator.sort(ADD_JWT_TOKEN_EXT_DATA_LIST);
         // 配置数据源
         DataSourceConfig dataSource = securityConfig.getDataSource();
         if (dataSource != null) {
             SecurityDataSource.JDBC_DATA_SOURCE_NAME = dataSource.getJdbcName();
             SecurityDataSource.REDIS_DATA_SOURCE_NAME = dataSource.getRedisName();
-            // TODO 验证数据源
+            Assert.notNull(SecurityDataSource.getJdbc(), "配置 security.dataSource.jdbcName=“" + dataSource.getJdbcName() + "” 的Jdbc数据源不存在");
+            if (dataSource.isEnableRedis()) {
+                Assert.notNull(SecurityDataSource.getRedis(), "配置 security.dataSource.redisName=“" + dataSource.getRedisName() + "” 的Redis不存在");
+            }
         }
         // 创建Filter对象
         this.securityConfig = securityConfig;
-        this.authenticationFilter = new AuthenticationFilter(
-                securityConfig,
-                VERIFY_JWT_TOKEN_LIST,
-                SECURITY_CONTEXT_REPOSITORY,
-                AUTHENTICATION_SUCCESS_HANDLER_LIST,
-                AUTHENTICATION_FAILURE_HANDLER_LIST,
-                REFRESH_JWT_TOKEN
-        );
-        this.loginFilter = new LoginFilter(
-                securityConfig,
-                LOGIN_DATA_COLLECT_LIST,
-                VERIFY_LOGIN_DATA_LIST,
-                LOAD_USER_LIST,
-                VERIFY_USER_INFO_LIST,
-                ADD_JWT_TOKEN_EXT_DATA_LIST,
-                LOGIN_SUCCESS_HANDLER_LIST,
-                LOGIN_FAILURE_HANDLER_LIST,
-                SECURITY_CONTEXT_REPOSITORY
-        );
-        this.logoutFilter = new LogoutFilter(
-                securityConfig,
-                LOGOUT_SUCCESS_HANDLER_LIST,
-                LOGOUT_FAILURE_HANDLER_LIST
-        );
-        this.authorizationFilter = new AuthorizationFilter(
-                securityConfig,
-                AUTHORIZATION_VOTER_LIST,
-                AUTHORIZATION_SUCCESS_HANDLER_LIST,
-                AUTHORIZATION_FAILURE_HANDLER_LIST
-        );
+    }
+
+    public synchronized AuthenticationFilter getAuthenticationFilter() {
+        if (authenticationFilter == null) {
+            authenticationFilter = new AuthenticationFilter(
+                    securityConfig,
+                    VERIFY_JWT_TOKEN_LIST,
+                    SECURITY_CONTEXT_REPOSITORY,
+                    AUTHENTICATION_SUCCESS_HANDLER_LIST,
+                    AUTHENTICATION_FAILURE_HANDLER_LIST,
+                    REFRESH_JWT_TOKEN
+            );
+        }
+        return authenticationFilter;
+    }
+
+    public synchronized LoginFilter getLoginFilter() {
+        if (loginFilter == null) {
+            loginFilter = new LoginFilter(
+                    securityConfig,
+                    LOGIN_DATA_COLLECT_LIST,
+                    VERIFY_LOGIN_DATA_LIST,
+                    LOAD_USER_LIST,
+                    VERIFY_USER_INFO_LIST,
+                    ADD_JWT_TOKEN_EXT_DATA_LIST,
+                    LOGIN_SUCCESS_HANDLER_LIST,
+                    LOGIN_FAILURE_HANDLER_LIST,
+                    SECURITY_CONTEXT_REPOSITORY
+            );
+        }
+        return loginFilter;
+    }
+
+    public synchronized LogoutFilter getLogoutFilter() {
+        if (logoutFilter == null) {
+            logoutFilter = new LogoutFilter(
+                    securityConfig,
+                    LOGOUT_SUCCESS_HANDLER_LIST,
+                    LOGOUT_FAILURE_HANDLER_LIST
+            );
+        }
+        return logoutFilter;
+    }
+
+    public synchronized AuthorizationFilter getAuthorizationFilter() {
+        if (authorizationFilter == null) {
+            authorizationFilter = new AuthorizationFilter(
+                    securityConfig,
+                    AUTHORIZATION_VOTER_LIST,
+                    AUTHORIZATION_SUCCESS_HANDLER_LIST,
+                    AUTHORIZATION_FAILURE_HANDLER_LIST
+            );
+        }
+        return authorizationFilter;
     }
 }

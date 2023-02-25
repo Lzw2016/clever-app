@@ -1,6 +1,6 @@
 package org.clever.security.impl.login;
 
-import org.clever.core.Ordered;
+import org.clever.core.OrderIncrement;
 import org.clever.security.config.LoginConfig;
 import org.clever.security.config.SecurityConfig;
 import org.clever.security.impl.model.request.NamePasswordLoginReq;
@@ -27,7 +27,7 @@ public class DefaultLoginDataCollect extends AbstractLoginDataCollect {
 
     @Override
     public double getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return OrderIncrement.MAX;
     }
 
     protected NamePasswordLoginReq getNamePasswordLoginReq(SecurityConfig securityConfig, HttpServletRequest request) {

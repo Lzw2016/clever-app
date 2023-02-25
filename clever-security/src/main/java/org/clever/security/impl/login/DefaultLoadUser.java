@@ -1,6 +1,6 @@
 package org.clever.security.impl.login;
 
-import org.clever.core.Ordered;
+import org.clever.core.OrderIncrement;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.security.SecurityDataSource;
@@ -39,7 +39,7 @@ public class DefaultLoadUser implements LoadUser {
 
     @Override
     public double getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return OrderIncrement.MAX;
     }
 
     protected UserInfo loadUser(HttpServletRequest request, NamePasswordLoginReq namePasswordLoginReq) {

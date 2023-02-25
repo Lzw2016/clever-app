@@ -70,8 +70,8 @@ public abstract class AppBootstrap {
         // mvc功能
         MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, environment);
         // security功能
-        SecurityBootstrap.useDefaultSecurity();
         SecurityBootstrap securityBootstrap = SecurityBootstrap.create(environment);
+        SecurityBootstrap.useDefaultSecurity(securityBootstrap.getSecurityConfig());
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()

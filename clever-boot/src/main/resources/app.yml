@@ -8,6 +8,7 @@ logging:
     org.clever.jdbc.datasource.DataSourceTransactionManager: info
     org.clever.jdbc.datasource.DataSourceUtils: info
     org.clever.core.HotReloadClassLoader: debug
+    org.clever.security: debug
     #com.zaxxer.hikari.HikariConfig: debug
     #org.eclipse.jetty.util.log: warn
 

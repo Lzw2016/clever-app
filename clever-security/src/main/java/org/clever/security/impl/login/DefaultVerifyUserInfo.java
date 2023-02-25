@@ -1,7 +1,7 @@
 package org.clever.security.impl.login;
 
 import org.clever.core.DateUtils;
-import org.clever.core.Ordered;
+import org.clever.core.OrderIncrement;
 import org.clever.security.SecurityDataSource;
 import org.clever.security.config.AesKeyConfig;
 import org.clever.security.config.LoginConfig;
@@ -56,7 +56,7 @@ public class DefaultVerifyUserInfo implements VerifyUserInfo {
 
     @Override
     public double getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return OrderIncrement.MAX;
     }
 
     /**
