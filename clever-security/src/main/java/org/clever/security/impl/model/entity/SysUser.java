@@ -12,8 +12,10 @@ import java.util.Date;
 public class SysUser implements Serializable {
     /** 用户id */
     private Long id;
-    /** 用户编号 */
-    private String userCode;
+    /** 用户登录名(允许修改) */
+    private String loginName;
+    /** 登录密码 */
+    private String password;
     /** 登录名 */
     private String userName;
     /** 是否启用: 0:禁用，1:启用 */
