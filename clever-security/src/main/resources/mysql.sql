@@ -8,7 +8,8 @@ set names utf8mb4;
 create table sys_user
 (
     id              bigint              not null        auto_increment                  comment '用户id',
-    user_code       varchar(127)        not null        unique                          comment '用户编号',
+    login_name      varchar(63)         not null        unique                          comment '用户登录名(允许修改)',
+    password        varchar(127)        not null                                        comment '登录密码',
     user_name       varchar(63)         not null                                        comment '登录名',
     is_enable       int                 not null        default 1                       comment '是否启用: 0:禁用，1:启用',
     -- 其它扩展字段
