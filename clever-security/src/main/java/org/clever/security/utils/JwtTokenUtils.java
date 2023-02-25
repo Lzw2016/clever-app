@@ -31,8 +31,8 @@ import java.util.Map;
  */
 @Slf4j
 public class JwtTokenUtils {
+    public static String SECRET_KEY_SUFFIX = "0123456789012345678901234567890123456789012345678901234567890123";
     private static final Class<? extends Claims> CLAIMS_CLASS = Jwts.claims().getClass();
-    private static final String SECRET_KEY_SUFFIX = "0123456789012345678901234567890123456789012345678901234567890123";
 
     /**
      * 创建JWT-Token
@@ -47,7 +47,7 @@ public class JwtTokenUtils {
         Claims claims = Jwts.claims();
         claims.setIssuer(tokenConfig.getIssuer());
         claims.setAudience(tokenConfig.getAudience());
-        claims.setSubject(userInfo.getUserId());
+        claims.setSubject(userInfo.strUserId());
         // 加入自定义信息
         if (addJwtTokenExtDataList != null && !addJwtTokenExtDataList.isEmpty()) {
             // addJwtTokenExtDataList = ListSortUtils.sort(addJwtTokenExtDataList);
