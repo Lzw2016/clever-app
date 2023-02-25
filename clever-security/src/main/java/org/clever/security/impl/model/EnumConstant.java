@@ -119,15 +119,11 @@ public interface EnumConstant {
     int LOGIN_FAILED_COUNT_DELETE_FLAG_1 = 1;
 
     /**
-     * request Attribute SysLoginAgent
-     */
-    String REQUEST_ATTR_LOGIN_AGENT = "sys_login_agent";
-    /**
      * request Attribute SysUser
      */
     String REQUEST_ATTR_USER = "sys_user";
     /**
-     * Jwt 扩展数据 login_id
+     * JWT 扩展数据 user_id
      */
-    String JWT_EXT_LOGIN_ID = "login_id";
+    String JWT_EXT_USER_ID = "user_id";
 }
