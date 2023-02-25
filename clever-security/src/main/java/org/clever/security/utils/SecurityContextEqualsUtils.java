@@ -33,7 +33,7 @@ public class SecurityContextEqualsUtils {
         List<String> roles = new ArrayList<>(securityContext.getRoles());
         List<String> permissions = new ArrayList<>(securityContext.getPermissions());
         StringBuilder sb = new StringBuilder();
-        sb.append(userInfo.getUserId());
+        sb.append(userInfo.strUserId());
         sb.append(userInfo.getUserName());
         sb.append(JacksonMapper.getInstance().toJson(userInfo.getExt()));
         Collections.sort(roles.stream().filter(Objects::nonNull).collect(Collectors.toList()));
