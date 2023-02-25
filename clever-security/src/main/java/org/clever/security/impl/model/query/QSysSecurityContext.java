@@ -20,7 +20,7 @@ import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 @SuppressWarnings("ALL")
 public class QSysSecurityContext extends RelationalPathBase<SysSecurityContext> {
     /** 用户security context(缓存表)(sys_security_context) */
-    public static final QSysSecurityContext sysUserSecurityContext = new QSysSecurityContext("sys_user_security_context");
+    public static final QSysSecurityContext sysUserSecurityContext = new QSysSecurityContext("sys_security_context");
 
     /** 主键id */
     public final NumberPath<Long> id = createNumber("id", Long.class);
@@ -34,7 +34,7 @@ public class QSysSecurityContext extends RelationalPathBase<SysSecurityContext> 
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     QSysSecurityContext(String variable) {
-        super(SysSecurityContext.class, forVariable(variable), "public", "sys_user_security_context");
+        super(SysSecurityContext.class, forVariable(variable), "public", "sys_security_context");
         addMetadata();
     }
 
@@ -44,17 +44,17 @@ public class QSysSecurityContext extends RelationalPathBase<SysSecurityContext> 
     }
 
     QSysSecurityContext(String variable, String schema) {
-        super(SysSecurityContext.class, forVariable(variable), schema, "sys_user_security_context");
+        super(SysSecurityContext.class, forVariable(variable), schema, "sys_security_context");
         addMetadata();
     }
 
     QSysSecurityContext(Path<? extends SysSecurityContext> path) {
-        super(path.getType(), path.getMetadata(), "public", "sys_user_security_context");
+        super(path.getType(), path.getMetadata(), "public", "sys_security_context");
         addMetadata();
     }
 
     QSysSecurityContext(PathMetadata metadata) {
-        super(SysSecurityContext.class, metadata, "public", "sys_user_security_context");
+        super(SysSecurityContext.class, metadata, "public", "sys_security_context");
         addMetadata();
     }
 
