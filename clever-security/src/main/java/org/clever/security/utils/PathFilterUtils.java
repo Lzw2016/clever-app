@@ -12,11 +12,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * TODO PathFilterUtils
  * 作者：lizw <br/>
  * 创建时间：2020/12/06 12:14 <br/>
  */
 public class PathFilterUtils {
-    private static final AntPathMatcher Ant_Path_Matcher = new AntPathMatcher();
+    private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 //    private static final CorsProcessor CORS_PROCESSOR = new DefaultCorsProcessor();
 
     private static String getPath(HttpServletRequest request) {
@@ -166,7 +167,7 @@ public class PathFilterUtils {
             return true;
         }
         for (String ignorePath : ignorePaths) {
-            if (Ant_Path_Matcher.match(ignorePath, path)) {
+            if (ANT_PATH_MATCHER.match(ignorePath, path)) {
                 // 忽略当前路径
                 return false;
             }
@@ -197,7 +198,7 @@ public class PathFilterUtils {
             return true;
         }
         for (String ignorePath : ignoreAuthPaths) {
-            if (Ant_Path_Matcher.match(ignorePath, path)) {
+            if (ANT_PATH_MATCHER.match(ignorePath, path)) {
                 // 忽略当前路径
                 return false;
             }
@@ -216,7 +217,7 @@ public class PathFilterUtils {
 
     public static boolean isIgnoreAuthFailedRequest(String path, String method, SecurityConfig securityConfig) {
         for (String ignorePath : securityConfig.getIgnoreAuthFailedPaths()) {
-            if (Ant_Path_Matcher.match(ignorePath, path)) {
+            if (ANT_PATH_MATCHER.match(ignorePath, path)) {
                 return true;
             }
         }
