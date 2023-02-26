@@ -112,9 +112,9 @@ web:
   security:
     enable: true
     dataSource:
-      jdbcName: ""
-      enableRedis: false
-      redisName: ""
+      jdbcName: "mysql"
+      enableRedis: true
+      redisName: "default"
       redisNamespace: "security"
     ignorePaths:
       - '/favicon.ico'
@@ -141,6 +141,9 @@ web:
     login:
       path: '/login'
       postOnly: true
+      allowRepeatLogin: true
+      concurrentLoginCount: 1
+      allowAfterLogin: true
     logout:
       path: '/logout'
     token:

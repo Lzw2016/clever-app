@@ -8,11 +8,11 @@ import org.clever.security.model.SecurityContext;
  * 作者：lizw <br/>
  * 创建时间：2020/12/19 13:44 <br/>
  */
-public class CleverSecurityJackson2Module extends SimpleModule {
-    public static final CleverSecurityJackson2Module instance = new CleverSecurityJackson2Module();
+public class SecurityJackson2Module extends SimpleModule {
+    public static final SecurityJackson2Module INSTANCE = new SecurityJackson2Module();
 
-    public CleverSecurityJackson2Module() {
-        super(CleverSecurityJackson2Module.class.getName(), new Version(1, 0, 0, null, null, null));
+    public SecurityJackson2Module() {
+        super(SecurityJackson2Module.class.getName(), new Version(1, 0, 0, null, null, null));
     }
 
     @Override

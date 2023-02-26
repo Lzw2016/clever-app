@@ -7,6 +7,7 @@ import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
 import org.clever.core.env.Environment;
+import org.clever.core.mapper.JacksonMapper;
 import org.clever.security.authentication.AuthenticationFilter;
 import org.clever.security.authentication.token.RefreshJwtToken;
 import org.clever.security.authentication.token.VerifyJwtToken;
@@ -26,6 +27,7 @@ import org.clever.security.impl.handler.*;
 import org.clever.security.impl.login.*;
 import org.clever.security.login.*;
 import org.clever.security.logout.LogoutFilter;
+import org.clever.security.model.jackson2.SecurityJackson2Module;
 import org.clever.util.Assert;
 
 import java.util.ArrayList;
@@ -213,6 +215,7 @@ public class SecurityBootstrap {
 
     public SecurityBootstrap(SecurityConfig securityConfig) {
         Assert.notNull(securityConfig, "参数 securityConfig 不能为 null");
+        JacksonMapper.getInstance().getMapper().registerModule(SecurityJackson2Module.INSTANCE);
         // 配置数据源
         DataSourceConfig dataSource = securityConfig.getDataSource();
         if (dataSource != null) {
