@@ -8,6 +8,7 @@ import org.clever.core.SystemClock;
 import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.data.jdbc.QueryDSL;
+import org.clever.data.redis.Redis;
 import org.clever.security.SecurityDataSource;
 import org.clever.security.config.DataSourceConfig;
 import org.clever.security.config.LoginConfig;
@@ -27,7 +28,6 @@ import org.clever.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -88,7 +88,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         sysJwtToken.setRefreshToken(event.getRefreshToken());
         sysJwtToken.setRtExpiredTime(event.getRtExpiredTime());
         sysJwtToken.setRtState(EnumConstant.JWT_TOKEN_REFRESH_TOKEN_STATE_1);
-        sysJwtToken.setCreateAt(new Timestamp(SystemClock.now()));
+        sysJwtToken.setCreateAt(new Date());
         SecurityDataSource.getQueryDSL().insert(QSysJwtToken.sysJwtToken).populate(sysJwtToken).execute();
         return sysJwtToken;
     }
@@ -136,7 +136,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         if (loginFailedCount != null) {
             SecurityDataSource.getQueryDSL().update(sysLoginFailedCount)
                     .set(sysLoginFailedCount.deleteFlag, EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_1)
-                    .set(sysLoginFailedCount.updateAt, new Timestamp(SystemClock.now()))
+                    .set(sysLoginFailedCount.updateAt, new Date())
                     .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
                     .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
                     .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType().getId()))
@@ -147,6 +147,9 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
 
     protected void disableFirstToken(LoginSuccessEvent event) {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
+        final Redis redis = SecurityDataSource.getRedis();
+        final DataSourceConfig dataSource = securityConfig.getDataSource();
+        final Date now = new Date();
         LoginConfig loginConfig = event.getLoginConfig();
         if (loginConfig.getConcurrentLoginCount() <= 0) {
             return;
@@ -160,7 +163,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
             long realConcurrentLoginCount = queryDSL.selectFrom(sysJwtToken)
                     .where(sysJwtToken.userId.eq(userInfo.getUserId()))
                     .where(sysJwtToken.disable.eq(EnumConstant.DISABLE_0))
-                    .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(new Timestamp(SystemClock.now()))))
+                    .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(now)))
                     .fetchCount();
             long disableCount = realConcurrentLoginCount - loginConfig.getConcurrentLoginCount();
             if (disableCount >= 1) {
@@ -168,15 +171,24 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
                 List<SysJwtToken> jwtTokenList = queryDSL.selectFrom(sysJwtToken)
                         .where(sysJwtToken.userId.eq(userInfo.getUserId()))
                         .where(sysJwtToken.disable.eq(EnumConstant.DISABLE_0))
-                        .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(new Timestamp(SystemClock.now()))))
+                        .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(now)))
                         .orderBy(sysJwtToken.createAt.asc())
                         .limit(disableCount)
                         .fetch();
                 if (jwtTokenList != null && !jwtTokenList.isEmpty()) {
+                    if (dataSource.isEnableRedis()) {
+                        List<String> kes = jwtTokenList.stream()
+                                .map(token -> SecurityRedisKey.getTokenKey(
+                                        dataSource.getRedisNamespace(),
+                                        Conv.asString(userInfo.getUserId()),
+                                        Conv.asString(token.getId())
+                                )).collect(Collectors.toList());
+                        redis.kDelete(kes);
+                    }
                     disableCount = queryDSL.update(sysJwtToken)
                             .set(sysJwtToken.disable, EnumConstant.DISABLE_1)
                             .set(sysJwtToken.disableReason, EnumConstant.JWT_TOKEN_DISABLE_REASON_2)
-                            .set(sysJwtToken.updateAt, new Timestamp(SystemClock.now()))
+                            .set(sysJwtToken.updateAt, now)
                             .where(sysJwtToken.id.in(jwtTokenList.stream().map(SysJwtToken::getId).collect(Collectors.toSet())))
                             .execute();
                     log.debug("### 挤下最早登录的用户 -> userId={} | disableCount={}", userInfo.getUserId(), disableCount);

@@ -13,10 +13,6 @@ public class SecurityRedisKey {
         return String.format("%s:token:uid_%s:tk_%s", redisNamespace, userId, tokenId);
     }
 
-//    public static String getLoginAgentKey(String redisNamespace, Long loginId) {
-//        return String.format("%s:login-agent:login_id_%s", redisNamespace, loginId);
-//    }
-
     public static String getUserKey(String redisNamespace, String userId) {
         return String.format("%s:user:uid_%s", redisNamespace, userId);
     }
