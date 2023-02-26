@@ -233,8 +233,8 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
                 break;
             }
         }
+        // 登录失败
         if (context.isLoginFailure()) {
-            // 登录失败
             log.debug("### 校验登录数据失败(登录失败) -> {}", userInfo);
             throw context.getLoginException();
         }
