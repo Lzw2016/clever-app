@@ -430,6 +430,51 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
             DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.US).withZone(GMT)
     };
 
+    /**
+     * 基于 HttpServletRequest 创建 HttpHeaders 对象
+     */
+    public static HttpHeaders create(HttpServletRequest request) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
+            String headerName = (String) names.nextElement();
+            for (Enumeration<?> headerValues = request.getHeaders(headerName); headerValues.hasMoreElements(); ) {
+                String headerValue = (String) headerValues.nextElement();
+                httpHeaders.add(headerName, headerValue);
+            }
+        }
+        // HttpServletRequest exposes some headers as properties: we should include those if not already present
+        try {
+            MediaType contentType = httpHeaders.getContentType();
+            if (contentType == null) {
+                String requestContentType = request.getContentType();
+                if (StringUtils.hasLength(requestContentType)) {
+                    contentType = MediaType.parseMediaType(requestContentType);
+                    httpHeaders.setContentType(contentType);
+                }
+            }
+            if (contentType != null && contentType.getCharset() == null) {
+                String requestEncoding = request.getCharacterEncoding();
+                if (StringUtils.hasLength(requestEncoding)) {
+                    Charset charSet = Charset.forName(requestEncoding);
+                    Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+                    params.putAll(contentType.getParameters());
+                    params.put("charset", charSet.toString());
+                    MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+                    httpHeaders.setContentType(mediaType);
+                }
+            }
+        } catch (InvalidMediaTypeException ex) {
+            // Ignore: simply not exposing an invalid content type in HttpHeaders...
+        }
+        if (httpHeaders.getContentLength() < 0) {
+            int requestContentLength = request.getContentLength();
+            if (requestContentLength != -1) {
+                httpHeaders.setContentLength(requestContentLength);
+            }
+        }
+        return httpHeaders;
+    }
+
     final MultiValueMap<String, String> headers;
 
     /**
@@ -450,51 +495,6 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
     public HttpHeaders(MultiValueMap<String, String> headers) {
         Assert.notNull(headers, "MultiValueMap must not be null");
         this.headers = headers;
-    }
-
-    /**
-     * TODO 修改&删除?? 目前通过此类(HttpHeaders)无法真正修改请求头信息考虑使用(ReadOnlyHttpHeaders)或者把这个类工具化!
-     * 把HttpServletRequest中的Header数据转换成当前 HttpHeaders 对象
-     */
-    public HttpHeaders(HttpServletRequest request) {
-        this();
-        for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
-            String headerName = (String) names.nextElement();
-            for (Enumeration<?> headerValues = request.getHeaders(headerName); headerValues.hasMoreElements(); ) {
-                String headerValue = (String) headerValues.nextElement();
-                this.add(headerName, headerValue);
-            }
-        }
-        // HttpServletRequest exposes some headers as properties: we should include those if not already present
-        try {
-            MediaType contentType = this.getContentType();
-            if (contentType == null) {
-                String requestContentType = request.getContentType();
-                if (StringUtils.hasLength(requestContentType)) {
-                    contentType = MediaType.parseMediaType(requestContentType);
-                    this.setContentType(contentType);
-                }
-            }
-            if (contentType != null && contentType.getCharset() == null) {
-                String requestEncoding = request.getCharacterEncoding();
-                if (StringUtils.hasLength(requestEncoding)) {
-                    Charset charSet = Charset.forName(requestEncoding);
-                    Map<String, String> params = new LinkedCaseInsensitiveMap<>();
-                    params.putAll(contentType.getParameters());
-                    params.put("charset", charSet.toString());
-                    MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
-                    this.setContentType(mediaType);
-                }
-            }
-        } catch (InvalidMediaTypeException ex) {
-            // Ignore: simply not exposing an invalid content type in HttpHeaders...
-        }
-        if (this.getContentLength() < 0) {
-            int requestContentLength = request.getContentLength();
-            if (requestContentLength != -1) {
-                this.setContentLength(requestContentLength);
-            }
-        }
     }
 
     /**
@@ -975,11 +975,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
      * @return the first {@code Locale} of the content languages, or {@code null} if unknown
      */
     public Locale getContentLanguage() {
-        return getValuesAsList(CONTENT_LANGUAGE)
-                .stream()
-                .findFirst()
-                .map(Locale::forLanguageTag)
-                .orElse(null);
+        return getValuesAsList(CONTENT_LANGUAGE).stream().findFirst().map(Locale::forLanguageTag).orElse(null);
     }
 
     /**

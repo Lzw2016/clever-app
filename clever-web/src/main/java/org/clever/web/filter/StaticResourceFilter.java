@@ -128,7 +128,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
             write(ctx.res, resource);
         } else {
             try {
-                List<HttpRange> httpRanges = new HttpHeaders(ctx.req).getRange();
+                List<HttpRange> httpRanges = HttpHeaders.create(ctx.req).getRange();
                 ctx.res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 List<ResourceRegion> resourceRegions = HttpRange.toResourceRegions(httpRanges, resource);
                 if (resourceRegions.size() == 1) {
