@@ -145,7 +145,7 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
                 throw new UnSupportLogoutException("当前未登录,无法登出");
             }
             LogoutRes loginRes = LogoutRes.logoutSuccess(securityContext.getUserInfo());
-            HttpServletResponseUtils.sendJson(ctx.res, loginRes);
+            HttpServletResponseUtils.sendData(ctx.res, loginRes);
         }
     }
 
@@ -164,9 +164,9 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
             // 直接返回
             if (e instanceof LogoutException) {
                 LogoutRes loginRes = LogoutRes.logoutFailure(e.getMessage());
-                HttpServletResponseUtils.sendJson(ctx.res, loginRes);
+                HttpServletResponseUtils.sendData(ctx.res, loginRes);
             } else {
-                HttpServletResponseUtils.sendJson(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+                HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
             }
         }
     }

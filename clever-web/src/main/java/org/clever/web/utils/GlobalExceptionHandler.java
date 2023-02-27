@@ -173,7 +173,7 @@ public abstract class GlobalExceptionHandler {
     /**
      * 对于返回结果大部分情况下只需要设置 “message” 和 “status” 两个字段
      */
-    private static ErrorResponse newErrorResponse(HttpServletRequest request, Throwable exception) {
+    public static ErrorResponse newErrorResponse(HttpServletRequest request, Throwable exception) {
         ErrorResponse res = new ErrorResponse();
         res.setError(exception.getMessage());
         res.setException(exception.getClass().getName());

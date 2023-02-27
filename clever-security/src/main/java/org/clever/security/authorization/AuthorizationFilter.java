@@ -92,7 +92,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
             }
             // 授权异常
             log.error("授权异常", e);
-            HttpServletResponseUtils.sendJson(ctx.req, ctx.res, HttpServletResponseUtils.getHttpStatus(e), e);
+            HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpServletResponseUtils.getHttpStatus(e), e);
             return;
         } finally {
             log.debug("### 授权逻辑执行完成 <----------------------------------------------------------------------");
@@ -108,7 +108,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
             }
         } catch (Throwable e) {
             log.error("授权异常", e);
-            HttpServletResponseUtils.sendJson(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+            HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
             return;
         }
         // 处理业务逻辑
@@ -203,7 +203,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
         } else {
             // 直接返回
             ForbiddenAccessRes forbiddenAccessRes = new ForbiddenAccessRes("未授权，禁止访问");
-            HttpServletResponseUtils.sendJson(response, forbiddenAccessRes, HttpStatus.FORBIDDEN);
+            HttpServletResponseUtils.sendData(response, forbiddenAccessRes, HttpStatus.FORBIDDEN);
         }
     }
 }

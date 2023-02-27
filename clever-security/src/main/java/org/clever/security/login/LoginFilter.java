@@ -146,12 +146,12 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
                 onLoginFailureResponse(context);
             } catch (Exception innerException) {
                 log.error("登录异常", innerException);
-                HttpServletResponseUtils.sendJson(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, innerException);
+                HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, innerException);
             }
         } catch (Throwable e) {
             // 登录异常
             log.error("登录异常", e);
-            HttpServletResponseUtils.sendJson(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+            HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
         } finally {
             log.debug("### 登录逻辑执行完成 <----------------------------------------------------------------------");
         }
@@ -330,7 +330,7 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
             // 直接返回
             UserInfo userInfo = context.getUserInfo().copy();
             LoginRes loginRes = LoginRes.loginSuccess(userInfo, context.getJwtToken(), context.getRefreshToken());
-            HttpServletResponseUtils.sendJson(context.getResponse(), loginRes, HttpStatus.OK);
+            HttpServletResponseUtils.sendData(context.getResponse(), loginRes, HttpStatus.OK);
         }
     }
 
@@ -349,7 +349,7 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
             // 直接返回
             LoginRes loginRes = LoginRes.loginFailure(context.getLoginException().getMessage());
             HttpStatus httpStatus = (context.getLoginException() instanceof RepeatLoginException) ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
-            HttpServletResponseUtils.sendJson(context.getResponse(), loginRes, httpStatus);
+            HttpServletResponseUtils.sendData(context.getResponse(), loginRes, httpStatus);
         }
     }
 }

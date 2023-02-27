@@ -129,7 +129,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
                 // 获取当前登录用户信息
                 SecurityContext securityContext = SecurityContextHolder.getContext();
                 SecurityContext data = securityContext.copy();
-                HttpServletResponseUtils.sendJson(ctx.res, data);
+                HttpServletResponseUtils.sendData(ctx.res, data);
             } else {
                 // 处理业务逻辑
                 ctx.next();
@@ -180,7 +180,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
                 log.error("认证异常", innerException);
                 // 返回数据给客户端
                 if (sendResponse) {
-                    HttpServletResponseUtils.sendJson(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, innerException);
+                    HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, innerException);
                 }
             }
             return false;
@@ -188,7 +188,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
             // 认证异常 - 返回数据给客户端
             log.error("认证异常", e);
             if (sendResponse) {
-                HttpServletResponseUtils.sendJson(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+                HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
             }
             return false;
         } finally {
@@ -317,7 +317,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
             HttpServletResponseUtils.redirect(response, securityConfig.getNotLoginRedirectPage());
         } else {
             // 直接返回
-            HttpServletResponseUtils.sendJson(request, response, HttpStatus.UNAUTHORIZED, e);
+            HttpServletResponseUtils.sendData(request, response, HttpStatus.UNAUTHORIZED, e);
         }
     }
 }
