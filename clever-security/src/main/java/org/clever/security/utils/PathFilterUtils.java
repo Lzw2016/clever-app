@@ -12,41 +12,18 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * TODO PathFilterUtils
  * 作者：lizw <br/>
  * 创建时间：2020/12/06 12:14 <br/>
  */
 public class PathFilterUtils {
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
-//    private static final CorsProcessor CORS_PROCESSOR = new DefaultCorsProcessor();
 
-    private static String getPath(HttpServletRequest request) {
-        // request.getRequestURI()  /a/b/c/xxx.jsp
+    public static String getPath(HttpServletRequest request) {
         // request.getContextPath() /a
-        // request.getServletPath() /b/c/xxx.jsp
+        // request.getServletPath() /b/c/xxx.html
+        // request.getRequestURI()  /a/b/c/xxx.html
         return request.getRequestURI();
     }
-
-//    /**
-//     * 是否是跨域预检请求
-//     */
-//    @SneakyThrows
-//    public static boolean isPreFlightRequest(HttpServletRequest request, HttpServletResponse response) {
-//        final String uri = HttpServletRequestUtils.getRequestURI(request);
-//        final YvanConfig yvanConfig = SpringContextHolder.getBean(YvanConfig.class, false);
-//        if (yvanConfig != null
-//                && yvanConfig.getCors() != null
-//                && yvanConfig.getCorsPathPattern() != null
-//                && !yvanConfig.getCorsPathPattern().isEmpty()
-//                && yvanConfig.getCorsPathPattern().stream().anyMatch(pathPattern -> Ant_Path_Matcher.match(pathPattern, uri))) {
-//            boolean supportCors = CORS_PROCESSOR.processRequest(yvanConfig.getCors(), request, response);
-//            if (supportCors) {
-//                // 是预检请求(OPTIONS)
-//                return CorsUtils.isPreFlightRequest(request);
-//            }
-//        }
-//        return false;
-//    }
 
     /**
      * 当前请求是否是获取图片验证码请求
@@ -86,7 +63,7 @@ public class PathFilterUtils {
         if (StringUtils.endsWith(path, "/")) {
             path = path.substring(0, path.length() - 1);
         }
-        if (!Objects.equals(login.getPath(), path)) {
+        if (login.getPaths() == null || !login.getPaths().contains(path)) {
             return false;
         }
         boolean postRequest = StringUtils.isBlank(method) || HttpMethod.POST.matches(method);

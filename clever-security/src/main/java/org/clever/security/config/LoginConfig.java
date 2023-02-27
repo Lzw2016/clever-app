@@ -3,6 +3,8 @@ package org.clever.security.config;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * 用户登录配置
@@ -12,9 +14,9 @@ import java.io.Serializable;
 @Data
 public class LoginConfig implements Serializable {
     /**
-     * 登录请求Path TODO 多个登录地址区分登录渠道
+     * 登录请求Path
      */
-    private String path = "/login";
+    private Set<String> paths = Collections.singleton("/login");
     /**
      * 登录只支持POST请求
      */

@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class DefaultLoginDataCollect extends AbstractLoginDataCollect {
     @Override
-    public boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request) {
+    public boolean isSupported(SecurityConfig securityConfig, String loginPath, HttpServletRequest request) {
         return true;
     }
 

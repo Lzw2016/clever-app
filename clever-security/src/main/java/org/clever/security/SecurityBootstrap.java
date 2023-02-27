@@ -178,7 +178,7 @@ public class SecurityBootstrap {
         logs.add("  ignoreAuthFailedPaths : " + StringUtils.join(securityConfig.getIgnoreAuthFailedPaths(), " | "));
         logs.add("  currentUserPath       : " + securityConfig.getCurrentUserPath());
         logs.add("  login: ");
-        logs.add("    path                : " + login.getPath());
+        logs.add("    path                : " + StringUtils.join(login.getPaths(), " | "));
         logs.add("    postOnly            : " + login.isPostOnly());
         logs.add("    allowRepeatLogin    : " + login.isAllowRepeatLogin());
         logs.add("  logout.path           : " + logout.getPath());

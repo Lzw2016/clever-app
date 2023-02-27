@@ -169,7 +169,7 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         // 收集登录数据
         AbstractUserLoginReq loginReq = null;
         for (LoginDataCollect collect : loginDataCollectList) {
-            if (!collect.isSupported(securityConfig, context.getRequest())) {
+            if (!collect.isSupported(securityConfig, PathFilterUtils.getPath(context.getRequest()), context.getRequest())) {
                 continue;
             }
             try {

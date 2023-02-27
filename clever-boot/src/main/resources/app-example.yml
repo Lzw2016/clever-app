@@ -276,7 +276,7 @@ web:
     forbiddenRedirectPage: '/403.html'
     currentUserPath: '/current_user'
     login:
-      path: '/login'
+      paths: [ '/login' ]
       postOnly: true
       hideUserNotFoundException: true
       successNeedRedirect: false

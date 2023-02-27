@@ -139,7 +139,7 @@ web:
     ignoreAuthFailedPaths: []
     currentUserPath: '/current_user'
     login:
-      path: '/login'
+      paths: [ '/login' ]
       postOnly: true
       allowRepeatLogin: true
       concurrentLoginCount: 1
