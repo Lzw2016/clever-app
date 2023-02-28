@@ -51,6 +51,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
     @Override
     public void onLoginSuccess(HttpServletRequest request, HttpServletResponse response, LoginSuccessEvent event) {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
+        final Redis redis = SecurityDataSource.getRedis();
         final DataSourceConfig dataSource = securityConfig.getDataSource();
         // 保存JWT-Token
         SysJwtToken jwtToken = queryDSL.beginTX(status -> {
@@ -68,7 +69,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         // SysJwtToken缓存在Redis中
         if (dataSource.isEnableRedis()) {
             String key = SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(jwtToken.getUserId()), Conv.asString(jwtToken.getId()));
-            SecurityDataSource.getRedis().vSet(key, jwtToken, jwtToken.getExpiredTime().getTime() - SystemClock.now());
+            redis.vSet(key, jwtToken, jwtToken.getExpiredTime().getTime() - SystemClock.now());
         }
     }
 
@@ -176,21 +177,21 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
                         .limit(disableCount)
                         .fetch();
                 if (jwtTokenList != null && !jwtTokenList.isEmpty()) {
-                    if (dataSource.isEnableRedis()) {
-                        List<String> kes = jwtTokenList.stream()
-                                .map(token -> SecurityRedisKey.getTokenKey(
-                                        dataSource.getRedisNamespace(),
-                                        Conv.asString(userInfo.getUserId()),
-                                        Conv.asString(token.getId())
-                                )).collect(Collectors.toList());
-                        redis.kDelete(kes);
-                    }
                     disableCount = queryDSL.update(sysJwtToken)
                             .set(sysJwtToken.disable, EnumConstant.DISABLE_1)
                             .set(sysJwtToken.disableReason, EnumConstant.JWT_TOKEN_DISABLE_REASON_2)
                             .set(sysJwtToken.updateAt, now)
                             .where(sysJwtToken.id.in(jwtTokenList.stream().map(SysJwtToken::getId).collect(Collectors.toSet())))
                             .execute();
+                    if (dataSource.isEnableRedis()) {
+                        List<String> keys = jwtTokenList.stream()
+                                .map(token -> SecurityRedisKey.getTokenKey(
+                                        dataSource.getRedisNamespace(),
+                                        Conv.asString(userInfo.getUserId()),
+                                        Conv.asString(token.getId())
+                                )).collect(Collectors.toList());
+                        keys.forEach(key-> redis.kExpire(key, Redis.DEL_TIME_OUT));
+                    }
                     log.debug("### 挤下最早登录的用户 -> userId={} | disableCount={}", userInfo.getUserId(), disableCount);
                 }
             }

@@ -45,6 +45,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class Redis extends AbstractDataSource {
+    /**
+     * 删除缓存时使用的过期时间
+     */
+    public static final long DEL_TIME_OUT = 1_000;
+
     @SuppressWarnings("rawtypes")
     private static final DefaultRedisScript<List> RATE_LIMIT_SCRIPT = new DefaultRedisScript<>();
 

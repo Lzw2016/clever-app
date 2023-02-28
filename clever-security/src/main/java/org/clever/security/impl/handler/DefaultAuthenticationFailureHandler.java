@@ -38,7 +38,8 @@ public class DefaultAuthenticationFailureHandler implements AuthenticationFailur
                 && event.getUserId() != null
                 && event.getClaims() != null
                 && StringUtils.isNotBlank(event.getClaims().getId())) {
-            redis.kDelete(SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(event.getUserId()), event.getClaims().getId()));
+            String key = SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(event.getUserId()), event.getClaims().getId());
+            redis.kExpire(key, Redis.DEL_TIME_OUT);
         }
     }
 

@@ -43,10 +43,11 @@ public class DefaultRefreshJwtToken implements RefreshJwtToken {
         return SecurityDataSource.getJdbc().beginTX(status -> {
             SysJwtToken useToken = queryDSL.selectFrom(sysJwtToken).where(sysJwtToken.id.eq(useJwtRefreshToken.getUseJwtId())).forUpdate().fetchOne();
             // 当token过期时，前端可能同时发送多个请求(并发)，而此时这些请求都带有相同的token和refreshToken，所以服务端对于这些请求需要返回相同的NewJwtToken
+            final int delaySeconds = 60;
             if (useToken != null
                     && useToken.getRtCreateTokenId() != null
                     && useToken.getRtUseTime() != null
-                    && DateUtils.pastSeconds(useToken.getRtUseTime(), now) <= 60) {
+                    && DateUtils.pastSeconds(useToken.getRtUseTime(), now) <= delaySeconds) {
                 SysJwtToken rtCreateToken = queryDSL.select(sysJwtToken).from(sysJwtToken).where(sysJwtToken.id.eq(useToken.getRtCreateTokenId())).fetchOne();
                 if (rtCreateToken != null) {
                     return BeanMapper.mapper(rtCreateToken, NewJwtToken.class);
@@ -85,10 +86,11 @@ public class DefaultRefreshJwtToken implements RefreshJwtToken {
             queryDSL.update(sysJwtToken).populate(update).where(sysJwtToken.id.eq(useToken.getId())).execute();
             // 更新Redis缓存
             if (dataSource.isEnableRedis()) {
-                String delKey = SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(useToken.getUserId()), Conv.asString(update.getId()));
                 String addKey = SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(useToken.getUserId()), Conv.asString(add.getId()));
-                redis.kDelete(delKey);
                 redis.vSet(addKey, add, add.getExpiredTime().getTime() - SystemClock.now());
+                // Token Redis 缓存本身有设置过期时间，默认会自动过期删除
+                // String delKey = SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(useToken.getUserId()), Conv.asString(update.getId()));
+                // redis.kExpire(delKey, delaySeconds);
             }
             // 返回新增的Token
             return BeanMapper.mapper(add, NewJwtToken.class);

@@ -46,7 +46,8 @@ public class DefaultLogoutSuccessHandler implements LogoutSuccessHandler {
         // 从Redis中删除SysJwtToken
         if (dataSource.isEnableRedis()) {
             UserInfo userInfo = event.getSecurityContext().getUserInfo();
-            redis.kDelete(SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(userInfo.getUserId()), event.getClaims().getId()));
+            String key = SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(userInfo.getUserId()), event.getClaims().getId());
+            redis.kExpire(key, Redis.DEL_TIME_OUT);
         }
     }
 

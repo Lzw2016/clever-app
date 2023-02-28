@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.clever.security.impl.model.query.QSysJwtToken.sysJwtToken;
+
 /**
  * 作者：lizw <br/>
  * 创建时间：2020/12/02 21:32 <br/>
@@ -95,7 +97,7 @@ public class JwtTokenUtils {
         claims.setExpiration(expiration);
         claims.setIssuedAt(new Date());
         // claims.setId(String.valueOf(SnowFlake.SNOW_FLAKE.nextId()));
-        claims.setId(String.valueOf(SecurityDataSource.getJdbc().nextId("sys_jwt_token")));
+        claims.setId(String.valueOf(SecurityDataSource.getJdbc().nextId(sysJwtToken.getTableName())));
         // 签名私钥
         Key key = getHmacShaKey(tokenConfig.getSecretKey(), claims.getSubject());
         return Jwts.builder()
