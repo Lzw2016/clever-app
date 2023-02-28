@@ -3,7 +3,7 @@ package org.clever.security.impl.model.request;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.clever.security.model.LoginType;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.validation.constraints.NotBlank;
 
@@ -15,8 +15,14 @@ import javax.validation.constraints.NotBlank;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class NamePasswordLoginReq extends AbstractUserLoginReq {
+public class NamePasswordLoginReq extends AbstractLoginReq {
+    /**
+     * “登录名”参数名
+     */
     public static final String LOGIN_NAME_PARAM_NAME = "loginName";
+    /**
+     * “登录密码”参数名
+     */
     public static final String PASSWORD_PARAM_NAME = "password";
     /**
      * 用户登录名

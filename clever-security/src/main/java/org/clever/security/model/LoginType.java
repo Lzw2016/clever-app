@@ -7,7 +7,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import java.util.Objects;
 
 /**
- * 登录方式
+ * 登录方式 TODO 可扩展?
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2020/11/29 15:24 <br/>

@@ -22,7 +22,7 @@ import org.clever.security.impl.model.query.QSysJwtToken;
 import org.clever.security.model.LoginChannel;
 import org.clever.security.model.UserInfo;
 import org.clever.security.model.jackson2.event.LoginSuccessEvent;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 import org.clever.security.utils.SecurityRedisKey;
 import org.clever.util.Assert;
 
@@ -98,7 +98,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
         final Date now = new Date();
         // 记录登录成功日志user_login_log
-        AbstractUserLoginReq loginData = event.getLoginData();
+        AbstractLoginReq loginData = event.getLoginData();
         UserInfo userInfo = event.getUserInfo();
         Assert.notNull(loginData, "loginData不能为null");
         Assert.notNull(userInfo, "userInfo不能为null");
@@ -124,7 +124,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
 
     protected void clearLoginFailedCount(LoginSuccessEvent event) {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
-        AbstractUserLoginReq loginData = event.getLoginData();
+        AbstractLoginReq loginData = event.getLoginData();
         UserInfo userInfo = event.getUserInfo();
         Assert.notNull(loginData, "loginData不能为null");
         Assert.notNull(userInfo, "userInfo不能为null");
@@ -154,7 +154,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         if (loginConfig.getConcurrentLoginCount() <= 0) {
             return;
         }
-        AbstractUserLoginReq loginData = event.getLoginData();
+        AbstractLoginReq loginData = event.getLoginData();
         UserInfo userInfo = event.getUserInfo();
         Assert.notNull(loginData, "loginData不能为null");
         Assert.notNull(userInfo, "userInfo不能为null");

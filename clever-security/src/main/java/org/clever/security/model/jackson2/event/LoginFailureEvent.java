@@ -3,7 +3,7 @@ package org.clever.security.model.jackson2.event;
 import lombok.Data;
 import org.clever.security.exception.LoginException;
 import org.clever.security.model.UserInfo;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +28,7 @@ public class LoginFailureEvent implements Serializable {
     /**
      * 用户登录数据
      */
-    private final AbstractUserLoginReq loginData;
+    private final AbstractLoginReq loginData;
     /**
      * 用户信息(从数据库或其它服务加载)
      */
@@ -38,7 +38,7 @@ public class LoginFailureEvent implements Serializable {
      */
     private final LoginException loginException;
 
-    public LoginFailureEvent(HttpServletRequest request, HttpServletResponse response, AbstractUserLoginReq loginData, UserInfo userInfo, LoginException loginException) {
+    public LoginFailureEvent(HttpServletRequest request, HttpServletResponse response, AbstractLoginReq loginData, UserInfo userInfo, LoginException loginException) {
         this.request = request;
         this.response = response;
         this.loginData = loginData;

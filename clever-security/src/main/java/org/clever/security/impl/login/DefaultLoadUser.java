@@ -12,7 +12,7 @@ import org.clever.security.impl.model.request.NamePasswordLoginReq;
 import org.clever.security.impl.utils.UserInfoConvertUtils;
 import org.clever.security.login.LoadUser;
 import org.clever.security.model.UserInfo;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -24,12 +24,12 @@ import static org.clever.security.impl.model.query.QSysUser.sysUser;
  */
 public class DefaultLoadUser implements LoadUser {
     @Override
-    public boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq) {
+    public boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq) {
         return true;
     }
 
     @Override
-    public UserInfo loadUserInfo(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq) {
+    public UserInfo loadUserInfo(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq) {
         if (loginReq instanceof NamePasswordLoginReq) {
             return loadUser(request, (NamePasswordLoginReq) loginReq);
         } else {

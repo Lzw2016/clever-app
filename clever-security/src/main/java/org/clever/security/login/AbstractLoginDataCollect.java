@@ -3,7 +3,7 @@ package org.clever.security.login;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.security.model.LoginChannel;
 import org.clever.security.model.LoginType;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,9 +12,9 @@ import javax.servlet.http.HttpServletRequest;
  * 创建时间：2021/12/16 14:22 <br/>
  */
 public abstract class AbstractLoginDataCollect implements LoginDataCollect {
-    protected void collectBaseDataByParameter(AbstractUserLoginReq loginData, HttpServletRequest request) {
+    protected void collectBaseDataByParameter(AbstractLoginReq loginData, HttpServletRequest request) {
         if (loginData.getLoginChannel() == null) {
-            String loginChannel = request.getParameter(AbstractUserLoginReq.LOGIN_CHANNEL_PARAM_NAME);
+            String loginChannel = request.getParameter(AbstractLoginReq.LOGIN_CHANNEL_PARAM_NAME);
             if (StringUtils.isNotBlank(loginChannel)) {
                 LoginChannel loginChannelEnum = LoginChannel.lookup(loginChannel);
                 if (loginChannelEnum != null) {
@@ -25,7 +25,7 @@ public abstract class AbstractLoginDataCollect implements LoginDataCollect {
     }
 
     protected LoginType getLoginType(HttpServletRequest request) {
-        String loginType = request.getParameter(AbstractUserLoginReq.LOGIN_TYPE_PARAM_NAME);
+        String loginType = request.getParameter(AbstractLoginReq.LOGIN_TYPE_PARAM_NAME);
         return LoginType.lookup(loginType);
     }
 }

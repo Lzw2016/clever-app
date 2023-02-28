@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import lombok.Data;
 import org.clever.security.config.LoginConfig;
 import org.clever.security.model.UserInfo;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +34,7 @@ public class LoginSuccessEvent implements Serializable {
     /**
      * 用户登录数据
      */
-    private final AbstractUserLoginReq loginData;
+    private final AbstractLoginReq loginData;
     /**
      * 用户信息(从数据库或其它服务加载)
      */
@@ -60,7 +60,7 @@ public class LoginSuccessEvent implements Serializable {
             HttpServletRequest request,
             HttpServletResponse response,
             LoginConfig loginConfig,
-            AbstractUserLoginReq loginData,
+            AbstractLoginReq loginData,
             UserInfo userInfo,
             String jwtToken,
             Claims claims) {

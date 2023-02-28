@@ -3,7 +3,7 @@ package org.clever.security.login;
 import org.clever.core.OrderIncrement;
 import org.clever.core.Ordered;
 import org.clever.security.config.SecurityConfig;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,7 +30,7 @@ public interface LoginDataCollect extends Ordered {
      * @param request           请求对象
      * @return 登录数据对象
      */
-    AbstractUserLoginReq collectLoginData(SecurityConfig securityConfig, HttpServletRequest request);
+    AbstractLoginReq collectLoginData(SecurityConfig securityConfig, HttpServletRequest request);
 
     @Override
     default double getOrder() {

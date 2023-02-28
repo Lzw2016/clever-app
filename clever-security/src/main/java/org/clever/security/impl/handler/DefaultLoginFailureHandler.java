@@ -13,7 +13,7 @@ import org.clever.security.impl.model.entity.SysLoginLog;
 import org.clever.security.model.LoginChannel;
 import org.clever.security.model.UserInfo;
 import org.clever.security.model.jackson2.event.LoginFailureEvent;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -48,7 +48,7 @@ public class DefaultLoginFailureHandler implements LoginFailureHandler {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
         final Date now = new Date();
         // 记录登录失败日志user_login_log
-        AbstractUserLoginReq loginData = event.getLoginData();
+        AbstractLoginReq loginData = event.getLoginData();
         if (loginData == null) {
             return;
         }
@@ -73,7 +73,7 @@ public class DefaultLoginFailureHandler implements LoginFailureHandler {
 
     protected void addLoginFailedCount(UserInfo userInfo, LoginFailureEvent event) {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
-        AbstractUserLoginReq loginData = event.getLoginData();
+        AbstractLoginReq loginData = event.getLoginData();
         if (loginData == null) {
             return;
         }

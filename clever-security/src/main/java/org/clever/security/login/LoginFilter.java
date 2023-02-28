@@ -22,7 +22,7 @@ import org.clever.security.model.LoginContext;
 import org.clever.security.model.UserInfo;
 import org.clever.security.model.jackson2.event.LoginFailureEvent;
 import org.clever.security.model.jackson2.event.LoginSuccessEvent;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 import org.clever.security.model.response.LoginRes;
 import org.clever.security.utils.HttpServletResponseUtils;
 import org.clever.security.utils.JwtTokenUtils;
@@ -167,7 +167,7 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
             throw context.getLoginException();
         }
         // 收集登录数据
-        AbstractUserLoginReq loginReq = null;
+        AbstractLoginReq loginReq = null;
         for (LoginDataCollect collect : loginDataCollectList) {
             if (!collect.isSupported(securityConfig, PathFilterUtils.getPath(context.getRequest()), context.getRequest())) {
                 continue;

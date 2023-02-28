@@ -4,7 +4,7 @@ import org.clever.core.OrderIncrement;
 import org.clever.core.Ordered;
 import org.clever.security.config.SecurityConfig;
 import org.clever.security.exception.LoginException;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,7 +21,7 @@ public interface VerifyLoginData extends Ordered {
      * @param loginReq       登录请求参数
      * @return 返回true表示支持搜集
      */
-    boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq);
+    boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq);
 
     /**
      * 用户登录验证
@@ -31,7 +31,7 @@ public interface VerifyLoginData extends Ordered {
      * @param loginReq       登录请求参数
      * @throws LoginException 验证失败
      */
-    void verify(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq) throws LoginException;
+    void verify(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq) throws LoginException;
 
     @Override
     default double getOrder() {

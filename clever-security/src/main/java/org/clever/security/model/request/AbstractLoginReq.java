@@ -6,15 +6,21 @@ import org.clever.core.model.request.BaseRequest;
 import org.clever.security.model.LoginType;
 
 /**
- * 用户登录请求数据
+ * 登录请求数据抽象类
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2020/11/29 14:32 <br/>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class AbstractUserLoginReq extends BaseRequest {
+public abstract class AbstractLoginReq extends BaseRequest {
+    /**
+     * 登录类型参数名
+     */
     public static final String LOGIN_TYPE_PARAM_NAME = "loginType";
+    /**
+     * 登录渠道参数名
+     */
     public static final String LOGIN_CHANNEL_PARAM_NAME = "loginChannel";
 
     /**

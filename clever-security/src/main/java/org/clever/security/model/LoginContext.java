@@ -3,7 +3,7 @@ package org.clever.security.model;
 import io.jsonwebtoken.Claims;
 import lombok.Data;
 import org.clever.security.exception.LoginException;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +28,7 @@ public class LoginContext {
     /**
      * 用户登录数据
      */
-    private AbstractUserLoginReq loginData;
+    private AbstractLoginReq loginData;
     /**
      * 登录异常信息
      */

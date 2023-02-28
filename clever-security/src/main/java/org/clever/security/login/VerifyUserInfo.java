@@ -5,7 +5,7 @@ import org.clever.core.Ordered;
 import org.clever.security.config.SecurityConfig;
 import org.clever.security.exception.LoginException;
 import org.clever.security.model.UserInfo;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,7 +23,7 @@ public interface VerifyUserInfo extends Ordered {
      * @param userInfo       用户信息(数据库中的用户数据)
      * @return 返回true表示支持搜集
      */
-    boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq, UserInfo userInfo);
+    boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq, UserInfo userInfo);
 
     /**
      * 用户登录验证
@@ -34,7 +34,7 @@ public interface VerifyUserInfo extends Ordered {
      * @param userInfo       用户信息(数据库中的用户数据)
      * @throws LoginException 验证失败
      */
-    void verify(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq, UserInfo userInfo) throws LoginException;
+    void verify(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq, UserInfo userInfo) throws LoginException;
 
     @Override
     default double getOrder() {

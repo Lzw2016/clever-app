@@ -5,7 +5,7 @@ import org.clever.security.config.LoginConfig;
 import org.clever.security.config.SecurityConfig;
 import org.clever.security.impl.model.request.NamePasswordLoginReq;
 import org.clever.security.login.AbstractLoginDataCollect;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 import org.clever.security.utils.HttpServletRequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ public class DefaultLoginDataCollect extends AbstractLoginDataCollect {
     }
 
     @Override
-    public AbstractUserLoginReq collectLoginData(SecurityConfig securityConfig, HttpServletRequest request) {
+    public AbstractLoginReq collectLoginData(SecurityConfig securityConfig, HttpServletRequest request) {
         return getNamePasswordLoginReq(securityConfig, request);
     }
 

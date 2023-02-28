@@ -13,7 +13,7 @@ import org.clever.security.impl.model.entity.SysUser;
 import org.clever.security.impl.model.request.NamePasswordLoginReq;
 import org.clever.security.login.VerifyUserInfo;
 import org.clever.security.model.UserInfo;
-import org.clever.security.model.request.AbstractUserLoginReq;
+import org.clever.security.model.request.AbstractLoginReq;
 import org.clever.security.utils.AesUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,12 +34,12 @@ public class DefaultVerifyUserInfo implements VerifyUserInfo {
     }
 
     @Override
-    public boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq, UserInfo userInfo) {
+    public boolean isSupported(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq, UserInfo userInfo) {
         return true;
     }
 
     @Override
-    public void verify(SecurityConfig securityConfig, HttpServletRequest request, AbstractUserLoginReq loginReq, UserInfo userInfo) throws LoginException {
+    public void verify(SecurityConfig securityConfig, HttpServletRequest request, AbstractLoginReq loginReq, UserInfo userInfo) throws LoginException {
         if (loginReq == null) {
             throw new LoginDataValidateException("登录数据为空");
         }
@@ -62,7 +62,7 @@ public class DefaultVerifyUserInfo implements VerifyUserInfo {
     /**
      * 验证用户信息
      */
-    protected void verifyUserInfo(LoginConfig loginConfig, AesKeyConfig reqAesKey, AbstractUserLoginReq loginReq, UserInfo userInfo, SysUser use) {
+    protected void verifyUserInfo(LoginConfig loginConfig, AesKeyConfig reqAesKey, AbstractLoginReq loginReq, UserInfo userInfo, SysUser use) {
         // 登录用户不存在
         if (userInfo == null || use == null) {
             if (loginConfig.isHideUserNotFoundException()) {
