@@ -23,8 +23,7 @@ import org.clever.security.model.UserInfo;
 import org.clever.security.model.jackson2.event.LoginFailureEvent;
 import org.clever.security.model.jackson2.event.LoginSuccessEvent;
 import org.clever.security.model.request.AbstractLoginReq;
-import org.clever.security.model.response.LoginRes;
-import org.clever.security.utils.HttpServletResponseUtils;
+import org.clever.security.utils.HttpRespondHandler;
 import org.clever.security.utils.JwtTokenUtils;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
@@ -80,6 +79,10 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
      * 加载安全上下文(用户信息)
      */
     private final SecurityContextRepository securityContextRepository;
+    /**
+     * 返回响应数据工具
+     */
+    public final HttpRespondHandler httpRespondHandler;
 
     public LoginFilter(
             SecurityConfig securityConfig,
@@ -90,13 +93,15 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
             List<AddJwtTokenExtData> addJwtTokenExtDataList,
             List<LoginSuccessHandler> loginSuccessHandlerList,
             List<LoginFailureHandler> loginFailureHandlerList,
-            SecurityContextRepository securityContextRepository) {
+            SecurityContextRepository securityContextRepository,
+            HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
         Assert.notEmpty(loginDataCollectList, "登录数据收集器(LoginDataCollect)不存在");
         Assert.notEmpty(verifyLoginDataList, "用户登录验证器(VerifyLoginData)不存在");
         Assert.notEmpty(loadUserList, "用户信息加载器(LoadUser)不存在");
         Assert.notEmpty(verifyUserInfoList, "用户登录验证器(VerifyUserInfo)不存在");
         Assert.notNull(securityContextRepository, "安全上下文存取器(SecurityContextRepository)不能为null");
+        Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
         OrderComparator.sort(loginDataCollectList);
         OrderComparator.sort(verifyLoginDataList);
         OrderComparator.sort(loadUserList);
@@ -113,6 +118,7 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         this.loginSuccessHandlerList = loginSuccessHandlerList;
         this.loginFailureHandlerList = loginFailureHandlerList;
         this.securityContextRepository = securityContextRepository;
+        this.httpRespondHandler = httpRespondHandler;
     }
 
     @Override
@@ -146,12 +152,12 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
                 onLoginFailureResponse(context);
             } catch (Exception innerException) {
                 log.error("登录异常", innerException);
-                HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, innerException);
+                httpRespondHandler.sendData(ctx.req, ctx.res, innerException, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Throwable e) {
             // 登录异常
             log.error("登录异常", e);
-            HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+            httpRespondHandler.sendData(ctx.req, ctx.res, e, HttpStatus.INTERNAL_SERVER_ERROR);
         } finally {
             log.debug("### 登录逻辑执行完成 <----------------------------------------------------------------------");
         }
@@ -325,12 +331,10 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         LoginConfig login = securityConfig.getLogin();
         if (login != null && login.isSuccessNeedRedirect()) {
             // 需要重定向
-            HttpServletResponseUtils.redirect(context.getResponse(), login.getSuccessRedirectPage());
+            httpRespondHandler.redirect(context.getResponse(), login.getSuccessRedirectPage());
         } else {
             // 直接返回
-            UserInfo userInfo = context.getUserInfo().copy();
-            LoginRes loginRes = LoginRes.loginSuccess(userInfo, context.getJwtToken(), context.getRefreshToken());
-            HttpServletResponseUtils.sendData(context.getResponse(), loginRes, HttpStatus.OK);
+            httpRespondHandler.loginSuccess(context);
         }
     }
 
@@ -344,12 +348,10 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         LoginConfig login = securityConfig.getLogin();
         if (login.isFailureNeedRedirect()) {
             // 需要重定向
-            HttpServletResponseUtils.redirect(context.getResponse(), login.getFailureRedirectPage());
+            httpRespondHandler.redirect(context.getResponse(), login.getFailureRedirectPage());
         } else {
             // 直接返回
-            LoginRes loginRes = LoginRes.loginFailure(context.getLoginException().getMessage());
-            HttpStatus httpStatus = (context.getLoginException() instanceof RepeatLoginException) ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
-            HttpServletResponseUtils.sendData(context.getResponse(), loginRes, httpStatus);
+            httpRespondHandler.loginFailure(context);
         }
     }
 }

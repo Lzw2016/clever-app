@@ -13,8 +13,7 @@ import org.clever.security.model.AuthorizationContext;
 import org.clever.security.model.SecurityContext;
 import org.clever.security.model.jackson2.event.AuthorizationFailureEvent;
 import org.clever.security.model.jackson2.event.AuthorizationSuccessEvent;
-import org.clever.security.model.response.ForbiddenAccessRes;
-import org.clever.security.utils.HttpServletResponseUtils;
+import org.clever.security.utils.HttpRespondHandler;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
@@ -50,16 +49,22 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
      * 授权失败的处理
      */
     private final List<AuthorizationFailureHandler> authorizationFailureHandlerList;
+    /**
+     * 返回响应数据工具
+     */
+    public final HttpRespondHandler httpRespondHandler;
 
     public AuthorizationFilter(
             SecurityConfig securityConfig,
             List<AuthorizationVoter> authorizationVoterList,
             List<AuthorizationSuccessHandler> authorizationSuccessHandlerList,
-            List<AuthorizationFailureHandler> authorizationFailureHandlerList) {
+            List<AuthorizationFailureHandler> authorizationFailureHandlerList,
+            HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
         Assert.notNull(authorizationVoterList, "授权投票器(AuthorizationVoter)不能为null");
         Assert.notNull(authorizationSuccessHandlerList, "授权成功的处理(AuthorizationSuccessHandler)不能为null");
         Assert.notNull(authorizationFailureHandlerList, "授权成功的处理(AuthorizationFailureHandler)不能为null");
+        Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
         OrderComparator.sort(authorizationVoterList);
         OrderComparator.sort(authorizationSuccessHandlerList);
         OrderComparator.sort(authorizationFailureHandlerList);
@@ -67,6 +72,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
         this.authorizationVoterList = authorizationVoterList;
         this.authorizationSuccessHandlerList = authorizationSuccessHandlerList;
         this.authorizationFailureHandlerList = authorizationFailureHandlerList;
+        this.httpRespondHandler = httpRespondHandler;
     }
 
     @Override
@@ -92,7 +98,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
             }
             // 授权异常
             log.error("授权异常", e);
-            HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpServletResponseUtils.getHttpStatus(e), e);
+            httpRespondHandler.sendData(ctx.req, ctx.res, e);
             return;
         } finally {
             log.debug("### 授权逻辑执行完成 <----------------------------------------------------------------------");
@@ -108,7 +114,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
             }
         } catch (Throwable e) {
             log.error("授权异常", e);
-            HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+            httpRespondHandler.sendData(ctx.req, ctx.res, e, HttpStatus.INTERNAL_SERVER_ERROR);
             return;
         }
         // 处理业务逻辑
@@ -199,11 +205,10 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
         }
         if (securityConfig.isForbiddenNeedRedirect()) {
             // 需要重定向
-            HttpServletResponseUtils.redirect(response, securityConfig.getNotLoginRedirectPage());
+            httpRespondHandler.redirect(response, securityConfig.getNotLoginRedirectPage());
         } else {
             // 直接返回
-            ForbiddenAccessRes forbiddenAccessRes = new ForbiddenAccessRes("未授权，禁止访问");
-            HttpServletResponseUtils.sendData(response, forbiddenAccessRes, HttpStatus.FORBIDDEN);
+            httpRespondHandler.forbiddenAccess(context);
         }
     }
 }

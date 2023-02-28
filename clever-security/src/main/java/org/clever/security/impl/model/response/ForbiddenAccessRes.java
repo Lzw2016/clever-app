@@ -1,4 +1,4 @@
-package org.clever.security.model.response;
+package org.clever.security.impl.model.response;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

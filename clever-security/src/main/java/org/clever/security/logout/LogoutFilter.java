@@ -18,8 +18,7 @@ import org.clever.security.model.LogoutContext;
 import org.clever.security.model.SecurityContext;
 import org.clever.security.model.jackson2.event.LogoutFailureEvent;
 import org.clever.security.model.jackson2.event.LogoutSuccessEvent;
-import org.clever.security.model.response.LogoutRes;
-import org.clever.security.utils.HttpServletResponseUtils;
+import org.clever.security.utils.HttpRespondHandler;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
@@ -47,17 +46,24 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
      * 登出失败处理
      */
     private final List<LogoutFailureHandler> logoutFailureHandlerList;
+    /**
+     * 返回响应数据工具
+     */
+    public final HttpRespondHandler httpRespondHandler;
 
     public LogoutFilter(
             SecurityConfig securityConfig,
             List<LogoutSuccessHandler> logoutSuccessHandlerList,
-            List<LogoutFailureHandler> logoutFailureHandlerList) {
+            List<LogoutFailureHandler> logoutFailureHandlerList,
+            HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
+        Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
         OrderComparator.sort(logoutSuccessHandlerList);
         OrderComparator.sort(logoutFailureHandlerList);
         this.securityConfig = securityConfig;
         this.logoutSuccessHandlerList = logoutSuccessHandlerList;
         this.logoutFailureHandlerList = logoutFailureHandlerList;
+        this.httpRespondHandler = httpRespondHandler;
     }
 
     @Override
@@ -74,14 +80,14 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
         try {
             logout(context);
             // 登出成功 - 返回数据给客户端
-            onLogoutSuccessResponse(ctx);
+            onLogoutSuccessResponse(context);
         } catch (Throwable e) {
             // 登出异常
             log.error("登出异常", e);
             if (context.isSuccess()) {
-                onLogoutSuccessResponse(ctx);
+                onLogoutSuccessResponse(context);
             } else {
-                onLogoutFailureResponse(ctx, e);
+                onLogoutFailureResponse(context, e);
             }
         } finally {
             log.debug("### 登出逻辑执行完成 <----------------------------------------------------------------------");
@@ -130,43 +136,42 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
     /**
      * 当登出成功时响应处理
      */
-    protected void onLogoutSuccessResponse(FilterRegistrar.Context ctx) throws IOException {
-        if (ctx.res.isCommitted()) {
+    protected void onLogoutSuccessResponse(LogoutContext context) throws IOException {
+        if (context.getResponse().isCommitted()) {
             return;
         }
         LogoutConfig logout = securityConfig.getLogout();
         if (logout != null && logout.isNeedRedirect()) {
             // 需要重定向
-            HttpServletResponseUtils.redirect(ctx.res, logout.getRedirectPage());
+            httpRespondHandler.redirect(context.getResponse(), logout.getRedirectPage());
         } else {
             // 直接返回
-            SecurityContext securityContext = SecurityContextHolder.getContext(ctx.req);
+            SecurityContext securityContext = SecurityContextHolder.getContext(context.getRequest());
             if (securityContext == null) {
                 throw new UnSupportLogoutException("当前未登录,无法登出");
             }
-            LogoutRes loginRes = LogoutRes.logoutSuccess(securityContext.getUserInfo());
-            HttpServletResponseUtils.sendData(ctx.res, loginRes);
+            httpRespondHandler.logoutSuccess(context);
         }
     }
 
     /**
      * 当登出失败时响应处理
      */
-    protected void onLogoutFailureResponse(FilterRegistrar.Context ctx, Throwable e) throws IOException {
-        if (ctx.res.isCommitted()) {
+    protected void onLogoutFailureResponse(LogoutContext context, Throwable e) throws IOException {
+        if (context.getResponse().isCommitted()) {
             return;
         }
         LogoutConfig logout = securityConfig.getLogout();
         if (logout != null && logout.isNeedRedirect()) {
             // 需要重定向
-            HttpServletResponseUtils.redirect(ctx.res, logout.getRedirectPage());
+            httpRespondHandler.redirect(context.getResponse(), logout.getRedirectPage());
         } else {
             // 直接返回
             if (e instanceof LogoutException) {
-                LogoutRes loginRes = LogoutRes.logoutFailure(e.getMessage());
-                HttpServletResponseUtils.sendData(ctx.res, loginRes);
+                context.setLogoutException((LogoutException) e);
+                httpRespondHandler.logoutFailure(context);
             } else {
-                HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+                httpRespondHandler.sendData(context.getRequest(), context.getResponse(), e, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
     }

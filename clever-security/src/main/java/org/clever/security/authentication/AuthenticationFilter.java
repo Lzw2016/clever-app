@@ -26,7 +26,7 @@ import org.clever.security.model.SecurityContext;
 import org.clever.security.model.UseJwtRefreshToken;
 import org.clever.security.model.jackson2.event.AuthenticationFailureEvent;
 import org.clever.security.model.jackson2.event.AuthenticationSuccessEvent;
-import org.clever.security.utils.HttpServletResponseUtils;
+import org.clever.security.utils.HttpRespondHandler;
 import org.clever.security.utils.JwtTokenUtils;
 import org.clever.security.utils.PathFilterUtils;
 import org.clever.util.Assert;
@@ -73,19 +73,25 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
      * 登录实现对象
      */
     private final RefreshJwtToken refreshJwtToken;
+    /**
+     * 返回响应数据工具
+     */
+    public final HttpRespondHandler httpRespondHandler;
 
     public AuthenticationFilter(SecurityConfig securityConfig,
                                 List<VerifyJwtToken> verifyJwtTokenList,
                                 SecurityContextRepository securityContextRepository,
                                 List<AuthenticationSuccessHandler> authenticationSuccessHandlerList,
                                 List<AuthenticationFailureHandler> authenticationFailureHandlerList,
-                                RefreshJwtToken refreshJwtToken) {
+                                RefreshJwtToken refreshJwtToken,
+                                HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
         Assert.notEmpty(verifyJwtTokenList, "JWT-Token验证器(VerifyJwtToken)不存在");
         Assert.notNull(securityContextRepository, "安全上下文存取器(SecurityContextRepository)不能为null");
         Assert.notNull(authenticationSuccessHandlerList, "参数authenticationSuccessHandlerList不能为null");
         Assert.notNull(authenticationFailureHandlerList, "参数authenticationFailureHandlerList不能为null");
         Assert.notNull(refreshJwtToken, "参数refreshJwtToken不能为null");
+        Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
         OrderComparator.sort(verifyJwtTokenList);
         OrderComparator.sort(authenticationSuccessHandlerList);
         OrderComparator.sort(authenticationFailureHandlerList);
@@ -95,6 +101,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
         this.authenticationSuccessHandlerList = authenticationSuccessHandlerList;
         this.authenticationFailureHandlerList = authenticationFailureHandlerList;
         this.refreshJwtToken = refreshJwtToken;
+        this.httpRespondHandler = httpRespondHandler;
     }
 
     @Override
@@ -129,7 +136,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
                 // 获取当前登录用户信息
                 SecurityContext securityContext = SecurityContextHolder.getContext();
                 SecurityContext data = securityContext.copy();
-                HttpServletResponseUtils.sendData(ctx.res, data);
+                httpRespondHandler.sendData(ctx.res, data);
             } else {
                 // 处理业务逻辑
                 ctx.next();
@@ -180,7 +187,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
                 log.error("认证异常", innerException);
                 // 返回数据给客户端
                 if (sendResponse) {
-                    HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, innerException);
+                    httpRespondHandler.sendData(ctx.req, ctx.res, innerException, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
             }
             return false;
@@ -188,7 +195,7 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
             // 认证异常 - 返回数据给客户端
             log.error("认证异常", e);
             if (sendResponse) {
-                HttpServletResponseUtils.sendData(ctx.req, ctx.res, HttpStatus.INTERNAL_SERVER_ERROR, e);
+                httpRespondHandler.sendData(ctx.req, ctx.res, e, HttpStatus.INTERNAL_SERVER_ERROR);
             }
             return false;
         } finally {
@@ -314,10 +321,10 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
         }
         if (securityConfig.isNotLoginNeedRedirect()) {
             // 需要重定向
-            HttpServletResponseUtils.redirect(response, securityConfig.getNotLoginRedirectPage());
+            httpRespondHandler.redirect(response, securityConfig.getNotLoginRedirectPage());
         } else {
             // 直接返回
-            HttpServletResponseUtils.sendData(request, response, HttpStatus.UNAUTHORIZED, e);
+            httpRespondHandler.sendData(request, response, e, HttpStatus.UNAUTHORIZED);
         }
     }
 }

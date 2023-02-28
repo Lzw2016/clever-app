@@ -28,6 +28,7 @@ import org.clever.security.impl.login.*;
 import org.clever.security.login.*;
 import org.clever.security.logout.LogoutFilter;
 import org.clever.security.model.jackson2.SecurityJackson2Module;
+import org.clever.security.utils.HttpRespondHandler;
 import org.clever.util.Assert;
 
 import java.util.ArrayList;
@@ -56,6 +57,10 @@ public class SecurityBootstrap {
      * 使用JWT的刷新Token续期Token
      */
     public static RefreshJwtToken REFRESH_JWT_TOKEN;
+    /**
+     * 返回响应数据工具
+     */
+    public static HttpRespondHandler HTTP_RESPOND_HANDLER = HttpRespondHandler.INSTANCE;
     /**
      * 登录成功处理逻辑
      */
@@ -238,7 +243,8 @@ public class SecurityBootstrap {
                     SECURITY_CONTEXT_REPOSITORY,
                     AUTHENTICATION_SUCCESS_HANDLER_LIST,
                     AUTHENTICATION_FAILURE_HANDLER_LIST,
-                    REFRESH_JWT_TOKEN
+                    REFRESH_JWT_TOKEN,
+                    HTTP_RESPOND_HANDLER
             );
         }
         return authenticationFilter;
@@ -255,7 +261,8 @@ public class SecurityBootstrap {
                     ADD_JWT_TOKEN_EXT_DATA_LIST,
                     LOGIN_SUCCESS_HANDLER_LIST,
                     LOGIN_FAILURE_HANDLER_LIST,
-                    SECURITY_CONTEXT_REPOSITORY
+                    SECURITY_CONTEXT_REPOSITORY,
+                    HTTP_RESPOND_HANDLER
             );
         }
         return loginFilter;
@@ -266,7 +273,8 @@ public class SecurityBootstrap {
             logoutFilter = new LogoutFilter(
                     securityConfig,
                     LOGOUT_SUCCESS_HANDLER_LIST,
-                    LOGOUT_FAILURE_HANDLER_LIST
+                    LOGOUT_FAILURE_HANDLER_LIST,
+                    HTTP_RESPOND_HANDLER
             );
         }
         return logoutFilter;
@@ -278,7 +286,8 @@ public class SecurityBootstrap {
                     securityConfig,
                     AUTHORIZATION_VOTER_LIST,
                     AUTHORIZATION_SUCCESS_HANDLER_LIST,
-                    AUTHORIZATION_FAILURE_HANDLER_LIST
+                    AUTHORIZATION_FAILURE_HANDLER_LIST,
+                    HTTP_RESPOND_HANDLER
             );
         }
         return authorizationFilter;
