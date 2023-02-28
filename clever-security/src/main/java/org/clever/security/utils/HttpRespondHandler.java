@@ -18,7 +18,6 @@ import org.clever.web.utils.GlobalExceptionHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * 返回响应数据工具
@@ -169,7 +168,7 @@ public abstract class HttpRespondHandler {
             res.setStatus(httpStatus.value());
             // noinspection deprecation
             response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-            response.getWriter().print(JacksonMapper.getInstance().toJson(new HashMap<>()));
+            response.getWriter().print(JacksonMapper.getInstance().toJson(res));
             response.getWriter().flush();
         }
 
