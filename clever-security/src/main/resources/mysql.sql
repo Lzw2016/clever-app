@@ -188,13 +188,12 @@ create index idx_sys_login_failed_count_user_id on sys_login_failed_count (user_
 create table sys_security_context
 (
     id                  bigint              not null                                        comment '主键id',
-    user_id             bigint              not null                                        comment '用户id',
+    user_id             bigint              not null        unique                          comment '用户id',
     security_context    varchar(16365)      not null                                        comment '用户security context',
     create_at           datetime(3)         not null        default current_timestamp(3)    comment '创建时间',
     update_at           datetime(3)                         on update current_timestamp(3)  comment '更新时间',
     primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '用户security context(缓存表)';
-create index idx_sys_security_context_user_id on sys_security_context (user_id);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/

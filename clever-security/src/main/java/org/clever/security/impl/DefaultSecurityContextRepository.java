@@ -127,7 +127,7 @@ public class DefaultSecurityContextRepository implements SecurityContextReposito
     }
 
     /**
-     * 刷新 SecurityContext
+     * 创建 SysSecurityContext 和 SecurityContext
      *
      * @param userId 用户id
      */
