@@ -7,7 +7,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import java.util.Objects;
 
 /**
- * 登录方式 TODO 可扩展?
+ * 登录方式
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2020/11/29 15:24 <br/>
@@ -19,6 +19,26 @@ public enum LoginType {
      * 用户名密码
      */
     LoginNamePassword(1, "LoginNamePassword"),
+    /**
+     * 手机号验证码
+     */
+    SmsValidateCode(2, "SmsValidateCode"),
+    /**
+     * 邮箱验证码
+     */
+    EmailValidateCode(3, "EmailValidateCode"),
+    /**
+     * 刷新令牌
+     */
+    RefreshToken(4, "RefreshToken"),
+    /**
+     * 微信小程序
+     */
+    WechatSmallProgram(5, "WechatSmallProgram"),
+    /**
+     * 扫码登录
+     */
+    ScanCode(6, "ScanCode"),
     ;
 
     /**

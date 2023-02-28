@@ -6,7 +6,7 @@ import org.clever.core.model.response.BaseResponse;
 import org.clever.security.model.UserInfo;
 import org.clever.util.Assert;
 
-/** TODO LogoutRes
+/**
  * 作者：lizw <br/>
  * 创建时间：2020/12/02 20:58 <br/>
  */

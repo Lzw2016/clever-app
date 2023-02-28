@@ -63,7 +63,7 @@ public class DefaultLoginFailureHandler implements LoginFailureHandler {
             loginChannel = LoginChannel.Unknown;
         }
         loginLog.setLoginChannel(loginChannel.getId());
-        loginLog.setLoginType(loginData.getLoginType().getId());
+        loginLog.setLoginType(loginData.getLoginType());
         loginLog.setLoginState(EnumConstant.USER_LOGIN_LOG_LOGIN_STATE_0);
         loginLog.setRequestData(JacksonMapper.getInstance().toJson(loginData));
         loginLog.setCreateAt(now);
@@ -81,7 +81,7 @@ public class DefaultLoginFailureHandler implements LoginFailureHandler {
         SysLoginFailedCount loginFailedCount = queryDSL.selectFrom(sysLoginFailedCount)
                 .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
                 .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
-                .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType().getId()))
+                .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
                 .fetchFirst();
         int failedCount = 1;
         if (loginFailedCount == null) {
@@ -90,7 +90,7 @@ public class DefaultLoginFailureHandler implements LoginFailureHandler {
             // loginFailedCount.setId(SnowFlake.SNOW_FLAKE.nextId());
             loginFailedCount.setId(queryDSL.nextId(sysLoginFailedCount.getTableName()));
             loginFailedCount.setUserId(userInfo.getUserId());
-            loginFailedCount.setLoginType(loginData.getLoginType().getId());
+            loginFailedCount.setLoginType(loginData.getLoginType());
             loginFailedCount.setFailedCount(1);
             loginFailedCount.setLastLoginTime(now);
             loginFailedCount.setDeleteFlag(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0);

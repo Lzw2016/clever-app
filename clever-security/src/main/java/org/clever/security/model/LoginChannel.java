@@ -17,17 +17,37 @@ import java.util.Objects;
 public enum LoginChannel {
     Unknown(-1, "未知"),
     /**
-     * PC-Admin
+     * PC 管理后台
      */
-    PC_Admin(0, "PC-Admin"),
+    PCAdmin(0, "PC-Admin"),
+    /**
+     * PC 业务端
+     */
+    PCWeb(1, "PC-Web"),
+    /**
+     * H5
+     */
+    H5(2, "H5"),
+    /**
+     * IOS-APP
+     */
+    IOS_APP(3, "IOS-APP"),
+    /**
+     * Android-APP
+     */
+    Android_APP(4, "Android-APP"),
+    /**
+     * 微信小程序
+     */
+    WechatSmallProgram(5, "WechatSmallProgram"),
     ;
 
     /**
-     * 登录渠道ID，0:PC-Admin，1:PC-Web，2:H5，3:IOS-APP，4:Android-APP，5:微信小程序
+     * 登录渠道 id
      */
     private final int id;
     /**
-     * 登录渠道名称，0:PC-Admin，1:PC-Web，2:H5，3:IOS-APP，4:Android-APP，5:微信小程序
+     * 登录渠道 name
      */
     private final String name;
 

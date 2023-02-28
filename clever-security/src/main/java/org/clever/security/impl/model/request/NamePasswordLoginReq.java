@@ -36,7 +36,7 @@ public class NamePasswordLoginReq extends AbstractLoginReq {
     private String password;
 
     @Override
-    public LoginType getLoginType() {
-        return LoginType.LoginNamePassword;
+    public Integer getLoginType() {
+        return LoginType.LoginNamePassword.getId();
     }
 }

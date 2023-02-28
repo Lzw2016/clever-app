@@ -13,19 +13,23 @@ import javax.servlet.http.HttpServletRequest;
  */
 public abstract class AbstractLoginDataCollect implements LoginDataCollect {
     protected void collectBaseDataByParameter(AbstractLoginReq loginData, HttpServletRequest request) {
+        if (loginData.getLoginType() == null) {
+            String loginType = request.getParameter(AbstractLoginReq.LOGIN_TYPE_PARAM_NAME);
+            if (StringUtils.isNotBlank(loginType)) {
+                LoginType loginTypeEnum = LoginType.lookup(loginType);
+                if (loginTypeEnum != null) {
+                    loginData.setLoginType(loginTypeEnum.getId());
+                }
+            }
+        }
         if (loginData.getLoginChannel() == null) {
             String loginChannel = request.getParameter(AbstractLoginReq.LOGIN_CHANNEL_PARAM_NAME);
             if (StringUtils.isNotBlank(loginChannel)) {
                 LoginChannel loginChannelEnum = LoginChannel.lookup(loginChannel);
                 if (loginChannelEnum != null) {
-                    loginData.setLoginChannel(String.valueOf(loginChannelEnum.getId()));
+                    loginData.setLoginChannel(loginChannelEnum.getId());
                 }
             }
         }
-    }
-
-    protected LoginType getLoginType(HttpServletRequest request) {
-        String loginType = request.getParameter(AbstractLoginReq.LOGIN_TYPE_PARAM_NAME);
-        return LoginType.lookup(loginType);
     }
 }

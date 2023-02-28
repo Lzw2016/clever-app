@@ -114,7 +114,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
             loginChannel = LoginChannel.Unknown;
         }
         loginLog.setLoginChannel(loginChannel.getId());
-        loginLog.setLoginType(loginData.getLoginType().getId());
+        loginLog.setLoginType(loginData.getLoginType());
         loginLog.setLoginState(EnumConstant.USER_LOGIN_LOG_LOGIN_STATE_1);
         loginLog.setRequestData(JacksonMapper.getInstance().toJson(loginData));
         loginLog.setJwtTokenId(jwtTokenId);
@@ -132,7 +132,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         SysLoginFailedCount loginFailedCount = queryDSL.selectFrom(sysLoginFailedCount)
                 .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
                 .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
-                .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType().getId()))
+                .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
                 .fetchOne();
         if (loginFailedCount != null) {
             SecurityDataSource.getQueryDSL().update(sysLoginFailedCount)
@@ -140,7 +140,7 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
                     .set(sysLoginFailedCount.updateAt, new Date())
                     .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
                     .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
-                    .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType().getId()))
+                    .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
                     .execute();
             log.debug("### 清除用户连续登录失败次数: {} | userId=[{}]", loginFailedCount.getFailedCount(), loginFailedCount.getUserId());
         }

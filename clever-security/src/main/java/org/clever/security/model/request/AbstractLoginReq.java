@@ -3,6 +3,7 @@ package org.clever.security.model.request;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.clever.core.model.request.BaseRequest;
+import org.clever.security.model.LoginChannel;
 import org.clever.security.model.LoginType;
 
 /**
@@ -24,12 +25,16 @@ public abstract class AbstractLoginReq extends BaseRequest {
     public static final String LOGIN_CHANNEL_PARAM_NAME = "loginChannel";
 
     /**
-     * 登录渠道
+     * 登录方式
+     *
+     * @see LoginType
      */
-    private String loginChannel;
+    private Integer loginType;
 
     /**
-     * 登录方式
+     * 登录渠道
+     *
+     * @see LoginChannel
      */
-    public abstract LoginType getLoginType();
+    private Integer loginChannel;
 }
