@@ -622,7 +622,7 @@
           "patternProperties": {
             "^\\S+$": {
               "type": "string",
-              "description": "root logger日志级别",
+              "description": "logger日志级别",
               "$ref": "#/definitions/logLevel"
             }
           }
