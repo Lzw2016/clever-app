@@ -17,6 +17,18 @@
       "type": "string",
       "description": "全局基础路径"
     },
+    "startup-task": {
+      "$ref": "#/definitions/startupTaskDefinition"
+    },
+    "mybatis": {
+      "$ref": "#/definitions/mybatisDefinition"
+    },
+    "jdbc": {
+      "$ref": "#/definitions/jdbcDefinition"
+    },
+    "redis": {
+      "$ref": "#/definitions/redisDefinition"
+    },
     "web": {
       "$ref": "#/definitions/webDefinition"
     }
@@ -98,13 +110,13 @@
           "type": "string",
           "description": "控制序列化期间包含的属性。使用 Jackson 的 JsonInclude.Include 枚举中的值之一进行配置。",
           "enum": [
-            "ALWAYS",
-            "NON_NULL",
-            "NON_ABSENT",
-            "NON_EMPTY",
-            "NON_DEFAULT",
-            "CUSTOM",
-            "USE_DEFAULTS"
+            "always",
+            "non_null",
+            "non_absent",
+            "non_empty",
+            "non_default",
+            "custom",
+            "use_defaults"
           ]
         },
         "visibility": {
@@ -112,25 +124,25 @@
           "description": "Jackson 可见性阈值，可用于限制自动检测哪些方法（和字段）",
           "propertyNames": {
             "enum": [
-              "GETTER",
-              "SETTER",
-              "CREATOR",
-              "FIELD",
-              "IS_GETTER",
-              "NONE",
-              "ALL"
+              "getter",
+              "setter",
+              "creator",
+              "field",
+              "is_getter",
+              "none",
+              "all"
             ]
           },
           "patternProperties": {
             "": {
               "type": "string",
               "enum": [
-                "ANY",
-                "NON_PRIVATE",
-                "PROTECTED_AND_PUBLIC",
-                "PUBLIC_ONLY",
-                "NONE",
-                "DEFAULT"
+                "any",
+                "non_private",
+                "protected_and_public",
+                "public_only",
+                "none",
+                "default"
               ]
             }
           }
@@ -140,32 +152,32 @@
           "description": "开启/关闭 Jackson 特性会影响 Java 对象的序列化方式",
           "propertyNames": {
             "enum": [
-              "WRAP_ROOT_VALUE",
-              "INDENT_OUTPUT",
-              "FAIL_ON_EMPTY_BEANS",
-              "FAIL_ON_SELF_REFERENCES",
-              "WRAP_EXCEPTIONS",
-              "FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS",
-              "WRITE_SELF_REFERENCES_AS_NULL",
-              "CLOSE_CLOSEABLE",
-              "FLUSH_AFTER_WRITE_VALUE",
-              "WRITE_DATES_AS_TIMESTAMPS",
-              "WRITE_DATE_KEYS_AS_TIMESTAMPS",
-              "WRITE_DATES_WITH_ZONE_ID",
-              "WRITE_DATES_WITH_CONTEXT_TIME_ZONE",
-              "WRITE_DURATIONS_AS_TIMESTAMPS",
-              "WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS",
-              "WRITE_ENUMS_USING_TO_STRING",
-              "WRITE_ENUMS_USING_INDEX",
-              "WRITE_ENUM_KEYS_USING_INDEX",
-              "WRITE_NULL_MAP_VALUES",
-              "WRITE_EMPTY_JSON_ARRAYS",
-              "WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED",
-              "WRITE_BIGDECIMAL_AS_PLAIN",
-              "WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS",
-              "ORDER_MAP_ENTRIES_BY_KEYS",
-              "EAGER_SERIALIZER_FETCH",
-              "USE_EQUALITY_FOR_OBJECT_ID"
+              "wrap_root_value",
+              "indent_output",
+              "fail_on_empty_beans",
+              "fail_on_self_references",
+              "wrap_exceptions",
+              "fail_on_unwrapped_type_identifiers",
+              "write_self_references_as_null",
+              "close_closeable",
+              "flush_after_write_value",
+              "write_dates_as_timestamps",
+              "write_date_keys_as_timestamps",
+              "write_dates_with_zone_id",
+              "write_dates_with_context_time_zone",
+              "write_durations_as_timestamps",
+              "write_char_arrays_as_json_arrays",
+              "write_enums_using_to_string",
+              "write_enums_using_index",
+              "write_enum_keys_using_index",
+              "write_null_map_values",
+              "write_empty_json_arrays",
+              "write_single_elem_arrays_unwrapped",
+              "write_bigdecimal_as_plain",
+              "write_date_timestamps_as_nanoseconds",
+              "order_map_entries_by_keys",
+              "eager_serializer_fetch",
+              "use_equality_for_object_id"
             ]
           },
           "patternProperties": {
@@ -179,34 +191,34 @@
           "description": "开启/关闭 Jackson 特性会影响 Java 对象的反序列化方式",
           "propertyNames": {
             "enum": [
-              "USE_BIG_DECIMAL_FOR_FLOATS",
-              "USE_BIG_INTEGER_FOR_INTS",
-              "USE_LONG_FOR_INTS",
-              "USE_JAVA_ARRAY_FOR_JSON_ARRAY",
-              "FAIL_ON_UNKNOWN_PROPERTIES",
-              "FAIL_ON_NULL_FOR_PRIMITIVES",
-              "FAIL_ON_NUMBERS_FOR_ENUMS",
-              "FAIL_ON_INVALID_SUBTYPE",
-              "FAIL_ON_READING_DUP_TREE_KEY",
-              "FAIL_ON_IGNORED_PROPERTIES",
-              "FAIL_ON_UNRESOLVED_OBJECT_IDS",
-              "FAIL_ON_MISSING_CREATOR_PROPERTIES",
-              "FAIL_ON_NULL_CREATOR_PROPERTIES",
-              "FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY",
-              "FAIL_ON_TRAILING_TOKENS",
-              "WRAP_EXCEPTIONS",
-              "ACCEPT_SINGLE_VALUE_AS_ARRAY",
-              "UNWRAP_SINGLE_VALUE_ARRAYS",
-              "UNWRAP_ROOT_VALUE",
-              "ACCEPT_EMPTY_STRING_AS_NULL_OBJECT",
-              "ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT",
-              "ACCEPT_FLOAT_AS_INT",
-              "READ_ENUMS_USING_TO_STRING",
-              "READ_UNKNOWN_ENUM_VALUES_AS_NULL",
-              "READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE",
-              "READ_DATE_TIMESTAMPS_AS_NANOSECONDS",
-              "ADJUST_DATES_TO_CONTEXT_TIME_ZONE",
-              "EAGER_DESERIALIZER_FETCH"
+              "use_big_decimal_for_floats",
+              "use_big_integer_for_ints",
+              "use_long_for_ints",
+              "use_java_array_for_json_array",
+              "fail_on_unknown_properties",
+              "fail_on_null_for_primitives",
+              "fail_on_numbers_for_enums",
+              "fail_on_invalid_subtype",
+              "fail_on_reading_dup_tree_key",
+              "fail_on_ignored_properties",
+              "fail_on_unresolved_object_ids",
+              "fail_on_missing_creator_properties",
+              "fail_on_null_creator_properties",
+              "fail_on_missing_external_type_id_property",
+              "fail_on_trailing_tokens",
+              "wrap_exceptions",
+              "accept_single_value_as_array",
+              "unwrap_single_value_arrays",
+              "unwrap_root_value",
+              "accept_empty_string_as_null_object",
+              "accept_empty_array_as_null_object",
+              "accept_float_as_int",
+              "read_enums_using_to_string",
+              "read_unknown_enum_values_as_null",
+              "read_unknown_enum_values_using_default_value",
+              "read_date_timestamps_as_nanoseconds",
+              "adjust_dates_to_context_time_zone",
+              "eager_deserializer_fetch"
             ]
           },
           "patternProperties": {
@@ -220,38 +232,38 @@
           "description": "开启/关闭 Jackson 的通用特性",
           "propertyNames": {
             "enum": [
-              "USE_ANNOTATIONS",
-              "USE_GETTERS_AS_SETTERS",
-              "PROPAGATE_TRANSIENT_MARKER",
-              "AUTO_DETECT_CREATORS",
-              "AUTO_DETECT_FIELDS",
-              "AUTO_DETECT_GETTERS",
-              "AUTO_DETECT_IS_GETTERS",
-              "AUTO_DETECT_SETTERS",
-              "REQUIRE_SETTERS_FOR_GETTERS",
-              "ALLOW_FINAL_FIELDS_AS_MUTATORS",
-              "INFER_PROPERTY_MUTATORS",
-              "INFER_CREATOR_FROM_CONSTRUCTOR_PROPERTIES",
-              "ALLOW_VOID_VALUED_PROPERTIES",
-              "CAN_OVERRIDE_ACCESS_MODIFIERS",
-              "OVERRIDE_PUBLIC_ACCESS_MODIFIERS",
-              "USE_STATIC_TYPING",
-              "USE_BASE_TYPE_AS_DEFAULT_IMPL",
-              "INFER_BUILDER_TYPE_BINDINGS",
-              "DEFAULT_VIEW_INCLUSION",
-              "SORT_PROPERTIES_ALPHABETICALLY",
-              "SORT_CREATOR_PROPERTIES_FIRST",
-              "ACCEPT_CASE_INSENSITIVE_PROPERTIES",
-              "ACCEPT_CASE_INSENSITIVE_ENUMS",
-              "ACCEPT_CASE_INSENSITIVE_VALUES",
-              "USE_WRAPPER_NAME_AS_PROPERTY_NAME",
-              "USE_STD_BEAN_NAMING",
-              "ALLOW_EXPLICIT_PROPERTY_RENAMING",
-              "ALLOW_COERCION_OF_SCALARS",
-              "IGNORE_DUPLICATE_MODULE_REGISTRATIONS",
-              "IGNORE_MERGE_FOR_UNMERGEABLE",
-              "BLOCK_UNSAFE_POLYMORPHIC_BASE_TYPES",
-              "APPLY_DEFAULT_VALUES"
+              "use_annotations",
+              "use_getters_as_setters",
+              "propagate_transient_marker",
+              "auto_detect_creators",
+              "auto_detect_fields",
+              "auto_detect_getters",
+              "auto_detect_is_getters",
+              "auto_detect_setters",
+              "require_setters_for_getters",
+              "allow_final_fields_as_mutators",
+              "infer_property_mutators",
+              "infer_creator_from_constructor_properties",
+              "allow_void_valued_properties",
+              "can_override_access_modifiers",
+              "override_public_access_modifiers",
+              "use_static_typing",
+              "use_base_type_as_default_impl",
+              "infer_builder_type_bindings",
+              "default_view_inclusion",
+              "sort_properties_alphabetically",
+              "sort_creator_properties_first",
+              "accept_case_insensitive_properties",
+              "accept_case_insensitive_enums",
+              "accept_case_insensitive_values",
+              "use_wrapper_name_as_property_name",
+              "use_std_bean_naming",
+              "allow_explicit_property_renaming",
+              "allow_coercion_of_scalars",
+              "ignore_duplicate_module_registrations",
+              "ignore_merge_for_unmergeable",
+              "block_unsafe_polymorphic_base_types",
+              "apply_default_values"
             ]
           },
           "patternProperties": {
@@ -265,21 +277,21 @@
           "description": "开启/关闭 Jackson 的解析器特性",
           "propertyNames": {
             "enum": [
-              "AUTO_CLOSE_SOURCE",
-              "ALLOW_COMMENTS",
-              "ALLOW_YAML_COMMENTS",
-              "ALLOW_UNQUOTED_FIELD_NAMES",
-              "ALLOW_SINGLE_QUOTES",
-              "ALLOW_UNQUOTED_CONTROL_CHARS",
-              "ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER",
-              "ALLOW_NUMERIC_LEADING_ZEROS",
-              "ALLOW_LEADING_DECIMAL_POINT_FOR_NUMBERS",
-              "ALLOW_NON_NUMERIC_NUMBERS",
-              "ALLOW_MISSING_VALUES",
-              "ALLOW_TRAILING_COMMA",
-              "STRICT_DUPLICATE_DETECTION",
-              "IGNORE_UNDEFINED",
-              "INCLUDE_SOURCE_IN_LOCATION"
+              "auto_close_source",
+              "allow_comments",
+              "allow_yaml_comments",
+              "allow_unquoted_field_names",
+              "allow_single_quotes",
+              "allow_unquoted_control_chars",
+              "allow_backslash_escaping_any_character",
+              "allow_numeric_leading_zeros",
+              "allow_leading_decimal_point_for_numbers",
+              "allow_non_numeric_numbers",
+              "allow_missing_values",
+              "allow_trailing_comma",
+              "strict_duplicate_detection",
+              "ignore_undefined",
+              "include_source_in_location"
             ]
           },
           "patternProperties": {
@@ -293,21 +305,282 @@
           "description": "开启/关闭 Jackson 的生成器特性",
           "propertyNames": {
             "enum": [
-              "AUTO_CLOSE_TARGET",
-              "AUTO_CLOSE_JSON_CONTENT",
-              "FLUSH_PASSED_TO_STREAM",
-              "QUOTE_FIELD_NAMES",
-              "QUOTE_NON_NUMERIC_NUMBERS",
-              "ESCAPE_NON_ASCII",
-              "WRITE_NUMBERS_AS_STRINGS",
-              "WRITE_BIGDECIMAL_AS_PLAIN",
-              "STRICT_DUPLICATE_DETECTION",
-              "IGNORE_UNKNOWN"
+              "auto_close_target",
+              "auto_close_json_content",
+              "flush_passed_to_stream",
+              "quote_field_names",
+              "quote_non_numeric_numbers",
+              "escape_non_ascii",
+              "write_numbers_as_strings",
+              "write_bigdecimal_as_plain",
+              "strict_duplicate_detection",
+              "ignore_unknown"
             ]
           },
           "patternProperties": {
             "": {
               "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "hikariConfigDefinition": {
+      "type": "object",
+      "description": "HikariCP连接池配置",
+      "properties": {
+        "catalog": {
+          "type": "string"
+        },
+        "connectionTimeout": {
+          "type": "integer"
+        },
+        "validationTimeout": {
+          "type": "integer"
+        },
+        "idleTimeout": {
+          "type": "integer"
+        },
+        "leakDetectionThreshold": {
+          "type": "integer"
+        },
+        "maxLifetime": {
+          "type": "integer"
+        },
+        "maxPoolSize": {
+          "type": "integer"
+        },
+        "minIdle": {
+          "type": "integer"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "initializationFailTimeout": {
+          "type": "integer"
+        },
+        "connectionInitSql": {
+          "type": "string"
+        },
+        "connectionTestQuery": {
+          "type": "string"
+        },
+        "dataSourceClassName": {
+          "type": "string"
+        },
+        "dataSourceJndiName": {
+          "type": "string"
+        },
+        "driverClassName": {
+          "type": "string"
+        },
+        "exceptionOverrideClassName": {
+          "type": "string"
+        },
+        "jdbcUrl": {
+          "type": "string"
+        },
+        "poolName": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "transactionIsolationName": {
+          "type": "string"
+        },
+        "isAutoCommit": {
+          "type": "boolean"
+        },
+        "isReadOnly": {
+          "type": "boolean"
+        },
+        "isIsolateInternalQueries": {
+          "type": "boolean"
+        },
+        "isRegisterMbeans": {
+          "type": "boolean"
+        },
+        "isAllowPoolSuspension": {
+          "type": "boolean"
+        },
+        "dataSourceProperties": {
+          "type": "object",
+          "patternProperties": {
+            "^.+$": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "redisPropertiesDefinition": {
+      "type": "object",
+      "description": "Redis 配置",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "Redis 连接模式",
+          "enum": [
+            "Standalone",
+            "Sentinel",
+            "Cluster"
+          ]
+        },
+        "standalone": {
+          "type": "object",
+          "description": "Redis 单节点配置",
+          "properties": {
+            "host": {
+              "type": "string",
+              "description": "Redis 服务器 host"
+            },
+            "port": {
+              "type": "integer",
+              "description": "Redis 服务器端口"
+            },
+            "database": {
+              "type": "integer",
+              "description": "使用的Redis库(一般 0~15)"
+            },
+            "username": {
+              "type": "string",
+              "description": "Redis 服务器的登录用户名"
+            },
+            "password": {
+              "type": "string",
+              "description": "Redis 服务器的登录密码"
+            }
+          }
+        },
+        "sentinel": {
+          "type": "object",
+          "description": "Redis 哨兵配置",
+          "properties": {
+            "master": {
+              "type": "string",
+              "description": "Redis 服务器的名称"
+            },
+            "nodes": {
+              "type": "array",
+              "description": "“host:port”对的逗号分隔列表",
+              "items": {
+                "type": "string"
+              }
+            },
+            "database": {
+              "type": "integer",
+              "description": "使用的Redis库(一般 0~15)"
+            },
+            "username": {
+              "type": "string",
+              "description": "Redis 服务器的登录用户名"
+            },
+            "password": {
+              "type": "string",
+              "description": "Redis 服务器的登录密码"
+            }
+          }
+        },
+        "cluster": {
+          "type": "object",
+          "description": "Redis 群集配置",
+          "properties": {
+            "nodes": {
+              "type": "array",
+              "description": "以逗号分隔的“host:port”对列表，用于引导。这表示集群节点的“initial”列表，并且需要至少有一个条目。",
+              "items": {
+                "type": "string"
+              }
+            },
+            "maxRedirects": {
+              "type": "integer",
+              "description": "在集群中执行命令时要遵循的最大重定向数"
+            },
+            "username": {
+              "type": "string",
+              "description": "Redis 服务器的登录用户名"
+            },
+            "password": {
+              "type": "string",
+              "description": "Redis 服务器的登录密码"
+            },
+            "refresh": {
+              "type": "object",
+              "description": "Redis 集群节点刷新配置",
+              "properties": {
+                "dynamicRefreshSources": {
+                  "type": "boolean",
+                  "description": "是否发现并查询所有集群节点以获取集群拓扑。设置为 false 时，只有初始种子节点用作拓扑发现的源。"
+                },
+                "period": {
+                  "type": "string",
+                  "description": "集群拓扑刷新周期",
+                  "$ref": "#/definitions/duration"
+                },
+                "adaptive": {
+                  "type": "boolean",
+                  "description": "是否应使用所有可用刷新触发器的自适应拓扑刷新"
+                }
+              }
+            }
+          }
+        },
+        "ssl": {
+          "type": "boolean",
+          "description": "是否启用 SSL 支持"
+        },
+        "readTimeout": {
+          "type": "string",
+          "description": "读取超时",
+          "$ref": "#/definitions/duration"
+        },
+        "connectTimeout": {
+          "type": "string",
+          "description": "连接超时",
+          "$ref": "#/definitions/duration"
+        },
+        "shutdownTimeout": {
+          "type": "string",
+          "description": "关机超时",
+          "$ref": "#/definitions/duration"
+        },
+        "clientName": {
+          "type": "string",
+          "description": "要在与 CLIENT SETNAME 的连接上设置的客户端名称"
+        },
+        "pool": {
+          "type": "object",
+          "description": "连接池配置",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "是否启用"
+            },
+            "maxIdle": {
+              "type": "integer",
+              "description": "池中“空闲”连接的最大数量。使用负值表示空闲连接数不受限制"
+            },
+            "minIdle": {
+              "type": "integer",
+              "description": "池中要维护的最小空闲连接数的目标。此设置仅在它和逐出运行之间的时间均为正时才有效。"
+            },
+            "maxActive": {
+              "type": "integer",
+              "description": "池在给定时间可以分配的最大连接数。使用负值表示没有限制。"
+            },
+            "maxWait": {
+              "type": "string",
+              "description": "连接分配在池耗尽时抛出异常之前应该阻塞的最长时间。使用负值无限期阻塞。",
+              "$ref": "#/definitions/duration"
+            },
+            "timeBetweenEvictionRuns": {
+              "type": "string",
+              "description": "空闲对象驱逐器线程运行之间的时间。当为正时，空闲对象驱逐器线程启动，否则不执行空闲对象驱逐。",
+              "$ref": "#/definitions/duration"
             }
           }
         }
@@ -395,6 +668,226 @@
         "application.name": {
           "type": "string",
           "description": "应用名称"
+        }
+      }
+    },
+    "startupTaskDefinition": {
+      "type": "object",
+      "description": "系统启动后的命令行任务",
+      "properties": {
+        "timedTask": {
+          "type": "array",
+          "description": "定时任务",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "任务名称"
+              },
+              "enable": {
+                "type": "boolean",
+                "description": "是否启用当前任务,默认: true"
+              },
+              "interval": {
+                "type": "string",
+                "description": "时执行此任务的时间间隔,默认60秒",
+                "$ref": "#/definitions/duration"
+              },
+              "clazz": {
+                "type": "string",
+                "description": "class名称"
+              },
+              "method": {
+                "type": "string",
+                "description": "method名称"
+              }
+            }
+          }
+        },
+        "cmdTask": {
+          "type": "array",
+          "description": "命令行任务",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "任务名称"
+              },
+              "workDir": {
+                "type": "string",
+                "description": "Command任务的工作目录"
+              },
+              "cmd": {
+                "type": "object",
+                "description": "执行的命令行",
+                "properties": {
+                  "windows": {
+                    "type": "string",
+                    "description": "windows 系统的命令行"
+                  },
+                  "linux": {
+                    "type": "string",
+                    "description": "linux 系统的命令行"
+                  },
+                  "macos": {
+                    "type": "string",
+                    "description": "macos 系统的命令行"
+                  }
+                }
+              },
+              "enable": {
+                "type": "boolean",
+                "description": "是否启用当前任务,默认: true"
+              },
+              "async": {
+                "type": "boolean",
+                "description": "是否异步执行任务,默认: true"
+              },
+              "interval": {
+                "type": "string",
+                "description": "时执行此任务的时间间隔,默认不定时执行",
+                "$ref": "#/definitions/duration"
+              }
+            }
+          }
+        }
+      }
+    },
+    "mybatisDefinition": {
+      "type": "object",
+      "description": "Mybatis 配置",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "是否启用mybatis配置"
+        },
+        "watcher": {
+          "type": "boolean",
+          "description": "是否实时动态加载 mapper.xml"
+        },
+        "interval": {
+          "type": "string",
+          "description": "文件检查时间间隔(默认1秒)",
+          "$ref": "#/definitions/duration"
+        },
+        "locations": {
+          "type": "array",
+          "description": "mapper.xml文件路径配置",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fileType": {
+                "type": "string",
+                "description": "文件系统类型",
+                "enum": [
+                  "filesystem",
+                  "jar"
+                ]
+              },
+              "location": {
+                "type": "string",
+                "description": "mapper.xml文件路径",
+                "x-intellij-html-description": "mapper.xml文件路径<pre>1.classpath路径\n  classpath:com/mycompany/**/*.xml\n  classpath*:com/mycompany/**/*.xml\n2.本机绝对路径\n  file:/home/www/public/\n  file:D:/resources/static/\n3.本机相对路径\n  ../public/static\n  ./public\n  ../../dist</pre>"
+              },
+              "filter": {
+                "type": "string",
+                "description": "ant风格的过滤器(为空则不过滤)",
+                "x-intellij-html-description": "ant风格的过滤器(为空则不过滤)<pre>1.dao/**/*.xml\n2.**/*.xml</pre>"
+              }
+            }
+          }
+        }
+      }
+    },
+    "jdbcDefinition": {
+      "type": "object",
+      "description": "Jdbc配置",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "是否启用JDBC配置"
+        },
+        "defaultName": {
+          "type": "string",
+          "description": "默认的数据源名称"
+        },
+        "metrics": {
+          "type": "object",
+          "description": "jdbc性能监控",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "description": "是否启用监控jdbc性能"
+            },
+            "ignoreSql": {
+              "type": "array",
+              "description": "忽略的SQL语句",
+              "items": {
+                "type": "string"
+              }
+            },
+            "maxSqlCount": {
+              "type": "integer",
+              "description": "最大监控的SQL数量"
+            },
+            "histogram": {
+              "type": "array",
+              "description": "执行直方图配置",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "histogramTopN": {
+              "type": "integer",
+              "description": "直方图区间最耗时的TopN"
+            }
+          }
+        },
+        "global": {
+          "type": "object",
+          "description": "JDBC数据源全局配置",
+          "$ref": "#/definitions/hikariConfigDefinition"
+        },
+        "dataSource": {
+          "type": "object",
+          "description": "JDBC数据源集合(数据源名称 --> 数据源配置)",
+          "patternProperties": {
+            "^.+$": {
+              "type": "object",
+              "$ref": "#/definitions/hikariConfigDefinition"
+            }
+          }
+        }
+      }
+    },
+    "redisDefinition": {
+      "type": "object",
+      "description": "Redis 配置",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "是否启用Redis配置"
+        },
+        "defaultName": {
+          "type": "string",
+          "description": "默认的数据源名称"
+        },
+        "global": {
+          "type": "object",
+          "description": "Redis全局配置",
+          "$ref": "#/definitions/redisPropertiesDefinition"
+        },
+        "dataSource": {
+          "type": "object",
+          "description": "Redis数据源集合(数据源名称 --> 数据源配置)",
+          "patternProperties": {
+            "^.+$": {
+              "type": "object",
+              "$ref": "#/definitions/redisPropertiesDefinition"
+            }
+          }
         }
       }
     },
@@ -683,7 +1176,7 @@
               }
             },
             "exposedHeaders": {
-              "type": "string",
+              "type": "array",
               "description": "允许客户端能获取的的Http Header，不支持\"*\"",
               "items": {
                 "type": "string"
@@ -745,9 +1238,12 @@
               "description": "mvc接口前缀"
             },
             "httpMethod": {
-              "type": "string",
+              "type": "array",
               "description": "mvc支持的Http Method",
-              "$ref": "#/definitions/httpMethod"
+              "items": {
+                "type": "string",
+                "$ref": "#/definitions/httpMethod"
+              }
             },
             "packagePrefix": {
               "type": "string",

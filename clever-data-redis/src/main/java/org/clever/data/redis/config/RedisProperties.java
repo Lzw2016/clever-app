@@ -94,7 +94,7 @@ public class RedisProperties {
          */
         private String username;
         /**
-         * redis服务器的登录密码
+         * Redis 服务器的登录密码
          */
         private String password;
     }
