@@ -133,23 +133,38 @@ public class SecurityBootstrap {
         SECURITY_CONTEXT_REPOSITORY = new DefaultSecurityContextRepository();
         // AuthenticationFilter
         REFRESH_JWT_TOKEN = new DefaultRefreshJwtToken(securityConfig);
+        VERIFY_JWT_TOKEN_LIST.clear();
         VERIFY_JWT_TOKEN_LIST.add(new DefaultVerifyJwtToken());
         // LoginFilter
+        LOGIN_DATA_COLLECT_LIST.clear();
         LOGIN_DATA_COLLECT_LIST.add(new DefaultLoginDataCollect());
+        VERIFY_LOGIN_DATA_LIST.clear();
         VERIFY_LOGIN_DATA_LIST.add(new DefaultVerifyLoginData());
+        LOAD_USER_LIST.clear();
         LOAD_USER_LIST.add(new DefaultLoadUser());
+        VERIFY_USER_INFO_LIST.clear();
         VERIFY_USER_INFO_LIST.add(new DefaultVerifyUserInfo(PASSWORD_ENCODER));
+        ADD_JWT_TOKEN_EXT_DATA_LIST.clear();
         ADD_JWT_TOKEN_EXT_DATA_LIST.add(new DefaultAddJwtTokenExtData());
         // AuthorizationFilter
-        // AUTHORIZATION_VOTER_LIST.add();
-        // event handler
+        AUTHORIZATION_VOTER_LIST.clear();
+        AUTHORIZATION_VOTER_LIST.add(new MvcAuthorizationVoter());
+        // EventHandler
+        LOGIN_SUCCESS_HANDLER_LIST.clear();
         LOGIN_SUCCESS_HANDLER_LIST.add(new DefaultLoginSuccessHandler(securityConfig));
+        LOGIN_FAILURE_HANDLER_LIST.clear();
         LOGIN_FAILURE_HANDLER_LIST.add(new DefaultLoginFailureHandler());
+        LOGOUT_SUCCESS_HANDLER_LIST.clear();
         LOGOUT_SUCCESS_HANDLER_LIST.add(new DefaultLogoutSuccessHandler(securityConfig));
+        LOGOUT_FAILURE_HANDLER_LIST.clear();
         // LOGOUT_FAILURE_HANDLER_LIST.add();
+        AUTHORIZATION_SUCCESS_HANDLER_LIST.clear();
         // AUTHORIZATION_SUCCESS_HANDLER_LIST.add();
+        AUTHORIZATION_FAILURE_HANDLER_LIST.clear();
         // AUTHORIZATION_FAILURE_HANDLER_LIST.add();
+        AUTHENTICATION_SUCCESS_HANDLER_LIST.clear();
         AUTHENTICATION_SUCCESS_HANDLER_LIST.add(new DefaultAuthenticationSuccessHandler());
+        AUTHENTICATION_FAILURE_HANDLER_LIST.clear();
         AUTHENTICATION_FAILURE_HANDLER_LIST.add(new DefaultAuthenticationFailureHandler(securityConfig));
     }
 
