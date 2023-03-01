@@ -92,18 +92,15 @@ redis:
       host: '192.168.1.201'
       port: 30007
       database: 0
-      username:
       password: 'admin123456'
     sentinel:
       master: 'node_1'
       nodes: ['node_1:6379', 'node_2:6379', 'node_3:6379']
       database: 0
-      username:
       password: 'admin123456'
     cluster:
       nodes: ['node_1:6379', 'node_2:6379', 'node_3:6379']
       maxRedirects: 16
-      username:
       password: 'admin123456'
       refresh:
         dynamicRefreshSources: true
