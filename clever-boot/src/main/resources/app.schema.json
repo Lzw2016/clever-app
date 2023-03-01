@@ -38,9 +38,260 @@
       "type": "string",
       "pattern": "^\\d+(ns|us|ms|s|m|h|d)$"
     },
+    "httpMethod": {
+      "enum": [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+        "TRACE"
+      ]
+    },
     "dataSize": {
       "type": "string",
       "pattern": "^\\d+(B|KB|MB|GB|TB)$"
+    },
+    "jacksonDefinition": {
+      "type": "object",
+      "description": "Jackson 配置",
+      "properties": {
+        "dateFormat": {
+          "type": "string",
+          "description": "日期格式字符串或完全限定的日期格式类名称。默认: 'yyyy-MM-dd HH:mm:ss'"
+        },
+        "locale": {
+          "type": "string",
+          "description": "用于格式化的语言环境。如：'zh'、'zh_CN'、'en'、'en_US'"
+        },
+        "timeZone": {
+          "type": "string",
+          "description": "格式化日期时使用的时区。例如，“America/Los_Angeles”或“GMT+10”"
+        },
+        "propertyNamingStrategy": {
+          "type": "string",
+          "description": "Jackson 的 com.fasterxml.jackson.databind.PropertyNamingStrategy 中的静态成员之一。也可以是 PropertyNamingStrategy 子类的完全限定类名。"
+        },
+        "defaultPropertyInclusion": {
+          "type": "string",
+          "description": "控制序列化期间包含的属性。使用 Jackson 的 JsonInclude.Include 枚举中的值之一进行配置。",
+          "enum": [
+            "ALWAYS",
+            "NON_NULL",
+            "NON_ABSENT",
+            "NON_EMPTY",
+            "NON_DEFAULT",
+            "CUSTOM",
+            "USE_DEFAULTS"
+          ]
+        },
+        "visibility": {
+          "type": "object",
+          "description": "Jackson 可见性阈值，可用于限制自动检测哪些方法（和字段）",
+          "propertyNames": {
+            "enum": [
+              "GETTER",
+              "SETTER",
+              "CREATOR",
+              "FIELD",
+              "IS_GETTER",
+              "NONE",
+              "ALL"
+            ]
+          },
+          "patternProperties": {
+            "": {
+              "type": "string",
+              "enum": [
+                "ANY",
+                "NON_PRIVATE",
+                "PROTECTED_AND_PUBLIC",
+                "PUBLIC_ONLY",
+                "NONE",
+                "DEFAULT"
+              ]
+            }
+          }
+        },
+        "serialization": {
+          "type": "object",
+          "description": "开启/关闭 Jackson 特性会影响 Java 对象的序列化方式",
+          "propertyNames": {
+            "enum": [
+              "WRAP_ROOT_VALUE",
+              "INDENT_OUTPUT",
+              "FAIL_ON_EMPTY_BEANS",
+              "FAIL_ON_SELF_REFERENCES",
+              "WRAP_EXCEPTIONS",
+              "FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS",
+              "WRITE_SELF_REFERENCES_AS_NULL",
+              "CLOSE_CLOSEABLE",
+              "FLUSH_AFTER_WRITE_VALUE",
+              "WRITE_DATES_AS_TIMESTAMPS",
+              "WRITE_DATE_KEYS_AS_TIMESTAMPS",
+              "WRITE_DATES_WITH_ZONE_ID",
+              "WRITE_DATES_WITH_CONTEXT_TIME_ZONE",
+              "WRITE_DURATIONS_AS_TIMESTAMPS",
+              "WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS",
+              "WRITE_ENUMS_USING_TO_STRING",
+              "WRITE_ENUMS_USING_INDEX",
+              "WRITE_ENUM_KEYS_USING_INDEX",
+              "WRITE_NULL_MAP_VALUES",
+              "WRITE_EMPTY_JSON_ARRAYS",
+              "WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED",
+              "WRITE_BIGDECIMAL_AS_PLAIN",
+              "WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS",
+              "ORDER_MAP_ENTRIES_BY_KEYS",
+              "EAGER_SERIALIZER_FETCH",
+              "USE_EQUALITY_FOR_OBJECT_ID"
+            ]
+          },
+          "patternProperties": {
+            "": {
+              "type": "boolean"
+            }
+          }
+        },
+        "deserialization": {
+          "type": "object",
+          "description": "开启/关闭 Jackson 特性会影响 Java 对象的反序列化方式",
+          "propertyNames": {
+            "enum": [
+              "USE_BIG_DECIMAL_FOR_FLOATS",
+              "USE_BIG_INTEGER_FOR_INTS",
+              "USE_LONG_FOR_INTS",
+              "USE_JAVA_ARRAY_FOR_JSON_ARRAY",
+              "FAIL_ON_UNKNOWN_PROPERTIES",
+              "FAIL_ON_NULL_FOR_PRIMITIVES",
+              "FAIL_ON_NUMBERS_FOR_ENUMS",
+              "FAIL_ON_INVALID_SUBTYPE",
+              "FAIL_ON_READING_DUP_TREE_KEY",
+              "FAIL_ON_IGNORED_PROPERTIES",
+              "FAIL_ON_UNRESOLVED_OBJECT_IDS",
+              "FAIL_ON_MISSING_CREATOR_PROPERTIES",
+              "FAIL_ON_NULL_CREATOR_PROPERTIES",
+              "FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY",
+              "FAIL_ON_TRAILING_TOKENS",
+              "WRAP_EXCEPTIONS",
+              "ACCEPT_SINGLE_VALUE_AS_ARRAY",
+              "UNWRAP_SINGLE_VALUE_ARRAYS",
+              "UNWRAP_ROOT_VALUE",
+              "ACCEPT_EMPTY_STRING_AS_NULL_OBJECT",
+              "ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT",
+              "ACCEPT_FLOAT_AS_INT",
+              "READ_ENUMS_USING_TO_STRING",
+              "READ_UNKNOWN_ENUM_VALUES_AS_NULL",
+              "READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE",
+              "READ_DATE_TIMESTAMPS_AS_NANOSECONDS",
+              "ADJUST_DATES_TO_CONTEXT_TIME_ZONE",
+              "EAGER_DESERIALIZER_FETCH"
+            ]
+          },
+          "patternProperties": {
+            "": {
+              "type": "boolean"
+            }
+          }
+        },
+        "mapper": {
+          "type": "object",
+          "description": "开启/关闭 Jackson 的通用特性",
+          "propertyNames": {
+            "enum": [
+              "USE_ANNOTATIONS",
+              "USE_GETTERS_AS_SETTERS",
+              "PROPAGATE_TRANSIENT_MARKER",
+              "AUTO_DETECT_CREATORS",
+              "AUTO_DETECT_FIELDS",
+              "AUTO_DETECT_GETTERS",
+              "AUTO_DETECT_IS_GETTERS",
+              "AUTO_DETECT_SETTERS",
+              "REQUIRE_SETTERS_FOR_GETTERS",
+              "ALLOW_FINAL_FIELDS_AS_MUTATORS",
+              "INFER_PROPERTY_MUTATORS",
+              "INFER_CREATOR_FROM_CONSTRUCTOR_PROPERTIES",
+              "ALLOW_VOID_VALUED_PROPERTIES",
+              "CAN_OVERRIDE_ACCESS_MODIFIERS",
+              "OVERRIDE_PUBLIC_ACCESS_MODIFIERS",
+              "USE_STATIC_TYPING",
+              "USE_BASE_TYPE_AS_DEFAULT_IMPL",
+              "INFER_BUILDER_TYPE_BINDINGS",
+              "DEFAULT_VIEW_INCLUSION",
+              "SORT_PROPERTIES_ALPHABETICALLY",
+              "SORT_CREATOR_PROPERTIES_FIRST",
+              "ACCEPT_CASE_INSENSITIVE_PROPERTIES",
+              "ACCEPT_CASE_INSENSITIVE_ENUMS",
+              "ACCEPT_CASE_INSENSITIVE_VALUES",
+              "USE_WRAPPER_NAME_AS_PROPERTY_NAME",
+              "USE_STD_BEAN_NAMING",
+              "ALLOW_EXPLICIT_PROPERTY_RENAMING",
+              "ALLOW_COERCION_OF_SCALARS",
+              "IGNORE_DUPLICATE_MODULE_REGISTRATIONS",
+              "IGNORE_MERGE_FOR_UNMERGEABLE",
+              "BLOCK_UNSAFE_POLYMORPHIC_BASE_TYPES",
+              "APPLY_DEFAULT_VALUES"
+            ]
+          },
+          "patternProperties": {
+            "": {
+              "type": "boolean"
+            }
+          }
+        },
+        "parser": {
+          "type": "object",
+          "description": "开启/关闭 Jackson 的解析器特性",
+          "propertyNames": {
+            "enum": [
+              "AUTO_CLOSE_SOURCE",
+              "ALLOW_COMMENTS",
+              "ALLOW_YAML_COMMENTS",
+              "ALLOW_UNQUOTED_FIELD_NAMES",
+              "ALLOW_SINGLE_QUOTES",
+              "ALLOW_UNQUOTED_CONTROL_CHARS",
+              "ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER",
+              "ALLOW_NUMERIC_LEADING_ZEROS",
+              "ALLOW_LEADING_DECIMAL_POINT_FOR_NUMBERS",
+              "ALLOW_NON_NUMERIC_NUMBERS",
+              "ALLOW_MISSING_VALUES",
+              "ALLOW_TRAILING_COMMA",
+              "STRICT_DUPLICATE_DETECTION",
+              "IGNORE_UNDEFINED",
+              "INCLUDE_SOURCE_IN_LOCATION"
+            ]
+          },
+          "patternProperties": {
+            "": {
+              "type": "boolean"
+            }
+          }
+        },
+        "generator": {
+          "type": "object",
+          "description": "开启/关闭 Jackson 的生成器特性",
+          "propertyNames": {
+            "enum": [
+              "AUTO_CLOSE_TARGET",
+              "AUTO_CLOSE_JSON_CONTENT",
+              "FLUSH_PASSED_TO_STREAM",
+              "QUOTE_FIELD_NAMES",
+              "QUOTE_NON_NUMERIC_NUMBERS",
+              "ESCAPE_NON_ASCII",
+              "WRITE_NUMBERS_AS_STRINGS",
+              "WRITE_BIGDECIMAL_AS_PLAIN",
+              "STRICT_DUPLICATE_DETECTION",
+              "IGNORE_UNKNOWN"
+            ]
+          },
+          "patternProperties": {
+            "": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
     },
     "//------------------------------------------------------------------------------配置Definition": {},
     "loggingDefinition": {
@@ -143,7 +394,7 @@
           "$ref": "#/definitions/webDefinition/definitions/serverDefinition"
         },
         "jackson": {
-          "$ref": "#/definitions/webDefinition/definitions/jacksonDefinition"
+          "$ref": "#/definitions/jacksonDefinition"
         },
         "http": {
           "$ref": "#/definitions/webDefinition/definitions/httpDefinition"
@@ -207,13 +458,6 @@
                 }
               }
             }
-          }
-        },
-        "jacksonDefinition": {
-          "type": "object",
-          "description": "Jackson 配置",
-          "properties": {
-            "TODO": {}
           }
         },
         "httpDefinition": {
@@ -349,16 +593,87 @@
         },
         "echoDefinition": {
           "type": "object",
-          "description": "",
+          "description": "EchoFilter 配置",
           "properties": {
-            "TODO": {}
+            "enable": {
+              "type": "boolean",
+              "description": "启用 EchoFilter"
+            },
+            "ignorePaths": {
+              "type": "array",
+              "description": "忽略地址(支持AntPath风格)",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
         "corsDefinition": {
           "type": "object",
-          "description": "",
+          "description": "跨域处理 Filter 配置",
           "properties": {
-            "TODO": {}
+            "enable": {
+              "type": "boolean",
+              "description": "启用 CorsFilter"
+            },
+            "pathPattern": {
+              "type": "array",
+              "description": "支持跨域的path(支持AntPath风格，默认：“/**”)",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allowedOrigins": {
+              "type": "array",
+              "description": "允许的域(不支持匹配符，如：\"*\")",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allowedOriginPatterns": {
+              "type": "array",
+              "description": "允许的域(支持匹配符，如：\"*\")",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allowedMethods": {
+              "type": "array",
+              "description": "允许客户端能发送的Http Method，\"*\"为所有Method",
+              "items": {
+                "type": "string"
+              }
+            },
+            "resolvedMethods": {
+              "type": "array",
+              "description": "允许客户端能发送的Http Method(解析后的HttpMethod对象)",
+              "items": {
+                "type": "string",
+                "$ref": "#/definitions/httpMethod"
+              }
+            },
+            "allowedHeaders": {
+              "type": "array",
+              "description": "允许客户端能发送的Http Header，\"*\"为所有Header",
+              "items": {
+                "type": "string"
+              }
+            },
+            "exposedHeaders": {
+              "type": "string",
+              "description": "允许客户端能获取的的Http Header，不支持\"*\"",
+              "items": {
+                "type": "string"
+              }
+            },
+            "allowCredentials": {
+              "type": "boolean",
+              "description": "是否允许凭证"
+            },
+            "maxAge": {
+              "type": "integer",
+              "description": "配置客户端可以缓存pre-flight请求的响应的持续时间(毫秒)"
+            }
           }
         },
         "resourcesDefinition": {
