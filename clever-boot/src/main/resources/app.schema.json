@@ -834,7 +834,206 @@
           "type": "object",
           "description": "Web权限配置",
           "properties": {
-            "TODO": {}
+            "enable": {
+              "type": "boolean",
+              "description": "是有启用 security"
+            },
+            "dataSource": {
+              "type": "object",
+              "description": "security 使用的数据源配置",
+              "properties": {
+                "jdbcName": {
+                  "type": "string",
+                  "description": "jdbc 数据源名称"
+                },
+                "enableRedis": {
+                  "type": "boolean",
+                  "description": "启用 redis 提高性能"
+                },
+                "redisName": {
+                  "type": "string",
+                  "description": "redis数据源名称"
+                },
+                "redisNamespace": {
+                  "type": "string",
+                  "description": "Token Redis前缀"
+                }
+              }
+            },
+            "ignorePaths": {
+              "type": "array",
+              "description": "不需要认证和授权的Path(支持Ant风格的Path)",
+              "items": {
+                "type": "string"
+              }
+            },
+            "ignoreAuthPaths": {
+              "type": "array",
+              "description": "不需要授权的Path(支持Ant风格的Path)",
+              "items": {
+                "type": "string"
+              }
+            },
+            "ignoreAuthFailedPaths": {
+              "type": "array",
+              "description": "认证或授权失败时不拦截的Path(支持Ant风格的Path)",
+              "items": {
+                "type": "string"
+              }
+            },
+            "notLoginNeedRedirect": {
+              "type": "boolean",
+              "description": "未登录时是否需要重定向到 401 页面"
+            },
+            "notLoginRedirectPage": {
+              "type": "string",
+              "description": "未登录时是否需要重定向"
+            },
+            "forbiddenNeedRedirect": {
+              "type": "boolean",
+              "description": "无权访问时是否需要重定向到 403 页面"
+            },
+            "forbiddenRedirectPage": {
+              "type": "string",
+              "description": "403页面地址(无权访问时的重定向地址)"
+            },
+            "currentUserPath": {
+              "type": "string",
+              "description": "获取当前用户信息请求地址"
+            },
+            "login": {
+              "type": "object",
+              "description": "用户登录相关配置",
+              "properties": {
+                "paths": {
+                  "type": "array",
+                  "description": "登录请求Path",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "postOnly": {
+                  "type": "boolean",
+                  "description": "登录只支持POST请求"
+                },
+                "hideUserNotFoundException": {
+                  "type": "boolean",
+                  "description": "隐藏登录用户不存在的异常"
+                },
+                "successNeedRedirect": {
+                  "type": "boolean",
+                  "description": "登录成功 - 是否需要重定向到指定页面"
+                },
+                "successRedirectPage": {
+                  "type": "string",
+                  "description": "登录成功重定向的地址"
+                },
+                "failureNeedRedirect": {
+                  "type": "boolean",
+                  "description": "登录失败 - 是否需要重定向"
+                },
+                "failureRedirectPage": {
+                  "type": "string",
+                  "description": "登录失败跳转地址"
+                },
+                "allowRepeatLogin": {
+                  "type": "boolean",
+                  "description": "是否允许重复登录(在登录状态下登录其他账号)"
+                },
+                "concurrentLoginCount": {
+                  "type": "integer",
+                  "description": "同一个用户并发登录次数限制(小于等于0表示不限制)"
+                },
+                "allowAfterLogin": {
+                  "type": "boolean",
+                  "description": "同一个用户并发登录次数达到最大值之后,是否后登陆的挤下前登录的(false表示登录次数达到最大值后,之后的用户无法登录)"
+                }
+              }
+            },
+            "logout": {
+              "type": "object",
+              "description": "用户登出相关配置",
+              "properties": {
+                "pathL": {
+                  "type": "string",
+                  "description": "登出请求路径"
+                },
+                "needRedirect": {
+                  "type": "boolean",
+                  "description": "登出后 - 是否需要重定向"
+                },
+                "redirectPage": {
+                  "type": "string",
+                  "description": "登出后跳转地址"
+                }
+              }
+            },
+            "reqAesKey": {
+              "type": "object",
+              "description": "用户请求参数加密配置AesKey(登录、注册等敏感接口使用)",
+              "properties": {
+                "enable": {
+                  "type": "boolean",
+                  "description": "启用密码加密传输"
+                },
+                "reqPasswordAesKey": {
+                  "type": "string",
+                  "description": "密码AES加密 key(Hex编码) -- 请求数据，与前端一致"
+                },
+                "reqPasswordAesIv": {
+                  "type": "string",
+                  "description": "密码AES加密 iv(Hex编码) -- 请求数据，与前端一致"
+                }
+              }
+            },
+            "token": {
+              "type": "object",
+              "description": "token配置(JWT-Token有效)",
+              "properties": {
+                "secretKey": {
+                  "type": "string",
+                  "description": "Token签名密钥"
+                },
+                "useCookie": {
+                  "type": "boolean",
+                  "description": "使用Cookie传输JWT-Token(false表示使用Http Header传输JWT-Token)"
+                },
+                "tokenValidity": {
+                  "type": "string",
+                  "description": "Token有效时间(默认：7天)",
+                  "$ref": "#/definitions/duration"
+                },
+                "hoursInDay": {
+                  "type": "string",
+                  "description": "设置密钥过期时间(格式 HH:mm:ss)"
+                },
+                "issuer": {
+                  "type": "string",
+                  "description": "iss（签发者）"
+                },
+                "audience": {
+                  "type": "string",
+                  "description": "aud（接收方）"
+                },
+                "jwtTokenName": {
+                  "type": "string",
+                  "description": "JWT-Token名称(Cookie或Header中的key)"
+                },
+                "enableRefreshToken": {
+                  "type": "boolean",
+                  "description": "启用刷新令牌"
+                },
+                "refreshTokenValidity": {
+                  "type": "string",
+                  "description": "刷新令牌有效时间",
+                  "$ref": "#/definitions/duration"
+                },
+                "refreshTokenName": {
+                  "type": "string",
+                  "description": "刷新Token名称(Cookie或Header中的key)"
+                }
+              }
+            }
           }
         }
       }
