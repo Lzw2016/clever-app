@@ -46,7 +46,7 @@ public class JacksonConfig {
      */
     private TimeZone timeZone = TimeZone.getTimeZone("GMT+8");
     /**
-     * Jackson 的 {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} 中的静态成员之一之一。
+     * Jackson 的 {@link com.fasterxml.jackson.databind.PropertyNamingStrategy} 中的静态成员之一。
      * 也可以是 PropertyNamingStrategy 子类的完全限定类名。
      */
     private String propertyNamingStrategy;
