@@ -50,6 +50,26 @@
         "TRACE"
       ]
     },
+    "propagation": {
+      "enum": [
+        "REQUIRED",
+        "SUPPORTS",
+        "MANDATORY",
+        "REQUIRES_NEW",
+        "NOT_SUPPORTED",
+        "NEVER",
+        "NESTED"
+      ]
+    },
+    "isolation": {
+      "enum": [
+        "DEFAULT",
+        "READ_UNCOMMITTED",
+        "READ_COMMITTED",
+        "REPEATABLE_READ",
+        "SERIALIZABLE"
+      ]
+    },
     "dataSize": {
       "type": "string",
       "pattern": "^\\d+(B|KB|MB|GB|TB)$"
@@ -416,6 +436,9 @@
         },
         "mvc": {
           "$ref": "#/definitions/webDefinition/definitions/mvcDefinition"
+        },
+        "security": {
+          "$ref": "#/definitions/webDefinition/definitions/securityDefinition"
         }
       },
       "definitions": {
@@ -678,14 +701,138 @@
         },
         "resourcesDefinition": {
           "type": "object",
-          "description": "",
+          "description": "静态资源映射 StaticResourceFilter 配置",
           "properties": {
-            "TODO": {}
+            "enable": {
+              "type": "boolean",
+              "description": "启用 StaticFileFilter"
+            },
+            "mappings": {
+              "type": "array",
+              "description": "静态资源映射",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "hostedPath": {
+                    "type": "string",
+                    "description": "服务端路径前缀。如：'/static/'、'/dist/'、'/assets/'"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "静态资源本机路径。",
+                    "x-intellij-html-description": "静态资源本机路径。如：<br/>1.classpath路径<br/>&nbsp;&nbsp;&nbsp;&nbsp;classpath:/public/<br/>&nbsp;&nbsp;&nbsp;&nbsp;classpath:/META-INF/resources/<br/>2.本机绝对路径<br/>&nbsp;&nbsp;&nbsp;&nbsp;file:/home/www/public/<br/>&nbsp;&nbsp;&nbsp;&nbsp;file:D:/resources/static/<br/>3.本机相对路径<br/>&nbsp;&nbsp;&nbsp;&nbsp;../public/static<br/>&nbsp;&nbsp;&nbsp;&nbsp;./public<br/>&nbsp;&nbsp;&nbsp;&nbsp;../../dist"
+                  },
+                  "cachePeriod": {
+                    "type": "string",
+                    "description": "缓存时间(单位：秒，小于等于0表示不缓存)",
+                    "$ref": "#/definitions/duration"
+                  }
+                }
+              }
+            }
           }
         },
         "mvcDefinition": {
           "type": "object",
           "description": "MVC 配置",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "description": "是否启用 mvc 功能"
+            },
+            "path": {
+              "type": "string",
+              "description": "mvc接口前缀"
+            },
+            "httpMethod": {
+              "type": "string",
+              "description": "mvc支持的Http Method",
+              "$ref": "#/definitions/httpMethod"
+            },
+            "packagePrefix": {
+              "type": "string",
+              "description": "mvc映射的 Method 的 package 默认前缀"
+            },
+            "allowPackages": {
+              "type": "array",
+              "description": "允许mvc调用的package前缀",
+              "items": {
+                "type": "string"
+              }
+            },
+            "defTransactional": {
+              "type": "object",
+              "description": "默认的事务配置",
+              "properties": {
+                "defDatasource": {
+                  "type": "array",
+                  "description": "使用 Transactional 时的默认 datasource 值",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "datasource": {
+                  "type": "array",
+                  "description": "要启用事务的数据源",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "propagation": {
+                  "type": "string",
+                  "description": "事务传播性",
+                  "$ref": "#/definitions/propagation"
+                },
+                "isolation": {
+                  "type": "string",
+                  "description": "事务隔离级别",
+                  "$ref": "#/definitions/isolation"
+                },
+                "timeout": {
+                  "type": "integer",
+                  "description": "事务超时时间"
+                },
+                "readOnly": {
+                  "type": "boolean",
+                  "description": "是否是只读事务"
+                }
+              }
+            },
+            "hotReload": {
+              "type": "object",
+              "description": "热重载配置",
+              "properties": {
+                "enable": {
+                  "type": "boolean",
+                  "description": "是否启用热重载模式"
+                },
+                "interval": {
+                  "type": "string",
+                  "description": "文件检查时间间隔(默认1秒)",
+                  "$ref": "#/definitions/duration"
+                },
+                "excludePackages": {
+                  "type": "array",
+                  "description": "不使用热重载的package前缀",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "locations": {
+                  "type": "array",
+                  "description": "热重载class位置",
+                  "x-intellij-html-description": "热重载class位置。<br/><pre>1.classpath路径\n  classpath:com/mycompany/**/*.xml\n  classpath*:com/mycompany/**/*.xml\n2.本机绝对路径\n  file:/home/www/public/\n  file:D:/resources/static/\n3.本机相对路径\n  ../public/static\n  ./public\n  ../../dist</pre>",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "securityDefinition": {
+          "type": "object",
+          "description": "Web权限配置",
           "properties": {
             "TODO": {}
           }

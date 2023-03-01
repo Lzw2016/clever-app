@@ -72,7 +72,7 @@ public class MvcConfig {
          */
         private Propagation propagation = Propagation.REQUIRED;
         /**
-         * 事务隔离性
+         * 事务隔离级别
          */
         private Isolation isolation = Isolation.DEFAULT;
         /**
