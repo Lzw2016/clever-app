@@ -93,21 +93,43 @@ public class RedissonClientFactory {
         if (readTimeout != null) {
             config.setTimeout((int) readTimeout.toMillis());
         }
-        // TODO 支持 Redisson 复杂配置
         // BaseConfig
-        // clientName
-        // username
-        // password
-        // timeout
-        // connectTimeout
-        // idleConnectionTimeout
-        // retryInterval
-        // retryAttempts
-        // subscriptionsPerConnection
-        // sslEnableEndpointIdentification
-        // pingConnectionInterval
-        // keepAlive
-        // tcpNoDelay
+        RedisProperties.RedissonConfig redisson = properties.getRedisson();
+        if (redisson == null) {
+            return;
+        }
+        Integer idleConnectionTimeout = redisson.getIdleConnectionTimeout();
+        if (idleConnectionTimeout != null) {
+            config.setIdleConnectionTimeout(idleConnectionTimeout);
+        }
+        Integer retryInterval = redisson.getRetryInterval();
+        if (retryInterval != null) {
+            config.setRetryInterval(retryInterval);
+        }
+        Integer retryAttempts = redisson.getRetryAttempts();
+        if (retryAttempts != null) {
+            config.setRetryAttempts(retryAttempts);
+        }
+        Integer subscriptionsPerConnection = redisson.getSubscriptionsPerConnection();
+        if (subscriptionsPerConnection != null) {
+            config.setSubscriptionsPerConnection(subscriptionsPerConnection);
+        }
+        Boolean sslEnableEndpointIdentification = redisson.getSslEnableEndpointIdentification();
+        if (sslEnableEndpointIdentification != null) {
+            config.setSslEnableEndpointIdentification(sslEnableEndpointIdentification);
+        }
+        Integer pingConnectionInterval = redisson.getPingConnectionInterval();
+        if (pingConnectionInterval != null) {
+            config.setPingConnectionInterval(pingConnectionInterval);
+        }
+        Boolean keepAlive = redisson.getKeepAlive();
+        if (keepAlive != null) {
+            config.setKeepAlive(keepAlive);
+        }
+        Boolean tcpNoDelay = redisson.getTcpNoDelay();
+        if (tcpNoDelay != null) {
+            config.setTcpNoDelay(tcpNoDelay);
+        }
     }
 
     private static void applyConfig(RedisProperties properties, BaseMasterSlaveServersConfig<?> config) {
@@ -115,66 +137,211 @@ public class RedissonClientFactory {
         Assert.notNull(config, "参数 config 不能为 null");
         applyConfig(properties, (BaseConfig<?>) config);
         // BaseMasterSlaveServersConfig
-        // slaveConnectionPoolSize
-        // slaveConnectionMinimumIdleSize
-        // failedSlaveCheckInterval
-        // failedSlaveReconnectionInterval
-        // masterConnectionPoolSize
-        // masterConnectionMinimumIdleSize
-        // readMode
-        // subscriptionMode
-        // subscriptionConnectionPoolSize
-        // subscriptionConnectionMinimumIdleSize
-        // dnsMonitoringInterval
+        RedisProperties.RedissonConfig redisson = properties.getRedisson();
+        if (redisson == null) {
+            return;
+        }
+        RedisProperties.RedissonConfig.SlaveConfig slave = redisson.getSlave();
+        if (slave == null) {
+            return;
+        }
+        Integer slaveConnectionPoolSize = slave.getSlaveConnectionPoolSize();
+        if (slaveConnectionPoolSize != null) {
+            config.setSlaveConnectionPoolSize(slaveConnectionPoolSize);
+        }
+        Integer slaveConnectionMinimumIdleSize = slave.getSlaveConnectionMinimumIdleSize();
+        if (slaveConnectionMinimumIdleSize != null) {
+            config.setSlaveConnectionMinimumIdleSize(slaveConnectionMinimumIdleSize);
+        }
+        Integer slaveFailsInterval = slave.getSlaveFailsInterval();
+        if (slaveFailsInterval != null) {
+            config.setFailedSlaveCheckInterval(slaveFailsInterval);
+        }
+        Integer failedSlavesReconnectionTimeout = slave.getFailedSlavesReconnectionTimeout();
+        if (failedSlavesReconnectionTimeout != null) {
+            config.setFailedSlaveReconnectionInterval(failedSlavesReconnectionTimeout);
+        }
+        Integer masterConnectionPoolSize = slave.getMasterConnectionPoolSize();
+        if (masterConnectionPoolSize != null) {
+            config.setMasterConnectionPoolSize(masterConnectionPoolSize);
+        }
+        Integer masterConnectionMinimumIdleSize = slave.getMasterConnectionMinimumIdleSize();
+        if (masterConnectionMinimumIdleSize != null) {
+            config.setMasterConnectionMinimumIdleSize(masterConnectionMinimumIdleSize);
+        }
+        ReadMode readMode = slave.getReadMode();
+        if (readMode != null) {
+            config.setReadMode(readMode);
+        }
+        SubscriptionMode subscriptionMode = slave.getSubscriptionMode();
+        if (subscriptionMode != null) {
+            config.setSubscriptionMode(subscriptionMode);
+        }
+        Integer subscriptionConnectionPoolSize = slave.getSubscriptionConnectionPoolSize();
+        if (subscriptionConnectionPoolSize != null) {
+            config.setSubscriptionConnectionPoolSize(subscriptionConnectionPoolSize);
+        }
+        Integer subscriptionConnectionMinimumIdleSize = slave.getSubscriptionConnectionMinimumIdleSize();
+        if (subscriptionConnectionMinimumIdleSize != null) {
+            config.setSubscriptionConnectionMinimumIdleSize(subscriptionConnectionMinimumIdleSize);
+        }
+        Long dnsMonitoringInterval = slave.getDnsMonitoringInterval();
+        if (dnsMonitoringInterval != null) {
+            config.setDnsMonitoringInterval(dnsMonitoringInterval);
+        }
     }
 
     private static void applyConfig(RedisProperties properties, SingleServerConfig config) {
         Assert.notNull(properties, "参数 properties 不能为 null");
         Assert.notNull(config, "参数 config 不能为 null");
         applyConfig(properties, (BaseConfig<?>) config);
-        // singleServerConfig.setDnsMonitoringInterval()
-        // singleServerConfig.setConnectionPoolSize()
-        // singleServerConfig.setConnectionMinimumIdleSize()
-        // singleServerConfig.setSubscriptionConnectionPoolSize()
-        // singleServerConfig.setSubscriptionConnectionMinimumIdleSize()
+        // SingleServerConfig
+        RedisProperties.RedissonConfig redisson = properties.getRedisson();
+        if (redisson == null) {
+            return;
+        }
+        RedisProperties.RedissonConfig.SingleConfig single = redisson.getSingle();
+        if (single == null) {
+            return;
+        }
+        Long dnsMonitoringInterval = single.getDnsMonitoringInterval();
+        if (dnsMonitoringInterval != null) {
+            config.setDnsMonitoringInterval(dnsMonitoringInterval);
+        }
+        Integer connectionPoolSize = single.getConnectionPoolSize();
+        if (connectionPoolSize != null) {
+            config.setConnectionPoolSize(connectionPoolSize);
+        }
+        Integer connectionMinimumIdleSize = single.getConnectionMinimumIdleSize();
+        if (connectionMinimumIdleSize != null) {
+            config.setConnectionMinimumIdleSize(connectionMinimumIdleSize);
+        }
+        Integer subscriptionConnectionPoolSize = single.getSubscriptionConnectionPoolSize();
+        if (subscriptionConnectionPoolSize != null) {
+            config.setSubscriptionConnectionPoolSize(subscriptionConnectionPoolSize);
+        }
+        Integer subscriptionConnectionMinimumIdleSize = single.getSubscriptionConnectionMinimumIdleSize();
+        if (subscriptionConnectionMinimumIdleSize != null) {
+            config.setSubscriptionConnectionMinimumIdleSize(subscriptionConnectionMinimumIdleSize);
+        }
     }
 
     private static void applyConfig(RedisProperties properties, SentinelServersConfig config) {
         Assert.notNull(properties, "参数 properties 不能为 null");
         Assert.notNull(config, "参数 config 不能为 null");
         applyConfig(properties, (BaseMasterSlaveServersConfig<?>) config);
-        // sentinelServersConfig.setNatMapper()
-        // sentinelServersConfig.setScanInterval()
-        // sentinelServersConfig.setCheckSentinelsList()
-        // sentinelServersConfig.setCheckSlaveStatusWithSyncing()
-        // sentinelServersConfig.setSentinelsDiscovery()
+        // SentinelServersConfig
+        RedisProperties.RedissonConfig redisson = properties.getRedisson();
+        if (redisson == null) {
+            return;
+        }
+        RedisProperties.RedissonConfig.SentinelConfig sentinel = redisson.getSentinel();
+        if (sentinel == null) {
+            return;
+        }
+        // config.setNatMapper()
+        Integer scanInterval = sentinel.getScanInterval();
+        if (scanInterval != null) {
+            config.setScanInterval(scanInterval);
+        }
+        Boolean checkSentinelsList = sentinel.getCheckSentinelsList();
+        if (checkSentinelsList != null) {
+            config.setCheckSentinelsList(checkSentinelsList);
+        }
+        Boolean checkSlaveStatusWithSyncing = sentinel.getCheckSlaveStatusWithSyncing();
+        if (checkSlaveStatusWithSyncing != null) {
+            config.setCheckSlaveStatusWithSyncing(checkSlaveStatusWithSyncing);
+        }
+        Boolean sentinelsDiscovery = sentinel.getSentinelsDiscovery();
+        if (sentinelsDiscovery != null) {
+            config.setSentinelsDiscovery(sentinelsDiscovery);
+        }
     }
 
     private static void applyConfig(RedisProperties properties, ClusterServersConfig config) {
         Assert.notNull(properties, "参数 properties 不能为 null");
         Assert.notNull(config, "参数 config 不能为 null");
         applyConfig(properties, (BaseMasterSlaveServersConfig<?>) config);
-        // clusterServersConfig.setNatMapper()
-        // clusterServersConfig.setScanInterval()
-        // clusterServersConfig.setCheckSlotsCoverage()
+        // ClusterServersConfig
+        RedisProperties.RedissonConfig redisson = properties.getRedisson();
+        if (redisson == null) {
+            return;
+        }
+        RedisProperties.RedissonConfig.ClusterConfig cluster = redisson.getCluster();
+        if (cluster == null) {
+            return;
+        }
+        // config.setNatMapper()
+        Integer scanInterval = cluster.getScanInterval();
+        if (scanInterval != null) {
+            config.setScanInterval(scanInterval);
+        }
+        Boolean checkSlotsCoverage = cluster.getCheckSlotsCoverage();
+        if (checkSlotsCoverage != null) {
+            config.setCheckSlotsCoverage(checkSlotsCoverage);
+        }
     }
 
     private static void applyConfig(RedisProperties properties, Config config) {
         Assert.notNull(properties, "参数 properties 不能为 null");
         Assert.notNull(config, "参数 config 不能为 null");
-        // threads
-        // nettyThreads
-        // executor
-        // referenceEnabled
-        // transportMode
-        // lockWatchdogTimeout
-        // checkLockSyncedSlaves
-        // reliableTopicWatchdogTimeout
-        // keepPubSubOrder
-        // useScriptCache
-        // minCleanUpDelay
-        // maxCleanUpDelay
-        // cleanUpKeysAmount
-        // useThreadClassLoader
+        // Config
+        RedisProperties.RedissonConfig redisson = properties.getRedisson();
+        if (redisson == null) {
+            return;
+        }
+        Integer threads = redisson.getThreads();
+        if (threads != null) {
+            config.setThreads(threads);
+        }
+        Integer nettyThreads = redisson.getThreads();
+        if (nettyThreads != null) {
+            config.setNettyThreads(nettyThreads);
+        }
+        // config.setExecutor()
+        Boolean redissonReferenceEnabled = redisson.getRedissonReferenceEnabled();
+        if (redissonReferenceEnabled != null) {
+            config.setReferenceEnabled(redissonReferenceEnabled);
+        }
+        TransportMode transportMode = redisson.getTransportMode();
+        if (transportMode != null) {
+            config.setTransportMode(transportMode);
+        }
+        Long lockWatchdogTimeout = redisson.getLockWatchdogTimeout();
+        if (lockWatchdogTimeout != null) {
+            config.setLockWatchdogTimeout(lockWatchdogTimeout);
+        }
+        Boolean checkLockSyncedSlaves = redisson.getCheckLockSyncedSlaves();
+        if (checkLockSyncedSlaves != null) {
+            config.setCheckLockSyncedSlaves(checkLockSyncedSlaves);
+        }
+        Long reliableTopicWatchdogTimeout = redisson.getReliableTopicWatchdogTimeout();
+        if (reliableTopicWatchdogTimeout != null) {
+            config.setReliableTopicWatchdogTimeout(reliableTopicWatchdogTimeout);
+        }
+        Boolean keepPubSubOrder = redisson.getKeepPubSubOrder();
+        if (keepPubSubOrder != null) {
+            config.setKeepPubSubOrder(keepPubSubOrder);
+        }
+        Boolean useScriptCache = redisson.getUseScriptCache();
+        if (useScriptCache != null) {
+            config.setUseScriptCache(useScriptCache);
+        }
+        Integer minCleanUpDelay = redisson.getMinCleanUpDelay();
+        if (minCleanUpDelay != null) {
+            config.setMinCleanUpDelay(minCleanUpDelay);
+        }
+        Integer maxCleanUpDelay = redisson.getMaxCleanUpDelay();
+        if (maxCleanUpDelay != null) {
+            config.setMaxCleanUpDelay(maxCleanUpDelay);
+        }
+        Integer cleanUpKeysAmount = redisson.getCleanUpKeysAmount();
+        if (cleanUpKeysAmount != null) {
+            config.setCleanUpKeysAmount(cleanUpKeysAmount);
+        }
+        Boolean useThreadClassLoader = redisson.getUseThreadClassLoader();
+        if (useThreadClassLoader != null) {
+            config.setUseThreadClassLoader(useThreadClassLoader);
+        }
     }
 }
