@@ -221,16 +221,16 @@ public class RedisProperties {
          * 线程数量在 RTopic 对象的所有侦听器、RRemoteService 对象的调用处理程序和 RExecutorService 任务之间共享。
          * 默认值为 16。 0 表示 current_processors_amount 2
          */
-        private Integer  threads;
+        private Integer threads;
         /**
          * Redisson 使用的所有 Redis 客户端之间共享的线程数。
          * 默认值为 32。0 表示 current_processors_amount 2
          */
-        private Integer  nettyThreads;
+        private Integer nettyThreads;
         /**
          * 用于启用 Redisson 参考功能的配置选项。默认是 true
          */
-        private Boolean  redissonReferenceEnabled;
+        private Boolean redissonReferenceEnabled;
         /**
          * 网路传输方式。默认是 TransportMode.NIO
          */
@@ -267,25 +267,25 @@ public class RedisProperties {
          * 应用于 JCache、RSetCache、RMapCache、RListMultimapCache、RSetMultimapCache 对象。
          * 默认为 5 秒
          */
-        private Integer  minCleanUpDelay;
+        private Integer minCleanUpDelay;
         /**
          * 定义过期条目清理过程的最大延迟秒数。
          * 应用于 JCache、RSetCache、RMapCache、RListMultimapCache、RSetMultimapCache 对象。
          * 默认为 1800 秒
          */
-        private Integer  maxCleanUpDelay;
+        private Integer maxCleanUpDelay;
         /**
          * 定义过期条目清理过程中每次操作删除的过期密钥数量。
          * 应用于 JCache、RSetCache、RMapCache、RListMultimapCache、RSetMultimapCache 对象。
          * 默认为 100
          */
-        private Integer  cleanUpKeysAmount;
+        private Integer cleanUpKeysAmount;
         /**
          * 定义是否向 Codec 提供 Thread ContextClassLoader。使用 Thread.getContextClassLoader() 可以解决 ClassNotFoundException 错误。
          * 例如，如果在 Tomcat 和已部署的应用程序中都使用 Redisson，则会出现此错误。
          * 默认为 true
          */
-        private Boolean  useThreadClassLoader;
+        private Boolean useThreadClassLoader;
         /**
          * 如果池连接在超时时间内未使用并且当前连接数量大于最小空闲连接池大小，则它将关闭并从池中删除(毫秒)
          */
@@ -421,7 +421,7 @@ public class RedisProperties {
          * cluster 模式配置
          */
         @Data
-        public static class ClusterConfig{
+        public static class ClusterConfig {
             /**
              * Redis 集群扫描间隔，以毫秒为单位。默认为 5000毫秒
              */
