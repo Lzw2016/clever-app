@@ -7,8 +7,6 @@ dependencies {
     api("com.querydsl:querydsl-sql")
     api("com.github.jsqlparser:jsqlparser")
     api("p6spy:p6spy")
-    // api("com.jfinal:enjoy")
-    // api("org.springframework.boot:spring-boot-starter-jdbc")
     testImplementation("org.postgresql:postgresql")
     testImplementation("mysql:mysql-connector-java")
     // runtimeOnly("com.oracle.database.jdbc:ojdbc8")

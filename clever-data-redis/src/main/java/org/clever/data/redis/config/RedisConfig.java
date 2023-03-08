@@ -26,7 +26,6 @@ public class RedisConfig {
      * Redis全局配置
      */
     private RedisProperties global = new RedisProperties();
-
     /**
      * Redis数据源集合(数据源名称 --> 数据源配置)
      */

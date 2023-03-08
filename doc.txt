@@ -4,6 +4,8 @@ clever-core     封装常用的工具类: 序列化反序列化、HTTP、编码�
 clever-web      基于javalin封装servlet web服务器的实现,参考spring mvc部分注解的实现,支持web mvc动态调用java class(包含kotlin或groovy等JVM语言,需要编译器支持)
 clever-groovy   基于groovy实现web mvc动态调用groovy class(无需编译器支持)
 
+clever-swagger2
+
 clever-data-dynamic-sql 实现类似mybatis的sql模版,实现动态sql能力
 clever-data-jdbc        参考spring-jdbc实现对JDBC操作的轻度封装
 clever-data-jdbc-meta   基于schemacrawler实现读取数据库表结构信息的功能

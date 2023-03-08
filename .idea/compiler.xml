@@ -24,10 +24,12 @@
         <module name="clever-app.clever-data-redis.main" />
         <module name="clever-app.clever-security.main" />
         <module name="clever-app.clever-groovy.test" />
+        <module name="clever-app.clever-data-rabbitmq.test" />
         <module name="clever-app.clever-data-commons.main" />
         <module name="clever-app.clever-data-commons.test" />
         <module name="clever-app.clever-data-jdbc.main" />
         <module name="clever-app.clever-data-dynamic-sql.test" />
+        <module name="clever-app.clever-data-rabbitmq.main" />
         <module name="clever-app.clever-data-jdbc.test" />
         <module name="clever-app.clever-core.test" />
       </profile>

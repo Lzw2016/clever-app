@@ -29,7 +29,6 @@ public class JdbcConfig {
      * JDBC数据源全局配置
      */
     private HikariConfig global = new HikariConfig();
-
     /**
      * JDBC数据源集合(数据源名称 --> 数据源配置)
      */
