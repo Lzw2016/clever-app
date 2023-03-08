@@ -1,9 +1,9 @@
 package org.clever.rabbitmq.config;
 
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.impl.AMQConnection;
 import lombok.Data;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -60,7 +60,7 @@ public class RabbitMQProperties {
     /**
      * 自定义客户端属性
      */
-    private Map<String, Object> clientProperties = new HashMap<>();
+    private Map<String, Object> clientProperties = AMQConnection.defaultClientProperties();
     /**
      * 启用或禁用自动连接恢复
      */
