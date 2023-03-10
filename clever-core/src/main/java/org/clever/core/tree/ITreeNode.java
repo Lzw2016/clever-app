@@ -8,7 +8,7 @@ import java.util.List;
  * 作者：LiZW <br/>
  * 创建时间：2016-5-8 22:07 <br/>
  *
- * @see org.clever.core.tree.BuildTreeUtils
+ * @see TreeUtils
  */
 public interface ITreeNode extends ITreeID {
     /**

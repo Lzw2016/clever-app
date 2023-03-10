@@ -13,7 +13,7 @@ import java.util.*;
  * 创建时间：2016-5-8 22:05 <br/>
  */
 @Slf4j
-public class BuildTreeUtils {
+public class TreeUtils {
     /**
      * 构建树结构，可能有多棵树<br/>
      *
