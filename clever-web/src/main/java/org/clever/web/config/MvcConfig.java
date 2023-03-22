@@ -92,6 +92,10 @@ public class MvcConfig {
          */
         private boolean enable = false;
         /**
+         * 执行热重载的标识文件。如果存在，这个文件变化就执行热重载。如果不存在，则监听所有class文件变化
+         */
+        private String watchFile;
+        /**
          * 文件检查时间间隔(默认1秒)
          */
         private Duration interval = Duration.ofSeconds(1);

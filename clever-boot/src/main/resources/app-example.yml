@@ -229,6 +229,7 @@ web:
       readOnly: false
     hotReload:
       enable: true
+      watchFile: './build/.hotReload'
       interval: 1s
       excludePackages: [ ]
       locations:

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.*;
+import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.util.Assert;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,6 +59,14 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
      */
     protected final ConcurrentMap<String, Method> handlerMethodCache = new ConcurrentHashMap<>();
     /**
+     * 执行热重载的标识文件。如果存在，这个文件变化就执行热重载。如果不存在，则监听所有class文件变化
+     */
+    protected final File watchFile;
+    /**
+     * watchFile的最后修改时间搓
+     */
+    protected Long watchFileLastModified;
+    /**
      * class文件的最后修改时间搓 {@code ConcurrentMap<AbsolutePath, LastModified>}
      */
     protected final ConcurrentMap<String, Long> classLastModifiedMap = new ConcurrentHashMap<>();
@@ -66,6 +76,19 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
         Assert.notNull(hotReload, "参数 hotReload 不能为 null");
         this.rootPath = rootPath;
         this.locationMap = Collections.unmodifiableMap(ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations()));
+        if (StringUtils.isBlank(hotReload.getWatchFile())) {
+            this.watchFile = null;
+        } else {
+            this.watchFile = new File(ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getWatchFile()));
+            if (!this.watchFile.exists()) {
+                try {
+                    FileUtils.writeStringToFile(this.watchFile, "", StandardCharsets.UTF_8);
+                } catch (Exception e) {
+                    throw ExceptionUtils.unchecked(e);
+                }
+            }
+            watchFileLastModified = this.watchFile.lastModified();
+        }
         if (hotReload.isEnable()) {
             hotReloadClassLoader = new HotReloadClassLoader(
                     this.getClass().getClassLoader(),
@@ -188,12 +211,15 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
      * 监听class文件变化
      */
     protected void hotReloadClass() {
+        if (watchFile != null && watchFileLastModified != null && watchFileLastModified >= watchFile.lastModified()) {
+            return;
+        }
+        final List<String> changedClass = new ArrayList<>(128);
         if (classLastModifiedMap.isEmpty()) {
             classLastModifiedMap.putAll(getAllLastModified());
             return;
         }
         final Map<String, Long> newLastModifiedMap = getAllLastModified();
-        final List<String> changedClass = new ArrayList<>(128);
         // 变化的文件(包含删除的文件)
         classLastModifiedMap.forEach((absolutePath, lastModified) -> {
             Long last = newLastModifiedMap.get(absolutePath);
@@ -211,12 +237,17 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
             }
         });
         if (!changedClass.isEmpty()) {
-            try {
-                // 休眠一下防止抖动(编译时class文件连续的变化)
-                Thread.sleep(300);
-            } catch (InterruptedException ignored) {
+            if (watchFile == null) {
+                try {
+                    // 休眠一下防止抖动(编译时class文件连续的变化)
+                    Thread.sleep(300);
+                } catch (InterruptedException ignored) {
+                }
             }
             log.info("class文件更新,文件: {}", changedClass);
+            if (watchFile != null) {
+                watchFileLastModified = watchFile.lastModified();
+            }
             final Map<String, Long> latest = getAllLastModified();
             hotReloadClassLoader.unloadAllClass();
             classLastModifiedMap.clear();

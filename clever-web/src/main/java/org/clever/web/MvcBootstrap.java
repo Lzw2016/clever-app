@@ -51,6 +51,7 @@ public class MvcBootstrap {
         logs.add("    readOnly       : " + defTransactional.isReadOnly());
         logs.add("  hotReload: ");
         logs.add("    enable         : " + hotReload.isEnable());
+        logs.add("    watchFile      : " + ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getWatchFile()));
         logs.add("    interval       : " + hotReload.getInterval().toMillis() + "ms");
         logs.add("    excludePackages: " + StringUtils.join(hotReload.getExcludePackages(), " | "));
         logs.add("    locations      : " + StringUtils.join(hotReload.getLocations().stream().map(locationMap::get).toArray(), " | "));
