@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.text.SimpleDateFormat
+import java.util.*
 
 plugins {
     //id("groovy")
@@ -75,8 +77,7 @@ tasks.register("copyResources", Copy::class) {
 tasks.jar {
     enabled = true
     manifest.attributes["Main-Class"] = "org.clever.app.StartApp"
-    val classPaths =
-        project.configurations.runtimeClasspath.get().files.map { file -> "lib/${file.name}" }.toMutableList()
+    val classPaths = project.configurations.runtimeClasspath.get().files.map { file -> "lib/${file.name}" }.toMutableList()
     val resourcesPath = File(projectDir.absolutePath, "src/main/resources").absolutePath
     file("src/main/resources").listFiles { file -> file.isFile }?.forEach { file ->
         var path = file.absolutePath
@@ -90,10 +91,16 @@ tasks.jar {
     // println("### @# [${classPaths.joinToString(" ")}]")
 }
 
+// 触发class热部署
 tasks.getByName("classes") {
     doLast {
-        // 触发class热部署
-        println("@@@###=================================")
+        File("./build", ".hotReload").apply {
+            if (this.exists()) {
+                this.createNewFile()
+            }
+            this.appendText("${SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Date())}\n")
+            println("> [触发class热部署] -> ${this.absolutePath}")
+        }
     }
 }
 
