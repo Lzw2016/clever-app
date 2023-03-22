@@ -1,6 +1,6 @@
 打包体积瘦身(保证在25MB内)
 [  ] org.antlr:antlr4
-[  ] gradle编译时(--continuous)会出现class文件回退问题,不能用于“dev”或“生产”环境
+[50] gradle编译时(--continuous)会出现class文件回退问题,不能用于“dev”或“生产”环境
 
 升级核心依赖包版本(最新稳定版)
 kotlin

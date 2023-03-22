@@ -58,14 +58,14 @@ tasks.withType<KotlinCompile> {
 }
 
 // 拷贝lib文件
-tasks.create("copyJar", Copy::class) {
+tasks.register("copyJar", Copy::class) {
     delete("$buildDir/libs/lib")
     from(configurations.runtimeClasspath)
     into("$buildDir/libs/lib")
 }
 
 // 拷贝配置文件
-tasks.create("copyResources", Copy::class) {
+tasks.register("copyResources", Copy::class) {
     delete("$buildDir/libs/config")
     from("src/main/resources")
     into("$buildDir/libs/config")
@@ -88,6 +88,13 @@ tasks.jar {
     }
     manifest.attributes["Class-Path"] = classPaths.joinToString(" ")
     // println("### @# [${classPaths.joinToString(" ")}]")
+}
+
+tasks.getByName("classes") {
+    doLast {
+        // 触发class热部署
+        println("@@@###=================================")
+    }
 }
 
 tasks.getByName("build") {
