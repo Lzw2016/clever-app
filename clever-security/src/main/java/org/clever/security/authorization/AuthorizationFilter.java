@@ -77,6 +77,10 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
+        if (!securityConfig.isEnable()) {
+            ctx.next();
+            return;
+        }
         // 不需要授权
         if (!PathFilterUtils.isAuthorizationRequest(ctx.req, securityConfig)) {
             ctx.next();

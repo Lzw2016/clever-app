@@ -68,6 +68,10 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
+        if (!securityConfig.isEnable()) {
+            ctx.next();
+            return;
+        }
         // 不是登出请求
         if (!PathFilterUtils.isLogoutRequest(ctx.req, securityConfig)) {
             ctx.next();

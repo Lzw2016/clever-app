@@ -106,6 +106,10 @@ public class AuthenticationFilter implements FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
+        if (!securityConfig.isEnable()) {
+            ctx.next();
+            return;
+        }
         // 是否是登出请求
         if (PathFilterUtils.isLogoutRequest(ctx.req, securityConfig)) {
             doAuthentication(ctx, false);

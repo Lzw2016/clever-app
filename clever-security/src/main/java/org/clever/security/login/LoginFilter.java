@@ -123,6 +123,10 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
+        if (!securityConfig.isEnable()) {
+            ctx.next();
+            return;
+        }
         // 不是登录请求
         if (!PathFilterUtils.isLoginRequest(ctx.req, securityConfig)) {
             ctx.next();
