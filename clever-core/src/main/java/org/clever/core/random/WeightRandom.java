@@ -17,7 +17,7 @@ import java.util.TreeMap;
  * 然后随机出一个[0,10)之间的随机数。落在哪个区间，则该区间之后的元素即为按权重命中的元素。<br>
  *
  * <p>
- * 参考博客：https://www.cnblogs.com/waterystone/p/5708063.html
+ * 参考博客：<a href="https://www.cnblogs.com/waterystone/p/5708063.html">参考博客</a>
  * <p>
  * 作者：LiZW <br/>
  * 创建时间：2016-5-8 16:14 <br/>

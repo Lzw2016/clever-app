@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 随机工具类
- *
+ * <p>
  * 作者：LiZW <br/>
  * 创建时间：2016-5-8 16:14 <br/>
  */
