@@ -9,14 +9,22 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.24/13a394eed5c4f9efb2a6d956e2086f1d81e857d9/lombok-1.18.24.jar" />
         </processorPath>
         <module name="clever-app.clever-security.test" />
-        <module name="clever-app.clever-core.main" />
         <module name="clever-app.clever-data-redis.test" />
         <module name="clever-app.clever-data-jdbc-meta.test" />
         <module name="clever-app.clever-spring.main" />
         <module name="clever-app.clever-web.main" />
-        <module name="clever-app.clever-boot.test" />
         <module name="clever-app.clever-data-jdbc-meta.main" />
         <module name="clever-app.clever-web.test" />
+        <module name="clever-app.clever-data-commons.test" />
+        <module name="clever-app.clever-task-ext.test" />
+        <module name="clever-app.clever-data-dynamic-sql.test" />
+        <module name="clever-app.clever-data-rabbitmq.main" />
+        <module name="clever-app.clever-task.test" />
+        <module name="clever-app.clever-data-jdbc.test" />
+        <module name="clever-app.clever-core.test" />
+        <module name="clever-app.clever-task.main" />
+        <module name="clever-app.clever-core.main" />
+        <module name="clever-app.clever-boot.test" />
         <module name="clever-app.clever-groovy.main" />
         <module name="clever-app.clever-spring.test" />
         <module name="clever-app.clever-boot.main" />
@@ -24,14 +32,10 @@
         <module name="clever-app.clever-data-redis.main" />
         <module name="clever-app.clever-security.main" />
         <module name="clever-app.clever-groovy.test" />
+        <module name="clever-app.clever-task-ext.main" />
         <module name="clever-app.clever-data-rabbitmq.test" />
         <module name="clever-app.clever-data-commons.main" />
-        <module name="clever-app.clever-data-commons.test" />
         <module name="clever-app.clever-data-jdbc.main" />
-        <module name="clever-app.clever-data-dynamic-sql.test" />
-        <module name="clever-app.clever-data-rabbitmq.main" />
-        <module name="clever-app.clever-data-jdbc.test" />
-        <module name="clever-app.clever-core.test" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8" />

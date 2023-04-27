@@ -1,5 +1,4 @@
 ### 总体
-
 打包体积瘦身(保证在25MB内)
 - [  ] org.antlr:antlr4
 - [OK] gradle编译时(--continuous)会出现class文件回退问题,不能用于“dev”或“生产”环境[已解决]
@@ -20,7 +19,6 @@
 - [  ] JDK17
 
 ### clever-spring
-
 需要删除的关键字
 - @Deprecated
 - @since
@@ -534,7 +532,6 @@ DAO数据访问层
 - [  ]
 
 ### clever-core
-
 - [OK] jackson配置
 - [  ]
 
@@ -570,7 +567,15 @@ DAO数据访问层
 https://www.dbvisitor.net/docs/guides/types/type-handlers
 https://www.dbvisitor.net/docs/guides/types/java-jdbc
 ```
+未开始
 
 ### clever-data-redis
 
 ### clever-data-rabbitmq
+已暂停
+
+### clever-task
+未开始
+
+### clever-task-ext
+未开始

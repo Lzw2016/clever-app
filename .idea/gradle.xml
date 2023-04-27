@@ -24,6 +24,8 @@
             <option value="$PROJECT_DIR$/clever-groovy" />
             <option value="$PROJECT_DIR$/clever-security" />
             <option value="$PROJECT_DIR$/clever-spring" />
+            <option value="$PROJECT_DIR$/clever-task" />
+            <option value="$PROJECT_DIR$/clever-task-ext" />
             <option value="$PROJECT_DIR$/clever-web" />
           </set>
         </option>
