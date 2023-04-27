@@ -1,0 +1,61 @@
+package org.clever.data.jdbc.meta;
+
+import org.clever.data.jdbc.meta.model.Schema;
+import org.clever.data.jdbc.meta.model.Table;
+
+import java.util.List;
+
+/**
+ * 获取数据库元数据接口
+ * <p>
+ * 作者：lizw <br/>
+ * 创建时间：2023/04/27 19:56 <br/>
+ */
+public interface DataBaseMetaData {
+    /**
+     * 获取当前库的所有 Schema
+     */
+    List<Schema> getSchemas();
+
+    /**
+     * 获取指定的 Schema
+     */
+    Schema getSchema(String schemaName);
+
+    /**
+     * 获取当前的 Schema
+     */
+    Schema getSchema();
+
+    /**
+     * 获取指定的 Table
+     */
+    Table getTable(String schemaName, String tableName);
+
+//String getDiffDDL
+
+//表
+//字段
+//组件
+//索引(唯一索引)
+//序列
+//存储过程(函数)
+//
+//删除、创建、变更
+//
+//DropTableDDL
+//CreateTableDDL
+//ModifyTableDDL
+//RenameTableDDL
+//ModifyIdxDDL
+//ModifyProcedureSQL
+//
+//getTableIndex
+//getProcedure
+//
+//executeModifyProcedureSQL
+//
+//executeDDL
+//
+//DataSync
+}

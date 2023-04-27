@@ -22,7 +22,7 @@ object Ver {
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.36"
     const val querydslVersion = "5.0.0"
-    const val schemacrawlerVersion = "16.16.18"
+    const val schemacrawlerVersion = "16.19.9"
     const val poiVersion = "5.2.3"
 }
 
