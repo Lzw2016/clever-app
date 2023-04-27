@@ -1,14 +1,13 @@
 package org.clever.rabbitmq;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 作者：lizw <br/>
@@ -58,23 +57,23 @@ public class RabbitMQTest {
         // channel.waitForConfirms();
 
         // 消费消息
-//        AtomicInteger idx = new AtomicInteger(0);
-//        Consumer consumer = new DefaultConsumer(channel) {
-//            @Override
-//            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-//                String message = new String(body, StandardCharsets.UTF_8);
-//                channel.basicAck(envelope.getDeliveryTag(), true);
-//                int i = idx.incrementAndGet();
-//                if (i % 1000 == 0) {
-//                    log.info("--> {}", i);
-//                }
-//            }
-//        };
-//        channel.basicConsume(queue, false, consumer);
-//        while (idx.get() < count) {
-//            // noinspection BusyWait
-//            Thread.sleep(100);
-//        }
+        AtomicInteger idx = new AtomicInteger(0);
+        Consumer consumer = new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                String message = new String(body, StandardCharsets.UTF_8);
+                channel.basicAck(envelope.getDeliveryTag(), true);
+                int i = idx.incrementAndGet();
+                if (i % 1000 == 0) {
+                    log.info("--> {}", i);
+                }
+            }
+        };
+        channel.basicConsume(queue, false, consumer);
+        while (idx.get() < count) {
+            // noinspection BusyWait
+            Thread.sleep(100);
+        }
 
         final long endTime = System.currentTimeMillis();
         log.info("耗时: {}ms | {}个/ms", (endTime - startTime), count / (endTime - startTime));

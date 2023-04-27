@@ -7,6 +7,13 @@
 //import lombok.Getter;
 //import lombok.extern.slf4j.Slf4j;
 //import org.apache.commons.lang3.StringUtils;
+//import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+//import org.springframework.amqp.rabbit.connection.ChannelListener;
+//import org.springframework.amqp.rabbit.connection.Connection;
+//import org.springframework.amqp.rabbit.connection.ConnectionListener;
+//import org.springframework.amqp.rabbit.core.RabbitAdmin;
+//import org.springframework.amqp.rabbit.core.RabbitTemplate;
+//
 //import java.util.Objects;
 //import java.util.Properties;
 //import java.util.concurrent.LinkedBlockingQueue;
@@ -20,7 +27,7 @@
 // */
 //@SuppressWarnings({"UnusedReturnValue", "unused"})
 //@Slf4j
-//public class RabbitMqDataSource extends AbstractDataSource {
+//public class RabbitMqDataSource   {
 //    /**
 //     * DLX
 //     */

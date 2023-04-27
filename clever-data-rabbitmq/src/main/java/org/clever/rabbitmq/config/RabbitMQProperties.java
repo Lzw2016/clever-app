@@ -91,4 +91,8 @@ public class RabbitMQProperties {
      * 工作池排队的超时时间（以毫秒为单位）
      */
     private int workPoolTimeout = ConnectionFactory.DEFAULT_WORK_POOL_TIMEOUT;
+    /**
+     * 连接池配置
+     */
+    private PoolConfig pool = new PoolConfig();
 }
