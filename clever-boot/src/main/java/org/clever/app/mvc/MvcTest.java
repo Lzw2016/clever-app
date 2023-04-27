@@ -29,9 +29,13 @@ import java.util.Map;
 public class MvcTest {
     // 无参数
     public static Object t01() {
+        Entity1 entity1 = new Entity1();
+        entity1.setAge(1);
+        entity1.setName("ABC");
+
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", 1);
-        res.put("b", "abc");
+        res.put("b", entity1);
         res.put("c", true);
         res.put("d", new Date());
         return res;
