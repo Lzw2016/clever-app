@@ -84,11 +84,11 @@ public class Jdbc extends AbstractDataSource {
     /**
      * 默认的返回数据字段名重命名策略
      */
-    public static final RenameStrategy DEFAULT_RESULT_RENAME = RenameStrategy.ToUnderline;
+    public static final RenameStrategy DEFAULT_RESULT_RENAME = RenameStrategy.None;
     /**
      * fields与whereMap字段名默认的重命名策略
      */
-    public static final RenameStrategy DEFAULT_PARAMS_RENAME = RenameStrategy.ToUnderline;
+    public static final RenameStrategy DEFAULT_PARAMS_RENAME = RenameStrategy.None;
     /**
      * 事务默认是否只读
      */

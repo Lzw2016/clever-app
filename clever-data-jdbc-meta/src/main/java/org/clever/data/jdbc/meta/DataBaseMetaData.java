@@ -3,6 +3,7 @@ package org.clever.data.jdbc.meta;
 import org.clever.data.jdbc.meta.model.Schema;
 import org.clever.data.jdbc.meta.model.Table;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,6 +13,19 @@ import java.util.List;
  * 创建时间：2023/04/27 19:56 <br/>
  */
 public interface DataBaseMetaData {
+    /**
+     * 获取数据库连接默认的Schema名
+     */
+    String currentSchema();
+
+    /**
+     * 获取数据库元数据
+     *
+     * @param schemasName 指定的 Schema 集合，不指定就不过滤
+     * @param tablesName  指定的 Table 集合，不指定就不过滤
+     */
+    List<Schema> getSchemas(Collection<String> schemasName, Collection<String> tablesName);
+
     /**
      * 获取当前库的所有 Schema
      */
@@ -36,7 +50,7 @@ public interface DataBaseMetaData {
 
 //表
 //字段
-//组件
+//主键
 //索引(唯一索引)
 //序列
 //存储过程(函数)

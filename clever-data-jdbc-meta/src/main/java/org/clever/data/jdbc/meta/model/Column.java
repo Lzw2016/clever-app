@@ -2,6 +2,7 @@ package org.clever.data.jdbc.meta.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.clever.util.Assert;
 
 /**
@@ -10,6 +11,7 @@ import org.clever.util.Assert;
  * 作者：lizw <br/>
  * 创建时间：2023/04/27 20:43 <br/>
  */
+@ToString(exclude = {"table"})
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class Column extends AttributedObject {
@@ -26,15 +28,15 @@ public class Column extends AttributedObject {
      */
     private String comment;
     /**
-     * 是否为主键
+     * 是否为主键的一部分
      */
     private boolean partOfPrimaryKey;
     /**
-     * 是否是索引
+     * 是否是索引的一部分
      */
     private boolean partOfIndex;
     /**
-     * 是否是唯一索引
+     * 是否是唯一索引的一部分
      */
     private boolean partOfUniqueIndex;
     /**
@@ -76,6 +78,9 @@ public class Column extends AttributedObject {
     }
 
     public String getTableName() {
+        if (table == null) {
+            return null;
+        }
         return table.getName();
     }
 }

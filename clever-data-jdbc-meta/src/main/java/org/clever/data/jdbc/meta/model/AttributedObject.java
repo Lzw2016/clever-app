@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 数据库 “schema名、表名、字段名” 使用全小写
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/04/27 20:10 <br/>
  */

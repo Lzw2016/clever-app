@@ -41,4 +41,13 @@ public class Schema extends AttributedObject {
         Assert.notNull(table, "参数 table 不能为空");
         tables.add(table);
     }
+
+    public Table getTable(String tableName) {
+        if (tableName == null) {
+            return null;
+        }
+        return tables.stream()
+                .filter(table -> tableName.equalsIgnoreCase(table.getName()))
+                .findFirst().orElse(null);
+    }
 }

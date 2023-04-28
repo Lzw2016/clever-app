@@ -2,6 +2,7 @@ package org.clever.data.jdbc.meta.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.clever.util.Assert;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.List;
  * 作者：lizw <br/>
  * 创建时间：2023/04/27 20:05 <br/>
  */
+@ToString(exclude = {"schema"})
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class Table extends AttributedObject {
@@ -32,9 +34,14 @@ public class Table extends AttributedObject {
      * 数据表字段
      */
     private final List<Column> columns = new ArrayList<>();
-
-    // TODO 管理 primaryKey
-    // TODO 管理 index uniqueIndex
+    /**
+     * 表的主键
+     */
+    private PrimaryKey primaryKey;
+    /**
+     * 表的索引
+     */
+    private final List<Index> indices = new ArrayList<>();
 
     public Table(Schema schema) {
         Assert.notNull(schema, "参数 schema 不能为空");
@@ -42,6 +49,9 @@ public class Table extends AttributedObject {
     }
 
     public String getSchemaName() {
+        if (schema == null) {
+            return null;
+        }
         return schema.getName();
     }
 
@@ -50,6 +60,26 @@ public class Table extends AttributedObject {
         columns.add(column);
     }
 
-//    getPrimaryKey
-//    getIndexes
+    public Column getColumn(String columnName) {
+        if (columnName == null) {
+            return null;
+        }
+        return columns.stream()
+                .filter(column -> columnName.equalsIgnoreCase(column.getName()))
+                .findFirst().orElse(null);
+    }
+
+    public void addIndex(Index index) {
+        Assert.notNull(index, "参数 index 不能为空");
+        indices.add(index);
+    }
+
+    public Index getIndex(String indexName) {
+        if (indexName == null) {
+            return null;
+        }
+        return indices.stream()
+                .filter(index -> indexName.equalsIgnoreCase(index.getName()))
+                .findFirst().orElse(null);
+    }
 }
