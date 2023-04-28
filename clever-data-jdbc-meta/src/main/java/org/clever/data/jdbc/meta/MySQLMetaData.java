@@ -185,6 +185,49 @@ public class MySQLMetaData extends AbstractMetaData {
                 index.addColumn(column);
             }
         }
+        // 查询存储过程&函数 -> 用户必须要有“数据库服务器select权限(navicat授权)”才能查询到 routine_definition 字段
+        sql.setLength(0);
+        params.clear();
+        sql.append("select ");
+        sql.append("    routine_schema      as `schemaName`, ");
+        sql.append("    routine_name        as `name`, ");
+        sql.append("    routine_type        as `type`, ");
+        sql.append("    routine_definition  as `definition`, ");
+        sql.append("    routine_body        as `body`, ");
+        sql.append("    specific_name       as `specific_name`, ");
+        sql.append("    external_name       as `external_name`, ");
+        sql.append("    external_language   as `external_language`, ");
+        sql.append("    parameter_style     as `parameter_style`, ");
+        sql.append("    routine_comment     as `routine_comment` ");
+        sql.append("from information_schema.routines ");
+        sql.append("where lower(routine_type) in ('procedure','function') ");
+        if (!schemasName.isEmpty()) {
+            sql.append("and lower(routine_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        if (!ignoreSchemas.isEmpty()) {
+            sql.append("and lower(routine_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+        }
+        sql.append("order by routine_schema, routine_name");
+        List<Map<String, Object>> mapRoutines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : mapRoutines) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            String name = Conv.asString(map.get("name")).toLowerCase();
+            String type = Conv.asString(map.get("type")).toLowerCase();
+            String definition = Conv.asString(map.get("definition"));
+            Schema schema = mapSchema.get(schemaName);
+            if (schema == null) {
+                continue;
+            }
+            Procedure procedure = new Procedure(schema);
+            procedure.setName(name);
+            // ROUTINE_TYPE 可能的值包括：
+            //   PROCEDURE 表示存储过程
+            //   FUNCTION 表示函数
+            procedure.setFunction("FUNCTION".equalsIgnoreCase(type));
+            procedure.setDefinition(definition);
+            procedure.getAttributes().putAll(map);
+            schema.addProcedure(procedure);
+        }
         // 返回数据
         List<Schema> result = new ArrayList<>(mapSchema.values());
         sort(result);

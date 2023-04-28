@@ -121,7 +121,8 @@ subprojects {
             dependency("com.oracle.database.jdbc:ojdbc8:21.6.0.0.1")
             dependency("com.oracle.database.nls:orai18n:21.3.0.0")
             dependency("org.postgresql:postgresql:42.3.6")
-            dependency("mysql:mysql-connector-java:8.0.30")
+            dependency("mysql:mysql-connector-java:8.0.33")
+            dependency("com.mysql:mysql-connector-j:8.0.33")
             dependency("com.microsoft.sqlserver:mssql-jdbc:11.2.1.jre8")
             // apache commons
             dependency("commons-io:commons-io:2.11.0")

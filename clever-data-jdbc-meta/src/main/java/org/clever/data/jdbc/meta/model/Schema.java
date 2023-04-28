@@ -29,8 +29,10 @@ public class Schema extends AttributedObject {
      * 数据库表
      */
     private final List<Table> tables = new ArrayList<>();
-
-    // TODO 管理 存储过程 函数
+    /**
+     * 存储过程&函数
+     */
+    private final List<Procedure> procedures = new ArrayList<>();
 
     public Schema(DbType dbType) {
         Assert.notNull(dbType, "参数 dbType 不能为空");
@@ -48,6 +50,20 @@ public class Schema extends AttributedObject {
         }
         return tables.stream()
                 .filter(table -> tableName.equalsIgnoreCase(table.getName()))
+                .findFirst().orElse(null);
+    }
+
+    public void addProcedure(Procedure procedure) {
+        Assert.notNull(procedure, "参数 procedure 不能为空");
+        procedures.add(procedure);
+    }
+
+    public Procedure getProcedure(String procedureName) {
+        if (procedureName == null) {
+            return null;
+        }
+        return procedures.stream()
+                .filter(procedure -> procedureName.equalsIgnoreCase(procedure.getName()))
                 .findFirst().orElse(null);
     }
 }

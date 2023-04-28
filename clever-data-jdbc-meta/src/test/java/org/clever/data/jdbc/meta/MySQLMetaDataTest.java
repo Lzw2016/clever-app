@@ -3,6 +3,7 @@ package org.clever.data.jdbc.meta;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.Schema;
+import org.clever.data.jdbc.meta.model.Table;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,6 +20,15 @@ public class MySQLMetaDataTest {
         MySQLMetaData metaData = new MySQLMetaData(jdbc);
         List<Schema> schemas = metaData.getSchemas(null, null);
         log.info("--> {}", schemas);
+        jdbc.close();
+    }
+
+    @Test
+    public void t02() {
+        Jdbc jdbc = BaseTest.newMysql();
+        MySQLMetaData metaData = new MySQLMetaData(jdbc);
+        Table table = metaData.getTable(metaData.currentSchema(), "biz_code");
+        log.info("--> {}", table);
         jdbc.close();
     }
 }
