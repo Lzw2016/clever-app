@@ -8,7 +8,6 @@ import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 获取数据库元数据 MySQL 实现
@@ -16,6 +15,7 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2023/04/27 22:58 <br/>
  */
+@SuppressWarnings("DuplicatedCode")
 public class MySQLMetaData extends AbstractMetaData {
     private final Jdbc jdbc;
 
@@ -33,21 +33,12 @@ public class MySQLMetaData extends AbstractMetaData {
     }
 
     @Override
-    public List<Schema> getSchemas(Collection<String> schemasName, Collection<String> tablesName) {
-        if (schemasName == null) {
-            schemasName = new HashSet<>();
-        }
-        if (tablesName == null) {
-            tablesName = new HashSet<>();
-        }
-        schemasName = schemasName.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
-        tablesName = tablesName.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
-        // 过滤 ignoreSchemas ignoreTables
-        final Set<String> ignoreSchemas = getIgnoreSchemas();
-        final Set<String> ignoreTables = getIgnoreTables();
-        // 过滤 ignoreTablesPrefix ignoreTablesSuffix
-        final Set<String> ignoreTablesPrefix = getIgnoreTablesPrefix();
-        final Set<String> ignoreTablesSuffix = getIgnoreTablesSuffix();
+    protected List<Schema> doGetSchemas(Collection<String> schemasName,
+                                        Collection<String> tablesName,
+                                        Set<String> ignoreSchemas,
+                                        Set<String> ignoreTables,
+                                        Set<String> ignoreTablesPrefix,
+                                        Set<String> ignoreTablesSuffix) {
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
         // 查询字段信息
@@ -69,7 +60,7 @@ public class MySQLMetaData extends AbstractMetaData {
         sql.append("    character_maximum_length as `width`, ");
         sql.append("    column_default           as `defaultValue`, ");
         sql.append("    ordinal_position         as `ordinalPosition`, ");
-        sql.append("    column_type              as `width`, ");
+        sql.append("    column_type              as `column_type`, ");
         sql.append("    extra                    as `extra` ");
         sql.append("from ");
         sql.append("    information_schema.columns ");
@@ -95,6 +86,7 @@ public class MySQLMetaData extends AbstractMetaData {
             }
             Column column = new Column(table);
             fillColumn(column, map);
+            column.getAttributes().putAll(map);
             table.addColumn(column);
         }
         // 查询表信息
@@ -162,6 +154,16 @@ public class MySQLMetaData extends AbstractMetaData {
             if (column == null) {
                 continue;
             }
+            Index index = table.getIndex(name);
+            if (index == null) {
+                boolean unique = !Conv.asBoolean(map.get("nonUnique"));
+                index = new Index(table);
+                index.setName(name);
+                index.setUnique(unique);
+                index.getAttributes().putAll(map);
+                table.addIndex(index);
+            }
+            index.addColumn(column);
             // 主键的索引名称是 “PRIMARY”
             if ("PRIMARY".equalsIgnoreCase(name)) {
                 PrimaryKey primaryKey = table.getPrimaryKey();
@@ -172,20 +174,10 @@ public class MySQLMetaData extends AbstractMetaData {
                     table.setPrimaryKey(primaryKey);
                 }
                 primaryKey.addColumn(column);
-            } else {
-                Index index = table.getIndex(name);
-                if (index == null) {
-                    boolean unique = !Conv.asBoolean(map.get("nonUnique"));
-                    index = new Index(table);
-                    index.setName(name);
-                    index.setUnique(unique);
-                    index.getAttributes().putAll(map);
-                    table.addIndex(index);
-                }
-                index.addColumn(column);
             }
         }
         // 查询存储过程&函数 -> 用户必须要有“数据库服务器select权限(navicat授权)”才能查询到 routine_definition 字段
+        // grant select on *.* to `admin`@`%`;
         sql.setLength(0);
         params.clear();
         sql.append("select ");
@@ -207,7 +199,7 @@ public class MySQLMetaData extends AbstractMetaData {
         if (!ignoreSchemas.isEmpty()) {
             sql.append("and lower(routine_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
-        sql.append("order by routine_schema, routine_name");
+        sql.append("order by routine_schema, type, routine_name");
         List<Map<String, Object>> mapRoutines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : mapRoutines) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
@@ -292,6 +284,5 @@ public class MySQLMetaData extends AbstractMetaData {
         column.setWidth(Conv.asInteger(map.get("width")));
         column.setDefaultValue(Conv.asString(map.get("defaultValue"), null));
         column.setOrdinalPosition(Conv.asInteger(map.get("ordinalPosition")));
-        column.setAttribute("extra", map.get("extra"));
     }
 }

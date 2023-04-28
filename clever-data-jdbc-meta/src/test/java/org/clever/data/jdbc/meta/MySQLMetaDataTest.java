@@ -31,4 +31,13 @@ public class MySQLMetaDataTest {
         log.info("--> {}", table);
         jdbc.close();
     }
+
+    @Test
+    public void t03() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        PostgreSQLMetaData metaData = new PostgreSQLMetaData(jdbc);
+        List<Schema> schemas = metaData.getSchemas(null, null);
+        log.info("--> {}", schemas);
+        jdbc.close();
+    }
 }

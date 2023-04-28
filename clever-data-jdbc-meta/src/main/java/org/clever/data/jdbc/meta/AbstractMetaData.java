@@ -99,6 +99,32 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
     }
 
     @Override
+    public List<Schema> getSchemas(Collection<String> schemasName, Collection<String> tablesName) {
+        if (schemasName == null) {
+            schemasName = new HashSet<>();
+        }
+        if (tablesName == null) {
+            tablesName = new HashSet<>();
+        }
+        schemasName = schemasName.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
+        tablesName = tablesName.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
+        // 过滤 ignoreSchemas ignoreTables
+        final Set<String> ignoreSchemas = getIgnoreSchemas();
+        final Set<String> ignoreTables = getIgnoreTables();
+        // 过滤 ignoreTablesPrefix ignoreTablesSuffix
+        final Set<String> ignoreTablesPrefix = getIgnoreTablesPrefix();
+        final Set<String> ignoreTablesSuffix = getIgnoreTablesSuffix();
+        return doGetSchemas(schemasName, tablesName, ignoreSchemas, ignoreTables, ignoreTablesPrefix, ignoreTablesSuffix);
+    }
+
+    protected abstract List<Schema> doGetSchemas(Collection<String> schemasName,
+                                                 Collection<String> tablesName,
+                                                 Set<String> ignoreSchemas,
+                                                 Set<String> ignoreTables,
+                                                 Set<String> ignoreTablesPrefix,
+                                                 Set<String> ignoreTablesSuffix);
+
+    @Override
     public List<Schema> getSchemas() {
         return getSchemas(null, null);
     }
