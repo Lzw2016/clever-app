@@ -39,6 +39,11 @@ public class Schema extends AttributedObject {
         this.dbType = dbType;
     }
 
+    public Schema(DbType dbType, String name) {
+        this(dbType);
+        this.name = name;
+    }
+
     public void addTable(Table table) {
         Assert.notNull(table, "参数 table 不能为空");
         tables.add(table);

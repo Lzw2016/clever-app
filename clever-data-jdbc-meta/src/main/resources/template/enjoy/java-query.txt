@@ -1,31 +1,33 @@
+#if(packageName)
 package #(packageName);
+#end
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.*;
 import com.querydsl.sql.*;
-import java.math.*;
-import java.sql.*;
-import #(importQueryEntity);
-#for(pkg : packages)
-import #(pkg).*
+import java.sql.Types;
+#for(pkg : importPackages)
+#if(!pkg.startsWith('java.lang.'))
+import #(pkg);
+#end
 #end
 
 /**
- * #(table.description)(#(table.tableName))
+ * #(table.comment)(#(table.name))
  */
 @SuppressWarnings("ALL")
 public class Q#(className) extends RelationalPathBase<#(className)> {
-    /** #(table.tableName)表 */
-    public static final Q#(className) #(com.yvan.core.NamingUtils::underline2Camel(table.tableName)) = new Q#(className)("#(table.tableName)");
+    /** #(table.name)表 */
+    public static final Q#(className) #(underlineToCamel(table.name)) = new Q#(className)("#(table.name)");
 
-#for(column : columns)
-    /** #(column.column_comment) */
-    public final #(fieldDefines.get(for.index));
+#for(property : properties)
+    /** #(property.comment) */
+    public final #(getQueryDslFieldDefine(property));
 #end
 
     Q#(className)(String variable) {
-        super(#(className).class, forVariable(variable), "#(table.schemaName)", "#(table.tableName)");
+        super(#(className).class, forVariable(variable), "#(table.schemaName)", "#(table.name)");
         addMetadata();
     }
 
@@ -35,24 +37,25 @@ public class Q#(className) extends RelationalPathBase<#(className)> {
     }
 
     Q#(className)(String variable, String schema) {
-        super(#(className).class, forVariable(variable), schema, "#(table.tableName)");
+        super(#(className).class, forVariable(variable), schema, "#(table.name)");
         addMetadata();
     }
 
     Q#(className)(Path<? extends #(className)> path) {
-        super(path.getType(), path.getMetadata(), "#(table.schemaName)", "#(table.tableName)");
+        super(path.getType(), path.getMetadata(), "#(table.schemaName)", "#(table.name)");
         addMetadata();
     }
 
     Q#(className)(PathMetadata metadata) {
-        super(#(className).class, metadata, "#(table.schemaName)", "#(table.tableName)");
+        super(#(className).class, metadata, "#(table.schemaName)", "#(table.name)");
         addMetadata();
     }
 
     void addMetadata() {
-#for(column : columns)
-        addMetadata(#(com.yvan.core.NamingUtils::underline2Camel(column.column_name)), ColumnMetadata.named("#(column.column_name)").withIndex(#(column.ordinal_position)).ofType(#(column.jdbc_type_name)).withSize(#(column.column_size))#if(column.decimal_digits>0).withDigits(#(column.decimal_digits))#end);
+#for(property : properties)
+#set(column = property.column)
+#set(size = max(column.size, column.width))
+        addMetadata(#(property.name), ColumnMetadata.named("#(column.name)").withIndex(#(column.ordinalPosition)).ofType(#(property.jdbcTypeName))#if(size>0).withSize(#(size))#end#if(column.decimalDigits>0).withDigits(#(column.decimalDigits))#end);
 #end
     }
 }
-

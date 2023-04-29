@@ -1,8 +1,12 @@
 package org.clever.data.jdbc.meta.utils;
 
 import com.jfinal.template.Engine;
+import com.jfinal.template.Template;
 import com.jfinal.template.expr.ast.MethodKit;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
 import org.clever.data.jdbc.Jdbc;
@@ -12,6 +16,8 @@ import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
 import org.clever.data.jdbc.meta.codegen.CodegenType;
 import org.clever.data.jdbc.meta.codegen.EntityModel;
 import org.clever.data.jdbc.meta.codegen.EntityPropertyModel;
+import org.clever.data.jdbc.meta.codegen.handler.*;
+import org.clever.data.jdbc.meta.codegen.support.QueryDSLSupport;
 import org.clever.data.jdbc.meta.model.Column;
 import org.clever.data.jdbc.meta.model.Schema;
 import org.clever.data.jdbc.meta.model.Table;
@@ -19,6 +25,8 @@ import org.clever.data.jdbc.support.DbColumnMetaData;
 import org.clever.util.Assert;
 import org.clever.util.ClassUtils;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
@@ -37,11 +45,15 @@ import java.util.Set;
 @Slf4j
 public class CodegenUtils {
     // 模版引擎
-    public static final Engine engine;
+    public static final Engine ENGINE;
+    public static final Map<CodegenType, CodegenHandler> CODEGEN_HANDLER_MAP = new HashMap<>();
+
     // 类型需要的 import package
     public static final Map<String, String> TYPE_PACKAGE = new HashMap<>();
     // jdbc类型映射 Map<java.sql.Types, String> | https://www.dbvisitor.net/docs/guides/types/java-jdbc
     public static final Map<Integer, String> JDBC_TYPES_MAPPING = new HashMap<>();
+    // 字段类型名称 Map<java.sql.Types, java.sql.TypesName>
+    public static final Map<Integer, String> JDBC_TYPES_NAME_MAPPING = new HashMap<>();
 
     static {
         final ClassLoader classLoader = CodegenUtils.class.getClassLoader();
@@ -50,15 +62,34 @@ public class CodegenUtils {
         Engine.setChineseExpression(true);
         MethodKit.removeForbiddenClass(Class.class);
         Engine.setFastMode(true);
-        engine = Engine.create("Codegen");
-        engine.setDevMode(true);
-        engine.setStaticFieldExpression(true);
-        engine.setStaticMethodExpression(true);
-        // engine.addSharedStaticMethod();
-        // engine.addSharedObject();
-        engine.setBaseTemplatePath(null);
-        engine.setToClassPathSourceFactory();
+        ENGINE = Engine.create("Codegen");
+        ENGINE.setDevMode(true);
+        ENGINE.setStaticFieldExpression(true);
+        ENGINE.setStaticMethodExpression(true);
+        ENGINE.addSharedStaticMethod(NamingUtils.class);
+        ENGINE.addSharedStaticMethod(QueryDSLSupport.class);
+        // ENGINE.addSharedObject();
+        ENGINE.setBaseTemplatePath(null);
+        ENGINE.setToClassPathSourceFactory();
+        // 配置模版
+        CODEGEN_HANDLER_MAP.put(CodegenType.JAVA_ENTITY, new CodegenJavaEntity());
+        CODEGEN_HANDLER_MAP.put(CodegenType.GROOVY_ENTITY, new CodegenGroovyEntity());
+        CODEGEN_HANDLER_MAP.put(CodegenType.KOTLIN_ENTITY, new CodegenKotlinEntity());
+        CODEGEN_HANDLER_MAP.put(CodegenType.JAVA_QUERYDSL, new CodegenJavaQueryDSL());
+        CODEGEN_HANDLER_MAP.put(CodegenType.GROOVY_QUERYDSL, new CodegenGroovyQueryDSL());
+        CODEGEN_HANDLER_MAP.put(CodegenType.KOTLIN_QUERYDSL, new CodegenKotlinQueryDSL());
         // 类型需要的 import package
+        TYPE_PACKAGE.put("Boolean", "java.lang.Boolean");
+        TYPE_PACKAGE.put("Byte", "java.lang.Byte");
+        TYPE_PACKAGE.put("Short", "java.lang.Short");
+        TYPE_PACKAGE.put("Integer", "java.lang.Integer");
+        TYPE_PACKAGE.put("Long", "java.lang.Long");
+        TYPE_PACKAGE.put("Float", "java.lang.Float");
+        TYPE_PACKAGE.put("Double", "java.lang.Double");
+        TYPE_PACKAGE.put("Character", "java.lang.Character");
+        TYPE_PACKAGE.put("String", "java.lang.String");
+        TYPE_PACKAGE.put("Void", "java.lang.Void");
+        TYPE_PACKAGE.put("Object", "java.lang.Object");
         TYPE_PACKAGE.put("Date", "java.util.Date");
         TYPE_PACKAGE.put("Time", "java.sql.Time");
         TYPE_PACKAGE.put("BigDecimal", "java.math.BigDecimal");
@@ -114,6 +145,47 @@ public class CodegenUtils {
             JDBC_TYPES_MAPPING.put(Types.TIME_WITH_TIMEZONE, "Date");
             JDBC_TYPES_MAPPING.put(Types.TIMESTAMP_WITH_TIMEZONE, "Date");
         }
+        // 字段类型名称
+        JDBC_TYPES_NAME_MAPPING.put(Types.BIT, "Types.BIT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.TINYINT, "Types.TINYINT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.SMALLINT, "Types.SMALLINT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.INTEGER, "Types.INTEGER");
+        JDBC_TYPES_NAME_MAPPING.put(Types.BIGINT, "Types.BIGINT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.FLOAT, "Types.FLOAT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.REAL, "Types.REAL");
+        JDBC_TYPES_NAME_MAPPING.put(Types.DOUBLE, "Types.DOUBLE");
+        JDBC_TYPES_NAME_MAPPING.put(Types.NUMERIC, "Types.NUMERIC");
+        JDBC_TYPES_NAME_MAPPING.put(Types.DECIMAL, "Types.DECIMAL");
+        JDBC_TYPES_NAME_MAPPING.put(Types.CHAR, "Types.CHAR");
+        JDBC_TYPES_NAME_MAPPING.put(Types.VARCHAR, "Types.VARCHAR");
+        JDBC_TYPES_NAME_MAPPING.put(Types.LONGVARCHAR, "Types.LONGVARCHAR");
+        JDBC_TYPES_NAME_MAPPING.put(Types.DATE, "Types.DATE");
+        JDBC_TYPES_NAME_MAPPING.put(Types.TIME, "Types.TIME");
+        JDBC_TYPES_NAME_MAPPING.put(Types.TIMESTAMP, "Types.TIMESTAMP");
+        JDBC_TYPES_NAME_MAPPING.put(Types.BINARY, "Types.BINARY");
+        JDBC_TYPES_NAME_MAPPING.put(Types.VARBINARY, "Types.VARBINARY");
+        JDBC_TYPES_NAME_MAPPING.put(Types.LONGVARBINARY, "Types.LONGVARBINARY");
+        JDBC_TYPES_NAME_MAPPING.put(Types.NULL, "Types.NULL");
+        JDBC_TYPES_NAME_MAPPING.put(Types.OTHER, "Types.OTHER");
+        JDBC_TYPES_NAME_MAPPING.put(Types.JAVA_OBJECT, "Types.JAVA_OBJECT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.DISTINCT, "Types.DISTINCT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.STRUCT, "Types.STRUCT");
+        JDBC_TYPES_NAME_MAPPING.put(Types.ARRAY, "Types.ARRAY");
+        JDBC_TYPES_NAME_MAPPING.put(Types.BLOB, "Types.BLOB");
+        JDBC_TYPES_NAME_MAPPING.put(Types.CLOB, "Types.CLOB");
+        JDBC_TYPES_NAME_MAPPING.put(Types.REF, "Types.REF");
+        JDBC_TYPES_NAME_MAPPING.put(Types.DATALINK, "Types.DATALINK");
+        JDBC_TYPES_NAME_MAPPING.put(Types.BOOLEAN, "Types.BOOLEAN");
+        JDBC_TYPES_NAME_MAPPING.put(Types.ROWID, "Types.ROWID");
+        JDBC_TYPES_NAME_MAPPING.put(Types.NCHAR, "Types.NCHAR");
+        JDBC_TYPES_NAME_MAPPING.put(Types.NVARCHAR, "Types.NVARCHAR");
+        JDBC_TYPES_NAME_MAPPING.put(Types.LONGNVARCHAR, "Types.LONGNVARCHAR");
+        JDBC_TYPES_NAME_MAPPING.put(Types.NCLOB, "Types.NCLOB");
+        JDBC_TYPES_NAME_MAPPING.put(Types.SQLXML, "Types.SQLXML");
+        JDBC_TYPES_NAME_MAPPING.put(Types.REF_CURSOR, "Types.REF_CURSOR");
+        JDBC_TYPES_NAME_MAPPING.put(Types.TIME_WITH_TIMEZONE, "Types.TIME_WITH_TIMEZONE");
+        JDBC_TYPES_NAME_MAPPING.put(Types.TIMESTAMP_WITH_TIMEZONE, "Types.TIMESTAMP_WITH_TIMEZONE");
+        JDBC_TYPES_NAME_MAPPING.put(-102, "Types.TIMESTAMP_WITH_TIMEZONE");
     }
 
     /**
@@ -122,6 +194,7 @@ public class CodegenUtils {
      * @param jdbc   数据源
      * @param config 配置
      */
+    @SneakyThrows
     public static void genCode(Jdbc jdbc, CodegenCodeConfig config) {
         Assert.notNull(jdbc, "参数 jdbc 不能为null");
         Assert.notNull(config, "参数 config 不能为null");
@@ -148,28 +221,21 @@ public class CodegenUtils {
                     continue;
                 }
                 EntityModel entityModel = createEntityModel(metaData, table);
-                if (config.hasCodegenType(CodegenType.JAVA_ENTITY)) {
-
-                }
-                if (config.hasCodegenType(CodegenType.GROOVY_ENTITY)) {
-
-                }
-                if (config.hasCodegenType(CodegenType.KOTLIN_ENTITY)) {
-
-                }
-                if (config.hasCodegenType(CodegenType.JAVA_QUERYDSL)) {
-
-                }
-                if (config.hasCodegenType(CodegenType.GROOVY_QUERYDSL)) {
-
-                }
-                if (config.hasCodegenType(CodegenType.KOTLIN_QUERYDSL)) {
-
+                entityModel.setPackageName(config.getPackageName());
+                for (CodegenType codegenType : config.getCodegenTypes()) {
+                    CodegenHandler codegenHandler = CODEGEN_HANDLER_MAP.get(codegenType);
+                    if (codegenHandler == null) {
+                        throw new UnsupportedOperationException("未配置代码生成实现: " + codegenType);
+                    }
+                    Template template = codegenHandler.getTemplate(ENGINE);
+                    String codes = template.renderToString(codegenHandler.getTemplateData(metaData, entityModel));
+                    File outFile = new File(FilenameUtils.concat(config.getOutDir(), codegenHandler.getFileName(entityModel)));
+                    FileUtils.writeStringToFile(outFile, codes, StandardCharsets.UTF_8);
+                    log.info("生成代码成功 | CodegenType={} | --> {}", codegenType, outFile.getAbsolutePath());
                 }
             }
         }
     }
-
 
     public static EntityModel createEntityModel(DataBaseMetaData metaData, Table table) {
         Assert.notNull(metaData, "参数 metaData 不能为null");
@@ -189,6 +255,7 @@ public class CodegenUtils {
                 throw new UnsupportedOperationException("不能获取 DbColumnMetaData，字段名: " + column.getName());
             }
             property.setJdbcType(columnMetaData.getColumnType());
+            property.setJdbcTypeName(JDBC_TYPES_NAME_MAPPING.get(columnMetaData.getColumnType()));
             String typeName = JDBC_TYPES_MAPPING.get(columnMetaData.getColumnType());
             if (StringUtils.isBlank(typeName)) {
                 throw new UnsupportedOperationException("缺少jdbc类型映射，java.sql.Types=" + columnMetaData.getColumnType());
@@ -196,6 +263,7 @@ public class CodegenUtils {
             property.setTypeName(typeName);
             String importPackage = TYPE_PACKAGE.get(typeName);
             if (StringUtils.isNotBlank(importPackage)) {
+                property.setFullTypeName(importPackage);
                 entityModel.addImportPackage(importPackage);
             }
             property.setName(NamingUtils.underlineToCamel(column.getName()));

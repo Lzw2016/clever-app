@@ -60,7 +60,7 @@ public class CodegenCodeConfig implements Serializable {
     private final Set<CodegenType> codegenTypes = new HashSet<>();
 
     public CodegenCodeConfig() {
-        codegenTypes.add(CodegenType.JAVA_ENTITY);
+//        codegenTypes.add(CodegenType.JAVA_ENTITY);
         codegenTypes.add(CodegenType.JAVA_QUERYDSL);
     }
 

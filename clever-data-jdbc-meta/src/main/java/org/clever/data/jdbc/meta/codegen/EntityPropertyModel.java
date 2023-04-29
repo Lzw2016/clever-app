@@ -18,9 +18,17 @@ public class EntityPropertyModel implements Serializable {
      */
     private Integer jdbcType;
     /**
+     * 字段类型名称(java.sql.Types)，如: Types.DECIMAL、Types.VARCHAR
+     */
+    private String jdbcTypeName;
+    /**
      * 字段类型名称，如: String、Boolean、Long
      */
     private String typeName;
+    /**
+     * 字段类型全名称，如: java.lang.String、java.lang.Boolean、java.lang.Long
+     */
+    private String fullTypeName;
     /**
      * 字段名
      */

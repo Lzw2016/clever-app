@@ -100,7 +100,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
                 continue;
             }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, name));
             Table table = schema.getTable(tableName);
             if (table == null) {
                 table = new Table(schema);

@@ -26,8 +26,8 @@ public class MetaDataUtilsTest {
     public void t02() {
         Jdbc jdbc = BaseTest.newPostgresql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-                .setOutDir("")
-                .setPackageName("")
+                .setOutDir("./src/test/java/org/clever/model")
+                .setPackageName("org.clever.model")
                 .addSchema("public")
                 .addTable("auto_increment_id");
         CodegenUtils.genCode(jdbc, config);
@@ -35,6 +35,7 @@ public class MetaDataUtilsTest {
         jdbc.close();
     }
 
+    @Test
     public void t03() {
 //        java.time.LocalDate date = new java.time.LocalDate();
 //        java.time.LocalTime date = new java.time.LocalTime();

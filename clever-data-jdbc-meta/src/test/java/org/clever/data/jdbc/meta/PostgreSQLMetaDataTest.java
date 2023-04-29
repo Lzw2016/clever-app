@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 public class PostgreSQLMetaDataTest {
     @Test
-    public void t03() {
+    public void t01() {
         Jdbc jdbc = BaseTest.newPostgresql();
         PostgreSQLMetaData metaData = new PostgreSQLMetaData(jdbc);
         List<Schema> schemas = metaData.getSchemas(null, null);
@@ -24,7 +24,7 @@ public class PostgreSQLMetaDataTest {
     }
 
     @Test
-    public void t04() {
+    public void t02() {
         Jdbc jdbc = BaseTest.newPostgresql();
         PostgreSQLMetaData metaData = new PostgreSQLMetaData(jdbc);
         Table table = metaData.getTable(metaData.currentSchema(), "auto_increment_id");

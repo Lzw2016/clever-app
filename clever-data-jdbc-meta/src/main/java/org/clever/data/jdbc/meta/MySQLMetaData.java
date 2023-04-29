@@ -75,7 +75,7 @@ public class MySQLMetaData extends AbstractMetaData {
             if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
                 continue;
             }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, name));
             Table table = schema.getTable(tableName);
             if (table == null) {
                 table = new Table(schema);
