@@ -1,22 +1,25 @@
+#if(packageName)
 package #(packageName)
-
-#for(pkg : packages)
-import #(pkg).*
 #end
-import java.sql.*
+
 import groovy.transform.Canonical
 import groovy.transform.MapConstructor
 import groovy.transform.ToString
+#for(pkg : importPackages)
+#if(!pkg.startsWith('java.lang.') && !pkg.startsWith('java.util.') && !pkg.startsWith('java.net.') && pkg!='java.math.BigDecimal' && pkg!='java.math.BigInteger')
+import #(pkg)
+#end
+#end
 
 /**
- * #(table.description)(#(table.tableName))
+ * #(table.comment)(#(table.name))
  */
 @MapConstructor
 @Canonical
 @ToString
 class #(className) {
-#for(column : columns)
-    /** #(column.column_comment) */
-    #(column.java_field_type) #(com.yvan.core.NamingUtils::underline2Camel(column.column_name))
+#for(property : properties)
+    /** #(property.comment) */
+    #(property.typeName) #(property.name)
 #end
 }

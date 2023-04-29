@@ -60,7 +60,7 @@ public class CodegenCodeConfig implements Serializable {
     private final Set<CodegenType> codegenTypes = new HashSet<>();
 
     public CodegenCodeConfig() {
-//        codegenTypes.add(CodegenType.JAVA_ENTITY);
+        codegenTypes.add(CodegenType.JAVA_ENTITY);
         codegenTypes.add(CodegenType.JAVA_QUERYDSL);
     }
 
@@ -223,6 +223,23 @@ public class CodegenCodeConfig implements Serializable {
         return codegenTypes.contains(codegenType);
     }
 
-//    public File getOutDirFile() {
-//    }
+    /**
+     * 生成代码类型
+     */
+    public CodegenCodeConfig addCodegenType(CodegenType codegenType) {
+        if (codegenType != null) {
+            codegenTypes.add(codegenType);
+        }
+        return this;
+    }
+
+    /**
+     * 生成代码类型
+     */
+    public CodegenCodeConfig removeCodegenType(CodegenType codegenType) {
+        if (codegenType != null) {
+            codegenTypes.remove(codegenType);
+        }
+        return this;
+    }
 }
