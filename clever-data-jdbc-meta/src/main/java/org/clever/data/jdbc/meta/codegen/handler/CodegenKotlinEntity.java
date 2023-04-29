@@ -16,6 +16,11 @@ public class CodegenKotlinEntity extends AbstractCodegenHandler {
 
     @Override
     public String getFileName(EntityModel entityModel) {
-        return String.format("%s.kt", entityModel.getClassName());
+        return String.format("entity/%s.kt", entityModel.getClassName());
+    }
+
+    @Override
+    public String getPackageName(String packageName) {
+        return packageName + ".entity";
     }
 }

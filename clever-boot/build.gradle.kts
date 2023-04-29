@@ -19,7 +19,6 @@ dependencies {
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk7")
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     // api("org.jetbrains.kotlin:kotlin-reflect")
-
     api("org.postgresql:postgresql")
     api("mysql:mysql-connector-java")
 }

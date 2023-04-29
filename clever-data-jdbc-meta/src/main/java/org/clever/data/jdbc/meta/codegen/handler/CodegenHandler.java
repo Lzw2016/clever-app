@@ -3,6 +3,7 @@ package org.clever.data.jdbc.meta.codegen.handler;
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
 import org.clever.data.jdbc.meta.AbstractMetaData;
+import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
 import org.clever.data.jdbc.meta.codegen.EntityModel;
 
 import java.util.Map;
@@ -18,8 +19,11 @@ public interface CodegenHandler {
     Template getTemplate(Engine engine);
 
     /** 获取模版数据 */
-    Map<?, ?> getTemplateData(AbstractMetaData metaData, EntityModel entityModel);
+    Map<String, Object> getTemplateData(AbstractMetaData metaData, EntityModel entityModel, CodegenCodeConfig config);
 
-    /** 获取生成的文件名 */
+    /** 获取生成的文件名(可以设置文件路径) */
     String getFileName(EntityModel entityModel);
+
+    /** 设置 class package 名 */
+    String getPackageName(String packageName);
 }

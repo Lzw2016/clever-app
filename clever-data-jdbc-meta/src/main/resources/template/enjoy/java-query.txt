@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.*;
 import com.querydsl.sql.*;
 import java.sql.Types;
+import #(importQueryEntity);
 #for(pkg : importPackages)
 #if(!pkg.startsWith('java.lang.'))
 import #(pkg);

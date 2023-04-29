@@ -16,6 +16,11 @@ public class CodegenGroovyEntity extends AbstractCodegenHandler {
 
     @Override
     public String getFileName(EntityModel entityModel) {
-        return String.format("%s.groovy", entityModel.getClassName());
+        return String.format("entity/%s.groovy", entityModel.getClassName());
+    }
+
+    @Override
+    public String getPackageName(String packageName) {
+        return packageName + ".entity";
     }
 }

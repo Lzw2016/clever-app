@@ -16,6 +16,11 @@ public class CodegenJavaEntity extends AbstractCodegenHandler {
 
     @Override
     public String getFileName(EntityModel entityModel) {
-        return String.format("%s.java", entityModel.getClassName());
+        return String.format("entity/%s.java", entityModel.getClassName());
+    }
+
+    @Override
+    public String getPackageName(String packageName) {
+        return packageName + ".entity";
     }
 }

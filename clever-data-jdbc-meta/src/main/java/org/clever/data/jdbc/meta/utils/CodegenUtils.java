@@ -222,14 +222,14 @@ public class CodegenUtils {
                     continue;
                 }
                 EntityModel entityModel = createEntityModel(metaData, table);
-                entityModel.setPackageName(config.getPackageName());
                 for (CodegenType codegenType : config.getCodegenTypes()) {
                     CodegenHandler codegenHandler = CODEGEN_HANDLER_MAP.get(codegenType);
                     if (codegenHandler == null) {
                         throw new UnsupportedOperationException("未配置代码生成实现: " + codegenType);
                     }
+                    entityModel.setPackageName(codegenHandler.getPackageName(config.getPackageName()));
                     Template template = codegenHandler.getTemplate(ENGINE);
-                    String codes = template.renderToString(codegenHandler.getTemplateData(metaData, entityModel));
+                    String codes = template.renderToString(codegenHandler.getTemplateData(metaData, entityModel, config));
                     File outFile = new File(FilenameUtils.concat(config.getOutDir(), codegenHandler.getFileName(entityModel)));
                     FileUtils.writeStringToFile(outFile, codes, StandardCharsets.UTF_8);
                     log.info("生成代码成功 | CodegenType={} | --> {}", codegenType, outFile.getAbsolutePath());

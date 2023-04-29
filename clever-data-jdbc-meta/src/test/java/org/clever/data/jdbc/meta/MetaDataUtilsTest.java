@@ -24,7 +24,8 @@ public class MetaDataUtilsTest {
 
     @Test
     public void t02() {
-        Jdbc jdbc = BaseTest.newPostgresql();
+        // Jdbc jdbc = BaseTest.newPostgresql();
+        Jdbc jdbc = BaseTest.newMysql();
         CodegenCodeConfig config = new CodegenCodeConfig()
                 .setOutDir("./src/test/java/org/clever/model")
 //                .setOutDir("./src/test/groovy/org/clever/model")
@@ -37,7 +38,9 @@ public class MetaDataUtilsTest {
 //                .addCodegenType(CodegenType.KOTLIN_ENTITY)
 //                .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
                 .addSchema("public")
-                .addTable("auto_increment_id");
+                .addSchema("test")
+//                .addTable("auto_increment_id")
+                .addSchema("__occupyPosition");
         CodegenUtils.genCode(jdbc, config);
         log.info("-->");
         jdbc.close();
