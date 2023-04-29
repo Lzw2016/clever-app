@@ -3,7 +3,6 @@ package org.clever.data.jdbc.meta;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
-import org.clever.data.jdbc.meta.codegen.CodegenType;
 import org.clever.data.jdbc.meta.model.Table;
 import org.clever.data.jdbc.meta.utils.CodegenUtils;
 import org.clever.data.jdbc.meta.utils.MetaDataUtils;
@@ -27,16 +26,16 @@ public class MetaDataUtilsTest {
     public void t02() {
         Jdbc jdbc = BaseTest.newPostgresql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-//                .setOutDir("./src/test/java/org/clever/model")
+                .setOutDir("./src/test/java/org/clever/model")
 //                .setOutDir("./src/test/groovy/org/clever/model")
-                .setOutDir("./src/test/kotlin/org/clever/model")
+//                .setOutDir("./src/test/kotlin/org/clever/model")
                 .setPackageName("org.clever.model")
-                .removeCodegenType(CodegenType.JAVA_ENTITY)
-                .removeCodegenType(CodegenType.JAVA_QUERYDSL)
+//                .removeCodegenType(CodegenType.JAVA_ENTITY)
+//                .removeCodegenType(CodegenType.JAVA_QUERYDSL)
 //                .addCodegenType(CodegenType.GROOVY_ENTITY)
 //                .addCodegenType(CodegenType.GROOVY_QUERYDSL)
-                .addCodegenType(CodegenType.KOTLIN_ENTITY)
-                .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
+//                .addCodegenType(CodegenType.KOTLIN_ENTITY)
+//                .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
                 .addSchema("public")
                 .addTable("auto_increment_id");
         CodegenUtils.genCode(jdbc, config);

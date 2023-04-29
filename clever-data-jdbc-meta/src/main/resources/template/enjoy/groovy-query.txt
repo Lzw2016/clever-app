@@ -51,7 +51,7 @@ class Q#(className) extends RelationalPathBase<#(className)> {
         addMetadata()
     }
 
-    void addMetadata() {
+    private void addMetadata() {
 #for(property : properties)
 #set(column = property.column)
 #set(size = max(column.size, column.width))

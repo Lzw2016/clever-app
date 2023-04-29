@@ -14,6 +14,7 @@ import org.clever.data.jdbc.meta.codegen.EntityPropertyModel;
  * 作者：lizw <br/>
  * 创建时间：2023/04/29 18:20 <br/>
  */
+@SuppressWarnings("DuplicatedCode")
 public class QueryDSLSupport {
     public static int max(int a, int b) {
         return Math.max(a, b);
@@ -21,26 +22,56 @@ public class QueryDSLSupport {
 
     @SneakyThrows
     public static String getQueryDslFieldDefine(EntityPropertyModel property) {
-        Class<?> clazz = Class.forName(property.getFullTypeName());
-        JavaTypeMappings typeMappings = new JavaTypeMappings();
-        TypeCategory typeCategory = TypeCategory.get(clazz.getName());
-        if (Number.class.isAssignableFrom(clazz)) {
-            typeCategory = TypeCategory.NUMERIC;
-        } else if (Enum.class.isAssignableFrom(clazz)) {
-            typeCategory = TypeCategory.ENUM;
-        }
-        ClassType classType = new ClassType(typeCategory, clazz);
-        SimpleType propertyType = new SimpleType(classType, classType.getParameters());
-        Type queryType = typeMappings.getPathType(propertyType, new EntityType(classType), false);
+        final Class<?> clazz = Class.forName(property.getFullTypeName());
+        final JavaTypeMappings typeMappings = new JavaTypeMappings();
+        final TypeCategory typeCategory = getTypeCategory(clazz);
+        final ClassType classType = new ClassType(typeCategory, clazz);
+        final SimpleType propertyType = new SimpleType(classType, classType.getParameters());
+        final Type queryType = typeMappings.getPathType(propertyType, new EntityType(classType), false);
+        final String javaType = getJavaType(queryType);
+        final String createMethod = getCreateMethod(propertyType);
         // 构建字段定义
         StringBuilder fieldType = new StringBuilder();
         fieldType.append(queryType.getSimpleName());
-        String javaType = "";
-        if (!queryType.getParameters().isEmpty()) {
-            javaType = queryType.getParameters().get(0).getSimpleName();
+        if (StringUtils.isNotBlank(javaType)) {
             fieldType.append("<").append(javaType).append(">");
         }
         fieldType.append(" ").append(property.getName());
+        fieldType.append(" = ").append(createMethod).append("(\"").append(property.getName());
+        if (StringUtils.isNotBlank(javaType)) {
+            fieldType.append("\", ").append(javaType).append(".class)");
+        } else {
+            fieldType.append("\")");
+        }
+        return fieldType.toString();
+    }
+
+    @SneakyThrows
+    public static String getQueryDslFieldDefineForKotlin(EntityPropertyModel property) {
+        final Class<?> clazz = Class.forName(property.getFullTypeName());
+        final JavaTypeMappings typeMappings = new JavaTypeMappings();
+        final TypeCategory typeCategory = getTypeCategory(clazz);
+        final ClassType classType = new ClassType(typeCategory, clazz);
+        final SimpleType propertyType = new SimpleType(classType, classType.getParameters());
+        final Type queryType = typeMappings.getPathType(propertyType, new EntityType(classType), false);
+        final String javaType = getJavaType(queryType);
+        final String createMethod = getCreateMethod(propertyType);
+        // 构建字段定义
+        StringBuilder fieldType = new StringBuilder();
+        fieldType.append(property.getName()).append(": ").append(queryType.getSimpleName());
+        if (StringUtils.isNotBlank(javaType)) {
+            fieldType.append("<").append(javaType).append(">");
+        }
+        fieldType.append(" = ").append(createMethod).append("(\"").append(property.getName());
+        if (StringUtils.isNotBlank(javaType)) {
+            fieldType.append("\", ").append(javaType).append("::class.java)");
+        } else {
+            fieldType.append("\")");
+        }
+        return fieldType.toString();
+    }
+
+    private static String getCreateMethod(SimpleType propertyType) {
         String createMethod = "";
         switch (propertyType.getCategory()) {
             case STRING:
@@ -74,15 +105,24 @@ public class QueryDSLSupport {
                 createMethod = "createArray";
                 break;
         }
-        if (StringUtils.isBlank(createMethod)) {
-            return "";
+        return createMethod;
+    }
+
+    private static String getJavaType(Type queryType) {
+        String javaType = "";
+        if (!queryType.getParameters().isEmpty()) {
+            javaType = queryType.getParameters().get(0).getSimpleName();
         }
-        fieldType.append(" = ").append(createMethod).append("(\"").append(property.getName());
-        if (StringUtils.isNotBlank(javaType)) {
-            fieldType.append("\", ").append(javaType).append(".class)");
-        } else {
-            fieldType.append("\")");
+        return javaType;
+    }
+
+    private static TypeCategory getTypeCategory(Class<?> clazz) {
+        TypeCategory typeCategory = TypeCategory.get(clazz.getName());
+        if (Number.class.isAssignableFrom(clazz)) {
+            typeCategory = TypeCategory.NUMERIC;
+        } else if (Enum.class.isAssignableFrom(clazz)) {
+            typeCategory = TypeCategory.ENUM;
         }
-        return fieldType.toString();
+        return typeCategory;
     }
 }

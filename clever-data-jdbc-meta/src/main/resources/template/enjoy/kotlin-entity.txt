@@ -1,0 +1,19 @@
+#if(packageName)
+package #(packageName)
+#end
+
+#for(pkg : importPackages)
+#if(!pkg.startsWith('java.lang.'))
+import #(pkg)
+#end
+#end
+
+/**
+ * #(table.comment)(#(table.name))
+ */
+data class #(className) (
+#for(property : properties)
+    /** #(property.comment) */
+    val #(property.name): #(property.typeName),
+#end
+)

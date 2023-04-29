@@ -87,6 +87,7 @@ public class CodegenUtils {
         TYPE_PACKAGE.put("Float", "java.lang.Float");
         TYPE_PACKAGE.put("Double", "java.lang.Double");
         TYPE_PACKAGE.put("Character", "java.lang.Character");
+        TYPE_PACKAGE.put("Char", "java.lang.Char");
         TYPE_PACKAGE.put("String", "java.lang.String");
         TYPE_PACKAGE.put("Void", "java.lang.Void");
         TYPE_PACKAGE.put("Object", "java.lang.Object");
@@ -111,7 +112,7 @@ public class CodegenUtils {
         JDBC_TYPES_MAPPING.put(Types.DOUBLE, "Double");
         JDBC_TYPES_MAPPING.put(Types.NUMERIC, "BigDecimal");
         JDBC_TYPES_MAPPING.put(Types.DECIMAL, "BigDecimal");
-        JDBC_TYPES_MAPPING.put(Types.CHAR, "Character");
+        JDBC_TYPES_MAPPING.put(Types.CHAR, "Char");
         JDBC_TYPES_MAPPING.put(Types.VARCHAR, "String");
         JDBC_TYPES_MAPPING.put(Types.LONGVARCHAR, "String");
         JDBC_TYPES_MAPPING.put(Types.DATE, "Date");
@@ -132,7 +133,7 @@ public class CodegenUtils {
         JDBC_TYPES_MAPPING.put(Types.DATALINK, "URL");
         JDBC_TYPES_MAPPING.put(Types.BOOLEAN, "Boolean");
         JDBC_TYPES_MAPPING.put(Types.ROWID, "Long");
-        JDBC_TYPES_MAPPING.put(Types.NCHAR, "Character");
+        JDBC_TYPES_MAPPING.put(Types.NCHAR, "Char");
         JDBC_TYPES_MAPPING.put(Types.NVARCHAR, "String");
         JDBC_TYPES_MAPPING.put(Types.LONGNVARCHAR, "String");
         JDBC_TYPES_MAPPING.put(Types.NCLOB, "String");

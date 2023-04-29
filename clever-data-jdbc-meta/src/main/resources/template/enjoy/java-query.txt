@@ -26,32 +26,32 @@ public class Q#(className) extends RelationalPathBase<#(className)> {
     public final #(getQueryDslFieldDefine(property));
 #end
 
-    Q#(className)(String variable) {
+    public Q#(className)(String variable) {
         super(#(className).class, forVariable(variable), "#(table.schemaName)", "#(table.name)");
         addMetadata();
     }
 
-    Q#(className)(String variable, String schema, String table) {
+    public Q#(className)(String variable, String schema, String table) {
         super(#(className).class, forVariable(variable), schema, table);
         addMetadata();
     }
 
-    Q#(className)(String variable, String schema) {
+    public Q#(className)(String variable, String schema) {
         super(#(className).class, forVariable(variable), schema, "#(table.name)");
         addMetadata();
     }
 
-    Q#(className)(Path<? extends #(className)> path) {
+    public Q#(className)(Path<? extends #(className)> path) {
         super(path.getType(), path.getMetadata(), "#(table.schemaName)", "#(table.name)");
         addMetadata();
     }
 
-    Q#(className)(PathMetadata metadata) {
+    public Q#(className)(PathMetadata metadata) {
         super(#(className).class, metadata, "#(table.schemaName)", "#(table.name)");
         addMetadata();
     }
 
-    void addMetadata() {
+    private void addMetadata() {
 #for(property : properties)
 #set(column = property.column)
 #set(size = max(column.size, column.width))

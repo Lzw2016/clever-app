@@ -1,0 +1,58 @@
+#if(packageName)
+package #(packageName)
+#end
+
+import com.querydsl.core.types.PathMetadataFactory
+import com.querydsl.core.types.dsl.*
+import com.querydsl.core.types.*
+import com.querydsl.sql.*
+import java.sql.Types
+#for(pkg : importPackages)
+#if(!pkg.startsWith('java.lang.'))
+import #(pkg)
+#end
+#end
+
+/**
+ * #(table.comment)(#(table.name))
+ */
+@Suppress("MemberVisibilityCanBePrivate", "unused")
+class Q#(className) : RelationalPathBase<#(className)> {
+    companion object {
+        /** #(table.name)表 */
+        val #(underlineToCamel(table.name)) = Q#(className)("#(table.name)")
+    }
+
+#for(property : properties)
+    /** #(property.comment) */
+    val #(getQueryDslFieldDefineForKotlin(property))
+#end
+
+    constructor(variable: String) : super(#(className)::class.java, PathMetadataFactory.forVariable(variable), "#(table.schemaName)", "#(table.name)") {
+        addMetadata()
+    }
+
+    constructor(variable: String, schema: String, table: String) : super(#(className)::class.java, PathMetadataFactory.forVariable(variable), schema, table) {
+        addMetadata()
+    }
+
+    constructor(variable: String, schema: String) : super(#(className)::class.java, PathMetadataFactory.forVariable(variable), schema, "#(table.name)") {
+        addMetadata()
+    }
+
+    constructor(path: Path<out #(className)>) : super(path.type, path.metadata, "#(table.schemaName)", "#(table.name)") {
+        addMetadata()
+    }
+
+    constructor(metadata: PathMetadata) : super(#(className)::class.java, metadata, "#(table.schemaName)", "#(table.name)") {
+        addMetadata()
+    }
+
+    private fun addMetadata() {
+#for(property : properties)
+#set(column = property.column)
+#set(size = max(column.size, column.width))
+        addMetadata(#(property.name), ColumnMetadata.named("#(column.name)").withIndex(#(column.ordinalPosition)).ofType(#(property.jdbcTypeName))#if(size>0).withSize(#(size))#end#if(column.decimalDigits>0).withDigits(#(column.decimalDigits))#end)
+#end
+    }
+}
