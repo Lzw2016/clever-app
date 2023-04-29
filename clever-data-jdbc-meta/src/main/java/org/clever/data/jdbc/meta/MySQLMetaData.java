@@ -17,10 +17,8 @@ import java.util.*;
  */
 @SuppressWarnings("DuplicatedCode")
 public class MySQLMetaData extends AbstractMetaData {
-    private final Jdbc jdbc;
-
     public MySQLMetaData(Jdbc jdbc) {
-        this.jdbc = jdbc;
+        super(jdbc);
         addIgnoreSchema("information_schema");
         addIgnoreSchema("mysql");
         addIgnoreSchema("performance_schema");
@@ -71,10 +69,10 @@ public class MySQLMetaData extends AbstractMetaData {
         for (Map<String, Object> map : mapColumns) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
-            if (ignoreTablesPrefix.stream().anyMatch(schemaName::startsWith)) {
+            if (ignoreTablesPrefix.stream().anyMatch(tableName::startsWith)) {
                 continue;
             }
-            if (ignoreTablesSuffix.stream().anyMatch(schemaName::endsWith)) {
+            if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
                 continue;
             }
             Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL));

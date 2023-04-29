@@ -14,9 +14,17 @@ public enum RenameStrategy {
      */
     ToCamel,
     /**
+     * 大写驼峰
+     */
+    ToCamelUpper,
+    /**
      * 全小写下划线
      */
     ToUnderline,
+    /**
+     * 全大写下划线
+     */
+    ToUnderlineUpper,
     /**
      * 全大写
      */

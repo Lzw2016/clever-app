@@ -1,0 +1,22 @@
+package #(packageName)
+
+#for(pkg : packages)
+import #(pkg).*
+#end
+import java.sql.*
+import groovy.transform.Canonical
+import groovy.transform.MapConstructor
+import groovy.transform.ToString
+
+/**
+ * #(table.description)(#(table.tableName))
+ */
+@MapConstructor
+@Canonical
+@ToString
+class #(className) {
+#for(column : columns)
+    /** #(column.column_comment) */
+    #(column.java_field_type) #(com.yvan.core.NamingUtils::underline2Camel(column.column_name))
+#end
+}

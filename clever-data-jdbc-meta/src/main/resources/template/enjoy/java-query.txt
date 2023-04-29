@@ -1,0 +1,58 @@
+package #(packageName);
+
+import static com.querydsl.core.types.PathMetadataFactory.*;
+import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.*;
+import com.querydsl.sql.*;
+import java.math.*;
+import java.sql.*;
+import #(importQueryEntity);
+#for(pkg : packages)
+import #(pkg).*
+#end
+
+/**
+ * #(table.description)(#(table.tableName))
+ */
+@SuppressWarnings("ALL")
+public class Q#(className) extends RelationalPathBase<#(className)> {
+    /** #(table.tableName)表 */
+    public static final Q#(className) #(com.yvan.core.NamingUtils::underline2Camel(table.tableName)) = new Q#(className)("#(table.tableName)");
+
+#for(column : columns)
+    /** #(column.column_comment) */
+    public final #(fieldDefines.get(for.index));
+#end
+
+    Q#(className)(String variable) {
+        super(#(className).class, forVariable(variable), "#(table.schemaName)", "#(table.tableName)");
+        addMetadata();
+    }
+
+    Q#(className)(String variable, String schema, String table) {
+        super(#(className).class, forVariable(variable), schema, table);
+        addMetadata();
+    }
+
+    Q#(className)(String variable, String schema) {
+        super(#(className).class, forVariable(variable), schema, "#(table.tableName)");
+        addMetadata();
+    }
+
+    Q#(className)(Path<? extends #(className)> path) {
+        super(path.getType(), path.getMetadata(), "#(table.schemaName)", "#(table.tableName)");
+        addMetadata();
+    }
+
+    Q#(className)(PathMetadata metadata) {
+        super(#(className).class, metadata, "#(table.schemaName)", "#(table.tableName)");
+        addMetadata();
+    }
+
+    void addMetadata() {
+#for(column : columns)
+        addMetadata(#(com.yvan.core.NamingUtils::underline2Camel(column.column_name)), ColumnMetadata.named("#(column.column_name)").withIndex(#(column.ordinal_position)).ofType(#(column.jdbc_type_name)).withSize(#(column.column_size))#if(column.decimal_digits>0).withDigits(#(column.decimal_digits))#end);
+#end
+    }
+}
+

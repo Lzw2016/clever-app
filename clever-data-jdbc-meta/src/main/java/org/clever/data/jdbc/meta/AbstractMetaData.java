@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.meta;
 
 import org.apache.commons.lang3.StringUtils;
+import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.Column;
 import org.clever.data.jdbc.meta.model.Schema;
 import org.clever.data.jdbc.meta.model.Table;
@@ -13,25 +14,31 @@ import java.util.stream.Collectors;
  * 创建时间：2023/04/28 10:15 <br/>
  */
 public abstract class AbstractMetaData implements DataBaseMetaData {
+    protected final Jdbc jdbc;
+
     /**
-     * 忽略Schema名(全小写过滤)
+     * 忽略Schema名(忽略大小写过滤)
      */
     private final Set<String> ignoreSchemas = new HashSet<>();
     /**
-     * 忽略表名(全小写过滤)
+     * 忽略表名(忽略大小写过滤)
      */
     private final Set<String> ignoreTables = new HashSet<>();
     /**
-     * 忽略表前缀(全小写过滤)
+     * 忽略表前缀(忽略大小写过滤)
      */
     private final Set<String> ignoreTablesPrefix = new HashSet<>();
     /**
-     * 忽略表后缀(全小写过滤)
+     * 忽略表后缀(忽略大小写过滤)
      */
     private final Set<String> ignoreTablesSuffix = new HashSet<>();
 
+    protected AbstractMetaData(Jdbc jdbc) {
+        this.jdbc = jdbc;
+    }
+
     /**
-     * 忽略Schema名(全小写过滤)
+     * 忽略Schema名(忽略大小写过滤)
      */
     public void addIgnoreSchema(String schemaName) {
         if (StringUtils.isBlank(schemaName)) {
@@ -41,7 +48,7 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
     }
 
     /**
-     * 忽略表名(全小写过滤)
+     * 忽略表名(忽略大小写过滤)
      */
     public void addIgnoreTable(String tableName) {
         if (StringUtils.isBlank(tableName)) {
@@ -51,7 +58,7 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
     }
 
     /**
-     * 忽略表前缀(全小写过滤)
+     * 忽略表前缀(忽略大小写过滤)
      */
     public void addIgnoreTablePrefix(String tablePrefix) {
         if (StringUtils.isBlank(tablePrefix)) {
@@ -61,7 +68,7 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
     }
 
     /**
-     * 忽略表后缀(全小写过滤)
+     * 忽略表后缀(忽略大小写过滤)
      */
     public void addIgnoreTableSuffix(String tableSuffix) {
         if (StringUtils.isBlank(tableSuffix)) {
@@ -71,31 +78,36 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
     }
 
     /**
-     * 忽略Schema名(全小写过滤)
+     * 忽略Schema名(忽略大小写过滤)
      */
     public Set<String> getIgnoreSchemas() {
         return ignoreSchemas.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
     }
 
     /**
-     * 忽略表名(全小写过滤)
+     * 忽略表名(忽略大小写过滤)
      */
     public Set<String> getIgnoreTables() {
         return ignoreTables.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
     }
 
     /**
-     * 忽略表前缀(全小写过滤)
+     * 忽略表前缀(忽略大小写过滤)
      */
     public Set<String> getIgnoreTablesPrefix() {
         return ignoreTablesPrefix.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
     }
 
     /**
-     * 忽略表后缀(全小写过滤)
+     * 忽略表后缀(忽略大小写过滤)
      */
     public Set<String> getIgnoreTablesSuffix() {
         return ignoreTablesSuffix.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Jdbc getJdbc() {
+        return jdbc;
     }
 
     @Override

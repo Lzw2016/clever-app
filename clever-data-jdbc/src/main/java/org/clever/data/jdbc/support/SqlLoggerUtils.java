@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 作者：lizw <br/>
@@ -38,6 +39,17 @@ public class SqlLoggerUtils {
             String paramMapStr = getParamMapStr(params);
             log.debug(Log_Parameters, paramMapStr);
         }
+    }
+
+    /**
+     * 打印SQL以及其参数
+     *
+     * @param sql    sql语句
+     * @param params sql参数
+     */
+    public static void printfSql(String sql, Object[] params) {
+        List<Object> paramList = Arrays.stream(params == null ? new Object[0] : params).collect(Collectors.toList());
+        printfSql(sql, paramList);
     }
 
     /**

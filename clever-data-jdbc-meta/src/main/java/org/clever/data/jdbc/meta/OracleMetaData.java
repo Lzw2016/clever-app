@@ -13,10 +13,8 @@ import java.util.*;
  * 创建时间：2023/04/28 15:53 <br/>
  */
 public class OracleMetaData extends AbstractMetaData {
-    private final Jdbc jdbc;
-
     public OracleMetaData(Jdbc jdbc) {
-        this.jdbc = jdbc;
+        super(jdbc);
 //        addIgnoreSchema("information_schema");
 //        addIgnoreSchema("mysql");
 //        addIgnoreSchema("performance_schema");

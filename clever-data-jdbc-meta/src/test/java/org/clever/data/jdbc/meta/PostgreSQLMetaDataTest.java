@@ -10,24 +10,24 @@ import java.util.List;
 
 /**
  * 作者：lizw <br/>
- * 创建时间：2023/04/27 23:13 <br/>
+ * 创建时间：2023/04/29 11:35 <br/>
  */
 @Slf4j
-public class MySQLMetaDataTest {
+public class PostgreSQLMetaDataTest {
     @Test
-    public void t01() {
-        Jdbc jdbc = BaseTest.newMysql();
-        MySQLMetaData metaData = new MySQLMetaData(jdbc);
+    public void t03() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        PostgreSQLMetaData metaData = new PostgreSQLMetaData(jdbc);
         List<Schema> schemas = metaData.getSchemas(null, null);
         log.info("--> {}", schemas);
         jdbc.close();
     }
 
     @Test
-    public void t02() {
-        Jdbc jdbc = BaseTest.newMysql();
-        MySQLMetaData metaData = new MySQLMetaData(jdbc);
-        Table table = metaData.getTable(metaData.currentSchema(), "biz_code");
+    public void t04() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        PostgreSQLMetaData metaData = new PostgreSQLMetaData(jdbc);
+        Table table = metaData.getTable(metaData.currentSchema(), "auto_increment_id");
         log.info("--> {}", table);
         jdbc.close();
     }

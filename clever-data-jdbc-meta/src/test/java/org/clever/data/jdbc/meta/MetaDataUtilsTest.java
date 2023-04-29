@@ -1,0 +1,47 @@
+package org.clever.data.jdbc.meta;
+
+import lombok.extern.slf4j.Slf4j;
+import org.clever.data.jdbc.Jdbc;
+import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
+import org.clever.data.jdbc.meta.model.Table;
+import org.clever.data.jdbc.meta.utils.CodegenUtils;
+import org.clever.data.jdbc.meta.utils.MetaDataUtils;
+import org.junit.jupiter.api.Test;
+
+/**
+ * 作者：lizw <br/>
+ * 创建时间：2023/04/29 11:34 <br/>
+ */
+@Slf4j
+public class MetaDataUtilsTest {
+    @Test
+    public void t01() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        Table table = MetaDataUtils.getTable(jdbc, MetaDataUtils.currentSchema(jdbc), "auto_increment_id");
+        log.info("--> {}", table);
+        jdbc.close();
+    }
+
+    @Test
+    public void t02() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        CodegenCodeConfig config = new CodegenCodeConfig()
+                .setOutDir("")
+                .setPackageName("")
+                .addSchema("public")
+                .addTable("auto_increment_id");
+        CodegenUtils.genCode(jdbc, config);
+        log.info("-->");
+        jdbc.close();
+    }
+
+    public void t03() {
+//        java.time.LocalDate date = new java.time.LocalDate();
+//        java.time.LocalTime date = new java.time.LocalTime();
+//        java.time.ZonedDateTime
+//        java.time.OffsetDateTime
+//        java.time.OffsetTime
+//        java.time.ZonedDateTime
+//        byte[] aa = null;
+    }
+}

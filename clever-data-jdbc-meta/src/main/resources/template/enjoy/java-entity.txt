@@ -1,0 +1,20 @@
+package #(packageName);
+
+#for(pkg : packages)
+import #(pkg).*;
+#end
+import java.io.Serializable;
+import java.math.*;
+import java.sql.*;
+import lombok.Data;
+
+/**
+ * #(table.description)(#(table.tableName))
+ */
+@Data
+public class #(className) implements Serializable {
+#for(column : columns)
+    /** #(column.column_comment) */
+    private #(column.java_field_type) #(com.yvan.core.NamingUtils::underline2Camel(column.column_name));
+#end
+}

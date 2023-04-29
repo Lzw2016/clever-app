@@ -190,7 +190,7 @@ subprojects {
             dependency("com.google.zxing:javase:3.4.1")
             dependency("ognl:ognl:3.2.21")
             dependency("com.github.jsqlparser:jsqlparser:4.4")
-            dependency("com.jfinal:enjoy:4.9.21")
+            dependency("com.jfinal:enjoy:5.0.3")
             dependency("com.belerweb:pinyin4j:2.5.1")
             dependency("org.ow2.asm:asm:7.1")
             dependency("org.apache.commons:commons-math3:3.6.1")

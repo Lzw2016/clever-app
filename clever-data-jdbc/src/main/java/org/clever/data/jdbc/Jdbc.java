@@ -3007,7 +3007,6 @@ public class Jdbc extends AbstractDataSource {
     private <T> T queryData(String sql, Map<String, Object> paramMap, JdbcExecute<T> jdbcExecute) {
         Assert.hasText(sql, "sql不能为空");
         sql = StringUtils.trim(sql);
-        SqlLoggerUtils.printfSql(sql, paramMap);
         T res = jdbcExecute.execute(new JdbcContext(sql, paramMap));
         SqlLoggerUtils.printfTotal(res);
         return res;
@@ -3110,7 +3109,6 @@ public class Jdbc extends AbstractDataSource {
         Assert.hasText(sql, "sql不能为空");
         Assert.notNull(queryForCursor, "queryForCursor不能为空");
         sql = StringUtils.trim(sql);
-        SqlLoggerUtils.printfSql(sql, paramMap);
         if (paramMap == null) {
             paramMap = new HashMap<>();
         }
@@ -3128,7 +3126,6 @@ public class Jdbc extends AbstractDataSource {
     private int update(String sql, Map<String, Object> paramMap, UpdateData updateData) {
         Assert.hasText(sql, "sql不能为空");
         sql = StringUtils.trim(sql);
-        SqlLoggerUtils.printfSql(sql, paramMap);
         int res = updateData.execute(new JdbcContext(sql, paramMap));
         SqlLoggerUtils.printfUpdateTotal(res);
         return res;
@@ -3149,7 +3146,6 @@ public class Jdbc extends AbstractDataSource {
             Map<String, Object> map = BeanCopyUtils.toMap(param);
             paramList.add(map);
         }
-        SqlLoggerUtils.printfSql(sql, paramList);
         int[] res = batchUpdateData.execute(new JdbcContext(sql, paramList));
         SqlLoggerUtils.printfUpdateTotal(res);
         return res;
@@ -3165,7 +3161,6 @@ public class Jdbc extends AbstractDataSource {
     private InsertResult insert(String sql, Map<String, Object> paramMap, InsertData insertData) {
         Assert.hasText(sql, "sql不能为空");
         sql = StringUtils.trim(sql);
-        SqlLoggerUtils.printfSql(sql, paramMap);
         InsertResult insertResult = insertData.execute(new JdbcContext(sql, paramMap));
         SqlLoggerUtils.printfUpdateTotal(insertResult.getInsertCount());
         return insertResult;
@@ -3241,6 +3236,7 @@ public class Jdbc extends AbstractDataSource {
             pss.setValues(preparedStatement);
         }
         // 执行sql
+        SqlLoggerUtils.printfSql(sql,  params);
         return preparedStatement.executeUpdate();
     }
 
@@ -3259,6 +3255,8 @@ public class Jdbc extends AbstractDataSource {
             ArgumentPreparedStatementSetter pss = new ArgumentPreparedStatementSetter(params);
             pss.setValues(preparedStatement);
         }
+        // 执行sql
+        SqlLoggerUtils.printfSql(sql,  params);
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             MapRowMapper mapRowMapper = new MapRowMapper(RenameStrategy.None);
             RowMapperResultSetExtractor<Map<String, Object>> resultExtractor = new RowMapperResultSetExtractor<>(mapRowMapper);
@@ -3310,12 +3308,13 @@ public class Jdbc extends AbstractDataSource {
 
         @Override
         public T execute(JdbcContext context) {
-            Page<?> page = new Page<>(1, 1, 1);
+            Page<?> page = new Page<>(1, 1);
             Map<String, Object> paramMap = new HashMap<>(context.getParamMap());
             String pageSql = DialectFactory.buildPaginationSql(page, context.getSql(), paramMap, jdbc.getDbType(), null);
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                SqlLoggerUtils.printfSql(pageSql, paramMap);
                 return jdbc.jdbcTemplate.query(pageSql, paramMap, resultSetExtractor);
             } catch (Exception e) {
                 exception = e;
@@ -3352,6 +3351,7 @@ public class Jdbc extends AbstractDataSource {
                     // 改写查询sql，限制查询数据量
                     sql = DialectFactory.buildPaginationSql(0, 1, sql, jdbc.dbType, null);
                 }
+                SqlLoggerUtils.printfSql(sql, context.getParamMap());
                 List<T> list = jdbc.jdbcTemplate.query(sql, context.getParamMap(), new SingleColumnRowMapper<>(returnType));
                 return DataAccessUtils.singleResult(list);
             } catch (Exception e) {
@@ -3389,6 +3389,7 @@ public class Jdbc extends AbstractDataSource {
                     // 改写查询sql，限制查询数据量
                     sql = DialectFactory.buildPaginationSql(0, 1, sql, jdbc.dbType, null);
                 }
+                SqlLoggerUtils.printfSql(sql, context.getParamMap());
                 List<T> list = jdbc.jdbcTemplate.query(sql, context.getParamMap(), rowMapper);
                 return DataAccessUtils.singleResult(list);
             } catch (Exception e) {
@@ -3410,6 +3411,7 @@ public class Jdbc extends AbstractDataSource {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                SqlLoggerUtils.printfSql(context.getSql(), context.getParamMap());
                 return jdbc.jdbcTemplate.query(context.getSql(), new MapSqlParameterSource(context.getParamMap()), rowMapper);
             } catch (Exception e) {
                 exception = e;
@@ -3430,6 +3432,7 @@ public class Jdbc extends AbstractDataSource {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                SqlLoggerUtils.printfSql(context.getSql(), context.getParamMap());
                 jdbc.jdbcTemplate.query(context.getSql(), new MapSqlParameterSource(context.getParamMap()), (ResultSetExtractor<?>) interruptRowCallbackHandler);
                 return null;
             } catch (Exception e) {
@@ -3450,6 +3453,7 @@ public class Jdbc extends AbstractDataSource {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                SqlLoggerUtils.printfSql(context.getSql(), context.getParamMap());
                 return jdbc.jdbcTemplate.update(context.getSql(), new MapSqlParameterSource(context.getParamMap()));
             } catch (Exception e) {
                 exception = e;
@@ -3476,6 +3480,7 @@ public class Jdbc extends AbstractDataSource {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                SqlLoggerUtils.printfSql(context.getSql(), paramList);
                 return jdbc.jdbcTemplate.batchUpdate(context.getSql(), paramArray);
             } catch (Exception e) {
                 exception = e;
@@ -3503,6 +3508,7 @@ public class Jdbc extends AbstractDataSource {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                SqlLoggerUtils.printfSql(context.getSql(), paramMap);
                 int insertCount = jdbc.jdbcTemplate.update(context.getSql(), sqlParameterSource, keyHolder);
                 List<Map<String, Object>> keysList = keyHolder.getKeyList();
                 InsertResult.KeyHolder resultKeyHolder = new InsertResult.KeyHolder(keysList);

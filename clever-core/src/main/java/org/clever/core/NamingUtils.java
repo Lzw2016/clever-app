@@ -22,39 +22,59 @@ public class NamingUtils {
     // --------------------------------------------------------------------------------------------
 
     /**
+     * 驼峰 转 下划线
+     *
+     * @param param     需要转换的字符串
+     * @param upperCase true:全大写; false:全小写
+     * @return 转换好的字符串
+     */
+    public static String camelToUnderline(String param, boolean upperCase) {
+        if (StringUtils.isBlank(param)) {
+            return StringUtils.EMPTY;
+        }
+        String res;
+        // 没有小写字母时(全是“大写字母”和“_”)
+        Matcher matcher = LOWER_CHAR_PATTERN.matcher(param);
+        if (!matcher.find()) {
+            res = param;
+        } else {
+            int len = param.length();
+            StringBuilder sb = new StringBuilder(len + 16);
+            for (int i = 0; i < len; i++) {
+                char c = param.charAt(i);
+                if (Character.isUpperCase(c) && i > 0) {
+                    sb.append(UNDERLINE);
+                }
+                sb.append(c);
+            }
+            res = sb.toString();
+        }
+        if (upperCase) {
+            res = res.toUpperCase();
+        } else {
+            res = res.toLowerCase();
+        }
+        return res;
+    }
+
+    /**
      * 驼峰 转 下划线(全小写)
      *
      * @param param 需要转换的字符串
      * @return 转换好的字符串
      */
     public static String camelToUnderline(String param) {
-        if (StringUtils.isBlank(param)) {
-            return StringUtils.EMPTY;
-        }
-        // 没有小写字母时(全是“大写字母”和“_”)
-        Matcher matcher = LOWER_CHAR_PATTERN.matcher(param);
-        if (!matcher.find()) {
-            return StringUtils.lowerCase(param);
-        }
-        int len = param.length();
-        StringBuilder sb = new StringBuilder(len + 16);
-        for (int i = 0; i < len; i++) {
-            char c = param.charAt(i);
-            if (Character.isUpperCase(c) && i > 0) {
-                sb.append(UNDERLINE);
-            }
-            sb.append(Character.toLowerCase(c));
-        }
-        return sb.toString();
+        return camelToUnderline(param, false);
     }
 
     /**
-     * 下划线 转 驼峰(小写驼峰)
+     * 下划线 转 驼峰
      *
-     * @param param 需要转换的字符串
+     * @param param      需要转换的字符串
+     * @param smallCamel true:大驼峰; false:小驼峰
      * @return 转换好的字符串
      */
-    public static String underlineToCamel(String param) {
+    public static String underlineToCamel(String param, boolean smallCamel) {
         if (StringUtils.isBlank(param)) {
             return StringUtils.EMPTY;
         }
@@ -72,9 +92,23 @@ public class NamingUtils {
                 flag = false;
                 c = Character.toUpperCase(c);
             }
+            if (i == 0 && smallCamel) {
+                c = Character.toUpperCase(c);
+            }
             sb.append(c);
         }
         return sb.toString();
+    }
+
+
+    /**
+     * 下划线 转 驼峰(小写驼峰)
+     *
+     * @param param 需要转换的字符串
+     * @return 转换好的字符串
+     */
+    public static String underlineToCamel(String param) {
+        return underlineToCamel(param, false);
     }
 
     /**
@@ -92,9 +126,17 @@ public class NamingUtils {
                 // 小写驼峰
                 name = underlineToCamel(name);
                 break;
+            case ToCamelUpper:
+                // 大写驼峰
+                name = underlineToCamel(name, true);
+                break;
             case ToUnderline:
                 // 全小写下划线
                 name = camelToUnderline(name);
+                break;
+            case ToUnderlineUpper:
+                // 全大写下划线
+                name = camelToUnderline(name, true);
                 break;
             case ToUpperCase:
                 // 全大写

@@ -1,5 +1,6 @@
 package org.clever.data.jdbc.meta;
 
+import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.Schema;
 import org.clever.data.jdbc.meta.model.Table;
 
@@ -14,6 +15,11 @@ import java.util.List;
  */
 public interface DataBaseMetaData {
     /**
+     * 当前的Jdbc对象
+     */
+    Jdbc getJdbc();
+
+    /**
      * 获取数据库连接默认的Schema名
      */
     String currentSchema();
@@ -21,8 +27,8 @@ public interface DataBaseMetaData {
     /**
      * 获取数据库元数据
      *
-     * @param schemasName 指定的 Schema 集合，不指定就不过滤
-     * @param tablesName  指定的 Table 集合，不指定就不过滤
+     * @param schemasName 指定的 Schema 集合，不指定就获取所有的 Schema
+     * @param tablesName  指定的 Table 集合，不指定就获取所有的 Table
      */
     List<Schema> getSchemas(Collection<String> schemasName, Collection<String> tablesName);
 
