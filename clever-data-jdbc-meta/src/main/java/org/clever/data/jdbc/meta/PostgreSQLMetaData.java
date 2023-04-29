@@ -70,6 +70,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         sql.append("    character_maximum_length                                as width, ");
         sql.append("    column_default                                          as defaultValue, ");
         sql.append("    ordinal_position                                        as ordinalPosition, ");
+        sql.append("    is_identity, ");
         sql.append("    table_catalog, ");
         sql.append("    character_octet_length, ");
         sql.append("    datetime_precision, ");
@@ -383,5 +384,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         column.setWidth(Conv.asInteger(map.get("width")));
         column.setDefaultValue(Conv.asString(map.get("defaultValue"), null));
         column.setOrdinalPosition(Conv.asInteger(map.get("ordinalPosition")));
+        // is_identity | column_default LIKE 'nextval(%'
+        column.setAutoIncremented(Conv.asBoolean(map.get("is_identity")) || Conv.asString(map.get("defaultValue")).toLowerCase().startsWith("nextval("));
     }
 }

@@ -18,4 +18,11 @@ public enum CodegenType {
     GROOVY_QUERYDSL,
     /** kotlin queryDSL */
     KOTLIN_QUERYDSL,
+
+    /** 数据库文档 markdown 格式 */
+    DB_DOC_MD,
+    /** 数据库文档 html 格式 */
+    DB_DOC_HTML,
+    /** 数据库文档 word 格式 */
+    DB_DOC_WORD,
 }
