@@ -16,7 +16,7 @@ object Ver {
     const val springBootVersion = "2.6.14"
     const val springCloudVersion = "2021.0.5"
     const val javalinVersion = "4.6.7"
-    const val kotlinVersion = "1.6.21"
+    const val kotlinVersion = "1.8.21"
     const val kotlinxCoroutinesVersion = "1.6.4"
     const val groovyVersion = "4.0.8"
     const val antlr4Version = "4.9.3"

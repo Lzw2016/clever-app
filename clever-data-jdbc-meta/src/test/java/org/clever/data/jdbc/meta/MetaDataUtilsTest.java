@@ -28,12 +28,15 @@ public class MetaDataUtilsTest {
         Jdbc jdbc = BaseTest.newPostgresql();
         CodegenCodeConfig config = new CodegenCodeConfig()
 //                .setOutDir("./src/test/java/org/clever/model")
-                .setOutDir("./src/test/groovy/org/clever/model")
+//                .setOutDir("./src/test/groovy/org/clever/model")
+                .setOutDir("./src/test/kotlin/org/clever/model")
                 .setPackageName("org.clever.model")
                 .removeCodegenType(CodegenType.JAVA_ENTITY)
                 .removeCodegenType(CodegenType.JAVA_QUERYDSL)
-                .addCodegenType(CodegenType.GROOVY_ENTITY)
+//                .addCodegenType(CodegenType.GROOVY_ENTITY)
 //                .addCodegenType(CodegenType.GROOVY_QUERYDSL)
+                .addCodegenType(CodegenType.KOTLIN_ENTITY)
+                .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
                 .addSchema("public")
                 .addTable("auto_increment_id");
         CodegenUtils.genCode(jdbc, config);
