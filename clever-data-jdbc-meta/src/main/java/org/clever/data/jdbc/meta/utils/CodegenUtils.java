@@ -77,6 +77,7 @@ public class CodegenUtils {
         CODEGEN_HANDLER_MAP.put(CodegenType.KOTLIN_QUERYDSL, new CodegenKotlinQueryDSL());
         CODEGEN_HANDLER_MAP.put(CodegenType.DB_DOC_MARKDOWN, new CodegenDbDocMarkdown());
         CODEGEN_HANDLER_MAP.put(CodegenType.DB_DOC_HTML, new CodegenDbDocHtml());
+        CODEGEN_HANDLER_MAP.put(CodegenType.DB_DOC_WORD, new CodegenDbDocWord());
         // 类型需要的 import package
         TYPE_PACKAGE.put("Boolean", "java.lang.Boolean");
         TYPE_PACKAGE.put("Byte", "java.lang.Byte");

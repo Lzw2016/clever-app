@@ -56,7 +56,8 @@ public class MetaDataUtilsTest {
                 .removeCodegenType(CodegenType.JAVA_ENTITY)
                 .removeCodegenType(CodegenType.JAVA_QUERYDSL)
 //                .addCodegenType(CodegenType.DB_DOC_MARKDOWN)
-                .addCodegenType(CodegenType.DB_DOC_HTML)
+//                .addCodegenType(CodegenType.DB_DOC_HTML)
+                .addCodegenType(CodegenType.DB_DOC_WORD)
                 .addSchema("public")
                 .addSchema("test")
                 .addSchema("__occupyPosition");
