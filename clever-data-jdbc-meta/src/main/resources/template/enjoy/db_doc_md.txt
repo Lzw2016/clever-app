@@ -12,7 +12,6 @@
 **文档描述：** #(description)
 
 #end
-
 | 序号 | 表名 | 说明 |
 | :--- | :--- | :--- |
 #for(table : tables)
@@ -33,11 +32,15 @@
 | :--- | :--- | :---| :--- | :--- | :--- | :--- | :--- |
 #for(column : table.columns)
 ### --- 计算“数据类型”
+#if(dbType== DbType.MYSQL)
+#set(dataType = column.getAttribute('column_type'))
+#else
 #set(size = max(column.size, column.width))
 #if(column.decimalDigits>0)
 #set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+', '+column.decimalDigits+')')))
 #else
 #set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+')')))
+#end
 ### --- 计算“主键”
 #set(primaryKey = column.isPartOfPrimaryKey() ? (column.isAutoIncremented() ? 'Y(自增)' : 'Y') : 'N')
 ### --- 计算“是否索引”
@@ -54,6 +57,7 @@
 #for(index : table.indices)
 | #(for.count) | #(index.name) | #for(column : index.columns)#(column.name)#if(!for.last), #end#end |  #(index.isUnique()?'Y':'N') |
 #end
+
 #end
 ---
 

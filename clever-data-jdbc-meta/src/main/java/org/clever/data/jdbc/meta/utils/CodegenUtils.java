@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
+import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.AbstractMetaData;
 import org.clever.data.jdbc.meta.DataBaseMetaData;
@@ -63,6 +64,7 @@ public class CodegenUtils {
         ENGINE.setStaticMethodExpression(true);
         ENGINE.addSharedStaticMethod(NamingUtils.class);
         ENGINE.addSharedStaticMethod(QueryDSLSupport.class);
+        ENGINE.addEnum(DbType.class);
         // ENGINE.addSharedObject();
         ENGINE.setBaseTemplatePath(null);
         ENGINE.setToClassPathSourceFactory();

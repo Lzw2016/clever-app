@@ -380,6 +380,9 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         column.setNotNull(Conv.asBoolean(map.get("notNull")));
         column.setDataType(Conv.asString(map.get("dataType"), null));
         column.setSize(Conv.asInteger(map.get("size")));
+        if (column.getSize() == 0) {
+            column.setSize(Conv.asInteger(map.get("datetime_precision")));
+        }
         column.setDecimalDigits(Conv.asInteger(map.get("decimalDigits")));
         column.setWidth(Conv.asInteger(map.get("width")));
         column.setDefaultValue(Conv.asString(map.get("defaultValue"), null));

@@ -59,6 +59,7 @@ public class MySQLMetaData extends AbstractMetaData {
         sql.append("    column_default           as `defaultValue`, ");
         sql.append("    ordinal_position         as `ordinalPosition`, ");
         sql.append("    column_type              as `column_type`, ");
+        sql.append("    datetime_precision       as `datetime_precision`, ");
         sql.append("    extra                    as `extra` ");
         sql.append("from ");
         sql.append("    information_schema.columns ");
@@ -278,6 +279,9 @@ public class MySQLMetaData extends AbstractMetaData {
         column.setNotNull(!Conv.asBoolean(map.get("notNull"), true));
         column.setDataType(Conv.asString(map.get("dataType"), null));
         column.setSize(Conv.asInteger(map.get("size")));
+        if (column.getSize() == 0) {
+            column.setSize(Conv.asInteger(map.get("datetime_precision")));
+        }
         column.setDecimalDigits(Conv.asInteger(map.get("decimalDigits")));
         column.setWidth(Conv.asInteger(map.get("width")));
         column.setDefaultValue(Conv.asString(map.get("defaultValue"), null));
