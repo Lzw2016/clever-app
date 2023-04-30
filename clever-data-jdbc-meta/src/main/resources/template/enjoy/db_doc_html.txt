@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
+    <title>#(title ?? '数据库设计文档')</title>
+    <style>
+        body {
+            padding-bottom: 50px
+        }
+
+        body, td {
+            font-family: verdana, fantasy;
+            font-size: 12px;
+            line-height: 150%
+        }
+
+        table {
+            width: 100%;
+            background-color: #ccc;
+            margin: 5px 0
+        }
+
+        td {
+            background-color: #fff;
+            padding: 3px 3px 3px 10px
+        }
+
+        thead td {
+            text-align: center;
+            font-weight: bold;
+            background-color: #eee
+        }
+
+        a:link, a:visited, a:active {
+            color: #015fb6;
+            text-decoration: none
+        }
+
+        a:hover {
+            color: #e33e06
+        }
+    </style>
+</head>
+<body style='text-align:center;'>
+    <div style='width:1000px; margin:20px auto; text-align:left;'>
+        <a name='index'></a>
+        <h2 style='text-align:center; line-height:50px;'>
+            #(title ?? '数据库设计文档')
+        </h2>
+        <div>
+            <b>数据库名：#(name)</b>
+            <br>
+            #if(version)
+                <b>文档版本：#(version)</b>
+                <br>
+            #end
+            #if(description)
+                <b>文档描述：#(description)</b>
+                <br>
+            #end
+        </div>
+        <table cellspacing='1'>
+            <thead>
+            <tr>
+                <td style='width:40px;'>序号</td>
+                <td>表名</td>
+                <td>说明</td>
+            </tr>
+            </thead>
+            #for(table : tables)
+                <tr>
+                    <td style='text-align:center;'>#(for.count)</td>
+                    <td><a href='##(table.name)'>#(table.name)</a></td>
+                    <td>#(table.comment)</td>
+                </tr>
+            #end
+        </table>
+
+        #for(table : tables)
+            <a name='#(table.name)'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：#(table.name)</b>
+            </div>
+            <div>说明：#(table.comment)</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                #for(column : table.columns)
+                    ### --- 计算“数据类型”
+                    #if(dbType== DbType.MYSQL)
+                        #set(dataType = column.getAttribute('column_type'))
+                    #else
+                        #set(size = max(column.size, column.width))
+                        #if(column.decimalDigits>0)
+                            #set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+', '+column.decimalDigits+')')))
+                        #else
+                            #set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+')')))
+                        #end
+                    #end
+                    ### --- 计算“主键”
+                    #set(primaryKey = column.isPartOfPrimaryKey() ? (column.isAutoIncremented() ? 'Y(自增)' : 'Y') : 'N')
+                    ### --- 计算“是否索引”
+                    #set(idx = column.isPartOfUniqueIndex() ? 'Y(唯一)' : (column.isPartOfIndex() ? 'Y': ''))
+                    <tr>
+                        <td style='text-align:center;'>#(column.ordinalPosition)</td>
+                        <td>#(column.name)</td>
+                        <td>#(dataType)</td>
+                        <td>#(primaryKey)</td>
+                        <td>#(column.isNotNull()?'Y':'N')</td>
+                        <td>#(idx)</td>
+                        <td>#(column.defaultValue)</td>
+                        <td>#(column.comment)</td>
+                    </tr>
+                #end
+            </table>
+            #if(!table.indices.isEmpty())
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                    #for(index : table.indices)
+                        <tr>
+                            <td style='text-align:center;'>#(for.count)</td>
+                            <td>#(index.name)</td>
+                            <td>#for(column : index.columns)#(column.name)#if(!for.last), #end#end</td>
+                            <td>#(index.isUnique()?'Y':'N')</td>
+                        </tr>
+                    #end
+              </table>
+            #end
+            <br/>
+        #end
+    </div>
+</body>
+</html>

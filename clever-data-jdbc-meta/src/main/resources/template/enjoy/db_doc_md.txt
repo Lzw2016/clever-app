@@ -41,11 +41,11 @@
 #else
 #set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+')')))
 #end
+#end
 ### --- 计算“主键”
 #set(primaryKey = column.isPartOfPrimaryKey() ? (column.isAutoIncremented() ? 'Y(自增)' : 'Y') : 'N')
 ### --- 计算“是否索引”
 #set(idx = column.isPartOfUniqueIndex() ? 'Y(唯一)' : (column.isPartOfIndex() ? 'Y': ''))
-#end
 | #(column.ordinalPosition) | #(column.name) | #(dataType) | #(primaryKey) | #(column.isNotNull()?'Y':'N') | #(idx) | #(column.defaultValue) | #(column.comment) |
 #end
 
