@@ -12,10 +12,7 @@ import org.clever.core.NamingUtils;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.AbstractMetaData;
 import org.clever.data.jdbc.meta.DataBaseMetaData;
-import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
-import org.clever.data.jdbc.meta.codegen.CodegenType;
-import org.clever.data.jdbc.meta.codegen.EntityModel;
-import org.clever.data.jdbc.meta.codegen.EntityPropertyModel;
+import org.clever.data.jdbc.meta.codegen.*;
 import org.clever.data.jdbc.meta.codegen.handler.*;
 import org.clever.data.jdbc.meta.codegen.support.QueryDSLSupport;
 import org.clever.data.jdbc.meta.model.Column;
@@ -28,10 +25,8 @@ import org.clever.util.ClassUtils;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 生成代码 <br/>
@@ -78,6 +73,7 @@ public class CodegenUtils {
         CODEGEN_HANDLER_MAP.put(CodegenType.JAVA_QUERYDSL, new CodegenJavaQueryDSL());
         CODEGEN_HANDLER_MAP.put(CodegenType.GROOVY_QUERYDSL, new CodegenGroovyQueryDSL());
         CODEGEN_HANDLER_MAP.put(CodegenType.KOTLIN_QUERYDSL, new CodegenKotlinQueryDSL());
+        CODEGEN_HANDLER_MAP.put(CodegenType.DB_DOC_MARKDOWN, new CodegenDbDocMarkdown());
         // 类型需要的 import package
         TYPE_PACKAGE.put("Boolean", "java.lang.Boolean");
         TYPE_PACKAGE.put("Byte", "java.lang.Byte");
@@ -189,55 +185,6 @@ public class CodegenUtils {
         JDBC_TYPES_NAME_MAPPING.put(-102, "Types.TIMESTAMP_WITH_TIMEZONE");
     }
 
-    /**
-     * 生成代码
-     *
-     * @param jdbc   数据源
-     * @param config 配置
-     */
-    @SneakyThrows
-    public static void genCode(Jdbc jdbc, CodegenCodeConfig config) {
-        Assert.notNull(jdbc, "参数 jdbc 不能为null");
-        Assert.notNull(config, "参数 config 不能为null");
-        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
-        config.getIgnoreSchemas().forEach(metaData::addIgnoreSchema);
-        config.getIgnoreTables().forEach(metaData::addIgnoreTable);
-        config.getIgnoreTablesPrefix().forEach(metaData::addIgnoreTablePrefix);
-        config.getIgnoreTablesSuffix().forEach(metaData::addIgnoreTableSuffix);
-        List<Schema> schemas = metaData.getSchemas(config.getSchemas(), config.getTables());
-        final Set<String> tablesPrefix = config.getTablesPrefix();
-        final Set<String> tablesSuffix = config.getTablesSuffix();
-        for (Schema schema : schemas) {
-            List<Table> tables = schema.getTables();
-            for (Table table : tables) {
-                String tableName = table.getName();
-                // List<Column> columns = table.getColumns();
-                if (!tablesPrefix.isEmpty() && tablesPrefix.stream().noneMatch(tableName::startsWith)) {
-                    continue;
-                }
-                if (!tablesSuffix.isEmpty() && tablesSuffix.stream().noneMatch(tableName::endsWith)) {
-                    continue;
-                }
-                if (config.getCodegenTypes().isEmpty()) {
-                    continue;
-                }
-                EntityModel entityModel = createEntityModel(metaData, table);
-                for (CodegenType codegenType : config.getCodegenTypes()) {
-                    CodegenHandler codegenHandler = CODEGEN_HANDLER_MAP.get(codegenType);
-                    if (codegenHandler == null) {
-                        throw new UnsupportedOperationException("未配置代码生成实现: " + codegenType);
-                    }
-                    entityModel.setPackageName(codegenHandler.getPackageName(config.getPackageName()));
-                    Template template = codegenHandler.getTemplate(ENGINE);
-                    String codes = template.renderToString(codegenHandler.getTemplateData(metaData, entityModel, config));
-                    File outFile = new File(FilenameUtils.concat(config.getOutDir(), codegenHandler.getFileName(entityModel)));
-                    FileUtils.writeStringToFile(outFile, codes, StandardCharsets.UTF_8);
-                    log.info("生成代码成功 | CodegenType={} | --> {}", codegenType, outFile.getAbsolutePath());
-                }
-            }
-        }
-    }
-
     public static EntityModel createEntityModel(DataBaseMetaData metaData, Table table) {
         Assert.notNull(metaData, "参数 metaData 不能为null");
         Assert.notNull(table, "参数 table 不能为null");
@@ -273,5 +220,83 @@ public class CodegenUtils {
             entityModel.addProperty(property);
         }
         return entityModel;
+    }
+
+    private static CodegenHandler getCodegenHandler(CodegenType codegenType) {
+        CodegenHandler codegenHandler = CODEGEN_HANDLER_MAP.get(codegenType);
+        if (codegenHandler == null) {
+            throw new UnsupportedOperationException("未配置代码生成实现: " + codegenType);
+        }
+        return codegenHandler;
+    }
+
+    private static List<CodegenHandler> getCodegenHandlerByScope(CodegenCodeConfig config, TemplateScope scope) {
+        return config.getCodegenTypes().stream()
+                .map(CodegenUtils::getCodegenHandler)
+                .filter(handler -> Objects.equals(scope, handler.getScope()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 生成代码
+     *
+     * @param jdbc   数据源
+     * @param config 配置
+     */
+    @SneakyThrows
+    public static void genCode(Jdbc jdbc, CodegenCodeConfig config) {
+        Assert.notNull(jdbc, "参数 jdbc 不能为null");
+        Assert.notNull(config, "参数 config 不能为null");
+        if (config.getCodegenTypes().isEmpty()) {
+            log.warn("未配置 CodegenType");
+            return;
+        }
+        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
+        config.getIgnoreSchemas().forEach(metaData::addIgnoreSchema);
+        config.getIgnoreTables().forEach(metaData::addIgnoreTable);
+        config.getIgnoreTablesPrefix().forEach(metaData::addIgnoreTablePrefix);
+        config.getIgnoreTablesSuffix().forEach(metaData::addIgnoreTableSuffix);
+        List<Schema> schemas = metaData.getSchemas(config.getSchemas(), config.getTables());
+        final Set<String> tablesPrefix = config.getTablesPrefix();
+        final Set<String> tablesSuffix = config.getTablesSuffix();
+        final TemplateDataContext templateDataContext = new TemplateDataContext(config, metaData, schemas);
+        for (Schema schema : schemas) {
+            final List<Table> tables = schema.getTables();
+            templateDataContext.setSchema(schema);
+            // TemplateScope.SCHEMA 范围
+            List<CodegenHandler> schemaCodegenHandlers = getCodegenHandlerByScope(config, TemplateScope.SCHEMA);
+            for (CodegenHandler codegenHandler : schemaCodegenHandlers) {
+                Template template = codegenHandler.getTemplate(ENGINE);
+                String codes = template.renderToString(codegenHandler.getTemplateData(templateDataContext));
+                File outFile = new File(FilenameUtils.concat(config.getOutDir(), codegenHandler.getFileName(templateDataContext)));
+                FileUtils.writeStringToFile(outFile, codes, StandardCharsets.UTF_8);
+                log.info("SCHEMA范围生成代码成功 | --> {}", outFile.getAbsolutePath());
+            }
+            for (Table table : tables) {
+                String tableName = table.getName();
+                // final List<Column> columns = table.getColumns();
+                if (!tablesPrefix.isEmpty() && tablesPrefix.stream().noneMatch(tableName::startsWith)) {
+                    continue;
+                }
+                if (!tablesSuffix.isEmpty() && tablesSuffix.stream().noneMatch(tableName::endsWith)) {
+                    continue;
+                }
+                // TemplateScope.TABLE 范围
+                List<CodegenHandler> tableCodegenHandlers = getCodegenHandlerByScope(config, TemplateScope.TABLE);
+                if (tableCodegenHandlers.isEmpty()) {
+                    break;
+                }
+                EntityModel entityModel = createEntityModel(metaData, table);
+                templateDataContext.setEntityModel(entityModel);
+                for (CodegenHandler tableCodegenHandler : tableCodegenHandlers) {
+                    entityModel.setPackageName(tableCodegenHandler.getPackageName(config.getPackageName()));
+                    Template template = tableCodegenHandler.getTemplate(ENGINE);
+                    String codes = template.renderToString(tableCodegenHandler.getTemplateData(templateDataContext));
+                    File outFile = new File(FilenameUtils.concat(config.getOutDir(), tableCodegenHandler.getFileName(templateDataContext)));
+                    FileUtils.writeStringToFile(outFile, codes, StandardCharsets.UTF_8);
+                    log.info("TABLE范围生成代码成功 | --> {}", outFile.getAbsolutePath());
+                }
+            }
+        }
     }
 }

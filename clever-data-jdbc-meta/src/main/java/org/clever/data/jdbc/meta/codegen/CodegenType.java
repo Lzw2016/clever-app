@@ -20,7 +20,7 @@ public enum CodegenType {
     KOTLIN_QUERYDSL,
 
     /** 数据库文档 markdown 格式 */
-    DB_DOC_MD,
+    DB_DOC_MARKDOWN,
     /** 数据库文档 html 格式 */
     DB_DOC_HTML,
     /** 数据库文档 word 格式 */

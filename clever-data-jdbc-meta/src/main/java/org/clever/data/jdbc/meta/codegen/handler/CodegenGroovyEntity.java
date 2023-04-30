@@ -2,7 +2,11 @@ package org.clever.data.jdbc.meta.codegen.handler;
 
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
-import org.clever.data.jdbc.meta.codegen.EntityModel;
+import org.clever.core.mapper.BeanCopyUtils;
+import org.clever.data.jdbc.meta.codegen.TemplateDataContext;
+import org.clever.data.jdbc.meta.codegen.TemplateScope;
+
+import java.util.Map;
 
 /**
  * 作者：lizw <br/>
@@ -15,8 +19,18 @@ public class CodegenGroovyEntity extends AbstractCodegenHandler {
     }
 
     @Override
-    public String getFileName(EntityModel entityModel) {
-        return String.format("entity/%s.groovy", entityModel.getClassName());
+    public TemplateScope getScope() {
+        return TemplateScope.TABLE;
+    }
+
+    @Override
+    public Map<String, Object> getTemplateData(TemplateDataContext context) {
+        return BeanCopyUtils.toMap(context.getEntityModel());
+    }
+
+    @Override
+    public String getFileName(TemplateDataContext context) {
+        return String.format("entity/%s.groovy", context.getEntityModel().getClassName());
     }
 
     @Override

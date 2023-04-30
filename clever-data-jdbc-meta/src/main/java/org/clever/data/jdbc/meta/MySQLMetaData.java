@@ -275,7 +275,7 @@ public class MySQLMetaData extends AbstractMetaData {
         if (Conv.asString(map.get("extra")).toUpperCase().contains("AUTO_INCREMENT")) {
             column.setAutoIncremented(true);
         }
-        column.setNotNull(Conv.asBoolean(map.get("notNull")));
+        column.setNotNull(!Conv.asBoolean(map.get("notNull"), true));
         column.setDataType(Conv.asString(map.get("dataType"), null));
         column.setSize(Conv.asInteger(map.get("size")));
         column.setDecimalDigits(Conv.asInteger(map.get("decimalDigits")));

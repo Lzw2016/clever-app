@@ -2,9 +2,9 @@ package org.clever.data.jdbc.meta.codegen.handler;
 
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
-import org.clever.data.jdbc.meta.AbstractMetaData;
-import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
-import org.clever.data.jdbc.meta.codegen.EntityModel;
+import org.clever.core.mapper.BeanCopyUtils;
+import org.clever.data.jdbc.meta.codegen.TemplateDataContext;
+import org.clever.data.jdbc.meta.codegen.TemplateScope;
 
 import java.util.Map;
 
@@ -19,15 +19,20 @@ public class CodegenJavaQueryDSL extends AbstractCodegenHandler {
     }
 
     @Override
-    public Map<String, Object> getTemplateData(AbstractMetaData metaData, EntityModel entityModel, CodegenCodeConfig config) {
-        Map<String, Object> data = super.getTemplateData(metaData, entityModel, config);
-        data.put("importQueryEntity", String.format("%s.entity.%s", config.getPackageName(), entityModel.getClassName()));
+    public TemplateScope getScope() {
+        return TemplateScope.TABLE;
+    }
+
+    @Override
+    public Map<String, Object> getTemplateData(TemplateDataContext context) {
+        Map<String, Object> data = BeanCopyUtils.toMap(context.getEntityModel());
+        data.put("importQueryEntity", String.format("%s.entity.%s", context.getConfig().getPackageName(), context.getEntityModel().getClassName()));
         return data;
     }
 
     @Override
-    public String getFileName(EntityModel entityModel) {
-        return String.format("query/Q%s.java", entityModel.getClassName());
+    public String getFileName(TemplateDataContext context) {
+        return String.format("query/Q%s.java", context.getEntityModel().getClassName());
     }
 
     @Override

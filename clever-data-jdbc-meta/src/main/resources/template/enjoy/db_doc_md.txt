@@ -1,35 +1,54 @@
-# ${title!'数据库设计文档'}
+# #(title ?? '数据库设计文档')
 
-<#if (database)??>
-    **数据库名：** ${database!''}
-</#if>
-<#if (version)??>
-    **文档版本：** ${version!''}
-</#if>
-<#if (description)??>
-    **文档描述：** ${description!''}
-</#if>
+#if(name)
+**数据库名：** #(name)
+#end
 
-| 表名 | 说明 |
-| :---: | :---: |
-<#list tables>
-    <#items as t>
-        | [${t.tableName!''}](#${t.tableName!''}) | ${t.remarks!''} |
-    </#items>
-</#list>
-<#list tables><#items as t>
+#if(version)
+**文档版本：** #(version)
+#end
 
-    **表名：** <a id="${t.tableName!''}">${t.tableName!''}</a>
+#if(description)
+**文档描述：** #(description)
+#end
 
-    **说明：** ${t.remarks!''}
+| 序号 | 表名 | 说明 |
+| :--- | :--- | :--- |
+#for(table : tables)
+| #(for.count) | [#(table.name)](##(table.name)) | #(table.comment) |
+#end
 
-    **数据列：**
+---
+<br/>
 
-    <#list t.columns>
-        | 序号 | 名称 | 数据类型 | 小数位 | 允许空值 | 主键 | 默认值 | 说明 |
-        | :---: | :---: | :---:| :---: | :---: | :---: | :---: | :---: |
-        <#items as c>
-            |  ${c?index+1}   | ${c.columnName!''} |   ${c.columnType!''}  |   ${c.decimalDigits!'0'}    |    ${c.nullable!''}     |  ${c.primaryKey!''}   |   ${c.columnDef!''}    | ${c.remarks!''}  |
-        </#items>
-    </#list></#items>
-</#list>
+#for(table : tables)
+**表名：** <a id="#(table.name)">#(table.name)</a>
+
+**说明：** #(table.comment)
+
+**表字段：**
+
+| 序号 | 名称 | 数据类型 | 允许空值 | 主键 | 默认值 | 说明 |
+| :--- | :--- | :---| :--- | :--- | :--- | :--- |
+#for(column : table.columns)
+#set(size = max(column.size, column.width))
+#if(column.decimalDigits>0)
+#set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+', '+column.decimalDigits+')')))
+#else
+#set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+')')))
+#end
+| #(column.ordinalPosition) | #(column.name) | #(dataType) | #(column.isNotNull()?'N':'Y') | #(column.isPartOfPrimaryKey()?'Y':'N') | #(column.defaultValue) | #(column.comment) |
+#end
+
+#if(!table.indices.isEmpty())
+**表索引：**
+
+| 序号 | 索引名 | 索引字段 | 唯一索引 |
+| :--- | :--- | :--- | :--- |
+#for(index : table.indices)
+| #(for.count) | #(index.name) | #for(column : index.columns)#(column.name)#if(!for.last), #end#end |  #(index.isUnique()?'Y':'N') |
+#end
+#end
+---
+
+#end

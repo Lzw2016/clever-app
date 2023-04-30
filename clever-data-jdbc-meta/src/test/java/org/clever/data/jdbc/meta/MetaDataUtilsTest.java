@@ -3,6 +3,7 @@ package org.clever.data.jdbc.meta;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
+import org.clever.data.jdbc.meta.codegen.CodegenType;
 import org.clever.data.jdbc.meta.model.Table;
 import org.clever.data.jdbc.meta.utils.CodegenUtils;
 import org.clever.data.jdbc.meta.utils.MetaDataUtils;
@@ -48,12 +49,18 @@ public class MetaDataUtilsTest {
 
     @Test
     public void t03() {
-//        java.time.LocalDate date = new java.time.LocalDate();
-//        java.time.LocalTime date = new java.time.LocalTime();
-//        java.time.ZonedDateTime
-//        java.time.OffsetDateTime
-//        java.time.OffsetTime
-//        java.time.ZonedDateTime
-//        byte[] aa = null;
+        Jdbc jdbc = BaseTest.newMysql();
+        CodegenCodeConfig config = new CodegenCodeConfig()
+                .setOutDir("./src/test/resources/doc")
+                .setPackageName("org.clever.model")
+                .removeCodegenType(CodegenType.JAVA_ENTITY)
+                .removeCodegenType(CodegenType.JAVA_QUERYDSL)
+                .addCodegenType(CodegenType.DB_DOC_MARKDOWN)
+                .addSchema("public")
+                .addSchema("test")
+                .addSchema("__occupyPosition");
+        CodegenUtils.genCode(jdbc, config);
+        log.info("-->");
+        jdbc.close();
     }
 }
