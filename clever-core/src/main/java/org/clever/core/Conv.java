@@ -165,7 +165,7 @@ public class Conv extends Conversion {
             return (Boolean) obj;
         }
         if (obj instanceof Number) {
-            return !Objects.equals(0, obj);
+            return !Objects.equals(0, ((Number) obj).intValue());
         }
         if (obj instanceof String) {
             String value = asString(obj);

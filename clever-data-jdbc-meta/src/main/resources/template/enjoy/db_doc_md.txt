@@ -2,14 +2,15 @@
 
 #if(name)
 **数据库名：** #(name)
-#end
 
+#end
 #if(version)
 **文档版本：** #(version)
-#end
 
+#end
 #if(description)
 **文档描述：** #(description)
+
 #end
 
 | 序号 | 表名 | 说明 |
@@ -28,16 +29,21 @@
 
 **表字段：**
 
-| 序号 | 名称 | 数据类型 | 允许空值 | 主键 | 默认值 | 说明 |
-| :--- | :--- | :---| :--- | :--- | :--- | :--- |
+| 序号 | 名称 | 数据类型 | 主键 | 不能为空 | 是否索引 | 默认值 | 说明 |
+| :--- | :--- | :---| :--- | :--- | :--- | :--- | :--- |
 #for(column : table.columns)
+### --- 计算“数据类型”
 #set(size = max(column.size, column.width))
 #if(column.decimalDigits>0)
 #set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+', '+column.decimalDigits+')')))
 #else
 #set(dataType = (size<=0 ? column.dataType : (column.dataType+'('+size+')')))
+### --- 计算“主键”
+#set(primaryKey = column.isPartOfPrimaryKey() ? (column.isAutoIncremented() ? 'Y(自增)' : 'Y') : 'N')
+### --- 计算“是否索引”
+#set(idx = column.isPartOfUniqueIndex() ? 'Y(唯一)' : (column.isPartOfIndex() ? 'Y': ''))
 #end
-| #(column.ordinalPosition) | #(column.name) | #(dataType) | #(column.isNotNull()?'N':'Y') | #(column.isPartOfPrimaryKey()?'Y':'N') | #(column.defaultValue) | #(column.comment) |
+| #(column.ordinalPosition) | #(column.name) | #(dataType) | #(primaryKey) | #(column.isNotNull()?'Y':'N') | #(idx) | #(column.defaultValue) | #(column.comment) |
 #end
 
 #if(!table.indices.isEmpty())
