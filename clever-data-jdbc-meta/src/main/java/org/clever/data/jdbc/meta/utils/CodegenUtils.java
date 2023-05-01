@@ -103,7 +103,7 @@ public class CodegenUtils {
         }
         // jdbc类型映射
         JDBC_TYPES_MAPPING.put(Types.BIT, "Boolean");
-        JDBC_TYPES_MAPPING.put(Types.TINYINT, "Byte");
+        JDBC_TYPES_MAPPING.put(Types.TINYINT, "Integer");
         JDBC_TYPES_MAPPING.put(Types.SMALLINT, "Short");
         JDBC_TYPES_MAPPING.put(Types.INTEGER, "Integer");
         JDBC_TYPES_MAPPING.put(Types.BIGINT, "Long");
