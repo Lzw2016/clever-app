@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
+    <title>数据库设计文档</title>
+    <style>
+        body {
+            padding-bottom: 50px
+        }
+
+        body, td {
+            font-family: verdana, fantasy;
+            font-size: 12px;
+            line-height: 150%
+        }
+
+        table {
+            width: 100%;
+            background-color: #ccc;
+            margin: 5px 0
+        }
+
+        td {
+            background-color: #fff;
+            padding: 3px 3px 3px 10px
+        }
+
+        thead td {
+            text-align: center;
+            font-weight: bold;
+            background-color: #eee
+        }
+
+        a:link, a:visited, a:active {
+            color: #015fb6;
+            text-decoration: none
+        }
+
+        a:hover {
+            color: #e33e06
+        }
+    </style>
+</head>
+<body style='text-align:center;'>
+    <div style='width:1000px; margin:20px auto; text-align:left;'>
+        <a name='index'></a>
+        <h2 style='text-align:center; line-height:50px;'>
+            数据库设计文档
+        </h2>
+        <div>
+            <b>数据库名：test</b>
+            <br>
+                <b>文档版本：1.0.0</b>
+                <br>
+        </div>
+        <table cellspacing='1'>
+            <thead>
+            <tr>
+                <td style='width:40px;'>序号</td>
+                <td>表名</td>
+                <td>说明</td>
+            </tr>
+            </thead>
+                <tr>
+                    <td style='text-align:center;'>1</td>
+                    <td><a href='#auto_increment_id'>auto_increment_id</a></td>
+                    <td>自增长id表</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>2</td>
+                    <td><a href='#biz_code'>biz_code</a></td>
+                    <td>业务编码表</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>3</td>
+                    <td><a href='#sys_jwt_token'>sys_jwt_token</a></td>
+                    <td>登录JWT Token(缓存表)</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>4</td>
+                    <td><a href='#sys_lock'>sys_lock</a></td>
+                    <td>自增长id表</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>5</td>
+                    <td><a href='#sys_login_failed_count'>sys_login_failed_count</a></td>
+                    <td>连续登录失败次数(缓存表)</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>6</td>
+                    <td><a href='#sys_login_log'>sys_login_log</a></td>
+                    <td>登录日志</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>7</td>
+                    <td><a href='#sys_resource'>sys_resource</a></td>
+                    <td>资源表</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>8</td>
+                    <td><a href='#sys_role'>sys_role</a></td>
+                    <td>角色表</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>9</td>
+                    <td><a href='#sys_role_resource'>sys_role_resource</a></td>
+                    <td>角色资源关联表</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>10</td>
+                    <td><a href='#sys_security_context'>sys_security_context</a></td>
+                    <td>用户security context(缓存表)</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>11</td>
+                    <td><a href='#sys_user'>sys_user</a></td>
+                    <td>用户表</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>12</td>
+                    <td><a href='#sys_user_role'>sys_user_role</a></td>
+                    <td>用户角色关联表</td>
+                </tr>
+        </table>
+
+            <a name='auto_increment_id'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：auto_increment_id</b>
+            </div>
+            <div>说明：自增长id表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>sequence_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>序列名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>current_value</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>-1</td>
+                        <td>当前值</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>description</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>说明</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_auto_increment_id_sequence_name</td>
+                            <td>sequence_name</td>
+                            <td>Y</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='biz_code'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：biz_code</b>
+            </div>
+            <div>说明：业务编码表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>code_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>编码名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>pattern</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>编码规则表达式</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>sequence</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>-1</td>
+                        <td>序列值</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>reset_pattern</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>重置sequence值的表达式，使用Java日期格式化字符串</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>reset_flag</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>重置sequence值标识，此字段值变化后则需要重置</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>description</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>说明</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>biz_code_code_name</td>
+                            <td>code_name</td>
+                            <td>Y</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_jwt_token'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_jwt_token</b>
+            </div>
+            <div>说明：登录JWT Token(缓存表)</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>token id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>user_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>用户id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>token</td>
+                        <td>varchar(4095)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>token数据</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>expired_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>token过期时间(空表示永不过期)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>disable</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>token是否禁用: 0:未禁用；1:已禁用</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>disable_reason</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>token禁用原因: 0:使用RefreshToken；1:管理员手动禁用；2:并发登录被挤下线；3:用户主动登出</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>refresh_token</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>token数据</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>rt_expired_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>刷新token过期时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>rt_state</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>刷新token状态: 0:无效(已使用)；1:有效(未使用)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>rt_use_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>刷新token使用时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>11</td>
+                        <td>rt_create_token_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>刷新token创建的token id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>12</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>13</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_sys_jwt_token_rt_create_token_id</td>
+                            <td>rt_create_token_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_sys_jwt_token_user_id</td>
+                            <td>user_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_lock'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_lock</b>
+            </div>
+            <div>说明：自增长id表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>lock_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>锁名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>lock_count</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>锁次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>description</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>说明</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>sys_lock_lock_name</td>
+                            <td>lock_name</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_login_failed_count'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_login_failed_count</b>
+            </div>
+            <div>说明：连续登录失败次数(缓存表)</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>user_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>用户id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>login_type</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录方式</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>failed_count</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录失败次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>last_login_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>最后登录失败时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>delete_flag</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>数据删除标志: 0:未删除，1:已删除</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_sys_login_failed_count_user_id</td>
+                            <td>user_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_login_log'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_login_log</b>
+            </div>
+            <div>说明：登录日志</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>user_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>用户id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>login_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>登录时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>login_ip</td>
+                        <td>varchar(31)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录ip</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>login_type</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录方式</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>login_channel</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录渠道</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>login_state</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录状态: 0:登录失败，1:登录成功</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>request_data</td>
+                        <td>varchar(4095)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录请求数据</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>jwt_token_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>token id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_sys_login_log_jwt_token_id</td>
+                            <td>jwt_token_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_sys_login_log_login_time</td>
+                            <td>login_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_sys_login_log_user_id</td>
+                            <td>user_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_resource'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_resource</b>
+            </div>
+            <div>说明：资源表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>资源id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>permission</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>权限编码</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>resource_type</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>资源类型: 1:API权限，2:菜单权限，3:UI权限(如:按钮、表单、表格)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>is_enable</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>是否启用: 0:禁用，1:启用</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>create_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>创建人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>update_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>permission</td>
+                            <td>permission</td>
+                            <td>Y</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_role'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_role</b>
+            </div>
+            <div>说明：角色表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>角色id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>role_code</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>角色编号</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>role_name</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>角色名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>is_enable</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>是否启用: 0:禁用，1:启用</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>create_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>创建人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>update_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_sys_role_role_name</td>
+                            <td>role_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>role_code</td>
+                            <td>role_code</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_role_resource'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_role_resource</b>
+            </div>
+            <div>说明：角色资源关联表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>role_id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>角色id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>resource_id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>资源id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>create_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>创建人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>update_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_sys_role_resource_resource_id</td>
+                            <td>resource_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_sys_role_resource_role_id</td>
+                            <td>role_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>primary</td>
+                            <td>role_id, resource_id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_security_context'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_security_context</b>
+            </div>
+            <div>说明：用户security context(缓存表)</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>user_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>用户id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>security_context</td>
+                        <td>varchar(16365)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>用户security context</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>user_id</td>
+                            <td>user_id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_user'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_user</b>
+            </div>
+            <div>说明：用户表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>用户id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>login_name</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>用户登录名(允许修改)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>password</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>登录密码</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>user_name</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>登录名</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>is_enable</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>是否启用: 0:禁用，1:启用</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>create_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>创建人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>update_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_sys_user_user_name</td>
+                            <td>user_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>login_name</td>
+                            <td>login_name</td>
+                            <td>Y</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='sys_user_role'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：sys_user_role</b>
+            </div>
+            <div>说明：用户角色关联表</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>user_id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>用户id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>role_id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>角色id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>create_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>创建人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>update_by</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新人(用户id)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表字段：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_sys_user_role_role_id</td>
+                            <td>role_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_sys_user_role_user_id</td>
+                            <td>user_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>primary</td>
+                            <td>user_id, role_id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+    </div>
+</body>
+</html>

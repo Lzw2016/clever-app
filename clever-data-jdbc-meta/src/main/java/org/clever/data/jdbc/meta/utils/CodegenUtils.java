@@ -296,7 +296,7 @@ public class CodegenUtils {
                     entityModel.setPackageName(tableCodegenHandler.getPackageName(config.getPackageName()));
                     Template template = tableCodegenHandler.getTemplate(ENGINE);
                     String codes = template.renderToString(tableCodegenHandler.getTemplateData(templateDataContext));
-                    File outFile = new File(FilenameUtils.concat(config.getOutDir(), tableCodegenHandler.getFileName(templateDataContext)));
+                    File outFile = new File(FilenameUtils.concat(new File(config.getOutDir()).getAbsolutePath(), tableCodegenHandler.getFileName(templateDataContext)));
                     FileUtils.writeStringToFile(outFile, codes, StandardCharsets.UTF_8);
                     log.info("TABLE范围生成代码成功 | --> {}", outFile.getAbsolutePath());
                 }

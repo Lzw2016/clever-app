@@ -567,7 +567,16 @@ DAO数据访问层
 https://www.dbvisitor.net/docs/guides/types/type-handlers
 https://www.dbvisitor.net/docs/guides/types/java-jdbc
 ```
-未开始
+- [OK] 读取MySQL数据库的元数据
+- [OK] 读取PostgreSQL数据库的元数据
+- [OK] 生成数据库文档, 支持: markdown、html、word文档
+- [OK] Entity、QueryDS代码生成, 支持: java、groovy、kotlin语言
+- [  ] 支持数据库DDL语句生成, 支持: 表、字段、主键、索引、序列、存储过程、函数
+- [  ] 数据库结构同步
+- [  ] 数据库数据库同步, 支持查询SQL
+- [  ]
+
+已暂停
 
 ### clever-data-redis
 
@@ -575,7 +584,9 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 已暂停
 
 ### clever-task
-未开始
+- [OK] 支持多集群 
+- [OK] 支持动态配置任务以及触发器
+- [  ] 
 
 ### clever-task-ext
 未开始
