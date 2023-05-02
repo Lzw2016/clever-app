@@ -68,9 +68,9 @@ public class QSysLoginFailedCount extends RelationalPathBase<SysLoginFailedCount
         addMetadata(userId, ColumnMetadata.named("user_id").withIndex(2).ofType(Types.BIGINT).withSize(19));
         addMetadata(loginType, ColumnMetadata.named("login_type").withIndex(3).ofType(Types.INTEGER).withSize(10));
         addMetadata(failedCount, ColumnMetadata.named("failed_count").withIndex(4).ofType(Types.INTEGER).withSize(10));
-        addMetadata(lastLoginTime, ColumnMetadata.named("last_login_time").withIndex(5).ofType(Types.TIMESTAMP));
+        addMetadata(lastLoginTime, ColumnMetadata.named("last_login_time").withIndex(5).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(deleteFlag, ColumnMetadata.named("delete_flag").withIndex(6).ofType(Types.INTEGER).withSize(10));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(7).ofType(Types.TIMESTAMP));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(8).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(7).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

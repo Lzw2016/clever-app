@@ -78,15 +78,15 @@ public class QSysJwtToken extends RelationalPathBase<SysJwtToken> {
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.BIGINT).withSize(19));
         addMetadata(userId, ColumnMetadata.named("user_id").withIndex(2).ofType(Types.BIGINT).withSize(19));
         addMetadata(token, ColumnMetadata.named("token").withIndex(3).ofType(Types.VARCHAR).withSize(4095));
-        addMetadata(expiredTime, ColumnMetadata.named("expired_time").withIndex(4).ofType(Types.TIMESTAMP));
+        addMetadata(expiredTime, ColumnMetadata.named("expired_time").withIndex(4).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(disable, ColumnMetadata.named("disable").withIndex(5).ofType(Types.INTEGER).withSize(10));
         addMetadata(disableReason, ColumnMetadata.named("disable_reason").withIndex(6).ofType(Types.INTEGER).withSize(10));
         addMetadata(refreshToken, ColumnMetadata.named("refresh_token").withIndex(7).ofType(Types.VARCHAR).withSize(127));
-        addMetadata(rtExpiredTime, ColumnMetadata.named("rt_expired_time").withIndex(8).ofType(Types.TIMESTAMP));
+        addMetadata(rtExpiredTime, ColumnMetadata.named("rt_expired_time").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(rtState, ColumnMetadata.named("rt_state").withIndex(9).ofType(Types.INTEGER).withSize(10));
-        addMetadata(rtUseTime, ColumnMetadata.named("rt_use_time").withIndex(10).ofType(Types.TIMESTAMP));
+        addMetadata(rtUseTime, ColumnMetadata.named("rt_use_time").withIndex(10).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(rtCreateTokenId, ColumnMetadata.named("rt_create_token_id").withIndex(11).ofType(Types.BIGINT).withSize(19));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(12).ofType(Types.TIMESTAMP));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(13).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(12).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(13).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

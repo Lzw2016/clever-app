@@ -34,9 +34,18 @@ public interface IDialect {
     String buildPaginationSql(String originalSql, long offset, long limit);
 
     /**
-     * 返回能得到下一个主键值的SQL语句以及参数
-     *
-     * @param primaryKeyName 主键名称
+     * 获取查询数据库当前时间的sql和参数
      */
-    TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName);
+    default TupleTwo<String, Map<String, Object>> currentDateTimeSql() {
+        throw new UnsupportedOperationException("不支持当前操作");
+    }
+
+    /**
+     * 获取查询当前序列值的sql和参数
+     *
+     * @param seqName 序列名称
+     */
+    default TupleTwo<String, Map<String, Object>> nextSeqSql(String seqName) {
+        throw new UnsupportedOperationException("不支持当前操作");
+    }
 }

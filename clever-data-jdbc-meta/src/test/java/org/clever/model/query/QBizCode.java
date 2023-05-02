@@ -74,7 +74,7 @@ public class QBizCode extends RelationalPathBase<BizCode> {
         addMetadata(resetPattern, ColumnMetadata.named("reset_pattern").withIndex(5).ofType(Types.VARCHAR).withSize(127));
         addMetadata(resetFlag, ColumnMetadata.named("reset_flag").withIndex(6).ofType(Types.VARCHAR).withSize(127));
         addMetadata(description, ColumnMetadata.named("description").withIndex(7).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(8).ofType(Types.TIMESTAMP));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(9).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(9).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

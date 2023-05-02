@@ -65,7 +65,7 @@ public class QSysLock extends RelationalPathBase<SysLock> {
         addMetadata(lockName, ColumnMetadata.named("lock_name").withIndex(2).ofType(Types.VARCHAR).withSize(127));
         addMetadata(lockCount, ColumnMetadata.named("lock_count").withIndex(3).ofType(Types.BIGINT).withSize(19));
         addMetadata(description, ColumnMetadata.named("description").withIndex(4).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(5).ofType(Types.TIMESTAMP));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(6).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(5).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(6).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

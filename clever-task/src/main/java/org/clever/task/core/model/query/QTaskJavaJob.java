@@ -29,7 +29,7 @@ public class QTaskJavaJob extends RelationalPathBase<TaskJavaJob> {
     /** 任务ID */
     public final NumberPath<Long> jobId = createNumber("jobId", Long.class);
     /** 是否是静态方法(函数)，0：非静态，1：静态 */
-    public final NumberPath<Byte> isStatic = createNumber("isStatic", Byte.class);
+    public final NumberPath<Integer> isStatic = createNumber("isStatic", Integer.class);
     /** java class全路径 */
     public final StringPath className = createString("className");
     /** java class method */

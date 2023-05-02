@@ -2681,12 +2681,23 @@ public class Jdbc extends AbstractDataSource {
     // --------------------------------------------------------------------------------------------
 
     /**
-     * 返回下一个主键值
-     *
-     * @param primaryKeyName 主键名称
+     * 获取数据库服务器当前时间
      */
-    public Long nextPK(String primaryKeyName) {
-        TupleTwo<String, Map<String, Object>> sqlInfo = DialectFactory.nextPKSql(primaryKeyName, dbType, null);
+    public Date currentDate() {
+        TupleTwo<String, Map<String, Object>> sqlInfo = DialectFactory.currentDateTimeSql(dbType, null);
+        Assert.notNull(sqlInfo, "sqlInfo 不能为空");
+        Assert.isNotBlank(sqlInfo.getValue1(), "sqlInfo.sql 不能为空");
+        Assert.notNull(sqlInfo.getValue2(), "sqlInfo.params 不能为空");
+        return queryDate(sqlInfo.getValue1(), sqlInfo.getValue2());
+    }
+
+    /**
+     * 返回下一个序列值
+     *
+     * @param seqName 序列名称
+     */
+    public Long nextSeq(String seqName) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = DialectFactory.nextSeqSql(seqName, dbType, null);
         Assert.notNull(sqlInfo, "sqlInfo 不能为空");
         Assert.isNotBlank(sqlInfo.getValue1(), "sqlInfo.sql 不能为空");
         Assert.notNull(sqlInfo.getValue2(), "sqlInfo.params 不能为空");

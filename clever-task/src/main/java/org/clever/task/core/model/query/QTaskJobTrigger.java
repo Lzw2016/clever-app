@@ -39,19 +39,19 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
     /** 下一次触发时间 */
     public final DateTimePath<Date> nextFireTime = createDateTime("nextFireTime", Date.class);
     /** 错过触发策略，1：忽略，2：立即补偿触发一次 */
-    public final NumberPath<Byte> misfireStrategy = createNumber("misfireStrategy", Byte.class);
+    public final NumberPath<Integer> misfireStrategy = createNumber("misfireStrategy", Integer.class);
     /** 是否允许多节点并行触发，使用悲观锁实现，不建议允许，0：禁止，1：允许 */
-    public final NumberPath<Byte> allowConcurrent = createNumber("allowConcurrent", Byte.class);
+    public final NumberPath<Integer> allowConcurrent = createNumber("allowConcurrent", Integer.class);
     /** 悲观锁 */
     public final NumberPath<Long> lockVersion = createNumber("lockVersion", Long.class);
     /** 任务类型，1：cron触发，2：固定间隔触发 */
-    public final NumberPath<Byte> type = createNumber("type", Byte.class);
+    public final NumberPath<Integer> type = createNumber("type", Integer.class);
     /** cron表达式 */
     public final StringPath cron = createString("cron");
     /** 固定间隔触发，间隔时间(单位：秒) */
     public final NumberPath<Long> fixedInterval = createNumber("fixedInterval", Long.class);
     /** 是否禁用：0-启用，1-禁用 */
-    public final NumberPath<Byte> disable = createNumber("disable", Byte.class);
+    public final NumberPath<Integer> disable = createNumber("disable", Integer.class);
     /** 描述 */
     public final StringPath description = createString("description");
     /** 创建时间 */

@@ -21,9 +21,14 @@ public class Oracle12cDialect extends AbstractDialect {
     }
 
     @Override
-    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
-        return TupleTwo.creat("SELECT :pkName FROM DUAL", new HashMap<String, Object>() {{
-            put("pkName", String.format("%s.NEXTVAL", primaryKeyName));
+    public TupleTwo<String, Map<String, Object>> currentDateTimeSql() {
+        return TupleTwo.creat("select current_timestamp from dual", new HashMap<>());
+    }
+
+    @Override
+    public TupleTwo<String, Map<String, Object>> nextSeqSql(String seqName) {
+        return TupleTwo.creat("SELECT :seqName FROM DUAL", new HashMap<String, Object>() {{
+            put("seqName", String.format("%s.NEXTVAL", seqName));
         }});
     }
 }

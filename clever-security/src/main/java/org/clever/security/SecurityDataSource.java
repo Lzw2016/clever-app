@@ -16,11 +16,11 @@ public class SecurityDataSource {
     /**
      * security 模块使用的 jdbc 数据源
      */
-    static String JDBC_DATA_SOURCE_NAME;
+    public static String JDBC_DATA_SOURCE_NAME;
     /**
      * security 模块使用的 redis 数据源
      */
-    static String REDIS_DATA_SOURCE_NAME;
+    public static String REDIS_DATA_SOURCE_NAME;
 
     public static Jdbc getJdbc() {
         if (StringUtils.isBlank(JDBC_DATA_SOURCE_NAME)) {

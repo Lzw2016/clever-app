@@ -4,6 +4,7 @@ package org.clever.data.jdbc.dialects;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.tuples.TupleTwo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,7 +28,6 @@ public class SQLServer2005Dialect extends AbstractDialect {
         StringBuilder pagingBuilder = new StringBuilder();
         String orderBy = getOrderByPart(originalSql);
         String distinctStr = StringUtils.EMPTY;
-
         String loweredString = originalSql.toLowerCase();
         String sqlPartString = originalSql;
         if (loweredString.trim().startsWith("select")) {
@@ -39,8 +39,7 @@ public class SQLServer2005Dialect extends AbstractDialect {
             sqlPartString = sqlPartString.substring(index);
         }
         pagingBuilder.append(sqlPartString);
-
-        // if no ORDER BY is specified use fake ORDER BY field to avoid errors
+        // 如果没有指定 ORDER BY 使用伪 ORDER BY 字段来避免错误
         if (StringUtils.isBlank(orderBy)) {
             orderBy = "ORDER BY CURRENT_TIMESTAMP";
         }
@@ -60,7 +59,6 @@ public class SQLServer2005Dialect extends AbstractDialect {
         StringBuilder pagingBuilder = new StringBuilder();
         String orderBy = getOrderByPart(originalSql);
         String distinctStr = StringUtils.EMPTY;
-
         String loweredString = originalSql.toLowerCase();
         String sqlPartString = originalSql;
         if (loweredString.trim().startsWith("select")) {
@@ -72,8 +70,7 @@ public class SQLServer2005Dialect extends AbstractDialect {
             sqlPartString = sqlPartString.substring(index);
         }
         pagingBuilder.append(sqlPartString);
-
-        // if no ORDER BY is specified use fake ORDER BY field to avoid errors
+        // 如果没有指定 ORDER BY 使用伪 ORDER BY 字段来避免错误
         if (StringUtils.isBlank(orderBy)) {
             orderBy = "ORDER BY CURRENT_TIMESTAMP";
         }
@@ -87,7 +84,7 @@ public class SQLServer2005Dialect extends AbstractDialect {
     }
 
     @Override
-    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
-        throw new UnsupportedOperationException("不支持当前操作");
+    public TupleTwo<String, Map<String, Object>> currentDateTimeSql() {
+        return TupleTwo.creat("select sysdatetime()", new HashMap<>());
     }
 }

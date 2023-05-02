@@ -88,14 +88,24 @@ public class DialectFactory {
     }
 
     /**
-     * 返回能得到下一个主键值的SQL语句以及参数
+     * 获取查询数据库当前时间的sql和参数
      *
-     * @param primaryKeyName 主键名称
-     * @param dbType         数据库类型
-     * @param dialectClazz   数据库方言
+     * @param dbType       数据库类型
+     * @param dialectClazz 数据库方言
      */
-    public static TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName, DbType dbType, String dialectClazz) {
-        return getDialect(dbType, dialectClazz).nextPKSql(primaryKeyName);
+    public static TupleTwo<String, Map<String, Object>> currentDateTimeSql(DbType dbType, String dialectClazz) {
+        return getDialect(dbType, dialectClazz).currentDateTimeSql();
+    }
+
+    /**
+     * 获取查询当前序列值的sql和参数
+     *
+     * @param seqName      序列名称
+     * @param dbType       数据库类型
+     * @param dialectClazz 数据库方言
+     */
+    public static TupleTwo<String, Map<String, Object>> nextSeqSql(String seqName, DbType dbType, String dialectClazz) {
+        return getDialect(dbType, dialectClazz).nextSeqSql(seqName);
     }
 
     /**

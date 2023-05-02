@@ -1512,12 +1512,19 @@ public class MyBatis extends AbstractDataSource {
     // --------------------------------------------------------------------------------------------
 
     /**
-     * 返回下一个主键值
-     *
-     * @param primaryKeyName 主键名称
+     * 获取数据库服务器当前时间
      */
-    public Long nextPK(String primaryKeyName) {
-        return jdbc.nextPK(primaryKeyName);
+    public Date currentDate() {
+        return jdbc.currentDate();
+    }
+
+    /**
+     * 返回下一个序列值
+     *
+     * @param seqName 序列名称
+     */
+    public Long nextSeq(String seqName) {
+        return jdbc.nextSeq(seqName);
     }
 
     /***

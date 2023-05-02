@@ -27,9 +27,14 @@ public class DB2Dialect extends AbstractDialect {
     }
 
     @Override
-    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
-        return TupleTwo.creat("values nextval for :pkName", new HashMap<String, Object>() {{
-            put("pkName", primaryKeyName);
+    public TupleTwo<String, Map<String, Object>> currentDateTimeSql() {
+        return TupleTwo.creat("select current timestamp from sysibm.sysdummy1", new HashMap<>());
+    }
+
+    @Override
+    public TupleTwo<String, Map<String, Object>> nextSeqSql(String seqName) {
+        return TupleTwo.creat("values nextval for :seqName", new HashMap<String, Object>() {{
+            put("seqName", seqName);
         }});
     }
 }

@@ -21,9 +21,14 @@ public class PostgreDialect extends AbstractDialect {
     }
 
     @Override
-    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
-        return TupleTwo.creat("select nextval(:pkName)", new HashMap<String, Object>() {{
-            put("pkName", primaryKeyName);
+    public TupleTwo<String, Map<String, Object>> currentDateTimeSql() {
+        return TupleTwo.creat("select now()", new HashMap<>());
+    }
+
+    @Override
+    public TupleTwo<String, Map<String, Object>> nextSeqSql(String seqName) {
+        return TupleTwo.creat("select nextval(:seqName)", new HashMap<String, Object>() {{
+            put("seqName", seqName);
         }});
     }
 }

@@ -73,8 +73,8 @@ public class QSysUser extends RelationalPathBase<SysUser> {
         addMetadata(userName, ColumnMetadata.named("user_name").withIndex(4).ofType(Types.VARCHAR).withSize(63));
         addMetadata(isEnable, ColumnMetadata.named("is_enable").withIndex(5).ofType(Types.INTEGER).withSize(10));
         addMetadata(createBy, ColumnMetadata.named("create_by").withIndex(6).ofType(Types.BIGINT).withSize(19));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(7).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(7).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(updateBy, ColumnMetadata.named("update_by").withIndex(8).ofType(Types.BIGINT).withSize(19));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(9).ofType(Types.TIMESTAMP));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(9).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

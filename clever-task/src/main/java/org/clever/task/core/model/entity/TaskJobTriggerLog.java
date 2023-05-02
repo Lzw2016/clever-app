@@ -25,7 +25,7 @@ public class TaskJobTriggerLog implements Serializable {
     /** 触发时间 */
     private Date fireTime;
     /** 是否是手动触发，0：系统自动触发，1：用户手动触发 */
-    private Byte isManual;
+    private Integer isManual;
     /** 触发耗时(单位：毫秒) */
     private Integer triggerTime;
     /** 上一次触发时间 */
@@ -35,7 +35,7 @@ public class TaskJobTriggerLog implements Serializable {
     /** 触发次数 */
     private Long fireCount;
     /** 是否错过了触发，0：否，1：是 */
-    private Byte misFired;
+    private Integer misFired;
     /** 触发器消息 */
     private String triggerMsg;
     /** 创建时间 */

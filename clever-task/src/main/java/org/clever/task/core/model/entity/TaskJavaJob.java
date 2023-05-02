@@ -17,7 +17,7 @@ public class TaskJavaJob implements Serializable {
     /** 任务ID */
     private Long jobId;
     /** 是否是静态方法(函数)，0：非静态，1：静态 */
-    private Byte isStatic;
+    private Integer isStatic;
     /** java class全路径 */
     private String className;
     /** java class method */

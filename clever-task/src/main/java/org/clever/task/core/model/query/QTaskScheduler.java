@@ -28,8 +28,8 @@ public class QTaskScheduler extends RelationalPathBase<TaskScheduler> {
     public final StringPath namespace = createString("namespace");
     /** 调度器实例名称 */
     public final StringPath instanceName = createString("instanceName");
-    /** 最后心跳时间 */
-    public final DateTimePath<Date> lastHeartbeatTime = createDateTime("lastHeartbeatTime", Date.class);
+    /** 最后心跳时间(毫秒时间戳) */
+    public final NumberPath<Long> lastHeartbeatTime = createNumber("lastHeartbeatTime", Long.class);
     /** 心跳频率(单位：毫秒) */
     public final NumberPath<Long> heartbeatInterval = createNumber("heartbeatInterval", Long.class);
     /** 调度器配置，线程池大小、负载权重、最大并发任务数... */
@@ -70,7 +70,7 @@ public class QTaskScheduler extends RelationalPathBase<TaskScheduler> {
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.BIGINT).withSize(19));
         addMetadata(namespace, ColumnMetadata.named("namespace").withIndex(2).ofType(Types.VARCHAR).withSize(63));
         addMetadata(instanceName, ColumnMetadata.named("instance_name").withIndex(3).ofType(Types.VARCHAR).withSize(127));
-        addMetadata(lastHeartbeatTime, ColumnMetadata.named("last_heartbeat_time").withIndex(4).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(lastHeartbeatTime, ColumnMetadata.named("last_heartbeat_time").withIndex(4).ofType(Types.BIGINT).withSize(19));
         addMetadata(heartbeatInterval, ColumnMetadata.named("heartbeat_interval").withIndex(5).ofType(Types.BIGINT).withSize(19));
         addMetadata(config, ColumnMetadata.named("config").withIndex(6).ofType(Types.LONGVARCHAR).withSize(65535));
         addMetadata(description, ColumnMetadata.named("description").withIndex(7).ofType(Types.VARCHAR).withSize(511));

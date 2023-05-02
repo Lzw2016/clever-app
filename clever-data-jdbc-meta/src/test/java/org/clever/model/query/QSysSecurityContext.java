@@ -62,7 +62,7 @@ public class QSysSecurityContext extends RelationalPathBase<SysSecurityContext> 
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.BIGINT).withSize(19));
         addMetadata(userId, ColumnMetadata.named("user_id").withIndex(2).ofType(Types.BIGINT).withSize(19));
         addMetadata(securityContext, ColumnMetadata.named("security_context").withIndex(3).ofType(Types.VARCHAR).withSize(16365));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(4).ofType(Types.TIMESTAMP));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(5).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(4).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(5).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

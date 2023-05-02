@@ -29,17 +29,17 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     /** 任务名称 */
     public final StringPath name = createString("name");
     /** 任务类型，1：http调用，2：java调用，3：js脚本，4：shell脚本 */
-    public final NumberPath<Byte> type = createNumber("type", Byte.class);
+    public final NumberPath<Integer> type = createNumber("type", Integer.class);
     /** 最大重入执行数量(对于单个节点当前任务未执行完成就触发了下一次执行导致任务重入执行)，小于等于0：表示禁止重入执行 */
-    public final NumberPath<Byte> maxReentry = createNumber("maxReentry", Byte.class);
+    public final NumberPath<Integer> maxReentry = createNumber("maxReentry", Integer.class);
     /** 是否允许多节点并发执行，使用悲观锁实现，不建议禁止，0：禁止，1：允许 */
-    public final NumberPath<Byte> allowConcurrent = createNumber("allowConcurrent", Byte.class);
+    public final NumberPath<Integer> allowConcurrent = createNumber("allowConcurrent", Integer.class);
     /** 悲观锁 */
     public final NumberPath<Long> lockVersion = createNumber("lockVersion", Long.class);
     /** 执行失败时的最大重试次数 */
     public final NumberPath<Integer> maxRetryCount = createNumber("maxRetryCount", Integer.class);
     /** 路由策略，0：不启用，1：指定节点优先，2：固定节点白名单，3：固定节点黑名单 */
-    public final NumberPath<Byte> routeStrategy = createNumber("routeStrategy", Byte.class);
+    public final NumberPath<Integer> routeStrategy = createNumber("routeStrategy", Integer.class);
     /** 路由策略，1-指定节点优先，调度器名称集合 */
     public final StringPath firstScheduler = createString("firstScheduler");
     /** 路由策略，2-固定节点白名单，调度器名称集合 */
@@ -47,13 +47,13 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     /** 路由策略，3-固定节点黑名单，调度器名称集合 */
     public final StringPath blacklistScheduler = createString("blacklistScheduler");
     /** 负载均衡策略，1：抢占，2：随机，3：轮询，4：一致性HASH */
-    public final NumberPath<Byte> loadBalance = createNumber("loadBalance", Byte.class);
+    public final NumberPath<Integer> loadBalance = createNumber("loadBalance", Integer.class);
     /** 是否更新任务数据，0：不更新，1：更新 */
-    public final NumberPath<Byte> isUpdateData = createNumber("isUpdateData", Byte.class);
+    public final NumberPath<Integer> isUpdateData = createNumber("isUpdateData", Integer.class);
     /** 任务数据(json格式) */
     public final StringPath jobData = createString("jobData");
     /** 是否禁用：0-启用，1-禁用 */
-    public final NumberPath<Byte> disable = createNumber("disable", Byte.class);
+    public final NumberPath<Integer> disable = createNumber("disable", Integer.class);
     /** 描述 */
     public final StringPath description = createString("description");
     /** 创建时间 */

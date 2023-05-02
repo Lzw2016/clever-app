@@ -33,7 +33,7 @@ public class QTaskShellJob extends RelationalPathBase<TaskShellJob> {
     /** 文件内容 */
     public final StringPath content = createString("content");
     /** 读写权限：0-可读可写，1-只读 */
-    public final NumberPath<Byte> readOnly = createNumber("readOnly", Byte.class);
+    public final NumberPath<Integer> readOnly = createNumber("readOnly", Integer.class);
     /** 创建时间 */
     public final DateTimePath<Date> createAt = createDateTime("createAt", Date.class);
     /** 更新时间 */

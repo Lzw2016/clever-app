@@ -10,7 +10,7 @@ create table task_scheduler
     id                  bigint          not null        auto_increment                          comment '主键id',
     namespace           varchar(63)     not null                                                comment '命名空间(同一个namespace的不同调度器属于同一个集群)',
     instance_name       varchar(127)    not null                                                comment '调度器实例名称',
-    last_heartbeat_time datetime(3)     not null                                                comment '最后心跳时间',
+    last_heartbeat_time bigint          not null                                                comment '最后心跳时间(毫秒时间戳)',
     heartbeat_interval  bigint          not null        default 3000                            comment '心跳频率(单位：毫秒)',
     config              text            not null                                                comment '调度器配置，线程池大小、负载权重、最大并发任务数...',
     -- TODO runtime_info        text                                                                    comment '调度器运行时信息',

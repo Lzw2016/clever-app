@@ -71,13 +71,13 @@ public class QSysLoginLog extends RelationalPathBase<SysLoginLog> {
     private void addMetadata() {
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.BIGINT).withSize(19));
         addMetadata(userId, ColumnMetadata.named("user_id").withIndex(2).ofType(Types.BIGINT).withSize(19));
-        addMetadata(loginTime, ColumnMetadata.named("login_time").withIndex(3).ofType(Types.TIMESTAMP));
+        addMetadata(loginTime, ColumnMetadata.named("login_time").withIndex(3).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(loginIp, ColumnMetadata.named("login_ip").withIndex(4).ofType(Types.VARCHAR).withSize(31));
         addMetadata(loginType, ColumnMetadata.named("login_type").withIndex(5).ofType(Types.INTEGER).withSize(10));
         addMetadata(loginChannel, ColumnMetadata.named("login_channel").withIndex(6).ofType(Types.INTEGER).withSize(10));
         addMetadata(loginState, ColumnMetadata.named("login_state").withIndex(7).ofType(Types.INTEGER).withSize(10));
         addMetadata(requestData, ColumnMetadata.named("request_data").withIndex(8).ofType(Types.VARCHAR).withSize(4095));
         addMetadata(jwtTokenId, ColumnMetadata.named("jwt_token_id").withIndex(9).ofType(Types.BIGINT).withSize(19));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(10).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(10).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

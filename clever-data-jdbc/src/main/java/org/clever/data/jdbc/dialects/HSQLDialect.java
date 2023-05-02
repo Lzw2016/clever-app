@@ -2,6 +2,7 @@ package org.clever.data.jdbc.dialects;
 
 import org.clever.core.tuples.TupleTwo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,7 +21,7 @@ public class HSQLDialect extends AbstractDialect {
     }
 
     @Override
-    public TupleTwo<String, Map<String, Object>> nextPKSql(String primaryKeyName) {
-        throw new UnsupportedOperationException("不支持当前操作");
+    public TupleTwo<String, Map<String, Object>> currentDateTimeSql() {
+        return TupleTwo.creat("select current_timestamp from information_schema.system_users", new HashMap<>());
     }
 }

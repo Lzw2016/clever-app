@@ -37,7 +37,7 @@ public class QTaskJobTriggerLog extends RelationalPathBase<TaskJobTriggerLog> {
     /** 触发时间 */
     public final DateTimePath<Date> fireTime = createDateTime("fireTime", Date.class);
     /** 是否是手动触发，0：系统自动触发，1：用户手动触发 */
-    public final NumberPath<Byte> isManual = createNumber("isManual", Byte.class);
+    public final NumberPath<Integer> isManual = createNumber("isManual", Integer.class);
     /** 触发耗时(单位：毫秒) */
     public final NumberPath<Integer> triggerTime = createNumber("triggerTime", Integer.class);
     /** 上一次触发时间 */
@@ -47,7 +47,7 @@ public class QTaskJobTriggerLog extends RelationalPathBase<TaskJobTriggerLog> {
     /** 触发次数 */
     public final NumberPath<Long> fireCount = createNumber("fireCount", Long.class);
     /** 是否错过了触发，0：否，1：是 */
-    public final NumberPath<Byte> misFired = createNumber("misFired", Byte.class);
+    public final NumberPath<Integer> misFired = createNumber("misFired", Integer.class);
     /** 触发器消息 */
     public final StringPath triggerMsg = createString("triggerMsg");
     /** 创建时间 */

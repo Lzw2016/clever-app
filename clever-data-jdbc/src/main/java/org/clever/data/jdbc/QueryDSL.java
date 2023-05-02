@@ -16,6 +16,7 @@ import org.clever.util.Assert;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -503,12 +504,19 @@ public class QueryDSL extends SQLQueryFactory {
     // --------------------------------------------------------------------------------------------
 
     /**
-     * 返回下一个主键值
-     *
-     * @param primaryKeyName 主键名称
+     * 获取数据库服务器当前时间
      */
-    public Long nextPK(String primaryKeyName) {
-        return jdbc.nextPK(primaryKeyName);
+    public Date currentDate() {
+        return jdbc.currentDate();
+    }
+
+    /**
+     * 返回下一个序列值
+     *
+     * @param seqName 序列名称
+     */
+    public Long nextSeq(String seqName) {
+        return jdbc.nextSeq(seqName);
     }
 
     /***
@@ -530,6 +538,27 @@ public class QueryDSL extends SQLQueryFactory {
      */
     public Long nextId(String idName) {
         return jdbc.nextId(idName);
+    }
+
+    /***
+     * 批量获取唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param qClass QueryDSL Q类
+     * @param size 唯一id值数量(1 ~ 10W)
+     */
+    public List<Long> nextIds(RelationalPathBase<?> qClass, int size) {
+        return jdbc.nextIds(qClass.getTableName(), size);
+    }
+
+    /**
+     * 返回下一个唯一的id值 <br/>
+     * <b>此功能需要数据库表支持</b>
+     *
+     * @param qClass QueryDSL Q类
+     */
+    public Long nextId(RelationalPathBase<?> qClass) {
+        return jdbc.nextId(qClass.getTableName());
     }
 
     /**

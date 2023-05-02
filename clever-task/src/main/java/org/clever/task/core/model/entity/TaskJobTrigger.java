@@ -27,19 +27,19 @@ public class TaskJobTrigger implements Serializable {
     /** 下一次触发时间 */
     private Date nextFireTime;
     /** 错过触发策略，1：忽略，2：立即补偿触发一次 */
-    private Byte misfireStrategy;
+    private Integer misfireStrategy;
     /** 是否允许多节点并行触发，使用悲观锁实现，不建议允许，0：禁止，1：允许 */
-    private Byte allowConcurrent;
+    private Integer allowConcurrent;
     /** 悲观锁 */
     private Long lockVersion;
     /** 任务类型，1：cron触发，2：固定间隔触发 */
-    private Byte type;
+    private Integer type;
     /** cron表达式 */
     private String cron;
     /** 固定间隔触发，间隔时间(单位：秒) */
     private Long fixedInterval;
     /** 是否禁用：0-启用，1-禁用 */
-    private Byte disable;
+    private Integer disable;
     /** 描述 */
     private String description;
     /** 创建时间 */

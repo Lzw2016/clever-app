@@ -31,7 +31,7 @@ public class TaskJobLog implements Serializable {
     /** 执行耗时(单位：毫秒) */
     private Integer runTime;
     /** 任务执行结果，0：成功，1：失败，2：取消 */
-    private Byte status;
+    private Integer status;
     /** 重试次数 */
     private Integer retryCount;
     /** 异常信息 */

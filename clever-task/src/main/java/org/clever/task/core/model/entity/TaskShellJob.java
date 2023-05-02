@@ -21,7 +21,7 @@ public class TaskShellJob implements Serializable {
     /** 文件内容 */
     private String content;
     /** 读写权限：0-可读可写，1-只读 */
-    private Byte readOnly;
+    private Integer readOnly;
     /** 创建时间 */
     private Date createAt;
     /** 更新时间 */

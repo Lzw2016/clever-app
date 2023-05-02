@@ -43,7 +43,7 @@ public class QTaskJobLog extends RelationalPathBase<TaskJobLog> {
     /** 执行耗时(单位：毫秒) */
     public final NumberPath<Integer> runTime = createNumber("runTime", Integer.class);
     /** 任务执行结果，0：成功，1：失败，2：取消 */
-    public final NumberPath<Byte> status = createNumber("status", Byte.class);
+    public final NumberPath<Integer> status = createNumber("status", Integer.class);
     /** 重试次数 */
     public final NumberPath<Integer> retryCount = createNumber("retryCount", Integer.class);
     /** 异常信息 */

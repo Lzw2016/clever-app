@@ -70,8 +70,8 @@ public class QSysResource extends RelationalPathBase<SysResource> {
         addMetadata(resourceType, ColumnMetadata.named("resource_type").withIndex(3).ofType(Types.INTEGER).withSize(10));
         addMetadata(isEnable, ColumnMetadata.named("is_enable").withIndex(4).ofType(Types.INTEGER).withSize(10));
         addMetadata(createBy, ColumnMetadata.named("create_by").withIndex(5).ofType(Types.BIGINT).withSize(19));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(6).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(6).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(updateBy, ColumnMetadata.named("update_by").withIndex(7).ofType(Types.BIGINT).withSize(19));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(8).ofType(Types.TIMESTAMP));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

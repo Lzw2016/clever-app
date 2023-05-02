@@ -63,8 +63,8 @@ public class QSysRoleResource extends RelationalPathBase<SysRoleResource> {
         addMetadata(roleId, ColumnMetadata.named("role_id").withIndex(1).ofType(Types.BIGINT).withSize(19));
         addMetadata(resourceId, ColumnMetadata.named("resource_id").withIndex(2).ofType(Types.BIGINT).withSize(19));
         addMetadata(createBy, ColumnMetadata.named("create_by").withIndex(3).ofType(Types.BIGINT).withSize(19));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(4).ofType(Types.TIMESTAMP));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(4).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(updateBy, ColumnMetadata.named("update_by").withIndex(5).ofType(Types.BIGINT).withSize(19));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(6).ofType(Types.TIMESTAMP));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(6).ofType(Types.TIMESTAMP).withSize(3));
     }
 }
