@@ -103,10 +103,11 @@ public class TaskStore {
         } else {
             // 需要更新
             queryDSL.update(taskScheduler)
-                    .set(taskScheduler.lastHeartbeatTime, now)
+                    // .set(taskScheduler.lastHeartbeatTime, now)
                     .set(taskScheduler.heartbeatInterval, scheduler.getHeartbeatInterval())
                     .set(taskScheduler.config, scheduler.getConfig())
                     .set(taskScheduler.description, scheduler.getDescription())
+                    .set(taskScheduler.updateAt, now)
                     .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
                     .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
                     .execute();
