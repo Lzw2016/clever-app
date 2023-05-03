@@ -273,7 +273,7 @@ public class TaskStore {
     }
 
     /**
-     * 获取定时任务悲观锁 TODO 乐观锁
+     * 获取定时任务锁(乐观锁)
      */
     public boolean getLockJob(String namespace, Long jobId, Long lockVersion) {
         return queryDSL.update(taskJob)

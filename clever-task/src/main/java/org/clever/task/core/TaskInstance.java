@@ -638,13 +638,12 @@ public class TaskInstance {
                 executeJob(dbNow, job, jobLog);
             } else {
                 try {
-                    taskStore.beginTX(status -> {
-                        // 获取定时任务悲观锁 - 判断是否被其他节点执行了
+                    taskStore.beginTX2(status -> {
+                        // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
                         boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId(), job.getLockVersion());
                         if (lock) {
                             executeJob(dbNow, job, jobLog);
                         }
-                        return null;
                     });
                 } catch (Exception e) {
                     log.error("[TaskInstance] 手动执行Job失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
@@ -1052,13 +1051,12 @@ public class TaskInstance {
                     executeJob(dbNow, job, jobLog);
                 } else {
                     try {
-                        taskStore.beginTX(status -> {
-                            // 获取定时任务悲观锁 - 判断是否被其他节点执行了
+                        taskStore.beginTX2(status -> {
+                            // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
                             boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId(), job.getLockVersion());
                             if (lock) {
                                 executeJob(dbNow, job, jobLog);
                             }
-                            return null;
                         });
                     } catch (Exception e) {
                         log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
