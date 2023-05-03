@@ -32,13 +32,13 @@ public interface GlobalConstant {
     // 维护接下来N秒内需要触发的触发器列表的时间间隔，建议：500 ~ 1000(单位：毫秒)
     int RELOAD_NEXT_TRIGGER_INTERVAL = 1_000;
     // 接下来N秒内需要触发的触发器列表(N = RELOAD_NEXT_TRIGGER_INTERVAL * NEXT_TRIGGER_N)
-    double NEXT_TRIGGER_N = 1.5;
+    double NEXT_TRIGGER_N = 2.0;
     // 调度器轮询任务的时间间隔(单位：毫秒)
     int TRIGGER_JOB_EXEC_INTERVAL = 10;
     // 调度器轮询任务的最大时间间隔(单位：毫秒)
     int TRIGGER_JOB_EXEC_MAX_INTERVAL = 900;
     // 接下来N秒内需要触发的触发器列表最大值
-    int NEXT_TRIGGER_MAX_COUNT = 1000;
+    int NEXT_TRIGGER_MAX_COUNT = 500;
 
     // 线程池初始延时(单位：毫秒)
     int THREAD_POOL_INITIAL_DELAY = 0;

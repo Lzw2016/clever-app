@@ -856,7 +856,7 @@ public class TaskInstance {
     private void reloadNextTrigger() {
         final TaskScheduler scheduler = taskContext.getCurrentScheduler();
         // noinspection ConstantConditions
-        final int nextTime = Conv.asInteger(GlobalConstant.RELOAD_NEXT_TRIGGER_INTERVAL * GlobalConstant.NEXT_TRIGGER_N + 1, 1500);
+        final int nextTime = Conv.asInteger(GlobalConstant.RELOAD_NEXT_TRIGGER_INTERVAL * GlobalConstant.NEXT_TRIGGER_N + 1, 2000);
         final List<TaskJobTrigger> nextJobTriggerList = taskStore.beginReadOnlyTX(status -> taskStore.queryNextTrigger(scheduler.getNamespace(), nextTime));
         final int size = nextJobTriggerList.size();
         // 同一秒触发任务过多打印警告
@@ -900,13 +900,12 @@ public class TaskInstance {
                         if (allowConcurrent) {
                             doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                         } else {
-                            taskStore.beginTX(status -> {
-                                // 获取触发器悲观锁 - 判断是否被其他节点触发了
+                            taskStore.beginTX2(status -> {
+                                // 获取触发器悲观锁(事务范围控制锁范围) - 判断是否被其他节点触发了
                                 boolean lock = taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId(), jobTrigger.getLockVersion());
                                 if (lock) {
                                     doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                                 }
-                                return null;
                             });
                         }
                         // 是否在当前节点触发执行了任务
@@ -952,7 +951,12 @@ public class TaskInstance {
             if (done || (System.currentTimeMillis() - startTime) >= GlobalConstant.TRIGGER_JOB_EXEC_MAX_INTERVAL) {
                 break;
             }
-            Thread.yield();
+            try {
+                // noinspection BusyWait
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {
+                Thread.yield();
+            }
         }
         final long endTime = System.currentTimeMillis();
         final long sunFireTime = endTime - startTime;

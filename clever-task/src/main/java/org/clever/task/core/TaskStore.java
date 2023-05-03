@@ -13,11 +13,13 @@ import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
+import org.clever.transaction.TransactionStatus;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.clever.task.core.model.query.QTaskHttpJob.taskHttpJob;
@@ -442,7 +444,7 @@ public class TaskStore {
     }
 
     /**
-     * 获取触发器悲观锁 TODO 乐观锁
+     * 获取触发器锁(乐观锁)
      */
     public boolean getLockTrigger(String namespace, Long jobTriggerId, Long lockVersion) {
         return queryDSL.update(taskJobTrigger)
@@ -588,6 +590,15 @@ public class TaskStore {
      */
     public <T> T beginTX(TransactionCallback<T> action) {
         return jdbc.beginTX(action);
+    }
+
+    /**
+     * 在事务内支持操作
+     *
+     * @param action 事务内数据库操作
+     */
+    public void beginTX2(Consumer<TransactionStatus> action) {
+        jdbc.beginTX(action);
     }
 
     /**

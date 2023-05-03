@@ -52,10 +52,6 @@ public class TaskContext {
      */
     private final LinkedHashMap<Long, TaskJobTrigger> nextJobTriggerMap = new LinkedHashMap<>(GlobalConstant.INITIAL_CAPACITY);
     /**
-     * NextJobTriggerMap对象读写锁
-     */
-    private final Object nextJobTriggerMapLock = new Object();
-    /**
      * 正在触发的触发器ID {@code Set<jobTriggerId + nextFireTime>}
      */
     private final Set<String> triggeringSet = Sets.newConcurrentHashSet();
@@ -86,26 +82,26 @@ public class TaskContext {
     }
 
     public void setNextJobTriggerMap(List<TaskJobTrigger> nextJobTriggerList) {
-        synchronized (nextJobTriggerMapLock) {
+        synchronized (nextJobTriggerMap) {
             nextJobTriggerMap.clear();
             nextJobTriggerList.forEach(jobTrigger -> nextJobTriggerMap.put(jobTrigger.getId(), jobTrigger));
         }
     }
 
     public List<TaskJobTrigger> getNextJobTriggerList() {
-        synchronized (nextJobTriggerMapLock) {
+        synchronized (nextJobTriggerMap) {
             return new ArrayList<>(nextJobTriggerMap.values());
         }
     }
 
     public void removeNextJobTrigger(Long jobTriggerId) {
-        synchronized (nextJobTriggerMapLock) {
+        synchronized (nextJobTriggerMap) {
             nextJobTriggerMap.remove(jobTriggerId);
         }
     }
 
     public void putNextJobTrigger(TaskJobTrigger jobTrigger) {
-        synchronized (nextJobTriggerMapLock) {
+        synchronized (nextJobTriggerMap) {
             nextJobTriggerMap.put(jobTrigger.getId(), jobTrigger);
         }
     }
