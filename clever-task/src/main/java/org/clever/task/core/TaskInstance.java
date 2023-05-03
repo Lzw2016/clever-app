@@ -638,12 +638,13 @@ public class TaskInstance {
                 executeJob(dbNow, job, jobLog);
             } else {
                 try {
-                    taskStore.beginTX2(status -> {
+                    taskStore.beginTX(status -> {
                         // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
                         boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId(), job.getLockVersion());
                         if (lock) {
                             executeJob(dbNow, job, jobLog);
                         }
+                        return null;
                     });
                 } catch (Exception e) {
                     log.error("[TaskInstance] 手动执行Job失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
@@ -899,12 +900,13 @@ public class TaskInstance {
                         if (allowConcurrent) {
                             doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                         } else {
-                            taskStore.beginTX2(status -> {
+                            taskStore.beginTX(status -> {
                                 // 获取触发器悲观锁(事务范围控制锁范围) - 判断是否被其他节点触发了
                                 boolean lock = taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId(), jobTrigger.getLockVersion());
                                 if (lock) {
                                     doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                                 }
+                                return null;
                             });
                         }
                         // 是否在当前节点触发执行了任务
@@ -1051,12 +1053,13 @@ public class TaskInstance {
                     executeJob(dbNow, job, jobLog);
                 } else {
                     try {
-                        taskStore.beginTX2(status -> {
+                        taskStore.beginTX(status -> {
                             // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
                             boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId(), job.getLockVersion());
                             if (lock) {
                                 executeJob(dbNow, job, jobLog);
                             }
+                            return null;
                         });
                     } catch (Exception e) {
                         log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
