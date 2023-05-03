@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Conv;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.config.SchedulerConfig;
@@ -129,11 +130,15 @@ public class TaskInstance {
         Assert.notEmpty(schedulerListeners, "参数 schedulerListeners 不能为空");
         Assert.notEmpty(jobTriggerListeners, "参数 jobTriggerListeners 不能为空");
         Assert.notEmpty(jobListeners, "参数 jobListeners 不能为空");
+        final SnowFlake snowFlake = new SnowFlake(
+                schedulerConfig.getInstanceName().hashCode() % SnowFlake.MAX_WORKER_ID,
+                schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID
+        );
         // 初始化数据源
-        taskStore = new TaskStore(queryDSL);
+        taskStore = new TaskStore(snowFlake, queryDSL);
         // 注册调度器
         TaskScheduler scheduler = registerScheduler(toScheduler(schedulerConfig));
-        taskContext = new TaskContext(schedulerConfig, scheduler);
+        taskContext = new TaskContext(schedulerConfig, scheduler, snowFlake);
         // 初始化守护线程池
         dataCheckDaemon = new DaemonExecutor(GlobalConstant.DATA_CHECK_DAEMON_NAME, schedulerConfig.getInstanceName());
         registerSchedulerDaemon = new DaemonExecutor(GlobalConstant.REGISTER_SCHEDULER_DAEMON_NAME, schedulerConfig.getInstanceName());
@@ -147,13 +152,13 @@ public class TaskInstance {
                 GlobalConstant.SCHEDULER_EXECUTOR_NAME,
                 schedulerConfig.getInstanceName(),
                 schedulerConfig.getSchedulerExecutorPoolSize(),
-                schedulerConfig.getMaxConcurrent()
+                schedulerConfig.getSchedulerExecutorQueueSize()
         );
         jobWorker = new WorkExecutor(
                 GlobalConstant.JOB_EXECUTOR_NAME,
                 schedulerConfig.getInstanceName(),
                 schedulerConfig.getJobExecutorPoolSize(),
-                schedulerConfig.getMaxConcurrent()
+                schedulerConfig.getJobExecutorQueueSize()
         );
         // 初始化定时任务执行器实现列表
         jobExecutors.sort(Comparator.comparingInt(JobExecutor::order));
@@ -1270,9 +1275,10 @@ public class TaskInstance {
     private TaskScheduler toScheduler(SchedulerConfig schedulerConfig) {
         TaskScheduler.Config config = new TaskScheduler.Config();
         config.setSchedulerExecutorPoolSize(schedulerConfig.getSchedulerExecutorPoolSize());
+        config.setSchedulerExecutorQueueSize(schedulerConfig.getSchedulerExecutorQueueSize());
+        config.setJobExecutorQueueSize(schedulerConfig.getJobExecutorQueueSize());
         config.setJobExecutorPoolSize(schedulerConfig.getJobExecutorPoolSize());
         config.setLoadWeight(schedulerConfig.getLoadWeight());
-        config.setMaxConcurrent(schedulerConfig.getMaxConcurrent());
         TaskScheduler scheduler = new TaskScheduler();
         scheduler.setNamespace(schedulerConfig.getNamespace());
         scheduler.setInstanceName(schedulerConfig.getInstanceName());

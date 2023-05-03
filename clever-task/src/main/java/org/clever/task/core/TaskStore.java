@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.clever.core.DateUtils;
+import org.clever.core.id.SnowFlake;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.exception.SchedulerException;
@@ -37,16 +38,21 @@ import static org.clever.task.core.model.query.QTaskShellJob.taskShellJob;
  * 创建时间：2021/08/08 16:14 <br/>
  */
 public class TaskStore {
+    private final SnowFlake snowFlake;
     private final Jdbc jdbc;
     private final QueryDSL queryDSL;
 
-    public TaskStore(QueryDSL queryDSL) {
+    public TaskStore(SnowFlake snowFlake, QueryDSL queryDSL) {
+        Assert.notNull(snowFlake, "参数 snowFlake 不能为null");
         Assert.notNull(queryDSL, "参数 queryDSL 不能为null");
+        this.snowFlake = snowFlake;
         this.queryDSL = queryDSL;
         this.jdbc = queryDSL.getJdbc();
     }
 
-    public TaskStore() {
+    public TaskStore(SnowFlake snowFlake) {
+        Assert.notNull(snowFlake, "参数 snowFlake 不能为null");
+        this.snowFlake = snowFlake;
         jdbc = TaskDataSource.getJdbc();
         queryDSL = TaskDataSource.getQueryDSL();
     }
@@ -90,7 +96,7 @@ public class TaskStore {
         final Date now = currentDate();
         if (registered == null) {
             // 需要注册
-            scheduler.setId(queryDSL.nextId(taskScheduler));
+            scheduler.setId(snowFlake.nextId());
             scheduler.setLastHeartbeatTime(now);
             scheduler.setCreateAt(now);
             queryDSL.insert(taskScheduler).populate(scheduler).execute();
@@ -447,19 +453,19 @@ public class TaskStore {
     }
 
     public int addSchedulerLog(TaskSchedulerLog schedulerLog) {
-        schedulerLog.setId(queryDSL.nextId(taskSchedulerLog));
+        schedulerLog.setId(snowFlake.nextId());
         schedulerLog.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskSchedulerLog).populate(schedulerLog).execute();
     }
 
     public int addJobTriggerLog(TaskJobTriggerLog jobTriggerLog) {
-        jobTriggerLog.setId(queryDSL.nextId(taskJobTriggerLog));
+        jobTriggerLog.setId(snowFlake.nextId());
         jobTriggerLog.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskJobTriggerLog).populate(jobTriggerLog).execute();
     }
 
     public int addJobLog(TaskJobLog jobLog) {
-        jobLog.setId(queryDSL.nextId(taskJobLog));
+        jobLog.setId(snowFlake.nextId());
         jobLog.setStartTime(currentDate());
         jobLog.setEndTime(null);
         jobLog.setRunTime(null);
@@ -494,25 +500,25 @@ public class TaskStore {
     // ---------------------------------------------------------------------------------------------------------------------------------------- manage
 
     public int addJob(TaskJob job) {
-        job.setId(queryDSL.nextId(taskJob));
+        job.setId(snowFlake.nextId());
         job.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskJob).populate(job).execute();
     }
 
     public int addJobTrigger(TaskJobTrigger jobTrigger) {
-        jobTrigger.setId(queryDSL.nextId(taskJobTrigger));
+        jobTrigger.setId(snowFlake.nextId());
         jobTrigger.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskJobTrigger).populate(jobTrigger).execute();
     }
 
     public int addHttpJob(TaskHttpJob httpJob) {
-        httpJob.setId(queryDSL.nextId(taskHttpJob));
+        httpJob.setId(snowFlake.nextId());
         httpJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskHttpJob).populate(httpJob).execute();
     }
 
     public int addJavaJob(TaskJavaJob javaJob) {
-        javaJob.setId(queryDSL.nextId(taskJavaJob));
+        javaJob.setId(snowFlake.nextId());
         javaJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskJavaJob).populate(javaJob).execute();
     }
@@ -527,13 +533,13 @@ public class TaskStore {
 //    }
 
     public int addJsJob(TaskJsJob jsJob) {
-        jsJob.setId(queryDSL.nextId(taskJsJob));
+        jsJob.setId(snowFlake.nextId());
         jsJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskJsJob).populate(jsJob).execute();
     }
 
     public int addShellJob(TaskShellJob shellJob) {
-        shellJob.setId(queryDSL.nextId(taskShellJob));
+        shellJob.setId(snowFlake.nextId());
         shellJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskShellJob).populate(shellJob).execute();
     }

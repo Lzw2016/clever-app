@@ -29,12 +29,12 @@ public interface GlobalConstant {
     int CALC_NEXT_FIRE_TIME_INTERVAL = 300_000;
     // 维护当前集群可用的调度器列表的时间间隔(单位：毫秒)
     int RELOAD_SCHEDULER_INTERVAL = 5_000;
-    // 维护接下来N秒内需要触发的触发器列表的时间间隔，建议：100 ~ 1000(单位：毫秒)
+    // 维护接下来N秒内需要触发的触发器列表的时间间隔，建议：500 ~ 1000(单位：毫秒)
     int RELOAD_NEXT_TRIGGER_INTERVAL = 1_000;
-    // 接下来N秒内需要触发的触发器列表(N = heartbeatInterval * NEXT_TRIGGER_N)
+    // 接下来N秒内需要触发的触发器列表(N = RELOAD_NEXT_TRIGGER_INTERVAL * NEXT_TRIGGER_N)
     double NEXT_TRIGGER_N = 1.5;
     // 调度器轮询任务的时间间隔(单位：毫秒)
-    int TRIGGER_JOB_EXEC_INTERVAL = 3;
+    int TRIGGER_JOB_EXEC_INTERVAL = 300;
     // 调度器轮询任务的最大时间间隔(单位：毫秒)
     int TRIGGER_JOB_EXEC_MAX_INTERVAL = 900;
     // 接下来N秒内需要触发的触发器列表最大值
@@ -46,8 +46,6 @@ public interface GlobalConstant {
     long THREAD_POOL_KEEP_ALIVE_SECONDS = 3_000L;
     // 集合初始容量
     int INITIAL_CAPACITY = 1024;
-    // 数据库事务名称前缀
-    String TRANSACTION_NAME_PREFIX = "SCH_TX";
     // 线程池名称
     Map<String, String> THREAD_POOL_NAME = Collections.unmodifiableMap(
             new HashMap<String, String>() {{

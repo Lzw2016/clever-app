@@ -21,7 +21,7 @@ public class SchedulerConfig implements Serializable {
     /**
      * 心跳频率，建议：300 ~ 15000(单位：毫秒)
      */
-    private long heartbeatInterval = 3_000;
+    private long heartbeatInterval = 10_000;
     /**
      * 描述
      */
@@ -31,15 +31,19 @@ public class SchedulerConfig implements Serializable {
      */
     private int schedulerExecutorPoolSize = 16;
     /**
+     * 调度线程池队列大小(大于等于schedulerExecutorPoolSize值)
+     */
+    private int schedulerExecutorQueueSize = 16;
+    /**
      * 定时任务执行线程池大小
      */
     private int jobExecutorPoolSize = 64;
     /**
+     * 定时任务执行线程池队列大小(大于等于jobExecutorPoolSize值)
+     */
+    private int jobExecutorQueueSize = 64;
+    /**
      * 负载权重
      */
     private double loadWeight = 1.0;
-    /**
-     * 最大并发任务数(大于等于jobExecutorPoolSize值)
-     */
-    private int maxConcurrent = 10240;
 }

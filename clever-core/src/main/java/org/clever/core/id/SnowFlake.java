@@ -39,8 +39,8 @@ public class SnowFlake {
      */
     private final static long DATA_CENTER_BIT = 5L;
     private final static long DATACENTER_ID_BITS = 5L;
-    private final static long MAX_WORKER_ID = ~(-1L << DATA_CENTER_BIT);
-    private final static long MAX_DATACENTER_ID = ~(-1L << DATACENTER_ID_BITS);
+    public final static long MAX_WORKER_ID = ~(-1L << DATA_CENTER_BIT);
+    public final static long MAX_DATACENTER_ID = ~(-1L << DATACENTER_ID_BITS);
     /**
      * 毫秒内自增位
      */

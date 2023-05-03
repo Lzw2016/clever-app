@@ -8,6 +8,7 @@ import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.task.core.model.entity.TaskScheduler;
+import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -75,10 +76,13 @@ public class TaskContext {
      */
     private final ConcurrentMap<Long, AtomicLong> jobRunCountMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
 
-    public TaskContext(SchedulerConfig schedulerConfig, TaskScheduler scheduler) {
+    public TaskContext(SchedulerConfig schedulerConfig, TaskScheduler scheduler, SnowFlake snowFlake) {
+        Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为null");
+        Assert.notNull(scheduler, "参数 scheduler 不能为null");
+        Assert.notNull(snowFlake, "参数 snowFlake 不能为null");
         this.schedulerConfig = schedulerConfig;
         this.currentScheduler = scheduler;
-        this.snowFlake = new SnowFlake(scheduler.getId() % 1024, 0);
+        this.snowFlake = snowFlake;
     }
 
     public void setNextJobTriggerMap(List<TaskJobTrigger> nextJobTriggerList) {
