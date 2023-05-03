@@ -54,22 +54,7 @@ public class DaemonExecutor {
                         .daemon(true)
                         .build()
         );
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (future != null && !future.isDone() && !future.isCancelled()) {
-                try {
-                    future.cancel(true);
-                    log.info("[DaemonExecutor] 线程停止成功 | {} | instanceName={}", this.name, this.instanceName);
-                } catch (Exception e) {
-                    log.error("[DaemonExecutor] 线程停止失败 | {} | instanceName={}", this.name, this.instanceName, e);
-                }
-            }
-            try {
-                executor.shutdownNow();
-                log.info("[DaemonExecutor] 线程池停止成功 | {} | instanceName={}", this.name, this.instanceName);
-            } catch (Exception e) {
-                log.error("[DaemonExecutor] 线程池停止失败 | {} | instanceName={}", this.name, this.instanceName, e);
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
 
     /**
@@ -91,6 +76,29 @@ public class DaemonExecutor {
     public void stop() {
         if (future != null && !future.isDone() && !future.isCancelled()) {
             future.cancel(true);
+        }
+    }
+
+    /**
+     * 停止线程池
+     */
+    public void shutdown() {
+        if (future != null && !future.isDone() && !future.isCancelled()) {
+            try {
+                future.cancel(true);
+                log.debug("[DaemonExecutor] 线程停止成功 | {} | instanceName={}", this.name, this.instanceName);
+            } catch (Exception e) {
+                log.error("[DaemonExecutor] 线程停止失败 | {} | instanceName={}", this.name, this.instanceName, e);
+            }
+        }
+        if (executor.isShutdown()) {
+            return;
+        }
+        try {
+            executor.shutdownNow();
+            log.debug("[DaemonExecutor] 线程池停止成功 | {} | instanceName={}", this.name, this.instanceName);
+        } catch (Exception e) {
+            log.error("[DaemonExecutor] 线程池停止失败 | {} | instanceName={}", this.name, this.instanceName, e);
         }
     }
 

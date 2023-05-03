@@ -131,8 +131,8 @@ public class TaskInstance {
         Assert.notEmpty(jobTriggerListeners, "参数 jobTriggerListeners 不能为空");
         Assert.notEmpty(jobListeners, "参数 jobListeners 不能为空");
         final SnowFlake snowFlake = new SnowFlake(
-                schedulerConfig.getInstanceName().hashCode() % SnowFlake.MAX_WORKER_ID,
-                schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID
+                Math.abs(schedulerConfig.getInstanceName().hashCode() % SnowFlake.MAX_WORKER_ID),
+                Math.abs(schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID)
         );
         // 初始化数据源
         taskStore = new TaskStore(snowFlake, queryDSL);
@@ -175,12 +175,6 @@ public class TaskInstance {
         this.schedulerListeners = schedulerListeners;
         this.jobTriggerListeners = jobTriggerListeners;
         this.jobListeners = jobListeners;
-        // 调度器停止日志
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            TaskSchedulerLog schedulerLog = newSchedulerLog();
-            schedulerLog.setEventName(TaskSchedulerLog.EVENT_SHUTDOWN);
-            this.schedulerPausedListener(schedulerLog);
-        }));
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- api
@@ -390,26 +384,71 @@ public class TaskInstance {
      * 暂停调度器
      */
     public void pause() {
-        try {
-            dataCheckDaemon.stop();
-            registerSchedulerDaemon.stop();
-            calcNextFireTimeDaemon.stop();
-            heartbeatDaemon.stop();
-            reloadSchedulerDaemon.stop();
-            reloadNextTriggerDaemon.stop();
-            triggerJobExecDaemon.stop();
-            // 调度器暂停成功日志(异步)
-            TaskSchedulerLog schedulerLog = newSchedulerLog();
-            schedulerLog.setEventName(TaskSchedulerLog.EVENT_PAUSED);
-            schedulerWorker.execute(() -> this.schedulerPausedListener(schedulerLog));
-        } catch (Exception e) {
-            log.error("[TaskInstance] 暂停调度器失败 | instanceName={}", this.getInstanceName(), e);
-            // 记录调度器日志(异步)
-            TaskSchedulerLog schedulerLog = newSchedulerLog();
-            schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_PAUSED_ERROR, ExceptionUtils.getStackTraceAsString(e));
-            schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-        } finally {
-            taskState = TaskState.Pause;
+        if (pauseCheck()) {
+            return;
+        }
+        synchronized (schedulerLock) {
+            if (pauseCheck()) {
+                return;
+            }
+            try {
+                dataCheckDaemon.stop();
+                registerSchedulerDaemon.stop();
+                calcNextFireTimeDaemon.stop();
+                heartbeatDaemon.stop();
+                reloadSchedulerDaemon.stop();
+                reloadNextTriggerDaemon.stop();
+                triggerJobExecDaemon.stop();
+                // 调度器暂停成功日志(异步)
+                TaskSchedulerLog schedulerLog = newSchedulerLog();
+                schedulerLog.setEventName(TaskSchedulerLog.EVENT_PAUSED);
+                schedulerWorker.execute(() -> this.schedulerPausedListener(schedulerLog));
+            } catch (Exception e) {
+                log.error("[TaskInstance] 暂停调度器失败 | instanceName={}", this.getInstanceName(), e);
+                // 记录调度器日志(异步)
+                TaskSchedulerLog schedulerLog = newSchedulerLog();
+                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_PAUSED_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
+            } finally {
+                taskState = TaskState.Pause;
+            }
+        }
+    }
+
+    /**
+     * 停止调度器
+     */
+    public void stop() {
+        if (stopCheck()) {
+            return;
+        }
+        synchronized (schedulerLock) {
+            if (stopCheck()) {
+                return;
+            }
+            try {
+                dataCheckDaemon.shutdown();
+                registerSchedulerDaemon.shutdown();
+                calcNextFireTimeDaemon.shutdown();
+                heartbeatDaemon.shutdown();
+                reloadSchedulerDaemon.shutdown();
+                reloadNextTriggerDaemon.shutdown();
+                triggerJobExecDaemon.shutdown();
+                schedulerWorker.shutdown();
+                jobWorker.shutdown();
+                // 调度器停止日志
+                TaskSchedulerLog schedulerLog = newSchedulerLog();
+                schedulerLog.setEventName(TaskSchedulerLog.EVENT_SHUTDOWN);
+                this.schedulerPausedListener(schedulerLog);
+            } catch (Exception e) {
+                log.error("[TaskInstance] 停止调度器失败 | instanceName={}", this.getInstanceName(), e);
+                // 调度器停止日志
+                TaskSchedulerLog schedulerLog = newSchedulerLog();
+                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_SHUTDOWN, ExceptionUtils.getStackTraceAsString(e));
+                this.schedulerErrorListener(schedulerLog, e);
+            } finally {
+                taskState = TaskState.Stopped;
+            }
         }
     }
 
@@ -457,33 +496,21 @@ public class TaskInstance {
                 count += taskStore.addJavaJob(javaJob);
                 addJobRes.setJavaJob(javaJob);
             } else if (jobModel instanceof JsJobModel) {
-                // TODO 新增 file_resource
                 // 新增 js_job
                 JsJobModel javaJobModel = (JsJobModel) jobModel;
-//                FileResource fileResource = javaJobModel.toFileResource();
-//                fileResource.setNamespace(scheduler.getNamespace());
-//                count += taskStore.addFileResource(fileResource);
                 TaskJsJob jsJob = javaJobModel.toJobEntity();
                 jsJob.setNamespace(scheduler.getNamespace());
                 jsJob.setJobId(job.getId());
-//                jsJob.setFileResourceId(fileResource.getId());
                 count += taskStore.addJsJob(jsJob);
                 addJobRes.setJsJob(jsJob);
-//                addJobRes.setFileResource(fileResource);
             } else if (jobModel instanceof ShellJobModel) {
-                // TODO 新增 file_resource
                 // 新增 shell_job
                 ShellJobModel shellJobModel = (ShellJobModel) jobModel;
-//                FileResource fileResource = shellJobModel.toFileResource();
-//                fileResource.setNamespace(scheduler.getNamespace());
-//                count += taskStore.addFileResource(fileResource);
                 TaskShellJob shellJob = shellJobModel.toJobEntity();
                 shellJob.setNamespace(scheduler.getNamespace());
                 shellJob.setJobId(job.getId());
-//                shellJob.setFileResourceId(fileResource.getId());
                 count += taskStore.addShellJob(shellJob);
                 addJobRes.setShellJob(shellJob);
-//                addJobRes.setFileResource(fileResource);
             } else {
                 throw new IllegalArgumentException("不支持的任务类型:" + jobModel.getClass().getName());
             }
@@ -560,20 +587,10 @@ public class TaskInstance {
                     taskStore.delJavaJobByJobId(namespace, jobId);
                     break;
                 case EnumConstant.JOB_TYPE_3:
-                    TaskJsJob jsJob = taskStore.getJsJob(namespace, jobId);
                     taskStore.delJsJobByJobId(namespace, jobId);
-                    // TODO FileResource
-//                    if (jsJob != null && jsJob.getFileResourceId() != null) {
-//                        taskStore.delFileResourceById(namespace, jsJob.getFileResourceId());
-//                    }
                     break;
                 case EnumConstant.JOB_TYPE_4:
-                    TaskShellJob shellJob = taskStore.getShellJob(namespace, jobId);
                     taskStore.delShellJobByJobId(namespace, jobId);
-                    // TODO FileResource
-//                    if (shellJob != null && shellJob.getFileResourceId() != null) {
-//                        taskStore.delFileResourceById(namespace, shellJob.getFileResourceId());
-//                    }
                     break;
                 default:
                     throw new IllegalArgumentException("不支持的任务类型: Type=" + job.getType());
@@ -736,6 +753,14 @@ public class TaskInstance {
         if (taskState != TaskState.None && taskState != TaskState.Pause) {
             throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", taskState));
         }
+    }
+
+    private boolean pauseCheck() {
+        return taskState != TaskState.Running;
+    }
+
+    private boolean stopCheck() {
+        return taskState != TaskState.Running && taskState != TaskState.Pause;
     }
 
     /**

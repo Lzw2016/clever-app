@@ -34,7 +34,7 @@ public interface GlobalConstant {
     // 接下来N秒内需要触发的触发器列表(N = RELOAD_NEXT_TRIGGER_INTERVAL * NEXT_TRIGGER_N)
     double NEXT_TRIGGER_N = 1.5;
     // 调度器轮询任务的时间间隔(单位：毫秒)
-    int TRIGGER_JOB_EXEC_INTERVAL = 300;
+    int TRIGGER_JOB_EXEC_INTERVAL = 10;
     // 调度器轮询任务的最大时间间隔(单位：毫秒)
     int TRIGGER_JOB_EXEC_MAX_INTERVAL = 900;
     // 接下来N秒内需要触发的触发器列表最大值

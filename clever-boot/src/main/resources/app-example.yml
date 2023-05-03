@@ -302,3 +302,16 @@ web:
       enableRefreshToken: true
       refreshTokenValidity: 60d
       refreshTokenName: 'refresh-token'
+
+timed-task:
+  enable: false
+  jdbcName: ''
+  namespace: 'default'
+  instanceName: 'node01'
+  heartbeatInterval: 10000
+  description: ''
+  schedulerExecutorPoolSize: 16
+  schedulerExecutorQueueSize: 16
+  jobExecutorPoolSize: 64
+  jobExecutorQueueSize: 64
+  loadWeight: 1.0

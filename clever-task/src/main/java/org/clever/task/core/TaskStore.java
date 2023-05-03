@@ -523,15 +523,6 @@ public class TaskStore {
         return (int) queryDSL.insert(taskJavaJob).populate(javaJob).execute();
     }
 
-//    public int addFileResource(FileResource fileResource) {
-//        final Map<String, Object> paramMap = SqlUtils.toMap(fileResource);
-//        final String sql = SqlUtils.insertSql(SqlConstant.FILE_RESOURCE_TABLE_NAME, paramMap, true);
-//        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-//        int count = namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(paramMap), keyHolder);
-//        fileResource.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
-//        return count;
-//    }
-
     public int addJsJob(TaskJsJob jsJob) {
         jsJob.setId(snowFlake.nextId());
         jsJob.setCreateAt(queryDSL.currentDate());
@@ -585,26 +576,6 @@ public class TaskStore {
                 .where(taskShellJob.jobId.eq(jobId))
                 .execute();
     }
-
-//    public void delFileResourceById(String namespace, Long jobId) {
-//        jdbcTemplate.update(SqlConstant.DELETE_FILE_RESOURCE_BY_ID, namespace, jobId);
-//    }
-//
-//    /**
-//     * 根据JobId查询脚本文件
-//     */
-//    public FileResource getFileResourceById(String namespace, Long fileResourceId) {
-//        List<FileResource> jobTriggerList = jdbcTemplate.query(
-//                SqlConstant.GET_FILE_RESOURCE_BY_ID,
-//                DataClassRowMapper.newInstance(FileResource.class),
-//                fileResourceId,
-//                namespace
-//        );
-//        if (jobTriggerList.isEmpty()) {
-//            return null;
-//        }
-//        return jobTriggerList.get(0);
-//    }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support
 

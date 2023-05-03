@@ -22,6 +22,4 @@ public class AddJobRes implements Serializable {
     private TaskJsJob jsJob;
 
     private TaskShellJob shellJob;
-
-//    private FileResource fileResource;
 }

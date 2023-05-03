@@ -23,4 +23,8 @@ public enum TaskState {
      * 暂停
      */
     Pause,
+    /**
+     * 已停止
+     */
+    Stopped,
 }

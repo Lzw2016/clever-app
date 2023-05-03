@@ -31,6 +31,9 @@
     },
     "web": {
       "$ref": "#/definitions/webDefinition"
+    },
+    "timed-task": {
+      "$ref": "#/definitions/schedulerDefinition"
     }
   },
   "definitions": {
@@ -1751,6 +1754,56 @@
               }
             }
           }
+        }
+      }
+    },
+    "schedulerDefinition": {
+      "type": "object",
+      "description": "分布式定时任务相关配置",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "是否启用“定时任务”"
+        },
+        "jdbcName": {
+          "type": "string",
+          "description": "jdbc数据源"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "命名空间(同一个namespace的不同调度器属于同一个集群)"
+        },
+        "instanceName": {
+          "type": "string",
+          "description": "调度器实例名称"
+        },
+        "heartbeatInterval": {
+          "type": "number",
+          "description": "心跳频率，建议：800 ~ 15000(单位：毫秒)"
+        },
+        "description": {
+          "type": "string",
+          "description": "调度器节点描述"
+        },
+        "schedulerExecutorPoolSize": {
+          "type": "number",
+          "description": "调度线程池大小"
+        },
+        "schedulerExecutorQueueSize": {
+          "type": "number",
+          "description": "调度线程池队列大小(大于等于schedulerExecutorPoolSize值)"
+        },
+        "jobExecutorPoolSize": {
+          "type": "number",
+          "description": "定时任务执行线程池大小"
+        },
+        "jobExecutorQueueSize": {
+          "type": "number",
+          "description": "定时任务执行线程池队列大小(大于等于jobExecutorPoolSize值)"
+        },
+        "loadWeight": {
+          "type": "number",
+          "description": "负载权重"
         }
       }
     }

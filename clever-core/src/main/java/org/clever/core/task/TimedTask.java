@@ -2,6 +2,8 @@ package org.clever.core.task;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.AppShutdownHook;
+import org.clever.core.OrderIncrement;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.core.reflection.ReflectionsUtils;
@@ -57,6 +59,6 @@ public class TimedTask {
                 log.error("执行定时任务失败: [{}]", name, e);
             }
         }, interval.toMillis());
-        Runtime.getRuntime().addShutdownHook(new Thread(daemonExecutor::stop));
+        AppShutdownHook.addShutdownHook(daemonExecutor::stop, OrderIncrement.NORMAL, "停止开机任务: " + this.name);
     }
 }

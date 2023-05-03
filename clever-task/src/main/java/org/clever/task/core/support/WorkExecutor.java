@@ -43,14 +43,7 @@ public class WorkExecutor {
                         .daemon(false)
                         .build()
         );
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                executor.shutdownNow();
-                log.info("[WorkExecutor] 线程池停止成功 | {} | instanceName={}", this.name, this.instanceName);
-            } catch (Exception e) {
-                log.error("[WorkExecutor] 线程池停止失败 | {} | instanceName={}", this.name, this.instanceName, e);
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
 
     public void execute(Runnable command) {
@@ -59,5 +52,20 @@ public class WorkExecutor {
 
     public Future<?> submit(Runnable command) {
         return executor.submit(command);
+    }
+
+    /**
+     * 停止线程池
+     */
+    public void shutdown() {
+        if (executor.isShutdown()) {
+            return;
+        }
+        try {
+            executor.shutdownNow();
+            log.debug("[WorkExecutor] 线程池停止成功 | {} | instanceName={}", this.name, this.instanceName);
+        } catch (Exception e) {
+            log.error("[WorkExecutor] 线程池停止失败 | {} | instanceName={}", this.name, this.instanceName, e);
+        }
     }
 }

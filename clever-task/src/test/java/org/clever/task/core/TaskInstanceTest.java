@@ -45,13 +45,8 @@ public class TaskInstanceTest {
         Thread.sleep(1000 * 60 * 2);
         taskInstance.pause();
         Thread.sleep(1000 * 30);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                Thread.sleep(8_000);
-            } catch (InterruptedException ignored) {
-            }
-            queryDSL.getJdbc().close();
-        }));
+        taskInstance.stop();
+        queryDSL.getJdbc().close();
     }
 
     @Test

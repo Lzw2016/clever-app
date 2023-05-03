@@ -10,17 +10,13 @@ import java.util.Map;
  */
 public interface EnumConstant {
     /**
-     * 所属模块：0-自定义扩展，1-资源文件，2-初始化脚本，3-HTTP API，4-定时任务
+     * 读写权限：0-可读可写，1-只读
      */
-    int FILE_RESOURCE_MODULE_4 = 4;
-    /**
-     * 数据类型：0-文件夹，1-文件
-     */
-    int FILE_RESOURCE_IS_FILE_1 = 1;
+    int FILE_CONTENT_READ_ONLY_0 = 0;
     /**
      * 读写权限：0-可读可写，1-只读
      */
-    int FILE_RESOURCE_READ_ONLY_0 = 0;
+    int FILE_CONTENT_READ_ONLY_1 = 1;
 
     /**
      * 是否是手动触发，0：系统自动触发，1：用户手动触发

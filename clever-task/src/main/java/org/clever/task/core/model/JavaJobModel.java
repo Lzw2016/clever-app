@@ -20,7 +20,6 @@ public class JavaJobModel extends AbstractJob {
      * java class全路径
      */
     private String className;
-
     /**
      * java class method
      */

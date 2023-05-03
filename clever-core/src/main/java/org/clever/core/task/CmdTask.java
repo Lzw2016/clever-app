@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.AppShutdownHook;
+import org.clever.core.OrderIncrement;
 import org.clever.core.SystemClock;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.util.Assert;
@@ -99,7 +101,7 @@ public class CmdTask {
             }
         } else {
             daemonExecutor.scheduleAtFixedRate(runnable, interval.toMillis());
-            Runtime.getRuntime().addShutdownHook(new Thread(daemonExecutor::stop));
+            AppShutdownHook.addShutdownHook(daemonExecutor::stop, OrderIncrement.NORMAL, "停止开机任务: " + this.name);
         }
     }
 

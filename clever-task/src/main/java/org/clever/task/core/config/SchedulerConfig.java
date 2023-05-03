@@ -10,6 +10,16 @@ import java.io.Serializable;
  */
 @Data
 public class SchedulerConfig implements Serializable {
+    public static final String PREFIX = "timed-task";
+
+    /**
+     * 是否启用“定时任务”
+     */
+    private boolean enable = false;
+    /**
+     * jdbc数据源
+     */
+    private String jdbcName = "default";
     /**
      * 命名空间(同一个namespace的不同调度器属于同一个集群)
      */
@@ -19,11 +29,11 @@ public class SchedulerConfig implements Serializable {
      */
     private String instanceName = "node01";
     /**
-     * 心跳频率，建议：300 ~ 15000(单位：毫秒)
+     * 心跳频率，建议：800 ~ 15000(单位：毫秒)
      */
     private long heartbeatInterval = 10_000;
     /**
-     * 描述
+     * 调度器节点描述
      */
     private String description;
     /**

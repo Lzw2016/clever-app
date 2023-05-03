@@ -26,6 +26,7 @@ jdbc:
       - 'declare     num integer := 1000; begin     dbms_output.get_lines(?, num);     dbms_output.disable(); end;'
       - 'select 1'
       - 'select 1 from dual'
+      - 'select now(6) from dual'
     maxSqlCount: 200
     histogram: [ 20, 50, 100, 200, 500, 1000, 2000, 5000, 20000 ]
     histogramTopN: 3
