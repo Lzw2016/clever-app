@@ -41,18 +41,7 @@ public class DaemonExecutor {
                         .daemon(true)
                         .build()
         );
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (future != null && !future.isDone() && !future.isCancelled()) {
-                try {
-                    future.cancel(true);
-                } catch (Exception ignored) {
-                }
-            }
-            try {
-                executor.shutdownNow();
-            } catch (Exception ignored) {
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
 
     /**
@@ -74,6 +63,25 @@ public class DaemonExecutor {
     public void stop() {
         if (future != null && !future.isDone() && !future.isCancelled()) {
             future.cancel(true);
+        }
+    }
+
+    /**
+     * 停止线程池
+     */
+    public void shutdown() {
+        if (future != null && !future.isDone() && !future.isCancelled()) {
+            try {
+                future.cancel(true);
+            } catch (Exception ignored) {
+            }
+        }
+        if (executor.isShutdown()) {
+            return;
+        }
+        try {
+            executor.shutdownNow();
+        } catch (Exception ignored) {
         }
     }
 
