@@ -2,7 +2,6 @@ package org.clever.task.core.job;
 
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
-import org.clever.task.core.JobExecutor;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.entity.TaskJob;
 import org.clever.task.core.model.entity.TaskScheduler;

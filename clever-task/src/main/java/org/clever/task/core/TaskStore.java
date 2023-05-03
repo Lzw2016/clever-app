@@ -87,12 +87,12 @@ public class TaskStore {
         if (!schedulerList.isEmpty()) {
             registered = schedulerList.get(0);
         }
-        final long now = currentTimeMillis();
+        final Date now = currentDate();
         if (registered == null) {
             // 需要注册
             scheduler.setId(queryDSL.nextId(taskScheduler));
             scheduler.setLastHeartbeatTime(now);
-            scheduler.setCreateAt(new Date(now));
+            scheduler.setCreateAt(now);
             queryDSL.insert(taskScheduler).populate(scheduler).execute();
         } else {
             // 需要更新
@@ -126,7 +126,7 @@ public class TaskStore {
      * 更新心跳时间
      */
     public int heartbeat(TaskScheduler scheduler) {
-        final long now = currentTimeMillis();
+        final Date now = currentDate();
         int count = (int) queryDSL.update(taskScheduler)
                 .set(taskScheduler.lastHeartbeatTime, now)
                 .set(taskScheduler.heartbeatInterval, scheduler.getHeartbeatInterval())
@@ -149,13 +149,17 @@ public class TaskStore {
      * 查询集群中在线的调度器列表
      */
     public List<TaskScheduler> queryAvailableSchedulerList(String namespace) {
-        final long now = currentTimeMillis();
+        // heartbeat_interval * 2 > now - last_heartbeat_time
+        BooleanExpression whereCondition = taskScheduler.heartbeatInterval.multiply(2).gt(
+                Expressions.numberOperation(
+                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, Expressions.currentTimestamp(), taskScheduler.lastHeartbeatTime
+                ).multiply(1000)
+        );
         return queryDSL.select(taskScheduler)
                 .from(taskScheduler)
                 .where(taskScheduler.namespace.eq(namespace))
                 .where(taskScheduler.lastHeartbeatTime.isNotNull())
-                // heartbeat_interval * 2 > now - last_heartbeat_time --> heartbeat_interval * 2 + last_heartbeat_time > now
-                .where(taskScheduler.heartbeatInterval.multiply(2).add(taskScheduler.lastHeartbeatTime).gt(now))
+                .where(whereCondition)
                 .fetch();
     }
 
@@ -163,9 +167,12 @@ public class TaskStore {
      * 所有调度器
      */
     public List<SchedulerInfo> queryAllSchedulerList(String namespace) {
-        final long now = currentTimeMillis();
-        // heartbeat_interval * 2 > now - last_heartbeat_time --> heartbeat_interval * 2 + last_heartbeat_time > now
-        BooleanExpression available = taskScheduler.heartbeatInterval.multiply(2).add(taskScheduler.lastHeartbeatTime).gt(now).as("available");
+        // heartbeat_interval * 2 > now - last_heartbeat_time
+        BooleanExpression available = taskScheduler.heartbeatInterval.multiply(2).gt(
+                Expressions.numberOperation(
+                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, Expressions.currentTimestamp(), taskScheduler.lastHeartbeatTime
+                ).multiply(1000)
+        ).as("available");
         List<Tuple> list = queryDSL.select(taskScheduler, available)
                 .from(taskScheduler)
                 .where(taskScheduler.namespace.eq(namespace))

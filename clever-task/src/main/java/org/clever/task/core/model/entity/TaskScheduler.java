@@ -16,8 +16,8 @@ public class TaskScheduler implements Serializable {
     private String namespace;
     /** 调度器实例名称 */
     private String instanceName;
-    /** 最后心跳时间(毫秒时间戳) */
-    private Long lastHeartbeatTime;
+    /** 最后心跳时间 */
+    private Date lastHeartbeatTime;
     /** 心跳频率(单位：毫秒) */
     private Long heartbeatInterval;
     /** 调度器配置，线程池大小、负载权重、最大并发任务数... */

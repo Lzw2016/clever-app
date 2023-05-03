@@ -28,9 +28,9 @@ public class SchedulerInfo implements Serializable {
      */
     private Boolean available;
     /**
-     * 最后心跳时间(毫秒时间戳)
+     * 最后心跳时间
      */
-    private Long lastHeartbeatTime;
+    private Date lastHeartbeatTime;
     /**
      * 心跳频率(单位：毫秒)
      */

@@ -50,13 +50,17 @@ public class TaskStoreTest {
         Jdbc jdbc = BaseTest.newMysql();
         // Jdbc jdbc = BaseTest.newPostgresql();
         QueryDSL queryDSL = QueryDSL.create(jdbc);
-        final Date now = jdbc.currentDate();
+        // heartbeat_interval * 2 > now - last_heartbeat_time
+        BooleanExpression whereCondition = taskScheduler.heartbeatInterval.multiply(2).gt(
+                Expressions.numberOperation(
+                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, Expressions.currentTimestamp(), taskScheduler.lastHeartbeatTime
+                ).multiply(1000)
+        );
         List<TaskScheduler> list = queryDSL.select(taskScheduler)
                 .from(taskScheduler)
                 .where(taskScheduler.namespace.eq("namespace"))
                 .where(taskScheduler.lastHeartbeatTime.isNotNull())
-                // heartbeat_interval * 2 > now - last_heartbeat_time --> heartbeat_interval * 2 + last_heartbeat_time > now
-                .where(taskScheduler.heartbeatInterval.multiply(2).add(taskScheduler.lastHeartbeatTime).gt(now.getTime()))
+                .where(whereCondition)
                 .fetch();
         log.info("--> {}", list);
         jdbc.close();
@@ -67,8 +71,12 @@ public class TaskStoreTest {
         Jdbc jdbc = BaseTest.newMysql();
         // Jdbc jdbc = BaseTest.newPostgresql();
         QueryDSL queryDSL = QueryDSL.create(jdbc);
-        final Date now = jdbc.currentDate();
-        BooleanExpression available = taskScheduler.heartbeatInterval.multiply(2).add(taskScheduler.lastHeartbeatTime).gt(now.getTime()).as("available");
+        // heartbeat_interval * 2 > now - last_heartbeat_time
+        BooleanExpression available = taskScheduler.heartbeatInterval.multiply(2).gt(
+                Expressions.numberOperation(
+                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, Expressions.currentTimestamp(), taskScheduler.lastHeartbeatTime
+                ).multiply(1000)
+        ).as("available");
         List<Tuple> list = queryDSL.select(taskScheduler, available)
                 .from(taskScheduler)
                 .where(taskScheduler.namespace.eq("namespace"))

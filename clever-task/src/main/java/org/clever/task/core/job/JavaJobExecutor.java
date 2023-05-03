@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.task.core.GlobalConstant;
-import org.clever.task.core.JobExecutor;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.exception.JobExecutorException;
 import org.clever.task.core.model.EnumConstant;

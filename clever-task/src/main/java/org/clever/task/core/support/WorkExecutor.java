@@ -1,7 +1,8 @@
-package org.clever.task.core;
+package org.clever.task.core.support;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.clever.task.core.GlobalConstant;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;

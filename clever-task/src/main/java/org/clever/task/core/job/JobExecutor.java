@@ -1,5 +1,6 @@
-package org.clever.task.core;
+package org.clever.task.core.job;
 
+import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.entity.TaskJob;
 import org.clever.task.core.model.entity.TaskScheduler;
 

@@ -1,9 +1,10 @@
-package org.clever.task.core;
+package org.clever.task.core.support;
 
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 import org.clever.core.id.SnowFlake;
+import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.task.core.model.entity.TaskScheduler;
