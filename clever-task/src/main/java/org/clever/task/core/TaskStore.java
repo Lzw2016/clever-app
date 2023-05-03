@@ -1,7 +1,9 @@
 package org.clever.task.core;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import org.clever.core.DateUtils;
 import org.clever.data.jdbc.Jdbc;
@@ -89,6 +91,7 @@ public class TaskStore {
         if (registered == null) {
             // 需要注册
             scheduler.setId(queryDSL.nextId(taskScheduler));
+            scheduler.setLastHeartbeatTime(now);
             scheduler.setCreateAt(new Date(now));
             queryDSL.insert(taskScheduler).populate(scheduler).execute();
         } else {
@@ -385,11 +388,31 @@ public class TaskStore {
     }
 
     /**
-     * TODO 更新触发器下一次触发时间 -> type=2 更新 next_fire_time
+     * 更新触发器下一次触发时间 -> type=2 更新 next_fire_time
      */
     public int updateNextFireTimeForType2(String namespace) {
-//        return jdbcTemplate.update(SqlConstant.UPDATE_TYPE2_NEXT_FIRE_TIME_TRIGGER, namespace);
-        return 0;
+        // "  case " +
+        // "    when isnull(last_fire_time) then date_add(start_time, interval fixed_interval second) " +
+        // "    when timestampdiff(microsecond, last_fire_time, start_time)>=0 then date_add(start_time, interval fixed_interval second) " +
+        // "    when timestampdiff(microsecond, last_fire_time, start_time)<0 then date_add(last_fire_time, interval fixed_interval second) " +
+        // "    else date_add(now(), interval fixed_interval second) " +
+        // "  end " +
+        DateTimeExpression<Date> nextFireTime = Expressions.cases()
+                .when(taskJobTrigger.lastFireTime.isNull()) //
+                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
+                .when(taskJobTrigger.lastFireTime.goe(taskJobTrigger.startTime)) //
+                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
+                .when(taskJobTrigger.lastFireTime.lt(taskJobTrigger.startTime)) //
+                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.lastFireTime, taskJobTrigger.fixedInterval)) //
+                .otherwise(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, Expressions.currentTimestamp(), taskJobTrigger.fixedInterval));
+        return (int) queryDSL.update(taskJobTrigger)
+                .set(taskJobTrigger.nextFireTime, nextFireTime)
+                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+                .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2))
+                .where(taskJobTrigger.fixedInterval.gt(0))
+                .where(taskJobTrigger.nextFireTime.isNotNull().or(taskJobTrigger.nextFireTime.ne(nextFireTime)))
+                .where(taskJobTrigger.namespace.eq(namespace))
+                .execute();
     }
 
     /**

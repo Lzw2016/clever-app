@@ -1,11 +1,14 @@
 package org.clever.task.core;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
+import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.util.Assert;
@@ -15,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 import static org.clever.task.core.model.query.QTaskScheduler.taskScheduler;
 
 /**
@@ -86,6 +90,38 @@ public class TaskStoreTest {
             return info;
         }).collect(Collectors.toList());
         log.info("--> {}", infos);
+        jdbc.close();
+    }
+
+    @Test
+    public void t05() {
+        Jdbc jdbc = BaseTest.newMysql();
+        // Jdbc jdbc = BaseTest.newPostgresql();
+        QueryDSL queryDSL = QueryDSL.create(jdbc);
+        // final Date now = queryDSL.currentDate();
+        // "  case " +
+        // "    when isnull(last_fire_time) then date_add(start_time, interval fixed_interval second) " +
+        // "    when timestampdiff(microsecond, last_fire_time, start_time)>=0 then date_add(start_time, interval fixed_interval second) " +
+        // "    when timestampdiff(microsecond, last_fire_time, start_time)<0 then date_add(last_fire_time, interval fixed_interval second) " +
+        // "    else date_add(now(), interval fixed_interval second) " +
+        // "  end " +
+        DateTimeExpression<Date> nextFireTime = Expressions.cases()
+                .when(taskJobTrigger.lastFireTime.isNull()) //
+                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
+                //.when(Expressions.numberOperation(Long.class, Ops.DateTimeOps.DIFF_SECONDS, taskJobTrigger.lastFireTime, taskJobTrigger.startTime).goe(0)) //
+                .when(taskJobTrigger.lastFireTime.goe(taskJobTrigger.startTime)) //
+                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
+                .when(taskJobTrigger.lastFireTime.lt(taskJobTrigger.startTime)) //
+                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.lastFireTime, taskJobTrigger.fixedInterval)) //
+                .otherwise(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, Expressions.currentTimestamp(), taskJobTrigger.fixedInterval));
+        queryDSL.update(taskJobTrigger)
+                .set(taskJobTrigger.nextFireTime, nextFireTime)
+                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+                .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2))
+                .where(taskJobTrigger.fixedInterval.gt(0))
+                // .where(taskJobTrigger.nextFireTime.isNotNull().or(taskJobTrigger.nextFireTime.ne(nextFireTime)))
+                .where(taskJobTrigger.namespace.eq("namespace"))
+                .execute();
         jdbc.close();
     }
 }
