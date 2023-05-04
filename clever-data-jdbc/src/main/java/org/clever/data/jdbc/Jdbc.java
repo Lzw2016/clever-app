@@ -2701,7 +2701,7 @@ public class Jdbc extends AbstractDataSource {
         Assert.notNull(sqlInfo, "sqlInfo 不能为空");
         Assert.isNotBlank(sqlInfo.getValue1(), "sqlInfo.sql 不能为空");
         Assert.notNull(sqlInfo.getValue2(), "sqlInfo.params 不能为空");
-        return beginTX(status -> {
+        return beginReadOnlyTX(status -> {
             return queryLong(sqlInfo.getValue1(), sqlInfo.getValue2());
         });
     }
@@ -2794,7 +2794,7 @@ public class Jdbc extends AbstractDataSource {
     public Long currentId(String idName) {
         final Map<String, Object> params = new HashMap<>();
         params.put("sequence_name", idName);
-        return beginTX(status -> {
+        return beginReadOnlyTX(status -> {
             Long id = queryLong("select current_value from auto_increment_id where sequence_name=:sequence_name", params);
             return id == null ? -1L : id;
         }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
