@@ -2909,7 +2909,7 @@ public class Jdbc extends AbstractDataSource {
      * }</pre>
      *
      * @param lockName  锁名称
-     * @param syncBlock 同步代码块
+     * @param syncBlock 同步代码块(可保证分布式串行执行)
      */
     @SneakyThrows
     public <T> T lock(String lockName, Supplier<T> syncBlock) {
@@ -2991,7 +2991,7 @@ public class Jdbc extends AbstractDataSource {
      * }</pre>
      *
      * @param lockName  锁名称
-     * @param syncBlock 同步代码块
+     * @param syncBlock 同步代码块(可保证分布式串行执行)
      */
     @SneakyThrows
     public void lock(String lockName, Runnable syncBlock) {

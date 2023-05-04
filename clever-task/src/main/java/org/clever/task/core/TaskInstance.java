@@ -638,13 +638,12 @@ public class TaskInstance {
                 executeJob(dbNow, job, jobLog);
             } else {
                 try {
-                    taskStore.beginTX(status -> {
-                        // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
-                        boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId());
-                        if (lock) {
+                    // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
+                    taskStore.getLockJob(job.getNamespace(), job.getId(), locked -> {
+                        if (locked) {
+                            // TODO 二次校验数据
                             executeJob(dbNow, job, jobLog);
                         }
-                        return null;
                     });
                 } catch (Exception e) {
                     log.error("[TaskInstance] 手动执行Job失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
@@ -900,13 +899,12 @@ public class TaskInstance {
                         if (allowConcurrent) {
                             doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                         } else {
-                            taskStore.beginTX(status -> {
-                                // 获取触发器悲观锁(事务范围控制锁范围) - 判断是否被其他节点触发了
-                                boolean lock = taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId());
-                                if (lock) {
+                            // 获取触发器悲观锁(事务范围控制锁范围) - 判断是否被其他节点触发了
+                            taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId(), locked -> {
+                                if (locked) {
+                                    // TODO 二次校验数据
                                     doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                                 }
-                                return null;
                             });
                         }
                         // 是否在当前节点触发执行了任务
@@ -1053,13 +1051,12 @@ public class TaskInstance {
                     executeJob(dbNow, job, jobLog);
                 } else {
                     try {
-                        taskStore.beginTX(status -> {
-                            // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
-                            boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId());
-                            if (lock) {
+                        // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
+                        taskStore.getLockJob(job.getNamespace(), job.getId(), locked -> {
+                            if (locked) {
+                                // TODO 二次校验数据
                                 executeJob(dbNow, job, jobLog);
                             }
-                            return null;
                         });
                     } catch (Exception e) {
                         log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);

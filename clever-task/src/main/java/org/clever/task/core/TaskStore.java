@@ -5,6 +5,7 @@ import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.sql.Configuration;
 import com.querydsl.sql.SQLQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
@@ -24,6 +25,7 @@ import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
+import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -283,12 +285,13 @@ public class TaskStore {
 
     /**
      * TODO 获取定时任务锁
+     *
+     * @param namespace 命名空间
+     * @param jobId     任务ID
+     * @param callback  回调函数: locked -> { ... }
      */
-    public boolean getLockJob(String namespace, Long jobId) {
-        lock(namespace, String.format("job_%s", jobId), flag -> {
-
-        });
-        return false;
+    public void getLockJob(String namespace, Long jobId, Consumer<Boolean> callback) {
+        lock(namespace, String.format("job_%s", jobId), callback);
     }
 
     /**
@@ -452,12 +455,13 @@ public class TaskStore {
 
     /**
      * TODO 获取触发器锁
+     *
+     * @param namespace    命名空间
+     * @param jobTriggerId 任务触发器ID
+     * @param callback     回调函数: locked -> { ... }
      */
-    public boolean getLockTrigger(String namespace, Long jobTriggerId) {
-        lock(namespace, String.format("job_trigger_%s", jobTriggerId), flag -> {
-
-        });
-        return false;
+    public void getLockTrigger(String namespace, Long jobTriggerId, Consumer<Boolean> callback) {
+        lock(namespace, String.format("job_trigger_%s", jobTriggerId), callback);
     }
 
     public int addSchedulerLog(TaskSchedulerLog schedulerLog) {
@@ -505,17 +509,35 @@ public class TaskStore {
                 .execute();
     }
 
-    public void lock(String namespace, String lockName, Consumer<Boolean> callback) {
+    /**
+     * 利用数据库行级锁实现分布式锁
+     *
+     * @param namespace 命名空间
+     * @param lockName  锁名称
+     * @param callback  同步回调函数(可保证分布式串行执行): locked -> { ... }
+     */
+    private void lock(String namespace, String lockName, Consumer<Boolean> callback) {
         Assert.isNotBlank(namespace, "参数 namespace 不能为空");
         Assert.isNotBlank(lockName, "参数 lockName 不能为空");
         // 在一个新连接中操作，不会受到 QueryDSL 原始的事务影响
-        final JdbcOperations jdbcOperations = queryDSL.getJdbc().getJdbcTemplate().getJdbcOperations();
+        final JdbcOperations jdbcOperations = jdbc.getJdbcTemplate().getJdbcOperations();
         jdbcOperations.execute((ConnectionCallback<Void>) connection -> {
             // 备份连接状态
             int transactionIsolation = connection.getTransactionIsolation();
             boolean autoCommit = connection.getAutoCommit();
             try {
-                SQLQueryFactory tmpDSL = new SQLQueryFactory(QueryDSL.getSQLTemplates(queryDSL.getJdbc().getDbType()), () -> connection);
+                // 这里使用新的连接获取数据库行级锁
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                connection.setAutoCommit(false);
+                Configuration configuration = new Configuration(QueryDSL.getSQLTemplates(jdbc.getDbType()));
+                // 设置超时时间
+//                configuration.addListener(new SQLBaseListener() {
+//                    @Override
+//                    public void preExecute(SQLListenerContext context) {
+//                        context.getPreparedStatement().setQueryTimeout(3);
+//                    }
+//                });
+                SQLQueryFactory tmpDSL = new SQLQueryFactory(configuration, () -> connection);
                 long lock = tmpDSL.update(taskSchedulerLock)
                         .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
                         .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
@@ -567,9 +589,13 @@ public class TaskStore {
                         throw new RuntimeException(taskSchedulerLock.getTableName() + " 表数据不存在(未知的异常)");
                     }
                 }
+                // 执行同步代码块
+                callback.accept(true);
             } catch (Exception e) {
                 // 异常回滚事务
                 connection.rollback();
+                // 执行同步代码块 TODO 超时异常？
+                callback.accept(false);
                 throw ExceptionUtils.unchecked(e);
             } finally {
                 // 还原连接状态后关闭连接
