@@ -5,19 +5,28 @@ import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.sql.SQLQueryFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
+import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.SnowFlake;
+import org.clever.dao.DataAccessException;
+import org.clever.dao.DuplicateKeyException;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
+import org.clever.jdbc.core.ConnectionCallback;
+import org.clever.jdbc.core.JdbcOperations;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
+import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.clever.task.core.model.query.QTaskHttpJob.taskHttpJob;
@@ -28,6 +37,7 @@ import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 import static org.clever.task.core.model.query.QTaskJobTriggerLog.taskJobTriggerLog;
 import static org.clever.task.core.model.query.QTaskJsJob.taskJsJob;
 import static org.clever.task.core.model.query.QTaskScheduler.taskScheduler;
+import static org.clever.task.core.model.query.QTaskSchedulerLock.taskSchedulerLock;
 import static org.clever.task.core.model.query.QTaskSchedulerLog.taskSchedulerLog;
 import static org.clever.task.core.model.query.QTaskShellJob.taskShellJob;
 
@@ -37,6 +47,7 @@ import static org.clever.task.core.model.query.QTaskShellJob.taskShellJob;
  * 作者：lizw <br/>
  * 创建时间：2021/08/08 16:14 <br/>
  */
+@Slf4j
 public class TaskStore {
     private final SnowFlake snowFlake;
     private final Jdbc jdbc;
@@ -271,15 +282,13 @@ public class TaskStore {
     }
 
     /**
-     * 获取定时任务锁(乐观锁)
+     * TODO 获取定时任务锁
      */
-    public boolean getLockJob(String namespace, Long jobId, Long lockVersion) {
-        return queryDSL.update(taskJob)
-                .set(taskJob.lockVersion, taskJob.lockVersion.add(1))
-                .where(taskJob.id.eq(jobId))
-                .where(taskJob.namespace.eq(namespace))
-                .where(taskJob.lockVersion.eq(lockVersion))
-                .execute() > 0;
+    public boolean getLockJob(String namespace, Long jobId) {
+        lock(namespace, String.format("job_%s", jobId), flag -> {
+
+        });
+        return false;
     }
 
     /**
@@ -442,15 +451,13 @@ public class TaskStore {
     }
 
     /**
-     * 获取触发器锁(乐观锁)
+     * TODO 获取触发器锁
      */
-    public boolean getLockTrigger(String namespace, Long jobTriggerId, Long lockVersion) {
-        return queryDSL.update(taskJobTrigger)
-                .set(taskJobTrigger.lockVersion, taskJobTrigger.lockVersion.add(1))
-                .where(taskJobTrigger.id.eq(jobTriggerId))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .where(taskJobTrigger.lockVersion.eq(lockVersion))
-                .execute() > 0;
+    public boolean getLockTrigger(String namespace, Long jobTriggerId) {
+        lock(namespace, String.format("job_trigger_%s", jobTriggerId), flag -> {
+
+        });
+        return false;
     }
 
     public int addSchedulerLog(TaskSchedulerLog schedulerLog) {
@@ -496,6 +503,82 @@ public class TaskStore {
                 .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
                 .where(taskJobLog.id.eq(jobLog.getId()))
                 .execute();
+    }
+
+    public void lock(String namespace, String lockName, Consumer<Boolean> callback) {
+        Assert.isNotBlank(namespace, "参数 namespace 不能为空");
+        Assert.isNotBlank(lockName, "参数 lockName 不能为空");
+        // 在一个新连接中操作，不会受到 QueryDSL 原始的事务影响
+        final JdbcOperations jdbcOperations = queryDSL.getJdbc().getJdbcTemplate().getJdbcOperations();
+        jdbcOperations.execute((ConnectionCallback<Void>) connection -> {
+            // 备份连接状态
+            int transactionIsolation = connection.getTransactionIsolation();
+            boolean autoCommit = connection.getAutoCommit();
+            try {
+                SQLQueryFactory tmpDSL = new SQLQueryFactory(QueryDSL.getSQLTemplates(queryDSL.getJdbc().getDbType()), () -> connection);
+                long lock = tmpDSL.update(taskSchedulerLock)
+                        .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
+                        .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
+                        .where(taskSchedulerLock.lockName.eq(lockName))
+                        .execute();
+                if (lock <= 0) {
+                    try {
+                        // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
+                        queryDSL.beginTX(status -> {
+                            queryDSL.insert(taskSchedulerLock)
+                                    .set(taskSchedulerLock.id, snowFlake.nextId())
+                                    .set(taskSchedulerLock.namespace, namespace)
+                                    .set(taskSchedulerLock.lockName, lockName)
+                                    .set(taskSchedulerLock.lockCount, 0L)
+                                    // .set(taskSchedulerLock.description, )
+                                    .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
+                                    .execute();
+                        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                    } catch (DuplicateKeyException e) {
+                        // 插入数据失败: 唯一约束错误
+                        log.warn("插入 {} 表失败: {}", taskSchedulerLock.getTableName(), e.getMessage());
+                    } catch (DataAccessException e) {
+                        log.warn("插入 {} 表失败", taskSchedulerLock.getTableName(), e);
+                    }
+                    // 等待锁数据插入完成
+                    final int maxRetryCount = 128;
+                    for (int i = 0; i < maxRetryCount; i++) {
+                        List<Long> list = tmpDSL.select(taskSchedulerLock.id)
+                                .from(taskSchedulerLock)
+                                .where(taskSchedulerLock.lockName.eq(lockName))
+                                .limit(2)
+                                .fetch();
+                        if (list != null && !list.isEmpty()) {
+                            break;
+                        }
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException ignored) {
+                            Thread.yield();
+                        }
+                    }
+                    // 使用数据库行级锁保证并发性
+                    lock = tmpDSL.update(taskSchedulerLock)
+                            .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
+                            .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
+                            .where(taskSchedulerLock.lockName.eq(lockName))
+                            .execute();
+                    if (lock <= 0) {
+                        throw new RuntimeException(taskSchedulerLock.getTableName() + " 表数据不存在(未知的异常)");
+                    }
+                }
+            } catch (Exception e) {
+                // 异常回滚事务
+                connection.rollback();
+                throw ExceptionUtils.unchecked(e);
+            } finally {
+                // 还原连接状态后关闭连接
+                connection.setTransactionIsolation(transactionIsolation);
+                connection.setAutoCommit(autoCommit);
+                connection.close();
+            }
+            return null;
+        });
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- manage

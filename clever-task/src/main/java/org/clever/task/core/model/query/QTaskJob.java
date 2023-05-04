@@ -34,8 +34,6 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     public final NumberPath<Integer> maxReentry = createNumber("maxReentry", Integer.class);
     /** 是否允许多节点并发执行，使用悲观锁实现，不建议禁止，0：禁止，1：允许 */
     public final NumberPath<Integer> allowConcurrent = createNumber("allowConcurrent", Integer.class);
-    /** 悲观锁 */
-    public final NumberPath<Long> lockVersion = createNumber("lockVersion", Long.class);
     /** 执行失败时的最大重试次数 */
     public final NumberPath<Integer> maxRetryCount = createNumber("maxRetryCount", Integer.class);
     /** 路由策略，0：不启用，1：指定节点优先，2：固定节点白名单，3：固定节点黑名单 */
@@ -93,18 +91,17 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
         addMetadata(type, ColumnMetadata.named("type").withIndex(4).ofType(Types.TINYINT).withSize(3));
         addMetadata(maxReentry, ColumnMetadata.named("max_reentry").withIndex(5).ofType(Types.TINYINT).withSize(3));
         addMetadata(allowConcurrent, ColumnMetadata.named("allow_concurrent").withIndex(6).ofType(Types.TINYINT).withSize(3));
-        addMetadata(lockVersion, ColumnMetadata.named("lock_version").withIndex(7).ofType(Types.BIGINT).withSize(19));
-        addMetadata(maxRetryCount, ColumnMetadata.named("max_retry_count").withIndex(8).ofType(Types.INTEGER).withSize(10));
-        addMetadata(routeStrategy, ColumnMetadata.named("route_strategy").withIndex(9).ofType(Types.TINYINT).withSize(3));
-        addMetadata(firstScheduler, ColumnMetadata.named("first_scheduler").withIndex(10).ofType(Types.VARCHAR).withSize(2047));
-        addMetadata(whitelistScheduler, ColumnMetadata.named("whitelist_scheduler").withIndex(11).ofType(Types.VARCHAR).withSize(2047));
-        addMetadata(blacklistScheduler, ColumnMetadata.named("blacklist_scheduler").withIndex(12).ofType(Types.VARCHAR).withSize(2047));
-        addMetadata(loadBalance, ColumnMetadata.named("load_balance").withIndex(13).ofType(Types.TINYINT).withSize(3));
-        addMetadata(isUpdateData, ColumnMetadata.named("is_update_data").withIndex(14).ofType(Types.TINYINT).withSize(3));
-        addMetadata(jobData, ColumnMetadata.named("job_data").withIndex(15).ofType(Types.LONGVARCHAR).withSize(65535));
-        addMetadata(disable, ColumnMetadata.named("disable").withIndex(16).ofType(Types.TINYINT).withSize(3));
-        addMetadata(description, ColumnMetadata.named("description").withIndex(17).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(18).ofType(Types.TIMESTAMP).withSize(3));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(19).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(maxRetryCount, ColumnMetadata.named("max_retry_count").withIndex(7).ofType(Types.INTEGER).withSize(10));
+        addMetadata(routeStrategy, ColumnMetadata.named("route_strategy").withIndex(8).ofType(Types.TINYINT).withSize(3));
+        addMetadata(firstScheduler, ColumnMetadata.named("first_scheduler").withIndex(9).ofType(Types.VARCHAR).withSize(2047));
+        addMetadata(whitelistScheduler, ColumnMetadata.named("whitelist_scheduler").withIndex(10).ofType(Types.VARCHAR).withSize(2047));
+        addMetadata(blacklistScheduler, ColumnMetadata.named("blacklist_scheduler").withIndex(11).ofType(Types.VARCHAR).withSize(2047));
+        addMetadata(loadBalance, ColumnMetadata.named("load_balance").withIndex(12).ofType(Types.TINYINT).withSize(3));
+        addMetadata(isUpdateData, ColumnMetadata.named("is_update_data").withIndex(13).ofType(Types.TINYINT).withSize(3));
+        addMetadata(jobData, ColumnMetadata.named("job_data").withIndex(14).ofType(Types.LONGVARCHAR).withSize(65535));
+        addMetadata(disable, ColumnMetadata.named("disable").withIndex(15).ofType(Types.TINYINT).withSize(3));
+        addMetadata(description, ColumnMetadata.named("description").withIndex(16).ofType(Types.VARCHAR).withSize(511));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(17).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(18).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

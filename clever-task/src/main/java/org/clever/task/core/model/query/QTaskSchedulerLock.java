@@ -28,6 +28,8 @@ public class QTaskSchedulerLock extends RelationalPathBase<TaskSchedulerLock> {
     public final StringPath namespace = createString("namespace");
     /** 锁名称 */
     public final StringPath lockName = createString("lockName");
+    /** 锁次数 */
+    public final NumberPath<Long> lockCount = createNumber("lockCount", Long.class);
     /** 描述 */
     public final StringPath description = createString("description");
     /** 创建时间 */
@@ -64,8 +66,9 @@ public class QTaskSchedulerLock extends RelationalPathBase<TaskSchedulerLock> {
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.BIGINT).withSize(19));
         addMetadata(namespace, ColumnMetadata.named("namespace").withIndex(2).ofType(Types.VARCHAR).withSize(63));
         addMetadata(lockName, ColumnMetadata.named("lock_name").withIndex(3).ofType(Types.VARCHAR).withSize(63));
-        addMetadata(description, ColumnMetadata.named("description").withIndex(4).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(5).ofType(Types.TIMESTAMP).withSize(3));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(6).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(lockCount, ColumnMetadata.named("lock_count").withIndex(4).ofType(Types.BIGINT).withSize(19));
+        addMetadata(description, ColumnMetadata.named("description").withIndex(5).ofType(Types.VARCHAR).withSize(511));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(6).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(7).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

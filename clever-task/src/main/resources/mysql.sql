@@ -33,6 +33,7 @@ create table task_scheduler_lock
     id                  bigint          not null        auto_increment                          comment '主键id',
     namespace           varchar(63)     not null                                                comment '命名空间',
     lock_name           varchar(63)     not null                                                comment '锁名称',
+    lock_count          bigint          not null        default 0                               comment '锁次数',
     description         varchar(511)                                                            comment '描述',
     create_at           datetime(3)     not null        default current_timestamp(3)            comment '创建时间',
     update_at           datetime(3)                     on update current_timestamp(3)          comment '更新时间',

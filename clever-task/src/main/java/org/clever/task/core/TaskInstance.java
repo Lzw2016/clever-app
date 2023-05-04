@@ -640,7 +640,7 @@ public class TaskInstance {
                 try {
                     taskStore.beginTX(status -> {
                         // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
-                        boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId(), job.getLockVersion());
+                        boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId());
                         if (lock) {
                             executeJob(dbNow, job, jobLog);
                         }
@@ -902,7 +902,7 @@ public class TaskInstance {
                         } else {
                             taskStore.beginTX(status -> {
                                 // 获取触发器悲观锁(事务范围控制锁范围) - 判断是否被其他节点触发了
-                                boolean lock = taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId(), jobTrigger.getLockVersion());
+                                boolean lock = taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId());
                                 if (lock) {
                                     doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                                 }
@@ -1055,7 +1055,7 @@ public class TaskInstance {
                     try {
                         taskStore.beginTX(status -> {
                             // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
-                            boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId(), job.getLockVersion());
+                            boolean lock = taskStore.getLockJob(job.getNamespace(), job.getId());
                             if (lock) {
                                 executeJob(dbNow, job, jobLog);
                             }

@@ -30,8 +30,6 @@ public class TaskJobTrigger implements Serializable {
     private Integer misfireStrategy;
     /** 是否允许多节点并行触发，使用悲观锁实现，不建议允许，0：禁止，1：允许 */
     private Integer allowConcurrent;
-    /** 悲观锁 */
-    private Long lockVersion;
     /** 任务类型，1：cron触发，2：固定间隔触发 */
     private Integer type;
     /** cron表达式 */

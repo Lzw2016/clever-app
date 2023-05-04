@@ -22,8 +22,6 @@ public class TaskJob implements Serializable {
     private Integer maxReentry;
     /** 是否允许多节点并发执行，使用悲观锁实现，不建议禁止，0：禁止，1：允许 */
     private Integer allowConcurrent;
-    /** 悲观锁 */
-    private Long lockVersion;
     /** 执行失败时的最大重试次数 */
     private Integer maxRetryCount;
     /** 路由策略，0：不启用，1：指定节点优先，2：固定节点白名单，3：固定节点黑名单 */

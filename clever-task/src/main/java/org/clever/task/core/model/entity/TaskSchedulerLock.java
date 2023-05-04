@@ -16,6 +16,8 @@ public class TaskSchedulerLock implements Serializable {
     private String namespace;
     /** 锁名称 */
     private String lockName;
+    /** 锁次数 */
+    private Long lockCount;
     /** 描述 */
     private String description;
     /** 创建时间 */

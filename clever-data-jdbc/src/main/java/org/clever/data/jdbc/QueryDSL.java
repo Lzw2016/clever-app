@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.querydsl.SQLCoreListener;
+import org.clever.data.jdbc.querydsl.sql.SQLQueryFactory;
 import org.clever.data.jdbc.support.JdbcDataSourceStatus;
 import org.clever.data.jdbc.support.JdbcInfo;
 import org.clever.transaction.TransactionDefinition;
@@ -653,7 +654,7 @@ public class QueryDSL extends SQLQueryFactory {
     //  内部函数
     // --------------------------------------------------------------------------------------------
 
-    private static SQLTemplates getSQLTemplates(DbType dbType) {
+    public static SQLTemplates getSQLTemplates(DbType dbType) {
         switch (dbType) {
             case MYSQL:
             case MARIADB:

@@ -2955,6 +2955,7 @@ public class Jdbc extends AbstractDataSource {
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException ignored) {
+                            Thread.yield();
                         }
                     }
                     // 使用数据库行级锁保证并发性

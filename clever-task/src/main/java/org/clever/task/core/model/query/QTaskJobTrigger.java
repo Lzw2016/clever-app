@@ -42,8 +42,6 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
     public final NumberPath<Integer> misfireStrategy = createNumber("misfireStrategy", Integer.class);
     /** 是否允许多节点并行触发，使用悲观锁实现，不建议允许，0：禁止，1：允许 */
     public final NumberPath<Integer> allowConcurrent = createNumber("allowConcurrent", Integer.class);
-    /** 悲观锁 */
-    public final NumberPath<Long> lockVersion = createNumber("lockVersion", Long.class);
     /** 任务类型，1：cron触发，2：固定间隔触发 */
     public final NumberPath<Integer> type = createNumber("type", Integer.class);
     /** cron表达式 */
@@ -95,13 +93,12 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
         addMetadata(nextFireTime, ColumnMetadata.named("next_fire_time").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
         addMetadata(misfireStrategy, ColumnMetadata.named("misfire_strategy").withIndex(9).ofType(Types.TINYINT).withSize(3));
         addMetadata(allowConcurrent, ColumnMetadata.named("allow_concurrent").withIndex(10).ofType(Types.TINYINT).withSize(3));
-        addMetadata(lockVersion, ColumnMetadata.named("lock_version").withIndex(11).ofType(Types.BIGINT).withSize(19));
-        addMetadata(type, ColumnMetadata.named("type").withIndex(12).ofType(Types.TINYINT).withSize(3));
-        addMetadata(cron, ColumnMetadata.named("cron").withIndex(13).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(fixedInterval, ColumnMetadata.named("fixed_interval").withIndex(14).ofType(Types.BIGINT).withSize(19));
-        addMetadata(disable, ColumnMetadata.named("disable").withIndex(15).ofType(Types.TINYINT).withSize(3));
-        addMetadata(description, ColumnMetadata.named("description").withIndex(16).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(17).ofType(Types.TIMESTAMP).withSize(3));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(18).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(type, ColumnMetadata.named("type").withIndex(11).ofType(Types.TINYINT).withSize(3));
+        addMetadata(cron, ColumnMetadata.named("cron").withIndex(12).ofType(Types.VARCHAR).withSize(511));
+        addMetadata(fixedInterval, ColumnMetadata.named("fixed_interval").withIndex(13).ofType(Types.BIGINT).withSize(19));
+        addMetadata(disable, ColumnMetadata.named("disable").withIndex(14).ofType(Types.TINYINT).withSize(3));
+        addMetadata(description, ColumnMetadata.named("description").withIndex(15).ofType(Types.VARCHAR).withSize(511));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(16).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(17).ofType(Types.TIMESTAMP).withSize(3));
     }
 }
