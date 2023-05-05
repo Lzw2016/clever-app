@@ -32,7 +32,7 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     public final NumberPath<Integer> type = createNumber("type", Integer.class);
     /** 最大重入执行数量(对于单个节点当前任务未执行完成就触发了下一次执行导致任务重入执行)，小于等于0：表示禁止重入执行 */
     public final NumberPath<Integer> maxReentry = createNumber("maxReentry", Integer.class);
-    /** 是否允许多节点并发执行，使用悲观锁实现，不建议禁止，0：禁止，1：允许 */
+    /** 是否允许多节点并发执行，使用分布式锁实现，不建议禁止，0：禁止，1：允许 */
     public final NumberPath<Integer> allowConcurrent = createNumber("allowConcurrent", Integer.class);
     /** 执行失败时的最大重试次数 */
     public final NumberPath<Integer> maxRetryCount = createNumber("maxRetryCount", Integer.class);
