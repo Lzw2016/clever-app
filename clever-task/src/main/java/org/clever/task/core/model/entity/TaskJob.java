@@ -38,8 +38,8 @@ public class TaskJob implements Serializable {
     private Integer isUpdateData;
     /** 任务数据(json格式) */
     private String jobData;
-    /** 上一次运行时间 */
-    private Date lastRunTime;
+    /** 运行次数 */
+    private Long runCount;
     /** 是否禁用：0-启用，1-禁用 */
     private Integer disable;
     /** 描述 */

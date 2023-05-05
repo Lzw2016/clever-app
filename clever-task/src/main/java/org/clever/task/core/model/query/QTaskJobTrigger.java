@@ -48,6 +48,8 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
     public final StringPath cron = createString("cron");
     /** 固定间隔触发，间隔时间(单位：秒) */
     public final NumberPath<Long> fixedInterval = createNumber("fixedInterval", Long.class);
+    /** 触发次数 */
+    public final NumberPath<Long> fireCount = createNumber("fireCount", Long.class);
     /** 是否禁用：0-启用，1-禁用 */
     public final NumberPath<Integer> disable = createNumber("disable", Integer.class);
     /** 描述 */
@@ -96,9 +98,10 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
         addMetadata(type, ColumnMetadata.named("type").withIndex(11).ofType(Types.TINYINT).withSize(3));
         addMetadata(cron, ColumnMetadata.named("cron").withIndex(12).ofType(Types.VARCHAR).withSize(511));
         addMetadata(fixedInterval, ColumnMetadata.named("fixed_interval").withIndex(13).ofType(Types.BIGINT).withSize(19));
-        addMetadata(disable, ColumnMetadata.named("disable").withIndex(14).ofType(Types.TINYINT).withSize(3));
-        addMetadata(description, ColumnMetadata.named("description").withIndex(15).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(16).ofType(Types.TIMESTAMP).withSize(3));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(17).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(fireCount, ColumnMetadata.named("fire_count").withIndex(14).ofType(Types.BIGINT).withSize(19));
+        addMetadata(disable, ColumnMetadata.named("disable").withIndex(15).ofType(Types.TINYINT).withSize(3));
+        addMetadata(description, ColumnMetadata.named("description").withIndex(16).ofType(Types.VARCHAR).withSize(511));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(17).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(18).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

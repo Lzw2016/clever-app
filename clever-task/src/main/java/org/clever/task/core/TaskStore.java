@@ -286,8 +286,8 @@ public class TaskStore {
                 .fetchOne();
     }
 
-    public Date getTriggerLastFireTime(String namespace, Long jobTriggerId) {
-        return queryDSL.select(taskJobTrigger.lastFireTime)
+    public Long getTriggerFireCount(String namespace, Long jobTriggerId) {
+        return queryDSL.select(taskJobTrigger.fireCount)
                 .from(taskJobTrigger)
                 .where(taskJobTrigger.namespace.eq(namespace))
                 .where(taskJobTrigger.id.eq(jobTriggerId))
@@ -328,10 +328,10 @@ public class TaskStore {
     }
 
     /**
-     * 根据 namespace jobId 查询 lastRunTime
+     * 根据 namespace jobId 查询 runCount
      */
-    public Date getJobLastRunTime(String namespace, Long jobId) {
-        return queryDSL.select(taskJob.lastRunTime)
+    public Long getJobRunCount(String namespace, Long jobId) {
+        return queryDSL.select(taskJob.runCount)
                 .from(taskJob)
                 .where(taskJob.namespace.eq(namespace))
                 .where(taskJob.id.eq(jobId))
@@ -339,11 +339,11 @@ public class TaskStore {
     }
 
     /**
-     * 根据 namespace jobId 更新 lastRunTime
+     * 根据 namespace jobId 更新 runCount
      */
-    public int updateJobLastRunTime(String namespace, Long jobId) {
+    public int updateJobRunCount(String namespace, Long jobId) {
         return (int) queryDSL.update(taskJob)
-                .set(taskJob.lastRunTime, Expressions.currentTimestamp())
+                .set(taskJob.runCount, taskJob.runCount.add(1))
                 .where(taskJob.namespace.eq(namespace))
                 .where(taskJob.id.eq(jobId))
                 .execute();
@@ -382,7 +382,7 @@ public class TaskStore {
         return queryDSL.select(taskHttpJob)
                 .from(taskHttpJob)
                 .where(taskHttpJob.namespace.eq(namespace))
-                .where(taskHttpJob.id.eq(jobId))
+                .where(taskHttpJob.jobId.eq(jobId))
                 .fetchOne();
     }
 
@@ -393,7 +393,7 @@ public class TaskStore {
         return queryDSL.select(taskJavaJob)
                 .from(taskJavaJob)
                 .where(taskJavaJob.namespace.eq(namespace))
-                .where(taskJavaJob.id.eq(jobId))
+                .where(taskJavaJob.jobId.eq(jobId))
                 .fetchOne();
     }
 
@@ -404,7 +404,7 @@ public class TaskStore {
         return queryDSL.select(taskJsJob)
                 .from(taskJsJob)
                 .where(taskJsJob.namespace.eq(namespace))
-                .where(taskJsJob.id.eq(jobId))
+                .where(taskJsJob.jobId.eq(jobId))
                 .fetchOne();
     }
 
@@ -415,7 +415,7 @@ public class TaskStore {
         return queryDSL.select(taskShellJob)
                 .from(taskShellJob)
                 .where(taskShellJob.namespace.eq(namespace))
-                .where(taskShellJob.id.eq(jobId))
+                .where(taskShellJob.jobId.eq(jobId))
                 .fetchOne();
     }
 
@@ -481,6 +481,7 @@ public class TaskStore {
         queryDSL.update(taskJobTrigger)
                 .set(taskJobTrigger.lastFireTime, jobTrigger.getLastFireTime())
                 .set(taskJobTrigger.nextFireTime, jobTrigger.getNextFireTime())
+                .set(taskJobTrigger.fireCount, taskJobTrigger.fireCount.add(1))
                 .where(taskJobTrigger.id.eq(jobTrigger.getId()))
                 .where(taskJobTrigger.namespace.eq(jobTrigger.getNamespace()))
                 .execute();

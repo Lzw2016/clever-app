@@ -4,15 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.config.SchedulerConfig;
-import org.clever.task.core.job.HttpJobExecutor;
 import org.clever.task.core.job.MockJobExecutor;
 import org.clever.task.core.listeners.JobLogListener;
 import org.clever.task.core.listeners.JobTriggerLogListener;
 import org.clever.task.core.listeners.SchedulerLogListener;
+import org.clever.task.core.model.CronTrigger;
+import org.clever.task.core.model.HttpJobModel;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 /**
  * 作者：lizw <br/>
@@ -20,6 +21,9 @@ import java.util.Collections;
  */
 @Slf4j
 public class TaskInstanceTest {
+    public static int SLEEP_1 = 1000 * 60 * 2;
+    public static int SLEEP_2 = 1000 * 30;
+
     public static SchedulerConfig newSchedulerConfig(String instanceName) {
         SchedulerConfig config = new SchedulerConfig();
         config.setSchedulerExecutorPoolSize(4);
@@ -30,27 +34,61 @@ public class TaskInstanceTest {
         return config;
     }
 
-    public static void startTaskInstance(String instanceName) throws InterruptedException {
+    public static void startTaskInstance(String instanceName, Consumer<TaskInstance> callback) throws InterruptedException {
         Jdbc jdbc = BaseTest.newMysql();
         QueryDSL queryDSL = QueryDSL.create(jdbc);
         TaskInstance taskInstance = new TaskInstance(
                 queryDSL,
                 newSchedulerConfig(instanceName),
-                Arrays.asList(new MockJobExecutor(), new HttpJobExecutor()),
+                Collections.singletonList(new MockJobExecutor()),
+                // Arrays.asList(new MockJobExecutor(), new HttpJobExecutor()),
                 Collections.singletonList(new SchedulerLogListener()),
                 Collections.singletonList(new JobTriggerLogListener()),
                 Collections.singletonList(new JobLogListener())
         );
+        callback.accept(taskInstance);
         taskInstance.start();
-        Thread.sleep(1000 * 60 * 2);
+        Thread.sleep(SLEEP_1);
         taskInstance.pause();
-        Thread.sleep(1000 * 30);
+        Thread.sleep(SLEEP_2);
         taskInstance.stop();
         queryDSL.getJdbc().close();
     }
 
     @Test
     public void t01() throws InterruptedException {
-        startTaskInstance("n01");
+        SLEEP_1 = 1000 * 5;
+        SLEEP_2 = 1000 * 3;
+        startTaskInstance("n01", taskInstance -> {
+            HttpJobModel job = new HttpJobModel("访问百度", "GET", "https://www.baidu.com");
+            job.setAllowConcurrent(0);
+            CronTrigger trigger = new CronTrigger("访问百度_触发器", "0/10 * * * * ?");
+            trigger.setAllowConcurrent(0);
+            taskInstance.addJob(job, trigger);
+        });
+    }
+
+    @Test
+    public void t02() throws InterruptedException {
+        SLEEP_1 = 1000 * 60 * 60 * 10;
+        SLEEP_2 = 1000 * 3;
+        startTaskInstance("n01", taskInstance -> {
+        });
+    }
+
+    @Test
+    public void t03() throws InterruptedException {
+        SLEEP_1 = 1000 * 60 * 60 * 10;
+        SLEEP_2 = 1000 * 3;
+        startTaskInstance("n02", taskInstance -> {
+        });
+    }
+
+    @Test
+    public void t04() throws InterruptedException {
+        SLEEP_1 = 1000 * 60 * 60 * 10;
+        SLEEP_2 = 1000 * 3;
+        startTaskInstance("n03", taskInstance -> {
+        });
     }
 }

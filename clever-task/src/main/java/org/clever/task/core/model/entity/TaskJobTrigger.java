@@ -36,6 +36,8 @@ public class TaskJobTrigger implements Serializable {
     private String cron;
     /** 固定间隔触发，间隔时间(单位：秒) */
     private Long fixedInterval;
+    /** 触发次数 */
+    private Long fireCount;
     /** 是否禁用：0-启用，1-禁用 */
     private Integer disable;
     /** 描述 */

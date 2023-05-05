@@ -50,8 +50,8 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     public final NumberPath<Integer> isUpdateData = createNumber("isUpdateData", Integer.class);
     /** 任务数据(json格式) */
     public final StringPath jobData = createString("jobData");
-    /** 上一次运行时间 */
-    public final DateTimePath<Date> lastRunTime = createDateTime("lastRunTime", Date.class);
+    /** 运行次数 */
+    public final NumberPath<Long> runCount = createNumber("runCount", Long.class);
     /** 是否禁用：0-启用，1-禁用 */
     public final NumberPath<Integer> disable = createNumber("disable", Integer.class);
     /** 描述 */
@@ -101,7 +101,7 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
         addMetadata(loadBalance, ColumnMetadata.named("load_balance").withIndex(12).ofType(Types.TINYINT).withSize(3));
         addMetadata(isUpdateData, ColumnMetadata.named("is_update_data").withIndex(13).ofType(Types.TINYINT).withSize(3));
         addMetadata(jobData, ColumnMetadata.named("job_data").withIndex(14).ofType(Types.LONGVARCHAR).withSize(65535));
-        addMetadata(lastRunTime, ColumnMetadata.named("last_run_time").withIndex(15).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(runCount, ColumnMetadata.named("run_count").withIndex(15).ofType(Types.BIGINT).withSize(19));
         addMetadata(disable, ColumnMetadata.named("disable").withIndex(16).ofType(Types.TINYINT).withSize(3));
         addMetadata(description, ColumnMetadata.named("description").withIndex(17).ofType(Types.VARCHAR).withSize(511));
         addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(18).ofType(Types.TIMESTAMP).withSize(3));
