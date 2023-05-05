@@ -2997,7 +2997,7 @@ public class Jdbc extends AbstractDataSource {
                         } catch (InterruptedException ignored) {
                             Thread.yield();
                         }
-                        if (wait && (waitSeconds * 1000L) > (SystemClock.now() - startTime)) {
+                        if (wait && (waitSeconds * 1000L) < (SystemClock.now() - startTime)) {
                             // 执行同步代码块(未得到锁)
                             return syncBlock.apply(false);
                         }
@@ -3013,9 +3013,7 @@ public class Jdbc extends AbstractDataSource {
                     }
                 }
                 // 执行同步代码块
-                T result = syncBlock.apply(true);
-                connection.commit();
-                return result;
+                return syncBlock.apply(true);
             });
         } catch (Exception e) {
             // 超时异常
@@ -3101,7 +3099,7 @@ public class Jdbc extends AbstractDataSource {
     /**
      * 在一个“新连接”、“新事物”中执行数据库操作(会自动处理事务“回滚”&“提交”)
      */
-    private <T> T newConnectionExecute(ConnectionCallback<T> callback) {
+    public <T> T newConnectionExecute(ConnectionCallback<T> callback) {
         Assert.notNull(callback, "参数 callback 不能为空");
         try (Connection connection = dataSource.getConnection()) {
             // log.info("connection -> {}", connection);
