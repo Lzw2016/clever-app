@@ -1,5 +1,7 @@
 package org.clever.data.jdbc;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.SQLBaseListener;
@@ -13,7 +15,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
 import org.clever.core.SystemClock;
 import org.clever.core.codec.EncodeDecodeUtils;
@@ -72,6 +73,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.clever.data.jdbc.support.query.QAutoIncrementId.autoIncrementId;
+import static org.clever.data.jdbc.support.query.QBizCode.bizCode;
 import static org.clever.data.jdbc.support.query.QSysLock.sysLock;
 
 /**
@@ -2728,7 +2730,7 @@ public class Jdbc extends AbstractDataSource {
         // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
         long currentValue = newConnectionExecute(connection -> {
             final SQLQueryFactory dsl = newDSL.apply(connection);
-            Long rowId = dsl.select(autoIncrementId.id).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchOne();
+            Long rowId = dsl.select(autoIncrementId.id).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchFirst();
             if (rowId == null) {
                 try {
                     // 在一个新事物里新增数据(尽可能让其他事务能使用这条数据) 也可以避免postgresql的on_error_rollback问题
@@ -2750,7 +2752,7 @@ public class Jdbc extends AbstractDataSource {
                 // 等待数据插入成功
                 final int maxRetryCount = 128;
                 for (int i = 0; i < maxRetryCount; i++) {
-                    rowId = dsl.select(autoIncrementId.id).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchOne();
+                    rowId = dsl.select(autoIncrementId.id).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchFirst();
                     if (rowId != null) {
                         break;
                     }
@@ -2773,7 +2775,7 @@ public class Jdbc extends AbstractDataSource {
             if (count <= 0) {
                 throw new RuntimeException(autoIncrementId.getTableName() + " 表数据不存在(未知的异常)");
             }
-            return dsl.select(autoIncrementId.currentValue).from(autoIncrementId).where(autoIncrementId.id.eq(rowId)).fetchOne();
+            return dsl.select(autoIncrementId.currentValue).from(autoIncrementId).where(autoIncrementId.id.eq(rowId)).fetchFirst();
         });
         long oldValue = currentValue - size;
         List<Long> ids = new ArrayList<>(size);
@@ -2801,11 +2803,9 @@ public class Jdbc extends AbstractDataSource {
      * @param idName 唯一id名称
      */
     public Long currentId(String idName) {
-        final Map<String, Object> params = new HashMap<>();
-        params.put("sequence_name", idName);
         return newConnectionExecute(connection -> {
             SQLQueryFactory dsl = new SQLQueryFactory(QueryDSL.getSQLTemplates(dbType), () -> connection);
-            Long id = dsl.select(autoIncrementId.currentValue).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchOne();
+            Long id = dsl.select(autoIncrementId.currentValue).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchFirst();
             return id == null ? -1L : id;
         });
     }
@@ -2826,28 +2826,29 @@ public class Jdbc extends AbstractDataSource {
     public List<String> nextCodes(String codeName, int size) {
         Assert.isTrue(size >= 1 && size <= 10_0000, "size取值范围必须在1 ~ 10W之间");
         final Function<Connection, SQLQueryFactory> newDSL = connection -> new SQLQueryFactory(QueryDSL.getSQLTemplates(dbType), () -> connection);
-
-        TupleThree<String, Date, Long> res = beginTX(status -> {
-            // 使用数据库行级锁保证并发性
-            Map<String, Object> params = new HashMap<>();
-            params.put("code_name", codeName);
-            Map<String, Object> result = queryOne(
-                    "select id, pattern, sequence, reset_pattern, reset_flag from biz_code where code_name=:code_name for update",
-                    params,
-                    RenameStrategy.None
-            );
+        // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
+        TupleThree<String, Date, Long> res = newConnectionExecute(connection -> {
+            final SQLQueryFactory dsl = newDSL.apply(connection);
+            DateTimeExpression<Date> nowField = Expressions.currentTimestamp().as("now");
+            Tuple result = dsl.select(bizCode.id, bizCode.pattern, bizCode.sequence, bizCode.resetPattern, bizCode.resetFlag, nowField)
+                    .from(bizCode)
+                    .where(bizCode.codeName.eq(codeName))
+                    .forUpdate().fetchFirst();
             if (result == null) {
-                throw new RuntimeException("biz_code 表数据不存在: code_name=" + codeName);
+                throw new RuntimeException(bizCode.getTableName() + " 表数据不存在: code_name=" + codeName);
             }
-            final Long rowId = Conv.asLong(result.get("id"));
-            final String pattern = Conv.asString(result.get("pattern"));
-            final Long sequence = Conv.asLong(result.get("sequence"));
-            final String resetPattern = Conv.asString(result.get("reset_pattern"));
-            final String resetFlag = Conv.asString(result.get("reset_flag"));
-            final Date now = new Date();
+            final Long rowId = result.get(bizCode.id);
+            final String pattern = result.get(bizCode.pattern);
+            final Long sequence = result.get(bizCode.sequence);
+            final String resetPattern = result.get(bizCode.resetPattern);
+            final String resetFlag = result.get(bizCode.resetFlag);
+            final Date now = result.get(nowField);
+            if (sequence == null) {
+                throw new RuntimeException(bizCode.getTableName() + " 表sequence字段不能为空: code_name=" + codeName);
+            }
             // 计算 reset_flag
             String newResetFlag = resetFlag;
-            Long newSequence = sequence;
+            long newSequence = sequence;
             if (StringUtils.isNotBlank(resetPattern)) {
                 newResetFlag = DateFormatUtils.format(now, resetPattern);
             }
@@ -2857,15 +2858,14 @@ public class Jdbc extends AbstractDataSource {
             }
             newSequence = newSequence + size;
             // 更新数据库值
-            params.clear();
-            params.put("id", rowId);
-            Map<String, Object> fields = new HashMap<>();
-            fields.put("sequence", newSequence);
-            fields.put("reset_flag", newResetFlag);
-            fields.put("update_at", now);
-            updateTable("biz_code", fields, params, RenameStrategy.None);
+            dsl.update(bizCode)
+                    .set(bizCode.sequence, newSequence)
+                    .set(bizCode.resetFlag, newResetFlag)
+                    .set(bizCode.updateAt, Expressions.currentTimestamp())
+                    .where(bizCode.id.eq(rowId))
+                    .execute();
             return TupleThree.creat(pattern, now, newSequence);
-        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        });
         long oldValue = res.getValue3() - size;
         List<String> codes = new ArrayList<>(size);
         for (int i = 1; i <= size; i++) {
@@ -2898,16 +2898,22 @@ public class Jdbc extends AbstractDataSource {
      * @param codeName code名称
      */
     public String currentCode(String codeName) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("code_name", codeName);
-        return beginTX(status -> {
-            Map<String, Object> result = queryOne("select pattern, sequence from biz_code where code_name=:code_name", params, RenameStrategy.None);
+        return newConnectionExecute(connection -> {
+            SQLQueryFactory dsl = new SQLQueryFactory(QueryDSL.getSQLTemplates(dbType), () -> connection);
+            DateTimeExpression<Date> nowField = Expressions.currentTimestamp().as("now");
+            Tuple result = dsl.select(bizCode.pattern, bizCode.sequence, nowField)
+                    .from(bizCode)
+                    .where(bizCode.codeName.eq(codeName))
+                    .fetchFirst();
             String code = null;
             if (result != null) {
-                code = BusinessCodeUtils.create(Conv.asString(result.get("pattern")), new Date(), Conv.asLong(result.get("sequence")));
+                final String pattern = result.get(bizCode.pattern);
+                final Long sequence = result.get(bizCode.sequence);
+                final Date now = result.get(nowField);
+                code = BusinessCodeUtils.create(pattern, now, sequence);
             }
             return code;
-        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        });
     }
 
     /**

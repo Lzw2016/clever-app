@@ -32,7 +32,7 @@ public class JdbcTest {
 
     private Jdbc newJdbc() {
         return BaseTest.newMysql();
-//        return BaseTest.newPostgresql();
+        // return BaseTest.newPostgresql();
     }
 
     @Test
