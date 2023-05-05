@@ -1,9 +1,9 @@
 package org.clever.core.model.request.page;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -46,24 +46,6 @@ public class Page<T> implements IPage<T> {
      * 是否命中count缓存
      */
     protected boolean hitCount = false;
-    /**
-     * 数据库信息
-     */
-    @Setter
-    @Getter
-    protected Map<String, Object> dbInfo = new HashMap<>();
-    /**
-     * 数据导出的SQL语句
-     */
-    @Setter
-    @Getter
-    protected String exportDataSql;
-    /**
-     * 数据导出的SQL语句的参数
-     */
-    @Setter
-    @Getter
-    protected Map<String, Object> exportDataSqlParams = new HashMap<>();
 
     public Page() {
     }

@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.RenameStrategy;
 import org.clever.core.SystemClock;
-import org.clever.core.codec.EncodeDecodeUtils;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.BusinessCodeUtils;
 import org.clever.core.id.SnowFlake;
@@ -61,7 +60,6 @@ import org.clever.util.Assert;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
@@ -3194,15 +3192,6 @@ public class Jdbc extends AbstractDataSource {
         }
         // 构造排序以及分页sql
         String sortSql = SqlUtils.concatOrderBy(sql, pagination);
-        page.setExportDataSql(sortSql);
-        page.setExportDataSqlParams(paramMap);
-        if (this.dataSource instanceof HikariDataSource) {
-            HikariDataSource hikariDataSource = (HikariDataSource) this.dataSource;
-            page.getDbInfo().put("dbType", dbType);
-            page.getDbInfo().put("jdbcurl", EncodeDecodeUtils.encodeHex(hikariDataSource.getJdbcUrl().getBytes(StandardCharsets.UTF_8)));
-            page.getDbInfo().put("username", EncodeDecodeUtils.encodeHex(hikariDataSource.getUsername().getBytes(StandardCharsets.UTF_8)));
-            page.getDbInfo().put("password", EncodeDecodeUtils.encodeHex(hikariDataSource.getPassword().getBytes(StandardCharsets.UTF_8)));
-        }
         String pageSql = DialectFactory.buildPaginationSql(page, sortSql, paramMap, dbType, null);
         // 执行 pageSql
         List<T> listData = queryData(pageSql, paramMap, jdbcExecute);
