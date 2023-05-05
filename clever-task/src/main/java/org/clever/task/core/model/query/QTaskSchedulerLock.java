@@ -38,7 +38,7 @@ public class QTaskSchedulerLock extends RelationalPathBase<TaskSchedulerLock> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskSchedulerLock(String variable) {
-        super(TaskSchedulerLock.class, forVariable(variable), "test", "task_scheduler_lock");
+        super(TaskSchedulerLock.class, forVariable(variable), "", "task_scheduler_lock");
         addMetadata();
     }
 
@@ -53,12 +53,12 @@ public class QTaskSchedulerLock extends RelationalPathBase<TaskSchedulerLock> {
     }
 
     public QTaskSchedulerLock(Path<? extends TaskSchedulerLock> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_scheduler_lock");
+        super(path.getType(), path.getMetadata(), "", "task_scheduler_lock");
         addMetadata();
     }
 
     public QTaskSchedulerLock(PathMetadata metadata) {
-        super(TaskSchedulerLock.class, metadata, "test", "task_scheduler_lock");
+        super(TaskSchedulerLock.class, metadata, "", "task_scheduler_lock");
         addMetadata();
     }
 

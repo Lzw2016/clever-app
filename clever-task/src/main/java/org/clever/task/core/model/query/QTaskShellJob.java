@@ -40,7 +40,7 @@ public class QTaskShellJob extends RelationalPathBase<TaskShellJob> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskShellJob(String variable) {
-        super(TaskShellJob.class, forVariable(variable), "test", "task_shell_job");
+        super(TaskShellJob.class, forVariable(variable), "", "task_shell_job");
         addMetadata();
     }
 
@@ -55,12 +55,12 @@ public class QTaskShellJob extends RelationalPathBase<TaskShellJob> {
     }
 
     public QTaskShellJob(Path<? extends TaskShellJob> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_shell_job");
+        super(path.getType(), path.getMetadata(), "", "task_shell_job");
         addMetadata();
     }
 
     public QTaskShellJob(PathMetadata metadata) {
-        super(TaskShellJob.class, metadata, "test", "task_shell_job");
+        super(TaskShellJob.class, metadata, "", "task_shell_job");
         addMetadata();
     }
 

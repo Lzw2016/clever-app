@@ -56,7 +56,7 @@ public class QTaskJobLog extends RelationalPathBase<TaskJobLog> {
     public final StringPath afterJobData = createString("afterJobData");
 
     public QTaskJobLog(String variable) {
-        super(TaskJobLog.class, forVariable(variable), "test", "task_job_log");
+        super(TaskJobLog.class, forVariable(variable), "", "task_job_log");
         addMetadata();
     }
 
@@ -71,12 +71,12 @@ public class QTaskJobLog extends RelationalPathBase<TaskJobLog> {
     }
 
     public QTaskJobLog(Path<? extends TaskJobLog> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_job_log");
+        super(path.getType(), path.getMetadata(), "", "task_job_log");
         addMetadata();
     }
 
     public QTaskJobLog(PathMetadata metadata) {
-        super(TaskJobLog.class, metadata, "test", "task_job_log");
+        super(TaskJobLog.class, metadata, "", "task_job_log");
         addMetadata();
     }
 

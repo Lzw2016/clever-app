@@ -50,6 +50,8 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     public final NumberPath<Integer> isUpdateData = createNumber("isUpdateData", Integer.class);
     /** 任务数据(json格式) */
     public final StringPath jobData = createString("jobData");
+    /** 上一次运行时间 */
+    public final DateTimePath<Date> lastRunTime = createDateTime("lastRunTime", Date.class);
     /** 是否禁用：0-启用，1-禁用 */
     public final NumberPath<Integer> disable = createNumber("disable", Integer.class);
     /** 描述 */
@@ -60,7 +62,7 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskJob(String variable) {
-        super(TaskJob.class, forVariable(variable), "test", "task_job");
+        super(TaskJob.class, forVariable(variable), "", "task_job");
         addMetadata();
     }
 
@@ -75,12 +77,12 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
     }
 
     public QTaskJob(Path<? extends TaskJob> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_job");
+        super(path.getType(), path.getMetadata(), "", "task_job");
         addMetadata();
     }
 
     public QTaskJob(PathMetadata metadata) {
-        super(TaskJob.class, metadata, "test", "task_job");
+        super(TaskJob.class, metadata, "", "task_job");
         addMetadata();
     }
 
@@ -99,9 +101,10 @@ public class QTaskJob extends RelationalPathBase<TaskJob> {
         addMetadata(loadBalance, ColumnMetadata.named("load_balance").withIndex(12).ofType(Types.TINYINT).withSize(3));
         addMetadata(isUpdateData, ColumnMetadata.named("is_update_data").withIndex(13).ofType(Types.TINYINT).withSize(3));
         addMetadata(jobData, ColumnMetadata.named("job_data").withIndex(14).ofType(Types.LONGVARCHAR).withSize(65535));
-        addMetadata(disable, ColumnMetadata.named("disable").withIndex(15).ofType(Types.TINYINT).withSize(3));
-        addMetadata(description, ColumnMetadata.named("description").withIndex(16).ofType(Types.VARCHAR).withSize(511));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(17).ofType(Types.TIMESTAMP).withSize(3));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(18).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(lastRunTime, ColumnMetadata.named("last_run_time").withIndex(15).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(disable, ColumnMetadata.named("disable").withIndex(16).ofType(Types.TINYINT).withSize(3));
+        addMetadata(description, ColumnMetadata.named("description").withIndex(17).ofType(Types.VARCHAR).withSize(511));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(18).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(19).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

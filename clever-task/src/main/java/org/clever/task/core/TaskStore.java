@@ -6,29 +6,32 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.sql.Configuration;
+import com.querydsl.sql.SQLBaseListener;
+import com.querydsl.sql.SQLListenerContext;
 import com.querydsl.sql.SQLQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
+import org.clever.core.SystemClock;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.SnowFlake;
 import org.clever.dao.DataAccessException;
 import org.clever.dao.DuplicateKeyException;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
-import org.clever.jdbc.core.ConnectionCallback;
-import org.clever.jdbc.core.JdbcOperations;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
-import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.clever.task.core.model.query.QTaskHttpJob.taskHttpJob;
@@ -283,15 +286,23 @@ public class TaskStore {
                 .fetchOne();
     }
 
+    public Date getTriggerLastFireTime(String namespace, Long jobTriggerId) {
+        return queryDSL.select(taskJobTrigger.lastFireTime)
+                .from(taskJobTrigger)
+                .where(taskJobTrigger.namespace.eq(namespace))
+                .where(taskJobTrigger.id.eq(jobTriggerId))
+                .fetchOne();
+    }
+
     /**
-     * TODO 获取定时任务锁
+     * 获取定时任务锁
      *
      * @param namespace 命名空间
      * @param jobId     任务ID
-     * @param callback  回调函数: locked -> { ... }
+     * @param syncBlock 同步回调函数(可保证分布式串行执行): () -> { ... }
      */
-    public void getLockJob(String namespace, Long jobId, Consumer<Boolean> callback) {
-        lock(namespace, String.format("job_%s", jobId), callback);
+    public void getLockJob(String namespace, Long jobId, Runnable syncBlock) {
+        lock(namespace, String.format("job_%s", jobId), syncBlock);
     }
 
     /**
@@ -314,6 +325,28 @@ public class TaskStore {
                 .where(taskJob.namespace.eq(namespace))
                 .where(taskJob.id.eq(jobId))
                 .fetchOne();
+    }
+
+    /**
+     * 根据 namespace jobId 查询 lastRunTime
+     */
+    public Date getJobLastRunTime(String namespace, Long jobId) {
+        return queryDSL.select(taskJob.lastRunTime)
+                .from(taskJob)
+                .where(taskJob.namespace.eq(namespace))
+                .where(taskJob.id.eq(jobId))
+                .fetchOne();
+    }
+
+    /**
+     * 根据 namespace jobId 更新 lastRunTime
+     */
+    public int updateJobLastRunTime(String namespace, Long jobId) {
+        return (int) queryDSL.update(taskJob)
+                .set(taskJob.lastRunTime, Expressions.currentTimestamp())
+                .where(taskJob.namespace.eq(namespace))
+                .where(taskJob.id.eq(jobId))
+                .execute();
     }
 
     /**
@@ -454,14 +487,14 @@ public class TaskStore {
     }
 
     /**
-     * TODO 获取触发器锁
+     * 获取触发器锁
      *
      * @param namespace    命名空间
      * @param jobTriggerId 任务触发器ID
-     * @param callback     回调函数: locked -> { ... }
+     * @param syncBlock    同步回调函数(可保证分布式串行执行): () -> { ... }
      */
-    public void getLockTrigger(String namespace, Long jobTriggerId, Consumer<Boolean> callback) {
-        lock(namespace, String.format("job_trigger_%s", jobTriggerId), callback);
+    public void getLockTrigger(String namespace, Long jobTriggerId, Runnable syncBlock) {
+        lock(namespace, String.format("job_trigger_%s", jobTriggerId), syncBlock);
     }
 
     public int addSchedulerLog(TaskSchedulerLog schedulerLog) {
@@ -512,50 +545,62 @@ public class TaskStore {
     /**
      * 利用数据库行级锁实现分布式锁
      *
-     * @param namespace 命名空间
-     * @param lockName  锁名称
-     * @param callback  同步回调函数(可保证分布式串行执行): locked -> { ... }
+     * @param namespace   命名空间
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步回调函数(可保证分布式串行执行): locked -> { ... }
+     * @see Jdbc#tryLock(String, int, Function)
      */
-    private void lock(String namespace, String lockName, Consumer<Boolean> callback) {
+    @SuppressWarnings({"SameParameterValue", "UnusedReturnValue"})
+    private <T> T lock(String namespace, String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
         Assert.isNotBlank(namespace, "参数 namespace 不能为空");
         Assert.isNotBlank(lockName, "参数 lockName 不能为空");
-        // 在一个新连接中操作，不会受到 QueryDSL 原始的事务影响
-        final JdbcOperations jdbcOperations = jdbc.getJdbcTemplate().getJdbcOperations();
-        jdbcOperations.execute((ConnectionCallback<Void>) connection -> {
-            // 备份连接状态
-            int transactionIsolation = connection.getTransactionIsolation();
-            boolean autoCommit = connection.getAutoCommit();
-            try {
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为空");
+        final long startTime = SystemClock.now();
+        final boolean wait = waitSeconds > 0;
+        final Function<Connection, SQLQueryFactory> newDSL = connection -> {
+            Configuration configuration = new Configuration(QueryDSL.getSQLTemplates(jdbc.getDbType()));
+            if (wait) {
+                configuration.addListener(new SQLBaseListener() {
+                    @Override
+                    public void preExecute(SQLListenerContext context) {
+                        try {
+                            int timeout = waitSeconds - ((int) ((SystemClock.now() - startTime) / 1000));
+                            context.getPreparedStatement().setQueryTimeout(Math.max(1, timeout));
+                        } catch (SQLException e) {
+                            throw ExceptionUtils.unchecked(e);
+                        }
+                    }
+                });
+            }
+            return new SQLQueryFactory(configuration, () -> connection);
+        };
+        try {
+            // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
+            return jdbc.newConnectionExecute(connection -> {
                 // 这里使用新的连接获取数据库行级锁
-                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-                connection.setAutoCommit(false);
-                Configuration configuration = new Configuration(QueryDSL.getSQLTemplates(jdbc.getDbType()));
-                // 设置超时时间
-//                configuration.addListener(new SQLBaseListener() {
-//                    @Override
-//                    public void preExecute(SQLListenerContext context) {
-//                        context.getPreparedStatement().setQueryTimeout(3);
-//                    }
-//                });
-                SQLQueryFactory tmpDSL = new SQLQueryFactory(configuration, () -> connection);
-                long lock = tmpDSL.update(taskSchedulerLock)
+                final SQLQueryFactory dsl = newDSL.apply(connection);
+                // 使用数据库行级锁保证并发性
+                long lock = dsl.update(taskSchedulerLock)
                         .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
                         .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
                         .where(taskSchedulerLock.lockName.eq(lockName))
                         .execute();
+                // 锁数据不存在就创建锁数据
                 if (lock <= 0) {
                     try {
                         // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
-                        queryDSL.beginTX(status -> {
-                            queryDSL.insert(taskSchedulerLock)
+                        jdbc.newConnectionExecute(innerCon -> {
+                            SQLQueryFactory tmpDSL = newDSL.apply(innerCon);
+                            return tmpDSL.insert(taskSchedulerLock)
                                     .set(taskSchedulerLock.id, snowFlake.nextId())
                                     .set(taskSchedulerLock.namespace, namespace)
                                     .set(taskSchedulerLock.lockName, lockName)
                                     .set(taskSchedulerLock.lockCount, 0L)
-                                    // .set(taskSchedulerLock.description, )
+                                    .set(taskSchedulerLock.description, "系统自动生成")
                                     .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
                                     .execute();
-                        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                        });
                     } catch (DuplicateKeyException e) {
                         // 插入数据失败: 唯一约束错误
                         log.warn("插入 {} 表失败: {}", taskSchedulerLock.getTableName(), e.getMessage());
@@ -565,12 +610,8 @@ public class TaskStore {
                     // 等待锁数据插入完成
                     final int maxRetryCount = 128;
                     for (int i = 0; i < maxRetryCount; i++) {
-                        List<Long> list = tmpDSL.select(taskSchedulerLock.id)
-                                .from(taskSchedulerLock)
-                                .where(taskSchedulerLock.lockName.eq(lockName))
-                                .limit(2)
-                                .fetch();
-                        if (list != null && !list.isEmpty()) {
+                        Long id = dsl.select(taskSchedulerLock.id).from(taskSchedulerLock).where(taskSchedulerLock.lockName.eq(lockName)).fetchFirst();
+                        if (id != null) {
                             break;
                         }
                         try {
@@ -578,9 +619,13 @@ public class TaskStore {
                         } catch (InterruptedException ignored) {
                             Thread.yield();
                         }
+                        if (wait && (waitSeconds * 1000L) < (SystemClock.now() - startTime)) {
+                            // 执行同步代码块(未得到锁)
+                            return syncBlock.apply(false);
+                        }
                     }
                     // 使用数据库行级锁保证并发性
-                    lock = tmpDSL.update(taskSchedulerLock)
+                    lock = dsl.update(taskSchedulerLock)
                             .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
                             .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
                             .where(taskSchedulerLock.lockName.eq(lockName))
@@ -590,18 +635,29 @@ public class TaskStore {
                     }
                 }
                 // 执行同步代码块
-                callback.accept(true);
-            } catch (Exception e) {
-                // 异常回滚事务
-                connection.rollback();
-                // 执行同步代码块 TODO 超时异常？
-                callback.accept(false);
-                throw ExceptionUtils.unchecked(e);
-            } finally {
-                // 还原连接状态后关闭连接
-                connection.setTransactionIsolation(transactionIsolation);
-                connection.setAutoCommit(autoCommit);
-                connection.close();
+                return syncBlock.apply(true);
+            });
+        } catch (Exception e) {
+            // 超时异常
+            if (ExceptionUtils.isCausedBy(e, Collections.singletonList(SQLTimeoutException.class))) {
+                // 执行同步代码块(未得到锁)
+                return syncBlock.apply(false);
+            }
+            throw ExceptionUtils.unchecked(e);
+        }
+    }
+
+    /**
+     * 利用数据库行级锁实现分布式锁
+     *
+     * @param namespace 命名空间
+     * @param lockName  锁名称
+     * @param syncBlock 同步回调函数(可保证分布式串行执行): () -> { ... }
+     */
+    private void lock(String namespace, String lockName, Runnable syncBlock) {
+        lock(namespace, lockName, 3, locked -> {
+            if (locked) {
+                syncBlock.run();
             }
             return null;
         });

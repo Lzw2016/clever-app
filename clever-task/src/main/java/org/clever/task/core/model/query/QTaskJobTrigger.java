@@ -40,7 +40,7 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
     public final DateTimePath<Date> nextFireTime = createDateTime("nextFireTime", Date.class);
     /** 错过触发策略，1：忽略，2：立即补偿触发一次 */
     public final NumberPath<Integer> misfireStrategy = createNumber("misfireStrategy", Integer.class);
-    /** 是否允许多节点并行触发，使用悲观锁实现，不建议允许，0：禁止，1：允许 */
+    /** 是否允许多节点并行触发，使用分布式锁实现，不建议允许，0：禁止，1：允许 */
     public final NumberPath<Integer> allowConcurrent = createNumber("allowConcurrent", Integer.class);
     /** 任务类型，1：cron触发，2：固定间隔触发 */
     public final NumberPath<Integer> type = createNumber("type", Integer.class);
@@ -58,7 +58,7 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskJobTrigger(String variable) {
-        super(TaskJobTrigger.class, forVariable(variable), "test", "task_job_trigger");
+        super(TaskJobTrigger.class, forVariable(variable), "", "task_job_trigger");
         addMetadata();
     }
 
@@ -73,12 +73,12 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
     }
 
     public QTaskJobTrigger(Path<? extends TaskJobTrigger> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_job_trigger");
+        super(path.getType(), path.getMetadata(), "", "task_job_trigger");
         addMetadata();
     }
 
     public QTaskJobTrigger(PathMetadata metadata) {
-        super(TaskJobTrigger.class, metadata, "test", "task_job_trigger");
+        super(TaskJobTrigger.class, metadata, "", "task_job_trigger");
         addMetadata();
     }
 

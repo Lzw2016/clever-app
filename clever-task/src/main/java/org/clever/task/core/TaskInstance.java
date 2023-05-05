@@ -638,10 +638,11 @@ public class TaskInstance {
                 executeJob(dbNow, job, jobLog);
             } else {
                 try {
-                    // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
-                    taskStore.getLockJob(job.getNamespace(), job.getId(), locked -> {
-                        if (locked) {
-                            // TODO 二次校验数据
+                    // 获取定时任务分布式锁 - 判断是否被其他节点执行了
+                    taskStore.getLockJob(job.getNamespace(), job.getId(), () -> {
+                        // 二次校验数据
+                        Date lastRunTime = taskStore.beginReadOnlyTX(status -> taskStore.getJobLastRunTime(scheduler.getNamespace(), jobId));
+                        if (Objects.equals(lastRunTime, job.getLastRunTime())) {
                             executeJob(dbNow, job, jobLog);
                         }
                     });
@@ -899,10 +900,11 @@ public class TaskInstance {
                         if (allowConcurrent) {
                             doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                         } else {
-                            // 获取触发器悲观锁(事务范围控制锁范围) - 判断是否被其他节点触发了
-                            taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId(), locked -> {
-                                if (locked) {
-                                    // TODO 二次校验数据
+                            // 获取触发器分布式锁 - 判断是否被其他节点触发了
+                            taskStore.getLockTrigger(jobTrigger.getNamespace(), jobTrigger.getId(), () -> {
+                                // 二次校验数据
+                                Date lastFireTime = taskStore.beginReadOnlyTX(status -> taskStore.getTriggerLastFireTime(jobTrigger.getNamespace(), jobTrigger.getId()));
+                                if (Objects.equals(lastFireTime, jobTrigger.getLastFireTime())) {
                                     doTriggerJobExec(dbNow, jobTrigger, jobTriggerLog);
                                 }
                             });
@@ -1051,10 +1053,11 @@ public class TaskInstance {
                     executeJob(dbNow, job, jobLog);
                 } else {
                     try {
-                        // 获取定时任务悲观锁(事务范围控制锁范围) - 判断是否被其他节点执行了
-                        taskStore.getLockJob(job.getNamespace(), job.getId(), locked -> {
-                            if (locked) {
-                                // TODO 二次校验数据
+                        // 获取定时任务分布式锁 - 判断是否被其他节点执行了
+                        taskStore.getLockJob(job.getNamespace(), job.getId(), () -> {
+                            // 二次校验数据
+                            Date lastRunTime = taskStore.beginReadOnlyTX(status -> taskStore.getJobLastRunTime(job.getNamespace(), job.getId()));
+                            if (Objects.equals(lastRunTime, job.getLastRunTime())) {
                                 executeJob(dbNow, job, jobLog);
                             }
                         });
@@ -1146,6 +1149,8 @@ public class TaskInstance {
             jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
             jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
         } finally {
+            // 更新 lastRunTime
+            taskStore.beginTX(status -> taskStore.updateJobLastRunTime(job.getNamespace(), job.getId()));
             // 任务执行事件处理
             taskContext.decrementAndGetJobReentryCount(job.getId());
             jobEndRunListener(jobLog);

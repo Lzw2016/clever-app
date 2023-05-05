@@ -42,7 +42,7 @@ public class QTaskHttpJob extends RelationalPathBase<TaskHttpJob> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskHttpJob(String variable) {
-        super(TaskHttpJob.class, forVariable(variable), "test", "task_http_job");
+        super(TaskHttpJob.class, forVariable(variable), "", "task_http_job");
         addMetadata();
     }
 
@@ -57,12 +57,12 @@ public class QTaskHttpJob extends RelationalPathBase<TaskHttpJob> {
     }
 
     public QTaskHttpJob(Path<? extends TaskHttpJob> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_http_job");
+        super(path.getType(), path.getMetadata(), "", "task_http_job");
         addMetadata();
     }
 
     public QTaskHttpJob(PathMetadata metadata) {
-        super(TaskHttpJob.class, metadata, "test", "task_http_job");
+        super(TaskHttpJob.class, metadata, "", "task_http_job");
         addMetadata();
     }
 

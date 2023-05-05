@@ -36,7 +36,7 @@ public class QTaskSchedulerLog extends RelationalPathBase<TaskSchedulerLog> {
     public final DateTimePath<Date> createAt = createDateTime("createAt", Date.class);
 
     public QTaskSchedulerLog(String variable) {
-        super(TaskSchedulerLog.class, forVariable(variable), "test", "task_scheduler_log");
+        super(TaskSchedulerLog.class, forVariable(variable), "", "task_scheduler_log");
         addMetadata();
     }
 
@@ -51,12 +51,12 @@ public class QTaskSchedulerLog extends RelationalPathBase<TaskSchedulerLog> {
     }
 
     public QTaskSchedulerLog(Path<? extends TaskSchedulerLog> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_scheduler_log");
+        super(path.getType(), path.getMetadata(), "", "task_scheduler_log");
         addMetadata();
     }
 
     public QTaskSchedulerLog(PathMetadata metadata) {
-        super(TaskSchedulerLog.class, metadata, "test", "task_scheduler_log");
+        super(TaskSchedulerLog.class, metadata, "", "task_scheduler_log");
         addMetadata();
     }
 

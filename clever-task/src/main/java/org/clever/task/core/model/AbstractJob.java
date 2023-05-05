@@ -22,7 +22,7 @@ public abstract class AbstractJob implements Serializable {
      */
     protected Integer maxReentry;
     /**
-     * 是否允许多节点并发执行，使用悲观锁实现(不建议使用)，0：禁止，1：允许
+     * 是否允许多节点并发执行，使用分布式锁实现，0：禁止，1：允许
      */
     protected Integer allowConcurrent;
     /**

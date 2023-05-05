@@ -54,7 +54,7 @@ public class QTaskJobTriggerLog extends RelationalPathBase<TaskJobTriggerLog> {
     public final DateTimePath<Date> createAt = createDateTime("createAt", Date.class);
 
     public QTaskJobTriggerLog(String variable) {
-        super(TaskJobTriggerLog.class, forVariable(variable), "test", "task_job_trigger_log");
+        super(TaskJobTriggerLog.class, forVariable(variable), "", "task_job_trigger_log");
         addMetadata();
     }
 
@@ -69,12 +69,12 @@ public class QTaskJobTriggerLog extends RelationalPathBase<TaskJobTriggerLog> {
     }
 
     public QTaskJobTriggerLog(Path<? extends TaskJobTriggerLog> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_job_trigger_log");
+        super(path.getType(), path.getMetadata(), "", "task_job_trigger_log");
         addMetadata();
     }
 
     public QTaskJobTriggerLog(PathMetadata metadata) {
-        super(TaskJobTriggerLog.class, metadata, "test", "task_job_trigger_log");
+        super(TaskJobTriggerLog.class, metadata, "", "task_job_trigger_log");
         addMetadata();
     }
 

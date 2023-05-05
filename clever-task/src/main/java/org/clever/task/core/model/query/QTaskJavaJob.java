@@ -40,7 +40,7 @@ public class QTaskJavaJob extends RelationalPathBase<TaskJavaJob> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskJavaJob(String variable) {
-        super(TaskJavaJob.class, forVariable(variable), "test", "task_java_job");
+        super(TaskJavaJob.class, forVariable(variable), "", "task_java_job");
         addMetadata();
     }
 
@@ -55,12 +55,12 @@ public class QTaskJavaJob extends RelationalPathBase<TaskJavaJob> {
     }
 
     public QTaskJavaJob(Path<? extends TaskJavaJob> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_java_job");
+        super(path.getType(), path.getMetadata(), "", "task_java_job");
         addMetadata();
     }
 
     public QTaskJavaJob(PathMetadata metadata) {
-        super(TaskJavaJob.class, metadata, "test", "task_java_job");
+        super(TaskJavaJob.class, metadata, "", "task_java_job");
         addMetadata();
     }
 

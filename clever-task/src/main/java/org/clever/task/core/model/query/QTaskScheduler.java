@@ -42,7 +42,7 @@ public class QTaskScheduler extends RelationalPathBase<TaskScheduler> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskScheduler(String variable) {
-        super(TaskScheduler.class, forVariable(variable), "test", "task_scheduler");
+        super(TaskScheduler.class, forVariable(variable), "", "task_scheduler");
         addMetadata();
     }
 
@@ -57,12 +57,12 @@ public class QTaskScheduler extends RelationalPathBase<TaskScheduler> {
     }
 
     public QTaskScheduler(Path<? extends TaskScheduler> path) {
-        super(path.getType(), path.getMetadata(), "test", "task_scheduler");
+        super(path.getType(), path.getMetadata(), "", "task_scheduler");
         addMetadata();
     }
 
     public QTaskScheduler(PathMetadata metadata) {
-        super(TaskScheduler.class, metadata, "test", "task_scheduler");
+        super(TaskScheduler.class, metadata, "", "task_scheduler");
         addMetadata();
     }
 

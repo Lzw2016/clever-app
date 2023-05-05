@@ -37,11 +37,11 @@ public interface EnumConstant {
     int JOB_TRIGGER_MIS_FIRED_1 = 1;
 
     /**
-     * 是否允许多节点并行触发，使用悲观锁实现，0：禁止，1：允许
+     * 是否允许多节点并行触发，使用分布式锁实现，0：禁止，1：允许
      */
     int JOB_TRIGGER_ALLOW_CONCURRENT_0 = 0;
     /**
-     * 是否允许多节点并行触发，使用悲观锁实现，0：禁止，1：允许
+     * 是否允许多节点并行触发，使用分布式锁实现，0：禁止，1：允许
      */
     int JOB_TRIGGER_ALLOW_CONCURRENT_1 = 1;
 
@@ -73,11 +73,11 @@ public interface EnumConstant {
     int JOB_TRIGGER_MISFIRE_STRATEGY_2 = 2;
 
     /**
-     * 是否允许多节点并发执行，使用悲观锁实现，0：禁止，1：允许
+     * 是否允许多节点并发执行，使用分布式锁实现，0：禁止，1：允许
      */
     int JOB_ALLOW_CONCURRENT_0 = 0;
     /**
-     * 是否允许多节点并发执行，使用悲观锁实现，0：禁止，1：允许
+     * 是否允许多节点并发执行，使用分布式锁实现，0：禁止，1：允许
      */
     int JOB_ALLOW_CONCURRENT_1 = 1;
 

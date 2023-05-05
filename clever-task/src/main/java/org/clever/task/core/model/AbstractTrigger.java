@@ -30,7 +30,7 @@ public abstract class AbstractTrigger {
      */
     protected Integer misfireStrategy;
     /**
-     * 是否允许多节点并行触发，使用悲观锁实现，0：禁止，1：允许
+     * 是否允许多节点并行触发，使用分布式锁实现，0：禁止，1：允许
      */
     protected Integer allowConcurrent;
     /**
