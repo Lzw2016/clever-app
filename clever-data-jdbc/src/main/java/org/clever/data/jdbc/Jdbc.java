@@ -26,7 +26,6 @@ import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.IPage;
 import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
-import org.clever.core.tuples.TupleOne;
 import org.clever.core.tuples.TupleThree;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.dao.DataAccessException;
@@ -72,6 +71,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.clever.data.jdbc.support.query.QAutoIncrementId.autoIncrementId;
 import static org.clever.data.jdbc.support.query.QSysLock.sysLock;
 
 /**
@@ -2712,7 +2712,7 @@ public class Jdbc extends AbstractDataSource {
         Assert.notNull(sqlInfo.getValue2(), "sqlInfo.params 不能为空");
         return beginReadOnlyTX(status -> {
             return queryLong(sqlInfo.getValue1(), sqlInfo.getValue2());
-        });
+        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     /***
@@ -2724,57 +2724,57 @@ public class Jdbc extends AbstractDataSource {
      */
     public List<Long> nextIds(String idName, int size) {
         Assert.isTrue(size >= 1 && size <= 10_0000, "size取值范围必须在1 ~ 10W之间");
-        final Map<String, Object> params = new HashMap<>();
-        params.put("sequence_name", idName);
-        final TupleOne<Long> rowId = TupleOne.creat(queryLong("select id from auto_increment_id where sequence_name=:sequence_name", params));
-        Long currentValue = beginTX(status -> {
-            if (rowId.getValue1() == null) {
+        final Function<Connection, SQLQueryFactory> newDSL = connection -> new SQLQueryFactory(QueryDSL.getSQLTemplates(dbType), () -> connection);
+        // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
+        long currentValue = newConnectionExecute(connection -> {
+            final SQLQueryFactory dsl = newDSL.apply(connection);
+            Long rowId = dsl.select(autoIncrementId.id).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchOne();
+            if (rowId == null) {
                 try {
                     // 在一个新事物里新增数据(尽可能让其他事务能使用这条数据) 也可以避免postgresql的on_error_rollback问题
-                    beginTX(innerStatus -> {
-                        Long id = SnowFlake.SNOW_FLAKE.nextId();
-                        params.clear();
-                        params.put("id", id);
-                        params.put("sequence_name", idName);
-                        params.put("description", "系统自动生成");
-                        params.put("create_at", new Date());
-                        insertTable("auto_increment_id", params, RenameStrategy.None);
-                    }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                    newConnectionExecute(innerCon -> {
+                        SQLQueryFactory tmpDSL = newDSL.apply(innerCon);
+                        return tmpDSL.insert(autoIncrementId)
+                                .set(autoIncrementId.id, SnowFlake.SNOW_FLAKE.nextId())
+                                .set(autoIncrementId.sequenceName, idName)
+                                .set(autoIncrementId.description, "系统自动生成")
+                                .set(autoIncrementId.createAt, Expressions.currentTimestamp())
+                                .execute();
+                    });
                 } catch (DuplicateKeyException e) {
                     // 插入数据失败: 唯一约束错误
-                    log.warn("插入 auto_increment_id 表失败: {}", e.getMessage());
+                    log.warn("插入 {} 表失败: {}", autoIncrementId.getTableName(), e.getMessage());
                 } catch (Exception e) {
-                    log.warn("插入 auto_increment_id 表失败", e);
+                    log.warn("插入 {} 表失败", autoIncrementId.getTableName(), e);
                 }
                 // 等待数据插入成功
                 final int maxRetryCount = 128;
-                params.clear();
-                params.put("sequence_name", idName);
                 for (int i = 0; i < maxRetryCount; i++) {
-                    rowId.setValue1(queryLong("select id from auto_increment_id where sequence_name=:sequence_name", params));
-                    if (rowId.getValue1() != null) {
+                    rowId = dsl.select(autoIncrementId.id).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchOne();
+                    if (rowId != null) {
                         break;
                     }
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException ignored) {
+                        Thread.yield();
                     }
                 }
             }
-            if (rowId.getValue1() == null) {
-                throw new RuntimeException("auto_increment_id 表数据不存在(未知的异常)");
+            if (rowId == null) {
+                throw new RuntimeException(autoIncrementId.getTableName() + " 表数据不存在(未知的异常)");
             }
             // 更新序列数据(使用数据库行级锁保证并发性)
-            params.clear();
-            params.put("size", size);
-            params.put("id", rowId.getValue1());
-            params.put("update_at", new Date());
-            update("update auto_increment_id set current_value=current_value+:size, update_at=:update_at where id=:id", params);
-            // 查询更新之后的值
-            params.clear();
-            params.put("id", rowId.getValue1());
-            return queryLong("select current_value from auto_increment_id where id=:id", params);
-        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+            long count = dsl.update(autoIncrementId)
+                    .set(autoIncrementId.currentValue, autoIncrementId.currentValue.add(size))
+                    .set(autoIncrementId.updateAt, Expressions.currentTimestamp())
+                    .where(autoIncrementId.id.eq(rowId))
+                    .execute();
+            if (count <= 0) {
+                throw new RuntimeException(autoIncrementId.getTableName() + " 表数据不存在(未知的异常)");
+            }
+            return dsl.select(autoIncrementId.currentValue).from(autoIncrementId).where(autoIncrementId.id.eq(rowId)).fetchOne();
+        });
         long oldValue = currentValue - size;
         List<Long> ids = new ArrayList<>(size);
         for (int i = 1; i <= size; i++) {
@@ -2803,10 +2803,11 @@ public class Jdbc extends AbstractDataSource {
     public Long currentId(String idName) {
         final Map<String, Object> params = new HashMap<>();
         params.put("sequence_name", idName);
-        return beginReadOnlyTX(status -> {
-            Long id = queryLong("select current_value from auto_increment_id where sequence_name=:sequence_name", params);
+        return newConnectionExecute(connection -> {
+            SQLQueryFactory dsl = new SQLQueryFactory(QueryDSL.getSQLTemplates(dbType), () -> connection);
+            Long id = dsl.select(autoIncrementId.currentValue).from(autoIncrementId).where(autoIncrementId.sequenceName.eq(idName)).fetchOne();
             return id == null ? -1L : id;
-        }, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        });
     }
 
     /**
@@ -2824,6 +2825,8 @@ public class Jdbc extends AbstractDataSource {
      */
     public List<String> nextCodes(String codeName, int size) {
         Assert.isTrue(size >= 1 && size <= 10_0000, "size取值范围必须在1 ~ 10W之间");
+        final Function<Connection, SQLQueryFactory> newDSL = connection -> new SQLQueryFactory(QueryDSL.getSQLTemplates(dbType), () -> connection);
+
         TupleThree<String, Date, Long> res = beginTX(status -> {
             // 使用数据库行级锁保证并发性
             Map<String, Object> params = new HashMap<>();
@@ -2949,9 +2952,9 @@ public class Jdbc extends AbstractDataSource {
             // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
             return newConnectionExecute(connection -> {
                 // 这里使用新的连接获取数据库行级锁
-                final SQLQueryFactory tmpDSL = new SQLQueryFactory(newConfiguration.get(), () -> connection);
+                final SQLQueryFactory dsl = new SQLQueryFactory(newConfiguration.get(), () -> connection);
                 // 使用数据库行级锁保证并发性
-                long lock = tmpDSL.update(sysLock)
+                long lock = dsl.update(sysLock)
                         .set(sysLock.lockCount, sysLock.lockCount.add(1))
                         .set(sysLock.updateAt, Expressions.currentTimestamp())
                         .where(sysLock.lockName.eq(lockName))
@@ -2961,8 +2964,8 @@ public class Jdbc extends AbstractDataSource {
                     try {
                         // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
                         newConnectionExecute(innerCon -> {
-                            SQLQueryFactory dsl = new SQLQueryFactory(newConfiguration.get(), () -> innerCon);
-                            return dsl.insert(sysLock)
+                            SQLQueryFactory tmpDSL = new SQLQueryFactory(newConfiguration.get(), () -> innerCon);
+                            return tmpDSL.insert(sysLock)
                                     .set(sysLock.id, SnowFlake.SNOW_FLAKE.nextId())
                                     .set(sysLock.lockName, lockName)
                                     .set(sysLock.lockCount, 0L)
@@ -2979,7 +2982,7 @@ public class Jdbc extends AbstractDataSource {
                     // 等待锁数据插入完成
                     final int maxRetryCount = 128;
                     for (int i = 0; i < maxRetryCount; i++) {
-                        Long id = tmpDSL.select(sysLock.id).from(sysLock).where(sysLock.lockName.eq(lockName)).fetchFirst();
+                        Long id = dsl.select(sysLock.id).from(sysLock).where(sysLock.lockName.eq(lockName)).fetchFirst();
                         if (id != null) {
                             break;
                         }
@@ -2994,7 +2997,7 @@ public class Jdbc extends AbstractDataSource {
                         }
                     }
                     // 使用数据库行级锁保证并发性
-                    lock = tmpDSL.update(sysLock)
+                    lock = dsl.update(sysLock)
                             .set(sysLock.lockCount, sysLock.lockCount.add(1))
                             .set(sysLock.updateAt, Expressions.currentTimestamp())
                             .where(sysLock.lockName.eq(lockName))
