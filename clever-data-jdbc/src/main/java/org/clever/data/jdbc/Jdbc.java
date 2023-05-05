@@ -1,16 +1,21 @@
 package org.clever.data.jdbc;
 
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.sql.Configuration;
+import com.querydsl.sql.SQLBaseListener;
+import com.querydsl.sql.SQLListenerContext;
+import com.querydsl.sql.SQLQueryFactory;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import lombok.Data;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
+import org.clever.core.SystemClock;
 import org.clever.core.codec.EncodeDecodeUtils;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.BusinessCodeUtils;
@@ -33,6 +38,7 @@ import org.clever.data.jdbc.dialects.DialectFactory;
 import org.clever.data.jdbc.listener.JdbcListeners;
 import org.clever.data.jdbc.listener.OracleDbmsOutputListener;
 import org.clever.data.jdbc.support.*;
+import org.clever.jdbc.UncategorizedSQLException;
 import org.clever.jdbc.core.*;
 import org.clever.jdbc.core.namedparam.EmptySqlParameterSource;
 import org.clever.jdbc.core.namedparam.MapSqlParameterSource;
@@ -43,6 +49,7 @@ import org.clever.jdbc.datasource.DataSourceTransactionManager;
 import org.clever.jdbc.support.GeneratedKeyHolder;
 import org.clever.jdbc.support.JdbcUtils;
 import org.clever.jdbc.support.KeyHolder;
+import org.clever.jdbc.support.SQLExceptionTranslator;
 import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.TransactionStatus;
 import org.clever.transaction.annotation.Isolation;
@@ -64,6 +71,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static org.clever.data.jdbc.support.query.QSysLock.sysLock;
 
 /**
  * Jdbc 数据库操作封装
@@ -2692,7 +2701,7 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 返回下一个序列值
+     * 返回下一个序列值(需要数据库支持“序列”特性)
      *
      * @param seqName 序列名称
      */
@@ -2899,7 +2908,140 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
-     * 借助数据库表实现的排他锁 <br/>
+     * 借助数据库行级锁实现的分布式排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   lock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *      return result;
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public <T> T tryLock(String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
+        Assert.isNotBlank(lockName, "参数 lockName 不能为空");
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为空");
+        final long startTime = SystemClock.now();
+        final boolean wait = waitSeconds > 0;
+        final Supplier<Configuration> newConfiguration = () -> {
+            Configuration configuration = new Configuration(QueryDSL.getSQLTemplates(dbType));
+            if (wait) {
+                configuration.addListener(new SQLBaseListener() {
+                    @Override
+                    public void preExecute(SQLListenerContext context) {
+                        try {
+                            int timeout = waitSeconds - ((int) ((SystemClock.now() - startTime) / 1000));
+                            context.getPreparedStatement().setQueryTimeout(Math.max(1, timeout));
+                        } catch (SQLException e) {
+                            throw ExceptionUtils.unchecked(e);
+                        }
+                    }
+                });
+            }
+            return configuration;
+        };
+        try {
+            // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
+            return newConnectionExecute(connection -> {
+                // 这里使用新的连接获取数据库行级锁
+                final SQLQueryFactory tmpDSL = new SQLQueryFactory(newConfiguration.get(), () -> connection);
+                // 使用数据库行级锁保证并发性
+                long lock = tmpDSL.update(sysLock)
+                        .set(sysLock.lockCount, sysLock.lockCount.add(1))
+                        .set(sysLock.updateAt, Expressions.currentTimestamp())
+                        .where(sysLock.lockName.eq(lockName))
+                        .execute();
+                // 锁数据不存在就创建锁数据
+                if (lock <= 0) {
+                    try {
+                        // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
+                        newConnectionExecute(innerCon -> {
+                            SQLQueryFactory dsl = new SQLQueryFactory(newConfiguration.get(), () -> innerCon);
+                            return dsl.insert(sysLock)
+                                    .set(sysLock.id, SnowFlake.SNOW_FLAKE.nextId())
+                                    .set(sysLock.lockName, lockName)
+                                    .set(sysLock.lockCount, 0L)
+                                    .set(sysLock.description, "系统自动生成")
+                                    .set(sysLock.createAt, Expressions.currentTimestamp())
+                                    .execute();
+                        });
+                    } catch (DuplicateKeyException e) {
+                        // 插入数据失败: 唯一约束错误
+                        log.warn("插入 {} 表失败: {}", sysLock.getTableName(), e.getMessage());
+                    } catch (DataAccessException e) {
+                        log.warn("插入 {} 表失败", sysLock.getTableName(), e);
+                    }
+                    // 等待锁数据插入完成
+                    final int maxRetryCount = 128;
+                    for (int i = 0; i < maxRetryCount; i++) {
+                        Long id = tmpDSL.select(sysLock.id).from(sysLock).where(sysLock.lockName.eq(lockName)).fetchFirst();
+                        if (id != null) {
+                            break;
+                        }
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException ignored) {
+                            Thread.yield();
+                        }
+                        if (wait && (waitSeconds * 1000L) > (SystemClock.now() - startTime)) {
+                            // 执行同步代码块(未得到锁)
+                            return syncBlock.apply(false);
+                        }
+                    }
+                    // 使用数据库行级锁保证并发性
+                    lock = tmpDSL.update(sysLock)
+                            .set(sysLock.lockCount, sysLock.lockCount.add(1))
+                            .set(sysLock.updateAt, Expressions.currentTimestamp())
+                            .where(sysLock.lockName.eq(lockName))
+                            .execute();
+                    if (lock <= 0) {
+                        throw new RuntimeException(sysLock.getTableName() + " 表数据不存在(未知的异常)");
+                    }
+                }
+                // 执行同步代码块
+                T result = syncBlock.apply(true);
+                connection.commit();
+                return result;
+            });
+        } catch (Exception e) {
+            // 超时异常
+            if (ExceptionUtils.isCausedBy(e, Collections.singletonList(SQLTimeoutException.class))) {
+                // 执行同步代码块(未得到锁)
+                return syncBlock.apply(false);
+            }
+            throw ExceptionUtils.unchecked(e);
+        }
+    }
+
+    /**
+     * 借助数据库行级锁实现的分布式排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   lock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public void tryLock(String lockName, int waitSeconds, Consumer<Boolean> syncBlock) {
+        tryLock(lockName, waitSeconds, locked -> {
+            syncBlock.accept(locked);
+            return null;
+        });
+    }
+
+    /**
+     * 借助数据库行级锁实现的分布式排他锁 <br/>
      * <b>此功能需要数据库表支持</b>
      * <pre>{@code
      *   lock("lockName", () -> {
@@ -2911,78 +3053,17 @@ public class Jdbc extends AbstractDataSource {
      * @param lockName  锁名称
      * @param syncBlock 同步代码块(可保证分布式串行执行)
      */
-    @SneakyThrows
     public <T> T lock(String lockName, Supplier<T> syncBlock) {
-        Assert.isNotBlank(lockName, "参数 lockName 不能为空");
-        Assert.notNull(syncBlock, "参数 syncBlock 不能为空");
-        final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
-        return jdbcOperations.execute((ConnectionCallback<T>) connection -> {
-            final String lockSql = "UPDATE sys_lock SET lock_count=lock_count+1, update_at=? WHERE lock_name=?";
-            final String insertSql = "INSERT INTO sys_lock (id, lock_name, lock_count, description, create_at) VALUES (?, ?, ?, ?, ?)";
-            final String selectSql = "SELECT id FROM sys_lock WHERE lock_name=?";
-            // 备份连接状态
-            int transactionIsolation = connection.getTransactionIsolation();
-            boolean autoCommit = connection.getAutoCommit();
-            try {
-                // 这里使用新的连接获取数据库行级锁
-                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-                connection.setAutoCommit(false);
-                // 使用数据库行级锁保证并发性
-                int lock = executeUpdate(connection, lockSql, new Object[]{new Date(), lockName});
-                // 锁数据不存在就创建锁数据
-                if (lock <= 0) {
-                    try {
-                        // 在一个新事物里新增锁数据(尽可能让其他事务能使用这个锁)
-                        jdbcOperations.execute((ConnectionCallback<Integer>) innerCon -> {
-                            long id = SnowFlake.SNOW_FLAKE.nextId();
-                            int change = executeUpdate(innerCon, insertSql, new Object[]{id, lockName, 0, "系统自动生成", new Date()});
-                            innerCon.commit();
-                            return change;
-                        });
-                    } catch (DuplicateKeyException e) {
-                        // 插入数据失败: 唯一约束错误
-                        log.warn("插入 sys_lock 表失败: {}", e.getMessage());
-                    } catch (DataAccessException e) {
-                        log.warn("插入 sys_lock 表失败", e);
-                    }
-                    // 等待锁数据插入完成
-                    final int maxRetryCount = 128;
-                    for (int i = 0; i < maxRetryCount; i++) {
-                        List<Map<String, Object>> list = executeQuery(connection, selectSql, new Object[]{lockName});
-                        if (list != null && !list.isEmpty()) {
-                            break;
-                        }
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException ignored) {
-                            Thread.yield();
-                        }
-                    }
-                    // 使用数据库行级锁保证并发性
-                    lock = executeUpdate(connection, lockSql, new Object[]{new Date(), lockName});
-                    if (lock <= 0) {
-                        throw new RuntimeException("sys_lock 表数据不存在(未知的异常)");
-                    }
-                }
-                // 执行同步代码块
-                T result = syncBlock.get();
-                connection.commit();
-                return result;
-            } catch (Exception e) {
-                // 异常回滚事务
-                connection.rollback();
-                throw ExceptionUtils.unchecked(e);
-            } finally {
-                // 还原连接状态后关闭连接
-                connection.setTransactionIsolation(transactionIsolation);
-                connection.setAutoCommit(autoCommit);
-                connection.close();
+        return tryLock(lockName, -1, locked -> {
+            if (!locked) {
+                throw new RuntimeException("获取锁失败(未知的异常)");
             }
+            return syncBlock.get();
         });
     }
 
     /**
-     * 借助数据库表实现的排他锁 <br/>
+     * 借助数据库行级锁实现的分布式排他锁 <br/>
      * <b>此功能需要数据库表支持</b>
      * <pre>{@code
      *   lock("lockName", () -> {
@@ -2993,7 +3074,6 @@ public class Jdbc extends AbstractDataSource {
      * @param lockName  锁名称
      * @param syncBlock 同步代码块(可保证分布式串行执行)
      */
-    @SneakyThrows
     public void lock(String lockName, Runnable syncBlock) {
         lock(lockName, () -> {
             syncBlock.run();
@@ -3007,6 +3087,46 @@ public class Jdbc extends AbstractDataSource {
 
     JdbcListeners getListeners() {
         return listeners;
+    }
+
+    /**
+     * 在一个“新连接”、“新事物”中执行数据库操作(会自动处理事务“回滚”&“提交”)
+     */
+    private <T> T newConnectionExecute(ConnectionCallback<T> callback) {
+        Assert.notNull(callback, "参数 callback 不能为空");
+        try (Connection connection = dataSource.getConnection()) {
+            // log.info("connection -> {}", connection);
+            // 备份连接状态
+            int transactionIsolation = connection.getTransactionIsolation();
+            boolean autoCommit = connection.getAutoCommit();
+            try {
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                connection.setAutoCommit(false);
+                T result = callback.doInConnection(connection);
+                connection.commit();
+                return result;
+            } catch (Throwable e) {
+                // 异常回滚事务
+                if (connection.isClosed()) {
+                    connection.rollback();
+                }
+                SQLException sqlException = ExceptionUtils.getCause(e, SQLException.class);
+                if (sqlException == null) {
+                    throw ExceptionUtils.unchecked(e);
+                }
+                throw sqlException;
+            } finally {
+                // 还原连接状态后关闭连接
+                if (connection.isClosed()) {
+                    connection.setTransactionIsolation(transactionIsolation);
+                    connection.setAutoCommit(autoCommit);
+                }
+            }
+        } catch (SQLException e) {
+            SQLExceptionTranslator translator = jdbcTemplate.getJdbcTemplate().getExceptionTranslator();
+            DataAccessException dae = translator.translate("newConnectionExecute", null, e);
+            throw (dae != null ? dae : new UncategorizedSQLException("newConnectionExecute", null, e));
+        }
     }
 
     /**
@@ -3248,7 +3368,7 @@ public class Jdbc extends AbstractDataSource {
             pss.setValues(preparedStatement);
         }
         // 执行sql
-        SqlLoggerUtils.printfSql(sql,  params);
+        SqlLoggerUtils.printfSql(sql, params);
         return preparedStatement.executeUpdate();
     }
 
@@ -3268,7 +3388,7 @@ public class Jdbc extends AbstractDataSource {
             pss.setValues(preparedStatement);
         }
         // 执行sql
-        SqlLoggerUtils.printfSql(sql,  params);
+        SqlLoggerUtils.printfSql(sql, params);
         try (ResultSet resultSet = preparedStatement.executeQuery()) {
             MapRowMapper mapRowMapper = new MapRowMapper(RenameStrategy.None);
             RowMapperResultSetExtractor<Map<String, Object>> resultExtractor = new RowMapperResultSetExtractor<>(mapRowMapper);

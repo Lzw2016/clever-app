@@ -2,6 +2,7 @@ package org.clever.core.exception;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
 
 /**
  * 作者：lizw <br/>
@@ -42,10 +43,11 @@ public class ExceptionUtils {
      *
      * @param ex                    异常对象
      * @param causeExceptionClasses 异常类型数组
-     * @return 如果异常对象(ex)的内部异常含有异常类型数组(causeExceptionClasses)中的异常类型返回true，否则返回false
+     * @return 如果异常对象(ex)的内部异常含有异常类型集合(causeExceptionClasses)中的异常类型返回true，否则返回false
      */
-    @SuppressWarnings("unchecked")
-    public static boolean isCausedBy(Throwable ex, Class<? extends Throwable>... causeExceptionClasses) {
+    public static boolean isCausedBy(Throwable ex, Collection<Class<? extends Throwable>> causeExceptionClasses) {
+        final int maxDepth = 256;
+        int depth = 0;
         Throwable cause = ex.getCause();
         while (cause != null) {
             for (Class<? extends Throwable> causeClass : causeExceptionClasses) {
@@ -54,7 +56,36 @@ public class ExceptionUtils {
                 }
             }
             cause = cause.getCause();
+            depth++;
+            if (depth > maxDepth) {
+                break;
+            }
         }
         return false;
+    }
+
+    /**
+     * 如果异常是由某些底层的异常引起，返回这个底层异常<br/>
+     *
+     * @param ex    异常对象
+     * @param clazz 异常类型
+     * @return 如果异常对象(ex)的内部异常含有异常类型(clazz)则返回这个异常对象，否则返回null
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Throwable> T getCause(Throwable ex, Class<T> clazz) {
+        final int maxDepth = 256;
+        int depth = 0;
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            if (clazz.isInstance(cause)) {
+                return (T) cause;
+            }
+            cause = cause.getCause();
+            depth++;
+            if (depth > maxDepth) {
+                break;
+            }
+        }
+        return null;
     }
 }

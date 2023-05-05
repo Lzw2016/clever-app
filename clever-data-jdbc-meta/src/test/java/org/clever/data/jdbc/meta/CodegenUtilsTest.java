@@ -35,4 +35,21 @@ public class CodegenUtilsTest {
         log.info("-->");
         jdbc.close();
     }
+
+    @Test
+    public void t02() {
+        Jdbc jdbc = BaseTest.newMysql();
+        CodegenCodeConfig config = new CodegenCodeConfig()
+                .setOutDir("../clever-data-jdbc/src/main/java/org/clever/data/jdbc/support")
+                .setPackageName("org.clever.data.jdbc.support")
+                .addTable("biz_code")
+                .addTable("auto_increment_id")
+                .addTable("sys_lock")
+                .addSchema("public")
+                .addSchema("test")
+                .addSchema("__occupyPosition");
+        CodegenUtils.genCode(jdbc, config);
+        log.info("-->");
+        jdbc.close();
+    }
 }

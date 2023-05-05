@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.tuples.TupleOne;
+import org.clever.jdbc.core.ConnectionCallback;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class JdbcTest {
     );
 
     private Jdbc newJdbc() {
-         return BaseTest.newMysql();
+        return BaseTest.newMysql();
 //        return BaseTest.newPostgresql();
     }
 
@@ -172,11 +173,55 @@ public class JdbcTest {
         for (Future<?> future : futures) {
             try {
                 future.get();
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.info("异常", e);
             }
         }
         // sum -> 10000
         log.info("sum -> {}", sum.getValue1());
+        jdbc.close();
+    }
+
+    @SneakyThrows
+    @Test
+    public void t08() {
+        final String lockName = "t08";
+        Jdbc jdbc = newJdbc();
+        Thread thread = new Thread(() -> {
+            jdbc.tryLock(lockName, -1, locked -> {
+                log.info("### 1 locked={}", locked);
+                try {
+                    Thread.sleep(10_000);
+                } catch (InterruptedException ignored) {
+                    Thread.yield();
+                }
+            });
+        });
+        thread.start();
+        Thread.sleep(1_000);
+        Thread thread2 = new Thread(() -> {
+            jdbc.tryLock(lockName, 3, locked -> {
+                log.info("### 2 locked={}", locked);
+            });
+        });
+        thread2.start();
+        thread.join();
+        thread2.join();
+        jdbc.close();
+    }
+
+    @Test
+    public void t09() {
+        final String lockName = "t09";
+        Jdbc jdbc = newJdbc();
+        jdbc.beginTX(status -> {
+            jdbc.getJdbcTemplate().getJdbcOperations().execute((ConnectionCallback<Void>) connection -> {
+                log.info("connection -> {}", connection);
+                jdbc.lock(lockName, () -> log.info("lock_1"));
+                jdbc.lock(lockName, () -> log.info("lock_2"));
+                return null;
+            });
+        });
         jdbc.close();
     }
 }
