@@ -3112,7 +3112,7 @@ public class Jdbc extends AbstractDataSource {
                 return result;
             } catch (Throwable e) {
                 // 异常回滚事务
-                if (connection.isClosed()) {
+                if (!connection.isClosed()) {
                     connection.rollback();
                 }
                 SQLException sqlException = ExceptionUtils.getCause(e, SQLException.class);
@@ -3122,7 +3122,7 @@ public class Jdbc extends AbstractDataSource {
                 throw sqlException;
             } finally {
                 // 还原连接状态后关闭连接
-                if (connection.isClosed()) {
+                if (!connection.isClosed()) {
                     connection.setTransactionIsolation(transactionIsolation);
                     connection.setAutoCommit(autoCommit);
                 }
