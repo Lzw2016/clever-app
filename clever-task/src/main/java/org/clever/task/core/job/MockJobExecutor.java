@@ -29,7 +29,8 @@ public class MockJobExecutor implements JobExecutor {
 
     @Override
     public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
-        // Thread.sleep(4_500);
+        // Thread.sleep(5_000);
+        // log.info("#### ---> 模拟执行定时任务 | name={} | time={}", job.getName(), DateUtils.formatToString(dbNow, "HH:mm:ss.SSS"));
         if (count.incrementAndGet() % 1000 == 0) {
             log.info("#### ---> 模拟执行定时任务 | name={} | time={}", job.getName(), DateUtils.formatToString(dbNow, "HH:mm:ss.SSS"));
         }
