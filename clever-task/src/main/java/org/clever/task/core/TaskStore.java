@@ -584,7 +584,7 @@ public class TaskStore {
                 // 使用数据库行级锁保证并发性
                 long lock = dsl.update(taskSchedulerLock)
                         .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
-                        .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
+                        .set(taskSchedulerLock.updateAt, Expressions.currentTimestamp())
                         .where(taskSchedulerLock.lockName.eq(lockName))
                         .execute();
                 // 锁数据不存在就创建锁数据
@@ -628,7 +628,7 @@ public class TaskStore {
                     // 使用数据库行级锁保证并发性
                     lock = dsl.update(taskSchedulerLock)
                             .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
-                            .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
+                            .set(taskSchedulerLock.updateAt, Expressions.currentTimestamp())
                             .where(taskSchedulerLock.lockName.eq(lockName))
                             .execute();
                     if (lock <= 0) {
