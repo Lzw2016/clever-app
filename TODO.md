@@ -586,7 +586,12 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 ### clever-task
 - [OK] 支持多集群 
 - [OK] 支持动态配置任务以及触发器
-- [  ] 
+- [  ] 中断定时任务
+- [  ] 更新任务信息
+- [  ] 数据完整性校验、一致性校验
+- [  ] 支持控制任务执行节点：指定节点优先、固定节点白名单、固定节点黑名单
+- [  ] 支持负载均衡策略：抢占、随机、轮询、一致性HASH
+- [  ] 支持任务类型：java调用任务、Http任务、js脚本任务、shell脚本任务
 
 ### clever-task-ext
 未开始
