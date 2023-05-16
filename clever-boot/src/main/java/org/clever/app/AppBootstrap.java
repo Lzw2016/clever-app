@@ -148,8 +148,6 @@ public abstract class AppBootstrap {
         // 系统关闭时的任务处理
         AppShutdownHook.addShutdownHook(javalin::stop, OrderIncrement.NORMAL, "停止WebServer");
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Double.MAX_VALUE, "停止日志模块");
-        // 系统启动完成日志
-        startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
         // 启动开机任务
         StartupTaskBootstrap startupTaskBootstrap = StartupTaskBootstrap.create(rootPath, environment);
         ClassLoader classLoader = AppContextHolder.getBean("hotReloadClassLoader", ClassLoader.class);
@@ -160,5 +158,7 @@ public abstract class AppBootstrap {
         // 分布式定时任务
         TaskBootstrap taskBootstrap = TaskBootstrap.create(environment);
         taskBootstrap.start();
+        // 系统启动完成日志
+        startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
     }
 }

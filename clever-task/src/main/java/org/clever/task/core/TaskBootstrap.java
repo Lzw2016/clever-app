@@ -33,6 +33,7 @@ public class TaskBootstrap {
         // 打印配置日志
         List<String> logs = new ArrayList<>();
         logs.add("timed-task: ");
+        logs.add("  enable                    : " + schedulerConfig.isEnable());
         logs.add("  jdbcName                  : " + schedulerConfig.getJdbcName());
         logs.add("  namespace                 : " + schedulerConfig.getNamespace());
         logs.add("  instanceName              : " + schedulerConfig.getInstanceName());
