@@ -154,7 +154,7 @@ web:
       refreshTokenName: 'refresh-token'
 
 timed-task:
-  enable: true
+  enable: false
   jdbcName: 'mysql'
   namespace: 'default'
   instanceName: 'node01'

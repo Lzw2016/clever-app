@@ -22,6 +22,6 @@ public class MySqlDialect extends AbstractDialect {
 
     @Override
     public TupleTwo<String, Map<String, Object>> currentDateTimeSql() {
-        return TupleTwo.creat("select now(6) from dual", new HashMap<>());
+        return TupleTwo.creat("select now(3) from dual", new HashMap<>());
     }
 }

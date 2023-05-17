@@ -34,11 +34,6 @@ public class JavaJobExecutor implements JobExecutor {
     }
 
     @Override
-    public int order() {
-        return 0;
-    }
-
-    @Override
     public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
         final TaskJavaJob javaJob = taskStore.beginReadOnlyTX(status -> taskStore.getJavaJob(scheduler.getNamespace(), job.getId()));
         if (javaJob == null) {

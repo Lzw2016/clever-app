@@ -30,6 +30,10 @@ public class QTaskShellJob extends RelationalPathBase<TaskShellJob> {
     public final NumberPath<Long> jobId = createNumber("jobId", Long.class);
     /** shell脚本类型：bash|sh|ash|powershell|cmd|python|node|deno|php */
     public final StringPath shellType = createString("shellType");
+    /** 执行终端的字符集编码，如：“UTF-8” */
+    public final StringPath shellCharset = createString("shellCharset");
+    /** 执行超时时间，单位：秒，默认：“10分钟” */
+    public final NumberPath<Integer> shellTimeout = createNumber("shellTimeout", Integer.class);
     /** 文件内容 */
     public final StringPath content = createString("content");
     /** 读写权限：0-可读可写，1-只读 */
@@ -40,7 +44,7 @@ public class QTaskShellJob extends RelationalPathBase<TaskShellJob> {
     public final DateTimePath<Date> updateAt = createDateTime("updateAt", Date.class);
 
     public QTaskShellJob(String variable) {
-        super(TaskShellJob.class, forVariable(variable), "", "task_shell_job");
+        super(TaskShellJob.class, forVariable(variable), "test", "task_shell_job");
         addMetadata();
     }
 
@@ -55,12 +59,12 @@ public class QTaskShellJob extends RelationalPathBase<TaskShellJob> {
     }
 
     public QTaskShellJob(Path<? extends TaskShellJob> path) {
-        super(path.getType(), path.getMetadata(), "", "task_shell_job");
+        super(path.getType(), path.getMetadata(), "test", "task_shell_job");
         addMetadata();
     }
 
     public QTaskShellJob(PathMetadata metadata) {
-        super(TaskShellJob.class, metadata, "", "task_shell_job");
+        super(TaskShellJob.class, metadata, "test", "task_shell_job");
         addMetadata();
     }
 
@@ -69,9 +73,11 @@ public class QTaskShellJob extends RelationalPathBase<TaskShellJob> {
         addMetadata(namespace, ColumnMetadata.named("namespace").withIndex(2).ofType(Types.VARCHAR).withSize(63));
         addMetadata(jobId, ColumnMetadata.named("job_id").withIndex(3).ofType(Types.BIGINT).withSize(19));
         addMetadata(shellType, ColumnMetadata.named("shell_type").withIndex(4).ofType(Types.VARCHAR).withSize(15));
-        addMetadata(content, ColumnMetadata.named("content").withIndex(5).ofType(Types.LONGVARCHAR).withSize(65535));
-        addMetadata(readOnly, ColumnMetadata.named("read_only").withIndex(6).ofType(Types.TINYINT).withSize(3));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(7).ofType(Types.TIMESTAMP).withSize(3));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(shellCharset, ColumnMetadata.named("shell_charset").withIndex(5).ofType(Types.VARCHAR).withSize(15));
+        addMetadata(shellTimeout, ColumnMetadata.named("shell_timeout").withIndex(6).ofType(Types.INTEGER).withSize(10));
+        addMetadata(content, ColumnMetadata.named("content").withIndex(7).ofType(Types.LONGVARCHAR).withSize(65535));
+        addMetadata(readOnly, ColumnMetadata.named("read_only").withIndex(8).ofType(Types.TINYINT).withSize(3));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(9).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(10).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

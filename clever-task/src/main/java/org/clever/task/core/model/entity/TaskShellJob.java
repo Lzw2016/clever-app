@@ -18,6 +18,10 @@ public class TaskShellJob implements Serializable {
     private Long jobId;
     /** shell脚本类型：bash|sh|ash|powershell|cmd|python|node|deno|php */
     private String shellType;
+    /** 执行终端的字符集编码，如：“UTF-8” */
+    private String shellCharset;
+    /** 执行超时时间，单位：秒，默认：“10分钟” */
+    private Integer shellTimeout;
     /** 文件内容 */
     private String content;
     /** 读写权限：0-可读可写，1-只读 */

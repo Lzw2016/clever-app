@@ -550,7 +550,6 @@ DAO数据访问层
 - [OK] MVC自定义事务@Transactional
 - [  ] WebSocket支持(配置在mvc下,验证:new对象后ClassLoader对象是否会被GC回收)
 - [  ] 精简代码 & 简化逻辑 & 整合相同功能代码 & 重构代码 -> 删除 ReadOnlyHttpHeaders HttpHeaders
-- [  ]
 - [OK] 事务提交或者回滚异常后不会向上抛出异常
 - [OK] 全局的404默认返回处理
 - [  ]
@@ -592,6 +591,8 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 - [  ] 支持控制任务执行节点：指定节点优先、固定节点白名单、固定节点黑名单
 - [  ] 支持负载均衡策略：抢占、随机、轮询、一致性HASH
 - [  ] 支持任务类型：java调用任务、Http任务、js脚本任务、shell脚本任务
+- [  ] 定时任务调度平台API接口
+- [  ] 定时任务调度平台Web页面
 
 ### clever-task-ext
 未开始

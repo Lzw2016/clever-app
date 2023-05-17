@@ -28,11 +28,6 @@ public class HttpJobExecutor implements JobExecutor {
     }
 
     @Override
-    public int order() {
-        return 0;
-    }
-
-    @Override
     public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
         TaskHttpJob httpJob = taskStore.beginReadOnlyTX(status -> taskStore.getHttpJob(scheduler.getNamespace(), job.getId()));
         if (httpJob == null) {

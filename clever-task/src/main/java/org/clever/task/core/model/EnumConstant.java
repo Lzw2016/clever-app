@@ -1,8 +1,6 @@
 package org.clever.task.core.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 作者：lizw <br/>
@@ -229,17 +227,17 @@ public interface EnumConstant {
     /**
      * shell脚本类型对应的command命令
      */
-    Map<String, String> SHELL_TYPE_COMMAND_MAPPING = Collections.unmodifiableMap(
-            new HashMap<String, String>() {{
-                put(SHELL_JOB_SHELL_TYPE_BASH, "sh");
-                put(SHELL_JOB_SHELL_TYPE_SH, "sh");
-                put(SHELL_JOB_SHELL_TYPE_ASH, "sh");
-                put(SHELL_JOB_SHELL_TYPE_POWERSHELL, "powershell");
-                put(SHELL_JOB_SHELL_TYPE_CMD, "cmd");
-                put(SHELL_JOB_SHELL_TYPE_PYTHON, "python");
-                put(SHELL_JOB_SHELL_TYPE_NODE, "node");
-                put(SHELL_JOB_SHELL_TYPE_DENO, "deno run");
-                put(SHELL_JOB_SHELL_TYPE_PHP, "php");
+    Map<String, List<String>> SHELL_TYPE_COMMAND_MAPPING = Collections.unmodifiableMap(
+            new HashMap<String, List<String>>() {{
+                put(SHELL_JOB_SHELL_TYPE_BASH, Arrays.asList("sh", "-c"));
+                put(SHELL_JOB_SHELL_TYPE_SH, Arrays.asList("sh", "-c"));
+                put(SHELL_JOB_SHELL_TYPE_ASH, Arrays.asList("sh", "-c"));
+                put(SHELL_JOB_SHELL_TYPE_POWERSHELL, Collections.singletonList("powershell"));
+                put(SHELL_JOB_SHELL_TYPE_CMD, Arrays.asList("cmd", "/q", "/c"));
+                put(SHELL_JOB_SHELL_TYPE_PYTHON, Collections.singletonList("python"));
+                put(SHELL_JOB_SHELL_TYPE_NODE, Collections.singletonList("node"));
+                put(SHELL_JOB_SHELL_TYPE_DENO, Arrays.asList("deno", "run"));
+                put(SHELL_JOB_SHELL_TYPE_PHP, Collections.singletonList("php"));
             }}
     );
 }

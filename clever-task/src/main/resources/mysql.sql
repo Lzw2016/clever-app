@@ -160,6 +160,8 @@ create table task_shell_job
     namespace           varchar(63)     not null                                                comment '命名空间',
     job_id              bigint          not null                                                comment '任务ID',
     shell_type          varchar(15)     not null                                                comment 'shell脚本类型：bash|sh|ash|powershell|cmd|python|node|deno|php',
+    shell_charset       varchar(15)                                                             comment '执行终端的字符集编码，如：“UTF-8”',
+    shell_timeout       int             not null        default 600                             comment '执行超时时间，单位：秒，默认：“10分钟”',
     content             text                                                                    comment '文件内容',
     `read_only`         tinyint         not null        default 0                               comment '读写权限：0-可读可写，1-只读',
     create_at           datetime(3)     not null        default current_timestamp(3)            comment '创建时间',

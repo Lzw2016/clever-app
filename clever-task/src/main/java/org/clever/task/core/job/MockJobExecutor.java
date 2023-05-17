@@ -23,11 +23,6 @@ public class MockJobExecutor implements JobExecutor {
     }
 
     @Override
-    public int order() {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
     public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
         // Thread.sleep(5_000);
         // log.info("#### ---> 模拟执行定时任务 | name={} | time={}", job.getName(), DateUtils.formatToString(dbNow, "HH:mm:ss.SSS"));

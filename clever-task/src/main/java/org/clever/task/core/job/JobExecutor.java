@@ -21,7 +21,9 @@ public interface JobExecutor {
     /**
      * 定时任务执行器优先级(值越小越优先)
      */
-    int order();
+    default int order() {
+        return 0;
+    }
 
     /**
      * 执行定时任务实现
