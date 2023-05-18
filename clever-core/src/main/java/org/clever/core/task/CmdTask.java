@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.OrderIncrement;
+import org.clever.core.PlatformOS;
 import org.clever.core.SystemClock;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.util.Assert;
@@ -145,10 +146,9 @@ public class CmdTask {
 
     protected List<String> getCmdArray() {
         String[] cmdArray;
-        String osInfo = System.getProperty("os.name").toLowerCase();
-        if (osInfo.contains("mac os")) {
+        if (PlatformOS.isMacOS()) {
             cmdArray = MACOS_CMD;
-        } else if (osInfo.contains("windows")) {
+        } else if (PlatformOS.isWindows()) {
             cmdArray = WINDOWS_CMD;
         } else {
             cmdArray = LINUX_CMD;
@@ -158,10 +158,9 @@ public class CmdTask {
 
     protected String getCharset() {
         String charset;
-        String osInfo = System.getProperty("os.name").toLowerCase();
-        if (osInfo.contains("mac os")) {
+        if (PlatformOS.isMacOS()) {
             charset = MACOS_CHARSET;
-        } else if (osInfo.contains("windows")) {
+        } else if (PlatformOS.isWindows()) {
             charset = WINDOWS_CHARSET;
         } else {
             charset = LINUX_CHARSET;
@@ -174,10 +173,9 @@ public class CmdTask {
 
     public static String getCmd(StartupTaskConfig.CmdConfig cmdConfig) {
         String cmd;
-        String osInfo = System.getProperty("os.name").toLowerCase();
-        if (osInfo.contains("mac os")) {
+        if (PlatformOS.isMacOS()) {
             cmd = cmdConfig.getMacos();
-        } else if (osInfo.contains("windows")) {
+        } else if (PlatformOS.isWindows()) {
             cmd = cmdConfig.getWindows();
         } else {
             cmd = cmdConfig.getLinux();

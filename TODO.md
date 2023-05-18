@@ -585,6 +585,7 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 ### clever-task
 - [OK] 支持多集群 
 - [OK] 支持动态配置任务以及触发器
+- [  ] 使用时间轮算法改良定时任务调度
 - [  ] 中断定时任务
 - [  ] 更新任务信息
 - [  ] 数据完整性校验、一致性校验

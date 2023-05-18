@@ -6,6 +6,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.DateUtils;
+import org.clever.core.PlatformOS;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.exception.JobExecutorException;
 import org.clever.task.core.job.JobExecutor;
@@ -152,10 +153,9 @@ public class ShellJobExecutor implements JobExecutor {
 
     protected String getCharset() {
         String charset;
-        String osInfo = System.getProperty("os.name").toLowerCase();
-        if (osInfo.contains("mac os")) {
+        if (PlatformOS.isMacOS()) {
             charset = "UTF-8";
-        } else if (osInfo.contains("windows")) {
+        } else if (PlatformOS.isWindows()) {
             charset = "GBK";
         } else {
             charset = "UTF-8";
