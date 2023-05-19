@@ -5,12 +5,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.OrderIncrement;
 import org.clever.core.exception.ExceptionUtils;
-import org.clever.core.job.DaemonExecutor;
+import org.clever.core.job.GlobalJob;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.util.Assert;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 作者：lizw <br/>
@@ -23,8 +26,9 @@ public class TimedTask {
     private final String clazz;
     private final String method;
     private final ClassLoader classLoader;
-    private final DaemonExecutor daemonExecutor;
-    private volatile boolean started = false;
+    private final GlobalJob job;
+    private ScheduledFuture<?> future;
+    private boolean registeredShutdownHook = false;
 
     public TimedTask(String name, Duration interval, String clazz, String method, ClassLoader classLoader) {
         Assert.notNull(interval, "参数 interval 不能为null");
@@ -44,21 +48,33 @@ public class TimedTask {
             throw ExceptionUtils.unchecked(e);
         }
         ReflectionsUtils.getStaticMethod(cls, this.method, true);
-        this.daemonExecutor = new DaemonExecutor(StringUtils.isBlank(this.name) ? cls.getSimpleName() + "@" + this.method : this.name);
+        this.job = new GlobalJob() {
+            @Override
+            protected void internalExecute() throws Exception {
+                Class<?> clazz = TimedTask.this.classLoader.loadClass(TimedTask.this.clazz);
+                Method method = ReflectionsUtils.getStaticMethod(clazz, TimedTask.this.method, true);
+                method.invoke(null);
+            }
+
+            @Override
+            protected void exceptionHandle(Exception e) {
+                log.error("执行定时任务失败: [{}]", TimedTask.this.name, e);
+            }
+        };
     }
 
-    public void start() {
-        Assert.isFalse(started, "任务已经启动，不可重复启动");
-        started = true;
-        daemonExecutor.scheduleAtFixedRate(() -> {
-            try {
-                Class<?> clazz = classLoader.loadClass(this.clazz);
-                Method method = ReflectionsUtils.getStaticMethod(clazz, this.method, true);
-                method.invoke(null);
-            } catch (Exception e) {
-                log.error("执行定时任务失败: [{}]", name, e);
-            }
-        }, interval.toMillis());
-        AppShutdownHook.addShutdownHook(daemonExecutor::stop, OrderIncrement.NORMAL, "停止开机任务: " + this.name);
+    public void start(ScheduledExecutorService scheduled) {
+        stop();
+        future = scheduled.scheduleAtFixedRate(this.job::execute, 0, interval.toMillis(), TimeUnit.MILLISECONDS);
+        if (!registeredShutdownHook) {
+            registeredShutdownHook = true;
+            AppShutdownHook.addShutdownHook(this::stop, OrderIncrement.NORMAL, "停止开机任务: " + this.name);
+        }
+    }
+
+    public void stop() {
+        if (future != null && !future.isDone() && !future.isCancelled()) {
+            future.cancel(true);
+        }
     }
 }

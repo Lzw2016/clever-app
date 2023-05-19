@@ -16,6 +16,10 @@ import java.util.List;
 public class StartupTaskConfig {
     public static final String PREFIX = "startup-task";
     /**
+     * 任务执行线程池大小
+     */
+    private int poolSize = 8;
+    /**
      * 定时任务
      */
     private List<TimedTaskConfig> timedTask = new ArrayList<>();

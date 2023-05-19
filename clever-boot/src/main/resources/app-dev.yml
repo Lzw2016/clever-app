@@ -1,4 +1,5 @@
 startup-task:
+  poolSize: 8
   timedTask:
     - name: '测试定时任务'
       enable: true

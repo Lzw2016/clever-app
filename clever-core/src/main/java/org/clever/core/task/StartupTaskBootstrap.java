@@ -3,10 +3,9 @@ package org.clever.core.task;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.boot.context.properties.bind.Binder;
-import org.clever.core.AppContextHolder;
-import org.clever.core.BannerUtils;
-import org.clever.core.ResourcePathUtils;
+import org.clever.core.*;
 import org.clever.core.env.Environment;
 import org.clever.util.Assert;
 
@@ -15,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * 作者：lizw <br/>
@@ -32,30 +33,29 @@ public class StartupTaskBootstrap {
         List<StartupTaskConfig.TimedTaskConfig> timedTask = config.getTimedTask();
         List<StartupTaskConfig.CmdTaskConfig> cmdTask = config.getCmdTask();
         List<String> logs = new ArrayList<>();
+        logs.add("poolSize    : " + config.getPoolSize());
         if (timedTask != null && !timedTask.isEmpty()) {
             logs.add("timedTask: ");
             for (StartupTaskConfig.TimedTaskConfig task : timedTask) {
-                logs.add("  - name    :" + task.getName());
-                logs.add("    enable  :" + task.isEnable());
-                logs.add("    interval:" + (task.getInterval() != null ? task.getInterval().toMillis() + "ms" : ""));
-                logs.add("    clazz   :" + task.getClazz());
-                logs.add("    method  :" + task.getMethod());
+                logs.add("  - name    : " + task.getName());
+                logs.add("    enable  : " + task.isEnable());
+                logs.add("    interval: " + (task.getInterval() != null ? task.getInterval().toMillis() + "ms" : ""));
+                logs.add("    clazz   : " + task.getClazz());
+                logs.add("    method  : " + task.getMethod());
             }
         }
         if (cmdTask != null && !cmdTask.isEmpty()) {
             logs.add("cmdTask: ");
             for (StartupTaskConfig.CmdTaskConfig task : cmdTask) {
-                logs.add("  - name    :" + task.getName());
-                logs.add("    enable  :" + task.isEnable());
-                logs.add("    async   :" + task.isAsync());
-                logs.add("    interval:" + (task.getInterval() != null ? task.getInterval().toMillis() + "ms" : ""));
-                logs.add("    workDir :" + ResourcePathUtils.getAbsolutePath(rootPath, task.getWorkDir()));
-                logs.add("    cmd     :" + CmdTask.getCmd(task.getCmd()));
+                logs.add("  - name    : " + task.getName());
+                logs.add("    enable  : " + task.isEnable());
+                logs.add("    async   : " + task.isAsync());
+                logs.add("    interval: " + (task.getInterval() != null ? task.getInterval().toMillis() + "ms" : ""));
+                logs.add("    workDir : " + ResourcePathUtils.getAbsolutePath(rootPath, task.getWorkDir()));
+                logs.add("    cmd     : " + CmdTask.getCmd(task.getCmd()));
             }
         }
-        if (!logs.isEmpty()) {
-            BannerUtils.printConfig(log, "startup-task配置", logs.toArray(new String[0]));
-        }
+        BannerUtils.printConfig(log, "startup-task配置", logs.toArray(new String[0]));
         return create(rootPath, config);
     }
 
@@ -64,6 +64,7 @@ public class StartupTaskBootstrap {
     private ClassLoader classLoader = this.getClass().getClassLoader();
     private final List<StartupTask> startupTasks = new LinkedList<>();
     private volatile boolean isStarted = false;
+    private volatile ScheduledExecutorService scheduled;
 
     public StartupTaskBootstrap(String rootPath, StartupTaskConfig config) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
@@ -76,6 +77,20 @@ public class StartupTaskBootstrap {
         Assert.notNull(classLoader, "参数 classLoader 不能为null");
         Assert.isFalse(isStarted, "任务已执行,设置 classLoader 已无效");
         this.classLoader = classLoader;
+    }
+
+    private ScheduledExecutorService getScheduled() {
+        if (scheduled == null) {
+            scheduled = new ScheduledThreadPoolExecutor(
+                    Math.max(1, config.getPoolSize()),
+                    new BasicThreadFactory.Builder()
+                            .namingPattern("timed-task-%s")
+                            .daemon(true)
+                            .build()
+            );
+            AppShutdownHook.addShutdownHook(scheduled::shutdownNow, OrderIncrement.NORMAL, "停止开机任务调度器");
+        }
+        return scheduled;
     }
 
     private void init() {
@@ -175,7 +190,7 @@ public class StartupTaskBootstrap {
                 config.getMethod(),
                 classLoader
         );
-        addStartupTask(timedTask::start, order, config.getName());
+        addStartupTask(() -> timedTask.start(getScheduled()), order, config.getName());
     }
 
     /**
