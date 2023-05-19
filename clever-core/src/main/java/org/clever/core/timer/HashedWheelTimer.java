@@ -15,7 +15,8 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 时间轮算法实现的定时任务调度器
+ * 时间轮算法实现的定时任务调度器 <br/>
+ * 拥有一个调度线程和一个任务执行线程池
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/05/18 15:03 <br/>
