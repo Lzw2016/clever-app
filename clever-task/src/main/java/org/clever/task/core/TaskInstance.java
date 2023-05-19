@@ -87,7 +87,7 @@ public class TaskInstance {
      */
     private final WorkExecutor jobWorker;
     /**
-     * 调度工作线程池 与 校准触发器触发时间守护线程 之间的协调器
+     * 调度工作线程池 与 校准触发器触发时间守护线程 之间的协调器 TODO 考虑删除!
      */
     private final Semaphore schedulerCoordinator = new Semaphore(1);
     /**
@@ -870,6 +870,7 @@ public class TaskInstance {
      * 调度器轮询任务(不会并发执行)
      */
     private void triggerJobExec() {
+        // TODO 使用时间轮算法改良触发逻辑
         final long startTime = System.currentTimeMillis();
         // 轮询触发 job
         final List<TaskJobTrigger> nextJobTriggerList = taskContext.getNextJobTriggerList();

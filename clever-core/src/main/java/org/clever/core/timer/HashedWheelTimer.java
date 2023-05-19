@@ -106,6 +106,10 @@ public class HashedWheelTimer implements Timer {
      */
     private final Thread workerThread;
     /**
+     * 定时任务执行线程池
+     */
+    private final ExecutorService jobExecutor;
+    /**
      * 当前实例的状态: 0 - init, 1 - started, 2 - shut down
      */
     private volatile int workerState = WORKER_STATE_INIT;
@@ -138,7 +142,7 @@ public class HashedWheelTimer implements Timer {
      * 创建一个新的定时任务调度器
      */
     public HashedWheelTimer() {
-        this(Executors.defaultThreadFactory());
+        this(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor());
     }
 
     /**
@@ -149,7 +153,7 @@ public class HashedWheelTimer implements Timer {
      * @throws IllegalArgumentException 参数值校验失败
      */
     public HashedWheelTimer(long tickDuration, TimeUnit unit) {
-        this(Executors.defaultThreadFactory(), tickDuration, unit);
+        this(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), tickDuration, unit);
     }
 
     /**
@@ -161,69 +165,75 @@ public class HashedWheelTimer implements Timer {
      * @throws IllegalArgumentException 参数值校验失败
      */
     public HashedWheelTimer(long tickDuration, TimeUnit unit, int ticksPerWheel) {
-        this(Executors.defaultThreadFactory(), tickDuration, unit, ticksPerWheel);
+        this(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), tickDuration, unit, ticksPerWheel);
     }
 
     /**
      * 创建一个新的定时任务调度器
      *
-     * @param threadFactory 一个 {@link ThreadFactory}，它创建一个专用于 {@link TimerTask} 执行的后台 {@link Thread}
+     * @param threadFactory 用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
+     * @param jobExecutor   定时任务执行线程池
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory) {
-        this(threadFactory, 100, TimeUnit.MILLISECONDS);
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor) {
+        this(threadFactory, jobExecutor, 100, TimeUnit.MILLISECONDS);
     }
 
     /**
      * 创建一个新的定时任务调度器
      *
-     * @param threadFactory 一个 {@link ThreadFactory}，它创建一个专用于 {@link TimerTask} 执行的后台 {@link Thread}
+     * @param threadFactory 用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
+     * @param jobExecutor   定时任务执行线程池
      * @param tickDuration  时间轮基本时间长度
      * @param unit          时间轮基本时间长度单位
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory, long tickDuration, TimeUnit unit) {
-        this(threadFactory, tickDuration, unit, 512);
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor, long tickDuration, TimeUnit unit) {
+        this(threadFactory, jobExecutor, tickDuration, unit, 512);
     }
 
     /**
      * 创建一个新的定时任务调度器
      *
-     * @param threadFactory 一个 {@link ThreadFactory}，它创建一个专用于 {@link TimerTask} 执行的后台 {@link Thread}
+     * @param threadFactory 用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
+     * @param jobExecutor   定时任务执行线程池
      * @param tickDuration  时间轮基本时间长度
      * @param unit          时间轮基本时间长度单位
      * @param ticksPerWheel 时间轮数组大小
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory, long tickDuration, TimeUnit unit, int ticksPerWheel) {
-        this(threadFactory, tickDuration, unit, ticksPerWheel, -1);
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor, long tickDuration, TimeUnit unit, int ticksPerWheel) {
+        this(threadFactory, jobExecutor, tickDuration, unit, ticksPerWheel, -1);
     }
 
     /**
      * 创建一个新的定时任务调度器
      *
-     * @param threadFactory      一个 {@link ThreadFactory}，它创建一个专用于 {@link TimerTask} 执行的后台 {@link Thread}
+     * @param threadFactory      用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
+     * @param jobExecutor        定时任务执行线程池
      * @param tickDuration       时间轮基本时间长度
      * @param unit               时间轮基本时间长度单位
      * @param ticksPerWheel      时间轮数组大小
      * @param maxPendingTimeouts 调用 {@code newTimeout} 后挂起的最大任务数量，将导致抛出 {@link java.util.concurrent.RejectedExecutionException}。如果小于等于0表示不限制
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory, long tickDuration, TimeUnit unit, int ticksPerWheel, long maxPendingTimeouts) {
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor, long tickDuration, TimeUnit unit, int ticksPerWheel, long maxPendingTimeouts) {
         Assert.notNull(threadFactory, "参数 threadFactory 不能为 null");
+        Assert.notNull(jobExecutor, "参数 jobExecutor 不能为 null");
         Assert.isTrue(tickDuration > 0, "参数 tickDuration 必须 > 0");
         Assert.notNull(unit, "参数 unit 不能为 null");
         Assert.isTrue(ticksPerWheel > 0 && ticksPerWheel <= 1073741824, "参数 ticksPerWheel 必须 > 0 & <=2^30");
         // 初始化时间轮数组
-        wheel = createWheel(ticksPerWheel);
-        mask = wheel.length - 1;
+        this.wheel = createWheel(ticksPerWheel);
+        this.mask = wheel.length - 1;
         // 转换 tickDuration 到纳秒
         this.tickDuration = unit.toNanos(tickDuration);
         // 防止溢出
         if (this.tickDuration >= Long.MAX_VALUE / wheel.length) {
             throw new IllegalArgumentException(String.format("tickDuration: %d (expected: 0 < tickDuration in nanos < %d", tickDuration, Long.MAX_VALUE / wheel.length));
         }
-        workerThread = threadFactory.newThread(worker);
+        this.workerThread = threadFactory.newThread(worker);
+        this.jobExecutor = jobExecutor;
         this.maxPendingTimeouts = maxPendingTimeouts;
         if (INSTANCE_COUNTER.incrementAndGet() > INSTANCE_COUNT_LIMIT && WARNED_TOO_MANY_INSTANCES.compareAndSet(false, true)) {
             reportTooManyInstances();
@@ -679,13 +689,15 @@ public class HashedWheelTimer implements Timer {
             if (!compareAndSetState(ST_INIT, ST_EXPIRED)) {
                 return;
             }
-            try {
-                task.run(this);
-            } catch (Throwable t) {
-                if (log.isWarnEnabled()) {
-                    log.warn("异常被抛出" + TimerTask.class.getSimpleName() + '。', t);
+            timer.jobExecutor.execute(() -> {
+                try {
+                    task.run(this);
+                } catch (Throwable t) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("异常被抛出" + task.getClass().getSimpleName() + '。', t);
+                    }
                 }
-            }
+            });
         }
 
         /**
