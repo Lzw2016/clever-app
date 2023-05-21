@@ -1,6 +1,5 @@
 package org.clever.task.core.support;
 
-import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 import org.clever.core.id.SnowFlake;
@@ -54,7 +53,7 @@ public class TaskContext {
     /**
      * 正在触发的触发器ID {@code Set<jobTriggerId + nextFireTime>}
      */
-    private final Set<String> triggeringSet = Sets.newConcurrentHashSet();
+    private final Set<String> triggeringSet = ConcurrentHashMap.newKeySet();
     /**
      * 当前节点任务运行的重入执行次数 {@code ConcurrentMap<jobId, jobReentryCount>}
      */
