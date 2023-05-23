@@ -68,7 +68,7 @@ public class HashedWheelTimer implements Timer {
     /**
      * 将 ticksPerWheel 标准化为 2 的幂 (结果 = 2^n >= ticksPerWheel)
      */
-    private static int normalizeTicksPerWheel(int ticksPerWheel) {
+    public static int normalizeTicksPerWheel(int ticksPerWheel) {
         int normalizedTicksPerWheel = ticksPerWheel - 1;
         normalizedTicksPerWheel |= normalizedTicksPerWheel >>> 1;
         normalizedTicksPerWheel |= normalizedTicksPerWheel >>> 2;
@@ -698,12 +698,12 @@ public class HashedWheelTimer implements Timer {
                         task.run(this);
                     } catch (Throwable t) {
                         if (log.isWarnEnabled()) {
-                            log.warn("异常被抛出" + task.getClass().getSimpleName() + '。', t);
+                            log.warn("throwing an exception while executing a timed task: {}" ,task.getClass().getSimpleName(), t);
                         }
                     }
                 });
             } catch (Throwable e) {
-                log.error("调度任务失败", e);
+                log.error("scheduled task scheduling failed", e);
             }
         }
 
