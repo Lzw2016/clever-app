@@ -579,6 +579,8 @@ public class HashedWheelTimer implements Timer {
                         return currentTime;
                     }
                 }
+                // See https://github.com/netty/netty/issues/356
+                // 这里是为了处理在windows系统上的一个bug，如果sleep不够10ms则要取整(https://www.javamex.com/tutorials/threads/sleep_issues.shtml)
                 if (PlatformOS.isWindows()) {
                     sleepTimeMs = sleepTimeMs / 10 * 10;
                 }
@@ -690,15 +692,19 @@ public class HashedWheelTimer implements Timer {
             if (!compareAndSetState(ST_INIT, ST_EXPIRED)) {
                 return;
             }
-            timer.jobExecutor.execute(() -> {
-                try {
-                    task.run(this);
-                } catch (Throwable t) {
-                    if (log.isWarnEnabled()) {
-                        log.warn("异常被抛出" + task.getClass().getSimpleName() + '。', t);
+            try {
+                timer.jobExecutor.execute(() -> {
+                    try {
+                        task.run(this);
+                    } catch (Throwable t) {
+                        if (log.isWarnEnabled()) {
+                            log.warn("异常被抛出" + task.getClass().getSimpleName() + '。', t);
+                        }
                     }
-                }
-            });
+                });
+            } catch (Throwable e) {
+                log.error("调度任务失败", e);
+            }
         }
 
         /**
