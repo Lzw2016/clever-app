@@ -74,4 +74,25 @@ public class HashedWheelTimerTest {
         scheduled.shutdown();
         log.info("#end");
     }
+
+    @Test
+    public void t04() throws Exception {
+        HashedWheelTimer timer = new HashedWheelTimer();
+        final TimerTask task = new TimerTask() {
+            @Override
+            public void run(Timeout timeout) {
+                log.info("@@@");
+                if (!timer.isStop()) {
+                    timer.newTimeout(this, 300, TimeUnit.MILLISECONDS);
+                }
+            }
+        };
+        timer.newTimeout(task, 300, TimeUnit.MILLISECONDS);
+        Thread.sleep(1000 * 10);
+        Set<Timeout> res = timer.stop();
+        log.info("res--> {}", res.size());
+        Thread.sleep(1000 * 2);
+        log.info("pendingTimeouts--> {}", timer.pendingTimeouts());
+        log.info("#end");
+    }
 }

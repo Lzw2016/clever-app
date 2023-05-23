@@ -109,7 +109,7 @@ public class HashedWheelTimer implements Timer {
     /**
      * 定时任务执行线程池
      */
-    private final ExecutorService jobExecutor;
+    private final ExecutorService taskExecutor;
     /**
      * 当前实例的状态: 0 - init, 1 - started, 2 - shut down
      */
@@ -173,54 +173,54 @@ public class HashedWheelTimer implements Timer {
      * 创建一个新的定时任务调度器
      *
      * @param threadFactory 用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
-     * @param jobExecutor   定时任务执行线程池
+     * @param taskExecutor  定时任务执行线程池
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor) {
-        this(threadFactory, jobExecutor, 100, TimeUnit.MILLISECONDS);
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService taskExecutor) {
+        this(threadFactory, taskExecutor, 100, TimeUnit.MILLISECONDS);
     }
 
     /**
      * 创建一个新的定时任务调度器
      *
      * @param threadFactory 用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
-     * @param jobExecutor   定时任务执行线程池
+     * @param taskExecutor  定时任务执行线程池
      * @param tickDuration  时间轮基本时间长度
      * @param unit          时间轮基本时间长度单位
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor, long tickDuration, TimeUnit unit) {
-        this(threadFactory, jobExecutor, tickDuration, unit, 512);
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService taskExecutor, long tickDuration, TimeUnit unit) {
+        this(threadFactory, taskExecutor, tickDuration, unit, 512);
     }
 
     /**
      * 创建一个新的定时任务调度器
      *
      * @param threadFactory 用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
-     * @param jobExecutor   定时任务执行线程池
+     * @param taskExecutor  定时任务执行线程池
      * @param tickDuration  时间轮基本时间长度
      * @param unit          时间轮基本时间长度单位
      * @param ticksPerWheel 时间轮数组大小
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor, long tickDuration, TimeUnit unit, int ticksPerWheel) {
-        this(threadFactory, jobExecutor, tickDuration, unit, ticksPerWheel, -1);
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService taskExecutor, long tickDuration, TimeUnit unit, int ticksPerWheel) {
+        this(threadFactory, taskExecutor, tickDuration, unit, ticksPerWheel, -1);
     }
 
     /**
      * 创建一个新的定时任务调度器
      *
      * @param threadFactory      用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
-     * @param jobExecutor        定时任务执行线程池
+     * @param taskExecutor       定时任务执行线程池
      * @param tickDuration       时间轮基本时间长度
      * @param unit               时间轮基本时间长度单位
      * @param ticksPerWheel      时间轮数组大小
      * @param maxPendingTimeouts 调用 {@code newTimeout} 后挂起的最大任务数量，将导致抛出 {@link java.util.concurrent.RejectedExecutionException}。如果小于等于0表示不限制
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService jobExecutor, long tickDuration, TimeUnit unit, int ticksPerWheel, long maxPendingTimeouts) {
+    public HashedWheelTimer(ThreadFactory threadFactory, ExecutorService taskExecutor, long tickDuration, TimeUnit unit, int ticksPerWheel, long maxPendingTimeouts) {
         Assert.notNull(threadFactory, "参数 threadFactory 不能为 null");
-        Assert.notNull(jobExecutor, "参数 jobExecutor 不能为 null");
+        Assert.notNull(taskExecutor, "参数 taskExecutor 不能为 null");
         Assert.isTrue(tickDuration > 0, "参数 tickDuration 必须 > 0");
         Assert.notNull(unit, "参数 unit 不能为 null");
         Assert.isTrue(ticksPerWheel > 0 && ticksPerWheel <= 1073741824, "参数 ticksPerWheel 必须 > 0 & <=2^30");
@@ -234,7 +234,7 @@ public class HashedWheelTimer implements Timer {
             throw new IllegalArgumentException(String.format("tickDuration: %d (expected: 0 < tickDuration in nanos < %d", tickDuration, Long.MAX_VALUE / wheel.length));
         }
         this.workerThread = threadFactory.newThread(worker);
-        this.jobExecutor = jobExecutor;
+        this.taskExecutor = taskExecutor;
         this.maxPendingTimeouts = maxPendingTimeouts;
         if (INSTANCE_COUNTER.incrementAndGet() > INSTANCE_COUNT_LIMIT && WARNED_TOO_MANY_INSTANCES.compareAndSet(false, true)) {
             reportTooManyInstances();
@@ -693,7 +693,7 @@ public class HashedWheelTimer implements Timer {
                 return;
             }
             try {
-                timer.jobExecutor.execute(() -> {
+                timer.taskExecutor.execute(() -> {
                     try {
                         task.run(this);
                     } catch (Throwable t) {
