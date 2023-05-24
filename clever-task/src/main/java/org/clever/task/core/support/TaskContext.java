@@ -2,7 +2,6 @@ package org.clever.task.core.support;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.clever.core.id.SnowFlake;
 import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.model.entity.TaskJobTrigger;
@@ -34,12 +33,8 @@ public class TaskContext {
      * 当前调度器信息
      */
     @Getter
-    private final TaskScheduler currentScheduler;
-    /**
-     * 唯一ID生成器
-     */
-    @Getter
-    private final SnowFlake snowFlake;
+    @Setter
+    private TaskScheduler currentScheduler;
     /**
      * 当前集群可用的调度器列表
      */
@@ -71,13 +66,9 @@ public class TaskContext {
      */
     private final ConcurrentMap<Long, AtomicLong> jobRunCountMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
 
-    public TaskContext(SchedulerConfig schedulerConfig, TaskScheduler scheduler, SnowFlake snowFlake) {
+    public TaskContext(SchedulerConfig schedulerConfig) {
         Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为null");
-        Assert.notNull(scheduler, "参数 scheduler 不能为null");
-        Assert.notNull(snowFlake, "参数 snowFlake 不能为null");
         this.schedulerConfig = schedulerConfig;
-        this.currentScheduler = scheduler;
-        this.snowFlake = snowFlake;
     }
 
     public void setNextJobTriggerMap(List<TaskJobTrigger> nextJobTriggerList) {

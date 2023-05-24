@@ -1,7 +1,8 @@
 package org.clever.task.core;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.Conv;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.SnowFlake;
@@ -16,13 +17,17 @@ import org.clever.task.core.listeners.JobTriggerListener;
 import org.clever.task.core.listeners.SchedulerListener;
 import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.*;
-import org.clever.task.core.support.*;
+import org.clever.task.core.support.DataBaseClock;
+import org.clever.task.core.support.JobTriggerUtils;
+import org.clever.task.core.support.TaskContext;
+import org.clever.task.core.support.WheelTimer;
 import org.clever.util.Assert;
 
 import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * 定时任务调度器实例
@@ -32,64 +37,15 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class TaskInstance {
-    /**
-     * 调度器数据存储对象
-     */
-    @Getter
-    private final TaskStore taskStore;
-    /**
-     * 调度器上下文
-     */
-    private final TaskContext taskContext;
-    /**
-     * 调度器状态
-     */
-    private volatile TaskState taskState = TaskState.None;
-    /**
-     * 调度器锁
-     */
-    private final Object schedulerLock = new Object();
+    public interface State {
+        int INIT = 0;
+        int RUNNING = 1;
+        int PAUSED = 2;
+        int STOPPED = 3;
+    }
 
-    /**
-     * 数据完整性校验、一致性校验 (守护线程)
-     */
-    private final DaemonExecutor dataCheckDaemon;
-    /**
-     * 调度器节点注册 (守护线程)
-     */
-    private final DaemonExecutor registerSchedulerDaemon;
-    /**
-     * 初始化触发器下一次触发时间(校准触发器触发时间) (守护线程)
-     */
-    private final DaemonExecutor calcNextFireTimeDaemon;
-    /**
-     * 心跳保持 (守护线程)
-     */
-    private final DaemonExecutor heartbeatDaemon;
-    /**
-     * 维护当前集群可用的调度器列表 (守护线程)
-     */
-    private final DaemonExecutor reloadSchedulerDaemon;
-    /**
-     * 维护接下来N秒内需要触发的触发器列表 (守护线程)
-     */
-    private final DaemonExecutor reloadNextTriggerDaemon;
-    /**
-     * 调度器轮询任务 (守护线程)
-     */
-    private final DaemonExecutor triggerJobExecDaemon;
-    /**
-     * 调度工作线程池
-     */
-    private final WorkExecutor schedulerWorker;
-    /**
-     * 定时任务执行工作线程池
-     */
-    private final WorkExecutor jobWorker;
-    /**
-     * 调度工作线程池 与 校准触发器触发时间守护线程 之间的协调器 TODO 考虑删除!
-     */
-    private final Semaphore schedulerCoordinator = new Semaphore(1);
+    private static final AtomicIntegerFieldUpdater<TaskInstance> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(TaskInstance.class, "state");
+
     /**
      * 定时任务执行器实现列表
      */
@@ -106,6 +62,54 @@ public class TaskInstance {
      * 定时任务执行事件监听器列表
      */
     private final List<JobListener> jobListeners;
+    /**
+     * 调度器数据存储对象
+     */
+    private final TaskStore taskStore;
+    /**
+     * 调度器上下文
+     */
+    private final TaskContext taskContext;
+    /**
+     * 内部的调度器(守护线程池)
+     */
+    private final ScheduledExecutorService scheduledExecutor;
+    /**
+     * 执行定时任务线程池
+     */
+    private final ExecutorService jobExecutor;
+    /**
+     * 调度器节点注册
+     */
+    private ScheduledFuture<?> registerSchedulerFuture;
+    /**
+     * 集群节点心跳保持
+     */
+    private ScheduledFuture<?> heartbeatFuture;
+    /**
+     * 数据完整性校验、一致性校验
+     */
+    private ScheduledFuture<?> dataCheckFuture;
+    /**
+     * 初始化触发器下一次触发时间(校准触发器触发时间)
+     */
+    private ScheduledFuture<?> calcNextFireTimeFuture;
+    /**
+     * 维护当前集群可用的调度器列表
+     */
+    private ScheduledFuture<?> reloadSchedulerFuture;
+    /**
+     * 维护接下来N秒内需要触发的触发器列表
+     */
+    private ScheduledFuture<?> reloadNextTriggerFuture;
+    /**
+     * 调度器状态
+     */
+    private volatile int state = State.INIT;
+    /**
+     * 内部时间轮调度器
+     */
+    private final WheelTimer wheelTimer;
 
     /**
      * 创建定时任务调度器实例
@@ -130,59 +134,125 @@ public class TaskInstance {
         Assert.notEmpty(schedulerListeners, "参数 schedulerListeners 不能为空");
         Assert.notEmpty(jobTriggerListeners, "参数 jobTriggerListeners 不能为空");
         Assert.notEmpty(jobListeners, "参数 jobListeners 不能为空");
-        final SnowFlake snowFlake = new SnowFlake(
-                Math.abs(schedulerConfig.getInstanceName().hashCode() % SnowFlake.MAX_WORKER_ID),
-                Math.abs(schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID)
-        );
-        // 初始化数据源
-        taskStore = new TaskStore(snowFlake, queryDSL);
-        // 注册调度器
-        TaskScheduler scheduler = registerScheduler(toScheduler(schedulerConfig));
-        taskContext = new TaskContext(schedulerConfig, scheduler, snowFlake);
-        // 初始化守护线程池
-        dataCheckDaemon = new DaemonExecutor(GlobalConstant.DATA_CHECK_DAEMON_NAME, schedulerConfig.getInstanceName());
-        registerSchedulerDaemon = new DaemonExecutor(GlobalConstant.REGISTER_SCHEDULER_DAEMON_NAME, schedulerConfig.getInstanceName());
-        calcNextFireTimeDaemon = new DaemonExecutor(GlobalConstant.CALC_NEXT_FIRE_TIME_DAEMON_NAME, schedulerConfig.getInstanceName());
-        heartbeatDaemon = new DaemonExecutor(GlobalConstant.HEARTBEAT_DAEMON_NAME, schedulerConfig.getInstanceName());
-        reloadSchedulerDaemon = new DaemonExecutor(GlobalConstant.RELOAD_SCHEDULER_DAEMON_NAME, schedulerConfig.getInstanceName());
-        reloadNextTriggerDaemon = new DaemonExecutor(GlobalConstant.RELOAD_NEXT_TRIGGER_DAEMON_NAME, schedulerConfig.getInstanceName());
-        triggerJobExecDaemon = new DaemonExecutor(GlobalConstant.TRIGGER_JOB_EXEC_DAEMON_NAME, schedulerConfig.getInstanceName());
-        // 初始化工作线程池
-        schedulerWorker = new WorkExecutor(
-                GlobalConstant.SCHEDULER_EXECUTOR_NAME,
-                schedulerConfig.getInstanceName(),
-                schedulerConfig.getSchedulerExecutorPoolSize(),
-                schedulerConfig.getSchedulerExecutorQueueSize()
-        );
-        jobWorker = new WorkExecutor(
-                GlobalConstant.JOB_EXECUTOR_NAME,
-                schedulerConfig.getInstanceName(),
-                schedulerConfig.getJobExecutorPoolSize(),
-                schedulerConfig.getJobExecutorQueueSize()
-        );
-        // 初始化定时任务执行器实现列表
         jobExecutors.sort(Comparator.comparingInt(JobExecutor::order));
         this.jobExecutors = jobExecutors;
         if (this.jobExecutors.isEmpty()) {
             log.error("[TaskInstance] 定时任务执行器实现列表为空 | instanceName={}", schedulerConfig.getInstanceName());
         }
-        if (log.isInfoEnabled()) {
-            StringBuilder sb = new StringBuilder();
-            this.jobExecutors.forEach(jobExecutor -> sb.append("\n").append(jobExecutor.getClass().getName()));
-            log.info("[TaskInstance] 定时任务执行器实现列表顺序如下 | instanceName={} {}", schedulerConfig.getInstanceName(), sb);
-        }
-        // 事件监听器
+        log.info(
+                "[TaskInstance] 定时任务执行器={} | instanceName={}",
+                StringUtils.join(this.jobExecutors.stream().map(exec -> exec.getClass().getSimpleName()).collect(Collectors.toList()), ", "),
+                schedulerConfig.getInstanceName()
+        );
         this.schedulerListeners = schedulerListeners;
         this.jobTriggerListeners = jobTriggerListeners;
         this.jobListeners = jobListeners;
+        final SnowFlake snowFlake = new SnowFlake(
+                Math.abs(schedulerConfig.getInstanceName().hashCode() % SnowFlake.MAX_WORKER_ID),
+                Math.abs(schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID)
+        );
+        this.taskStore = new TaskStore(snowFlake, queryDSL);
+        this.taskContext = new TaskContext(schedulerConfig);
+        this.scheduledExecutor = new ScheduledThreadPoolExecutor(
+                schedulerConfig.getSchedulerExecutorPoolSize(),
+                new BasicThreadFactory.Builder().namingPattern("task-scheduler-pool-%d").daemon(true).build(),
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+        this.jobExecutor = new ThreadPoolExecutor(
+                schedulerConfig.getJobExecutorPoolSize(),
+                schedulerConfig.getJobExecutorPoolSize(),
+                GlobalConstant.THREAD_POOL_KEEP_ALIVE_SECONDS,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(schedulerConfig.getJobExecutorQueueSize()),
+                new BasicThreadFactory.Builder().namingPattern("task-worker-pool-%d").daemon(true).build(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+        this.wheelTimer = new WheelTimer(
+                new BasicThreadFactory.Builder().namingPattern("task-wheel-pool-%d").daemon(true).build(),
+                this.jobExecutor,
+                new DataBaseClock(queryDSL.getJdbc()),
+                GlobalConstant.TRIGGER_JOB_EXEC_INTERVAL,
+                TimeUnit.MILLISECONDS,
+                512
+        );
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- api
 
     /**
+     * 启动调度器，只有当前为 {@link State#INIT} 状态才能调用
+     */
+    public void start() {
+        STATE_UPDATER.getAndUpdate(this, state -> {
+            if (state == State.INIT) {
+                doStart();
+            } else {
+                throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", getStateText()));
+            }
+            return State.RUNNING;
+        });
+    }
+
+    /**
+     * 异步延时启动调度器
+     *
+     * @param seconds 延时时间(单位：秒)
+     */
+    public void startDelayed(int seconds) {
+        Assert.isTrue(seconds >= 0, "参数 seconds 必须 >=0");
+        scheduledExecutor.schedule(this::start, seconds, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 暂停调度器，只有当前为 {@link State#RUNNING} 状态才能调用
+     */
+    public void paused() {
+        STATE_UPDATER.getAndUpdate(this, state -> {
+            if (state == State.RUNNING) {
+                doPause();
+            } else {
+                throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", getStateText()));
+            }
+            return State.PAUSED;
+        });
+    }
+
+    /**
+     * 继续运行调度器，只有当前为 {@link State#PAUSED} 状态才能调用
+     */
+    public void resume() {
+        STATE_UPDATER.getAndUpdate(this, state -> {
+            if (state == State.PAUSED) {
+                doResume();
+            } else {
+                throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", getStateText()));
+            }
+            return State.RUNNING;
+        });
+    }
+
+    /**
+     * 停止调度器，只有当前为 {@link State#RUNNING}、{@link State#PAUSED} 状态才能调用
+     */
+    public void stop() {
+        STATE_UPDATER.getAndUpdate(this, state -> {
+            if (state == State.RUNNING) {
+                doPause();
+                doStop();
+            } else if (state == State.PAUSED) {
+                doStop();
+            } else {
+                throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", getStateText()));
+            }
+            return State.STOPPED;
+        });
+    }
+
+    /**
      * 当前集群 namespace
      */
     public String getNamespace() {
+        Assert.isTrue(State.INIT != getState(), "当前定时任务调度器还未启动");
         return taskContext.getCurrentScheduler().getNamespace();
     }
 
@@ -190,7 +260,15 @@ public class TaskInstance {
      * 当前调度器实例名
      */
     public String getInstanceName() {
+        Assert.isTrue(State.INIT != getState(), "当前定时任务调度器还未启动");
         return taskContext.getCurrentScheduler().getInstanceName();
+    }
+
+    /**
+     * 获取调度器 TaskStore
+     */
+    public TaskStore getTaskStore() {
+        return taskStore;
     }
 
     /**
@@ -201,254 +279,28 @@ public class TaskInstance {
     }
 
     /**
-     * 当前调度器状态
+     * 当前调度器状态 {@link State}
      */
-    public TaskState getTaskState() {
-        return taskState;
+    public int getState() {
+        return STATE_UPDATER.get(this);
     }
 
     /**
-     * 同步启动调度器
+     * 当前调度器状态 {@link State}
      */
-    public void start() {
-        startCheck();
-        synchronized (schedulerLock) {
-            startCheck();
-            final TaskScheduler scheduler = taskContext.getCurrentScheduler();
-            // 备份之前的状态
-            final TaskState oldState = taskState;
-            try {
-                // 开始初始化
-                taskState = TaskState.Initializing;
-                // 1.数据完整性校验、一致性校验
-                dataCheckDaemon.scheduleAtFixedRate(
-                        () -> {
-                            try {
-                                dataCheck();
-                            } catch (Exception e) {
-                                log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", this.getInstanceName(), e);
-                                // 记录调度器日志(异步)
-                                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-                            }
-                        },
-                        GlobalConstant.DATA_CHECK_INTERVAL
-                );
-                // 2.调度器节点注册
-                registerSchedulerDaemon.scheduleAtFixedRate(
-                        () -> {
-                            try {
-                                registerScheduler(taskContext.getCurrentScheduler());
-                            } catch (Exception e) {
-                                log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", this.getInstanceName(), e);
-                                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_REGISTER_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-                            }
-                        },
-                        GlobalConstant.REGISTER_SCHEDULER_INTERVAL
-                );
-                // 3.初始化触发器下一次触发时间(校准触发器触发时间)
-                calcNextFireTimeDaemon.scheduleAtFixedRate(
-                        () -> {
-                            try {
-                                calcNextFireTime();
-                            } catch (Exception e) {
-                                log.error("[TaskInstance] 校准触发器触发时间失败 | instanceName={}", this.getInstanceName(), e);
-                                // 记录调度器日志(异步)
-                                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_CALC_NEXT_FIRE_TIME_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-                            }
-                        },
-                        GlobalConstant.CALC_NEXT_FIRE_TIME_INTERVAL
-                );
-                // 1.心跳保持
-                heartbeatDaemon.scheduleAtFixedRate(
-                        () -> {
-                            try {
-                                heartbeat();
-                            } catch (Exception e) {
-                                log.error("[TaskInstance] 心跳保持失败 | instanceName={}", this.getInstanceName(), e);
-                                // 记录调度器日志(异步)
-                                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_HEART_BEAT_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-                            }
-                        },
-                        scheduler.getHeartbeatInterval()
-                );
-                // 2.维护当前集群可用的调度器列表
-                reloadSchedulerDaemon.scheduleAtFixedRate(
-                        () -> {
-                            try {
-                                reloadScheduler();
-                            } catch (Exception e) {
-                                log.error("[TaskInstance] 维护当前集群可用的调度器列表失败 | instanceName={}", this.getInstanceName(), e);
-                                // 记录调度器日志(异步)
-                                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-                            }
-                        },
-                        GlobalConstant.RELOAD_SCHEDULER_INTERVAL
-                );
-                // 3.维护接下来N秒内需要触发的触发器列表
-                reloadNextTriggerDaemon.scheduleAtFixedRate(
-                        () -> {
-                            boolean hasPermit = false;
-                            try {
-                                hasPermit = schedulerCoordinator.tryAcquire(GlobalConstant.RELOAD_NEXT_TRIGGER_INTERVAL, TimeUnit.MILLISECONDS);
-                                reloadNextTrigger();
-                            } catch (InterruptedException e) {
-                                log.warn("[TaskInstance] 维护接下来N秒内需要触发的触发器列表被中断 | instanceName={}", this.getInstanceName());
-                            } catch (Exception e) {
-                                log.error("[TaskInstance] 维护接下来N秒内需要触发的触发器列表失败 | instanceName={}", this.getInstanceName(), e);
-                                // 记录调度器日志(异步)
-                                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_NEXT_TRIGGER_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-                            } finally {
-                                if (hasPermit) {
-                                    schedulerCoordinator.release();
-                                }
-                            }
-                        },
-                        GlobalConstant.RELOAD_NEXT_TRIGGER_INTERVAL
-                );
-                // 4.调度器轮询任务
-                triggerJobExecDaemon.scheduleAtFixedRate(
-                        () -> {
-                            boolean hasPermit = false;
-                            try {
-                                hasPermit = schedulerCoordinator.tryAcquire(GlobalConstant.TRIGGER_JOB_EXEC_MAX_INTERVAL, TimeUnit.MILLISECONDS);
-                                triggerJobExec();
-                            } catch (InterruptedException e) {
-                                log.warn("[TaskInstance] 调度器轮询任务被中断 | instanceName={}", this.getInstanceName());
-                            } catch (Exception e) {
-                                log.error("[TaskInstance] 调度器轮询任务失败 | instanceName={}", this.getInstanceName(), e);
-                                // 记录调度器日志(异步)
-                                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_TRIGGER_JOB_EXEC_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-                            } finally {
-                                if (hasPermit) {
-                                    schedulerCoordinator.release();
-                                }
-                            }
-                        },
-                        GlobalConstant.TRIGGER_JOB_EXEC_INTERVAL
-                );
-                // 初始化完成就是运行中
-                taskState = TaskState.Running;
-                // 调度器启动成功日志(异步)
-                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                schedulerLog.setEventName(TaskSchedulerLog.EVENT_STARTED);
-                schedulerWorker.execute(() -> this.schedulerStartedListener(schedulerLog));
-            } catch (Exception e) {
-                // 异常就还原之前的状态
-                taskState = oldState;
-                log.error("[TaskInstance] 调度器启动失败 | instanceName={}", this.getInstanceName(), e);
-                // 记录调度器日志(异步)
-                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_STARTED_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-            }
-        }
-    }
-
-    /**
-     * 异步延时启动调度器
-     *
-     * @param seconds 延时时间(单位：秒)
-     */
-    public void startDelayed(int seconds) {
-        schedulerWorker.execute(() -> {
-            if (seconds > 0) {
-                try {
-                    Thread.sleep(seconds * 1000L);
-                } catch (InterruptedException e) {
-                    log.warn("[TaskInstance] 异步延时启动，延时失败 | instanceName={}", this.getInstanceName(), e);
-                }
-            }
-            try {
-                start();
-            } catch (Exception e) {
-                log.error("[TaskInstance] 异步延时启动失败 | instanceName={}", this.getInstanceName(), e);
-            }
-        });
-    }
-
-    /**
-     * 暂停调度器
-     */
-    public void pause() {
-        if (pauseCheck()) {
-            return;
-        }
-        synchronized (schedulerLock) {
-            if (pauseCheck()) {
-                return;
-            }
-            try {
-                dataCheckDaemon.stop();
-                registerSchedulerDaemon.stop();
-                calcNextFireTimeDaemon.stop();
-                heartbeatDaemon.stop();
-                reloadSchedulerDaemon.stop();
-                reloadNextTriggerDaemon.stop();
-                triggerJobExecDaemon.stop();
-                // 调度器暂停成功日志(异步)
-                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                schedulerLog.setEventName(TaskSchedulerLog.EVENT_PAUSED);
-                schedulerWorker.execute(() -> this.schedulerPausedListener(schedulerLog));
-            } catch (Exception e) {
-                log.error("[TaskInstance] 暂停调度器失败 | instanceName={}", this.getInstanceName(), e);
-                // 记录调度器日志(异步)
-                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_PAUSED_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
-            } finally {
-                taskState = TaskState.Pause;
-            }
-        }
-    }
-
-    /**
-     * 停止调度器
-     */
-    public void stop() {
-        if (stopCheck()) {
-            return;
-        }
-        synchronized (schedulerLock) {
-            if (stopCheck()) {
-                return;
-            }
-            try {
-                dataCheckDaemon.shutdown();
-                registerSchedulerDaemon.shutdown();
-                calcNextFireTimeDaemon.shutdown();
-                heartbeatDaemon.shutdown();
-                reloadSchedulerDaemon.shutdown();
-                reloadNextTriggerDaemon.shutdown();
-                triggerJobExecDaemon.shutdown();
-                schedulerWorker.shutdown();
-                jobWorker.shutdown();
-                // 调度器停止日志
-                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                schedulerLog.setEventName(TaskSchedulerLog.EVENT_SHUTDOWN);
-                this.schedulerPausedListener(schedulerLog);
-            } catch (Exception e) {
-                log.error("[TaskInstance] 停止调度器失败 | instanceName={}", this.getInstanceName(), e);
-                // 调度器停止日志
-                TaskSchedulerLog schedulerLog = newSchedulerLog();
-                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_SHUTDOWN, ExceptionUtils.getStackTraceAsString(e));
-                this.schedulerErrorListener(schedulerLog, e);
-            } finally {
-                taskState = TaskState.Stopped;
-            }
+    public String getStateText() {
+        int state = getState();
+        switch (state) {
+            case State.INIT:
+                return "init";
+            case State.RUNNING:
+                return "running";
+            case State.PAUSED:
+                return "paused";
+            case State.STOPPED:
+                return "stopped";
+            default:
+                throw new SchedulerException(String.format("无效的调度器状态：%s", state));
         }
     }
 
@@ -746,21 +598,170 @@ public class TaskInstance {
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- service
 
-    /**
-     * 启动调度器前的校验
-     */
-    private void startCheck() {
-        if (taskState != TaskState.None && taskState != TaskState.Pause) {
-            throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", taskState));
+    private void startScheduler() {
+        long initialDelay = 0;
+        TaskScheduler taskScheduler = registerScheduler(toScheduler(taskContext.getSchedulerConfig()));
+        taskContext.setCurrentScheduler(taskScheduler);
+        // 调度器节点注册
+        registerSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        registerScheduler(taskContext.getCurrentScheduler());
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", this.getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_REGISTER_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                GlobalConstant.REGISTER_SCHEDULER_INTERVAL, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
+        );
+        // 集群节点心跳保持
+        heartbeatFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        heartbeat();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 心跳保持失败 | instanceName={}", this.getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_HEART_BEAT_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, taskScheduler.getHeartbeatInterval(), TimeUnit.MILLISECONDS
+        );
+        // 数据完整性校验、一致性校验
+        dataCheckFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        dataCheck();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", this.getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.DATA_CHECK_INTERVAL, TimeUnit.MILLISECONDS
+        );
+        // 初始化触发器下一次触发时间(校准触发器触发时间)
+        calcNextFireTimeFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        calcNextFireTime();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 校准触发器触发时间失败 | instanceName={}", this.getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_CALC_NEXT_FIRE_TIME_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.CALC_NEXT_FIRE_TIME_INTERVAL, TimeUnit.MILLISECONDS
+        );
+        // 维护当前集群可用的调度器列表
+        reloadSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        reloadScheduler();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 维护当前集群可用的调度器列表失败 | instanceName={}", this.getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.RELOAD_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
+        );
+        // 维护接下来N秒内需要触发的触发器列表
+        reloadNextTriggerFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        reloadNextTrigger();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 维护接下来N秒内需要触发的触发器列表失败 | instanceName={}", this.getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_NEXT_TRIGGER_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.RELOAD_NEXT_TRIGGER_INTERVAL, TimeUnit.MILLISECONDS
+        );
+    }
+
+    private void stopScheduler() {
+        Consumer<ScheduledFuture<?>> stopScheduler = future -> {
+            if (future != null && !future.isDone() && !future.isCancelled()) {
+                future.cancel(true);
+            }
+        };
+        stopScheduler.accept(registerSchedulerFuture);
+        stopScheduler.accept(heartbeatFuture);
+        stopScheduler.accept(dataCheckFuture);
+        stopScheduler.accept(calcNextFireTimeFuture);
+        stopScheduler.accept(reloadSchedulerFuture);
+        stopScheduler.accept(reloadNextTriggerFuture);
+    }
+
+    private void doStart() {
+        try {
+            startScheduler();
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventName(TaskSchedulerLog.EVENT_STARTED);
+            schedulerStartedListener(schedulerLog);
+        } catch (Exception e) {
+            log.error("[TaskInstance] 调度器启动失败 | instanceName={}", this.getInstanceName(), e);
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_STARTED_ERROR, ExceptionUtils.getStackTraceAsString(e));
+            schedulerErrorListener(schedulerLog, e);
+            throw ExceptionUtils.unchecked(e);
         }
     }
 
-    private boolean pauseCheck() {
-        return taskState != TaskState.Running;
+    private void doPause() {
+        try {
+            stopScheduler();
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventName(TaskSchedulerLog.EVENT_PAUSED);
+            schedulerPausedListener(schedulerLog);
+        } catch (Exception e) {
+            log.error("[TaskInstance] 暂停调度器失败 | instanceName={}", this.getInstanceName(), e);
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_PAUSED_ERROR, ExceptionUtils.getStackTraceAsString(e));
+            schedulerErrorListener(schedulerLog, e);
+            throw ExceptionUtils.unchecked(e);
+        }
     }
 
-    private boolean stopCheck() {
-        return taskState != TaskState.Running && taskState != TaskState.Pause;
+    private void doResume() {
+        try {
+            startScheduler();
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventName(TaskSchedulerLog.EVENT_RESUME);
+            schedulerStartedListener(schedulerLog);
+        } catch (Exception e) {
+            log.error("[TaskInstance] 调度器恢复运行失败 | instanceName={}", this.getInstanceName(), e);
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RESUME_ERROR, ExceptionUtils.getStackTraceAsString(e));
+            schedulerErrorListener(schedulerLog, e);
+            throw ExceptionUtils.unchecked(e);
+        }
+    }
+
+    private void doStop() {
+        try {
+            startScheduler();
+            wheelTimer.stop();
+            scheduledExecutor.shutdownNow();
+            jobExecutor.shutdownNow();
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventName(TaskSchedulerLog.EVENT_SHUTDOWN);
+            this.schedulerPausedListener(schedulerLog);
+        } catch (Exception e) {
+            log.error("[TaskInstance] 停止调度器失败 | instanceName={}", this.getInstanceName(), e);
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_SHUTDOWN, ExceptionUtils.getStackTraceAsString(e));
+            this.schedulerErrorListener(schedulerLog, e);
+        }
     }
 
     /**

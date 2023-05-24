@@ -40,6 +40,10 @@ public class TaskSchedulerLog implements Serializable {
     public static final String EVENT_PAUSED = "paused";
     /** 调度器暂停失败 */
     public static final String EVENT_PAUSED_ERROR = "paused_error";
+    /** 调度器继续运行成功 */
+    public static final String EVENT_RESUME = "resume";
+    /** 调度器继续运行失败 */
+    public static final String EVENT_RESUME_ERROR = "resume_error";
     /** 调度器停止 */
     public static final String EVENT_SHUTDOWN = "shutdown";
 

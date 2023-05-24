@@ -5,9 +5,12 @@ import org.clever.core.DateUtils;
 import org.clever.core.SystemClock;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
@@ -77,7 +80,7 @@ public class WheelTimerTest {
     public void t03() throws Exception {
         AtomicLong count = new AtomicLong(0);
         WheelTimer.Clock clock = SystemClock::now;
-        WheelTimer timer = new WheelTimer(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), clock, 10, TimeUnit.MILLISECONDS, 512);
+        WheelTimer timer = new WheelTimer(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), clock, 10, TimeUnit.MILLISECONDS, 64);
         final Supplier<WheelTimer.Task> task = () -> new WheelTimer.Task() {
             private final long id = count.incrementAndGet();
 
@@ -103,6 +106,30 @@ public class WheelTimerTest {
         timer.stop();
         Thread.sleep(1000 * 2);
         log.info("pendingTimeouts--> {}", timer.pendingTasks());
+        log.info("#end");
+    }
+
+    private static final AtomicIntegerFieldUpdater<WheelTimerTest> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(WheelTimerTest.class, "state");
+    private volatile int state = 0;
+
+    @Test
+    public void t04() throws Exception {
+        int count = 3000;
+        List<Thread> threads = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            threads.add(new Thread(() -> STATE_UPDATER.getAndUpdate(this, value -> {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ignored) {
+                }
+                return value + 1;
+            })));
+        }
+        threads.forEach(Thread::start);
+        for (Thread thread : threads) {
+            thread.join();
+        }
+        log.info("state--> {}", state);
         log.info("#end");
     }
 }

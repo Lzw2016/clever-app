@@ -41,10 +41,6 @@ public class SchedulerConfig implements Serializable {
      */
     private int schedulerExecutorPoolSize = 16;
     /**
-     * 调度线程池队列大小(大于等于schedulerExecutorPoolSize值)
-     */
-    private int schedulerExecutorQueueSize = 16;
-    /**
      * 定时任务执行线程池大小
      */
     private int jobExecutorPoolSize = 64;

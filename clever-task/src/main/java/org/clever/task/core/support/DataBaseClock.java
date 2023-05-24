@@ -14,9 +14,13 @@ public class DataBaseClock implements WheelTimer.Clock {
     private final Jdbc jdbc;
     private volatile long offset = 0;
 
-    public DataBaseClock() {
-        jdbc = TaskDataSource.getJdbc();
+    public DataBaseClock(Jdbc jdbc) {
+        this.jdbc = jdbc;
         syncTime();
+    }
+
+    public DataBaseClock() {
+        this(TaskDataSource.getJdbc());
     }
 
     /**
