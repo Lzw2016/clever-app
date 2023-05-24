@@ -14,8 +14,14 @@ import java.util.concurrent.TimeUnit;
 public class WheelTimerTest {
     @Test
     public void t01() throws Exception {
-        WheelTimer timer = new WheelTimer(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), 10, TimeUnit.MILLISECONDS, 512);
+        WheelTimer.Clock clock = System::nanoTime;
+        WheelTimer timer = new WheelTimer(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), clock, 10, TimeUnit.MILLISECONDS, 512);
         final WheelTimer.Task task = new WheelTimer.Task() {
+            @Override
+            public long getId() {
+                return 0;
+            }
+
             @Override
             public void run(WheelTimer.TaskInfo taskInfo) {
                 log.info("@@@");
@@ -25,9 +31,36 @@ public class WheelTimerTest {
             }
         };
         WheelTimer.TaskInfo taskInfo = timer.addTask(task, 100, TimeUnit.MILLISECONDS);
-       log.info("--> {}", taskInfo.getState());
+        log.info("--> {}", taskInfo.getState());
         Thread.sleep(1000 * 10);
         timer.stop();
+        Thread.sleep(1000 * 2);
+        log.info("pendingTimeouts--> {}", timer.pendingTasks());
+        log.info("#end");
+    }
+
+    @Test
+    public void t02() throws Exception {
+        WheelTimer.Clock clock = System::nanoTime;
+        WheelTimer timer = new WheelTimer(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), clock, 10, TimeUnit.MILLISECONDS, 512);
+        final WheelTimer.Task task = new WheelTimer.Task() {
+            @Override
+            public long getId() {
+                return 0;
+            }
+
+            @Override
+            public void run(WheelTimer.TaskInfo taskInfo) {
+                log.info("@@@");
+            }
+        };
+        timer.addTask(task, 100, TimeUnit.MILLISECONDS);
+        Thread.sleep(200);
+        timer.addTask(task, 100, TimeUnit.MILLISECONDS);
+        for (int i = 0; i < 100; i++) {
+            Thread.sleep(50);
+            timer.addTask(task, 100, TimeUnit.MILLISECONDS);
+        }
         Thread.sleep(1000 * 2);
         log.info("pendingTimeouts--> {}", timer.pendingTasks());
         log.info("#end");

@@ -3,6 +3,7 @@ package org.clever.task.core.support;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.PlatformOS;
 import org.clever.core.timer.HashedWheelTimer;
+import org.clever.task.core.GlobalConstant;
 import org.clever.util.Assert;
 
 import java.util.Queue;
@@ -30,26 +31,30 @@ public class WheelTimer {
     }
 
     public interface Task {
+        /**
+         * 定时任务唯一ID
+         */
+        long getId();
+
+        /**
+         * 定时任务逻辑
+         *
+         * @param taskInfo 定时任务上下文信息
+         */
         void run(TaskInfo taskInfo) throws Exception;
+    }
+
+    public interface Clock {
+        /**
+         * 获取当前时间()
+         */
+        long nanoTime();
     }
 
     /**
      * 用于同步更新 workerState
      */
     private static final AtomicIntegerFieldUpdater<WheelTimer> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(WheelTimer.class, "workerState");
-
-    /**
-     * 创建时间轮数组
-     */
-    private static WheelBucket[] createWheel(int ticksPerWheel) {
-        Assert.isTrue(ticksPerWheel > 0 && ticksPerWheel <= 1073741824, "参数 ticksPerWheel 必须 > 0 & <=2^30");
-        ticksPerWheel = HashedWheelTimer.normalizeTicksPerWheel(ticksPerWheel);
-        WheelBucket[] wheel = new WheelBucket[ticksPerWheel];
-        for (int i = 0; i < wheel.length; i++) {
-            wheel[i] = new WheelBucket();
-        }
-        return wheel;
-    }
 
     /**
      * 时间轮的启动时间(纳秒)
@@ -68,10 +73,6 @@ public class WheelTimer {
      */
     private final int mask;
     /**
-     * 时间轮调度逻辑
-     */
-    private final Worker worker = new Worker();
-    /**
      * 时间轮调度线程
      */
     private final Thread workerThread;
@@ -79,6 +80,10 @@ public class WheelTimer {
      * 定时任务执行线程池
      */
     private final ExecutorService taskExecutor;
+    /**
+     * 调度器时钟
+     */
+    private final Clock clock;
     /**
      * 当前实例的状态，{@link State}
      */
@@ -91,20 +96,26 @@ public class WheelTimer {
      * 待处理的 TaskInfo 队列
      */
     private final Queue<TaskInfo> tasks = new LinkedBlockingQueue<>();
+    /**
+     * 时间轮中的所有任务 {@code ConcurrentMap<taskId, TaskInfo>}
+     */
+    private final ConcurrentMap<Long, TaskInfo> wheelAllTaskInfo = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
 
     /**
      * 创建一个新的定时任务调度器
      *
      * @param threadFactory 用于创建调度线程的 {@link ThreadFactory}，只会创建一个调度线程
      * @param taskExecutor  定时任务执行线程池
+     * @param clock         用于获取当前时间的时钟
      * @param tickDuration  时间轮基本时间长度
      * @param unit          时间轮基本时间长度单位
      * @param ticksPerWheel 时间轮数组大小
      * @throws IllegalArgumentException 参数值校验失败
      */
-    public WheelTimer(ThreadFactory threadFactory, ExecutorService taskExecutor, long tickDuration, TimeUnit unit, int ticksPerWheel) {
+    public WheelTimer(ThreadFactory threadFactory, ExecutorService taskExecutor, Clock clock, long tickDuration, TimeUnit unit, int ticksPerWheel) {
         Assert.notNull(threadFactory, "参数 threadFactory 不能为 null");
         Assert.notNull(taskExecutor, "参数 taskExecutor 不能为 null");
+        Assert.notNull(clock, "参数 clock 不能为 null");
         Assert.isTrue(tickDuration > 0, "参数 tickDuration 必须 > 0");
         Assert.notNull(unit, "参数 unit 不能为 null");
         Assert.isTrue(ticksPerWheel > 0 && ticksPerWheel <= 1073741824, "参数 ticksPerWheel 必须 > 0 & <=2^30");
@@ -117,8 +128,9 @@ public class WheelTimer {
         if (this.tickDuration >= Long.MAX_VALUE / wheel.length) {
             throw new IllegalArgumentException(String.format("tickDuration: %d (expected: 0 < tickDuration in nanos < %d", tickDuration, Long.MAX_VALUE / wheel.length));
         }
-        this.workerThread = threadFactory.newThread(worker);
+        this.workerThread = threadFactory.newThread(new Worker());
         this.taskExecutor = taskExecutor;
+        this.clock = clock;
     }
 
     /**
@@ -140,7 +152,7 @@ public class WheelTimer {
             default:
                 throw new Error("Invalid WorkerState");
         }
-        // 等到 startTime 被 worker 初始化
+        // 等到 startTime 被 workerThread 初始化
         while (startTime == 0) {
             try {
                 startTimeInitialized.await();
@@ -188,7 +200,7 @@ public class WheelTimer {
         Assert.notNull(unit, "参数 unit 不能为 null");
         start();
         // 将 TaskInfo 添加到待处理的 Task 队列
-        long deadline = System.nanoTime() + unit.toNanos(delay) - startTime;
+        long deadline = clock.nanoTime() + unit.toNanos(delay) - startTime;
         // 防止溢出
         if (delay > 0 && deadline < 0) {
             deadline = Long.MAX_VALUE;
@@ -220,16 +232,26 @@ public class WheelTimer {
     }
 
     /**
-     * 时间轮调度逻辑对象
+     * 创建时间轮数组
      */
-    public Worker getWorker() {
-        return worker;
+    private WheelBucket[] createWheel(int ticksPerWheel) {
+        Assert.isTrue(ticksPerWheel > 0 && ticksPerWheel <= 1073741824, "参数 ticksPerWheel 必须 > 0 & <=2^30");
+        ticksPerWheel = HashedWheelTimer.normalizeTicksPerWheel(ticksPerWheel);
+        WheelBucket[] wheel = new WheelBucket[ticksPerWheel];
+        for (int i = 0; i < wheel.length; i++) {
+            wheel[i] = new WheelBucket(this);
+        }
+        return wheel;
     }
 
     /**
      * 时间轮刻度上的节点(链表)
      */
     private static final class WheelBucket {
+        /**
+         * 所属的调度器
+         */
+        private final WheelTimer timer;
         /**
          * 连表头部，用于链表数据结构
          */
@@ -239,25 +261,14 @@ public class WheelTimer {
          */
         private TaskInfo tail;
 
-        /**
-         * 添加 {@link TaskInfo} 到当前时间轮刻度上
-         */
-        void addTask(TaskInfo taskInfo) {
-            Assert.isTrue(taskInfo.bucket == null, "当前 TaskInfo 已分配到 WheelBucket 中，不能重复分配");
-            taskInfo.bucket = this;
-            if (head == null) {
-                head = tail = taskInfo;
-            } else {
-                tail.next = taskInfo;
-                taskInfo.prev = tail;
-                tail = taskInfo;
-            }
+        private WheelBucket(WheelTimer timer) {
+            this.timer = timer;
         }
 
         /**
          * 在给定的 {@code deadline} 内，执行所有的 {@link TaskInfo}
          */
-        void executeTasks(long deadline) {
+        private void executeTasks(long deadline) {
             TaskInfo taskInfo = head;
             // 处理所有的任务(TaskInfo)
             while (taskInfo != null) {
@@ -282,7 +293,24 @@ public class WheelTimer {
             }
         }
 
-        public TaskInfo remove(TaskInfo taskInfo) {
+        /**
+         * 添加 {@link TaskInfo} 到当前时间轮刻度上
+         */
+        private void addTask(final TaskInfo taskInfo) {
+            Assert.isTrue(taskInfo.bucket == null, "当前 TaskInfo 已分配到 WheelBucket 中，不能重复分配");
+            taskInfo.bucket = this;
+            if (head == null) {
+                head = tail = taskInfo;
+            } else {
+                tail.next = taskInfo;
+                taskInfo.prev = tail;
+                tail = taskInfo;
+            }
+            timer.wheelAllTaskInfo.put(taskInfo.getTaskId(), taskInfo);
+        }
+
+        private TaskInfo remove(TaskInfo taskInfo) {
+            timer.wheelAllTaskInfo.remove(taskInfo.getTaskId());
             TaskInfo next = taskInfo.next;
             // 通过更新链接列表删除已处理或取消的任务
             if (taskInfo.prev != null) {
@@ -313,7 +341,8 @@ public class WheelTimer {
         /**
          * 清除所有的任务
          */
-        void clearTasks() {
+        private void clearTasks() {
+            timer.wheelAllTaskInfo.clear();
             while (true) {
                 TaskInfo taskInfo = pollTaskInfo();
                 if (taskInfo == null) {
@@ -340,6 +369,34 @@ public class WheelTimer {
             head.bucket = null;
             return head;
         }
+
+        private void replaceTaskInfo(TaskInfo oldTask, TaskInfo newTask) {
+            Assert.isTrue(oldTask.bucket == this, "oldTask 不属于当前 WheelBucket");
+            Assert.isTrue(newTask.bucket == null, "newTask 已分配到 WheelBucket 中，不能重复分配");
+            newTask.bucket = this;
+            TaskInfo prev = oldTask.prev;
+            if (prev == null) {
+                head = newTask;
+                newTask.prev = null;
+            } else {
+                prev.next = newTask;
+                newTask.prev = prev;
+            }
+            TaskInfo next = oldTask.next;
+            if (next == null) {
+                tail = newTask;
+                newTask.next = null;
+            } else {
+                next.prev = newTask;
+                newTask.next = next;
+            }
+            timer.wheelAllTaskInfo.put(newTask.getTaskId(), newTask);
+            timer.wheelAllTaskInfo.remove(oldTask.getTaskId());
+            // 清空 prev 和 next 以允许 GC
+            oldTask.next = null;
+            oldTask.prev = null;
+            oldTask.bucket = null;
+        }
     }
 
     /**
@@ -351,14 +408,6 @@ public class WheelTimer {
          */
         private static final AtomicIntegerFieldUpdater<TaskInfo> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(TaskInfo.class, "state");
         /**
-         * 所属的调度器
-         */
-        private final WheelTimer timer;
-        /**
-         * 所属的时间轮数组项(Bucket)
-         */
-        private WheelBucket bucket;
-        /**
          * 上一个任务
          */
         private TaskInfo next;
@@ -366,10 +415,14 @@ public class WheelTimer {
          * 下一个任务
          */
         private TaskInfo prev;
-//        /**
-//         * TODO 任务关联的数据对象
-//         */
-//        private final Object data;
+        /**
+         * 所属的调度器
+         */
+        private final WheelTimer timer;
+        /**
+         * 所属的时间轮数组项(Bucket)
+         */
+        private WheelBucket bucket;
         /**
          * 定时任务
          */
@@ -387,7 +440,7 @@ public class WheelTimer {
          */
         private volatile int state = TaskState.INIT;
 
-        TaskInfo(WheelTimer timer, Task task, long deadline) {
+        private TaskInfo(WheelTimer timer, Task task, long deadline) {
             this.timer = timer;
             this.task = task;
             this.deadline = deadline;
@@ -408,20 +461,27 @@ public class WheelTimer {
         }
 
         /**
+         * 定时任务唯一ID
+         */
+        public long getTaskId() {
+            return task.getId();
+        }
+
+        /**
          * 取消定时任务
          *
          * @return 取消成功返回 true
          */
         public boolean cancel() {
             // 仅更新状态，将在下一次更新时从 WheelBucket 中删除的状态
-            return compareAndSetState(TaskState.INIT, TaskState.CANCELLED);
+            return STATE_UPDATER.compareAndSet(this, TaskState.INIT, TaskState.CANCELLED);
         }
 
         /**
          * 执行当前任务
          */
         public void execute() {
-            if (!compareAndSetState(TaskState.INIT, TaskState.EXECUTED)) {
+            if (!STATE_UPDATER.compareAndSet(this, TaskState.INIT, TaskState.EXECUTED)) {
                 return;
             }
             try {
@@ -436,16 +496,6 @@ public class WheelTimer {
                 });
             } catch (Throwable e) {
                 log.error("scheduled task scheduling failed", e);
-            }
-        }
-
-        /**
-         * 删除当前任务
-         */
-        void remove() {
-            WheelBucket bucket = this.bucket;
-            if (bucket != null) {
-                bucket.remove(this);
             }
         }
 
@@ -479,7 +529,7 @@ public class WheelTimer {
 
         @Override
         public String toString() {
-            final long currentTime = System.nanoTime();
+            final long currentTime = timer.clock.nanoTime();
             long remaining = deadline - currentTime + timer.startTime;
             String simpleClassName = this.getClass().getSimpleName();
             StringBuilder buf = new StringBuilder(255).append(simpleClassName).append('(').append("deadline: ");
@@ -499,9 +549,21 @@ public class WheelTimer {
             return buf.append(", task: ").append(task).append(')').toString();
         }
 
-        @SuppressWarnings({"SameParameterValue", "BooleanMethodIsAlwaysInverted"})
-        private boolean compareAndSetState(int expected, int state) {
-            return STATE_UPDATER.compareAndSet(this, expected, state);
+        /**
+         * 删除当前任务
+         */
+        private void remove() {
+            WheelBucket bucket = this.bucket;
+            if (bucket != null) {
+                bucket.remove(this);
+            }
+        }
+
+        private void replaceTaskInfo(TaskInfo newTask) {
+            WheelBucket bucket = this.bucket;
+            if (bucket != null) {
+                bucket.replaceTaskInfo(this, newTask);
+            }
         }
     }
 
@@ -514,10 +576,13 @@ public class WheelTimer {
          */
         private long tick;
 
+        private Worker() {
+        }
+
         @Override
         public void run() {
             // 初始化 startTime
-            startTime = System.nanoTime();
+            startTime = clock.nanoTime();
             if (startTime == 0) {
                 // 我们这里使用0作为未初始化值的指示符，所以要保证初始化的时候不是0
                 startTime = 1;
@@ -558,7 +623,7 @@ public class WheelTimer {
         private long waitForNextTick() {
             long deadline = tickDuration * (tick + 1);
             while (true) {
-                final long currentTime = System.nanoTime() - startTime;
+                final long currentTime = clock.nanoTime() - startTime;
                 long sleepTimeMs = ((deadline - currentTime) + 999999) / 1000000;
                 if (sleepTimeMs <= 0) {
                     if (currentTime == Long.MIN_VALUE) {
@@ -598,14 +663,36 @@ public class WheelTimer {
                     // 任务已经取消了
                     continue;
                 }
-                long calculated = taskInfo.deadline / tickDuration;
-                taskInfo.remainingRounds = (calculated - tick) / wheel.length;
-                // TODO 需要更新 TaskInfo
+                long stopTick = (taskInfo.deadline + tickDuration - 1) / tickDuration;
+                long waitTick = stopTick - tick;
+                taskInfo.remainingRounds = waitTick / wheel.length;
                 // 确保任务放在未走过的时间轮 tick 下
-                final long ticks = Math.max(calculated, tick);
+                final long ticks = Math.max(stopTick, tick);
                 int stopIndex = (int) (ticks & mask);
                 WheelBucket bucket = wheel[stopIndex];
-                bucket.addTask(taskInfo);
+                // 更新或新增 TaskInfo
+                // 1.TaskInfo不存在且需要放在tick之前(需要丢弃)
+                // 2.TaskInfo不存在且需要放在tick之后(需要新增)
+                // 3.TaskInfo存在且deadline未变化(替换/丢弃)
+                // 4.TaskInfo存在且deadline变化(先删除之前的再新增)
+                TaskInfo existsTaskInfo = wheelAllTaskInfo.get(taskInfo.getTaskId());
+                if (existsTaskInfo == null) {
+                    if (waitTick < 0) {
+                        // TaskInfo不存在且需要放在tick之前(需要丢弃)
+                        continue;
+                    }
+                    // TaskInfo不存在且需要放在tick之后(需要新增)
+                    bucket.addTask(taskInfo);
+                } else {
+                    if (existsTaskInfo.deadline == taskInfo.deadline) {
+                        // TaskInfo存在且deadline未变化(替换/丢弃)
+                        existsTaskInfo.replaceTaskInfo(taskInfo);
+                        continue;
+                    }
+                    // TaskInfo存在且deadline变化(先删除之前的再新增)
+                    existsTaskInfo.remove();
+                    bucket.addTask(taskInfo);
+                }
             }
         }
     }

@@ -132,4 +132,16 @@ public class TaskStoreTest {
                 .execute();
         jdbc.close();
     }
+
+    @Test
+    public void t06() {
+        Jdbc jdbc = BaseTest.newMysql();
+        long t1 = System.currentTimeMillis();
+        long t2 = jdbc.currentDate().getTime();
+        long t4 = System.currentTimeMillis();
+        long offset = (t2 - t1) - (t4 - t2);
+        log.info("t2={} | t4={} | offset -> {}", t2, t4, offset);
+        log.info("t2-t4={}", t2 - t4);
+        jdbc.close();
+    }
 }
