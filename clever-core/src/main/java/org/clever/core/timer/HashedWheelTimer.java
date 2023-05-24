@@ -470,6 +470,7 @@ public class HashedWheelTimer implements Timer {
         }
     }
 
+    @SuppressWarnings("DuplicatedCode")
     private final class Worker implements Runnable {
         /**
          * 需要执行但未执行的任务
@@ -584,6 +585,9 @@ public class HashedWheelTimer implements Timer {
                 // 这里是为了处理在windows系统上的一个bug，如果sleep不够10ms则要取整(https://www.javamex.com/tutorials/threads/sleep_issues.shtml)
                 if (PlatformOS.isWindows()) {
                     sleepTimeMs = sleepTimeMs / 10 * 10;
+                    if (sleepTimeMs == 0) {
+                        sleepTimeMs = 1;
+                    }
                 }
                 try {
                     // noinspection BusyWait
@@ -700,7 +704,7 @@ public class HashedWheelTimer implements Timer {
                         task.run(this);
                     } catch (Throwable t) {
                         if (log.isWarnEnabled()) {
-                            log.warn("throwing an exception while executing a timed task: {}" ,task.getClass().getSimpleName(), t);
+                            log.warn("throwing an exception while executing a timed task: {}", task.getClass().getSimpleName(), t);
                         }
                     }
                 });

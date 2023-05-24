@@ -6,6 +6,7 @@ import org.clever.core.timer.HashedWheelTimer;
 import org.clever.task.core.GlobalConstant;
 import org.clever.util.Assert;
 
+import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -46,9 +47,9 @@ public class WheelTimer {
 
     public interface Clock {
         /**
-         * 获取当前时间()
+         * 获取当前时间戳(毫秒)
          */
-        long nanoTime();
+        long currentTimeMillis();
     }
 
     /**
@@ -57,11 +58,11 @@ public class WheelTimer {
     private static final AtomicIntegerFieldUpdater<WheelTimer> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(WheelTimer.class, "workerState");
 
     /**
-     * 时间轮的启动时间(纳秒)
+     * 时间轮的启动时间(毫秒)
      */
     private volatile long startTime;
     /**
-     * 时间轮基本时间长度(纳秒)
+     * 时间轮基本时间长度(毫秒)
      */
     private final long tickDuration;
     /**
@@ -122,11 +123,11 @@ public class WheelTimer {
         // 初始化时间轮数组
         this.wheel = createWheel(ticksPerWheel);
         this.mask = wheel.length - 1;
-        // 转换 tickDuration 到纳秒
-        this.tickDuration = unit.toNanos(tickDuration);
+        // 转换 tickDuration 到毫秒
+        this.tickDuration = unit.toMillis(tickDuration);
         // 防止溢出
-        if (this.tickDuration >= Long.MAX_VALUE / wheel.length) {
-            throw new IllegalArgumentException(String.format("tickDuration: %d (expected: 0 < tickDuration in nanos < %d", tickDuration, Long.MAX_VALUE / wheel.length));
+        if ((this.tickDuration * wheel.length) >= Long.MAX_VALUE) {
+            throw new IllegalArgumentException(String.format("tickDuration: %d (expected: 0 < tickDuration in millis < %d", tickDuration, Long.MAX_VALUE / wheel.length));
         }
         this.workerThread = threadFactory.newThread(new Worker());
         this.taskExecutor = taskExecutor;
@@ -198,9 +199,10 @@ public class WheelTimer {
     public TaskInfo addTask(Task task, long delay, TimeUnit unit) {
         Assert.notNull(task, "参数 task 不能为 null");
         Assert.notNull(unit, "参数 unit 不能为 null");
+        Assert.isTrue(delay >= 0, "参数 delay 必须 >=0");
         start();
         // 将 TaskInfo 添加到待处理的 Task 队列
-        long deadline = clock.nanoTime() + unit.toNanos(delay) - startTime;
+        long deadline = clock.currentTimeMillis() + unit.toMillis(delay) - startTime;
         // 防止溢出
         if (delay > 0 && deadline < 0) {
             deadline = Long.MAX_VALUE;
@@ -208,6 +210,21 @@ public class WheelTimer {
         TaskInfo taskInfo = new TaskInfo(this, task, deadline);
         tasks.add(taskInfo);
         return taskInfo;
+    }
+
+    /**
+     * 调度指定的 {@link Task} 在指定的时间一次性执行
+     *
+     * @param task 后台任务
+     * @param date 任务执行的时间
+     * @return 与指定任务关联的对象
+     * @throws IllegalStateException 如果这个计时器已经{@linkplain #stop() stop}了
+     */
+    public TaskInfo addTask(Task task, Date date) {
+        Assert.notNull(task, "参数 task 不能为 null");
+        Assert.notNull(date, "参数 date 不能为 null");
+        long delayNs = date.getTime() - clock.currentTimeMillis();
+        return addTask(task, delayNs, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -235,7 +252,6 @@ public class WheelTimer {
      * 创建时间轮数组
      */
     private WheelBucket[] createWheel(int ticksPerWheel) {
-        Assert.isTrue(ticksPerWheel > 0 && ticksPerWheel <= 1073741824, "参数 ticksPerWheel 必须 > 0 & <=2^30");
         ticksPerWheel = HashedWheelTimer.normalizeTicksPerWheel(ticksPerWheel);
         WheelBucket[] wheel = new WheelBucket[ticksPerWheel];
         for (int i = 0; i < wheel.length; i++) {
@@ -430,7 +446,7 @@ public class WheelTimer {
          */
         private final Task task;
         /**
-         * 计划执行时间，相对于 {@link WheelTimer#startTime} 的时间(纳秒)
+         * 计划执行时间，相对于 {@link WheelTimer#startTime} 的时间(毫秒)
          */
         private final long deadline;
         /**
@@ -516,7 +532,7 @@ public class WheelTimer {
         }
 
         /**
-         * 任务计划执行时间，相对于 startTime 的时间(纳秒)
+         * 任务计划执行时间，相对于 startTime 的时间(毫秒)
          */
         public long getDeadline() {
             return deadline;
@@ -531,14 +547,14 @@ public class WheelTimer {
 
         @Override
         public String toString() {
-            final long currentTime = timer.clock.nanoTime();
+            final long currentTime = timer.clock.currentTimeMillis();
             long remaining = deadline - currentTime + timer.startTime;
             String simpleClassName = this.getClass().getSimpleName();
             StringBuilder buf = new StringBuilder(255).append(simpleClassName).append('(').append("deadline: ");
             if (remaining > 0) {
-                buf.append(remaining).append(" ns later");
+                buf.append(remaining).append(" ms later");
             } else if (remaining < 0) {
-                buf.append(-remaining).append(" ns ago");
+                buf.append(-remaining).append(" ms ago");
             } else {
                 buf.append("now");
             }
@@ -572,6 +588,7 @@ public class WheelTimer {
     /**
      * 调度器逻辑
      */
+    @SuppressWarnings("DuplicatedCode")
     private final class Worker implements Runnable {
         /**
          * 时间轮数组的刻度指向
@@ -584,7 +601,7 @@ public class WheelTimer {
         @Override
         public void run() {
             // 初始化 startTime
-            startTime = clock.nanoTime();
+            startTime = clock.currentTimeMillis();
             if (startTime == 0) {
                 // 我们这里使用0作为未初始化值的指示符，所以要保证初始化的时候不是0
                 startTime = 1;
@@ -625,9 +642,9 @@ public class WheelTimer {
         private long waitForNextTick() {
             long deadline = tickDuration * (tick + 1);
             while (true) {
-                final long currentTime = clock.nanoTime() - startTime;
-                long sleepTimeMs = ((deadline - currentTime) + 999999) / 1000000;
-                if (sleepTimeMs <= 0) {
+                final long currentTime = clock.currentTimeMillis() - startTime;
+                long sleepTime = deadline - currentTime;
+                if (sleepTime <= 0) {
                     if (currentTime == Long.MIN_VALUE) {
                         return -Long.MAX_VALUE;
                     } else {
@@ -637,11 +654,14 @@ public class WheelTimer {
                 // See https://github.com/netty/netty/issues/356
                 // 这里是为了处理在windows系统上的一个bug，如果sleep不够10ms则要取整(https://www.javamex.com/tutorials/threads/sleep_issues.shtml)
                 if (PlatformOS.isWindows()) {
-                    sleepTimeMs = sleepTimeMs / 10 * 10;
+                    sleepTime = sleepTime / 10 * 10;
+                    if (sleepTime == 0) {
+                        sleepTime = 1;
+                    }
                 }
                 try {
                     // noinspection BusyWait
-                    Thread.sleep(sleepTimeMs);
+                    Thread.sleep(sleepTime);
                 } catch (InterruptedException ignored) {
                     if (STATE_UPDATER.get(WheelTimer.this) == State.SHUTDOWN) {
                         return Long.MIN_VALUE;
