@@ -62,6 +62,8 @@ public class WheelTimerTest {
             timer.addTask(task, 100, TimeUnit.MILLISECONDS);
         }
         Thread.sleep(1000 * 2);
+        timer.stop();
+        Thread.sleep(1000 * 2);
         log.info("pendingTimeouts--> {}", timer.pendingTasks());
         log.info("#end");
     }

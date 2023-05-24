@@ -247,6 +247,7 @@ public class WheelTimer {
     /**
      * 时间轮刻度上的节点(链表)
      */
+    @SuppressWarnings("DuplicatedCode")
     private static final class WheelBucket {
         /**
          * 所属的调度器
@@ -373,6 +374,7 @@ public class WheelTimer {
         private void replaceTaskInfo(TaskInfo oldTask, TaskInfo newTask) {
             Assert.isTrue(oldTask.bucket == this, "oldTask 不属于当前 WheelBucket");
             Assert.isTrue(newTask.bucket == null, "newTask 已分配到 WheelBucket 中，不能重复分配");
+            timer.wheelAllTaskInfo.remove(oldTask.getTaskId());
             newTask.bucket = this;
             TaskInfo prev = oldTask.prev;
             if (prev == null) {
@@ -391,7 +393,6 @@ public class WheelTimer {
                 newTask.next = next;
             }
             timer.wheelAllTaskInfo.put(newTask.getTaskId(), newTask);
-            timer.wheelAllTaskInfo.remove(oldTask.getTaskId());
             // 清空 prev 和 next 以允许 GC
             oldTask.next = null;
             oldTask.prev = null;
@@ -402,6 +403,7 @@ public class WheelTimer {
     /**
      * 任务信息(任务上下文)
      */
+    @SuppressWarnings("DuplicatedCode")
     public static final class TaskInfo {
         /**
          * 用于同步更新 state
