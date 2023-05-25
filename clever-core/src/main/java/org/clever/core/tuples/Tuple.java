@@ -9,6 +9,65 @@ import java.util.*;
  * 创建时间：2019/08/16 10:53 <br/>
  */
 public abstract class Tuple implements Iterable<Object>, Serializable, Comparable<Tuple> {
+    interface One<T> {
+        T getValue1();
+
+        void setValue1(T val);
+    }
+
+    interface Two<T> {
+        T getValue2();
+
+        void setValue2(T val);
+    }
+
+    interface Three<T> {
+        T getValue3();
+
+        void setValue3(T val);
+    }
+
+    interface Four<T> {
+        T getValue4();
+
+        void setValue4(T val);
+    }
+
+    interface Five<T> {
+        T getValue5();
+
+        void setValue5(T val);
+    }
+
+    interface Six<T> {
+        T getValue6();
+
+        void setValue6(T val);
+    }
+
+    interface Seven<T> {
+        T getValue7();
+
+        void setValue7(T val);
+    }
+
+    interface Eight<T> {
+        T getValue8();
+
+        void setValue8(T val);
+    }
+
+    interface Nine<T> {
+        T getValue9();
+
+        void setValue9(T val);
+    }
+
+    interface Ten<T> {
+        T getValue10();
+
+        void setValue10(T val);
+    }
 
     private final Object[] valueArray;
     private final List<Object> valueList;

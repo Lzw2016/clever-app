@@ -1,16 +1,11 @@
 package org.clever.core.tuples;
 
-import org.clever.core.tuples.value.Four;
-import org.clever.core.tuples.value.One;
-import org.clever.core.tuples.value.Three;
-import org.clever.core.tuples.value.Two;
-
 /**
  * 四元元组
  * 作者：lizw <br/>
  * 创建时间：2019/08/16 12:05 <br/>
  */
-public final class TupleFour<A, B, C, D> extends Tuple implements One<A>, Two<B>, Three<C>, Four<D> {
+public final class TupleFour<A, B, C, D> extends Tuple implements Tuple.One<A>, Tuple.Two<B>, Tuple.Three<C>, Tuple.Four<D> {
     private static final int SIZE = 4;
 
     private A value1;

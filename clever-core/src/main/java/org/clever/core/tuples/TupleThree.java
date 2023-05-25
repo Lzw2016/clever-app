@@ -1,15 +1,11 @@
 package org.clever.core.tuples;
 
-import org.clever.core.tuples.value.One;
-import org.clever.core.tuples.value.Three;
-import org.clever.core.tuples.value.Two;
-
 /**
  * 三元元组
  * 作者：lizw <br/>
  * 创建时间：2019/08/16 12:01 <br/>
  */
-public final class TupleThree<A, B, C> extends Tuple implements One<A>, Two<B>, Three<C> {
+public final class TupleThree<A, B, C> extends Tuple implements Tuple.One<A>, Tuple.Two<B>, Tuple.Three<C> {
     private static final int SIZE = 3;
 
     private A value1;

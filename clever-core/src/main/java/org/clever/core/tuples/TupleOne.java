@@ -1,12 +1,10 @@
 package org.clever.core.tuples;
 
-import org.clever.core.tuples.value.One;
-
 /**
  * 作者：lizw <br/>
  * 创建时间：2020/02/20 09:20 <br/>
  */
-public class TupleOne<A> extends Tuple implements One<A> {
+public class TupleOne<A> extends Tuple implements Tuple.One<A> {
     private static final int SIZE = 1;
 
     private A value1;

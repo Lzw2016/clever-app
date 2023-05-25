@@ -1,13 +1,11 @@
 package org.clever.core.tuples;
 
-import org.clever.core.tuples.value.*;
-
 /**
  * 九元元组
  * 作者：lizw <br/>
  * 创建时间：2019/08/16 12:15 <br/>
  */
-public final class TupleNine<A, B, C, D, E, F, G, H, I> extends Tuple implements One<A>, Two<B>, Three<C>, Four<D>, Five<E>, Six<F>, Seven<G>, Eight<H>, Nine<I> {
+public final class TupleNine<A, B, C, D, E, F, G, H, I> extends Tuple implements Tuple.One<A>, Tuple.Two<B>, Tuple.Three<C>, Tuple.Four<D>, Tuple.Five<E>, Tuple.Six<F>, Tuple.Seven<G>, Tuple.Eight<H>, Tuple.Nine<I> {
     private static final int SIZE = 9;
 
     private A value1;

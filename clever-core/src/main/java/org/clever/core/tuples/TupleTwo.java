@@ -1,14 +1,11 @@
 package org.clever.core.tuples;
 
-import org.clever.core.tuples.value.One;
-import org.clever.core.tuples.value.Two;
-
 /**
  * 二元元组
  * 作者：lizw <br/>
  * 创建时间：2019/08/16 11:44 <br/>
  */
-public final class TupleTwo<A, B> extends Tuple implements One<A>, Two<B> {
+public final class TupleTwo<A, B> extends Tuple implements Tuple.One<A>, Tuple.Two<B> {
     private static final int SIZE = 2;
 
     private A value1;
