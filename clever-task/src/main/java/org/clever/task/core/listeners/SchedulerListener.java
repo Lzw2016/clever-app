@@ -17,9 +17,19 @@ public interface SchedulerListener {
     void onStarted(TaskScheduler scheduler, TaskStore taskStore, TaskSchedulerLog schedulerLog);
 
     /**
-     * 调度器已停止
+     * 调度器已暂停
      */
     void onPaused(TaskScheduler scheduler, TaskStore taskStore, TaskSchedulerLog schedulerLog);
+
+    /**
+     * 调度器已取消暂停(继续运行)
+     */
+    void onResume(TaskScheduler scheduler, TaskStore taskStore, TaskSchedulerLog schedulerLog);
+
+    /**
+     * 调度器已停止
+     */
+    void onStop(TaskScheduler scheduler, TaskStore taskStore, TaskSchedulerLog schedulerLog);
 
     /**
      * 调度器出现错误

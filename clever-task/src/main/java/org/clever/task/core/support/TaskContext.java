@@ -34,7 +34,7 @@ public class TaskContext {
      */
     @Getter
     @Setter
-    private TaskScheduler currentScheduler;
+    private volatile TaskScheduler currentScheduler;
     /**
      * 当前集群可用的调度器列表
      */

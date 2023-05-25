@@ -13,7 +13,7 @@ create table task_scheduler
     last_heartbeat_time datetime(3)     not null                                                comment '最后心跳时间',
     heartbeat_interval  bigint          not null        default 3000                            comment '心跳频率(单位：毫秒)',
     config              text            not null                                                comment '调度器配置，线程池大小、负载权重、最大并发任务数...',
-    -- TODO runtime_info        text                                                                    comment '调度器运行时信息',
+    runtime_info        text                                                                    comment '调度器运行时信息',
     description         varchar(511)                                                            comment '描述',
     create_at           datetime(3)     not null        default current_timestamp(3)            comment '创建时间',
     update_at           datetime(3)                     on update current_timestamp(3)          comment '更新时间',

@@ -9,6 +9,7 @@ import com.querydsl.sql.Configuration;
 import com.querydsl.sql.SQLBaseListener;
 import com.querydsl.sql.SQLListenerContext;
 import com.querydsl.sql.SQLQueryFactory;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
 import org.clever.core.SystemClock;
@@ -54,6 +55,7 @@ import static org.clever.task.core.model.query.QTaskShellJob.taskShellJob;
  */
 @Slf4j
 public class TaskStore {
+    @Getter
     private final SnowFlake snowFlake;
     private final Jdbc jdbc;
     private final QueryDSL queryDSL;

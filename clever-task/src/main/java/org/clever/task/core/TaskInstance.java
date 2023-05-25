@@ -30,7 +30,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * 定时任务调度器实例
+ * 定时任务调度器实例 <br />
+ * 1.三种实体: 调度器、任务、触发器 <br />
+ * 2.调度器: 通过 namespace 隔离，同一个 namespace 下可以有多个调度器组成一个集群 <br />
+ * 3.任务&触发器: 任务与触发器是一对一的关系(表结构体现的是一个任务可以有多个触发器，目前程序设计的是一对一的关系) <br />
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2021/08/01 20:38 <br/>
@@ -236,10 +239,7 @@ public class TaskInstance {
      */
     public void stop() {
         STATE_UPDATER.getAndUpdate(this, state -> {
-            if (state == State.RUNNING) {
-                doPause();
-                doStop();
-            } else if (state == State.PAUSED) {
+            if (state == State.RUNNING || state == State.PAUSED) {
                 doStop();
             } else {
                 throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", getStateText()));
@@ -302,6 +302,85 @@ public class TaskInstance {
             default:
                 throw new SchedulerException(String.format("无效的调度器状态：%s", state));
         }
+    }
+
+    /**
+     * 新增或更新 http 定时任务，基于 jobId 判断是更新还是新增
+     */
+    public void addOrUpdateHttpJob(long jobId, HttpJobModel httpJob, AbstractTrigger trigger) {
+        // TODO addOrUpdateHttpJob
+    }
+
+    /**
+     * 新增或更新 java 定时任务，基于 jobId 判断是更新还是新增
+     */
+    public void addOrUpdateJavaJob(long jobId, JavaJobModel javaJob, AbstractTrigger trigger) {
+    }
+
+    /**
+     * 新增或更新 js 定时任务，基于 jobId 判断是更新还是新增
+     */
+    public void addOrUpdateJsJob(long jobId, JsJobModel jsJob, AbstractTrigger trigger) {
+    }
+
+    /**
+     * 新增或更新 shell 定时任务，基于 jobId 判断是更新还是新增
+     */
+    public void addOrUpdateShellJob(long jobId, ShellJobModel shellJob, AbstractTrigger trigger) {
+    }
+
+    /**
+     * 新增 http 定时任务
+     */
+    public void addHttpJob(HttpJobModel httpJob, AbstractTrigger trigger) {
+    }
+
+    /**
+     * 新增 java 定时任务
+     */
+    public void addJavaJob(JavaJobModel javaJob, AbstractTrigger trigger) {
+    }
+
+    /**
+     * 新增 js 定时任务
+     */
+    public void addJsJob(JsJobModel jsJob, AbstractTrigger trigger) {
+    }
+
+    /**
+     * 新增 shell 定时任务
+     */
+    public void addShellJob(ShellJobModel shellJob, AbstractTrigger trigger) {
+    }
+
+    /**
+     * 更新 http 定时任务
+     */
+    public void updateHttpJob(long jobId, HttpJobModel httpJob) {
+    }
+
+    /**
+     * 更新 java 定时任务
+     */
+    public void updateJavaJob(long jobId, JavaJobModel javaJob) {
+    }
+
+    /**
+     * 更新 js 定时任务
+     */
+    public void updateJsJob(long jobId, JsJobModel jsJob) {
+    }
+
+    /**
+     * 更新 shell 定时任务
+     */
+    public void updateShellJob(long jobId, ShellJobModel shellJob) {
+    }
+
+    /**
+     * 更新触发器
+     */
+    public void updateTrigger(long triggerId, AbstractTrigger trigger) {
     }
 
     /**
@@ -372,21 +451,6 @@ public class TaskInstance {
     }
 
     /**
-     * 批量增加定时任务
-     */
-    public List<AddJobRes> addJobs(Map<AbstractJob, AbstractTrigger> jobs) {
-        Assert.notEmpty(jobs, "参数jobs不能为空");
-        Assert.noNullElements(jobs.keySet(), "参数jobs含有空job");
-        Assert.noNullElements(jobs.values(), "参数jobs含有空trigger");
-        final List<AddJobRes> resList = new ArrayList<>(jobs.size());
-        taskStore.beginTX(status -> {
-            jobs.forEach((abstractJob, trigger) -> resList.add(this.addJob(abstractJob, trigger)));
-            return resList;
-        });
-        return resList;
-    }
-
-    /**
      * 禁用定时任务
      */
     public int disableJob(Long jobId) {
@@ -421,143 +485,6 @@ public class TaskInstance {
     }
 
     /**
-     * 删除定时任务
-     */
-    public void deleteJob(Long jobId) {
-        Assert.notNull(jobId, "参数jobId不能为空");
-        final String namespace = getNamespace();
-        taskStore.beginTX(status -> {
-            TaskJob job = taskStore.getJob(namespace, jobId);
-            Assert.notNull(job, "job不存在");
-            taskStore.delJobByJobId(namespace, jobId);
-            taskStore.delTriggerByJobId(namespace, jobId);
-            switch (job.getType()) {
-                case EnumConstant.JOB_TYPE_1:
-                    taskStore.delHttpJobByJobId(namespace, jobId);
-                    break;
-                case EnumConstant.JOB_TYPE_2:
-                    taskStore.delJavaJobByJobId(namespace, jobId);
-                    break;
-                case EnumConstant.JOB_TYPE_3:
-                    taskStore.delJsJobByJobId(namespace, jobId);
-                    break;
-                case EnumConstant.JOB_TYPE_4:
-                    taskStore.delShellJobByJobId(namespace, jobId);
-                    break;
-                default:
-                    throw new IllegalArgumentException("不支持的任务类型: Type=" + job.getType());
-            }
-            return null;
-        });
-    }
-
-    /**
-     * 批量删除定时任务
-     */
-    public void deleteJobs(Collection<Long> jobIds) {
-        Assert.notEmpty(jobIds, "参数jobIds不能为空");
-        Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
-        taskStore.beginTX(status -> {
-            jobIds.forEach(this::deleteJob);
-            return null;
-        });
-    }
-
-    /**
-     * 立即执行定时任务
-     */
-    public void execJob(Long jobId) {
-        Assert.notNull(jobId, "参数jobId不能为空");
-        final long startTime = System.currentTimeMillis();
-        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
-        final TaskJob job = taskStore.beginReadOnlyTX(status -> taskStore.getJob(scheduler.getNamespace(), jobId));
-        Assert.notNull(job, "job不存在");
-        jobWorker.execute(() -> {
-            final Date dbNow = taskStore.currentDate();
-            // 记录触发器日志
-            final TaskJobTriggerLog jobTriggerLog = newJobTriggerLog(dbNow, jobId);
-            schedulerWorker.execute(() -> {
-                final long endTime = System.currentTimeMillis();
-                jobTriggerLog.setTriggerTime((int) (endTime - startTime));
-                this.jobTriggeredListener(jobTriggerLog);
-            });
-            // 执行任务
-            final TaskJobLog jobLog = newJobLog(dbNow, job, null, jobTriggerLog.getId());
-            final String oldJobData = job.getJobData();
-            // 控制并发执行 - 是否允许多节点并发执行
-            final boolean allowConcurrent = Objects.equals(EnumConstant.JOB_ALLOW_CONCURRENT_1, job.getAllowConcurrent());
-            if (allowConcurrent) {
-                executeJob(dbNow, job, jobLog);
-            } else {
-                try {
-                    // 获取定时任务分布式锁 - 判断是否被其他节点执行了
-                    taskStore.getLockJob(job.getNamespace(), job.getId(), () -> {
-                        // 二次校验数据
-                        Long runCount = taskStore.beginReadOnlyTX(status -> taskStore.getJobRunCount(scheduler.getNamespace(), jobId));
-                        if (Objects.equals(runCount, job.getRunCount())) {
-                            executeJob(dbNow, job, jobLog);
-                        }
-                    });
-                } catch (Exception e) {
-                    log.error("[TaskInstance] 手动执行Job失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
-                    jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
-                    jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
-                    jobEndRunListener(jobLog);
-                }
-            }
-            // 更新任务数据
-            final String newJobData = job.getJobData();
-            if (!Objects.equals(oldJobData, newJobData) && Objects.equals(job.getIsUpdateData(), EnumConstant.JOB_IS_UPDATE_DATA_1)) {
-                taskStore.beginTX(status -> taskStore.updateJodData(job.getNamespace(), job.getId(), newJobData));
-            }
-        });
-    }
-
-    /**
-     * 批量立即执行定时任务
-     */
-    public void execJobs(Collection<Long> jobIds) {
-        Assert.notEmpty(jobIds, "参数jobIds不能为空");
-        Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
-        taskStore.beginTX(status -> {
-            jobIds.forEach(this::execJob);
-            return null;
-        });
-    }
-
-    /**
-     * 中断定时任务
-     */
-    public void interruptJob(Long jobId) {
-        // TODO 中断定时任务
-    }
-
-    /**
-     * 批量中断定时任务
-     */
-    public void interruptJobs(Collection<Long> jobIds) {
-        Assert.notEmpty(jobIds, "参数jobIds不能为空");
-        Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
-        taskStore.beginTX(status -> {
-            jobIds.forEach(this::interruptJob);
-            return null;
-        });
-    }
-
-//    /**
-//     * TODO 更新任务信息
-//     */
-//    public void updateJob() {
-//    }
-//
-//    /**
-//     *
-//     */
-//    public void queryJobs() {
-//    }
-//
-
-    /**
      * 禁用触发器
      */
     public int disableTrigger(Long triggerId) {
@@ -590,6 +517,120 @@ public class TaskInstance {
     }
 
     /**
+     * 删除定时任务(同时删除触发器)
+     */
+    public void deleteJob(Long jobId) {
+        Assert.notNull(jobId, "参数jobId不能为空");
+        final String namespace = getNamespace();
+        taskStore.beginTX(status -> {
+            TaskJob job = taskStore.getJob(namespace, jobId);
+            Assert.notNull(job, "job不存在");
+            taskStore.delJobByJobId(namespace, jobId);
+            taskStore.delTriggerByJobId(namespace, jobId);
+            switch (job.getType()) {
+                case EnumConstant.JOB_TYPE_1:
+                    taskStore.delHttpJobByJobId(namespace, jobId);
+                    break;
+                case EnumConstant.JOB_TYPE_2:
+                    taskStore.delJavaJobByJobId(namespace, jobId);
+                    break;
+                case EnumConstant.JOB_TYPE_3:
+                    taskStore.delJsJobByJobId(namespace, jobId);
+                    break;
+                case EnumConstant.JOB_TYPE_4:
+                    taskStore.delShellJobByJobId(namespace, jobId);
+                    break;
+                default:
+                    throw new IllegalArgumentException("不支持的任务类型: Type=" + job.getType());
+            }
+            return null;
+        });
+        // TODO 处理程序内部状态
+        // taskContext & wheelTimer
+    }
+
+    /**
+     * 批量删除定时任务(同时删除触发器)
+     */
+    public void deleteJobs(Collection<Long> jobIds) {
+        Assert.notEmpty(jobIds, "参数jobIds不能为空");
+        Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
+        taskStore.beginTX(status -> {
+            jobIds.forEach(this::deleteJob);
+            return null;
+        });
+    }
+
+    /**
+     * 立即执行定时任务
+     */
+    public void execJob(Long jobId) {
+        Assert.notNull(jobId, "参数jobId不能为空");
+        final long startTime = System.currentTimeMillis();
+        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
+        final TaskJob job = taskStore.beginReadOnlyTX(status -> taskStore.getJob(scheduler.getNamespace(), jobId));
+        Assert.notNull(job, "job不存在");
+        jobExecutor.execute(() -> {
+            final Date dbNow = taskStore.currentDate();
+            // 记录触发器日志
+            final TaskJobTriggerLog jobTriggerLog = newJobTriggerLog(dbNow, jobId);
+            scheduledExecutor.execute(() -> {
+                final long endTime = System.currentTimeMillis();
+                jobTriggerLog.setTriggerTime((int) (endTime - startTime));
+                jobTriggeredListener(jobTriggerLog);
+            });
+            // 执行任务
+            final TaskJobLog jobLog = newJobLog(dbNow, job, null, jobTriggerLog.getId());
+            final String oldJobData = job.getJobData();
+            // 控制并发执行 - 是否允许多节点并发执行
+            final boolean allowConcurrent = Objects.equals(EnumConstant.JOB_ALLOW_CONCURRENT_1, job.getAllowConcurrent());
+            if (allowConcurrent) {
+                executeJob(dbNow, job, jobLog);
+            } else {
+                try {
+                    // 获取定时任务分布式锁 - 判断是否被其他节点执行了
+                    taskStore.getLockJob(job.getNamespace(), job.getId(), () -> {
+                        // 二次校验数据
+                        Long runCount = taskStore.beginReadOnlyTX(status -> taskStore.getJobRunCount(scheduler.getNamespace(), jobId));
+                        if (Objects.equals(runCount, job.getRunCount())) {
+                            executeJob(dbNow, job, jobLog);
+                        }
+                    });
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 手动执行Job失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), getInstanceName(), e);
+                    jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
+                    jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
+                    jobEndRunListener(jobLog);
+                }
+            }
+            // 更新任务数据
+            final String newJobData = job.getJobData();
+            if (!Objects.equals(oldJobData, newJobData) && Objects.equals(job.getIsUpdateData(), EnumConstant.JOB_IS_UPDATE_DATA_1)) {
+                taskStore.beginTX(status -> taskStore.updateJodData(job.getNamespace(), job.getId(), newJobData));
+            }
+        });
+    }
+
+    /**
+     * 批量立即执行定时任务
+     */
+    public void execJobs(Collection<Long> jobIds) {
+        Assert.notEmpty(jobIds, "参数jobIds不能为空");
+        Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
+        taskStore.beginTX(status -> {
+            jobIds.forEach(this::execJob);
+            return null;
+        });
+    }
+
+    /**
+     * 分页查询定时任务列表
+     */
+    public void queryJobs() {
+        // TODO queryJobs
+    }
+
+    /**
      * 获取所有调度器
      */
     public List<SchedulerInfo> allSchedulers() {
@@ -608,7 +649,7 @@ public class TaskInstance {
                     try {
                         registerScheduler(taskContext.getCurrentScheduler());
                     } catch (Exception e) {
-                        log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", this.getInstanceName(), e);
+                        log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_REGISTER_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
                         schedulerErrorListener(schedulerLog, e);
@@ -622,7 +663,7 @@ public class TaskInstance {
                     try {
                         heartbeat();
                     } catch (Exception e) {
-                        log.error("[TaskInstance] 心跳保持失败 | instanceName={}", this.getInstanceName(), e);
+                        log.error("[TaskInstance] 心跳保持失败 | instanceName={}", getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_HEART_BEAT_ERROR, ExceptionUtils.getStackTraceAsString(e));
                         schedulerErrorListener(schedulerLog, e);
@@ -636,7 +677,7 @@ public class TaskInstance {
                     try {
                         dataCheck();
                     } catch (Exception e) {
-                        log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", this.getInstanceName(), e);
+                        log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR, ExceptionUtils.getStackTraceAsString(e));
                         schedulerErrorListener(schedulerLog, e);
@@ -650,7 +691,7 @@ public class TaskInstance {
                     try {
                         calcNextFireTime();
                     } catch (Exception e) {
-                        log.error("[TaskInstance] 校准触发器触发时间失败 | instanceName={}", this.getInstanceName(), e);
+                        log.error("[TaskInstance] 校准触发器触发时间失败 | instanceName={}", getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_CALC_NEXT_FIRE_TIME_ERROR, ExceptionUtils.getStackTraceAsString(e));
                         schedulerErrorListener(schedulerLog, e);
@@ -664,7 +705,7 @@ public class TaskInstance {
                     try {
                         reloadScheduler();
                     } catch (Exception e) {
-                        log.error("[TaskInstance] 维护当前集群可用的调度器列表失败 | instanceName={}", this.getInstanceName(), e);
+                        log.error("[TaskInstance] 维护当前集群可用的调度器列表失败 | instanceName={}", getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
                         schedulerErrorListener(schedulerLog, e);
@@ -678,7 +719,7 @@ public class TaskInstance {
                     try {
                         reloadNextTrigger();
                     } catch (Exception e) {
-                        log.error("[TaskInstance] 维护接下来N秒内需要触发的触发器列表失败 | instanceName={}", this.getInstanceName(), e);
+                        log.error("[TaskInstance] 维护接下来N秒内需要触发的触发器列表失败 | instanceName={}", getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_NEXT_TRIGGER_ERROR, ExceptionUtils.getStackTraceAsString(e));
                         schedulerErrorListener(schedulerLog, e);
@@ -707,12 +748,12 @@ public class TaskInstance {
             startScheduler();
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_STARTED);
-            schedulerStartedListener(schedulerLog);
+            scheduledExecutor.execute(() -> schedulerStartedListener(schedulerLog));
         } catch (Exception e) {
-            log.error("[TaskInstance] 调度器启动失败 | instanceName={}", this.getInstanceName(), e);
+            log.error("[TaskInstance] 调度器启动失败 | instanceName={}", getInstanceName(), e);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_STARTED_ERROR, ExceptionUtils.getStackTraceAsString(e));
-            schedulerErrorListener(schedulerLog, e);
+            scheduledExecutor.execute(() -> schedulerErrorListener(schedulerLog, e));
             throw ExceptionUtils.unchecked(e);
         }
     }
@@ -722,12 +763,12 @@ public class TaskInstance {
             stopScheduler();
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_PAUSED);
-            schedulerPausedListener(schedulerLog);
+            scheduledExecutor.execute(() -> schedulerPausedListener(schedulerLog));
         } catch (Exception e) {
-            log.error("[TaskInstance] 暂停调度器失败 | instanceName={}", this.getInstanceName(), e);
+            log.error("[TaskInstance] 暂停调度器失败 | instanceName={}", getInstanceName(), e);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_PAUSED_ERROR, ExceptionUtils.getStackTraceAsString(e));
-            schedulerErrorListener(schedulerLog, e);
+            scheduledExecutor.execute(() -> schedulerErrorListener(schedulerLog, e));
             throw ExceptionUtils.unchecked(e);
         }
     }
@@ -737,30 +778,30 @@ public class TaskInstance {
             startScheduler();
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_RESUME);
-            schedulerStartedListener(schedulerLog);
+            scheduledExecutor.execute(() -> schedulerResumeListener(schedulerLog));
         } catch (Exception e) {
-            log.error("[TaskInstance] 调度器恢复运行失败 | instanceName={}", this.getInstanceName(), e);
+            log.error("[TaskInstance] 调度器恢复运行失败 | instanceName={}", getInstanceName(), e);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RESUME_ERROR, ExceptionUtils.getStackTraceAsString(e));
-            schedulerErrorListener(schedulerLog, e);
+            scheduledExecutor.execute(() -> schedulerErrorListener(schedulerLog, e));
             throw ExceptionUtils.unchecked(e);
         }
     }
 
     private void doStop() {
         try {
-            startScheduler();
+            stopScheduler();
             wheelTimer.stop();
             scheduledExecutor.shutdownNow();
             jobExecutor.shutdownNow();
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_SHUTDOWN);
-            this.schedulerPausedListener(schedulerLog);
+            schedulerStopListener(schedulerLog);
         } catch (Exception e) {
-            log.error("[TaskInstance] 停止调度器失败 | instanceName={}", this.getInstanceName(), e);
+            log.error("[TaskInstance] 停止调度器失败 | instanceName={}", getInstanceName(), e);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_SHUTDOWN, ExceptionUtils.getStackTraceAsString(e));
-            this.schedulerErrorListener(schedulerLog, e);
+            schedulerErrorListener(schedulerLog, e);
         }
     }
 
@@ -776,6 +817,13 @@ public class TaskInstance {
      */
     private void dataCheck() {
         // TODO 数据完整性校验、一致性校验
+        // 1.task_http_job、task_java_job、task_js_job、task_shell_job 与 task_job 是否是一对一的关系
+        // 2.task_job_trigger 与 task_job 是否是一对一的关系
+        // 3. task_job: type、route_strategy、first_scheduler、whitelist_scheduler、blacklist_scheduler、load_balance 字段值的有效性
+        // 4.task_http_job: request_method 字段值的有效性
+        // 5.task_java_job: class_name、class_method 字段值的有效性
+        // 6.task_shell_job: shell_type、shell_charset 字段值的有效性
+        // 7.task_job_trigger: misfire_strategy、type、cron、fixed_interval 字段值的有效性
     }
 
     /**
@@ -787,7 +835,7 @@ public class TaskInstance {
         int invalidCount = taskStore.beginReadOnlyTX(status -> taskStore.countInvalidTrigger(scheduler.getNamespace()));
         int updateCount = taskStore.beginTX(status -> taskStore.updateInvalidTrigger(scheduler.getNamespace()));
         if (updateCount > 0) {
-            log.info("[TaskInstance] 更新异常触发器nextFireTime=null | 更新数量：{} | instanceName={}", updateCount, this.getInstanceName());
+            log.info("[TaskInstance] 更新异常触发器nextFireTime=null | 更新数量：{} | instanceName={}", updateCount, getInstanceName());
         }
         // 全部cron触发器列表
         List<TaskJobTrigger> cronTriggerList = taskStore.beginReadOnlyTX(status -> taskStore.queryEnableCronTrigger(scheduler.getNamespace()));
@@ -819,18 +867,17 @@ public class TaskInstance {
                     taskStore.beginTX(status -> taskStore.updateNextFireTime(cronTrigger));
                 }
             } catch (Exception e) {
-                log.error("[TaskInstance] 计算触发器下一次触发时间失败 | JobTrigger(id={}) | instanceName={}", cronTrigger.getId(), this.getInstanceName(), e);
-                // 记录调度器日志(异步)
+                log.error("[TaskInstance] 计算触发器下一次触发时间失败 | JobTrigger(id={}) | instanceName={}", cronTrigger.getId(), getInstanceName(), e);
                 TaskSchedulerLog schedulerLog = newSchedulerLog();
                 schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_CALC_CRON_NEXT_FIRE_TIME_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
+                scheduledExecutor.execute(() -> schedulerErrorListener(schedulerLog, e));
             }
         }
-        log.info("[TaskInstance] 更新触发器下一次触发时间nextFireTime字段 | 更新数量：{} | instanceName={}", updateCount, this.getInstanceName());
+        log.info("[TaskInstance] 更新触发器下一次触发时间nextFireTime字段 | 更新数量：{} | instanceName={}", updateCount, getInstanceName());
         if (invalidCount > 0) {
-            log.warn("[TaskInstance] 触发器配置检查完成，异常的触发器数量：{} | instanceName={}", invalidCount, this.getInstanceName());
+            log.warn("[TaskInstance] 触发器配置检查完成，异常的触发器数量：{} | instanceName={}", invalidCount, getInstanceName());
         } else {
-            log.info("[TaskInstance] 触发器配置检查完成，无异常触发器 | instanceName={}", this.getInstanceName());
+            log.info("[TaskInstance] 触发器配置检查完成，无异常触发器 | instanceName={}", getInstanceName());
         }
     }
 
@@ -864,7 +911,7 @@ public class TaskInstance {
         if (size > GlobalConstant.NEXT_TRIGGER_MAX_COUNT) {
             log.warn(
                     "[TaskInstance] 接下来{}秒内需要触发的触发器列表超过最大值：{}，当前值：{} | instanceName={}",
-                    nextTime, GlobalConstant.NEXT_TRIGGER_MAX_COUNT, size, this.getInstanceName()
+                    nextTime, GlobalConstant.NEXT_TRIGGER_MAX_COUNT, size, getInstanceName()
             );
         }
         taskContext.setNextJobTriggerMap(nextJobTriggerList);
@@ -894,7 +941,7 @@ public class TaskInstance {
                 continue;
             }
             try {
-                Future<?> future = schedulerWorker.submit(() -> {
+                Future<?> future = scheduledExecutor.submit(() -> {
                     final TaskJobTriggerLog jobTriggerLog = newJobTriggerLog(dbNow, jobTrigger);
                     jobTriggerLog.setFireCount(taskContext.incrementAndGetJobFireCount(jobTrigger.getId()));
                     taskContext.setLastTriggerFireTime(jobTrigger.getId(), dbNow.getTime());
@@ -923,26 +970,24 @@ public class TaskInstance {
                             // 已触发 - 触发器触发成功日志(异步)
                             final long endFireTime = System.currentTimeMillis();
                             jobTriggerLog.setTriggerTime((int) (endFireTime - startFireTime));
-                            schedulerWorker.execute(() -> this.jobTriggeredListener(jobTriggerLog));
+                            scheduledExecutor.execute(() -> jobTriggeredListener(jobTriggerLog));
                         }
                     } catch (Exception e) {
-                        log.error("[TaskInstance] JobTrigger触发失败 | id={} | name={} | instanceName={}", jobTrigger.getId(), jobTrigger.getName(), this.getInstanceName(), e);
-                        // 记录调度器日志(异步)
+                        log.error("[TaskInstance] JobTrigger触发失败 | id={} | name={} | instanceName={}", jobTrigger.getId(), jobTrigger.getName(), getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_JOB_TRIGGER_FIRE_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                        schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
+                        scheduledExecutor.execute(() -> schedulerErrorListener(schedulerLog, e));
                     } finally {
                         taskContext.removeTriggering(jobTrigger);
                     }
                 });
                 triggerFutureList.add(future);
-                log.debug("[TaskInstance] JobTrigger触发完成 | id={} | name={} | instanceName={}", jobTrigger.getId(), jobTrigger.getName(), this.getInstanceName());
+                log.debug("[TaskInstance] JobTrigger触发完成 | id={} | name={} | instanceName={}", jobTrigger.getId(), jobTrigger.getName(), getInstanceName());
             } catch (Exception e) {
-                log.error("[TaskInstance] JobTrigger触发失败 | id={} | name={} | instanceName={}", jobTrigger.getId(), jobTrigger.getName(), this.getInstanceName(), e);
-                // 记录调度器日志(异步)
+                log.error("[TaskInstance] JobTrigger触发失败 | id={} | name={} | instanceName={}", jobTrigger.getId(), jobTrigger.getName(), getInstanceName(), e);
                 TaskSchedulerLog schedulerLog = newSchedulerLog();
                 schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_TRIGGER_JOB_EXEC_ITEM_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                schedulerWorker.execute(() -> this.schedulerErrorListener(schedulerLog, e));
+                scheduledExecutor.execute(() -> schedulerErrorListener(schedulerLog, e));
             }
         }
         // 等待触发任务结束(最多等TRIGGER_JOB_EXEC_MAX_INTERVAL毫秒)
@@ -967,9 +1012,9 @@ public class TaskInstance {
         final long endTime = System.currentTimeMillis();
         final long sunFireTime = endTime - startTime;
         if (sunFireTime >= 1000) {
-            log.warn("[TaskInstance] 定时任务触发线程完成 | 耗时：{}ms | instanceName={}", sunFireTime, this.getInstanceName());
+            log.warn("[TaskInstance] 定时任务触发线程完成 | 耗时：{}ms | instanceName={}", sunFireTime, getInstanceName());
         } else {
-            log.debug("[TaskInstance] 定时任务触发线程完成 | 耗时：{}ms | instanceName={}", sunFireTime, this.getInstanceName());
+            log.debug("[TaskInstance] 定时任务触发线程完成 | 耗时：{}ms | instanceName={}", sunFireTime, getInstanceName());
         }
     }
 
@@ -1049,7 +1094,7 @@ public class TaskInstance {
         if (needRunJob) {
             // 执行任务
             jobTriggerLog.setMisFired(EnumConstant.JOB_TRIGGER_MIS_FIRED_0);
-            jobWorker.execute(() -> {
+            jobExecutor.execute(() -> {
                 final TaskJobLog jobLog = newJobLog(dbNow, job, jobTrigger, jobTriggerLog.getId());
                 final String oldJobData = job.getJobData();
                 // 控制并发执行 - 是否允许多节点并发执行
@@ -1067,7 +1112,7 @@ public class TaskInstance {
                             }
                         });
                     } catch (Exception e) {
-                        log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
+                        log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), getInstanceName(), e);
                         jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
                         jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
                         jobEndRunListener(jobLog);
@@ -1136,7 +1181,7 @@ public class TaskInstance {
                     jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_0);
                     break;
                 } catch (Exception e) {
-                    log.error("[TaskInstance] Job执行失败，重试次数：{} | id={} | name={} | instanceName={}", retryCount, job.getId(), job.getName(), this.getInstanceName(), e);
+                    log.error("[TaskInstance] Job执行失败，重试次数：{} | id={} | name={} | instanceName={}", retryCount, job.getId(), job.getName(), getInstanceName(), e);
                     // 记录任务执行日志(同步)
                     final long endTime = System.currentTimeMillis();
                     jobLog.setRunTime((int) (endTime - startTime));
@@ -1150,7 +1195,7 @@ public class TaskInstance {
             jobLog.setRunTime((int) (endTime - startTime));
             jobLog.setAfterJobData(job.getJobData());
         } catch (Exception e) {
-            log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), this.getInstanceName(), e);
+            log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), getInstanceName(), e);
             jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
             jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
         } finally {
@@ -1167,7 +1212,7 @@ public class TaskInstance {
     /**
      * 调度器启动完成
      */
-    public void schedulerStartedListener(TaskSchedulerLog schedulerLog) {
+    private void schedulerStartedListener(TaskSchedulerLog schedulerLog) {
         if (schedulerListeners == null || schedulerListeners.isEmpty()) {
             return;
         }
@@ -1179,15 +1224,15 @@ public class TaskInstance {
             try {
                 schedulerListener.onStarted(scheduler, taskStore, schedulerLog);
             } catch (Exception e) {
-                log.error("[TaskInstance] 调度器启动完成事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), this.getInstanceName(), e);
+                log.error("[TaskInstance] 调度器启动完成事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), getInstanceName(), e);
             }
         }
     }
 
     /**
-     * 调度器已停止
+     * 调度器已暂停
      */
-    public void schedulerPausedListener(TaskSchedulerLog schedulerLog) {
+    private void schedulerPausedListener(TaskSchedulerLog schedulerLog) {
         if (schedulerListeners == null || schedulerListeners.isEmpty()) {
             return;
         }
@@ -1199,7 +1244,47 @@ public class TaskInstance {
             try {
                 schedulerListener.onPaused(scheduler, taskStore, schedulerLog);
             } catch (Exception e) {
-                log.error("[TaskInstance] 调度器已停止事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), this.getInstanceName(), e);
+                log.error("[TaskInstance] 调度器暂停事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), getInstanceName(), e);
+            }
+        }
+    }
+
+    /**
+     * 调度器已取消暂停(继续运行)
+     */
+    private void schedulerResumeListener(TaskSchedulerLog schedulerLog) {
+        if (schedulerListeners == null || schedulerListeners.isEmpty()) {
+            return;
+        }
+        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
+        for (SchedulerListener schedulerListener : schedulerListeners) {
+            if (schedulerListener == null) {
+                continue;
+            }
+            try {
+                schedulerListener.onResume(scheduler, taskStore, schedulerLog);
+            } catch (Exception e) {
+                log.error("[TaskInstance] 调度器取消暂停事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), getInstanceName(), e);
+            }
+        }
+    }
+
+    /**
+     * 调度器已停止
+     */
+    private void schedulerStopListener(TaskSchedulerLog schedulerLog) {
+        if (schedulerListeners == null || schedulerListeners.isEmpty()) {
+            return;
+        }
+        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
+        for (SchedulerListener schedulerListener : schedulerListeners) {
+            if (schedulerListener == null) {
+                continue;
+            }
+            try {
+                schedulerListener.onStop(scheduler, taskStore, schedulerLog);
+            } catch (Exception e) {
+                log.error("[TaskInstance] 调度器停止事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), getInstanceName(), e);
             }
         }
     }
@@ -1207,7 +1292,7 @@ public class TaskInstance {
     /**
      * 调度器出现错误
      */
-    public void schedulerErrorListener(TaskSchedulerLog schedulerLog, Exception error) {
+    private void schedulerErrorListener(TaskSchedulerLog schedulerLog, Exception error) {
         if (schedulerListeners == null || schedulerListeners.isEmpty()) {
             return;
         }
@@ -1219,7 +1304,7 @@ public class TaskInstance {
             try {
                 schedulerListener.onErrorEvent(scheduler, taskStore, schedulerLog, error);
             } catch (Exception e) {
-                log.error("[TaskInstance] 调度器出现错误事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), this.getInstanceName(), e);
+                log.error("[TaskInstance] 调度器出现错误事件处理失败 | schedulerListener={} | instanceName={}", schedulerListener.getClass().getName(), getInstanceName(), e);
             }
         }
     }
@@ -1227,7 +1312,7 @@ public class TaskInstance {
     /**
      * 触发成功
      */
-    public void jobTriggeredListener(TaskJobTriggerLog jobTriggerLog) {
+    private void jobTriggeredListener(TaskJobTriggerLog jobTriggerLog) {
         if (jobTriggerListeners == null || jobTriggerListeners.isEmpty()) {
             return;
         }
@@ -1239,7 +1324,7 @@ public class TaskInstance {
             try {
                 jobTriggerListener.onTriggered(scheduler, taskStore, jobTriggerLog);
             } catch (Exception e) {
-                log.error("[TaskInstance] 触发器触发成功事件处理失败 | schedulerListener={} | instanceName={}", jobTriggerListener.getClass().getName(), this.getInstanceName(), e);
+                log.error("[TaskInstance] 触发器触发成功事件处理失败 | schedulerListener={} | instanceName={}", jobTriggerListener.getClass().getName(), getInstanceName(), e);
             }
         }
     }
@@ -1247,7 +1332,7 @@ public class TaskInstance {
     /**
      * 开始执行
      */
-    public void jobStartRunListener(TaskJobLog jobLog) {
+    private void jobStartRunListener(TaskJobLog jobLog) {
         if (jobListeners == null || jobListeners.isEmpty()) {
             return;
         }
@@ -1259,7 +1344,7 @@ public class TaskInstance {
             try {
                 jobListener.onStartRun(scheduler, taskStore, jobLog);
             } catch (Exception e) {
-                log.error("[TaskInstance] 任务开始执行事件处理失败 | schedulerListener={} | instanceName={}", jobListener.getClass().getName(), this.getInstanceName(), e);
+                log.error("[TaskInstance] 任务开始执行事件处理失败 | schedulerListener={} | instanceName={}", jobListener.getClass().getName(), getInstanceName(), e);
             }
         }
     }
@@ -1267,7 +1352,7 @@ public class TaskInstance {
     /**
      * 执行完成(成功或者失败)
      */
-    public void jobEndRunListener(TaskJobLog jobLog) {
+    private void jobEndRunListener(TaskJobLog jobLog) {
         if (jobListeners == null || jobListeners.isEmpty()) {
             return;
         }
@@ -1279,7 +1364,7 @@ public class TaskInstance {
             try {
                 jobListener.onEndRun(scheduler, taskStore, jobLog);
             } catch (Exception e) {
-                log.error("[TaskInstance] 任务执行完成事件处理失败 | schedulerListener={} | instanceName={}", jobListener.getClass().getName(), this.getInstanceName(), e);
+                log.error("[TaskInstance] 任务执行完成事件处理失败 | schedulerListener={} | instanceName={}", jobListener.getClass().getName(), getInstanceName(), e);
             }
         }
     }
@@ -1287,7 +1372,7 @@ public class TaskInstance {
     /**
      * 重试执行
      */
-    public void jobRetryRunListener(TaskJobLog jobLog, Exception error) {
+    private void jobRetryRunListener(TaskJobLog jobLog, Exception error) {
         if (jobListeners == null || jobListeners.isEmpty()) {
             return;
         }
@@ -1299,22 +1384,19 @@ public class TaskInstance {
             try {
                 jobListener.onRetryRun(scheduler, taskStore, jobLog, error);
             } catch (Exception e) {
-                log.error("[TaskInstance] 任务重试执行事件处理失败 | schedulerListener={} | instanceName={}", jobListener.getClass().getName(), this.getInstanceName(), e);
+                log.error("[TaskInstance] 任务重试执行事件处理失败 | schedulerListener={} | instanceName={}", jobListener.getClass().getName(), getInstanceName(), e);
             }
         }
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- support
 
-    /**
-     * SchedulerConfig 转换成 Scheduler
-     */
+    // SchedulerConfig 转换成 Scheduler
     private TaskScheduler toScheduler(SchedulerConfig schedulerConfig) {
         TaskScheduler.Config config = new TaskScheduler.Config();
         config.setSchedulerExecutorPoolSize(schedulerConfig.getSchedulerExecutorPoolSize());
-        config.setSchedulerExecutorQueueSize(schedulerConfig.getSchedulerExecutorQueueSize());
-        config.setJobExecutorQueueSize(schedulerConfig.getJobExecutorQueueSize());
         config.setJobExecutorPoolSize(schedulerConfig.getJobExecutorPoolSize());
+        config.setJobExecutorQueueSize(schedulerConfig.getJobExecutorQueueSize());
         config.setLoadWeight(schedulerConfig.getLoadWeight());
         TaskScheduler scheduler = new TaskScheduler();
         scheduler.setNamespace(schedulerConfig.getNamespace());
@@ -1333,13 +1415,11 @@ public class TaskInstance {
         return schedulerLog;
     }
 
-    /**
-     * 自动触发
-     */
+    // 自动触发
     private TaskJobTriggerLog newJobTriggerLog(Date dbNow, TaskJobTrigger jobTrigger) {
         final TaskScheduler scheduler = taskContext.getCurrentScheduler();
         TaskJobTriggerLog jobTriggerLog = new TaskJobTriggerLog();
-        jobTriggerLog.setId(taskContext.getSnowFlake().nextId());
+        jobTriggerLog.setId(taskStore.getSnowFlake().nextId());
         jobTriggerLog.setNamespace(scheduler.getNamespace());
         jobTriggerLog.setInstanceName(scheduler.getInstanceName());
         jobTriggerLog.setJobTriggerId(jobTrigger.getId());
@@ -1352,13 +1432,11 @@ public class TaskInstance {
         return jobTriggerLog;
     }
 
-    /**
-     * 手动触发
-     */
+    // 手动触发
     private TaskJobTriggerLog newJobTriggerLog(Date dbNow, Long jobId) {
         final TaskScheduler scheduler = taskContext.getCurrentScheduler();
         TaskJobTriggerLog jobTriggerLog = new TaskJobTriggerLog();
-        jobTriggerLog.setId(taskContext.getSnowFlake().nextId());
+        jobTriggerLog.setId(taskStore.getSnowFlake().nextId());
         jobTriggerLog.setNamespace(scheduler.getNamespace());
         jobTriggerLog.setInstanceName(scheduler.getInstanceName());
         jobTriggerLog.setJobId(jobId);

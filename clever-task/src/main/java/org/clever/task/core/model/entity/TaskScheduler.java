@@ -22,6 +22,8 @@ public class TaskScheduler implements Serializable {
     private Long heartbeatInterval;
     /** 调度器配置，线程池大小、负载权重、最大并发任务数... */
     private String config;
+    /** 调度器运行时信息 */
+    private String runtimeInfo;
     /** 描述 */
     private String description;
     /** 创建时间 */
@@ -33,8 +35,6 @@ public class TaskScheduler implements Serializable {
     public static final class Config implements Serializable {
         /** 调度线程池大小 */
         private Integer schedulerExecutorPoolSize;
-        /** 调度线程池队列大小 */
-        private Integer schedulerExecutorQueueSize;
         /** 定时任务执行线程池大小 */
         private Integer jobExecutorPoolSize;
         /** 定时任务执行线程池队列大小 */

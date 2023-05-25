@@ -25,7 +25,7 @@ public class CodegenUtilsTest {
                 // .addCodegenType(CodegenType.KOTLIN_ENTITY)
                 // .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
                 .addTablePrefix("task_")
-                .addTable("task_shell_job")
+                .addTable("task_scheduler")
                 .addSchema("public")
                 .addSchema("test")
                 .addSchema("__occupyPosition");

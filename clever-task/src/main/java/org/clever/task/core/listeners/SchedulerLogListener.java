@@ -24,6 +24,16 @@ public class SchedulerLogListener implements SchedulerListener {
     }
 
     @Override
+    public void onResume(TaskScheduler scheduler, TaskStore taskStore, TaskSchedulerLog schedulerLog) {
+        saveSchedulerLog(taskStore, schedulerLog);
+    }
+
+    @Override
+    public void onStop(TaskScheduler scheduler, TaskStore taskStore, TaskSchedulerLog schedulerLog) {
+        saveSchedulerLog(taskStore, schedulerLog);
+    }
+
+    @Override
     public void onErrorEvent(TaskScheduler scheduler, TaskStore taskStore, TaskSchedulerLog schedulerLog, Exception error) {
         saveSchedulerLog(taskStore, schedulerLog);
     }
