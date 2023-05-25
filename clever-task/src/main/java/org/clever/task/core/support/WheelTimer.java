@@ -58,7 +58,7 @@ public class WheelTimer {
     private static final AtomicIntegerFieldUpdater<WheelTimer> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(WheelTimer.class, "workerState");
 
     /**
-     * 时间轮的启动时间(毫秒) TODO 删除
+     * 时间轮的启动时间(毫秒)
      */
     private volatile long startTime;
     /**
@@ -203,10 +203,7 @@ public class WheelTimer {
         start();
         // 将 TaskInfo 添加到待处理的 Task 队列
         long deadline = clock.currentTimeMillis() + unit.toMillis(delay) - startTime;
-        // 防止溢出
-        if (delay > 0 && deadline < 0) {
-            deadline = Long.MAX_VALUE;
-        }
+        Assert.isTrue(deadline >= 0, "计划执行时间 deadline 溢出");
         TaskInfo taskInfo = new TaskInfo(this, task, deadline);
         tasks.add(taskInfo);
         return taskInfo;
@@ -224,6 +221,7 @@ public class WheelTimer {
         Assert.notNull(task, "参数 task 不能为 null");
         Assert.notNull(date, "参数 date 不能为 null");
         long delay = date.getTime() - clock.currentTimeMillis();
+        // log.info("delay -> {}", delay);
         return addTask(task, delay, TimeUnit.MILLISECONDS);
     }
 
@@ -602,10 +600,6 @@ public class WheelTimer {
         public void run() {
             // 初始化 startTime
             startTime = clock.currentTimeMillis();
-            if (startTime == 0) {
-                // 我们这里使用0作为未初始化值的指示符，所以要保证初始化的时候不是0
-                startTime = 1;
-            }
             // 在 start() 时通知等待初始化的其他线程
             startTimeInitialized.countDown();
             do {
@@ -691,6 +685,7 @@ public class WheelTimer {
                 // 确保任务放在未走过的时间轮 tick 下
                 final long ticks = Math.max(stopTick, tick);
                 int stopIndex = (int) (ticks & mask);
+                // log.info("stopIndex -> {}", stopIndex);
                 WheelBucket bucket = wheel[stopIndex];
                 // 更新或新增 TaskInfo
                 // 1.TaskInfo不存在且需要放在tick之前(需要丢弃)

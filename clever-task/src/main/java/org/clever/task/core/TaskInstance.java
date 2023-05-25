@@ -417,7 +417,7 @@ public class TaskInstance {
             // 新增 job_trigger
             jobTrigger.setJobId(job.getId());
             if (jobTrigger.getStartTime() == null || jobTrigger.getStartTime().compareTo(dbNow) < 0) {
-                jobTrigger.setStartTime(JobTriggerUtils.nextSecond(dbNow));
+                jobTrigger.setStartTime(JobTriggerUtils.removeMillisecond(dbNow));
             }
             final Date nextFireTime = JobTriggerUtils.getNextFireTime(jobTrigger);
             jobTrigger.setNextFireTime(nextFireTime);
@@ -837,6 +837,14 @@ public class TaskInstance {
     }
 
     /**
+     * 心跳保持
+     */
+    private void heartbeat() {
+        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
+        taskStore.beginTX(status -> taskStore.heartbeat(scheduler));
+    }
+
+    /**
      * 数据完整性校验&一致性校验
      */
     private void dataCheck() {
@@ -906,14 +914,6 @@ public class TaskInstance {
     }
 
     /**
-     * 心跳保持
-     */
-    private void heartbeat() {
-        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
-        taskStore.beginTX(status -> taskStore.heartbeat(scheduler));
-    }
-
-    /**
      * 维护当前集群可用的调度器列表
      */
     private void reloadScheduler() {
@@ -942,6 +942,72 @@ public class TaskInstance {
             if (trigger.getNextFireTime() != null) {
                 wheelTimer.addTask(new JobTriggerTask(trigger), trigger.getNextFireTime());
             }
+        }
+    }
+
+    /**
+     * 执行定时任务逻辑
+     */
+    private void executeJob(final Date dbNow, final TaskJob job, final TaskJobLog jobLog) {
+        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
+        try {
+            final int jobReentryCount = taskContext.getAndIncrementJobReentryCount(job.getId());
+            final long jobRunCount = taskContext.incrementAndGetJobRunCount(job.getId());
+            // 控制重入执行
+            if (jobReentryCount > Math.max(job.getMaxReentry(), 0)) {
+                // 最大重入执行数量
+                jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_2);
+                jobLog.setExceptionInfo(String.format("当前节点超过最大重入执行次数 jobReentryCount=%s | maxReentry=%s", jobReentryCount, job.getMaxReentry()));
+                return;
+            }
+            // 记录任务执行日志(同步)
+            jobLog.setRunCount(jobRunCount);
+            jobStartRunListener(jobLog);
+            // 获取JobExecutor
+            JobExecutor jobExecutor = null;
+            for (JobExecutor executor : jobExecutors) {
+                if (executor.support(job.getType())) {
+                    jobExecutor = executor;
+                    break;
+                }
+            }
+            if (jobExecutor == null) {
+                throw new SchedulerException(String.format("暂不支持的任务类型，Job(id=%s)", job.getId()));
+            }
+            // 支持重试执行任务
+            final int maxRetryCount = Math.max(job.getMaxRetryCount(), 1);
+            final long startTime = SystemClock.now();
+            int retryCount = 0;
+            while (retryCount < maxRetryCount) {
+                retryCount++;
+                try {
+                    jobExecutor.exec(dbNow, job, scheduler, taskStore);
+                    jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_0);
+                    break;
+                } catch (Exception e) {
+                    log.error("[TaskInstance] Job执行失败，重试次数：{} | id={} | name={} | instanceName={}", retryCount, job.getId(), job.getName(), getInstanceName(), e);
+                    // 记录任务执行日志(同步)
+                    final long endTime = SystemClock.now();
+                    jobLog.setRunTime((int) (endTime - startTime));
+                    jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
+                    jobLog.setRetryCount(retryCount);
+                    jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
+                    jobRetryRunListener(jobLog, e);
+                }
+            }
+            final long endTime = SystemClock.now();
+            jobLog.setRunTime((int) (endTime - startTime));
+            jobLog.setAfterJobData(job.getJobData());
+        } catch (Exception e) {
+            log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), getInstanceName(), e);
+            jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
+            jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
+        } finally {
+            // 更新 runCount
+            taskStore.beginTX(status -> taskStore.updateJobRunCount(job.getNamespace(), job.getId()));
+            // 任务执行事件处理
+            taskContext.decrementAndGetJobReentryCount(job.getId());
+            jobEndRunListener(jobLog);
         }
     }
 
@@ -1204,72 +1270,6 @@ public class TaskInstance {
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- trigger job
 
-    /**
-     * 执行定时任务逻辑
-     */
-    private void executeJob(final Date dbNow, final TaskJob job, final TaskJobLog jobLog) {
-        final TaskScheduler scheduler = taskContext.getCurrentScheduler();
-        try {
-            final int jobReentryCount = taskContext.getAndIncrementJobReentryCount(job.getId());
-            final long jobRunCount = taskContext.incrementAndGetJobRunCount(job.getId());
-            // 控制重入执行
-            if (jobReentryCount > Math.max(job.getMaxReentry(), 0)) {
-                // 最大重入执行数量
-                jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_2);
-                jobLog.setExceptionInfo(String.format("当前节点超过最大重入执行次数 jobReentryCount=%s | maxReentry=%s", jobReentryCount, job.getMaxReentry()));
-                return;
-            }
-            // 记录任务执行日志(同步)
-            jobLog.setRunCount(jobRunCount);
-            jobStartRunListener(jobLog);
-            // 获取JobExecutor
-            JobExecutor jobExecutor = null;
-            for (JobExecutor executor : jobExecutors) {
-                if (executor.support(job.getType())) {
-                    jobExecutor = executor;
-                    break;
-                }
-            }
-            if (jobExecutor == null) {
-                throw new SchedulerException(String.format("暂不支持的任务类型，Job(id=%s)", job.getId()));
-            }
-            // 支持重试执行任务
-            final int maxRetryCount = Math.max(job.getMaxRetryCount(), 1);
-            final long startTime = SystemClock.now();
-            int retryCount = 0;
-            while (retryCount < maxRetryCount) {
-                retryCount++;
-                try {
-                    jobExecutor.exec(dbNow, job, scheduler, taskStore);
-                    jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_0);
-                    break;
-                } catch (Exception e) {
-                    log.error("[TaskInstance] Job执行失败，重试次数：{} | id={} | name={} | instanceName={}", retryCount, job.getId(), job.getName(), getInstanceName(), e);
-                    // 记录任务执行日志(同步)
-                    final long endTime = SystemClock.now();
-                    jobLog.setRunTime((int) (endTime - startTime));
-                    jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
-                    jobLog.setRetryCount(retryCount);
-                    jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
-                    jobRetryRunListener(jobLog, e);
-                }
-            }
-            final long endTime = SystemClock.now();
-            jobLog.setRunTime((int) (endTime - startTime));
-            jobLog.setAfterJobData(job.getJobData());
-        } catch (Exception e) {
-            log.error("[TaskInstance] Job执行失败 | id={} | name={} | instanceName={}", job.getId(), job.getName(), getInstanceName(), e);
-            jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_1);
-            jobLog.setExceptionInfo(ExceptionUtils.getStackTraceAsString(e));
-        } finally {
-            // 更新 runCount
-            taskStore.beginTX(status -> taskStore.updateJobRunCount(job.getNamespace(), job.getId()));
-            // 任务执行事件处理
-            taskContext.decrementAndGetJobReentryCount(job.getId());
-            jobEndRunListener(jobLog);
-        }
-    }
-
     private class JobTriggerTask implements WheelTimer.Task {
         private final TaskJobTrigger trigger;
 
@@ -1389,6 +1389,7 @@ public class TaskInstance {
                         // 立即补偿触发一次
                         needRunJob = true;
                         lastFireTime = JobTriggerUtils.removeMillisecond(dbNow);
+                        jobTriggerLog.setTriggerMsg(String.format("补偿触发，JobId=%s", job.getId()));
                         break;
                     default:
                         throw new SchedulerException(String.format("任务触发器misfireStrategy字段值错误，JobTrigger(id=%s)", jobTrigger.getId()));
