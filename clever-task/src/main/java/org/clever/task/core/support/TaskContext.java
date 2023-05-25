@@ -4,14 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.config.SchedulerConfig;
-import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.util.Assert;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,23 +38,11 @@ public class TaskContext {
     @Setter
     private volatile List<TaskScheduler> availableSchedulerList;
     /**
-     * 接下来N秒内需要触发的触发器列表(N = heartbeatInterval * NEXT_TRIGGER_INTERVAL) {@code ConcurrentMap<jobTriggerId, JobTrigger>}
-     */
-    private final LinkedHashMap<Long, TaskJobTrigger> nextJobTriggerMap = new LinkedHashMap<>(GlobalConstant.INITIAL_CAPACITY);
-    /**
-     * 正在触发的触发器ID {@code Set<jobTriggerId + nextFireTime>}
-     */
-    private final Set<String> triggeringSet = ConcurrentHashMap.newKeySet();
-    /**
      * 当前节点任务运行的重入执行次数 {@code ConcurrentMap<jobId, jobReentryCount>}
      */
     private final ConcurrentMap<Long, AtomicInteger> jobReentryCountMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
     /**
-     * 触发器最后一次触发的时间 {@code ConcurrentMap<jobTriggerId, 时间戳>}
-     */
-    private final ConcurrentMap<Long, Long> jobLastTriggerFireTimeMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
-    /**
-     * 当前节点触发器触发次数计数 {@code ConcurrentMap<jobTriggerId, fireCount>}
+     * 当前节点触发器触发总次数 {@code ConcurrentMap<jobTriggerId, fireCount>}
      */
     private final ConcurrentMap<Long, AtomicLong> jobTriggerFireCountMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
     /**
@@ -69,31 +53,6 @@ public class TaskContext {
     public TaskContext(SchedulerConfig schedulerConfig) {
         Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为null");
         this.schedulerConfig = schedulerConfig;
-    }
-
-    public void setNextJobTriggerMap(List<TaskJobTrigger> nextJobTriggerList) {
-        synchronized (nextJobTriggerMap) {
-            nextJobTriggerMap.clear();
-            nextJobTriggerList.forEach(jobTrigger -> nextJobTriggerMap.put(jobTrigger.getId(), jobTrigger));
-        }
-    }
-
-    public List<TaskJobTrigger> getNextJobTriggerList() {
-        synchronized (nextJobTriggerMap) {
-            return new ArrayList<>(nextJobTriggerMap.values());
-        }
-    }
-
-    public void removeNextJobTrigger(Long jobTriggerId) {
-        synchronized (nextJobTriggerMap) {
-            nextJobTriggerMap.remove(jobTriggerId);
-        }
-    }
-
-    public void putNextJobTrigger(TaskJobTrigger jobTrigger) {
-        synchronized (nextJobTriggerMap) {
-            nextJobTriggerMap.put(jobTrigger.getId(), jobTrigger);
-        }
     }
 
     public int getJobReentryCount(Long jobId) {
@@ -136,26 +95,5 @@ public class TaskContext {
 
     public void removeJobRunCount(Long jobId) {
         jobRunCountMap.remove(jobId);
-    }
-
-    public boolean addTriggering(TaskJobTrigger jobTrigger) {
-        return triggeringSet.add(String.format("%s_%s", jobTrigger.getId(), jobTrigger.getNextFireTime().getTime()));
-    }
-
-    public void removeTriggering(TaskJobTrigger jobTrigger) {
-        triggeringSet.remove(String.format("%s_%s", jobTrigger.getId(), jobTrigger.getNextFireTime().getTime()));
-    }
-
-    public void setLastTriggerFireTime(Long jobTriggerId, Long lastFireTime) {
-        jobLastTriggerFireTimeMap.put(jobTriggerId, lastFireTime);
-    }
-
-    public long getLastTriggerFireTime(Long jobTriggerId) {
-        Long time = jobLastTriggerFireTimeMap.get(jobTriggerId);
-        return time == null ? 0 : time;
-    }
-
-    public void removeLastTriggerFireTime(Long jobTriggerId) {
-        jobLastTriggerFireTimeMap.remove(jobTriggerId);
     }
 }

@@ -256,9 +256,9 @@ public class TaskStore {
     }
 
     /**
-     * 接下来N秒内需要触发的触发器列表(根据“下一次触发时间”有小到大排序返回)
+     * 接下来(N+M)秒内需要触发的触发器列表(根据“下一次触发时间”有小到大排序返回)
      *
-     * @param nextTime N秒对应的毫秒时间
+     * @param nextTime (N+M)秒对应的毫秒时间
      */
     public List<TaskJobTrigger> queryNextTrigger(String namespace, int nextTime) {
         final Date now = currentDate();
@@ -272,7 +272,7 @@ public class TaskStore {
                 // next_fire_time - now <= nextTime --> next_fire_time <= now + nextTime
                 .where(taskJobTrigger.nextFireTime.loe(DateUtils.addMilliseconds(now, nextTime)))
                 .orderBy(taskJobTrigger.nextFireTime.asc())
-                .limit(1200)
+                .limit(5000)
                 .fetch();
     }
 
@@ -293,6 +293,14 @@ public class TaskStore {
                 .from(taskJobTrigger)
                 .where(taskJobTrigger.namespace.eq(namespace))
                 .where(taskJobTrigger.id.eq(jobTriggerId))
+                .fetchOne();
+    }
+
+    public Long getTriggerId(String namespace, Long jobId) {
+        return queryDSL.select(taskJobTrigger.id)
+                .from(taskJobTrigger)
+                .where(taskJobTrigger.namespace.eq(namespace))
+                .where(taskJobTrigger.jobId.eq(jobId))
                 .fetchOne();
     }
 
