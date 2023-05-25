@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.querydsl.utils;
 
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.NullExpression;
 import com.querydsl.core.types.Path;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
@@ -31,6 +32,8 @@ public class SQLClause {
 
     public static void setx(SQLUpdateClause updateClause, Path<?> path, Object value) {
         if (value == null) {
+            updateClause.setNull(path);
+        } else if (value instanceof NullExpression) {
             updateClause.setNull(path);
         } else if (value instanceof Expression) {
             updateClause.set(path, (Expression) value);

@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -73,6 +74,9 @@ public class SafeSQLUpdateClause extends SQLUpdateClause {
 
     @Override
     public <T> SQLUpdateClause set(Path<T> path, Expression<? extends T> expression) {
+        if (expression != null && Objects.equals(Object.class, expression.getType())) {
+            return super.set(path, expression);
+        }
         if (path != null
                 && expression != null
                 && path.getType() != null

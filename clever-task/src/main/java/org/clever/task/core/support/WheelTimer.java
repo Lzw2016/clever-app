@@ -58,7 +58,7 @@ public class WheelTimer {
     private static final AtomicIntegerFieldUpdater<WheelTimer> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(WheelTimer.class, "workerState");
 
     /**
-     * 时间轮的启动时间(毫秒)
+     * 时间轮的启动时间(毫秒) TODO 删除
      */
     private volatile long startTime;
     /**
@@ -223,8 +223,8 @@ public class WheelTimer {
     public TaskInfo addTask(Task task, Date date) {
         Assert.notNull(task, "参数 task 不能为 null");
         Assert.notNull(date, "参数 date 不能为 null");
-        long delayNs = date.getTime() - clock.currentTimeMillis();
-        return addTask(task, delayNs, TimeUnit.MILLISECONDS);
+        long delay = date.getTime() - clock.currentTimeMillis();
+        return addTask(task, delay, TimeUnit.MILLISECONDS);
     }
 
     /**

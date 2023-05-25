@@ -253,16 +253,28 @@ public class TaskInstance {
      * 当前集群 namespace
      */
     public String getNamespace() {
-        Assert.isTrue(State.INIT != getState(), "当前定时任务调度器还未启动");
-        return taskContext.getCurrentScheduler().getNamespace();
+        String namespace = null;
+        if (taskContext.getCurrentScheduler() != null) {
+            namespace = taskContext.getCurrentScheduler().getNamespace();
+        }
+        if (namespace == null) {
+            namespace = taskContext.getSchedulerConfig().getNamespace();
+        }
+        return namespace;
     }
 
     /**
      * 当前调度器实例名
      */
     public String getInstanceName() {
-        Assert.isTrue(State.INIT != getState(), "当前定时任务调度器还未启动");
-        return taskContext.getCurrentScheduler().getInstanceName();
+        String instanceName = null;
+        if (taskContext.getCurrentScheduler() != null) {
+            instanceName = taskContext.getCurrentScheduler().getInstanceName();
+        }
+        if (instanceName == null) {
+            instanceName = taskContext.getSchedulerConfig().getInstanceName();
+        }
+        return instanceName;
     }
 
     /**
@@ -697,6 +709,7 @@ public class TaskInstance {
                 initialDelay, GlobalConstant.DATA_CHECK_INTERVAL, TimeUnit.MILLISECONDS
         );
         // 初始化触发器下一次触发时间(校准触发器触发时间)
+        calcNextFireTime();
         calcNextFireTimeFuture = scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
@@ -708,7 +721,7 @@ public class TaskInstance {
                         schedulerErrorListener(schedulerLog, e);
                     }
                 },
-                initialDelay, GlobalConstant.CALC_NEXT_FIRE_TIME_INTERVAL, TimeUnit.MILLISECONDS
+                GlobalConstant.CALC_NEXT_FIRE_TIME_INTERVAL, GlobalConstant.CALC_NEXT_FIRE_TIME_INTERVAL, TimeUnit.MILLISECONDS
         );
         // 维护当前集群可用的调度器列表
         reloadSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
@@ -926,7 +939,9 @@ public class TaskInstance {
         }
         // 添加任务到时间轮调度器
         for (TaskJobTrigger trigger : nextJobTriggerList) {
-            wheelTimer.addTask(new JobTriggerTask(trigger), trigger.getNextFireTime());
+            if (trigger.getNextFireTime() != null) {
+                wheelTimer.addTask(new JobTriggerTask(trigger), trigger.getNextFireTime());
+            }
         }
     }
 
@@ -1419,10 +1434,13 @@ public class TaskInstance {
             jobTrigger.setLastFireTime(lastFireTime);
             jobTrigger.setNextFireTime(newNextFireTime);
             // 更新JobTrigger并获取最新的JobTrigger
-            taskStore.beginTX(status -> {
+            final TaskJobTrigger newJobTrigger = taskStore.beginTX(status -> {
                 taskStore.updateFireTime(jobTrigger);
-                return null;
+                return taskStore.getTrigger(jobTrigger.getNamespace(), jobTrigger.getId());
             });
+            if (newJobTrigger != null && newJobTrigger.getNextFireTime() != null) {
+                wheelTimer.addTask(new JobTriggerTask(newJobTrigger), newJobTrigger.getNextFireTime());
+            }
         }
     }
 }
