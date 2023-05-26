@@ -141,10 +141,30 @@ public class JobTriggerUtils {
         return dbNow.compareTo(nextFireTime) >= 0;
     }
 
+    /**
+     * 清除时间的毫秒信息精确到秒
+     */
     public static Date removeMillisecond(Date date) {
-        if (date != null && date.getTime() % 1000 != 0) {
-            date = new Date(date.getTime() - (date.getTime() % 1000));
+        if (date != null) {
+            long ms = date.getTime() % 1000;
+            if (ms != 0) {
+                date = new Date(date.getTime() - ms);
+            }
         }
         return date;
+    }
+
+    /**
+     * 把时间转换为秒
+     */
+    public static long getSecond(Date date) {
+        return getSecond(date.getTime());
+    }
+
+    /**
+     * 把时间转换为秒
+     */
+    public static long getSecond(long millis) {
+        return millis / 1000;
     }
 }

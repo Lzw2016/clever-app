@@ -19,10 +19,6 @@ public interface GlobalConstant {
     int NEXT_TRIGGER_M = 2_000;
     // 接下来(N+M)秒内需要触发的触发器列表最大值
     int NEXT_TRIGGER_MAX_COUNT = 1000;
-    // 内部时间轮调度器的精度(单位：毫秒)，建议：5 ~ 100(单位：毫秒)
-    int WHEEL_TICK_DURATION = 10;
-    // 内部时间轮的数组大小
-    int WHEEL_TICK_COUNT = 512;
     // 线程池线程保持时间(单位：毫秒)
     long THREAD_POOL_KEEP_ALIVE_SECONDS = 3_000L;
     // 集合初始容量

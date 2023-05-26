@@ -4,11 +4,16 @@ import lombok.Getter;
 import lombok.Setter;
 import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.config.SchedulerConfig;
+import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.util.Assert;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,62 +43,91 @@ public class TaskContext {
     @Setter
     private volatile List<TaskScheduler> availableSchedulerList;
     /**
+     * 接下来(N+M)秒内需要触发的触发器列表 {@code ConcurrentMap<触发时间戳(秒), Linked<TaskJobTrigger>>}
+     */
+    private final ConcurrentMap<Long, ConcurrentLinkedQueue<TaskJobTrigger>> nextTriggers = new ConcurrentHashMap<>(
+            GlobalConstant.NEXT_TRIGGER_N + GlobalConstant.NEXT_TRIGGER_M
+    );
+    /**
      * 当前节点任务运行的重入执行次数 {@code ConcurrentMap<jobId, jobReentryCount>}
      */
-    private final ConcurrentMap<Long, AtomicInteger> jobReentryCountMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
+    private final ConcurrentMap<Long, AtomicInteger> jobReentryCount = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
     /**
      * 当前节点触发器触发总次数 {@code ConcurrentMap<jobTriggerId, fireCount>}
      */
-    private final ConcurrentMap<Long, AtomicLong> jobTriggerFireCountMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
+    private final ConcurrentMap<Long, AtomicLong> jobTriggerFireCount = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
     /**
      * 当前节点任务运行的总次数 {@code ConcurrentMap<jobId, jobRunCount>}
      */
-    private final ConcurrentMap<Long, AtomicLong> jobRunCountMap = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
+    private final ConcurrentMap<Long, AtomicLong> jobRunCount = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
 
     public TaskContext(SchedulerConfig schedulerConfig) {
         Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为null");
         this.schedulerConfig = schedulerConfig;
     }
 
+    public void addNextTriggers(TaskJobTrigger trigger) {
+        if (trigger.getNextFireTime() != null) {
+            long second = JobTriggerUtils.getSecond(trigger.getNextFireTime());
+            ConcurrentLinkedQueue<TaskJobTrigger> triggers = nextTriggers.computeIfAbsent(second, time -> new ConcurrentLinkedQueue<>());
+            triggers.add(trigger);
+        }
+    }
+
+    public Map<Long, ConcurrentLinkedQueue<TaskJobTrigger>> getNextTriggers(long second) {
+        Map<Long, ConcurrentLinkedQueue<TaskJobTrigger>> triggerMap = new HashMap<>();
+        Iterator<Map.Entry<Long, ConcurrentLinkedQueue<TaskJobTrigger>>> iterator = nextTriggers.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, ConcurrentLinkedQueue<TaskJobTrigger>> entry = iterator.next();
+            long timeOfSecond = entry.getKey();
+            ConcurrentLinkedQueue<TaskJobTrigger> taskJobTriggers = entry.getValue();
+            if (second >= timeOfSecond) {
+                triggerMap.put(timeOfSecond, taskJobTriggers);
+            }
+            iterator.remove();
+        }
+        return triggerMap;
+    }
+
     public int getJobReentryCount(Long jobId) {
-        return jobReentryCountMap.computeIfAbsent(jobId, id -> new AtomicInteger(0)).get();
+        return jobReentryCount.computeIfAbsent(jobId, id -> new AtomicInteger(0)).get();
     }
 
     public int getAndIncrementJobReentryCount(Long jobId) {
-        return jobReentryCountMap.computeIfAbsent(jobId, id -> new AtomicInteger(0)).getAndIncrement();
+        return jobReentryCount.computeIfAbsent(jobId, id -> new AtomicInteger(0)).getAndIncrement();
     }
 
     public void decrementAndGetJobReentryCount(Long jobId) {
-        AtomicInteger jobReentryCount = jobReentryCountMap.get(jobId);
+        AtomicInteger jobReentryCount = this.jobReentryCount.get(jobId);
         if (jobReentryCount != null) {
             jobReentryCount.decrementAndGet();
         }
     }
 
     public void removeJobReentryCount(Long jobId) {
-        jobReentryCountMap.remove(jobId);
+        jobReentryCount.remove(jobId);
     }
 
     public long incrementAndGetJobFireCount(Long jobTriggerId) {
-        return jobTriggerFireCountMap.computeIfAbsent(jobTriggerId, id -> new AtomicLong(0)).incrementAndGet();
+        return jobTriggerFireCount.computeIfAbsent(jobTriggerId, id -> new AtomicLong(0)).incrementAndGet();
     }
 
     public void decrementAndGetJobFireCount(Long jobTriggerId) {
-        AtomicLong jobFireCount = jobTriggerFireCountMap.get(jobTriggerId);
+        AtomicLong jobFireCount = jobTriggerFireCount.get(jobTriggerId);
         if (jobFireCount != null) {
             jobFireCount.decrementAndGet();
         }
     }
 
     public void removeJobFireCount(Long jobTriggerId) {
-        jobTriggerFireCountMap.remove(jobTriggerId);
+        jobTriggerFireCount.remove(jobTriggerId);
     }
 
     public long incrementAndGetJobRunCount(Long jobId) {
-        return jobRunCountMap.computeIfAbsent(jobId, id -> new AtomicLong(0)).incrementAndGet();
+        return jobRunCount.computeIfAbsent(jobId, id -> new AtomicLong(0)).incrementAndGet();
     }
 
     public void removeJobRunCount(Long jobId) {
-        jobRunCountMap.remove(jobId);
+        jobRunCount.remove(jobId);
     }
 }

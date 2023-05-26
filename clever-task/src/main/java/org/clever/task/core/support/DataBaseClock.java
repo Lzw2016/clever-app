@@ -10,7 +10,7 @@ import org.clever.task.core.TaskDataSource;
  * 作者：lizw <br/>
  * 创建时间：2023/05/24 15:07 <br/>
  */
-public class DataBaseClock implements WheelTimer.Clock {
+public class DataBaseClock {
     private final Jdbc jdbc;
     private volatile long offset = 0;
 
@@ -33,7 +33,9 @@ public class DataBaseClock implements WheelTimer.Clock {
         offset = (t2 - t1) - (t4 - t2);
     }
 
-    @Override
+    /**
+     * 获取当前时间戳(毫秒)
+     */
     public long currentTimeMillis() {
         return SystemClock.now() + offset;
     }

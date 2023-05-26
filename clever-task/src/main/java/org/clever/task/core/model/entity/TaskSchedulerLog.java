@@ -22,7 +22,7 @@ public class TaskSchedulerLog implements Serializable {
     public static final String EVENT_HEART_BEAT_ERROR = "heart_beat_error";
     /** 维护当前集群可用的调度器列表失败 */
     public static final String EVENT_RELOAD_SCHEDULER_ERROR = "reload_scheduler_error";
-    /** 维护接下来N秒内需要触发的触发器列表失败 */
+    /** 维护接下来(N+M)秒内需要触发的触发器列表失败 */
     public static final String EVENT_RELOAD_NEXT_TRIGGER_ERROR = "reload_next_trigger_error";
     /** 调度器轮询任务失败 */
     public static final String EVENT_TRIGGER_JOB_EXEC_ERROR = "trigger_job_exec_error";
