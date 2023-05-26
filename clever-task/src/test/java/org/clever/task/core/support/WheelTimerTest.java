@@ -132,4 +132,29 @@ public class WheelTimerTest {
         log.info("state--> {}", state);
         log.info("#end");
     }
+
+    @Test
+    public void t05() throws Exception {
+        WheelTimer.Clock clock = SystemClock::now;
+        WheelTimer timer = new WheelTimer(Executors.defaultThreadFactory(), Executors.newSingleThreadExecutor(), clock, 10, TimeUnit.MILLISECONDS, 64);
+        final Supplier<WheelTimer.Task> task = () -> new WheelTimer.Task() {
+            @Override
+            public long getId() {
+                return 1;
+            }
+
+            @Override
+            public void run(WheelTimer.TaskInfo taskInfo) {
+                log.info("@@@ -> @@@");
+            }
+        };
+        timer.start();
+        WheelTimer.TaskInfo taskInfo = timer.addTask(task.get(), -100, TimeUnit.SECONDS);
+        log.info("--> {}", taskInfo.getState());
+        Thread.sleep(1000 * 5);
+        timer.stop();
+        Thread.sleep(1000 * 2);
+        log.info("pendingTimeouts--> {}", timer.pendingTasks());
+        log.info("#end");
+    }
 }

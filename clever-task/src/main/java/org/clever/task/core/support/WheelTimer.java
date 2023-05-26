@@ -201,6 +201,7 @@ public class WheelTimer {
         Assert.notNull(unit, "参数 unit 不能为 null");
         Assert.isTrue(delay >= 0, "参数 delay 必须 >=0");
         start();
+        // if(delay<0) delay = 0;
         // 将 TaskInfo 添加到待处理的 Task 队列
         long deadline = clock.currentTimeMillis() + unit.toMillis(delay) - startTime;
         Assert.isTrue(deadline >= 0, "计划执行时间 deadline 溢出");
@@ -696,19 +697,23 @@ public class WheelTimer {
                 if (existsTaskInfo == null) {
                     if (waitTick < 0) {
                         // TaskInfo不存在且需要放在tick之前(需要丢弃)
+                        // log.info("需要丢弃");
                         continue;
                     }
                     // TaskInfo不存在且需要放在tick之后(需要新增)
                     bucket.addTask(taskInfo);
+                    // log.info("需要新增");
                 } else {
                     if (existsTaskInfo.deadline == taskInfo.deadline) {
                         // TaskInfo存在且deadline未变化(替换/丢弃)
                         existsTaskInfo.replaceTaskInfo(taskInfo);
+                        // log.info("替换/丢弃");
                         continue;
                     }
                     // TaskInfo存在且deadline变化(先删除之前的再新增)
                     existsTaskInfo.remove();
                     bucket.addTask(taskInfo);
+                    // log.info("先删除之前的再新增");
                 }
             }
         }

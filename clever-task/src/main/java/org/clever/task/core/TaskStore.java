@@ -23,6 +23,7 @@ import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
+import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
@@ -59,6 +60,8 @@ public class TaskStore {
     private final SnowFlake snowFlake;
     private final Jdbc jdbc;
     private final QueryDSL queryDSL;
+    @Getter
+    private final DataBaseClock clock;
 
     public TaskStore(SnowFlake snowFlake, QueryDSL queryDSL) {
         Assert.notNull(snowFlake, "参数 snowFlake 不能为null");
@@ -66,13 +69,11 @@ public class TaskStore {
         this.snowFlake = snowFlake;
         this.queryDSL = queryDSL;
         this.jdbc = queryDSL.getJdbc();
+        this.clock = new DataBaseClock(this.jdbc);
     }
 
     public TaskStore(SnowFlake snowFlake) {
-        Assert.notNull(snowFlake, "参数 snowFlake 不能为null");
-        this.snowFlake = snowFlake;
-        jdbc = TaskDataSource.getJdbc();
-        queryDSL = TaskDataSource.getQueryDSL();
+        this(snowFlake, TaskDataSource.getQueryDSL());
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- dao
@@ -81,14 +82,14 @@ public class TaskStore {
      * 获取数据库当前时间戳(毫秒)
      */
     public long currentTimeMillis() {
-        return jdbc.currentDate().getTime();
+        return clock.currentTimeMillis();
     }
 
     /**
      * 获取数据库当前时间戳(精确到毫秒)
      */
     public Date currentDate() {
-        return jdbc.currentDate();
+        return new Date(clock.currentTimeMillis());
     }
 
     /**
