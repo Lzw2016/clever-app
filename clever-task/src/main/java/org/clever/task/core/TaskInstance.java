@@ -176,7 +176,7 @@ public class TaskInstance {
                 this.taskStore.getClock(),
                 GlobalConstant.WHEEL_TICK_DURATION,
                 TimeUnit.MILLISECONDS,
-                512
+                GlobalConstant.WHEEL_TICK_COUNT
         );
     }
 
@@ -939,7 +939,6 @@ public class TaskInstance {
         // 添加任务到时间轮调度器
         for (TaskJobTrigger trigger : nextJobTriggerList) {
             if (trigger.getNextFireTime() != null) {
-                // log.info("addTask_1 -> {}", DateUtils.formatToString(trigger.getNextFireTime(), "HH:mm:ss.SSS"));
                 wheelTimer.addTask(new JobTriggerTask(trigger), trigger.getNextFireTime());
             }
         }
@@ -1309,7 +1308,7 @@ public class TaskInstance {
                     taskContext.decrementAndGetJobFireCount(trigger.getId());
                     jobTriggerLog.setFireCount(jobTriggerLog.getFireCount() - 1);
                 } else {
-                    // 已触发 - 触发器触发成功日志(异步)
+                    // 已触发 - 触发器触发成功日志
                     final long endFireTime = SystemClock.now();
                     jobTriggerLog.setTriggerTime((int) (endFireTime - startFireTime));
                     scheduledExecutor.execute(() -> jobTriggeredListener(jobTriggerLog));
@@ -1440,14 +1439,16 @@ public class TaskInstance {
                 return taskStore.getTrigger(jobTrigger.getNamespace(), jobTrigger.getId());
             });
             if (newJobTrigger != null && newJobTrigger.getNextFireTime() != null) {
-//                log.info(
-//                        "addTask_2 -> {} | {} | {}",
-//                        DateUtils.formatToString(newJobTrigger.getNextFireTime(), "HH:mm:ss.SSS"),
-//                        DateUtils.formatToString(taskStore.currentDate(), "HH:mm:ss.SSS"),
-//                        DateUtils.formatToString(new Date(taskStore.getClock().currentTimeMillis()), "HH:mm:ss.SSS")
-//                );
                 wheelTimer.addTask(new JobTriggerTask(newJobTrigger), newJobTrigger.getNextFireTime());
             }
+        }
+
+        @Override
+        public String toString() {
+            return "JobTriggerTask{" +
+                    "triggerId=" + trigger.getId() + ", " +
+                    "jobId=" + trigger.getJobId() + ", " +
+                    '}';
         }
     }
 }

@@ -72,7 +72,7 @@ public class TaskInstanceTest {
 
     @Test
     public void t02() throws InterruptedException {
-        SLEEP_1 = 60_000;
+        SLEEP_1 = 36000_000;
         SLEEP_2 = 1000 * 3;
         startTaskInstance("n01", taskInstance -> {
         });

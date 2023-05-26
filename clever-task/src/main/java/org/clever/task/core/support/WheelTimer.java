@@ -199,9 +199,12 @@ public class WheelTimer {
     public TaskInfo addTask(Task task, long delay, TimeUnit unit) {
         Assert.notNull(task, "参数 task 不能为 null");
         Assert.notNull(unit, "参数 unit 不能为 null");
-        Assert.isTrue(delay >= 0, "参数 delay 必须 >=0");
+        // Assert.isTrue(delay >= 0, "参数 delay 必须 >=0");
         start();
-        // if(delay<0) delay = 0;
+        if (delay < 0) {
+            log.warn("参数 delay 必须 >=0 | delay={}", delay);
+            delay = 0;
+        }
         // 将 TaskInfo 添加到待处理的 Task 队列
         long deadline = clock.currentTimeMillis() + unit.toMillis(delay) - startTime;
         Assert.isTrue(deadline >= 0, "计划执行时间 deadline 溢出");
