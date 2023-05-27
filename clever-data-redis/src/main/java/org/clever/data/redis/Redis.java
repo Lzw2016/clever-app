@@ -341,9 +341,9 @@ public class Redis extends AbstractDataSource {
     }
 
     /**
-     * 查找所有符合给定模式( pattern)的 key
+     * 查找所有符合给定模式(pattern)的 key
      *
-     * @param pattern 模式( pattern)
+     * @param pattern 模式(pattern)
      */
     public Set<String> keys(String pattern) {
         return redisTemplate.keys(pattern);

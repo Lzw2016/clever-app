@@ -2,16 +2,14 @@ package org.clever.task.core.support;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.util.Assert;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -24,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * 作者：lizw <br/>
  * 创建时间：2021/08/01 20:55 <br/>
  */
+@Slf4j
 public class TaskContext {
     /**
      * 当前调度器配置
@@ -74,15 +73,21 @@ public class TaskContext {
         }
     }
 
+    public void removeNextTriggers(TaskJobTrigger trigger) {
+        for (ConcurrentLinkedQueue<TaskJobTrigger> triggers : nextTriggers.values()) {
+            triggers.removeIf(jobTrigger -> Objects.equals(jobTrigger.getId(), trigger.getId()));
+        }
+    }
+
     public Map<Long, ConcurrentLinkedQueue<TaskJobTrigger>> getNextTriggers(long second) {
-        Map<Long, ConcurrentLinkedQueue<TaskJobTrigger>> triggerMap = new HashMap<>();
+        Map<Long, ConcurrentLinkedQueue<TaskJobTrigger>> triggerMap = new HashMap<>(4);
         Iterator<Map.Entry<Long, ConcurrentLinkedQueue<TaskJobTrigger>>> iterator = nextTriggers.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Long, ConcurrentLinkedQueue<TaskJobTrigger>> entry = iterator.next();
             long timeOfSecond = entry.getKey();
-            ConcurrentLinkedQueue<TaskJobTrigger> taskJobTriggers = entry.getValue();
+            ConcurrentLinkedQueue<TaskJobTrigger> triggers = entry.getValue();
             if (second >= timeOfSecond) {
-                triggerMap.put(timeOfSecond, taskJobTriggers);
+                triggerMap.put(timeOfSecond, triggers);
             }
             iterator.remove();
         }

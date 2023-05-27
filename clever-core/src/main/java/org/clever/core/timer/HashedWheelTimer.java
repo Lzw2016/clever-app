@@ -351,7 +351,6 @@ public class HashedWheelTimer implements Timer {
      * 存储 HashedWheelTimeouts 的桶。这些存储在类似数据结构的链表中，以便轻松删除中间的 HashedWheelTimeouts。
      * 此外，HashedWheelTimeout 本身充当节点，因此不需要创建额外的对象。
      */
-    @SuppressWarnings("DuplicatedCode")
     private static final class HashedWheelBucket {
         /**
          * 连表头部，用于链表数据结构
@@ -470,7 +469,6 @@ public class HashedWheelTimer implements Timer {
         }
     }
 
-    @SuppressWarnings("DuplicatedCode")
     private final class Worker implements Runnable {
         /**
          * 需要执行但未执行的任务
@@ -608,7 +606,6 @@ public class HashedWheelTimer implements Timer {
         }
     }
 
-    @SuppressWarnings("DuplicatedCode")
     private static final class HashedWheelTimeout implements Timeout {
         /**
          * init 状态

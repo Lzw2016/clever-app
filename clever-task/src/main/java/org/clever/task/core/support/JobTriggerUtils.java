@@ -155,14 +155,14 @@ public class JobTriggerUtils {
     }
 
     /**
-     * 把时间转换为秒
+     * 把时间转换为秒时间戳
      */
     public static long getSecond(Date date) {
         return getSecond(date.getTime());
     }
 
     /**
-     * 把时间转换为秒
+     * 把时间转换为秒时间戳
      */
     public static long getSecond(long millis) {
         return millis / 1000;

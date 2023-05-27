@@ -9,6 +9,8 @@ import com.querydsl.sql.Configuration;
 import com.querydsl.sql.SQLBaseListener;
 import com.querydsl.sql.SQLListenerContext;
 import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.dml.SQLInsertClause;
+import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
@@ -273,7 +275,7 @@ public class TaskStore {
                 // next_fire_time - now <= nextTime --> next_fire_time <= now + nextTime
                 .where(taskJobTrigger.nextFireTime.loe(DateUtils.addMilliseconds(now, nextTime)))
                 .orderBy(taskJobTrigger.nextFireTime.asc())
-                .limit(5000)
+                .limit(2000)
                 .fetch();
     }
 
@@ -488,8 +490,8 @@ public class TaskStore {
     /**
      * 更新触发器“上一次触发时间”、“下一次触发时间”
      */
-    public void updateFireTime(TaskJobTrigger jobTrigger) {
-        queryDSL.update(taskJobTrigger)
+    public long updateFireTime(TaskJobTrigger jobTrigger) {
+        return queryDSL.update(taskJobTrigger)
                 .set(taskJobTrigger.lastFireTime, jobTrigger.getLastFireTime())
                 .set(taskJobTrigger.nextFireTime, jobTrigger.getNextFireTime())
                 .set(taskJobTrigger.fireCount, taskJobTrigger.fireCount.add(1))
@@ -515,43 +517,66 @@ public class TaskStore {
         return (int) queryDSL.insert(taskSchedulerLog).populate(schedulerLog).execute();
     }
 
-    public int addJobTriggerLog(TaskJobTriggerLog jobTriggerLog) {
-        jobTriggerLog.setId(snowFlake.nextId());
-        jobTriggerLog.setCreateAt(currentDate());
-        return (int) queryDSL.insert(taskJobTriggerLog).populate(jobTriggerLog).execute();
+    public void addJobTriggerLogs(List<TaskJobTriggerLog> jobTriggerLogs) {
+        if (jobTriggerLogs == null || jobTriggerLogs.isEmpty()) {
+            return;
+        }
+        SQLInsertClause insert = queryDSL.insert(taskJobTriggerLog);
+        for (TaskJobTriggerLog jobTriggerLog : jobTriggerLogs) {
+            jobTriggerLog.setId(snowFlake.nextId());
+            insert.populate(jobTriggerLog).addBatch();
+        }
+        insert.execute();
     }
 
-    public int addJobLog(TaskJobLog jobLog) {
-        jobLog.setId(snowFlake.nextId());
-        jobLog.setStartTime(currentDate());
-        jobLog.setEndTime(null);
-        jobLog.setRunTime(null);
-        jobLog.setStatus(null);
-        return (int) queryDSL.insert(taskJobLog).populate(jobLog).execute();
+    public void addJobLogs(List<TaskJobLog> jobLogs) {
+        if (jobLogs == null || jobLogs.isEmpty()) {
+            return;
+        }
+        SQLInsertClause insert = queryDSL.insert(taskJobLog);
+        for (TaskJobLog jobLog : jobLogs) {
+            jobLog.setId(snowFlake.nextId());
+            jobLog.setEndTime(null);
+            jobLog.setRunTime(null);
+            jobLog.setStatus(null);
+            insert.populate(jobLog).addBatch();
+        }
+        insert.execute();
     }
 
-    public int updateJobLogByEnd(TaskJobLog jobLog) {
-        jobLog.setEndTime(currentDate());
-        return (int) queryDSL.update(taskJobLog)
-                .set(taskJobLog.endTime, jobLog.getEndTime())
-                .set(taskJobLog.runTime, jobLog.getRunTime())
-                .set(taskJobLog.status, jobLog.getStatus())
-                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
-                .set(taskJobLog.afterJobData, jobLog.getAfterJobData())
-                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
-                .where(taskJobLog.id.eq(jobLog.getId()))
-                .execute();
+    public void updateJobLogsByEnd(List<TaskJobLog> jobLogs) {
+        if (jobLogs == null || jobLogs.isEmpty()) {
+            return;
+        }
+        SQLUpdateClause update = queryDSL.update(taskJobLog);
+        for (TaskJobLog jobLog : jobLogs) {
+            update.set(taskJobLog.endTime, jobLog.getEndTime())
+                    .set(taskJobLog.runTime, jobLog.getRunTime())
+                    .set(taskJobLog.status, jobLog.getStatus())
+                    .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+                    .set(taskJobLog.afterJobData, jobLog.getAfterJobData())
+                    .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+                    .where(taskJobLog.id.eq(jobLog.getId()))
+                    .addBatch();
+        }
+        update.execute();
     }
 
-    public int updateJobLogByRetry(TaskJobLog jobLog) {
-        return (int) queryDSL.update(taskJobLog)
-                .set(taskJobLog.runTime, jobLog.getRunTime())
-                .set(taskJobLog.status, jobLog.getStatus())
-                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
-                .set(taskJobLog.retryCount, jobLog.getRetryCount())
-                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
-                .where(taskJobLog.id.eq(jobLog.getId()))
-                .execute();
+    public void updateJobLogByRetry(List<TaskJobLog> jobLogs) {
+        if (jobLogs == null || jobLogs.isEmpty()) {
+            return;
+        }
+        SQLUpdateClause update = queryDSL.update(taskJobLog);
+        for (TaskJobLog jobLog : jobLogs) {
+            update.set(taskJobLog.runTime, jobLog.getRunTime())
+                    .set(taskJobLog.status, jobLog.getStatus())
+                    .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+                    .set(taskJobLog.retryCount, jobLog.getRetryCount())
+                    .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+                    .where(taskJobLog.id.eq(jobLog.getId()))
+                    .addBatch();
+        }
+        update.execute();
     }
 
     /**

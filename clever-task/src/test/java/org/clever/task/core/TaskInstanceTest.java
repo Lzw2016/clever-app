@@ -27,8 +27,9 @@ public class TaskInstanceTest {
 
     public static SchedulerConfig newSchedulerConfig(String instanceName) {
         SchedulerConfig config = new SchedulerConfig();
-        config.setSchedulerExecutorPoolSize(4);
-        config.setJobExecutorPoolSize(8);
+        config.setSchedulerExecutorPoolSize(256);
+        config.setJobExecutorPoolSize(512);
+        config.setJobExecutorQueueSize(5120);
         config.setNamespace("lzw");
         config.setInstanceName(instanceName);
         config.setDescription("测试节点01");
@@ -41,8 +42,9 @@ public class TaskInstanceTest {
         TaskInstance taskInstance = new TaskInstance(
                 queryDSL,
                 newSchedulerConfig(instanceName),
-                Collections.singletonList(new MockJobExecutor()),
                 // Arrays.asList(new MockJobExecutor(), new HttpJobExecutor()),
+                Collections.singletonList(new MockJobExecutor()),
+                // Collections.singletonList(new RedisMockJobExecutor()),
                 Collections.singletonList(new SchedulerLogListener()),
                 Collections.singletonList(new JobTriggerLogListener()),
                 Collections.singletonList(new JobLogListener())
@@ -63,7 +65,7 @@ public class TaskInstanceTest {
         startTaskInstance("n01", taskInstance -> {
             HttpJobModel job = new HttpJobModel("访问百度", "GET", "https://www.baidu.com");
             job.setAllowConcurrent(0);
-            CronTrigger trigger = new CronTrigger("访问百度_触发器", "0/10 * * * * ?");
+            CronTrigger trigger = new CronTrigger("访问百度_触发器", "0/1 * * * * ?");
             trigger.setAllowConcurrent(0);
             AddJobRes res = taskInstance.addJob(job, trigger);
             log.info("res -> {}", res);

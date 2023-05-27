@@ -42,4 +42,11 @@ public class TaskJobLog implements Serializable {
     private String beforeJobData;
     /** 执行后的任务数据 */
     private String afterJobData;
+
+    public void setExceptionInfo(String exceptionInfo) {
+        if (exceptionInfo != null && exceptionInfo.length() >= 1023) {
+            exceptionInfo = exceptionInfo.substring(0, 1023);
+        }
+        this.exceptionInfo = exceptionInfo;
+    }
 }

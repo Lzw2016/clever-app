@@ -15,8 +15,8 @@ public class BaseTest {
         hikariConfig.setUsername("admin");
         hikariConfig.setPassword("admin123456");
         hikariConfig.setAutoCommit(false);
-        hikariConfig.setMinimumIdle(1);
-        hikariConfig.setMaximumPoolSize(512);
+        hikariConfig.setMinimumIdle(128);
+        hikariConfig.setMaximumPoolSize(1000);
         return hikariConfig;
     }
 
@@ -31,7 +31,7 @@ public class BaseTest {
         hikariConfig.setUsername("admin");
         hikariConfig.setPassword("admin123456");
         hikariConfig.setAutoCommit(false);
-        hikariConfig.setMinimumIdle(1);
+        hikariConfig.setMinimumIdle(100);
         hikariConfig.setMaximumPoolSize(512);
         return hikariConfig;
     }
