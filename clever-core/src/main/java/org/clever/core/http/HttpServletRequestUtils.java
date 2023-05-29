@@ -18,15 +18,15 @@ import java.util.Set;
 public class HttpServletRequestUtils {
     /**
      * 获取请求的URL地址
-     * <pre>
+     * <pre>{@code
      * 示例：
-     * 当前url：http://localhost:8080/CarsiLogCenter_new/idpstat.jsp?action=idp.sptopn
-     * request.getRequestURL()   http://localhost:8080/CarsiLogCenter_new/idpstat.jsp
-     * request.getRequestURI()   /CarsiLogCenter_new/idpstat.jsp
-     * request.getContextPath()  /CarsiLogCenter_new
-     * request.getPathInfo()     /idpstat.jsp
-     * request.getQueryString()  action=idp.sptopn
-     * </pre>
+     * 当前url：http://localhost:8080/context_path/test_api?param_1=value_1
+     * request.getRequestURL()   http://localhost:8080/context_path/test_api?param_1=value_1
+     * request.getContextPath()  /context_path
+     * request.getRequestURI()   /context_path/test_api
+     * request.getPathInfo()     /test_api
+     * request.getQueryString()  param_1=value_1
+     * }</pre>
      *
      * @param request 请求对象
      * @return 请求的URL地址

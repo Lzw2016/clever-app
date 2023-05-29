@@ -20,9 +20,9 @@ public class PathFilterUtils {
 
     public static String getPath(HttpServletRequest request) {
         // request.getContextPath() /a
-        // request.getServletPath() /b/c/xxx.html
+        // request.getPathInfo() /b/c/xxx.html
         // request.getRequestURI()  /a/b/c/xxx.html
-        return request.getRequestURI();
+        return request.getPathInfo();
     }
 
     /**
