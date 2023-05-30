@@ -35,8 +35,8 @@ public interface GlobalConstant {
     int NEXT_TRIGGER_MAX_COUNT = 150;
     // 线程池线程保持时间(单位：毫秒)
     int THREAD_POOL_KEEP_ALIVE_SECONDS = 3_000;
-    // 保存日志的时间间隔(单位：毫秒)
-    int SAVE_LOG_INTERVAL = 1_000;
+    // 保存日志的时间间隔(单位：毫秒)，建议：100 ~ 1_000(单位：毫秒)
+    int SAVE_LOG_INTERVAL = 300;
     // 集合初始容量
     int INITIAL_CAPACITY = 1024;
 }
