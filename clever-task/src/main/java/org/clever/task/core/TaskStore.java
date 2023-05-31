@@ -692,7 +692,7 @@ public class TaskStore {
      * @param syncBlock 同步回调函数(可保证分布式串行执行): () -> { ... }
      */
     private void lock(String namespace, String lockName, Runnable syncBlock) {
-        lock(namespace, lockName, 3, locked -> {
+        lock(namespace, lockName, GlobalConstant.CONCURRENT_LOCK_WAIT, locked -> {
             if (locked) {
                 syncBlock.run();
             }

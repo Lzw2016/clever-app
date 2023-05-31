@@ -47,7 +47,7 @@ public class RedisMockJobExecutor implements JobExecutor {
     }
 
     @Override
-    public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) {
+    public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
         long newTime = taskStore.currentTimeMillis();
         String key = String.format("task-test:job_%s", job.getId());
         Long oldTime = Conv.asLong(redis.vGet(key, String.class), 0L);
@@ -59,9 +59,10 @@ public class RedisMockJobExecutor implements JobExecutor {
             }
         }
         long second = JobTriggerUtils.getSecond(newTime);
-//        log.info("#### ---> 模拟执行定时任务 | name={} | second={}", job.getName(), second);
-        if (count.incrementAndGet() % 100 == 0) {
-            log.info("#### ---> 模拟执行定时任务 | name={} | second={}", job.getName(), second);
-        }
+        log.info("#### ---> 模拟执行定时任务 | name={} | second={}", job.getName(), second);
+//        Thread.sleep(5_000);
+//        if (count.incrementAndGet() % 100 == 0) {
+//            log.info("#### ---> 模拟执行定时任务 | name={} | second={}", job.getName(), second);
+//        }
     }
 }

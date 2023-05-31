@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.config.SchedulerConfig;
-import org.clever.task.core.job.MockJobExecutor;
 import org.clever.task.core.listeners.JobLogListener;
 import org.clever.task.core.listeners.JobTriggerLogListener;
 import org.clever.task.core.listeners.SchedulerLogListener;
@@ -43,8 +42,8 @@ public class TaskInstanceTest {
                 queryDSL,
                 newSchedulerConfig(instanceName),
                 // Arrays.asList(new MockJobExecutor(), new HttpJobExecutor()),
-                Collections.singletonList(new MockJobExecutor()),
-                // Collections.singletonList(new RedisMockJobExecutor()),
+                // Collections.singletonList(new MockJobExecutor()),
+                Collections.singletonList(new RedisMockJobExecutor()),
                 Collections.singletonList(new SchedulerLogListener()),
                 Collections.singletonList(new JobTriggerLogListener()),
                 Collections.singletonList(new JobLogListener())
@@ -74,7 +73,7 @@ public class TaskInstanceTest {
 
     @Test
     public void t02() throws InterruptedException {
-        SLEEP_1 = 36000_000;
+        SLEEP_1 = 3600_000;
         SLEEP_2 = 1000 * 3;
         startTaskInstance("n01", taskInstance -> {
         });
@@ -82,7 +81,7 @@ public class TaskInstanceTest {
 
     @Test
     public void t03() throws InterruptedException {
-        SLEEP_1 = 1000 * 60 * 60 * 10;
+        SLEEP_1 = 3600_000;
         SLEEP_2 = 1000 * 3;
         startTaskInstance("n02", taskInstance -> {
         });

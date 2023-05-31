@@ -39,4 +39,6 @@ public interface GlobalConstant {
     int SAVE_LOG_INTERVAL = 300;
     // 集合初始容量
     int INITIAL_CAPACITY = 1024;
+    // 分布式锁的等待事件(单位：秒)
+    int CONCURRENT_LOCK_WAIT = 3;
 }
