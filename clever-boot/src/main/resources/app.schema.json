@@ -1468,9 +1468,22 @@
                 "$ref": "#/definitions/httpMethod"
               }
             },
-            "packagePrefix": {
-              "type": "string",
-              "description": "mvc映射的 Method 的 package 默认前缀"
+            "packageMapping": {
+              "type": "array",
+              "description": "解析 HandlerMethod 时 path 与 package 的映射关系",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pathPrefix": {
+                    "type": "string",
+                    "description": "http path 前缀"
+                  },
+                  "packagePrefix": {
+                    "type": "string",
+                    "description": "java package 前缀"
+                  }
+                }
+              }
             },
             "allowPackages": {
               "type": "array",

@@ -93,8 +93,14 @@ web:
   mvc:
     path: '/api/'
     httpMethod: [ 'POST', 'GET' ]
-    packagePrefix: 'org.clever.app.mvc.'
-    allowPackages: [ 'org.clever.app.mvc.' ]
+    packageMapping:
+      - pathPrefix: '/app'
+        packagePrefix: 'org.clever.app.mvc'
+      - pathPrefix: '/task'
+        packagePrefix: 'org.clever.task.mvc'
+    allowPackages:
+      - 'org.clever.app.mvc.'
+      - 'org.clever.task.mvc.'
     defTransactional:
       defDatasource: ['mysql']
       datasource: ['mysql', 'postgresql']

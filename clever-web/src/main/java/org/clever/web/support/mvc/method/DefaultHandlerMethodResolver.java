@@ -111,8 +111,31 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
     @Override
     public HandlerMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, MvcConfig mvcConfig) throws Exception {
         final String reqPath = request.getPathInfo();
+        final List<MvcConfig.PackageMapping> packageMapping = mvcConfig.getPackageMapping();
+        // 验证 path 前缀
+        if (!reqPath.startsWith(mvcConfig.getPath())) {
+            return null;
+        }
         // 解析出 Handler Method 的全路径
-        String tmpStr = StringUtils.trimToEmpty(mvcConfig.getPackagePrefix()) + reqPath.substring(mvcConfig.getPath().length());
+        String tmpStr = reqPath.substring(mvcConfig.getPath().length());
+        if (tmpStr.startsWith("/")) {
+            tmpStr = tmpStr.substring(1);
+        }
+        for (MvcConfig.PackageMapping mapping : packageMapping) {
+            String pathPrefix = mapping.getPathPrefix();
+            if (pathPrefix.startsWith("/")) {
+                pathPrefix = pathPrefix.substring(1);
+            }
+            String pkgPrefix = mapping.getPackagePrefix();
+            if (tmpStr.startsWith(pathPrefix)) {
+                tmpStr = tmpStr.substring(pathPrefix.length());
+                if (tmpStr.startsWith("/")) {
+                    tmpStr = tmpStr.substring(1);
+                }
+                tmpStr = pkgPrefix + '.' + tmpStr;
+                break;
+            }
+        }
         tmpStr = StringUtils.replaceChars(tmpStr, '/', '.');
         tmpStr = StringUtils.replaceChars(tmpStr, '\\', '.');
         String[] tmpArr = StringUtils.split(tmpStr, '@');

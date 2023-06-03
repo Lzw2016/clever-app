@@ -41,9 +41,9 @@ public class MvcConfig {
         add(HttpMethod.OPTIONS);
     }};
     /**
-     * mvc映射的 Method 的 package 默认前缀
+     * 解析 HandlerMethod 时 path 与 package 的映射关系
      */
-    private String packagePrefix = "";
+    private List<PackageMapping> packageMapping = new ArrayList<>();
     /**
      * 允许mvc调用的package前缀
      */
@@ -56,6 +56,17 @@ public class MvcConfig {
      * 热重载配置
      */
     private HotReload hotReload = new HotReload();
+
+    @Data
+    public static class PackageMapping {
+        private String pathPrefix;
+        private String packagePrefix;
+
+        @Override
+        public String toString() {
+            return pathPrefix + '=' + packagePrefix;
+        }
+    }
 
     @Data
     public static class TransactionalConfig {

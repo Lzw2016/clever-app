@@ -42,7 +42,7 @@ public class MvcBootstrap {
         logs.add("  path             : " + mvcConfig.getPath());
         logs.add("  httpMethod       : " + StringUtils.join(mvcConfig.getHttpMethod(), " | "));
         logs.add("  allowPackages    : " + StringUtils.join(mvcConfig.getAllowPackages(), " | "));
-        logs.add("  packagePrefix    : " + mvcConfig.getPackagePrefix());
+        logs.add("  packageMapping   : " + mvcConfig.getPackageMapping());
         logs.add("  defTransactional: ");
         logs.add("    datasource     : " + StringUtils.join(defTransactional.getDatasource(), " | "));
         logs.add("    propagation    : " + defTransactional.getPropagation());
