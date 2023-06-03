@@ -162,7 +162,7 @@ timed-task:
   heartbeatInterval: 10000
   description: 'dev节点01'
   schedulerExecutorPoolSize: 16
-  schedulerExecutorQueueSize: 16
   jobExecutorPoolSize: 64
   jobExecutorQueueSize: 64
   loadWeight: 1.0
+  shellJobWorkingDir: './'

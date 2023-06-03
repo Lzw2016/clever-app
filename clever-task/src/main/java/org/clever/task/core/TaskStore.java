@@ -579,6 +579,45 @@ public class TaskStore {
         update.execute();
     }
 
+    public int addJobTriggerLog(TaskJobTriggerLog jobTriggerLog) {
+        jobTriggerLog.setId(snowFlake.nextId());
+        jobTriggerLog.setCreateAt(currentDate());
+        return (int) queryDSL.insert(taskJobTriggerLog).populate(jobTriggerLog).execute();
+    }
+
+    public int addJobLog(TaskJobLog jobLog) {
+        jobLog.setId(snowFlake.nextId());
+        jobLog.setStartTime(currentDate());
+        jobLog.setEndTime(null);
+        jobLog.setRunTime(null);
+        jobLog.setStatus(null);
+        return (int) queryDSL.insert(taskJobLog).populate(jobLog).execute();
+    }
+
+    public int updateJobLogByEnd(TaskJobLog jobLog) {
+        jobLog.setEndTime(currentDate());
+        return (int) queryDSL.update(taskJobLog)
+                .set(taskJobLog.endTime, jobLog.getEndTime())
+                .set(taskJobLog.runTime, jobLog.getRunTime())
+                .set(taskJobLog.status, jobLog.getStatus())
+                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+                .set(taskJobLog.afterJobData, jobLog.getAfterJobData())
+                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+                .where(taskJobLog.id.eq(jobLog.getId()))
+                .execute();
+    }
+
+    public int updateJobLogByRetry(TaskJobLog jobLog) {
+        return (int) queryDSL.update(taskJobLog)
+                .set(taskJobLog.runTime, jobLog.getRunTime())
+                .set(taskJobLog.status, jobLog.getStatus())
+                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+                .set(taskJobLog.retryCount, jobLog.getRetryCount())
+                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+                .where(taskJobLog.id.eq(jobLog.getId()))
+                .execute();
+    }
+
     /**
      * 利用数据库行级锁实现分布式锁
      *

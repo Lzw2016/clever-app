@@ -53,7 +53,7 @@ public class SchedulerConfig implements Serializable {
      */
     private double loadWeight = 1.0;
     /**
-     * shell任务的work目录
+     * TODO shell任务的work目录
      */
     private String shellJobWorkingDir = "";
 }

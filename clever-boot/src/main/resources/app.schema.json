@@ -1793,10 +1793,6 @@
           "type": "number",
           "description": "调度线程池大小"
         },
-        "schedulerExecutorQueueSize": {
-          "type": "number",
-          "description": "调度线程池队列大小(大于等于schedulerExecutorPoolSize值)"
-        },
         "jobExecutorPoolSize": {
           "type": "number",
           "description": "定时任务执行线程池大小"
@@ -1808,6 +1804,10 @@
         "loadWeight": {
           "type": "number",
           "description": "负载权重"
+        },
+        "shellJobWorkingDir": {
+          "type": "string",
+          "description": "shell任务的work目录"
         }
       }
     }
