@@ -1,4 +1,4 @@
-package org.clever.task.core;
+package org.clever.task;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,7 @@ import org.clever.core.AppShutdownHook;
 import org.clever.core.BannerUtils;
 import org.clever.core.OrderIncrement;
 import org.clever.core.env.Environment;
+import org.clever.task.core.TaskInstance;
 import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.job.HttpJobExecutor;
 import org.clever.task.core.job.JavaJobExecutor;

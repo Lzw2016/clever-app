@@ -103,7 +103,7 @@ web:
       - 'org.clever.task.mvc.'
     defTransactional:
       defDatasource: ['mysql']
-      datasource: ['mysql', 'postgresql']
+      datasource: ['mysql']
       propagation: REQUIRED
       isolation: DEFAULT
       timeout: -1

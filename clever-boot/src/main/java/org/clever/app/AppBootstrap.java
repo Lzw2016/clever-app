@@ -16,7 +16,7 @@ import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.redis.RedisBootstrap;
 import org.clever.security.SecurityBootstrap;
-import org.clever.task.core.TaskBootstrap;
+import org.clever.task.TaskBootstrap;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.MvcBootstrap;
 import org.clever.web.PathConstants;

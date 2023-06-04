@@ -21,6 +21,7 @@ import org.clever.dao.DataAccessException;
 import org.clever.dao.DuplicateKeyException;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
+import org.clever.task.TaskDataSource;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
@@ -216,6 +217,7 @@ public class TaskStore {
             info.setLastHeartbeatTime(scheduler.getLastHeartbeatTime());
             info.setHeartbeatInterval(scheduler.getHeartbeatInterval());
             info.setConfig(scheduler.getConfig());
+            info.setRuntimeInfo(scheduler.getRuntimeInfo());
             info.setDescription(scheduler.getDescription());
             info.setCreateAt(scheduler.getCreateAt());
             info.setUpdateAt(scheduler.getUpdateAt());

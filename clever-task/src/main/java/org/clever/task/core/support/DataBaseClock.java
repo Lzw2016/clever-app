@@ -2,7 +2,7 @@ package org.clever.task.core.support;
 
 import org.clever.core.SystemClock;
 import org.clever.data.jdbc.Jdbc;
-import org.clever.task.core.TaskDataSource;
+import org.clever.task.TaskDataSource;
 
 /**
  * 数据库时钟

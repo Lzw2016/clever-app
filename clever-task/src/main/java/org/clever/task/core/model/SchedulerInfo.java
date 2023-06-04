@@ -40,6 +40,10 @@ public class SchedulerInfo implements Serializable {
      */
     private String config;
     /**
+     * 调度器运行时信息
+     */
+    private String runtimeInfo;
+    /**
      * 描述
      */
     private String description;

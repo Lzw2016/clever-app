@@ -1,4 +1,4 @@
-package org.clever.task.core;
+package org.clever.task;
 
 import org.apache.commons.lang3.StringUtils;
 import org.clever.data.jdbc.DaoFactory;

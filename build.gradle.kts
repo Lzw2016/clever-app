@@ -16,7 +16,7 @@ object Ver {
     const val springBootVersion = "2.6.14"
     const val springCloudVersion = "2021.0.5"
     const val javalinVersion = "4.6.7"
-    const val kotlinVersion = "1.8.21"
+    const val kotlinVersion = "1.6.21"
     const val kotlinxCoroutinesVersion = "1.6.4"
     const val groovyVersion = "4.0.8"
     const val antlr4Version = "4.9.3"
@@ -44,7 +44,7 @@ plugins {
     `maven-publish`
     id("io.spring.dependency-management").version("1.0.12.RELEASE")
     id("org.springframework.boot").version("2.6.12").apply(false)
-    id("org.jetbrains.kotlin.jvm").version("1.8.21").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.6.21").apply(false)
 }
 
 idea {
