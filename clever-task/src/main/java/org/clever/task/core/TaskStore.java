@@ -5,27 +5,28 @@ import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.sql.Configuration;
-import com.querydsl.sql.SQLBaseListener;
-import com.querydsl.sql.SQLListenerContext;
-import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.*;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.clever.core.DateUtils;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.SnowFlake;
+import org.clever.core.model.request.page.Page;
 import org.clever.dao.DataAccessException;
 import org.clever.dao.DuplicateKeyException;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
+import org.clever.data.jdbc.querydsl.utils.QueryDslUtils;
 import org.clever.task.TaskDataSource;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
+import org.clever.task.core.model.request.SchedulerLogReq;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
@@ -819,6 +820,15 @@ public class TaskStore {
                 .where(taskShellJob.namespace.eq(namespace))
                 .where(taskShellJob.jobId.eq(jobId))
                 .execute();
+    }
+
+    public Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq param) {
+        SQLQuery<TaskSchedulerLog> sqlQuery = queryDSL.selectFrom(taskSchedulerLog);
+        if (StringUtils.isNotBlank(param.getNamespace())) {
+            sqlQuery.where(taskSchedulerLog.namespace.eq(param.getNamespace()));
+        }
+        sqlQuery.orderBy(taskSchedulerLog.createAt.desc());
+        return QueryDslUtils.queryByPage(sqlQuery, param);
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

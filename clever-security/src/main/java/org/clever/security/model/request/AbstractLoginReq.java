@@ -1,10 +1,10 @@
 package org.clever.security.model.request;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.clever.core.model.request.BaseRequest;
 import org.clever.security.model.LoginChannel;
 import org.clever.security.model.LoginType;
+
+import java.io.Serializable;
 
 /**
  * 登录请求数据抽象类
@@ -12,9 +12,8 @@ import org.clever.security.model.LoginType;
  * 作者：lizw <br/>
  * 创建时间：2020/11/29 14:32 <br/>
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class AbstractLoginReq extends BaseRequest {
+public abstract class AbstractLoginReq implements Serializable {
     /**
      * 登录类型参数名
      */
