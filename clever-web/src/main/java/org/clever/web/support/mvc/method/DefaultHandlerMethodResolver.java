@@ -108,7 +108,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
             for (String excludeClass : hotReload.getExcludeClasses()) {
                 try {
                     parentClassLoader.loadClass(excludeClass);
-                } catch (ClassNotFoundException e) {
+                } catch (Exception e) {
                     throw ExceptionUtils.unchecked(e);
                 }
             }
