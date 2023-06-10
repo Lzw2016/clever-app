@@ -1,4 +1,4 @@
-package org.clever.web.support.mvc.annotation;
+package org.clever.validation.annotation;
 
 import java.lang.annotation.*;
 

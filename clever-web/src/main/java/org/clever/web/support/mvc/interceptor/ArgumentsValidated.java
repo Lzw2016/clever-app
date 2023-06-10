@@ -3,8 +3,8 @@ package org.clever.web.support.mvc.interceptor;
 import org.clever.core.MethodParameter;
 import org.clever.core.OrderIncrement;
 import org.clever.core.validator.BaseValidatorUtils;
+import org.clever.validation.annotation.Validated;
 import org.clever.web.support.mvc.HandlerContext;
-import org.clever.web.support.mvc.annotation.Validated;
 
 /**
  * HandlerMethod 参数 JSR-303 数据验证实现

@@ -87,12 +87,12 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         // Annotation-based argument resolution
         resolvers.add(new RequestParamMethodArgumentResolver(useCache, false));
         resolvers.add(new RequestParamMapMethodArgumentResolver());
+        resolvers.add(new ServletModelAttributeMethodProcessor(false));
         resolvers.add(new RequestBodyMethodProcessor(objectMapper));
         resolvers.add(new RequestPartMethodArgumentResolver(objectMapper));
         resolvers.add(new RequestHeaderMethodArgumentResolver(useCache));
         resolvers.add(new RequestHeaderMapMethodArgumentResolver());
         resolvers.add(new CookieValueMethodArgumentResolver(useCache));
-        // TODO ModelAttributeMethodProcessor & ServletModelAttributeMethodProcessor
         // Type-based argument resolution
         resolvers.add(new ServletRequestMethodArgumentResolver());
         resolvers.add(new ServletResponseMethodArgumentResolver());
@@ -100,6 +100,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         resolvers.add(new PrincipalMethodArgumentResolver());
         resolvers.add(new ContextMethodArgumentResolver(javalin._conf.inner.appAttributes));
         resolvers.add(new RequestParamMethodArgumentResolver(useCache, true));
+        resolvers.add(new ServletModelAttributeMethodProcessor(true));
         return resolvers;
     }
 

@@ -10,6 +10,7 @@ import org.clever.core.validator.annotation.NotBlank;
 import org.clever.data.jdbc.DaoFactory;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.util.MultiValueMap;
+import org.clever.validation.annotation.Validated;
 import org.clever.web.http.HttpStatus;
 import org.clever.web.http.multipart.MultipartFile;
 import org.clever.web.support.mvc.annotation.*;

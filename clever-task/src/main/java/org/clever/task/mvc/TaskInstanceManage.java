@@ -8,7 +8,6 @@ import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
 import org.clever.task.core.model.request.SchedulerLogReq;
-import org.clever.web.support.mvc.annotation.RequestParam;
 
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class TaskInstanceManage {
     /**
      * 获取所有的调度器信息
      */
-    public static Page<TaskSchedulerLog> querySchedulerLog(@RequestParam SchedulerLogReq req) {
+    public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq req) {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.querySchedulerLog(req));
