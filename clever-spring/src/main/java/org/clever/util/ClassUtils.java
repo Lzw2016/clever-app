@@ -1,5 +1,6 @@
 package org.clever.util;
 
+import java.beans.Introspector;
 import java.io.Closeable;
 import java.io.Externalizable;
 import java.io.Serializable;
@@ -645,6 +646,20 @@ public class ClassUtils {
             }
         }
         return clazz;
+    }
+
+    /**
+     * 以未大写的 JavaBeans 属性格式返回 Java 类的短字符串名称。在嵌套类的情况下去除外部类名。
+     *
+     * @param clazz class
+     * @return 以标准 JavaBeans 属性格式呈现的短名称
+     * @see java.beans.Introspector#decapitalize(String)
+     */
+    public static String getShortNameAsProperty(Class<?> clazz) {
+        String shortName = getShortName(clazz);
+        int dotIndex = shortName.lastIndexOf(PACKAGE_SEPARATOR);
+        shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
+        return Introspector.decapitalize(shortName);
     }
 
     private static Method getMethodOrNull(Class<?> clazz, String methodName, Class<?>[] paramTypes) {

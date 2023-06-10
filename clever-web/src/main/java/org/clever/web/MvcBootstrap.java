@@ -54,6 +54,7 @@ public class MvcBootstrap {
         logs.add("    watchFile      : " + ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getWatchFile()));
         logs.add("    interval       : " + hotReload.getInterval().toMillis() + "ms");
         logs.add("    excludePackages: " + StringUtils.join(hotReload.getExcludePackages(), " | "));
+        logs.add("    excludeClasses : " + StringUtils.join(hotReload.getExcludeClasses(), " | "));
         logs.add("    locations      : " + StringUtils.join(hotReload.getLocations().stream().map(locationMap::get).toArray(), " | "));
         BannerUtils.printConfig(log, "mvc配置", logs.toArray(new String[0]));
         return create(rootPath, mvcConfig);

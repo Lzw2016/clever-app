@@ -115,6 +115,10 @@ public class MvcConfig {
          */
         private Set<String> excludePackages = new HashSet<>();
         /**
+         * 不使用热重载的class
+         */
+        private Set<String> excludeClasses = new HashSet<>();
+        /**
          * 热重载class位置
          * <pre>
          * 1.classpath路径

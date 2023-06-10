@@ -233,6 +233,7 @@ web:
       watchFile: './build/.hotReload'
       interval: 1s
       excludePackages: [ ]
+      excludeClasses: [ ]
       locations:
         - './clever-boot/out/production/classes'
         - './clever-boot/build/classes/java/main'

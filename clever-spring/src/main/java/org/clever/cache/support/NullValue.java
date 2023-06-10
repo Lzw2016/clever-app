@@ -19,6 +19,7 @@ public final class NullValue implements Serializable {
         return INSTANCE;
     }
 
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
         return (this == obj || obj == null);

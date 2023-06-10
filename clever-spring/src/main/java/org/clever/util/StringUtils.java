@@ -837,4 +837,15 @@ public class StringUtils {
         }
         return path.substring(0, extIndex);
     }
+
+    /**
+     * 测试给定的 {@code String} 是否以指定的前缀开头，忽略大小写。
+     *
+     * @param str    要检查的 {@code String}
+     * @param prefix 要查找的前缀
+     * @see java.lang.String#startsWith
+     */
+    public static boolean startsWithIgnoreCase(String str, String prefix) {
+        return (str != null && prefix != null && str.length() >= prefix.length() && str.regionMatches(true, 0, prefix, 0, prefix.length()));
+    }
 }

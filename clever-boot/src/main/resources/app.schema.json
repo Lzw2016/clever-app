@@ -1554,6 +1554,13 @@
                     "type": "string"
                   }
                 },
+                "excludeClasses": {
+                  "type": "array",
+                  "description": "不使用热重载的class",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "locations": {
                   "type": "array",
                   "description": "热重载class位置",

@@ -113,12 +113,14 @@ web:
       watchFile: './build/.hotReload'
       interval: 1s
       excludePackages: [ ]
+      excludeClasses: [ ]
       locations:
         #- './clever-boot/out/production/classes'
         - './clever-boot/build/classes/java/main'
         - './clever-boot/build/classes/kotlin/main'
+        - './clever-task/build/classes/java/main'
   security:
-    enable: true
+    enable: false
     dataSource:
       jdbcName: "mysql"
       enableRedis: true

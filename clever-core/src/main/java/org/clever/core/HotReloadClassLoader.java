@@ -10,6 +10,7 @@ import java.io.File;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,24 +68,24 @@ public class HotReloadClassLoader extends ClassLoader {
      */
     private final String[] loadPath;
     /**
-     * 支持热加载的class package前缀
+     * 不支持热加载的class前缀
      */
-    private final String[] basePackage;
+    private final String[] excludeClassPrefixes;
     /**
      * 内部委托的 ClassLoader
      */
     private volatile ClassLoader innerClassLoader;
 
     /**
-     * @param parent      父ClassLoader
-     * @param basePackage 支持热加载的class package前缀
-     * @param loadPath    加载class文件的路径
+     * @param parent               父ClassLoader
+     * @param excludeClassPrefixes 不支持热加载的class前缀
+     * @param loadPath             加载class文件的路径
      */
-    public HotReloadClassLoader(ClassLoader parent, String[] basePackage, String... loadPath) {
+    public HotReloadClassLoader(ClassLoader parent, String[] excludeClassPrefixes, String... loadPath) {
         super(parent);
-        Assert.notNull(basePackage, "basePackage 不能为null");
+        Assert.notNull(excludeClassPrefixes, "excludeClassPrefixes 不能为null");
         Assert.notEmpty(loadPath, "loadPath 不能为空");
-        this.basePackage = basePackage;
+        this.excludeClassPrefixes = excludeClassPrefixes;
         this.loadPath = cleanPath(loadPath);
         this.innerClassLoader = new InnerClassLoader(this.getParent());
     }
@@ -163,24 +164,40 @@ public class HotReloadClassLoader extends ClassLoader {
         return result.toArray(new String[0]);
     }
 
+    /**
+     * 是否需要热加载class
+     *
+     * @param name class名
+     */
     private boolean basePackageFilter(String name) {
-        if (basePackage == null || basePackage.length == 0) {
+        if (excludeClassPrefixes == null || excludeClassPrefixes.length == 0) {
             return true;
         }
-        for (String prefix : basePackage) {
+        for (String prefix : excludeClassPrefixes) {
             if (name.startsWith(prefix)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     /**
      * 内部真实的 ClassLoader
      */
     private class InnerClassLoader extends ClassLoader {
+        private final Method findLoadedClassMethod;
+
         public InnerClassLoader(ClassLoader parent) {
             super(parent);
+            Method method = null;
+            if (parent != null) {
+                try {
+                    method = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
+                    method.setAccessible(true);
+                } catch (Exception ignored) {
+                }
+            }
+            findLoadedClassMethod = method;
             // 创建序列号
             final Long serialNumber = SERIAL_NUMBER.incrementAndGet();
             PHANTOM_REFERENCE_MAP.put(new PhantomReference<>(this, REFERENCE_QUEUE), serialNumber);
@@ -191,10 +208,21 @@ public class HotReloadClassLoader extends ClassLoader {
 
         @Override
         public Class<?> loadClass(String name) throws ClassNotFoundException {
+            ClassLoader parentClassLoader = getParent();
             synchronized (getClassLoadingLock(name)) {
                 Class<?> clazz = findLoadedClass(name);
                 if (clazz != null) {
                     return clazz;
+                }
+                if (parentClassLoader != null && findLoadedClassMethod != null) {
+                    try {
+                        // 调用 getParent().findLoadedClass(name)
+                        clazz = (Class<?>) findLoadedClassMethod.invoke(parentClassLoader, name);
+                    } catch (Exception ignored) {
+                    }
+                    if (clazz != null) {
+                        return clazz;
+                    }
                 }
                 ClassNotFoundException exception = null;
                 if (basePackageFilter(name)) {
@@ -202,13 +230,13 @@ public class HotReloadClassLoader extends ClassLoader {
                         clazz = findClass(name);
                     } catch (ClassNotFoundException e) {
                         exception = e;
-                        if (getParent() != null) {
-                            clazz = getParent().loadClass(name);
+                        if (parentClassLoader != null) {
+                            clazz = parentClassLoader.loadClass(name);
                         }
                     }
                 } else {
-                    if (getParent() != null) {
-                        clazz = getParent().loadClass(name);
+                    if (parentClassLoader != null) {
+                        clazz = parentClassLoader.loadClass(name);
                     }
                 }
                 if (clazz == null) {
@@ -244,6 +272,7 @@ public class HotReloadClassLoader extends ClassLoader {
                     throw new ClassNotFoundException(String.format("%s 不存在,paths=[%s]", name, StringUtils.join(clazzPath.toArray(), ", ")));
                 }
                 try {
+                    // log.debug("findClass: {}", clazzFile.getAbsolutePath());
                     bytes = FileUtils.readFileToByteArray(clazzFile);
                     classCache.put(name, bytes);
                 } catch (Exception e) {

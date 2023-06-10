@@ -90,12 +90,28 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
             watchFileLastModified = this.watchFile.lastModified();
         }
         if (hotReload.isEnable()) {
+            ClassLoader parentClassLoader = this.getClass().getClassLoader();
+            Set<String> excludeClassPrefixes = new HashSet<>();
+            if (hotReload.getExcludePackages() != null) {
+                excludeClassPrefixes.addAll(hotReload.getExcludePackages());
+            }
+            if (hotReload.getExcludeClasses() != null) {
+                excludeClassPrefixes.addAll(hotReload.getExcludeClasses());
+            }
             hotReloadClassLoader = new HotReloadClassLoader(
-                    this.getClass().getClassLoader(),
+                    parentClassLoader,
                     // Thread.currentThread().getContextClassLoader(),
                     // new Launcher().getClassLoader(),
+                    excludeClassPrefixes.toArray(new String[0]),
                     hotReload.getLocations().stream().map(location -> locationMap.getOrDefault(location, location)).toArray(String[]::new)
             );
+            for (String excludeClass : hotReload.getExcludeClasses()) {
+                try {
+                    parentClassLoader.loadClass(excludeClass);
+                } catch (ClassNotFoundException e) {
+                    throw ExceptionUtils.unchecked(e);
+                }
+            }
             // 监听 class 文件变化
             DaemonExecutor daemonWatch = new DaemonExecutor("hot-reload-class");
             daemonWatch.scheduleAtFixedRate(this::hotReloadClass, hotReload.getInterval().toMillis());
