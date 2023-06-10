@@ -15,7 +15,7 @@ import java.util.List;
 public class QueryByPage extends QueryBySort {
     private static final long serialVersionUID = 1L;
     /**
-     * 每页的数据量 - 最大值 1w
+     * 每页的数据量 - 最大值 1k
      */
     public static final int PAGE_SIZE_MAX = 1000;
 
@@ -58,8 +58,8 @@ public class QueryByPage extends QueryBySort {
     }
 
     public int getPageSize() {
-        if (pageSize > PAGE_SIZE_MAX) {
-            pageSize = PAGE_SIZE_MAX;
+        if (pageSize > getMaxPageSize()) {
+            pageSize = getMaxPageSize();
         }
         if (pageSize < 1) {
             pageSize = 1;
@@ -68,8 +68,8 @@ public class QueryByPage extends QueryBySort {
     }
 
     public void setPageSize(int pageSize) {
-        if (pageSize > PAGE_SIZE_MAX) {
-            pageSize = PAGE_SIZE_MAX;
+        if (pageSize > getMaxPageSize()) {
+            pageSize = getMaxPageSize();
         }
         if (pageSize < 1) {
             pageSize = 1;
@@ -89,6 +89,13 @@ public class QueryByPage extends QueryBySort {
             pageNo = 1;
         }
         this.pageNo = pageNo;
+    }
+
+    /**
+     * 返回最大页大小
+     */
+    public int getMaxPageSize() {
+        return PAGE_SIZE_MAX;
     }
 
     /**
