@@ -33,6 +33,12 @@ public class QueryByPage extends QueryBySort {
     @Setter
     @Getter
     private boolean isSearchCount = true;
+    // /**
+    //  *  是否使用缓存 count 查询值(减少 count 频率)
+    //  */
+    // @Setter
+    // @Getter
+    // private boolean useCacheCount = false;
 
     public QueryByPage(int pageSize, int pageNo, boolean isSearchCount) {
         this.pageSize = pageSize;

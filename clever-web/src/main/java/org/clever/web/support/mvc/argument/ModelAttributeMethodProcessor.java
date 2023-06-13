@@ -292,7 +292,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
      * 替换 WebDataBinderFactory
      */
     protected WebDataBinder createBinder(Object target, String objectName) {
-        return new ExtendedServletRequestDataBinder(target, objectName);
+        WebDataBinder binder = new ExtendedServletRequestDataBinder(target, objectName);
+        binder.setConversionService(AbstractNamedValueMethodArgumentResolver.CONVERSION);
+        return binder;
     }
 
     /**

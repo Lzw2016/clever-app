@@ -27,6 +27,7 @@ import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.SchedulerLogReq;
+import org.clever.task.core.model.request.TaskJobLogReq;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
@@ -822,13 +823,46 @@ public class TaskStore {
                 .execute();
     }
 
-    public Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq param) {
+    public Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq query) {
         SQLQuery<TaskSchedulerLog> sqlQuery = queryDSL.selectFrom(taskSchedulerLog);
-        if (StringUtils.isNotBlank(param.getNamespace())) {
-            sqlQuery.where(taskSchedulerLog.namespace.eq(param.getNamespace()));
+        if (StringUtils.isNotBlank(query.getNamespace())) {
+            sqlQuery.where(taskSchedulerLog.namespace.eq(query.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(query.getInstanceName())) {
+            sqlQuery.where(taskSchedulerLog.instanceName.eq(query.getInstanceName()));
+        }
+        if (StringUtils.isNotBlank(query.getEventName())) {
+            sqlQuery.where(taskSchedulerLog.eventName.eq(query.getEventName()));
+        }
+        if (query.getCreateAtStart() != null) {
+            sqlQuery.where(taskSchedulerLog.createAt.goe(query.getCreateAtStart()));
+        }
+        if (query.getCreateAtEnd() != null) {
+            sqlQuery.where(taskSchedulerLog.createAt.loe(query.getCreateAtEnd()));
         }
         sqlQuery.orderBy(taskSchedulerLog.createAt.desc());
-        return QueryDslUtils.queryByPage(sqlQuery, param);
+        return QueryDslUtils.queryByPage(sqlQuery, query);
+    }
+
+    public Page<TaskJobLog> queryTaskJobLog(TaskJobLogReq query) {
+        SQLQuery<TaskJobLog> sqlQuery = queryDSL.selectFrom(taskJobLog);
+        if (StringUtils.isNotBlank(query.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(query.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(query.getInstanceName())) {
+            sqlQuery.where(taskJobLog.instanceName.eq(query.getInstanceName()));
+        }
+        if (query.getJobId() != null) {
+            sqlQuery.where(taskJobLog.jobId.eq(query.getJobId()));
+        }
+        if (query.getFireTimeStart() != null) {
+            sqlQuery.where(taskJobLog.fireTime.goe(query.getFireTimeStart()));
+        }
+        if (query.getFireTimeEnd() != null) {
+            sqlQuery.where(taskJobLog.fireTime.loe(query.getFireTimeEnd()));
+        }
+        sqlQuery.orderBy(taskJobLog.fireTime.desc());
+        return QueryDslUtils.queryByPage(sqlQuery, query);
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support
