@@ -29,7 +29,8 @@ object Ver {
 buildscript {
     repositories {
         mavenLocal()
-        maven("https://maven.aliyun.com/nexus/content/groups/public/")
+        maven("https://maven.aliyun.com/repository/public/")
+        maven("https://maven.aliyun.com/repository/central")
         mavenCentral()
     }
     dependencies {
@@ -42,9 +43,7 @@ plugins {
     idea
     `java-library`
     `maven-publish`
-    id("io.spring.dependency-management").version("1.0.12.RELEASE")
-    id("org.springframework.boot").version("2.6.12").apply(false)
-    id("org.jetbrains.kotlin.jvm").version("1.6.21").apply(false)
+    id("io.spring.dependency-management")
 }
 
 idea {

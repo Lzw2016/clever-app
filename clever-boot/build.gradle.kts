@@ -3,7 +3,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 plugins {
-    //id("groovy")
+    //groovy
     id("org.jetbrains.kotlin.jvm")
     //id("org.springframework.boot")
 }
@@ -94,6 +94,7 @@ tasks.jar {
 // 触发class热部署
 tasks.getByName("classes") {
     doLast {
+        File("./build").mkdirs()
         File("./build", ".hotReload").apply {
             if (this.exists()) {
                 this.createNewFile()

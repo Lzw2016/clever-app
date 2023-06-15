@@ -1,5 +1,5 @@
 //plugins {
-//    id("groovy")
+//    groovy
 //    id("org.jetbrains.kotlin.jvm")
 //}
 

@@ -8,6 +8,8 @@ CustomFilter
     🡓
     [200] ExceptionHandlerFilter (异常处理)
     🡓
+    [TODO] GlobalRequestParamsFilter (获取全局请求参数: QueryBySort、QueryByPage)
+    🡓
     [300] CorsFilter (可参考: https://javalin.io/plugins/cors)
     🡓
     [400] CaptureHandlerFilter(未实现)
