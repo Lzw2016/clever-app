@@ -861,7 +861,10 @@ public class TaskStore {
         if (query.getFireTimeEnd() != null) {
             sqlQuery.where(taskJobLog.fireTime.loe(query.getFireTimeEnd()));
         }
-        sqlQuery.orderBy(taskJobLog.fireTime.desc());
+        if (query.isOrderEmpty()) {
+            query.addOrderField(taskJobLog.fireTime.toString(), "desc");
+            // query.addOrderField(taskJobLog.fireTime.getMetadata().getName(), "desc");
+        }
         return QueryDslUtils.queryByPage(sqlQuery, query);
     }
 

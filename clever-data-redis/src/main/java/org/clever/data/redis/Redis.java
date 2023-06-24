@@ -2729,6 +2729,7 @@ public class Redis extends AbstractDataSource {
         return list;
     }
 
+    // TODO 反序列化 List<JavaBean> 有问题
     private <T> T deserializer(String value, Class<T> clazz) {
         return jacksonMapper.fromJson(value, clazz);
     }

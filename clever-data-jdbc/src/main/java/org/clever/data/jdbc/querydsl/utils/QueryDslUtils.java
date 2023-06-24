@@ -4,24 +4,32 @@ import com.querydsl.core.JoinExpression;
 import com.querydsl.core.QueryMetadata;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.PathMetadata;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
+import org.clever.core.RenameStrategy;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
+import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.data.jdbc.querydsl.QArray;
 import org.clever.data.jdbc.querydsl.QLinkedMap;
 import org.clever.data.jdbc.querydsl.QList;
+import org.clever.data.jdbc.support.SqlUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
@@ -77,6 +85,17 @@ public class QueryDslUtils {
         }
         List<T> list = sqlQuery.offset(page.offset()).limit(page.getSize()).fetch();
         page.setRecords(list);
+        // 排序信息
+        List<String> orderFieldsTmp = queryByPage.getOrderFields();
+        List<String> sortsTmp = queryByPage.getSorts();
+        for (int i = 0; i < orderFieldsTmp.size(); i++) {
+            String fieldSql = orderFieldsTmp.get(i);
+            String sort = sortsTmp.get(i);
+            OrderItem orderItem = new OrderItem();
+            orderItem.setColumn(fieldSql);
+            orderItem.setAsc(SqlUtils.ASC.equalsIgnoreCase(StringUtils.trim(sort)));
+            page.addOrder(orderItem);
+        }
         return page;
     }
 
@@ -88,7 +107,15 @@ public class QueryDslUtils {
             for (int i = 0; i < orderFields.size(); i++) {
                 String sqlField = orderFields.get(i);
                 String sort = sorts.get(i);
-                Path<?> fieldPath = getPath(fieldMap, sqlField);
+                Path<?> fieldPath = null;
+                sqlField = queryBySort.getMappingField(sqlField);
+                if (StringUtils.isNotBlank(sqlField)) {
+                    fieldPath = getPath(fieldMap, sqlField);
+                }
+                if (fieldPath == null) {
+                    sqlField = orderFields.get(i);
+                    fieldPath = getPath(fieldMap, sqlField);
+                }
                 if (!(fieldPath instanceof ComparableExpressionBase)) {
                     continue;
                 }
@@ -138,18 +165,44 @@ public class QueryDslUtils {
     }
 
     private static Path<?> getPath(Map<String, Path<?>> fieldMap, String sqlField) {
-        final String field = NamingUtils.underlineToCamel(sqlField);
-        String fieldKey = fieldMap.keySet().stream()
-                .filter(key -> Objects.equals(field, key))
-                .findFirst().orElse(null);
-        if (StringUtils.isBlank(fieldKey)) {
-            fieldKey = fieldMap.keySet().stream()
-                    .filter(key -> key.endsWith("." + field))
-                    .findFirst().orElse(null);
+        RenameStrategy[] strategies = new RenameStrategy[]{
+                RenameStrategy.None,
+                RenameStrategy.ToCamel,
+                RenameStrategy.ToCamelUpper,
+                RenameStrategy.ToUnderline,
+                RenameStrategy.ToUnderlineUpper,
+                RenameStrategy.ToUpperCase,
+                RenameStrategy.ToLowerCase,
+        };
+        BiFunction<String, String, Boolean> match = (rawStr, matchStr) -> {
+            for (RenameStrategy strategy : strategies) {
+                if (NamingUtils.rename(matchStr, strategy).equals(rawStr)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        for (Map.Entry<String, Path<?>> entry : fieldMap.entrySet()) {
+            String key = entry.getKey();
+            Path<?> path = entry.getValue();
+            if (key.equalsIgnoreCase(sqlField)) {
+                return path;
+            }
+            PathMetadata pathMetadata = path.getMetadata();
+            if (pathMetadata != null) {
+                String field = pathMetadata.getName();
+                if (match.apply(field, sqlField)) {
+                    return path;
+                }
+            }
+            key = StringUtils.substringAfterLast(key, ".");
+            if (StringUtils.isBlank(key)) {
+                key = entry.getKey();
+            }
+            if (match.apply(key, sqlField)) {
+                return path;
+            }
         }
-        if (StringUtils.isBlank(fieldKey)) {
-            return null;
-        }
-        return fieldMap.get(fieldKey);
+        return null;
     }
 }

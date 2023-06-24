@@ -129,6 +129,14 @@ public class QueryBySort implements Serializable {
     }
 
     /**
+     * 排序字段是否为空
+     */
+    public boolean isOrderEmpty() {
+        List<String> orderFields = getOrderFields();
+        return orderFields.isEmpty();
+    }
+
+    /**
      * 清空排序sql字段映射
      */
     public QueryBySort clearFieldsMapping() {
@@ -138,6 +146,20 @@ public class QueryBySort implements Serializable {
         return this;
     }
 
+    /**
+     * 根据 fieldsMapping 获取排序字段
+     *
+     * @param rawField 原始字段
+     */
+    public String getMappingField(String rawField) {
+        return fieldsMapping.get(rawField);
+    }
+
+    /**
+     * 根据 fieldsMapping 获取排序字段集合
+     *
+     * @return {@code List<field>}
+     */
     public List<String> getOrderFieldsSql() {
         List<String> orderFieldsSql = new ArrayList<>();
         List<String> orderFieldsTmp = getOrderFields();
@@ -150,6 +172,11 @@ public class QueryBySort implements Serializable {
         return orderFieldsSql;
     }
 
+    /**
+     * 根据 fieldsMapping 获取排序顺序集合
+     *
+     * @return {@code List<ASC|DESC>}
+     */
     public List<String> getSortsSql() {
         List<String> sortsSql = new ArrayList<>();
         List<String> orderFieldsTmp = getOrderFields();
