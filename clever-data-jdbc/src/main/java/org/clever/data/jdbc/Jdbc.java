@@ -3340,6 +3340,16 @@ public class Jdbc extends AbstractDataSource {
                     SimpleJdbcCall procedure = new ProcedureJdbcCall(this)
                             .withProcedureName(procedureName)
                             .withNamedBinding();
+                    // 默认调用当前连接的数据库的存储过程
+                    String schemaName = null;
+                    switch (getDbType()) {
+                        case POSTGRE_SQL:
+                            schemaName = queryString("select current_schema()");
+                            break;
+                    }
+                    if (StringUtils.isNotBlank(schemaName)) {
+                        procedure.setSchemaName(schemaName);
+                    }
                     procedure.compile();
                     return procedure;
                 }
