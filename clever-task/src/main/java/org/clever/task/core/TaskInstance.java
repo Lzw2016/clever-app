@@ -636,7 +636,8 @@ public class TaskInstance {
      * 获取所有调度器
      */
     public List<SchedulerInfo> allSchedulers() {
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryAllSchedulerList(getNamespace()));
+        // getNamespace()
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryAllSchedulerList(null));
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- service

@@ -3342,6 +3342,7 @@ public class Jdbc extends AbstractDataSource {
                             .withNamedBinding();
                     // 默认调用当前连接的数据库的存储过程
                     String schemaName = null;
+                    // noinspection SwitchStatementWithTooFewBranches
                     switch (getDbType()) {
                         case POSTGRE_SQL:
                             schemaName = queryString("select current_schema()");

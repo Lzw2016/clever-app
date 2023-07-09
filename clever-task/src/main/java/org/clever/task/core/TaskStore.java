@@ -183,7 +183,7 @@ public class TaskStore {
         // heartbeat_interval * 2 > now - last_heartbeat_time
         BooleanExpression whereCondition = taskScheduler.heartbeatInterval.multiply(2).gt(
                 Expressions.numberOperation(
-                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, Expressions.currentTimestamp(), taskScheduler.lastHeartbeatTime
+                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, taskScheduler.lastHeartbeatTime, Expressions.currentTimestamp()
                 ).multiply(1000)
         );
         return queryDSL.select(taskScheduler)
@@ -201,12 +201,16 @@ public class TaskStore {
         // heartbeat_interval * 2 > now - last_heartbeat_time
         BooleanExpression available = taskScheduler.heartbeatInterval.multiply(2).gt(
                 Expressions.numberOperation(
-                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, Expressions.currentTimestamp(), taskScheduler.lastHeartbeatTime
+                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, taskScheduler.lastHeartbeatTime, Expressions.currentTimestamp()
                 ).multiply(1000)
         ).as("available");
-        List<Tuple> list = queryDSL.select(taskScheduler, available)
-                .from(taskScheduler)
-                .where(taskScheduler.namespace.eq(namespace))
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskScheduler, available).from(taskScheduler);
+        if (StringUtils.isNotBlank(namespace)) {
+            sqlQuery.where(taskScheduler.namespace.eq(namespace));
+        }
+        List<Tuple> list = sqlQuery
+                .orderBy(taskScheduler.namespace.asc())
+                .orderBy(taskScheduler.instanceName.asc())
                 .fetch();
         return list.stream().map(tuple -> {
             TaskScheduler scheduler = tuple.get(taskScheduler);
