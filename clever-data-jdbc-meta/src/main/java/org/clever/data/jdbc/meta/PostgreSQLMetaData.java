@@ -55,42 +55,42 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sql = new StringBuilder();
         sql.append("select ");
-        sql.append("    table_schema                                            as schemaName, ");
-        sql.append("    table_name                                              as tableName, ");
-        sql.append("    column_name                                             as columnName, ");
+        sql.append("    a.table_schema                                            as schemaName, ");
+        sql.append("    a.table_name                                              as tableName, ");
+        sql.append("    a.column_name                                             as columnName, ");
         // columnComment
         // partOfPrimaryKey
         // partOfIndex
         // partOfUniqueIndex
         // autoIncremented
-        sql.append("    is_nullable                                             as notNull, ");
-        sql.append("    udt_name                                                as dataType, ");
-        sql.append("    numeric_precision                                       as size, ");
-        sql.append("    numeric_scale                                           as decimalDigits, ");
-        sql.append("    character_maximum_length                                as width, ");
-        sql.append("    column_default                                          as defaultValue, ");
-        sql.append("    ordinal_position                                        as ordinalPosition, ");
-        sql.append("    is_identity, ");
-        sql.append("    table_catalog, ");
-        sql.append("    character_octet_length, ");
-        sql.append("    datetime_precision, ");
-        sql.append("    udt_schema, ");
-        sql.append("    data_type ");
-        sql.append("from information_schema.columns ");
-        sql.append("where 1=1 ");
+        sql.append("    a.is_nullable                                             as notNull, ");
+        sql.append("    a.udt_name                                                as dataType, ");
+        sql.append("    a.numeric_precision                                       as size, ");
+        sql.append("    a.numeric_scale                                           as decimalDigits, ");
+        sql.append("    a.character_maximum_length                                as width, ");
+        sql.append("    a.column_default                                          as defaultValue, ");
+        sql.append("    a.ordinal_position                                        as ordinalPosition, ");
+        sql.append("    a.is_identity, ");
+        sql.append("    a.table_catalog, ");
+        sql.append("    a.character_octet_length, ");
+        sql.append("    a.datetime_precision, ");
+        sql.append("    a.udt_schema, ");
+        sql.append("    a.data_type ");
+        sql.append("from information_schema.columns a left join information_schema.views b on (a.table_catalog=b.table_catalog and a.table_schema=b.table_schema and a.table_name=b.table_name) ");
+        sql.append("where b.table_schema is null ");
         if (!schemasName.isEmpty()) {
-            sql.append("and lower(table_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
+            sql.append("and lower(a.table_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
         }
         if (!tablesName.isEmpty()) {
-            sql.append("and lower(table_name) in (").append(createWhereIn(params, tablesName)).append(") ");
+            sql.append("and lower(a.table_name) in (").append(createWhereIn(params, tablesName)).append(") ");
         }
         if (!ignoreSchemas.isEmpty()) {
-            sql.append("and lower(table_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+            sql.append("and lower(a.table_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
         if (!ignoreTables.isEmpty()) {
-            sql.append("and lower(table_name) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
+            sql.append("and lower(a.table_name) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
         }
-        sql.append("order by table_schema, table_name, ordinal_position ");
+        sql.append("order by a.table_schema, a.table_name, a.ordinal_position ");
         List<Map<String, Object>> mapColumns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : mapColumns) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();

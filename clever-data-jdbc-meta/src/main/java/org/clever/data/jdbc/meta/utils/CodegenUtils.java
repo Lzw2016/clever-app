@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
@@ -18,6 +19,7 @@ import org.clever.data.jdbc.meta.codegen.handler.*;
 import org.clever.data.jdbc.meta.codegen.support.QueryDSLSupport;
 import org.clever.data.jdbc.meta.model.Column;
 import org.clever.data.jdbc.meta.model.Schema;
+import org.clever.data.jdbc.meta.model.SchemaWrapper;
 import org.clever.data.jdbc.meta.model.Table;
 import org.clever.data.jdbc.support.DbColumnMetaData;
 import org.clever.util.Assert;
@@ -64,6 +66,7 @@ public class CodegenUtils {
         ENGINE.setStaticMethodExpression(true);
         ENGINE.addSharedStaticMethod(NamingUtils.class);
         ENGINE.addSharedStaticMethod(QueryDSLSupport.class);
+        ENGINE.addSharedStaticMethod(StringEscapeUtils.class);
         ENGINE.addEnum(DbType.class);
         // ENGINE.addSharedObject();
         ENGINE.setBaseTemplatePath(null);
@@ -265,8 +268,9 @@ public class CodegenUtils {
         final Set<String> tablesSuffix = config.getTablesSuffix();
         final TemplateDataContext templateDataContext = new TemplateDataContext(config, metaData, schemas);
         for (Schema schema : schemas) {
-            final List<Table> tables = schema.getTables();
-            templateDataContext.setSchema(schema);
+            SchemaWrapper schemaWrapper = new SchemaWrapper(schema, tablesPrefix, tablesSuffix);
+            final List<Table> tables = schemaWrapper.getTables();
+            templateDataContext.setSchema(schemaWrapper);
             // TemplateScope.SCHEMA 范围
             List<CodegenHandler> schemaCodegenHandlers = getCodegenHandlerByScope(config, TemplateScope.SCHEMA);
             for (CodegenHandler codegenHandler : schemaCodegenHandlers) {
@@ -277,14 +281,6 @@ public class CodegenUtils {
                 log.info("SCHEMA范围生成代码成功 | --> {}", outFile.getAbsolutePath());
             }
             for (Table table : tables) {
-                String tableName = table.getName();
-                // final List<Column> columns = table.getColumns();
-                if (!tablesPrefix.isEmpty() && tablesPrefix.stream().noneMatch(tableName::startsWith)) {
-                    continue;
-                }
-                if (!tablesSuffix.isEmpty() && tablesSuffix.stream().noneMatch(tableName::endsWith)) {
-                    continue;
-                }
                 // TemplateScope.TABLE 范围
                 List<CodegenHandler> tableCodegenHandlers = getCodegenHandlerByScope(config, TemplateScope.TABLE);
                 if (tableCodegenHandlers.isEmpty()) {
