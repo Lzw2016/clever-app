@@ -532,6 +532,10 @@
             }
           }
         },
+        "validateConnection": {
+          "type": "boolean",
+          "description": "验证连接是否可用"
+        },
         "ssl": {
           "type": "boolean",
           "description": "是否启用 SSL 支持"

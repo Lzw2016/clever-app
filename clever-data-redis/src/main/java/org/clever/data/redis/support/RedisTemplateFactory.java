@@ -65,6 +65,7 @@ public class RedisTemplateFactory {
         Assert.notNull(builderCustomizers, "参数 builderCustomizers 不能为 null");
         LettuceClientConfiguration clientConfiguration = createClientConfiguration(properties, clientResources, builderCustomizers);
         LettuceConnectionFactory connectionFactory = createConnectionFactory(properties, clientConfiguration);
+        connectionFactory.setValidateConnection(properties.isValidateConnection());
         connectionFactory.afterPropertiesSet();
         return connectionFactory;
     }

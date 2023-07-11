@@ -232,4 +232,18 @@ public class RedisTest {
         }
         redis.close();
     }
+
+    @Test
+    public void t05() {
+        RedisProperties properties = getProperties();
+        properties.setValidateConnection(false);
+        properties.getPool().setMinIdle(5);
+        Redis redis = new Redis("test", properties);
+        redis.vSet("001", "123");
+        log.info("### 1");
+        // 断开网络连接
+        redis.vSet("001", "456");
+        log.info("### 2");
+        redis.close();
+    }
 }

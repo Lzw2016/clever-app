@@ -33,6 +33,10 @@ public class RedisProperties {
      */
     private Cluster cluster = new Cluster();
     /**
+     * 验证连接是否可用
+     */
+    private boolean validateConnection = true;
+    /**
      * 是否启用 SSL 支持
      */
     private boolean ssl = false;

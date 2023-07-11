@@ -107,6 +107,7 @@ redis:
         dynamicRefreshSources: true
         period: 16s
         adaptive: false
+    validateConnection: true
     ssl:  false
     readTimeout: 30s
     connectTimeout: 10s
