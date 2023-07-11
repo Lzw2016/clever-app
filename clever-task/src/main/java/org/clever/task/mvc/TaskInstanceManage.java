@@ -10,6 +10,8 @@ import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
 import org.clever.task.core.model.request.SchedulerLogReq;
 import org.clever.task.core.model.request.TaskJobLogReq;
+import org.clever.task.core.model.request.TaskJobReq;
+import org.clever.task.core.model.response.TaskInfoRes;
 
 import java.util.List;
 
@@ -33,6 +35,13 @@ public class TaskInstanceManage {
      */
     public static List<SchedulerInfo> allSchedulers() {
         return getTaskInstance().allSchedulers();
+    }
+
+    /**
+     * 查询所有任务信息
+     */
+    public static Page<TaskInfoRes> queryJobs(TaskJobReq query) {
+        return getTaskInstance().queryJobs(query);
     }
 
     /**

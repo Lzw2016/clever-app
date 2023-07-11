@@ -25,12 +25,10 @@ import org.clever.data.jdbc.support.SqlUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * 为扩展querydsl功能提供的工具类
@@ -39,16 +37,52 @@ import java.util.function.Supplier;
  * 创建时间：2021/12/09 14:53 <br/>
  */
 public class QueryDslUtils {
-    public static QLinkedMap linkedMap(Expression<?>... exprs) {
-        return new QLinkedMap(exprs);
+    public static QLinkedMap linkedMap(Expression<?>... fields) {
+        return new QLinkedMap(fields);
     }
 
-    public static QArray array(Expression<?>... exprs) {
-        return new QArray(exprs);
+    public static QLinkedMap linkedMap(Collection<? extends Expression<?>> fields) {
+        return new QLinkedMap(fields.toArray(new Expression<?>[0]));
     }
 
-    public static QList list(Expression<?>... exprs) {
-        return new QList(exprs);
+    public static QLinkedMap linkedMap(RelationalPathBase<?>... tables) {
+        List<Expression<?>> fields = new LinkedList<>();
+        for (RelationalPathBase<?> table : tables) {
+            fields.addAll(Arrays.stream(table.all()).collect(Collectors.toList()));
+        }
+        return new QLinkedMap(fields.toArray(new Expression<?>[0]));
+    }
+
+    public static QArray array(Expression<?>... fields) {
+        return new QArray(fields);
+    }
+
+    public static QArray array(Collection<? extends Expression<?>> fields) {
+        return new QArray(fields.toArray(new Expression<?>[0]));
+    }
+
+    public static QArray array(RelationalPathBase<?>... tables) {
+        List<Expression<?>> fields = new LinkedList<>();
+        for (RelationalPathBase<?> table : tables) {
+            fields.addAll(Arrays.stream(table.all()).collect(Collectors.toList()));
+        }
+        return new QArray(fields.toArray(new Expression<?>[0]));
+    }
+
+    public static QList list(Expression<?>... fields) {
+        return new QList(fields);
+    }
+
+    public static QList list(Collection<? extends Expression<?>> fields) {
+        return new QList(fields.toArray(new Expression<?>[0]));
+    }
+
+    public static QList list(RelationalPathBase<?>... tables) {
+        List<Expression<?>> fields = new LinkedList<>();
+        for (RelationalPathBase<?> table : tables) {
+            fields.addAll(Arrays.stream(table.all()).collect(Collectors.toList()));
+        }
+        return new QList(fields.toArray(new Expression<?>[0]));
     }
 
     /**

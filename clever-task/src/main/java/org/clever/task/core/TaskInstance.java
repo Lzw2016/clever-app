@@ -6,6 +6,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
+import org.clever.core.model.request.page.Page;
 import org.clever.core.tuples.TupleOne;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.config.SchedulerConfig;
@@ -17,6 +18,8 @@ import org.clever.task.core.listeners.JobTriggerListener;
 import org.clever.task.core.listeners.SchedulerListener;
 import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.*;
+import org.clever.task.core.model.request.TaskJobReq;
+import org.clever.task.core.model.response.TaskInfoRes;
 import org.clever.task.core.support.JobTriggerUtils;
 import org.clever.task.core.support.TaskContext;
 import org.clever.util.Assert;
@@ -628,8 +631,8 @@ public class TaskInstance {
     /**
      * 分页查询定时任务列表
      */
-    public void queryJobs() {
-        // TODO queryJobs
+    public Page<TaskInfoRes> queryJobs(TaskJobReq query) {
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryJobs(query));
     }
 
     /**

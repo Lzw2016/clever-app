@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * 作者：lizw <br/>
@@ -243,5 +245,22 @@ public class Page<T> implements IPage<T> {
     public boolean isHitCount() {
         return hitCount;
     }
-}
 
+    /**
+     * 装换当前页数据
+     *
+     * @param conversion 自定义转换函数
+     */
+    public <R> Page<R> convertRecords(Function<T, R> conversion) {
+        Page<R> page = new Page<>();
+        page.records = this.records.stream().map(record -> conversion.apply(record)).collect(Collectors.toList());
+        page.total = this.total;
+        page.size = this.size;
+        page.current = this.current;
+        page.orders = this.orders;
+        page.optimizeCountSql = this.optimizeCountSql;
+        page.isSearchCount = this.isSearchCount;
+        page.hitCount = this.hitCount;
+        return page;
+    }
+}

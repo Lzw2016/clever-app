@@ -28,6 +28,8 @@ import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.SchedulerLogReq;
 import org.clever.task.core.model.request.TaskJobLogReq;
+import org.clever.task.core.model.request.TaskJobReq;
+import org.clever.task.core.model.response.TaskInfoRes;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
@@ -870,6 +872,43 @@ public class TaskStore {
             // query.addOrderField(taskJobLog.fireTime.getMetadata().getName(), "desc");
         }
         return QueryDslUtils.queryByPage(sqlQuery, query);
+    }
+
+    public Page<TaskInfoRes> queryJobs(TaskJobReq query) {
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJob, taskHttpJob, taskJavaJob, taskJsJob, taskShellJob, taskJobTrigger)
+                .from(taskJob)
+                .leftJoin(taskHttpJob).on(taskJob.id.eq(taskHttpJob.jobId))
+                .leftJoin(taskJavaJob).on(taskJob.id.eq(taskJavaJob.jobId))
+                .leftJoin(taskJsJob).on(taskJob.id.eq(taskJsJob.jobId))
+                .leftJoin(taskShellJob).on(taskJob.id.eq(taskShellJob.jobId))
+                .leftJoin(taskJobTrigger).on(taskJob.id.eq(taskJobTrigger.jobId))
+                .orderBy(taskJob.namespace.asc())
+                .orderBy(taskJob.name.asc());
+        if (StringUtils.isNotBlank(query.getNamespace())) {
+            sqlQuery.where(taskJob.namespace.eq(query.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(query.getName())) {
+            sqlQuery.where(taskJob.name.eq(query.getName()));
+        }
+        if (query.getType() != null) {
+            sqlQuery.where(taskJob.type.eq(query.getType()));
+        }
+        if (query.getCreateStart() != null) {
+            sqlQuery.where(taskJob.createAt.goe(query.getCreateStart()));
+        }
+        if (query.getCreateEnd() != null) {
+            sqlQuery.where(taskJob.createAt.loe(query.getCreateEnd()));
+        }
+        Page<Tuple> page = QueryDslUtils.queryByPage(sqlQuery, query);
+        return page.convertRecords(tuple -> {
+            TaskJob job = tuple.get(taskJob);
+            TaskHttpJob httpJob = tuple.get(taskHttpJob);
+            TaskJavaJob javaJob = tuple.get(taskJavaJob);
+            TaskJsJob jsJob = tuple.get(taskJsJob);
+            TaskShellJob shellJob = tuple.get(taskShellJob);
+            TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
+            return new TaskInfoRes(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
+        });
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support
