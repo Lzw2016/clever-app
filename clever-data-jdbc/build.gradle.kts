@@ -9,6 +9,6 @@ dependencies {
     api("p6spy:p6spy")
     testImplementation("org.postgresql:postgresql")
     testImplementation("mysql:mysql-connector-java")
-    // runtimeOnly("com.oracle.database.jdbc:ojdbc8")
-    // runtimeOnly("com.microsoft.sqlserver:mssql-jdbc")
+    testImplementation("com.oracle.database.jdbc:ojdbc8")
+    testImplementation("com.microsoft.sqlserver:mssql-jdbc")
 }

@@ -13,5 +13,5 @@ dependencies {
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     testImplementation("org.postgresql:postgresql")
     testImplementation("mysql:mysql-connector-java")
-    testImplementation("com.oracle.database.jdbc:ojdbc8:23.2.0.0")
+    testImplementation("com.oracle.database.jdbc:ojdbc8")
 }
