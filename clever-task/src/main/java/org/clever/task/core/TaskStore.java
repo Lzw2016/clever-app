@@ -15,6 +15,7 @@ import org.clever.core.DateUtils;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.id.SnowFlake;
+import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.Page;
 import org.clever.dao.DataAccessException;
 import org.clever.dao.DuplicateKeyException;
@@ -868,8 +869,7 @@ public class TaskStore {
             sqlQuery.where(taskJobLog.fireTime.loe(query.getFireTimeEnd()));
         }
         if (query.isOrderEmpty()) {
-            query.addOrderField(taskJobLog.fireTime.toString(), "desc");
-            // query.addOrderField(taskJobLog.fireTime.getMetadata().getName(), "desc");
+            query.addOrderField(ColumnMetadata.getName(taskJobLog.fireTime), QueryBySort.DESC);
         }
         return QueryDslUtils.queryByPage(sqlQuery, query);
     }
