@@ -38,6 +38,20 @@ public class TaskInstanceManage {
     }
 
     /**
+     * 获取所有的 “命名空间”
+     */
+    public static List<String> allNamespace() {
+        return getTaskInstance().allNamespace();
+    }
+
+    /**
+     * 获取所有的 “实例名”
+     */
+    public List<String> allInstance() {
+        return getTaskInstance().allInstance();
+    }
+
+    /**
      * 查询所有任务信息
      */
     public static Page<TaskInfoRes> queryJobs(TaskJobReq query) {

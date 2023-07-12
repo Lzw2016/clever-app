@@ -629,6 +629,20 @@ public class TaskInstance {
     }
 
     /**
+     * 获取所有的 “命名空间”
+     */
+    public List<String> allNamespace() {
+        return taskStore.beginReadOnlyTX(status -> taskStore.allNamespace());
+    }
+
+    /**
+     * 获取所有的 “实例名”
+     */
+    public List<String> allInstance() {
+        return taskStore.beginReadOnlyTX(status -> taskStore.allInstance());
+    }
+
+    /**
      * 分页查询定时任务列表
      */
     public Page<TaskInfoRes> queryJobs(TaskJobReq query) {

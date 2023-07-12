@@ -875,12 +875,12 @@ public class TaskStore {
     }
 
     public Page<TaskInfoRes> queryJobs(TaskJobReq query) {
-        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJob, taskHttpJob, taskJavaJob, taskJsJob, taskShellJob, taskJobTrigger)
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJob, /*taskHttpJob, taskJavaJob, taskJsJob, taskShellJob,*/ taskJobTrigger)
                 .from(taskJob)
-                .leftJoin(taskHttpJob).on(taskJob.id.eq(taskHttpJob.jobId))
-                .leftJoin(taskJavaJob).on(taskJob.id.eq(taskJavaJob.jobId))
-                .leftJoin(taskJsJob).on(taskJob.id.eq(taskJsJob.jobId))
-                .leftJoin(taskShellJob).on(taskJob.id.eq(taskShellJob.jobId))
+                // .leftJoin(taskHttpJob).on(taskJob.id.eq(taskHttpJob.jobId))
+                // .leftJoin(taskJavaJob).on(taskJob.id.eq(taskJavaJob.jobId))
+                // .leftJoin(taskJsJob).on(taskJob.id.eq(taskJsJob.jobId))
+                // .leftJoin(taskShellJob).on(taskJob.id.eq(taskShellJob.jobId))
                 .leftJoin(taskJobTrigger).on(taskJob.id.eq(taskJobTrigger.jobId))
                 .orderBy(taskJob.namespace.asc())
                 .orderBy(taskJob.name.asc());
@@ -888,7 +888,7 @@ public class TaskStore {
             sqlQuery.where(taskJob.namespace.eq(query.getNamespace()));
         }
         if (StringUtils.isNotBlank(query.getName())) {
-            sqlQuery.where(taskJob.name.eq(query.getName()));
+            sqlQuery.where(taskJob.name.like(query.getName()));
         }
         if (query.getType() != null) {
             sqlQuery.where(taskJob.type.eq(query.getType()));
@@ -902,13 +902,27 @@ public class TaskStore {
         Page<Tuple> page = QueryDslUtils.queryByPage(sqlQuery, query);
         return page.convertRecords(tuple -> {
             TaskJob job = tuple.get(taskJob);
-            TaskHttpJob httpJob = tuple.get(taskHttpJob);
-            TaskJavaJob javaJob = tuple.get(taskJavaJob);
-            TaskJsJob jsJob = tuple.get(taskJsJob);
-            TaskShellJob shellJob = tuple.get(taskShellJob);
+            // TaskHttpJob httpJob = tuple.get(taskHttpJob);
+            // TaskJavaJob javaJob = tuple.get(taskJavaJob);
+            // TaskJsJob jsJob = tuple.get(taskJsJob);
+            // TaskShellJob shellJob = tuple.get(taskShellJob);
             TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
-            return new TaskInfoRes(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
+            return new TaskInfoRes(job, null, null, null, null, jobTrigger);
         });
+    }
+
+    public List<String> allNamespace() {
+        return queryDSL.select(taskScheduler.namespace).distinct()
+                .from(taskScheduler)
+                .orderBy(taskScheduler.namespace.asc())
+                .fetch();
+    }
+
+    public List<String> allInstance() {
+        return queryDSL.select(taskScheduler.instanceName).distinct()
+                .from(taskScheduler)
+                .orderBy(taskScheduler.instanceName.asc())
+                .fetch();
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support
