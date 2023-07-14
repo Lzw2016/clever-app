@@ -39,4 +39,20 @@ public class BaseTest {
     public static Jdbc newPostgresql() {
         return new Jdbc(postgresqlConfig());
     }
+
+    public static HikariConfig oracleConfig() {
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName("oracle.jdbc.OracleDriver");
+        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@122.9.140.63:1521:wms8dev");
+        hikariConfig.setUsername("wms8dev");
+        hikariConfig.setPassword("lmis9system");
+        hikariConfig.setAutoCommit(false);
+        hikariConfig.setMinimumIdle(1);
+        hikariConfig.setMaximumPoolSize(512);
+        return hikariConfig;
+    }
+
+    public static Jdbc newOracle() {
+        return new Jdbc(oracleConfig());
+    }
 }
