@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes">
-    <title>#(title ?? '数据库设计文档')</title>
+    <title>#escape(title ?? '数据库设计文档')</title>
     <style>
         body {
             padding-bottom: 50px
@@ -46,17 +46,17 @@
     <div style='width:1000px; margin:20px auto; text-align:left;'>
         <a name='index'></a>
         <h2 style='text-align:center; line-height:50px;'>
-            #(title ?? '数据库设计文档')
+            #escape(title ?? '数据库设计文档')
         </h2>
         <div>
-            <b>数据库名：#(name)</b>
+            <b>数据库名：#escape(name)</b>
             <br>
             #if(version)
-                <b>文档版本：#(version)</b>
+                <b>文档版本：#escape(version)</b>
                 <br>
             #end
             #if(description)
-                <b>文档描述：#(description)</b>
+                <b>文档描述：#escape(description)</b>
                 <br>
             #end
         </div>
@@ -71,19 +71,19 @@
             #for(table : tables)
                 <tr>
                     <td style='text-align:center;'>#(for.count)</td>
-                    <td><a href='##(table.name)'>#(table.name)</a></td>
-                    <td>#(table.comment)</td>
+                    <td><a href='##escape(table.name)'>#escape(table.name)</a></td>
+                    <td>#escape(table.comment)</td>
                 </tr>
             #end
         </table>
 
         #for(table : tables)
-            <a name='#(table.name)'></a>
+            <a name='#escape(table.name)'></a>
             <div style='margin-top:30px;'>
                 <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
-                <b>表名：#(table.name)</b>
+                <b>表名：#escape(table.name)</b>
             </div>
-            <div>说明：#(table.comment)</div>
+            <div>说明：#escape(table.comment)</div>
             <div>表字段：</div>
             <table cellspacing='1'>
                 <thead>
@@ -115,14 +115,14 @@
                     ### --- 计算“是否索引”
                     #set(idx = column.isPartOfUniqueIndex() ? 'Y(唯一)' : (column.isPartOfIndex() ? 'Y': ''))
                     <tr>
-                        <td style='text-align:center;'>#(column.ordinalPosition)</td>
-                        <td>#(column.name)</td>
-                        <td>#(dataType)</td>
-                        <td>#(primaryKey)</td>
+                        <td style='text-align:center;'>#escape(column.ordinalPosition)</td>
+                        <td>#escape(column.name)</td>
+                        <td>#escape(dataType)</td>
+                        <td>#escape(primaryKey)</td>
                         <td>#(column.isNotNull()?'Y':'N')</td>
-                        <td>#(idx)</td>
-                        <td>#(column.defaultValue)</td>
-                        <td>#(column.comment)</td>
+                        <td>#escape(idx)</td>
+                        <td>#escape(column.defaultValue)</td>
+                        <td>#escape(column.comment)</td>
                     </tr>
                 #end
             </table>
@@ -140,8 +140,8 @@
                     #for(index : table.indices)
                         <tr>
                             <td style='text-align:center;'>#(for.count)</td>
-                            <td>#(index.name)</td>
-                            <td>#for(column : index.columns)#(column.name)#if(!for.last), #end#end</td>
+                            <td>#escape(index.name)</td>
+                            <td>#for(column : index.columns)#escape(column.name)#if(!for.last), #end#end</td>
                             <td>#(index.isUnique()?'Y':'N')</td>
                         </tr>
                     #end

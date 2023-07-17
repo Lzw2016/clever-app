@@ -39,9 +39,44 @@ public class MySQLMetaData extends AbstractMetaData {
                                         Set<String> ignoreTablesSuffix) {
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
-        // 查询字段信息
+        // 查询表信息
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sql = new StringBuilder();
+        // TABLE_TYPE列可能的一些值：
+        //   "BASE TABLE"：表示普通的表。
+        //   "VIEW"：表示视图。
+        //   "SYSTEM VIEW"：表示系统视图，这些视图提供了关于数据库内部元数据的信息。
+        //   "TEMPORARY"：表示临时表，它们在会话结束后自动被删除。
+        //   "SEQUENCE"：表示序列，这是MySQL 8.0版本后引入的新特性，用于生成序列号。
+        sql.append("select ");
+        sql.append("    table_schema        as `schemaName`, ");
+        sql.append("    table_name          as `tableName`, ");
+        sql.append("    table_comment       as `comment` ");
+        sql.append("from ");
+        sql.append("    information_schema.tables ");
+        sql.append("where lower(table_type) in ('base table') ");
+        addWhere(sql, params, schemasName, tablesName, ignoreSchemas, ignoreTables);
+        List<Map<String, Object>> tables = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : tables) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            String tableName = Conv.asString(map.get("tableName")).toLowerCase();
+            String comment = Conv.asString(map.get("comment"), null);
+            // 过滤
+            if (ignoreTablesPrefix.stream().anyMatch(tableName::startsWith)) {
+                continue;
+            }
+            if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
+                continue;
+            }
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, name));
+            Table table = new Table(schema);
+            table.setName(tableName);
+            table.setComment(comment);
+            schema.addTable(table);
+        }
+        // 查询字段信息
+        sql.setLength(0);
+        params.clear();
         sql.append("select");
         sql.append("    table_schema             as `schemaName`, ");
         sql.append("    table_name               as `tableName`, ");
@@ -66,44 +101,10 @@ public class MySQLMetaData extends AbstractMetaData {
         sql.append("where 1=1 ");
         addWhere(sql, params, schemasName, tablesName, ignoreSchemas, ignoreTables);
         sql.append("order by table_schema, table_name, ordinal_position");
-        List<Map<String, Object>> mapColumns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapColumns) {
+        List<Map<String, Object>> columns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : columns) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
-            if (ignoreTablesPrefix.stream().anyMatch(tableName::startsWith)) {
-                continue;
-            }
-            if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
-                continue;
-            }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, name));
-            Table table = schema.getTable(tableName);
-            if (table == null) {
-                table = new Table(schema);
-                table.setName(tableName);
-                schema.addTable(table);
-            }
-            Column column = new Column(table);
-            fillColumn(column, map);
-            column.getAttributes().putAll(map);
-            table.addColumn(column);
-        }
-        // 查询表信息
-        sql.setLength(0);
-        params.clear();
-        sql.append("select ");
-        sql.append("    table_schema        as `schemaName`, ");
-        sql.append("    table_name          as `tableName`, ");
-        sql.append("    table_comment       as `comment` ");
-        sql.append("from ");
-        sql.append("    information_schema.tables ");
-        sql.append("where 1=1  ");
-        addWhere(sql, params, schemasName, tablesName, ignoreSchemas, ignoreTables);
-        List<Map<String, Object>> mapTables = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapTables) {
-            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
-            String tableName = Conv.asString(map.get("tableName")).toLowerCase();
-            String comment = Conv.asString(map.get("comment"), null);
             Schema schema = mapSchema.get(schemaName);
             if (schema == null) {
                 continue;
@@ -112,7 +113,10 @@ public class MySQLMetaData extends AbstractMetaData {
             if (table == null) {
                 continue;
             }
-            table.setComment(comment);
+            Column column = new Column(table);
+            fillColumn(column, map);
+            column.getAttributes().putAll(map);
+            table.addColumn(column);
         }
         // 查询主键&索引
         sql.setLength(0);

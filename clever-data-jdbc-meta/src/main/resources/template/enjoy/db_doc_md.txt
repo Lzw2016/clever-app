@@ -1,7 +1,7 @@
-# #(title ?? '数据库设计文档')
+# #escape(title ?? '数据库设计文档')
 
 #if(name)
-**数据库名：** #(name)
+**数据库名：** #escape(name)
 
 #end
 #if(version)
@@ -9,22 +9,22 @@
 
 #end
 #if(description)
-**文档描述：** #(description)
+**文档描述：** #escape(description)
 
 #end
 | 序号 | 表名 | 说明 |
 | :--- | :--- | :--- |
 #for(table : tables)
-| #(for.count) | [#(table.name)](##(table.name)) | #(table.comment) |
+| #(for.count) | [#escape(table.name)](##escape(table.name)) | #escape(table.comment) |
 #end
 
 ---
 <br/>
 
 #for(table : tables)
-**表名：** <a id="#(table.name)">#(table.name)</a>
+**表名：** <a id="#escape(table.name)">#escape(table.name)</a>
 
-**说明：** #(table.comment)
+**说明：** #escape(table.comment)
 
 **表字段：**
 
@@ -46,7 +46,7 @@
 #set(primaryKey = column.isPartOfPrimaryKey() ? (column.isAutoIncremented() ? 'Y(自增)' : 'Y') : 'N')
 ### --- 计算“是否索引”
 #set(idx = column.isPartOfUniqueIndex() ? 'Y(唯一)' : (column.isPartOfIndex() ? 'Y': ''))
-| #(column.ordinalPosition) | #(column.name) | #(dataType) | #(primaryKey) | #(column.isNotNull()?'Y':'N') | #(idx) | #(column.defaultValue) | #(column.comment) |
+| #(column.ordinalPosition) | #escape(column.name) | #escape(dataType) | escape(primaryKey) | #(column.isNotNull()?'Y':'N') | #(idx) | #escape(column.defaultValue) | #escape(column.comment) |
 #end
 
 #if(!table.indices.isEmpty())
@@ -55,7 +55,7 @@
 | 序号 | 索引名 | 索引字段 | 唯一索引 |
 | :--- | :--- | :--- | :--- |
 #for(index : table.indices)
-| #(for.count) | #(index.name) | #for(column : index.columns)#(column.name)#if(!for.last), #end#end |  #(index.isUnique()?'Y':'N') |
+| #(for.count) | #escape(index.name) | #for(column : index.columns)#escape(column.name)#if(!for.last), #end#end |  #escape(index.isUnique()?'Y':'N') |
 #end
 
 #end

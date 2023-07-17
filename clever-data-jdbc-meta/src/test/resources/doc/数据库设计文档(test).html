@@ -122,6 +122,61 @@
                     <td><a href='#sys_user_role'>sys_user_role</a></td>
                     <td>用户角色关联表</td>
                 </tr>
+                <tr>
+                    <td style='text-align:center;'>13</td>
+                    <td><a href='#task_http_job'>task_http_job</a></td>
+                    <td>Http任务</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>14</td>
+                    <td><a href='#task_java_job'>task_java_job</a></td>
+                    <td>js脚本任务</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>15</td>
+                    <td><a href='#task_job'>task_job</a></td>
+                    <td>定时任务</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>16</td>
+                    <td><a href='#task_job_log'>task_job_log</a></td>
+                    <td>任务执行日志</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>17</td>
+                    <td><a href='#task_job_trigger'>task_job_trigger</a></td>
+                    <td>任务触发器</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>18</td>
+                    <td><a href='#task_job_trigger_log'>task_job_trigger_log</a></td>
+                    <td>任务触发器日志</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>19</td>
+                    <td><a href='#task_js_job'>task_js_job</a></td>
+                    <td>js脚本任务</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>20</td>
+                    <td><a href='#task_scheduler'>task_scheduler</a></td>
+                    <td>调度器</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>21</td>
+                    <td><a href='#task_scheduler_lock'>task_scheduler_lock</a></td>
+                    <td>调度器集群锁</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>22</td>
+                    <td><a href='#task_scheduler_log'>task_scheduler_log</a></td>
+                    <td>调度器事件日志</td>
+                </tr>
+                <tr>
+                    <td style='text-align:center;'>23</td>
+                    <td><a href='#task_shell_job'>task_shell_job</a></td>
+                    <td>js脚本任务</td>
+                </tr>
         </table>
 
             <a name='auto_increment_id'></a>
@@ -205,7 +260,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -340,7 +395,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -515,7 +570,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -626,7 +681,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -751,7 +806,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -896,7 +951,7 @@
                         <td>创建时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -1033,7 +1088,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -1158,7 +1213,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -1269,7 +1324,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -1370,7 +1425,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -1505,7 +1560,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -1616,7 +1671,7 @@
                         <td>更新时间</td>
                     </tr>
             </table>
-                <div>表字段：</div>
+                <div>表索引：</div>
                 <table cellspacing='1'>
                     <thead>
                         <tr>
@@ -1642,6 +1697,1937 @@
                             <td style='text-align:center;'>3</td>
                             <td>primary</td>
                             <td>user_id, role_id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_http_job'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_http_job</b>
+            </div>
+            <div>说明：Http任务</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>job_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>request_method</td>
+                        <td>varchar(15)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>http请求method，ALL GET HEAD POST PUT DELETE CONNECT OPTIONS TRACE PATCH</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>request_url</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>Http请求地址</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>request_data</td>
+                        <td>mediumtext</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>Http请求数据json格式，包含：params、headers、body</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>success_check</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>Http请求是否成功校验(js脚本)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_http_job_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_http_job_job_id</td>
+                            <td>job_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_http_job_request_url</td>
+                            <td>request_url</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>idx_task_http_job_update_at</td>
+                            <td>update_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>5</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_java_job'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_java_job</b>
+            </div>
+            <div>说明：js脚本任务</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>job_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>is_static</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>是否是静态方法(函数)，0：非静态，1：静态</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>class_name</td>
+                        <td>varchar(255)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>java class全路径</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>class_method</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>java class method</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_java_job_class_method</td>
+                            <td>class_method</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_java_job_class_name</td>
+                            <td>class_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_java_job_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>idx_task_java_job_job_id</td>
+                            <td>job_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>5</td>
+                            <td>idx_task_java_job_update_at</td>
+                            <td>update_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>6</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_job'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_job</b>
+            </div>
+            <div>说明：定时任务</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>type</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>任务类型，1：http调用，2：java调用，3：js脚本，4：shell脚本</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>max_reentry</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>最大重入执行数量(对于单个节点当前任务未执行完成就触发了下一次执行导致任务重入执行)，小于等于0：表示禁止重入执行</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>allow_concurrent</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>是否允许多节点并发执行，使用悲观锁实现，不建议禁止，0：禁止，1：允许</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>max_retry_count</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>执行失败时的最大重试次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>route_strategy</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>路由策略，0：不启用，1：指定节点优先，2：固定节点白名单，3：固定节点黑名单</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>first_scheduler</td>
+                        <td>varchar(2047)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>路由策略，1-指定节点优先，调度器名称集合</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>whitelist_scheduler</td>
+                        <td>varchar(2047)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>路由策略，2-固定节点白名单，调度器名称集合</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>11</td>
+                        <td>blacklist_scheduler</td>
+                        <td>varchar(2047)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>路由策略，3-固定节点黑名单，调度器名称集合</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>12</td>
+                        <td>load_balance</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>负载均衡策略，1：抢占，2：随机，3：轮询，4：一致性HASH</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>13</td>
+                        <td>is_update_data</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>1</td>
+                        <td>是否更新任务数据，0：不更新，1：更新</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>14</td>
+                        <td>job_data</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>任务数据(json格式)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>15</td>
+                        <td>run_count</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>运行次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>16</td>
+                        <td>disable</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>是否禁用：0-启用，1-禁用</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>17</td>
+                        <td>description</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>描述</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>18</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>19</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_job_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_job_name</td>
+                            <td>name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_job_update_at</td>
+                            <td>update_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_job_log'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_job_log</b>
+            </div>
+            <div>说明：任务执行日志</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>instance_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>调度器实例名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>job_trigger_log_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>对应的触发器日志ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>job_trigger_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务触发器ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>job_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>fire_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>触发时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>start_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>开始执行时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>end_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>执行结束时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>run_time</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>执行耗时(单位：毫秒)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>11</td>
+                        <td>status</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>任务执行结果，0：成功，1：失败，2：取消</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>12</td>
+                        <td>retry_count</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>重试次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>13</td>
+                        <td>exception_info</td>
+                        <td>varchar(2047)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>异常信息</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>14</td>
+                        <td>run_count</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>执行次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>15</td>
+                        <td>before_job_data</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>执行前的任务数据</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>16</td>
+                        <td>after_job_data</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>执行后的任务数据</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_job_log_end_time</td>
+                            <td>end_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_job_log_fire_time</td>
+                            <td>fire_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_job_log_instance_name</td>
+                            <td>instance_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>idx_task_job_log_job_id</td>
+                            <td>job_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>5</td>
+                            <td>idx_task_job_log_job_trigger_id</td>
+                            <td>job_trigger_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>6</td>
+                            <td>idx_task_job_log_job_trigger_log_id</td>
+                            <td>job_trigger_log_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>7</td>
+                            <td>idx_task_job_log_start_time</td>
+                            <td>start_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>8</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_job_trigger'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_job_trigger</b>
+            </div>
+            <div>说明：任务触发器</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>job_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>触发器名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>start_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>触发开始时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>end_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>触发结束时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>last_fire_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>上一次触发时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>next_fire_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>下一次触发时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>misfire_strategy</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>2</td>
+                        <td>错过触发策略，1：忽略，2：立即补偿触发一次</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>allow_concurrent</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>是否允许多节点并行触发，使用悲观锁实现，不建议允许，0：禁止，1：允许</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>11</td>
+                        <td>type</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>任务类型，1：cron触发，2：固定间隔触发</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>12</td>
+                        <td>cron</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>cron表达式</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>13</td>
+                        <td>fixed_interval</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>固定间隔触发，间隔时间(单位：秒)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>14</td>
+                        <td>fire_count</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>触发次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>15</td>
+                        <td>disable</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>是否禁用：0-启用，1-禁用</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>16</td>
+                        <td>description</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>描述</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>17</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>18</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_job_trigger_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_job_trigger_job_id</td>
+                            <td>job_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_job_trigger_last_fire_time</td>
+                            <td>last_fire_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>idx_task_job_trigger_name</td>
+                            <td>name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>5</td>
+                            <td>idx_task_job_trigger_next_fire_time</td>
+                            <td>next_fire_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>6</td>
+                            <td>idx_task_job_trigger_update_at</td>
+                            <td>update_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>7</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_job_trigger_log'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_job_trigger_log</b>
+            </div>
+            <div>说明：任务触发器日志</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>instance_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>调度器实例名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>job_trigger_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>任务触发器ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>job_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>trigger_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>触发器名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>fire_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>触发时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>is_manual</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>是否是手动触发，0：系统自动触发，1：用户手动触发</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>trigger_time</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>触发耗时(单位：毫秒)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>last_fire_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>上一次触发时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>11</td>
+                        <td>next_fire_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>下一次触发时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>12</td>
+                        <td>fire_count</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>触发次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>13</td>
+                        <td>mis_fired</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>是否错过了触发，0：否，1：是</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>14</td>
+                        <td>trigger_msg</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>触发器消息</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>15</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_job_trigger_log_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_job_trigger_log_fire_time</td>
+                            <td>fire_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_job_trigger_log_instance_name</td>
+                            <td>instance_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>idx_task_job_trigger_log_job_id</td>
+                            <td>job_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>5</td>
+                            <td>idx_task_job_trigger_log_last_fire_time</td>
+                            <td>last_fire_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>6</td>
+                            <td>idx_task_job_trigger_log_next_fire_time</td>
+                            <td>next_fire_time</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>7</td>
+                            <td>idx_task_job_trigger_log_trigger_name</td>
+                            <td>trigger_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>8</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_js_job'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_js_job</b>
+            </div>
+            <div>说明：js脚本任务</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>job_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>content</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>文件内容</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>read_only</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>读写权限：0-可读可写，1-只读</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_js_job_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_js_job_job_id</td>
+                            <td>job_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_js_job_update_at</td>
+                            <td>update_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_scheduler'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_scheduler</b>
+            </div>
+            <div>说明：调度器</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间(同一个namespace的不同调度器属于同一个集群)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>instance_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>调度器实例名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>last_heartbeat_time</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>最后心跳时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>heartbeat_interval</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>3000</td>
+                        <td>心跳频率(单位：毫秒)</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>config</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>调度器配置，线程池大小、负载权重、最大并发任务数...</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>runtime_info</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>调度器运行时信息</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>description</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>描述</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_scheduler_instance_name</td>
+                            <td>instance_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_scheduler_lock'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_scheduler_lock</b>
+            </div>
+            <div>说明：调度器集群锁</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>lock_name</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>锁名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>lock_count</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>锁次数</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>description</td>
+                        <td>varchar(511)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>描述</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_scheduler_lock_lock_name</td>
+                            <td>lock_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_scheduler_log'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_scheduler_log</b>
+            </div>
+            <div>说明：调度器事件日志</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>编号</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>instance_name</td>
+                        <td>varchar(127)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>调度器实例名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>event_name</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>事件名称</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>log_data</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>事件日志数据</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_scheduler_log_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_scheduler_log_instance_name</td>
+                            <td>instance_name</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>primary</td>
+                            <td>id</td>
+                            <td>Y</td>
+                        </tr>
+              </table>
+            <br/>
+            <a name='task_shell_job'></a>
+            <div style='margin-top:30px;'>
+                <a href='#index' style='float:right; margin-top:6px;'>返回目录</a>
+                <b>表名：task_shell_job</b>
+            </div>
+            <div>说明：js脚本任务</div>
+            <div>表字段：</div>
+            <table cellspacing='1'>
+                <thead>
+                    <tr>
+                        <td style='width:40px;'>序号</td>
+                        <td>名称</td>
+                        <td>数据类型</td>
+                        <td style='width:56px;'>主键</td>
+                        <td style='width:64px;'>不能为空</td>
+                        <td style='width:64px;'>是否索引</td>
+                        <td>默认值</td>
+                        <td>说明</td>
+                    </tr>
+                </thead>
+                    <tr>
+                        <td style='text-align:center;'>1</td>
+                        <td>id</td>
+                        <td>bigint(20)</td>
+                        <td>Y(自增)</td>
+                        <td>Y</td>
+                        <td>Y(唯一)</td>
+                        <td></td>
+                        <td>主键id</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>2</td>
+                        <td>namespace</td>
+                        <td>varchar(63)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>命名空间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>3</td>
+                        <td>job_id</td>
+                        <td>bigint(20)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>任务ID</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>4</td>
+                        <td>shell_type</td>
+                        <td>varchar(15)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td></td>
+                        <td>shell脚本类型：bash|sh|ash|powershell|cmd|python|node|deno|php</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>5</td>
+                        <td>shell_charset</td>
+                        <td>varchar(15)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>执行终端的字符集编码，如：“UTF-8”</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>6</td>
+                        <td>shell_timeout</td>
+                        <td>int(11)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>600</td>
+                        <td>执行超时时间，单位：秒，默认：“10分钟”</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>7</td>
+                        <td>content</td>
+                        <td>text</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td></td>
+                        <td></td>
+                        <td>文件内容</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>8</td>
+                        <td>read_only</td>
+                        <td>tinyint(4)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>0</td>
+                        <td>读写权限：0-可读可写，1-只读</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>9</td>
+                        <td>create_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td>Y</td>
+                        <td>CURRENT_TIMESTAMP(3)</td>
+                        <td>创建时间</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:center;'>10</td>
+                        <td>update_at</td>
+                        <td>datetime(3)</td>
+                        <td>N</td>
+                        <td>N</td>
+                        <td>Y</td>
+                        <td></td>
+                        <td>更新时间</td>
+                    </tr>
+            </table>
+                <div>表索引：</div>
+                <table cellspacing='1'>
+                    <thead>
+                        <tr>
+                            <td style='width:40px;'>序号</td>
+                            <td>索引名</td>
+                            <td>索引字段</td>
+                            <td>唯一索引</td>
+                        </tr>
+                    </thead>
+                        <tr>
+                            <td style='text-align:center;'>1</td>
+                            <td>idx_task_shell_job_create_at</td>
+                            <td>create_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>2</td>
+                            <td>idx_task_shell_job_job_id</td>
+                            <td>job_id</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>3</td>
+                            <td>idx_task_shell_job_update_at</td>
+                            <td>update_at</td>
+                            <td>N</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center;'>4</td>
+                            <td>primary</td>
+                            <td>id</td>
                             <td>Y</td>
                         </tr>
               </table>

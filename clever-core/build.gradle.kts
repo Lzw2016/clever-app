@@ -4,6 +4,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("org.apache.commons:commons-lang3")
     api("commons-io:commons-io")
+    api("org.apache.commons:commons-text")
     api("commons-codec:commons-codec")
     api("org.json:json")
     api("com.fasterxml.jackson.datatype:jackson-datatype-joda")
@@ -11,7 +12,6 @@ dependencies {
     api("com.squareup.okhttp3:okhttp")
     // 可选依赖
     compileOnly("com.squareup.retrofit2:converter-jackson")
-    compileOnly("org.apache.commons:commons-text")
     compileOnly("com.google.zxing:javase")
     compileOnly("javax.servlet:javax.servlet-api")
     compileOnly("javax.validation:validation-api")

@@ -113,7 +113,8 @@ web:
       watchFile: './build/.hotReload'
       interval: 1s
       excludePackages: [ ]
-      excludeClasses: [ ]
+      excludeClasses:
+        - 'org.clever.task.core.model.response.TaskInfoRes'
       locations:
         - './clever-boot/out/production/classes'
         - './clever-task/out/production/classes'

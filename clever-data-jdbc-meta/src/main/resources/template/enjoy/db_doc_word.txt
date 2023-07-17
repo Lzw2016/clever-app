@@ -31,7 +31,7 @@
                             <w:rPr>
                                 <w:rFonts w:hint="eastAsia"/>
                             </w:rPr>
-                            <w:t>#(escapeHtml4(title ?? '数据库设计文档'))</w:t>
+                            <w:t>#(escapeXml11(title ?? '数据库设计文档'))</w:t>
                         </w:r>
                     </w:p>
                     <w:p w14:paraId="11B80088" w14:textId="77777777" w:rsidR="005153C0" w:rsidRPr="006012B2" w:rsidRDefault="005153C0">
@@ -116,7 +116,7 @@
                                     <w:sz w:val="18"/>
                                     <w:szCs w:val="18"/>
                                 </w:rPr>
-                                <w:t>#(escapeHtml4(description))</w:t>
+                                <w:t>#(escapeXml11(description))</w:t>
                             </w:r>
                         </w:p>
                     #end
@@ -156,7 +156,7 @@
                                     <w:szCs w:val="21"/>
                                 </w:rPr>
                                 #if(table.comment)
-                                    <w:t>#(table.name) (#(escapeHtml4(table.comment)))</w:t>
+                                    <w:t>#(table.name) (#(escapeXml11(table.comment)))</w:t>
                                 #else
                                     <w:t>#(table.name)</w:t>
                                 #end
@@ -589,7 +589,7 @@
                                                     <w:sz w:val="18"/>
                                                     <w:szCs w:val="18"/>
                                                 </w:rPr>
-                                                <w:t>#(escapeHtml4(column.comment))</w:t>
+                                                <w:t>#(escapeXml11(column.comment))</w:t>
                                             </w:r>
                                         </w:p>
                                     </w:tc>
@@ -1730,7 +1730,7 @@
     <pkg:part pkg:name="/docProps/core.xml" pkg:contentType="application/vnd.openxmlformats-package.core-properties+xml" pkg:padding="256">
         <pkg:xmlData>
             <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/">
-                <dc:title>#(escapeHtml4(title ?? '数据库设计文档'))</dc:title>
+                <dc:title>#(escapeXml11(title ?? '数据库设计文档'))</dc:title>
                 <dc:subject/>
                 <dc:creator>screw</dc:creator>
                 <cp:keywords/>

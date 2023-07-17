@@ -12,10 +12,11 @@ import java.util.List;
 /**
  * 数据库元数据工具 <br/>
  * 1. 支持多个数据库 <br/>
- * 2. <br/>
- * 3. <br/>
- * 4. <br/>
- * 5. <br/>
+ * 2. 获取 Schema 信息<br/>
+ * 3. 获取 Table 信息<br/>
+ * 4. 获取 Column 信息<br/>
+ * 5. 获取 PrimaryKey 信息<br/>
+ * 6. 获取 Index 信息<br/>
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/04/28 22:58 <br/>

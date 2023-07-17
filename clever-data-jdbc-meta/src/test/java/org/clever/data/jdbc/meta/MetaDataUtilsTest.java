@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
 import org.clever.data.jdbc.meta.codegen.CodegenType;
+import org.clever.data.jdbc.meta.model.Schema;
 import org.clever.data.jdbc.meta.model.Table;
 import org.clever.data.jdbc.meta.utils.CodegenUtils;
 import org.clever.data.jdbc.meta.utils.MetaDataUtils;
@@ -55,14 +56,22 @@ public class MetaDataUtilsTest {
                 .setPackageName("org.clever.model")
                 .removeCodegenType(CodegenType.JAVA_ENTITY)
                 .removeCodegenType(CodegenType.JAVA_QUERYDSL)
-//                .addCodegenType(CodegenType.DB_DOC_MARKDOWN)
-//                .addCodegenType(CodegenType.DB_DOC_HTML)
+                .addCodegenType(CodegenType.DB_DOC_MARKDOWN)
+                .addCodegenType(CodegenType.DB_DOC_HTML)
                 .addCodegenType(CodegenType.DB_DOC_WORD)
                 .addSchema("public")
                 .addSchema("test")
                 .addSchema("__occupyPosition");
         CodegenUtils.genCode(jdbc, config);
         log.info("-->");
+        jdbc.close();
+    }
+
+    @Test
+    public void t04() {
+        Jdbc jdbc = BaseTest.newMysql();
+        Schema schema = MetaDataUtils.getSchema(jdbc);
+        log.info("--> {}", schema);
         jdbc.close();
     }
 }
