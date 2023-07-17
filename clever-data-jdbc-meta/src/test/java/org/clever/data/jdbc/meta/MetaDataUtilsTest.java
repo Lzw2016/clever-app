@@ -69,9 +69,9 @@ public class MetaDataUtilsTest {
 
     @Test
     public void t04() {
-        Jdbc jdbc = BaseTest.newPostgresql();
+        Jdbc jdbc = BaseTest.newOracle();
         Schema schema = MetaDataUtils.getSchema(jdbc);
-        log.info("--> {}", schema);
+        log.info("--> {}", schema.getTables().size());
         jdbc.close();
     }
 }

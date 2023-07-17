@@ -56,12 +56,12 @@ public class MySQLMetaData extends AbstractMetaData {
         sql.append("    information_schema.tables ");
         sql.append("where lower(table_type) in ('base table') ");
         addWhere(sql, params, schemasName, tablesName, ignoreSchemas, ignoreTables);
+        sql.append("order by table_schema, table_name");
         List<Map<String, Object>> tables = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : tables) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
             String comment = Conv.asString(map.get("comment"), null);
-            // 过滤
             if (ignoreTablesPrefix.stream().anyMatch(tableName::startsWith)) {
                 continue;
             }
@@ -139,8 +139,8 @@ public class MySQLMetaData extends AbstractMetaData {
         sql.append("where 1=1 ");
         addWhere(sql, params, schemasName, tablesName, ignoreSchemas, ignoreTables);
         sql.append("order by table_schema, table_name, index_name, seq_in_index, column_name");
-        List<Map<String, Object>> mapStatistics = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapStatistics) {
+        List<Map<String, Object>> statistics = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : statistics) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
             String columnName = Conv.asString(map.get("columnName")).toLowerCase();
@@ -203,8 +203,8 @@ public class MySQLMetaData extends AbstractMetaData {
             sql.append("and lower(routine_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
         sql.append("order by routine_schema, type, routine_name");
-        List<Map<String, Object>> mapRoutines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapRoutines) {
+        List<Map<String, Object>> routines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : routines) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String name = Conv.asString(map.get("name")).toLowerCase();
             String type = Conv.asString(map.get("type")).toLowerCase();

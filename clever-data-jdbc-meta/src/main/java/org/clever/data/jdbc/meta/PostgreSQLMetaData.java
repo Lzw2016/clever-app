@@ -55,8 +55,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
-        sql.append("    nps.nspname as schemaName, ");
-        sql.append("    cls.relname as tableName, ");
+        sql.append("    nps.nspname             as schemaName, ");
+        sql.append("    cls.relname             as tableName, ");
         sql.append("    description.description as comment ");
         sql.append("FROM ");
         sql.append("    pg_class cls ");
@@ -75,6 +75,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         if (!ignoreTables.isEmpty()) {
             sql.append("and lower(cls.relname) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
         }
+        sql.append("order by nps.nspname, cls.relname");
         List<Map<String, Object>> tables = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : tables) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
@@ -132,8 +133,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             sql.append("and lower(a.table_name) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
         }
         sql.append("order by a.table_schema, a.table_name, a.ordinal_position ");
-        List<Map<String, Object>> mapColumns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapColumns) {
+        List<Map<String, Object>> columns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : columns) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
             Schema schema = mapSchema.get(schemaName);
@@ -190,8 +191,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             sql.append("and lower(c.relname) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
         }
         sql.append("order by n.nspname, c.relname, a.attnum ");
-        mapColumns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapColumns) {
+        columns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : columns) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
             String columnName = Conv.asString(map.get("columnName")).toLowerCase();
@@ -267,8 +268,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             sql.append("and lower(t.relname) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
         }
         sql.append("order by schemaName, tableName, name, position");
-        List<Map<String, Object>> mapStatistics = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapStatistics) {
+        List<Map<String, Object>> statistics = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : statistics) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
             String name = Conv.asString(map.get("name")).toLowerCase();
@@ -346,8 +347,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             sql.append("and lower(routine_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
         sql.append("order by routine_schema, routine_type, routine_name ");
-        List<Map<String, Object>> mapRoutines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapRoutines) {
+        List<Map<String, Object>> routines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : routines) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String name = Conv.asString(map.get("name")).toLowerCase();
             String type = Conv.asString(map.get("type")).toLowerCase();
