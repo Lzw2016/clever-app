@@ -69,7 +69,7 @@ public class MetaDataUtilsTest {
 
     @Test
     public void t04() {
-        Jdbc jdbc = BaseTest.newMysql();
+        Jdbc jdbc = BaseTest.newPostgresql();
         Schema schema = MetaDataUtils.getSchema(jdbc);
         log.info("--> {}", schema);
         jdbc.close();

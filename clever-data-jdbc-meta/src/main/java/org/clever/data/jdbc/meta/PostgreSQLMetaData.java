@@ -51,9 +51,50 @@ public class PostgreSQLMetaData extends AbstractMetaData {
                                         Set<String> ignoreTablesSuffix) {
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
-        // 查询字段信息
+        // 查询表信息
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ");
+        sql.append("    nps.nspname as schemaName, ");
+        sql.append("    cls.relname as tableName, ");
+        sql.append("    description.description as comment ");
+        sql.append("FROM ");
+        sql.append("    pg_class cls ");
+        sql.append("    LEFT JOIN pg_namespace nps on nps.oid = cls.relnamespace ");
+        sql.append("    LEFT JOIN pg_description description ON cls.oid = description.objoid and description.objsubid = 0 ");
+        sql.append("WHERE cls.relkind in ('r', 'p') ");
+        if (!schemasName.isEmpty()) {
+            sql.append("and lower(nps.nspname) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        if (!tablesName.isEmpty()) {
+            sql.append("and lower(cls.relname) in (").append(createWhereIn(params, tablesName)).append(") ");
+        }
+        if (!ignoreSchemas.isEmpty()) {
+            sql.append("and lower(nps.nspname) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+        }
+        if (!ignoreTables.isEmpty()) {
+            sql.append("and lower(cls.relname) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
+        }
+        List<Map<String, Object>> tables = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : tables) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            String tableName = Conv.asString(map.get("tableName")).toLowerCase();
+            String comment = Conv.asString(map.get("comment"), null);
+            if (ignoreTablesPrefix.stream().anyMatch(tableName::startsWith)) {
+                continue;
+            }
+            if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
+                continue;
+            }
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, name));
+            Table table = new Table(schema);
+            table.setName(tableName);
+            table.setComment(comment);
+            schema.addTable(table);
+        }
+        // 查询字段信息
+        sql.setLength(0);
+        params.clear();
         sql.append("select ");
         sql.append("    a.table_schema                                            as schemaName, ");
         sql.append("    a.table_name                                              as tableName, ");
@@ -76,8 +117,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         sql.append("    a.datetime_precision, ");
         sql.append("    a.udt_schema, ");
         sql.append("    a.data_type ");
-        sql.append("from information_schema.columns a left join information_schema.views b on (a.table_catalog=b.table_catalog and a.table_schema=b.table_schema and a.table_name=b.table_name) ");
-        sql.append("where b.table_schema is null ");
+        sql.append("from information_schema.columns a ");
+        sql.append("where 1=1 ");
         if (!schemasName.isEmpty()) {
             sql.append("and lower(a.table_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
         }
@@ -95,18 +136,13 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         for (Map<String, Object> map : mapColumns) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String tableName = Conv.asString(map.get("tableName")).toLowerCase();
-            if (ignoreTablesPrefix.stream().anyMatch(tableName::startsWith)) {
+            Schema schema = mapSchema.get(schemaName);
+            if (schema == null) {
                 continue;
             }
-            if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
-                continue;
-            }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, name));
             Table table = schema.getTable(tableName);
             if (table == null) {
-                table = new Table(schema);
-                table.setName(tableName);
-                schema.addTable(table);
+                continue;
             }
             Column column = new Column(table);
             fillColumn(column, map);
@@ -173,45 +209,6 @@ public class PostgreSQLMetaData extends AbstractMetaData {
                 continue;
             }
             column.setComment(columnComment);
-        }
-        // 查询表信息
-        sql.setLength(0);
-        params.clear();
-        sql.append("SELECT ");
-        sql.append("    nps.nspname as schemaName, ");
-        sql.append("    cls.relname as tableName, ");
-        sql.append("    description.description as comment ");
-        sql.append("FROM ");
-        sql.append("    pg_class cls ");
-        sql.append("    LEFT JOIN pg_namespace nps on nps.oid = cls.relnamespace ");
-        sql.append("    LEFT JOIN pg_description description ON cls.oid = description.objoid and description.objsubid = 0 ");
-        sql.append("WHERE cls.relkind in ('r', 'p') ");
-        if (!schemasName.isEmpty()) {
-            sql.append("and lower(nps.nspname) in (").append(createWhereIn(params, schemasName)).append(") ");
-        }
-        if (!tablesName.isEmpty()) {
-            sql.append("and lower(cls.relname) in (").append(createWhereIn(params, tablesName)).append(") ");
-        }
-        if (!ignoreSchemas.isEmpty()) {
-            sql.append("and lower(nps.nspname) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
-        }
-        if (!ignoreTables.isEmpty()) {
-            sql.append("and lower(cls.relname) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
-        }
-        List<Map<String, Object>> mapTables = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : mapTables) {
-            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
-            String tableName = Conv.asString(map.get("tableName")).toLowerCase();
-            String comment = Conv.asString(map.get("comment"), null);
-            Schema schema = mapSchema.get(schemaName);
-            if (schema == null) {
-                continue;
-            }
-            Table table = schema.getTable(tableName);
-            if (table == null) {
-                continue;
-            }
-            table.setComment(comment);
         }
         // 查询主键&索引 ->
         sql.setLength(0);
