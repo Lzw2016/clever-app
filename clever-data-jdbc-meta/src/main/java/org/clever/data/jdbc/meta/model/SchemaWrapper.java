@@ -46,6 +46,16 @@ public class SchemaWrapper extends Schema {
     }
 
     @Override
+    public void addSequence(Sequence sequence) {
+        rawSchema.addSequence(sequence);
+    }
+
+    @Override
+    public Sequence getSequence(String sequenceName) {
+        return rawSchema.getSequence(sequenceName);
+    }
+
+    @Override
     public void addProcedure(Procedure procedure) {
         rawSchema.addProcedure(procedure);
     }
@@ -69,6 +79,11 @@ public class SchemaWrapper extends Schema {
             }
             return tablesSuffix.isEmpty() || tablesSuffix.stream().anyMatch(suffix -> StringUtils.endsWithIgnoreCase(tableName, suffix));
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Sequence> getSequences() {
+        return rawSchema.getSequences();
     }
 
     @Override

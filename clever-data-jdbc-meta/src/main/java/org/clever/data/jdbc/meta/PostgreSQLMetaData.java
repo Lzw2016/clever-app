@@ -42,6 +42,10 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         return StringUtils.lowerCase(jdbc.queryString("select current_schema()"));
     }
 
+    // --------------------------------------------------------------------------------------------
+    //  表结构元数据
+    // --------------------------------------------------------------------------------------------
+
     @Override
     protected List<Schema> doGetSchemas(Collection<String> schemasName,
                                         Collection<String> tablesName,
@@ -367,6 +371,51 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             procedure.getAttributes().putAll(map);
             schema.addProcedure(procedure);
         }
+        // 查询序列
+        sql.setLength(0);
+        params.clear();
+        sql.append("select ");
+        sql.append("    sequence_schema              as schemaName, ");
+        sql.append("    sequence_name                as name, ");
+        sql.append("    minimum_value                as minValue, ");
+        sql.append("    maximum_value                as maxValue, ");
+        sql.append("    increment                    as increment, ");
+        sql.append("    cycle_option                 as cycle, ");
+        sql.append("    sequence_catalog, ");
+        sql.append("    data_type, ");
+        sql.append("    numeric_precision, ");
+        sql.append("    numeric_precision_radix, ");
+        sql.append("    numeric_scale, ");
+        sql.append("    start_value ");
+        sql.append("from information_schema.sequences ");
+        sql.append("where 1=1 ");
+        if (!schemasName.isEmpty()) {
+            sql.append("and lower(sequence_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        if (!ignoreSchemas.isEmpty()) {
+            sql.append("and lower(sequence_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+        }
+        sql.append("order by sequence_catalog, sequence_schema, sequence_name ");
+        List<Map<String, Object>> sequences = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : sequences) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            String name = Conv.asString(map.get("name")).toLowerCase();
+            Long minValue = Conv.asLong(map.get("minValue"), null);
+            Long maxValue = Conv.asLong(map.get("maxValue"), null);
+            Long increment = Conv.asLong(map.get("increment"), null);
+            boolean cycle = Conv.asBoolean(map.get("cycle"));
+            Schema schema = mapSchema.get(schemaName);
+            if (schema == null) {
+                continue;
+            }
+            Sequence sequence = new Sequence(schema);
+            sequence.setName(name);
+            sequence.setMinValue(minValue);
+            sequence.setMaxValue(maxValue);
+            sequence.setIncrement(increment);
+            sequence.setCycle(cycle);
+            schema.addSequence(sequence);
+        }
         // 返回数据
         List<Schema> result = new ArrayList<>(mapSchema.values());
         sort(result);
@@ -387,5 +436,69 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         column.setOrdinalPosition(Conv.asInteger(map.get("ordinalPosition")));
         // is_identity | column_default LIKE 'nextval(%'
         column.setAutoIncremented(Conv.asBoolean(map.get("is_identity")) || Conv.asString(map.get("defaultValue")).toLowerCase().startsWith("nextval("));
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  表结构变更 DDL 语句
+    // --------------------------------------------------------------------------------------------
+
+    @Override
+    public String diffTable(Table newTable, Table oldTable) {
+        return null;
+    }
+
+    @Override
+    public String delTable(Table oldTable) {
+        return null;
+    }
+
+    @Override
+    public String addTable(Table newTable) {
+        return null;
+    }
+
+    @Override
+    public String diffColumn(Column newColumn, Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String delColumn(Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String addColumn(Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String delPrimaryKey(PrimaryKey oldPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String addPrimaryKey(PrimaryKey newPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String diffIndex(Index newIndex, Index oldIndex) {
+        return null;
+    }
+
+    @Override
+    public String delIndex(Index oldIndex) {
+        return null;
+    }
+
+    @Override
+    public String addIndex(Index newIndex) {
+        return null;
     }
 }

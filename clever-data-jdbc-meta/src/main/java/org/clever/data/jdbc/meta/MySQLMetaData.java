@@ -30,6 +30,10 @@ public class MySQLMetaData extends AbstractMetaData {
         return StringUtils.lowerCase(jdbc.queryString("select database() from dual"));
     }
 
+    // --------------------------------------------------------------------------------------------
+    //  表结构元数据
+    // --------------------------------------------------------------------------------------------
+
     @Override
     protected List<Schema> doGetSchemas(Collection<String> schemasName,
                                         Collection<String> tablesName,
@@ -290,5 +294,69 @@ public class MySQLMetaData extends AbstractMetaData {
         column.setWidth(Conv.asInteger(map.get("width")));
         column.setDefaultValue(Conv.asString(map.get("defaultValue"), null));
         column.setOrdinalPosition(Conv.asInteger(map.get("ordinalPosition")));
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  表结构变更 DDL 语句
+    // --------------------------------------------------------------------------------------------
+
+    @Override
+    public String diffTable(Table newTable, Table oldTable) {
+        return null;
+    }
+
+    @Override
+    public String delTable(Table oldTable) {
+        return null;
+    }
+
+    @Override
+    public String addTable(Table newTable) {
+        return null;
+    }
+
+    @Override
+    public String diffColumn(Column newColumn, Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String delColumn(Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String addColumn(Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String delPrimaryKey(PrimaryKey oldPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String addPrimaryKey(PrimaryKey newPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String diffIndex(Index newIndex, Index oldIndex) {
+        return null;
+    }
+
+    @Override
+    public String delIndex(Index oldIndex) {
+        return null;
+    }
+
+    @Override
+    public String addIndex(Index newIndex) {
+        return null;
     }
 }

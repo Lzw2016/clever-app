@@ -57,6 +57,10 @@ public class OracleMetaData extends AbstractMetaData {
         return StringUtils.lowerCase(jdbc.queryString("select sys_context('userenv', 'current_schema') from dual"));
     }
 
+    // --------------------------------------------------------------------------------------------
+    //  表结构元数据
+    // --------------------------------------------------------------------------------------------
+
     @Override
     protected List<Schema> doGetSchemas(Collection<String> schemasName,
                                         Collection<String> tablesName,
@@ -324,6 +328,48 @@ public class OracleMetaData extends AbstractMetaData {
         for (TupleTwo<StringBuilder, Procedure> tuple : routineMap.values()) {
             tuple.getValue2().setDefinition(tuple.getValue1().toString());
         }
+        // 查询序列
+        sql.setLength(0);
+        params.clear();
+        sql.append("select ");
+        sql.append("    sequence_owner          as \"schemaName\", ");
+        sql.append("    sequence_name           as \"name\", ");
+        sql.append("    min_value               as \"minValue\", ");
+        sql.append("    max_value               as \"maxValue\", ");
+        sql.append("    increment_by            as \"increment\", ");
+        sql.append("    cycle_flag              as \"cycle\", ");
+        sql.append("    order_flag, ");
+        sql.append("    cache_size, ");
+        sql.append("    last_number ");
+        sql.append("from sys.all_sequences ");
+        sql.append("where 1=1 ");
+        if (!schemasName.isEmpty()) {
+            sql.append("and lower(sequence_owner) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        if (!ignoreSchemas.isEmpty()) {
+            sql.append("and lower(sequence_owner) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+        }
+        sql.append("order by sequence_owner, sequence_name ");
+        List<Map<String, Object>> sequences = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : sequences) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            String name = Conv.asString(map.get("name")).toLowerCase();
+            Long minValue = Conv.asLong(map.get("minValue"), null);
+            Long maxValue = Conv.asLong(map.get("maxValue"), null);
+            Long increment = Conv.asLong(map.get("increment"), null);
+            boolean cycle = Conv.asBoolean(map.get("cycle"));
+            Schema schema = mapSchema.get(schemaName);
+            if (schema == null) {
+                continue;
+            }
+            Sequence sequence = new Sequence(schema);
+            sequence.setName(name);
+            sequence.setMinValue(minValue);
+            sequence.setMaxValue(maxValue);
+            sequence.setIncrement(increment);
+            sequence.setCycle(cycle);
+            schema.addSequence(sequence);
+        }
         // 返回数据
         List<Schema> result = new ArrayList<>(mapSchema.values());
         sort(result);
@@ -341,5 +387,69 @@ public class OracleMetaData extends AbstractMetaData {
         column.setDefaultValue(Conv.asString(map.get("defaultValue"), null));
         column.setOrdinalPosition(Conv.asInteger(map.get("ordinalPosition")));
         column.setAutoIncremented(false);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  表结构变更 DDL 语句
+    // --------------------------------------------------------------------------------------------
+
+    @Override
+    public String diffTable(Table newTable, Table oldTable) {
+        return null;
+    }
+
+    @Override
+    public String delTable(Table oldTable) {
+        return null;
+    }
+
+    @Override
+    public String addTable(Table newTable) {
+        return null;
+    }
+
+    @Override
+    public String diffColumn(Column newColumn, Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String delColumn(Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String addColumn(Column oldColumn) {
+        return null;
+    }
+
+    @Override
+    public String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String delPrimaryKey(PrimaryKey oldPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String addPrimaryKey(PrimaryKey newPrimaryKey) {
+        return null;
+    }
+
+    @Override
+    public String diffIndex(Index newIndex, Index oldIndex) {
+        return null;
+    }
+
+    @Override
+    public String delIndex(Index oldIndex) {
+        return null;
+    }
+
+    @Override
+    public String addIndex(Index newIndex) {
+        return null;
     }
 }

@@ -1,8 +1,7 @@
 package org.clever.data.jdbc.meta;
 
 import org.clever.data.jdbc.Jdbc;
-import org.clever.data.jdbc.meta.model.Schema;
-import org.clever.data.jdbc.meta.model.Table;
+import org.clever.data.jdbc.meta.model.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +22,10 @@ public interface DataBaseMetaData {
      * 获取数据库连接默认的Schema名
      */
     String currentSchema();
+
+    // --------------------------------------------------------------------------------------------
+    //  表结构元数据
+    // --------------------------------------------------------------------------------------------
 
     /**
      * 获取数据库元数据
@@ -52,15 +55,71 @@ public interface DataBaseMetaData {
      */
     Table getTable(String schemaName, String tableName);
 
-//String getDiffDDL
+    // --------------------------------------------------------------------------------------------
+    //  表结构变更 DDL 语句
+    // --------------------------------------------------------------------------------------------
 
-//表
-//字段
-//主键
-//索引(唯一索引)
-//序列
-//存储过程(函数)
-//
+    /***
+     * 修改“表”的 DDL 语句
+     */
+    String diffTable(Table newTable, Table oldTable);
+
+    /**
+     * 删除“表”的 DDL 语句
+     */
+    String delTable(Table oldTable);
+
+    /**
+     * 新增“表”的 DDL 语句
+     */
+    String addTable(Table newTable);
+
+    /***
+     * 修改“字段”的 DDL 语句
+     */
+    String diffColumn(Column newColumn, Column oldColumn);
+
+    /***
+     * 删除“字段”的 DDL 语句
+     */
+    String delColumn(Column oldColumn);
+
+    /***
+     * 新增“字段”的 DDL 语句
+     */
+    String addColumn(Column oldColumn);
+
+    /***
+     * 修改“主键”的 DDL 语句
+     */
+    String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey);
+
+    /***
+     * 删除“主键”的 DDL 语句
+     */
+    String delPrimaryKey(PrimaryKey oldPrimaryKey);
+
+    /***
+     * 新增“主键”的 DDL 语句
+     */
+    String addPrimaryKey(PrimaryKey newPrimaryKey);
+
+    /***
+     * 修改“索引”的 DDL 语句
+     */
+    String diffIndex(Index newIndex, Index oldIndex);
+
+    /***
+     * 删除“索引”的 DDL 语句
+     */
+    String delIndex(Index oldIndex);
+
+    /***
+     * 新增“索引”的 DDL 语句
+     */
+    String addIndex(Index newIndex);
+
+//String getDiffDDL
 //删除、创建、变更
 //
 //DropTableDDL
@@ -69,13 +128,7 @@ public interface DataBaseMetaData {
 //RenameTableDDL
 //ModifyIdxDDL
 //ModifyProcedureSQL
-//
-//getTableIndex
-//getProcedure
-//
 //executeModifyProcedureSQL
-//
 //executeDDL
-//
 //DataSync
 }

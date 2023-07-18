@@ -30,6 +30,10 @@ public class Schema extends AttributedObject {
      */
     private final List<Table> tables = new ArrayList<>();
     /**
+     * 序列信息
+     */
+    private final List<Sequence> sequences = new ArrayList<>();
+    /**
      * 存储过程&函数
      */
     private final List<Procedure> procedures = new ArrayList<>();
@@ -55,6 +59,20 @@ public class Schema extends AttributedObject {
         }
         return tables.stream()
                 .filter(table -> tableName.equalsIgnoreCase(table.getName()))
+                .findFirst().orElse(null);
+    }
+
+    public void addSequence(Sequence sequence) {
+        Assert.notNull(sequence, "参数 sequence 不能为空");
+        sequences.add(sequence);
+    }
+
+    public Sequence getSequence(String sequenceName) {
+        if (sequenceName == null) {
+            return null;
+        }
+        return sequences.stream()
+                .filter(sequence -> sequenceName.equalsIgnoreCase(sequence.getName()))
                 .findFirst().orElse(null);
     }
 
