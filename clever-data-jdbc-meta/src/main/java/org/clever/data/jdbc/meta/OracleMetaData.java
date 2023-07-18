@@ -402,7 +402,6 @@ public class OracleMetaData extends AbstractMetaData {
         // TODO 字段变化
         // TODO 主键变化
         // TODO 索引变化
-
         // 表名变化
         if (!Objects.equals(newTable.getName(), oldTable.getName())) {
             ddl.append("-- 修改表名称").append(LINE);
@@ -430,8 +429,7 @@ public class OracleMetaData extends AbstractMetaData {
     @Override
     public String addTable(Table newTable) {
         Assert.notNull(newTable, "参数 newTable 不能为空");
-
-        // create table "table_name"
+        // TODO create table "table_name"
         // (
         //         column_name number
         // );
@@ -516,37 +514,111 @@ public class OracleMetaData extends AbstractMetaData {
 
     @Override
     public String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
-        return null;
+        Assert.notNull(newPrimaryKey, "参数 newPrimaryKey 不能为空");
+        Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = oldPrimaryKey.getTableName();
+        // alter table sys_user2 drop primary key
+        ddl.append(String.format("alter table %s drop primary key;", toLiteral(tableName))).append(LINE);
+        // alter table sys_user2 add constraint "sys_user2_pk"  primary key (user_id, user_code)
+        ddl.append(String.format(
+                "alter table %s add constraint %s primary key (",
+                toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+        ));
+        for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
+            Column column = newPrimaryKey.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        return ddl.toString();
     }
 
     @Override
     public String delPrimaryKey(PrimaryKey oldPrimaryKey) {
-        return null;
+        Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
+        // alter table sys_user2 drop primary key
+        return String.format("alter table %s drop primary key;", toLiteral(oldPrimaryKey.getTableName())) + LINE;
     }
 
     @Override
     public String addPrimaryKey(PrimaryKey newPrimaryKey) {
-        return null;
+        Assert.notNull(newPrimaryKey, "参数 newPrimaryKey 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // alter table sys_user2 add constraint "sys_user2_pk"  primary key (user_id, user_code)
+        ddl.append(String.format(
+                "alter table %s add constraint %s primary key (",
+                toLiteral(newPrimaryKey.getTableName()), toLiteral(newPrimaryKey.getName())
+        ));
+        for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
+            Column column = newPrimaryKey.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        return ddl.toString();
     }
 
     @Override
     public String diffIndex(Index newIndex, Index oldIndex) {
-        return null;
+        Assert.notNull(newIndex, "参数 newIndex 不能为空");
+        Assert.notNull(oldIndex, "参数 oldIndex 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = oldIndex.getTableName();
+        // drop index "user_id_user_code_idx"
+        ddl.append(String.format("drop index %s;", toLiteral(oldIndex.getName()))).append(LINE);
+        // create unique index "user_id_user_code_idx" on sys_user2 (user_id, user_code)
+        ddl.append("create ");
+        if (newIndex.isUnique()) {
+            ddl.append("unique ");
+        }
+        ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(tableName)));
+        for (int i = 0; i < newIndex.getColumns().size(); i++) {
+            Column column = newIndex.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        return ddl.toString();
     }
 
     @Override
     public String delIndex(Index oldIndex) {
-        return null;
+        Assert.notNull(oldIndex, "参数 oldPrimaryKey 不能为空");
+        // drop index "user_id_user_code_idx"
+        return String.format("drop index %s;", toLiteral(oldIndex.getName())) + LINE;
     }
 
     @Override
     public String addIndex(Index newIndex) {
-        return null;
+        Assert.notNull(newIndex, "参数 newIndex 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // create unique index "user_id_user_code_idx" on sys_user2 (user_id, user_code)
+        ddl.append("create ");
+        if (newIndex.isUnique()) {
+            ddl.append("unique ");
+        }
+        ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(newIndex.getTableName())));
+        for (int i = 0; i < newIndex.getColumns().size(); i++) {
+            Column column = newIndex.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        return ddl.toString();
     }
 
     protected String toLiteral(String objName) {
         Assert.isNotBlank(objName, "参数 objName 不能为空");
-        return "\"" + StringUtils.trim(objName) + "\"";
+        return "\"" + StringUtils.trim(objName).toLowerCase() + "\"";
     }
 
     protected String toComment(String comment) {
