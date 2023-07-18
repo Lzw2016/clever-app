@@ -7,6 +7,7 @@ import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
+import org.clever.util.Assert;
 
 import java.util.*;
 
@@ -395,32 +396,122 @@ public class OracleMetaData extends AbstractMetaData {
 
     @Override
     public String diffTable(Table newTable, Table oldTable) {
-        return null;
+        Assert.notNull(newTable, "参数 newTable 不能为空");
+        Assert.notNull(oldTable, "参数 oldTable 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // TODO 字段变化
+        // TODO 主键变化
+        // TODO 索引变化
+
+        // 表名变化
+        if (!Objects.equals(newTable.getName(), oldTable.getName())) {
+            ddl.append("-- 修改表名称").append(LINE);
+            // rename sys_user to "sys_user1"
+            String tmp = String.format("rename %s to %s;", toLiteral(oldTable.getName()), toLiteral(newTable.getName()));
+            ddl.append(tmp).append(LINE);
+        }
+        // 修改表备注
+        if (!Objects.equals(newTable.getComment(), oldTable.getComment())) {
+            ddl.append("-- 修改表备注").append(LINE);
+            // comment on table "sys_user1" is '用户表''u'''
+            String tmp = String.format("comment on table %s is '%s';", toLiteral(newTable.getName()), toComment(newTable.getComment()));
+            ddl.append(tmp).append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String delTable(Table oldTable) {
-        return null;
+        Assert.notNull(oldTable, "参数 oldTable 不能为空");
+        return "-- 删除表" + LINE
+                + String.format("drop table %s;", toLiteral(oldTable.getName())) + LINE;
     }
 
     @Override
     public String addTable(Table newTable) {
+        Assert.notNull(newTable, "参数 newTable 不能为空");
+
+        // create table "table_name"
+        // (
+        //         column_name number
+        // );
+        //
+        // comment on table table_name is '1212';
         return null;
     }
 
     @Override
     public String diffColumn(Column newColumn, Column oldColumn) {
-        return null;
+        Assert.notNull(newColumn, "参数 newColumn 不能为空");
+        Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = oldColumn.getTableName();
+        // alter table sys_user2 rename column is_enable2 to is_enable3
+        if (!Objects.equals(newColumn.getName(), oldColumn.getName())) {
+            ddl.append(String.format(
+                    "alter table %s rename column %s to %s;",
+                    toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())
+            )).append(LINE);
+        }
+        // comment on column sys_user.is_enable_1 is '是否启用: 0:禁用，1:启用_1'
+        if (!Objects.equals(newColumn.getComment(), oldColumn.getComment())) {
+            ddl.append(String.format(
+                    "comment on column %s.%s is '%s';",
+                    toLiteral(tableName), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+            )).append(LINE);
+        }
+        // alter table sys_user modify is_enable_1 number(16) default 16 not null
+        if (!Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
+                || !Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())
+                || !Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())
+                || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
+                || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
+                || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
+            ddl.append(String.format(
+                    "alter table %s modify %s %s",
+                    toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)
+            ));
+            if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
+                ddl.append(" default ").append(StringUtils.trim(newColumn.getDefaultValue()));
+            }
+            if (newColumn.isNotNull()) {
+                ddl.append(" not null");
+            }
+            ddl.append(";").append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String delColumn(Column oldColumn) {
-        return null;
+        Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
+        return String.format("alter table %s drop column %s;", toLiteral(oldColumn.getTableName()), toLiteral(oldColumn.getName())) + LINE;
     }
 
     @Override
-    public String addColumn(Column oldColumn) {
-        return null;
+    public String addColumn(Column newColumn) {
+        Assert.notNull(newColumn, "参数 newColumn 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // alter table sys_user add column_name varchar2(100) default 'aaa' not null
+        ddl.append(String.format(
+                "alter table %s add %s %s",
+                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
+        ));
+        if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
+            ddl.append(" default ").append(StringUtils.trim(newColumn.getDefaultValue()));
+        }
+        if (newColumn.isNotNull()) {
+            ddl.append(" not null");
+        }
+        ddl.append(";").append(LINE);
+        // comment on column sys_user.column_name is '测试'
+        if (StringUtils.isNotBlank(newColumn.getComment())) {
+            ddl.append(String.format(
+                    "comment on column %s.%s is '%s';",
+                    toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+            )).append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
@@ -451,5 +542,42 @@ public class OracleMetaData extends AbstractMetaData {
     @Override
     public String addIndex(Index newIndex) {
         return null;
+    }
+
+    protected String toLiteral(String objName) {
+        Assert.isNotBlank(objName, "参数 objName 不能为空");
+        return "\"" + StringUtils.trim(objName) + "\"";
+    }
+
+    protected String toComment(String comment) {
+        comment = StringUtils.trimToEmpty(comment);
+        return StringUtils.replace(comment, "'", "''");
+    }
+
+    protected String columnType(Column column) {
+        Assert.notNull(column, "参数 column 不能为空");
+        String dataType = StringUtils.lowerCase(column.getDataType());
+        // timestamp(6) with local time zone | varchar2(64) | number(10, 4)
+        StringBuilder type = new StringBuilder();
+        if (dataType.contains("time") || dataType.contains("date")) {
+            type.append(dataType);
+        } else if (dataType.contains("char") || column.getSize() <= 0) {
+            type.append(dataType);
+            if (column.getWidth() > 0) {
+                type.append("(").append(column.getWidth()).append(")");
+            } else if (column.getSize() > 0) {
+                type.append("(").append(column.getSize()).append(")");
+            }
+        } else {
+            type.append(dataType);
+            if (column.getSize() > 0) {
+                type.append("(").append(column.getSize());
+                if (column.getDecimalDigits() > 0) {
+                    type.append(", ").append(column.getDecimalDigits());
+                }
+                type.append(")");
+            }
+        }
+        return type.toString();
     }
 }

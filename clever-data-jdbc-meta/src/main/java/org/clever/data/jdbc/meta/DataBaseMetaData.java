@@ -13,6 +13,8 @@ import java.util.List;
  * 创建时间：2023/04/27 19:56 <br/>
  */
 public interface DataBaseMetaData {
+    String LINE = "\n";
+
     /**
      * 当前的Jdbc对象
      */
@@ -87,7 +89,7 @@ public interface DataBaseMetaData {
     /***
      * 新增“字段”的 DDL 语句
      */
-    String addColumn(Column oldColumn);
+    String addColumn(Column newColumn);
 
     /***
      * 修改“主键”的 DDL 语句

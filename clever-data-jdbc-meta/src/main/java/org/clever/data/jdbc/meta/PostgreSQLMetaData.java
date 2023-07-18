@@ -468,7 +468,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String addColumn(Column oldColumn) {
+    public String addColumn(Column newColumn) {
         return null;
     }
 

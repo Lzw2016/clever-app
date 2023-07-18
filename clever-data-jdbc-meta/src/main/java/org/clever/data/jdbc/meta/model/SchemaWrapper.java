@@ -1,6 +1,9 @@
 package org.clever.data.jdbc.meta.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -11,8 +14,11 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2023/07/10 17:02 <br/>
  */
+@ToString(exclude = {"rawSchema"})
+@EqualsAndHashCode(callSuper = true)
 @Getter
 public class SchemaWrapper extends Schema {
+    @JsonIgnore
     private final Schema rawSchema;
     /**
      * 指定表前缀(忽略大小写过滤)

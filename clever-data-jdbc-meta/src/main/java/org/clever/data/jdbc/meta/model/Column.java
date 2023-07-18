@@ -1,5 +1,6 @@
 package org.clever.data.jdbc.meta.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -18,6 +19,7 @@ public class Column extends AttributedObject {
     /**
      * 数据表
      */
+    @JsonIgnore
     private final Table table;
     /**
      * 字段名

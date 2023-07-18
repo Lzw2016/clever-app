@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.meta;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.mapper.JacksonMapper;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
 import org.clever.data.jdbc.meta.codegen.CodegenType;
@@ -72,6 +73,14 @@ public class MetaDataUtilsTest {
         Jdbc jdbc = BaseTest.newPostgresql();
         Schema schema = MetaDataUtils.getSchema(jdbc);
         log.info("--> {}", schema.getTables().size());
+        jdbc.close();
+    }
+
+    @Test
+    public void t05() {
+        Jdbc jdbc = BaseTest.newOracle();
+        Table table = MetaDataUtils.getTable(jdbc, "wms8dev", "sys_user2");
+        log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
         jdbc.close();
     }
 }

@@ -326,7 +326,7 @@ public class MySQLMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String addColumn(Column oldColumn) {
+    public String addColumn(Column newColumn) {
         return null;
     }
 
