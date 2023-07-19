@@ -399,22 +399,55 @@ public class OracleMetaData extends AbstractMetaData {
         Assert.notNull(newTable, "参数 newTable 不能为空");
         Assert.notNull(oldTable, "参数 oldTable 不能为空");
         final StringBuilder ddl = new StringBuilder();
-        // TODO 字段变化
-        // TODO 主键变化
-        // TODO 索引变化
         // 表名变化
         if (!Objects.equals(newTable.getName(), oldTable.getName())) {
-            ddl.append("-- 修改表名称").append(LINE);
             // rename sys_user to "sys_user1"
-            String tmp = String.format("rename %s to %s;", toLiteral(oldTable.getName()), toLiteral(newTable.getName()));
-            ddl.append(tmp).append(LINE);
+            ddl.append(String.format(
+                    "rename %s to %s;",
+                    toLiteral(oldTable.getName()), toLiteral(newTable.getName())
+            )).append(LINE);
         }
         // 修改表备注
         if (!Objects.equals(newTable.getComment(), oldTable.getComment())) {
-            ddl.append("-- 修改表备注").append(LINE);
             // comment on table "sys_user1" is '用户表''u'''
-            String tmp = String.format("comment on table %s is '%s';", toLiteral(newTable.getName()), toComment(newTable.getComment()));
-            ddl.append(tmp).append(LINE);
+            ddl.append(String.format(
+                    "comment on table %s is '%s';",
+                    toLiteral(newTable.getName()), toComment(newTable.getComment())
+            )).append(LINE);
+        }
+        // 字段变化
+        final List<Column> newColumns = getNewColumns(newTable, oldTable);
+        final List<Column> delColumns = getDelColumns(newTable, oldTable);
+        final List<TupleTwo<Column, Column>> diffColumns = getDiffColumns(newTable, oldTable);
+        for (Column column : newColumns) {
+            ddl.append(createColumn(column));
+        }
+        for (Column column : delColumns) {
+            ddl.append(dropColumn(column));
+        }
+        for (TupleTwo<Column, Column> tuple : diffColumns) {
+            Column newColumn = tuple.getValue1();
+            Column oldColumn = tuple.getValue2();
+            ddl.append(alterColumn(newColumn, oldColumn));
+        }
+        // 主键变化
+        if (isPrimaryKeyChange(newTable.getPrimaryKey(), oldTable.getPrimaryKey())) {
+            ddl.append(alterPrimaryKey(newTable.getPrimaryKey(), oldTable.getPrimaryKey()));
+        }
+        // 索引变化
+        final List<Index> newIndices = getNewIndices(newTable, oldTable);
+        final List<Index> delIndices = getDelIndices(newTable, oldTable);
+        final List<TupleTwo<Index, Index>> diffIndices = getDiffIndices(newTable, oldTable);
+        for (Index index : newIndices) {
+            ddl.append(createIndex(index));
+        }
+        for (Index index : delIndices) {
+            ddl.append(dropIndex(index));
+        }
+        for (TupleTwo<Index, Index> tuple : diffIndices) {
+            Index newIndex = tuple.getValue1();
+            Index oldIndex = tuple.getValue2();
+            ddl.append(alterIndex(newIndex, oldIndex));
         }
         return ddl.toString();
     }
@@ -422,8 +455,7 @@ public class OracleMetaData extends AbstractMetaData {
     @Override
     public String dropTable(Table oldTable) {
         Assert.notNull(oldTable, "参数 oldTable 不能为空");
-        return "-- 删除表" + LINE
-                + String.format("drop table %s;", toLiteral(oldTable.getName())) + LINE;
+        return String.format("drop table %s;", toLiteral(oldTable.getName())) + LINE;
     }
 
     @Override
@@ -508,7 +540,7 @@ public class OracleMetaData extends AbstractMetaData {
         Assert.notNull(newColumn, "参数 newColumn 不能为空");
         Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
         final StringBuilder ddl = new StringBuilder();
-        final String tableName = oldColumn.getTableName();
+        final String tableName = newColumn.getTableName();
         // alter table sys_user2 rename column is_enable2 to is_enable3
         if (!Objects.equals(newColumn.getName(), oldColumn.getName())) {
             ddl.append(String.format(
@@ -581,25 +613,30 @@ public class OracleMetaData extends AbstractMetaData {
 
     @Override
     public String alterPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
-        Assert.notNull(newPrimaryKey, "参数 newPrimaryKey 不能为空");
-        Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
-        final StringBuilder ddl = new StringBuilder();
-        final String tableName = oldPrimaryKey.getTableName();
-        // alter table sys_user2 drop primary key
-        ddl.append(String.format("alter table %s drop primary key;", toLiteral(tableName))).append(LINE);
-        // alter table sys_user2 add constraint "sys_user2_pk"  primary key (user_id, user_code)
-        ddl.append(String.format(
-                "alter table %s add constraint %s primary key (",
-                toLiteral(tableName), toLiteral(newPrimaryKey.getName())
-        ));
-        for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
-            Column column = newPrimaryKey.getColumns().get(i);
-            if (i > 0) {
-                ddl.append(", ");
-            }
-            ddl.append(toLiteral(column.getName()));
+        if (oldPrimaryKey == null && newPrimaryKey == null) {
+            return StringUtils.EMPTY;
         }
-        ddl.append(");").append(LINE);
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newPrimaryKey != null ? newPrimaryKey.getTableName() : oldPrimaryKey.getTableName();
+        if (oldPrimaryKey != null) {
+            // alter table sys_user2 drop primary key
+            ddl.append(String.format("alter table %s drop primary key;", toLiteral(tableName))).append(LINE);
+        }
+        if (newPrimaryKey != null) {
+            // alter table sys_user2 add constraint "sys_user2_pk"  primary key (user_id, user_code)
+            ddl.append(String.format(
+                    "alter table %s add constraint %s primary key (",
+                    toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+            ));
+            for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
+                Column column = newPrimaryKey.getColumns().get(i);
+                if (i > 0) {
+                    ddl.append(", ");
+                }
+                ddl.append(toLiteral(column.getName()));
+            }
+            ddl.append(");").append(LINE);
+        }
         return ddl.toString();
     }
 
@@ -632,26 +669,31 @@ public class OracleMetaData extends AbstractMetaData {
 
     @Override
     public String alterIndex(Index newIndex, Index oldIndex) {
-        Assert.notNull(newIndex, "参数 newIndex 不能为空");
-        Assert.notNull(oldIndex, "参数 oldIndex 不能为空");
+        if (newIndex == null && oldIndex == null) {
+            return StringUtils.EMPTY;
+        }
         final StringBuilder ddl = new StringBuilder();
-        final String tableName = oldIndex.getTableName();
-        // drop index "user_id_user_code_idx"
-        ddl.append(String.format("drop index %s;", toLiteral(oldIndex.getName()))).append(LINE);
-        // create unique index "user_id_user_code_idx" on sys_user2 (user_id, user_code)
-        ddl.append("create ");
-        if (newIndex.isUnique()) {
-            ddl.append("unique ");
+        final String tableName = newIndex != null ? newIndex.getTableName() : oldIndex.getTableName();
+        if (oldIndex != null) {
+            // drop index "user_id_user_code_idx"
+            ddl.append(String.format("drop index %s;", toLiteral(oldIndex.getName()))).append(LINE);
         }
-        ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(tableName)));
-        for (int i = 0; i < newIndex.getColumns().size(); i++) {
-            Column column = newIndex.getColumns().get(i);
-            if (i > 0) {
-                ddl.append(", ");
+        if (newIndex != null) {
+            // create unique index "user_id_user_code_idx" on sys_user2 (user_id, user_code)
+            ddl.append("create ");
+            if (newIndex.isUnique()) {
+                ddl.append("unique ");
             }
-            ddl.append(toLiteral(column.getName()));
+            ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(tableName)));
+            for (int i = 0; i < newIndex.getColumns().size(); i++) {
+                Column column = newIndex.getColumns().get(i);
+                if (i > 0) {
+                    ddl.append(", ");
+                }
+                ddl.append(toLiteral(column.getName()));
+            }
+            ddl.append(");").append(LINE);
         }
-        ddl.append(");").append(LINE);
         return ddl.toString();
     }
 

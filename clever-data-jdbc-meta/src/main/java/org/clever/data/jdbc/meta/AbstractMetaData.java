@@ -2,11 +2,10 @@ package org.clever.data.jdbc.meta;
 
 import org.apache.commons.lang3.StringUtils;
 import org.clever.beans.BeanUtils;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
-import org.clever.data.jdbc.meta.model.Column;
-import org.clever.data.jdbc.meta.model.Schema;
-import org.clever.data.jdbc.meta.model.Table;
+import org.clever.data.jdbc.meta.model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,6 +14,7 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2023/04/28 10:15 <br/>
  */
+@SuppressWarnings("DuplicatedCode")
 public abstract class AbstractMetaData implements DataBaseMetaData {
     protected final Jdbc jdbc;
 
@@ -197,6 +197,139 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
                 columns.sort(Comparator.comparing(Column::getOrdinalPosition));
             }
         }
+    }
+
+    /**
+     * 获取需要新增的字段
+     */
+    protected List<Column> getNewColumns(Table newTable, Table oldTable) {
+        final List<Column> newColumns = new ArrayList<>();
+        for (Column newColumn : newTable.getColumns()) {
+            if (oldTable.getColumn(newColumn.getName()) == null) {
+                newColumns.add(newColumn);
+            }
+        }
+        return newColumns;
+    }
+
+    /**
+     * 获取需要删除的字段
+     */
+    protected List<Column> getDelColumns(Table newTable, Table oldTable) {
+        final List<Column> delColumns = new ArrayList<>();
+        for (Column oldColumn : oldTable.getColumns()) {
+            if (newTable.getColumn(oldColumn.getName()) == null) {
+                delColumns.add(oldColumn);
+            }
+        }
+        return delColumns;
+    }
+
+    /**
+     * 获取需要变化的字段
+     *
+     * @return {@code List<TupleTwo<newColumn, oldColumn>>}
+     */
+    protected List<TupleTwo<Column, Column>> getDiffColumns(Table newTable, Table oldTable) {
+        final List<TupleTwo<Column, Column>> diffColumns = new ArrayList<>();
+        for (Column newColumn : newTable.getColumns()) {
+            Column oldColumn = oldTable.getColumn(newColumn.getName());
+            if (oldColumn == null) {
+                continue;
+            }
+            // 对比两个字段有无变化
+            if (Objects.equals(newColumn.getName(), oldColumn.getName())
+                    && Objects.equals(newColumn.getComment(), oldColumn.getComment())
+                    && Objects.equals(newColumn.isAutoIncremented(), oldColumn.isAutoIncremented())
+                    && Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())
+                    && Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
+                    && Objects.equals(newColumn.getSize(), oldColumn.getSize())
+                    && Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
+                    && Objects.equals(newColumn.getWidth(), oldColumn.getWidth())
+                    && Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
+                continue;
+            }
+            diffColumns.add(TupleTwo.creat(newColumn, oldColumn));
+        }
+        return diffColumns;
+    }
+
+    /**
+     * 主键是否变化
+     */
+    protected boolean isPrimaryKeyChange(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
+        if (oldPrimaryKey == null && newPrimaryKey == null) {
+            return false;
+        }
+        if (oldPrimaryKey == null || newPrimaryKey == null) {
+            return true;
+        }
+        if (!Objects.equals(newPrimaryKey.getName(), oldPrimaryKey.getName())) {
+            return true;
+        }
+        List<String> newNames = newPrimaryKey.getColumns().stream()
+                .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
+                .collect(Collectors.toList());
+        List<String> oldNames = oldPrimaryKey.getColumns().stream()
+                .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
+                .collect(Collectors.toList());
+        return !Objects.equals(StringUtils.join(newNames), StringUtils.join(oldNames));
+    }
+
+    /**
+     * 获取需要新增的索引
+     */
+    protected List<Index> getNewIndices(Table newTable, Table oldTable) {
+        final List<Index> newIndices = new ArrayList<>();
+        for (Index newIndex : newTable.getIndices()) {
+            if (oldTable.getIndex(newIndex.getName()) == null) {
+                newIndices.add(newIndex);
+            }
+        }
+        return newIndices;
+    }
+
+    /**
+     * 获取需要删除的索引
+     */
+    protected List<Index> getDelIndices(Table newTable, Table oldTable) {
+        final List<Index> delIndices = new ArrayList<>();
+        for (Index delIndex : oldTable.getIndices()) {
+            if (newTable.getIndex(delIndex.getName()) == null) {
+                delIndices.add(delIndex);
+            }
+        }
+        return delIndices;
+    }
+
+    /**
+     * 获取需要变化的字段
+     *
+     * @return {@code List<TupleTwo<newIndex, oldIndex>>}
+     */
+    protected List<TupleTwo<Index, Index>> getDiffIndices(Table newTable, Table oldTable) {
+        final List<TupleTwo<Index, Index>> diffIndices = new ArrayList<>();
+        for (Index newIndex : newTable.getIndices()) {
+            Index oldIndex = oldTable.getIndex(newIndex.getName());
+            if (oldIndex == null) {
+                continue;
+            }
+            // 对比两个索引有无变化
+            boolean change = !Objects.equals(newIndex.getName(), oldIndex.getName()) || !Objects.equals(newIndex.isUnique(), oldIndex.isUnique());
+            if (!change) {
+                List<String> newNames = newIndex.getColumns().stream()
+                        .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
+                        .collect(Collectors.toList());
+                List<String> oldNames = oldIndex.getColumns().stream()
+                        .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
+                        .collect(Collectors.toList());
+                change = !Objects.equals(StringUtils.join(newNames), StringUtils.join(oldNames));
+            }
+            if (change) {
+                diffIndices.add(TupleTwo.creat(newIndex, oldIndex));
+            }
+        }
+        return diffIndices;
     }
 
     /**
