@@ -301,62 +301,62 @@ public class MySQLMetaData extends AbstractMetaData {
     // --------------------------------------------------------------------------------------------
 
     @Override
-    public String diffTable(Table newTable, Table oldTable) {
+    public String alterTable(Table newTable, Table oldTable) {
         return null;
     }
 
     @Override
-    public String delTable(Table oldTable) {
+    public String dropTable(Table oldTable) {
         return null;
     }
 
     @Override
-    public String addTable(Table newTable) {
+    public String createTable(Table newTable) {
         return null;
     }
 
     @Override
-    public String diffColumn(Column newColumn, Column oldColumn) {
+    public String alterColumn(Column newColumn, Column oldColumn) {
         return null;
     }
 
     @Override
-    public String delColumn(Column oldColumn) {
+    public String dropColumn(Column oldColumn) {
         return null;
     }
 
     @Override
-    public String addColumn(Column newColumn) {
+    public String createColumn(Column newColumn) {
         return null;
     }
 
     @Override
-    public String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
+    public String alterPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
         return null;
     }
 
     @Override
-    public String delPrimaryKey(PrimaryKey oldPrimaryKey) {
+    public String dropPrimaryKey(PrimaryKey oldPrimaryKey) {
         return null;
     }
 
     @Override
-    public String addPrimaryKey(PrimaryKey newPrimaryKey) {
+    public String createPrimaryKey(PrimaryKey newPrimaryKey) {
         return null;
     }
 
     @Override
-    public String diffIndex(Index newIndex, Index oldIndex) {
+    public String alterIndex(Index newIndex, Index oldIndex) {
         return null;
     }
 
     @Override
-    public String delIndex(Index oldIndex) {
+    public String dropIndex(Index oldIndex) {
         return null;
     }
 
     @Override
-    public String addIndex(Index newIndex) {
+    public String createIndex(Index newIndex) {
         return null;
     }
 }

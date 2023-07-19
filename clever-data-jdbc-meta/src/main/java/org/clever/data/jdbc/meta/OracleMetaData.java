@@ -395,7 +395,7 @@ public class OracleMetaData extends AbstractMetaData {
     // --------------------------------------------------------------------------------------------
 
     @Override
-    public String diffTable(Table newTable, Table oldTable) {
+    public String alterTable(Table newTable, Table oldTable) {
         Assert.notNull(newTable, "参数 newTable 不能为空");
         Assert.notNull(oldTable, "参数 oldTable 不能为空");
         final StringBuilder ddl = new StringBuilder();
@@ -420,26 +420,91 @@ public class OracleMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String delTable(Table oldTable) {
+    public String dropTable(Table oldTable) {
         Assert.notNull(oldTable, "参数 oldTable 不能为空");
         return "-- 删除表" + LINE
                 + String.format("drop table %s;", toLiteral(oldTable.getName())) + LINE;
     }
 
     @Override
-    public String addTable(Table newTable) {
+    public String createTable(Table newTable) {
         Assert.notNull(newTable, "参数 newTable 不能为空");
-        // TODO create table "table_name"
+        // create table "table_name"
         // (
-        //         column_name number
+        //     user_id    number(19)                                        not null,
+        //     update_at  timestamp(6) with local time zone default sysdate not null,
+        //     primary key (user_id, user_code)
+        //     constraint "sys_user2_pk" primary key (user_id, user_code)
         // );
-        //
-        // comment on table table_name is '1212';
-        return null;
+        // comment on table table_name is 'AAA';
+        // comment on column table_name.user_id is '用户id';
+        final StringBuilder ddl = new StringBuilder();
+        final PrimaryKey primaryKey = newTable.getPrimaryKey();
+        final List<Column> columns = newTable.getColumns();
+        final List<Index> indices = newTable.getIndices();
+        ddl.append("create table ").append(toLiteral(newTable.getName())).append(LINE);
+        ddl.append("(").append(LINE);
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            ddl.append(TAB).append(String.format("%s %s", toLiteral(column.getName()), columnType(column)));
+            if (StringUtils.isNotBlank(column.getDefaultValue())) {
+                ddl.append(" default ").append(StringUtils.trim(column.getDefaultValue()));
+            }
+            if (column.isNotNull()) {
+                ddl.append(" not null");
+            }
+            if ((i + 1) < columns.size()) {
+                ddl.append(",").append(LINE);
+            } else if (newTable.getPrimaryKey() != null) {
+                // 最后一个字段 & 存在主键
+                ddl.append(",").append(LINE);
+                ddl.append(TAB);
+                if (StringUtils.isNotBlank(primaryKey.getName())) {
+                    ddl.append(String.format("constraint %s ", toLiteral(primaryKey.getName())));
+                }
+                ddl.append("primary key (");
+                for (int j = 0; j < primaryKey.getColumns().size(); j++) {
+                    Column pCol = primaryKey.getColumns().get(j);
+                    if (j > 0) {
+                        ddl.append(", ");
+                    }
+                    ddl.append(toLiteral(pCol.getName()));
+                }
+                ddl.append(")").append(LINE);
+            } else {
+                ddl.append(LINE);
+            }
+        }
+        ddl.append(");").append(LINE);
+        // 表备注
+        if (StringUtils.isNotBlank(newTable.getComment())) {
+            ddl.append(String.format(
+                    "comment on table %s is '%s';",
+                    toLiteral(newTable.getName()), toComment(newTable.getComment()))
+            ).append(LINE);
+        }
+        // 字段备注
+        for (Column column : columns) {
+            if (StringUtils.isBlank(column.getComment())) {
+                continue;
+            }
+            ddl.append(String.format(
+                    "comment on column %s.%s is '%s';",
+                    toLiteral(newTable.getName()), toLiteral(column.getName()), toComment(column.getComment()))
+            ).append(LINE);
+        }
+        // 索引
+        for (Index index : indices) {
+            if (primaryKey != null && Objects.equals(primaryKey.getName(), index.getName())) {
+                continue;
+            }
+            ddl.append(createIndex(index));
+        }
+        return ddl.toString();
     }
 
     @Override
-    public String diffColumn(Column newColumn, Column oldColumn) {
+    public String alterColumn(Column newColumn, Column oldColumn) {
         Assert.notNull(newColumn, "参数 newColumn 不能为空");
         Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
         final StringBuilder ddl = new StringBuilder();
@@ -474,6 +539,8 @@ public class OracleMetaData extends AbstractMetaData {
             }
             if (newColumn.isNotNull()) {
                 ddl.append(" not null");
+            } else {
+                ddl.append(" null");
             }
             ddl.append(";").append(LINE);
         }
@@ -481,13 +548,13 @@ public class OracleMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String delColumn(Column oldColumn) {
+    public String dropColumn(Column oldColumn) {
         Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
         return String.format("alter table %s drop column %s;", toLiteral(oldColumn.getTableName()), toLiteral(oldColumn.getName())) + LINE;
     }
 
     @Override
-    public String addColumn(Column newColumn) {
+    public String createColumn(Column newColumn) {
         Assert.notNull(newColumn, "参数 newColumn 不能为空");
         final StringBuilder ddl = new StringBuilder();
         // alter table sys_user add column_name varchar2(100) default 'aaa' not null
@@ -513,7 +580,7 @@ public class OracleMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
+    public String alterPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
         Assert.notNull(newPrimaryKey, "参数 newPrimaryKey 不能为空");
         Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
         final StringBuilder ddl = new StringBuilder();
@@ -537,14 +604,14 @@ public class OracleMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String delPrimaryKey(PrimaryKey oldPrimaryKey) {
+    public String dropPrimaryKey(PrimaryKey oldPrimaryKey) {
         Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
         // alter table sys_user2 drop primary key
         return String.format("alter table %s drop primary key;", toLiteral(oldPrimaryKey.getTableName())) + LINE;
     }
 
     @Override
-    public String addPrimaryKey(PrimaryKey newPrimaryKey) {
+    public String createPrimaryKey(PrimaryKey newPrimaryKey) {
         Assert.notNull(newPrimaryKey, "参数 newPrimaryKey 不能为空");
         final StringBuilder ddl = new StringBuilder();
         // alter table sys_user2 add constraint "sys_user2_pk"  primary key (user_id, user_code)
@@ -564,7 +631,7 @@ public class OracleMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String diffIndex(Index newIndex, Index oldIndex) {
+    public String alterIndex(Index newIndex, Index oldIndex) {
         Assert.notNull(newIndex, "参数 newIndex 不能为空");
         Assert.notNull(oldIndex, "参数 oldIndex 不能为空");
         final StringBuilder ddl = new StringBuilder();
@@ -589,14 +656,14 @@ public class OracleMetaData extends AbstractMetaData {
     }
 
     @Override
-    public String delIndex(Index oldIndex) {
+    public String dropIndex(Index oldIndex) {
         Assert.notNull(oldIndex, "参数 oldPrimaryKey 不能为空");
         // drop index "user_id_user_code_idx"
         return String.format("drop index %s;", toLiteral(oldIndex.getName())) + LINE;
     }
 
     @Override
-    public String addIndex(Index newIndex) {
+    public String createIndex(Index newIndex) {
         Assert.notNull(newIndex, "参数 newIndex 不能为空");
         final StringBuilder ddl = new StringBuilder();
         // create unique index "user_id_user_code_idx" on sys_user2 (user_id, user_code)
@@ -618,7 +685,12 @@ public class OracleMetaData extends AbstractMetaData {
 
     protected String toLiteral(String objName) {
         Assert.isNotBlank(objName, "参数 objName 不能为空");
-        return "\"" + StringUtils.trim(objName).toLowerCase() + "\"";
+        final String special = "@#$%^&*+-/|<>=?![]{};,`. ";
+        objName = StringUtils.trim(objName).toLowerCase();
+        if (StringUtils.containsAny(objName, special)) {
+            return "\"" + objName + "\"";
+        }
+        return objName;
     }
 
     protected String toComment(String comment) {
@@ -628,6 +700,7 @@ public class OracleMetaData extends AbstractMetaData {
 
     protected String columnType(Column column) {
         Assert.notNull(column, "参数 column 不能为空");
+        // TODO 不同数据库需要做类型映射
         String dataType = StringUtils.lowerCase(column.getDataType());
         // timestamp(6) with local time zone | varchar2(64) | number(10, 4)
         StringBuilder type = new StringBuilder();

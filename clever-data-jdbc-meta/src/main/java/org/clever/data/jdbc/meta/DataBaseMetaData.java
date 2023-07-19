@@ -14,6 +14,7 @@ import java.util.List;
  */
 public interface DataBaseMetaData {
     String LINE = "\n";
+    String TAB = "    ";
 
     /**
      * 当前的Jdbc对象
@@ -64,73 +65,64 @@ public interface DataBaseMetaData {
     /***
      * 修改“表”的 DDL 语句
      */
-    String diffTable(Table newTable, Table oldTable);
+    String alterTable(Table newTable, Table oldTable);
 
     /**
      * 删除“表”的 DDL 语句
      */
-    String delTable(Table oldTable);
+    String dropTable(Table oldTable);
 
     /**
      * 新增“表”的 DDL 语句
      */
-    String addTable(Table newTable);
+    String createTable(Table newTable);
 
     /***
      * 修改“字段”的 DDL 语句
      */
-    String diffColumn(Column newColumn, Column oldColumn);
+    String alterColumn(Column newColumn, Column oldColumn);
 
     /***
      * 删除“字段”的 DDL 语句
      */
-    String delColumn(Column oldColumn);
+    String dropColumn(Column oldColumn);
 
     /***
      * 新增“字段”的 DDL 语句
      */
-    String addColumn(Column newColumn);
+    String createColumn(Column newColumn);
 
     /***
      * 修改“主键”的 DDL 语句
      */
-    String diffPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey);
+    String alterPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey);
 
     /***
      * 删除“主键”的 DDL 语句
      */
-    String delPrimaryKey(PrimaryKey oldPrimaryKey);
+    String dropPrimaryKey(PrimaryKey oldPrimaryKey);
 
     /***
      * 新增“主键”的 DDL 语句
      */
-    String addPrimaryKey(PrimaryKey newPrimaryKey);
+    String createPrimaryKey(PrimaryKey newPrimaryKey);
 
     /***
      * 修改“索引”的 DDL 语句
      */
-    String diffIndex(Index newIndex, Index oldIndex);
+    String alterIndex(Index newIndex, Index oldIndex);
 
     /***
      * 删除“索引”的 DDL 语句
      */
-    String delIndex(Index oldIndex);
+    String dropIndex(Index oldIndex);
 
     /***
      * 新增“索引”的 DDL 语句
      */
-    String addIndex(Index newIndex);
-
-//String getDiffDDL
-//删除、创建、变更
-//
-//DropTableDDL
-//CreateTableDDL
-//ModifyTableDDL
-//RenameTableDDL
-//ModifyIdxDDL
+    String createIndex(Index newIndex);
+}
 //ModifyProcedureSQL
 //executeModifyProcedureSQL
 //executeDDL
 //DataSync
-}
