@@ -448,7 +448,7 @@ public class OracleMetaData extends AbstractMetaData {
             Column column = columns.get(i);
             ddl.append(TAB).append(String.format("%s %s", toLiteral(column.getName()), columnType(column)));
             if (StringUtils.isNotBlank(column.getDefaultValue())) {
-                ddl.append(" default ").append(StringUtils.trim(column.getDefaultValue()));
+                ddl.append(" default ").append(defaultValue(column));
             }
             if (column.isNotNull()) {
                 ddl.append(" not null");
@@ -535,7 +535,7 @@ public class OracleMetaData extends AbstractMetaData {
                     toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)
             ));
             if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
-                ddl.append(" default ").append(StringUtils.trim(newColumn.getDefaultValue()));
+                ddl.append(" default ").append(defaultValue(newColumn));
             }
             if (newColumn.isNotNull()) {
                 ddl.append(" not null");
@@ -563,7 +563,7 @@ public class OracleMetaData extends AbstractMetaData {
                 toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
         ));
         if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
-            ddl.append(" default ").append(StringUtils.trim(newColumn.getDefaultValue()));
+            ddl.append(" default ").append(defaultValue(newColumn));
         }
         if (newColumn.isNotNull()) {
             ddl.append(" not null");
@@ -724,5 +724,10 @@ public class OracleMetaData extends AbstractMetaData {
             }
         }
         return type.toString();
+    }
+
+    protected String defaultValue(Column column) {
+        Assert.notNull(column, "参数 column 不能为空");
+        return defaultValueMapping(column, DbType.ORACLE);
     }
 }

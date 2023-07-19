@@ -212,7 +212,22 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         }
         Column newColumn = new Column(column.getTable());
         BeanUtils.copyProperties(column, newColumn);
-        // TODO 不同数据库需要做类型映射
+        // TODO 不同数据库需要做类型映射 dataType size width decimalDigits
         return newColumn;
+    }
+
+    /**
+     * 数据库字段默认值映射
+     *
+     * @param column   源数据库字段
+     * @param targetDb 目标数据库类型
+     */
+    protected String defaultValueMapping(Column column, DbType targetDb) {
+        DbType dbType = column.getTable().getSchema().getDbType();
+        if (dbType == null || targetDb == null || Objects.equals(dbType, targetDb)) {
+            return StringUtils.trim(column.getDefaultValue());
+        }
+        // TODO 不同数据库需要做映射 defaultValue
+        return StringUtils.trim(column.getDefaultValue());
     }
 }
