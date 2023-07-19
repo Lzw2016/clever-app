@@ -700,7 +700,7 @@ public class OracleMetaData extends AbstractMetaData {
 
     protected String columnType(Column column) {
         Assert.notNull(column, "参数 column 不能为空");
-        // TODO 不同数据库需要做类型映射
+        column = columnTypeMapping(column, DbType.ORACLE);
         String dataType = StringUtils.lowerCase(column.getDataType());
         // timestamp(6) with local time zone | varchar2(64) | number(10, 4)
         StringBuilder type = new StringBuilder();

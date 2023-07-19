@@ -1,6 +1,8 @@
 package org.clever.data.jdbc.meta;
 
 import org.apache.commons.lang3.StringUtils;
+import org.clever.beans.BeanUtils;
+import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.Column;
 import org.clever.data.jdbc.meta.model.Schema;
@@ -195,5 +197,22 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
                 columns.sort(Comparator.comparing(Column::getOrdinalPosition));
             }
         }
+    }
+
+    /**
+     * 数据库字段类型映射
+     *
+     * @param column   源数据库字段
+     * @param targetDb 目标数据库类型
+     */
+    protected Column columnTypeMapping(Column column, DbType targetDb) {
+        DbType dbType = column.getTable().getSchema().getDbType();
+        if (dbType == null || targetDb == null || Objects.equals(dbType, targetDb)) {
+            return column;
+        }
+        Column newColumn = new Column(column.getTable());
+        BeanUtils.copyProperties(column, newColumn);
+        // TODO 不同数据库需要做类型映射
+        return newColumn;
     }
 }
