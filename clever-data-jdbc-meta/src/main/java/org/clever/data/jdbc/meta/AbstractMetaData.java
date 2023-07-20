@@ -200,6 +200,56 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
     }
 
     /**
+     * 表和字段的备注转义处理
+     */
+    protected String toComment(String comment) {
+        comment = StringUtils.trimToEmpty(comment);
+        return StringUtils.replace(comment, "'", "''");
+    }
+
+    /**
+     * 生产修改表的部分sql: 字段变化、主键变化、索引变化
+     */
+    protected String doAlterTable(Table newTable, Table oldTable) {
+        final StringBuilder ddl = new StringBuilder();
+        // 字段变化
+        final List<Column> newColumns = getNewColumns(newTable, oldTable);
+        final List<Column> delColumns = getDelColumns(newTable, oldTable);
+        final List<TupleTwo<Column, Column>> diffColumns = getDiffColumns(newTable, oldTable);
+        for (Column column : newColumns) {
+            ddl.append(createColumn(column));
+        }
+        for (Column column : delColumns) {
+            ddl.append(dropColumn(column));
+        }
+        for (TupleTwo<Column, Column> tuple : diffColumns) {
+            Column newColumn = tuple.getValue1();
+            Column oldColumn = tuple.getValue2();
+            ddl.append(alterColumn(newColumn, oldColumn));
+        }
+        // 主键变化
+        if (isPrimaryKeyChange(newTable.getPrimaryKey(), oldTable.getPrimaryKey())) {
+            ddl.append(alterPrimaryKey(newTable.getPrimaryKey(), oldTable.getPrimaryKey()));
+        }
+        // 索引变化
+        final List<Index> newIndices = getNewIndices(newTable, oldTable);
+        final List<Index> delIndices = getDelIndices(newTable, oldTable);
+        final List<TupleTwo<Index, Index>> diffIndices = getDiffIndices(newTable, oldTable);
+        for (Index index : newIndices) {
+            ddl.append(createIndex(index));
+        }
+        for (Index index : delIndices) {
+            ddl.append(dropIndex(index));
+        }
+        for (TupleTwo<Index, Index> tuple : diffIndices) {
+            Index newIndex = tuple.getValue1();
+            Index oldIndex = tuple.getValue2();
+            ddl.append(alterIndex(newIndex, oldIndex));
+        }
+        return ddl.toString();
+    }
+
+    /**
      * 获取需要新增的字段
      */
     protected List<Column> getNewColumns(Table newTable, Table oldTable) {

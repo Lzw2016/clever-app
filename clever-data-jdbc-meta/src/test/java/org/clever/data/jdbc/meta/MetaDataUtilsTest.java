@@ -77,9 +77,9 @@ public class MetaDataUtilsTest {
 
     @Test
     public void t05() {
-        Jdbc jdbc = BaseTest.newOracle();
+        Jdbc jdbc = BaseTest.newMysql();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
-        Table table = metaData.getTable("wms8dev", "sys_user3");
+        Table table = metaData.getTable("test", "auto_increment_id");
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
         log.info("--> \n\n{}\n", metaData.createTable(table));
         // log.info("--> \n\n{}\n", metaData.alterTable(table, table));

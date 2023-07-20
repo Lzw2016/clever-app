@@ -6,6 +6,7 @@ import org.clever.core.RenameStrategy;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
+import org.clever.util.Assert;
 
 import java.util.*;
 
@@ -302,61 +303,445 @@ public class MySQLMetaData extends AbstractMetaData {
 
     @Override
     public String alterTable(Table newTable, Table oldTable) {
-        return null;
+        Assert.notNull(newTable, "参数 newTable 不能为空");
+        Assert.notNull(oldTable, "参数 oldTable 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // 表名变化
+        if (!Objects.equals(newTable.getName(), oldTable.getName())) {
+            // rename table auto_increment_id to auto_increment_id2;
+            ddl.append(String.format(
+                    "rename table %s to %s;",
+                    toLiteral(oldTable.getName()), toLiteral(newTable.getName())
+            )).append(LINE);
+        }
+        // 修改表备注
+        if (!Objects.equals(newTable.getComment(), oldTable.getComment())) {
+            // alter table biz_code comment '业务编码表A';
+            ddl.append(String.format(
+                    "alter table %s comment '%s';",
+                    toLiteral(newTable.getName()), toComment(newTable.getComment())
+            )).append(LINE);
+        }
+        // 字段变化、主键变化、索引变化
+        ddl.append(doAlterTable(newTable, oldTable));
+        return ddl.toString();
     }
 
     @Override
     public String dropTable(Table oldTable) {
-        return null;
+        Assert.notNull(oldTable, "参数 oldTable 不能为空");
+        return String.format("drop table %s;", toLiteral(oldTable.getName())) + LINE;
     }
 
     @Override
     public String createTable(Table newTable) {
-        return null;
+        Assert.notNull(newTable, "参数 newTable 不能为空");
+        // create table auto_increment_id2
+        // (
+        //     id            bigint auto_increment comment '主键id',
+        //     sequence_name varchar(127) collate utf8mb4_bin         not null comment '序列名称',
+        //     current_value bigint      default -1                   not null comment '当前值',
+        //     description   varchar(511)                             null comment '说明',
+        //     create_at     datetime(3) default CURRENT_TIMESTAMP(3) not null comment '创建时间',
+        //     update_at     datetime(3)                              null on update CURRENT_TIMESTAMP(3) comment '更新时间',
+        //     constraint auto_increment_id_pk primary key (id, current_value)
+        // ) comment '自增长id表';
+        // create index idx_sys_login_failed_count_user_id on sys_login_failed_count (user_id);
+        final StringBuilder ddl = new StringBuilder();
+        final PrimaryKey primaryKey = newTable.getPrimaryKey();
+        final List<Column> columns = newTable.getColumns();
+        final List<Index> indices = newTable.getIndices();
+        ddl.append("create table ").append(toLiteral(newTable.getName())).append(LINE);
+        ddl.append("(").append(LINE);
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            ddl.append(TAB).append(String.format("%s %s", toLiteral(column.getName()), columnType(column)));
+            if (StringUtils.isNotBlank(column.getDefaultValue())) {
+                ddl.append(" default ").append(defaultValue(column));
+            }
+            if (column.isNotNull()) {
+                ddl.append(" not");
+            }
+            ddl.append(" null");
+            if ((i + 1) < columns.size()) {
+                ddl.append(",").append(LINE);
+            } else if (newTable.getPrimaryKey() != null) {
+                // 最后一个字段 & 存在主键
+                ddl.append(",").append(LINE);
+                ddl.append(TAB);
+                if (StringUtils.isNotBlank(primaryKey.getName())
+                        && !StringUtils.trimToEmpty(primaryKey.getName()).equalsIgnoreCase("primary")) {
+                    ddl.append(String.format("constraint %s ", toLiteral(primaryKey.getName())));
+                }
+                ddl.append("primary key (");
+                for (int j = 0; j < primaryKey.getColumns().size(); j++) {
+                    Column pCol = primaryKey.getColumns().get(j);
+                    if (j > 0) {
+                        ddl.append(", ");
+                    }
+                    ddl.append(toLiteral(pCol.getName()));
+                }
+                ddl.append(")").append(LINE);
+            } else {
+                ddl.append(LINE);
+            }
+        }
+        ddl.append(")");
+        // 表备注
+        if (StringUtils.isNotBlank(newTable.getComment())) {
+            ddl.append(String.format(" comment '%s'", toComment(newTable.getComment())));
+        }
+        ddl.append(";").append(LINE);
+        // 索引
+        for (Index index : indices) {
+            if (primaryKey != null && Objects.equals(primaryKey.getName(), index.getName())) {
+                continue;
+            }
+            ddl.append(createIndex(index));
+        }
+        return ddl.toString();
     }
 
     @Override
     public String alterColumn(Column newColumn, Column oldColumn) {
-        return null;
+        Assert.notNull(newColumn, "参数 newColumn 不能为空");
+        Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newColumn.getTableName();
+        // alter table auto_increment_id2 change sequence_name sequence_name2 varchar(128) collate utf8mb4_bin not null comment '序列名称';
+        // alter table auto_increment_id2 change description description2 varchar(511) not null comment '说明2';
+        if (Objects.equals(toLiteral(oldColumn.getName()), toLiteral(newColumn.getName()))) {
+            ddl.append(String.format(
+                    "alter table %s modify %s %s",
+                    toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)
+            ));
+        } else {
+            ddl.append(String.format(
+                    "alter table %s change %s %s %s",
+                    toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName()), columnType(newColumn)
+            ));
+        }
+        if (newColumn.isNotNull()) {
+            ddl.append(" not");
+        }
+        ddl.append(" null");
+        if (StringUtils.isNotBlank(newColumn.getComment())) {
+            ddl.append(String.format(" comment '%s'", toComment(newColumn.getComment())));
+        }
+        ddl.append(";").append(LINE);
+        return ddl.toString();
     }
 
     @Override
     public String dropColumn(Column oldColumn) {
-        return null;
+        Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
+        return String.format("alter table %s drop column %s;", toLiteral(oldColumn.getTableName()), toLiteral(oldColumn.getName())) + LINE;
     }
 
     @Override
     public String createColumn(Column newColumn) {
-        return null;
+        Assert.notNull(newColumn, "参数 newColumn 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // alter table auto_increment_id2 add col varchar(100) default 'abc' not null comment '测试';
+        ddl.append(String.format(
+                "alter table %s add %s %s",
+                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
+        ));
+        if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
+            ddl.append(" default ").append(defaultValue(newColumn));
+        }
+        if (newColumn.isNotNull()) {
+            ddl.append(" not");
+        }
+        ddl.append(" null");
+        if (StringUtils.isNotBlank(newColumn.getComment())) {
+            ddl.append(String.format(" comment '%s'", toComment(newColumn.getComment())));
+        }
+        ddl.append(";").append(LINE);
+        return ddl.toString();
     }
 
     @Override
     public String alterPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
-        return null;
+        if (oldPrimaryKey == null && newPrimaryKey == null) {
+            return StringUtils.EMPTY;
+        }
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newPrimaryKey != null ? newPrimaryKey.getTableName() : oldPrimaryKey.getTableName();
+        // 先删除主键
+        if (oldPrimaryKey != null) {
+            for (Column column : oldPrimaryKey.getColumns()) {
+                // alter table auto_increment_id2 modify id bigint not null comment '主键';
+                if (column.isAutoIncremented()) {
+                    ddl.append(String.format(
+                            "alter table %s modify %s %s",
+                            toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                    ));
+                    if (StringUtils.isNotBlank(column.getDefaultValue())) {
+                        ddl.append(" default ").append(defaultValue(column));
+                    }
+                    if (column.isNotNull()) {
+                        ddl.append(" not");
+                    }
+                    ddl.append(" null");
+                    if (StringUtils.isNotBlank(column.getComment())) {
+                        ddl.append(String.format(" comment '%s'", toComment(column.getComment())));
+                    }
+                    ddl.append(";").append(LINE);
+                }
+            }
+            // alter table auto_increment_id2 drop primary key;
+            ddl.append(String.format("alter table %s drop primary key;", toLiteral(tableName))).append(LINE);
+        }
+        // 在新增主键
+        if (newPrimaryKey != null) {
+            // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (id, sequence_name);
+            ddl.append(String.format(
+                    "alter table %s add constraint %s primary key ",
+                    toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+            ));
+            for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
+                Column column = newPrimaryKey.getColumns().get(i);
+                if (i > 0) {
+                    ddl.append(", ");
+                }
+                ddl.append(toLiteral(column.getName()));
+            }
+            ddl.append(");").append(LINE);
+            // alter table auto_increment_id2 modify id bigint default 1 not null auto_increment comment '主键id';
+            boolean hasAutoInc = false;
+            for (Column column : newPrimaryKey.getColumns()) {
+                if (column.isAutoIncremented()) {
+                    hasAutoInc = true;
+                    ddl.append(String.format(
+                            "alter table %s modify %s %s",
+                            toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                    ));
+                    if (StringUtils.isNotBlank(column.getDefaultValue())) {
+                        ddl.append(" default ").append(defaultValue(column));
+                    }
+                    if (column.isNotNull()) {
+                        ddl.append(" not");
+                    }
+                    ddl.append(" null auto_increment");
+                    if (StringUtils.isNotBlank(column.getComment())) {
+                        ddl.append(String.format(" comment '%s'", toComment(column.getComment())));
+                    }
+                    ddl.append(";").append(LINE);
+                }
+            }
+            if (hasAutoInc) {
+                // alter table auto_increment_id2 auto_increment = 1;
+                ddl.append(String.format("alter table %s auto_increment = 1;", toLiteral(tableName))).append(LINE);
+            }
+        }
+        return ddl.toString();
     }
 
     @Override
     public String dropPrimaryKey(PrimaryKey oldPrimaryKey) {
-        return null;
+        Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = oldPrimaryKey.getTableName();
+        // 确保当前表没有 auto_increment 列
+        for (Column column : oldPrimaryKey.getColumns()) {
+            // alter table auto_increment_id2 modify id bigint not null comment '主键';
+            if (column.isAutoIncremented()) {
+                ddl.append(String.format(
+                        "alter table %s modify %s %s",
+                        toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                ));
+                if (StringUtils.isNotBlank(column.getDefaultValue())) {
+                    ddl.append(" default ").append(defaultValue(column));
+                }
+                if (column.isNotNull()) {
+                    ddl.append(" not");
+                }
+                ddl.append(" null");
+                if (StringUtils.isNotBlank(column.getComment())) {
+                    ddl.append(String.format(" comment '%s'", toComment(column.getComment())));
+                }
+                ddl.append(";").append(LINE);
+            }
+        }
+        // alter table auto_increment_id2 drop primary key;
+        ddl.append(String.format("alter table %s drop primary key;", toLiteral(tableName))).append(LINE);
+        return ddl.toString();
     }
 
     @Override
     public String createPrimaryKey(PrimaryKey newPrimaryKey) {
-        return null;
+        Assert.notNull(newPrimaryKey, "参数 newPrimaryKey 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newPrimaryKey.getTableName();
+        // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (id, sequence_name);
+        ddl.append(String.format(
+                "alter table %s add constraint %s primary key ",
+                toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+        ));
+        for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
+            Column column = newPrimaryKey.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        // alter table auto_increment_id2 modify id bigint default 1 not null auto_increment comment '主键id';
+        boolean hasAutoInc = false;
+        for (Column column : newPrimaryKey.getColumns()) {
+            if (column.isAutoIncremented()) {
+                hasAutoInc = true;
+                ddl.append(String.format(
+                        "alter table %s modify %s %s",
+                        toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                ));
+                if (StringUtils.isNotBlank(column.getDefaultValue())) {
+                    ddl.append(" default ").append(defaultValue(column));
+                }
+                if (column.isNotNull()) {
+                    ddl.append(" not");
+                }
+                ddl.append(" null auto_increment");
+                if (StringUtils.isNotBlank(column.getComment())) {
+                    ddl.append(String.format(" comment '%s'", toComment(column.getComment())));
+                }
+                ddl.append(";").append(LINE);
+            }
+        }
+        if (hasAutoInc) {
+            // alter table auto_increment_id2 auto_increment = 1;
+            ddl.append(String.format("alter table %s auto_increment = 1;", toLiteral(tableName))).append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String alterIndex(Index newIndex, Index oldIndex) {
-        return null;
+        if (newIndex == null && oldIndex == null) {
+            return StringUtils.EMPTY;
+        }
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newIndex != null ? newIndex.getTableName() : oldIndex.getTableName();
+        if (oldIndex != null) {
+            // alter table auto_increment_id2 drop key auto_increment_uidx1;
+            if (oldIndex.isUnique()) {
+                ddl.append(String.format(
+                        "alter table %s drop key %s;",
+                        toLiteral(tableName), toLiteral(oldIndex.getName())
+                )).append(LINE);
+            } else {
+                // drop index auto_increment_idx1 on auto_increment_id2;
+                ddl.append(String.format(
+                        "drop index %s on %s;",
+                        toLiteral(oldIndex.getName()), toLiteral(tableName)
+                )).append(LINE);
+            }
+        }
+        if (newIndex != null) {
+            // create unique index auto_increment_uidx1 on auto_increment_id2 (id, current_value);
+            ddl.append("create ");
+            if (newIndex.isUnique()) {
+                ddl.append("unique ");
+            }
+            ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(tableName)));
+            for (int i = 0; i < newIndex.getColumns().size(); i++) {
+                Column column = newIndex.getColumns().get(i);
+                if (i > 0) {
+                    ddl.append(", ");
+                }
+                ddl.append(toLiteral(column.getName()));
+            }
+            ddl.append(");").append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String dropIndex(Index oldIndex) {
-        return null;
+        Assert.notNull(oldIndex, "参数 oldPrimaryKey 不能为空");
+        // alter table auto_increment_id2 drop key auto_increment_uidx1;
+        if (oldIndex.isUnique()) {
+            return String.format(
+                    "alter table %s drop key %s;",
+                    toLiteral(oldIndex.getTableName()), toLiteral(oldIndex.getName())
+            ) + LINE;
+        }
+        // drop index auto_increment_idx1 on auto_increment_id2;
+        return String.format(
+                "drop index %s on %s;",
+                toLiteral(oldIndex.getName()), toLiteral(oldIndex.getTableName())
+        ) + LINE;
     }
 
     @Override
     public String createIndex(Index newIndex) {
-        return null;
+        Assert.notNull(newIndex, "参数 newIndex 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // create unique index auto_increment_uidx1 on auto_increment_id2 (id, current_value);
+        ddl.append("create ");
+        if (newIndex.isUnique()) {
+            ddl.append("unique ");
+        }
+        ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(newIndex.getTableName())));
+        for (int i = 0; i < newIndex.getColumns().size(); i++) {
+            Column column = newIndex.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        return ddl.toString();
+    }
+
+    protected String toLiteral(String objName) {
+        Assert.isNotBlank(objName, "参数 objName 不能为空");
+        final String special = "@#$%^&*+-/|<>=?![]{};,`. ";
+        objName = StringUtils.trim(objName).toLowerCase();
+        if (StringUtils.containsAny(objName, special)) {
+            return String.format("`%s`", objName);
+        }
+        return objName;
+    }
+
+    protected String columnType(Column column) {
+        Assert.notNull(column, "参数 column 不能为空");
+        String columnType = column.getAttribute("column_type");
+        if (StringUtils.isNotBlank(columnType)) {
+            return StringUtils.lowerCase(StringUtils.trimToEmpty(columnType));
+        }
+        column = columnTypeMapping(column, DbType.MYSQL);
+        String dataType = StringUtils.lowerCase(column.getDataType());
+        // datetime(3) | varchar(511) | decimal(20, 4)
+        StringBuilder type = new StringBuilder();
+        if (dataType.contains("time") || dataType.contains("date")) {
+            type.append(dataType);
+            if (column.getDecimalDigits() > 0) {
+                type.append("(").append(column.getDecimalDigits()).append(")");
+            }
+        } else if (dataType.contains("char") || column.getSize() <= 0) {
+            type.append(dataType);
+            if (column.getWidth() > 0) {
+                type.append("(").append(column.getWidth()).append(")");
+            } else if (column.getSize() > 0) {
+                type.append("(").append(column.getSize()).append(")");
+            }
+        } else {
+            type.append(dataType);
+            if (column.getSize() > 0) {
+                type.append("(").append(column.getSize());
+                if (column.getDecimalDigits() > 0) {
+                    type.append(", ").append(column.getDecimalDigits());
+                }
+                type.append(")");
+            }
+        }
+        return type.toString();
+    }
+
+    protected String defaultValue(Column column) {
+        Assert.notNull(column, "参数 column 不能为空");
+        return defaultValueMapping(column, DbType.MYSQL);
     }
 }
