@@ -5,6 +5,8 @@ import org.clever.beans.BeanUtils;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
+import org.clever.data.jdbc.meta.inner.ColumnTypeMapping;
+import org.clever.data.jdbc.meta.inner.DefaultValueMapping;
 import org.clever.data.jdbc.meta.model.*;
 
 import java.util.*;
@@ -395,7 +397,18 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         }
         Column newColumn = new Column(column.getTable());
         BeanUtils.copyProperties(column, newColumn);
-        // TODO 不同数据库需要做类型映射 dataType size width decimalDigits
+        // 不同数据库需要做类型映射 dataType size width decimalDigits
+        switch (targetDb) {
+            case MYSQL:
+                ColumnTypeMapping.mysql(newColumn);
+                break;
+            case ORACLE:
+                ColumnTypeMapping.oracle(newColumn);
+                break;
+            case POSTGRE_SQL:
+                ColumnTypeMapping.postgresql(newColumn);
+                break;
+        }
         return newColumn;
     }
 
@@ -410,7 +423,15 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         if (dbType == null || targetDb == null || Objects.equals(dbType, targetDb)) {
             return StringUtils.trim(column.getDefaultValue());
         }
-        // TODO 不同数据库需要做映射 defaultValue
+        // 不同数据库需要做映射 defaultValue
+        switch (targetDb) {
+            case MYSQL:
+                return DefaultValueMapping.mysql(column);
+            case ORACLE:
+                return DefaultValueMapping.oracle(column);
+            case POSTGRE_SQL:
+                return DefaultValueMapping.postgresql(column);
+        }
         return StringUtils.trim(column.getDefaultValue());
     }
 }
