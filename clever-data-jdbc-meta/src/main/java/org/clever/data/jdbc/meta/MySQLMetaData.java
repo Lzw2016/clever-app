@@ -363,6 +363,12 @@ public class MySQLMetaData extends AbstractMetaData {
                 ddl.append(" not");
             }
             ddl.append(" null");
+            if (column.isAutoIncremented()) {
+                ddl.append(" auto_increment");
+            }
+            if (StringUtils.isNotBlank(column.getComment())) {
+                ddl.append(String.format(" comment '%s'", toComment(column.getComment())));
+            }
             if ((i + 1) < columns.size()) {
                 ddl.append(",").append(LINE);
             } else if (newTable.getPrimaryKey() != null) {

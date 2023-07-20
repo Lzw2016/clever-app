@@ -77,11 +77,34 @@ public class MetaDataUtilsTest {
 
     @Test
     public void t05() {
+        Jdbc jdbc = BaseTest.newOracle();
+        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
+        Table table = metaData.getTable("wms8dev", "sys_user3");
+        // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
+        log.info("--> \n\n{}\n", metaData.createTable(table));
+        // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        jdbc.close();
+    }
+
+    @Test
+    public void t06() {
         Jdbc jdbc = BaseTest.newMysql();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
         Table table = metaData.getTable("test", "auto_increment_id");
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
         log.info("--> \n\n{}\n", metaData.createTable(table));
+        // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        jdbc.close();
+    }
+
+    @Test
+    public void t07() {
+        Jdbc jdbc = BaseTest.newOracle();
+        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
+        Table table = metaData.getTable("wms8dev", "sys_user");
+        MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
+        // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
+        log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
         // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
         jdbc.close();
     }
