@@ -99,6 +99,17 @@ public class MetaDataUtilsTest {
 
     @Test
     public void t07() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
+        Table table = metaData.getTable("public", "auto_increment_id");
+        // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
+        log.info("--> \n\n{}\n", metaData.createTable(table));
+        // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        jdbc.close();
+    }
+
+    @Test
+    public void t08() {
         Jdbc jdbc = BaseTest.newOracle();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
         Table table = metaData.getTable("wms8dev", "sys_user");

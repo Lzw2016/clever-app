@@ -10,15 +10,19 @@ import org.clever.data.jdbc.meta.model.Column;
  * 创建时间：2023/07/20 17:57 <br/>
  */
 public class DefaultValueMapping {
+    protected static String defaultValue(String defaultValue) {
+        return StringUtils.trim(defaultValue);
+    }
+
     public static String mysql(Column column) {
-        return StringUtils.trim(column.getDefaultValue());
+        return defaultValue(column.getDefaultValue());
     }
 
     public static String oracle(Column column) {
-        return StringUtils.trim(column.getDefaultValue());
+        return defaultValue(column.getDefaultValue());
     }
 
     public static String postgresql(Column column) {
-        return StringUtils.trim(column.getDefaultValue());
+        return defaultValue(column.getDefaultValue());
     }
 }
