@@ -152,23 +152,20 @@ public class ColumnTypeMapping {
     protected static void mysql2oracle() {
         final DbType targetDbType = DbType.ORACLE;
         // 数值型
-        register(DbType.MYSQL, "tinyint", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
-        });
-        register(DbType.MYSQL, "smallint", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
-        });
-        register(DbType.MYSQL, "mediumint", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
-        });
-        register(DbType.MYSQL, "int", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
-        });
-        register(DbType.MYSQL, "integer", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
+        register(DbType.MYSQL, new String[]{"tinyint", "smallint", "mediumint", "int", "integer"}, targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
+            setColumnType("number", 22, column);
         });
         register(DbType.MYSQL, "bigint", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
+            setColumnType("number", 19, 0, column);
         });
         register(DbType.MYSQL, "float", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
+            setColumnType("binary_float", 4, column);
         });
         register(DbType.MYSQL, "double", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
+            setColumnType("binary_double", 8, column);
         });
         register(DbType.MYSQL, "decimal", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
+            setColumnType("number", column.getSize(), column.getDecimalDigits(), column);
         });
         // 字符串型
         register(DbType.MYSQL, "char", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
@@ -547,7 +544,6 @@ public class ColumnTypeMapping {
 //integer
 //float(p) BINARY_FLOAT
 //double precision
-//binary_float
 //binary_double
 //real
 
@@ -564,17 +560,9 @@ public class ColumnTypeMapping {
 //timestamp
 //timestamp with local time zone
 //timestamp with time zone
-//interval year to moth
-//interval day to second
-
-//布尔型
-//boolean
 
 //二进制型
-//clob
-//nclob
 //blob
-//bfile 二进制文件，存储在数据库外的系统文件，只读的，数据库会将该文件当二进制文件处理
 //raw(size) 用于存储二进制或字符类型数据，变长二进制数据类型，这说明采用这种数据类型存储的数据不会发生字符集转换。这种类型最多可以存储2,000字节的信息
 //long raw 能存储2GB 的原始二进制数据（不用进行字符集转换的数据）
     }
