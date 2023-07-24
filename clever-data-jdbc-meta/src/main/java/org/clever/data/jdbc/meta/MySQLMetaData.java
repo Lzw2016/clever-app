@@ -719,31 +719,26 @@ public class MySQLMetaData extends AbstractMetaData {
         }
         column = columnTypeMapping(column, DbType.MYSQL);
         String dataType = StringUtils.lowerCase(column.getDataType());
-        // datetime(3) | varchar(511) | decimal(20, 4)
-        StringBuilder type = new StringBuilder();
-        if (dataType.contains("time") || dataType.contains("date")) {
-            type.append(dataType);
-            if (column.getDecimalDigits() > 0) {
-                type.append("(").append(column.getDecimalDigits()).append(")");
-            }
-        } else if (dataType.contains("char") || column.getSize() <= 0) {
-            type.append(dataType);
-            if (column.getWidth() > 0) {
-                type.append("(").append(column.getWidth()).append(")");
-            } else if (column.getSize() > 0) {
-                type.append("(").append(column.getSize()).append(")");
-            }
-        } else {
-            type.append(dataType);
-            if (column.getSize() > 0) {
-                type.append("(").append(column.getSize());
-                if (column.getDecimalDigits() > 0) {
-                    type.append(", ").append(column.getDecimalDigits());
-                }
-                type.append(")");
-            }
+        if ("datetime".equalsIgnoreCase(dataType)) {
+            return "datetime(3)";
         }
-        return type.toString();
+        if ("timestamp".equalsIgnoreCase(dataType)) {
+            return "timestamp(3)";
+        }
+        if ("time".equalsIgnoreCase(dataType)) {
+            return "time(3)";
+        }
+        final String[] noParamType = new String[]{
+                "tinyint", "smallint", "mediumint", "int", "bigint", "float", "double",
+                "tinytext", "text", "mediumtext", "longtext",
+                "year", "date",
+                "tinyblob", "mediumblob", "longblob",
+        };
+        if (StringUtils.equalsAnyIgnoreCase(dataType, noParamType)) {
+            return dataType;
+        }
+        // datetime(3) | varchar(511) | decimal(20, 4)
+        return super.columnType(column);
     }
 
     protected String defaultValue(Column column) {

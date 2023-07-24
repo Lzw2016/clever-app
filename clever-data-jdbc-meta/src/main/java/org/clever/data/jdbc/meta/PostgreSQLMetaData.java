@@ -6,6 +6,7 @@ import org.clever.core.RenameStrategy;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
+import org.clever.util.Assert;
 
 import java.util.*;
 
@@ -500,5 +501,26 @@ public class PostgreSQLMetaData extends AbstractMetaData {
     @Override
     public String createIndex(Index newIndex) {
         return null;
+    }
+
+    protected String columnType(Column column) {
+        Assert.notNull(column, "参数 column 不能为空");
+        column = columnTypeMapping(column, DbType.POSTGRE_SQL);
+        String dataType = StringUtils.lowerCase(column.getDataType());
+        final String[] noParamType = new String[]{
+                "int2", "int4", "int8", "float4", "float8",
+                "timestamp", "timestamptz", "date", "time", "timetz",
+                "bool", "bytea",
+        };
+        if (StringUtils.equalsAnyIgnoreCase(dataType, noParamType)) {
+            return dataType;
+        }
+        // timestamp(6) with local time zone | varchar2(64) | number(10, 4)
+        return super.columnType(column);
+    }
+
+    protected String defaultValue(Column column) {
+        Assert.notNull(column, "参数 column 不能为空");
+        return defaultValueMapping(column, DbType.POSTGRE_SQL);
     }
 }

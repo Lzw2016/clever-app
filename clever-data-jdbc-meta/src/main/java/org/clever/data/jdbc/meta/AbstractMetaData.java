@@ -209,6 +209,31 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         return StringUtils.replace(comment, "'", "''");
     }
 
+    protected String columnType(Column column) {
+        String dataType = StringUtils.lowerCase(column.getDataType());
+        StringBuilder type = new StringBuilder();
+        if (dataType.contains("time") || dataType.contains("date")) {
+            type.append(dataType);
+        } else if (dataType.contains("char") || column.getSize() <= 0) {
+            type.append(dataType);
+            if (column.getWidth() > 0) {
+                type.append("(").append(column.getWidth()).append(")");
+            } else if (column.getSize() > 0) {
+                type.append("(").append(column.getSize()).append(")");
+            }
+        } else {
+            type.append(dataType);
+            if (column.getSize() > 0) {
+                type.append("(").append(column.getSize());
+                if (column.getDecimalDigits() > 0) {
+                    type.append(", ").append(column.getDecimalDigits());
+                }
+                type.append(")");
+            }
+        }
+        return type.toString();
+    }
+
     /**
      * 生产修改表的部分sql: 字段变化、主键变化、索引变化
      */

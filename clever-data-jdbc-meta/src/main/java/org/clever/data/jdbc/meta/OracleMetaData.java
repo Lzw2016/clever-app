@@ -707,28 +707,17 @@ public class OracleMetaData extends AbstractMetaData {
         Assert.notNull(column, "参数 column 不能为空");
         column = columnTypeMapping(column, DbType.ORACLE);
         String dataType = StringUtils.lowerCase(column.getDataType());
-        // timestamp(6) with local time zone | varchar2(64) | number(10, 4)
-        StringBuilder type = new StringBuilder();
-        if (dataType.contains("time") || dataType.contains("date")) {
-            type.append(dataType);
-        } else if (dataType.contains("char") || column.getSize() <= 0) {
-            type.append(dataType);
-            if (column.getWidth() > 0) {
-                type.append("(").append(column.getWidth()).append(")");
-            } else if (column.getSize() > 0) {
-                type.append("(").append(column.getSize()).append(")");
-            }
-        } else {
-            type.append(dataType);
-            if (column.getSize() > 0) {
-                type.append("(").append(column.getSize());
-                if (column.getDecimalDigits() > 0) {
-                    type.append(", ").append(column.getDecimalDigits());
-                }
-                type.append(")");
-            }
+        final String[] noParamType = new String[]{
+                "float", "binary_float", "binary_double",
+                "clob", "nclob",
+                "date",
+                "blob", "long raw",
+        };
+        if (StringUtils.equalsAnyIgnoreCase(dataType, noParamType)) {
+            return dataType;
         }
-        return type.toString();
+        // timestamp(6) with local time zone | varchar2(64) | number(10, 4)
+        return super.columnType(column);
     }
 
     protected String defaultValue(Column column) {

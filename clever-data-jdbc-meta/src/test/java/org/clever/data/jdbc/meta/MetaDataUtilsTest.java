@@ -112,7 +112,19 @@ public class MetaDataUtilsTest {
     public void t08() {
         Jdbc jdbc = BaseTest.newOracle();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
-        Table table = metaData.getTable("wms8dev", "sys_user");
+        Table table = metaData.getTable("wms8dev", "sys_user3");
+        MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
+        // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
+        log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
+        // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        jdbc.close();
+    }
+
+    @Test
+    public void t09() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
+        Table table = metaData.getTable("public", "auto_increment_id2");
         MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
         log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
