@@ -445,68 +445,338 @@ public class PostgreSQLMetaData extends AbstractMetaData {
 
     @Override
     public String alterTable(Table newTable, Table oldTable) {
-        return null;
+        Assert.notNull(newTable, "参数 newTable 不能为空");
+        Assert.notNull(oldTable, "参数 oldTable 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // 表名变化
+        if (!Objects.equals(newTable.getName(), oldTable.getName())) {
+            // alter table auto_increment_id rename to auto_increment_id2;
+            ddl.append(String.format(
+                    "alter table %s rename to %s;",
+                    toLiteral(oldTable.getName()), toLiteral(newTable.getName())
+            )).append(LINE);
+        }
+        // 修改表备注
+        if (!Objects.equals(newTable.getComment(), oldTable.getComment())) {
+            // comment on table auto_increment_id2 is '自增长ID数据表2';
+            ddl.append(String.format(
+                    "comment on table %s is '%s';",
+                    toLiteral(newTable.getName()), toComment(newTable.getComment())
+            )).append(LINE);
+        }
+        // 字段变化、主键变化、索引变化
+        ddl.append(doAlterTable(newTable, oldTable));
+        return ddl.toString();
     }
 
     @Override
     public String dropTable(Table oldTable) {
-        return null;
+        Assert.notNull(oldTable, "参数 oldTable 不能为空");
+        return String.format("drop table %s;", toLiteral(oldTable.getName())) + LINE;
     }
 
     @Override
     public String createTable(Table newTable) {
-        return null;
+        Assert.notNull(newTable, "参数 newTable 不能为空");
+        // create table auto_increment_id2
+        //(
+        //    c1  smallint,
+        //    c2  integer,
+        //    c3  bigint,
+        //    constraint aii2_pk primary key (c1, c2)
+        //);
+        //comment on table auto_increment_id2 is '自增长ID数据表';
+        //comment on column auto_increment_id2.c1 is 'smallint';
+        //comment on column auto_increment_id2.c2 is 'integer';
+        //comment on column auto_increment_id2.c3 is 'bigint';
+        final StringBuilder ddl = new StringBuilder();
+        final PrimaryKey primaryKey = newTable.getPrimaryKey();
+        final List<Column> columns = newTable.getColumns();
+        final List<Index> indices = newTable.getIndices();
+        ddl.append("create table ").append(toLiteral(newTable.getName())).append(LINE);
+        ddl.append("(").append(LINE);
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            ddl.append(TAB).append(String.format("%s %s", toLiteral(column.getName()), columnType(column)));
+            if (StringUtils.isNotBlank(column.getDefaultValue())) {
+                ddl.append(" default ").append(defaultValue(column));
+            }
+            if (column.isNotNull()) {
+                ddl.append(" not null");
+            }
+            if ((i + 1) < columns.size()) {
+                ddl.append(",").append(LINE);
+            } else if (newTable.getPrimaryKey() != null) {
+                // 最后一个字段 & 存在主键
+                ddl.append(",").append(LINE);
+                ddl.append(TAB);
+                if (StringUtils.isNotBlank(primaryKey.getName())) {
+                    ddl.append(String.format("constraint %s ", toLiteral(primaryKey.getName())));
+                }
+                ddl.append("primary key (");
+                for (int j = 0; j < primaryKey.getColumns().size(); j++) {
+                    Column pCol = primaryKey.getColumns().get(j);
+                    if (j > 0) {
+                        ddl.append(", ");
+                    }
+                    ddl.append(toLiteral(pCol.getName()));
+                }
+                ddl.append(")").append(LINE);
+            } else {
+                ddl.append(LINE);
+            }
+        }
+        ddl.append(");").append(LINE);
+        // 表备注
+        if (StringUtils.isNotBlank(newTable.getComment())) {
+            ddl.append(String.format(
+                    "comment on table %s is '%s';",
+                    toLiteral(newTable.getName()), toComment(newTable.getComment()))
+            ).append(LINE);
+        }
+        // 字段备注
+        for (Column column : columns) {
+            if (StringUtils.isBlank(column.getComment())) {
+                continue;
+            }
+            ddl.append(String.format(
+                    "comment on column %s.%s is '%s';",
+                    toLiteral(newTable.getName()), toLiteral(column.getName()), toComment(column.getComment()))
+            ).append(LINE);
+        }
+        // 索引
+        for (Index index : indices) {
+            if (primaryKey != null && Objects.equals(primaryKey.getName(), index.getName())) {
+                continue;
+            }
+            ddl.append(createIndex(index));
+        }
+        return ddl.toString();
     }
 
     @Override
     public String alterColumn(Column newColumn, Column oldColumn) {
-        return null;
+        Assert.notNull(newColumn, "参数 newColumn 不能为空");
+        Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newColumn.getTableName();
+        // alter table sys_user2 rename column is_enable2 to is_enable3
+        if (!Objects.equals(newColumn.getName(), oldColumn.getName())) {
+            ddl.append(String.format(
+                    "alter table %s rename column %s to %s;",
+                    toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())
+            )).append(LINE);
+        }
+        // comment on column sys_user.is_enable_1 is '是否启用: 0:禁用，1:启用_1'
+        if (!Objects.equals(newColumn.getComment(), oldColumn.getComment())) {
+            ddl.append(String.format(
+                    "comment on column %s.%s is '%s';",
+                    toLiteral(tableName), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+            )).append(LINE);
+        }
+        // alter table auto_increment_id2 alter column c11 set default 'abc';
+        if (!Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
+            ddl.append(String.format(
+                    "alter table %s alter column %s set default %s;",
+                    toLiteral(tableName), toLiteral(newColumn.getName()), defaultValue(newColumn)
+            )).append(LINE);
+        }
+        // alter table auto_increment_id2 alter column c11 type varchar(12) using c11::varchar(12);
+        if (!Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
+                || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
+                || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
+                || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
+            ddl.append(String.format(
+                    "alter table %s alter column %s type %s using %s::%s;",
+                    toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn), toLiteral(newColumn.getName()), columnType(newColumn)
+            )).append(LINE);
+        }
+        // alter table auto_increment_id2 alter column c11 set not null;
+        if (!Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())) {
+            ddl.append(String.format(
+                    "alter table %s alter column %s set",
+                    toLiteral(tableName), toLiteral(newColumn.getName())
+            ));
+            if (newColumn.isNotNull()) {
+                ddl.append(" not");
+            }
+            ddl.append(" null;").append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String dropColumn(Column oldColumn) {
-        return null;
+        Assert.notNull(oldColumn, "参数 oldColumn 不能为空");
+        // alter table auto_increment_id2 drop column c23;
+        return String.format("alter table %s drop column %s;", toLiteral(oldColumn.getTableName()), toLiteral(oldColumn.getName())) + LINE;
     }
 
     @Override
     public String createColumn(Column newColumn) {
-        return null;
+        Assert.notNull(newColumn, "参数 newColumn 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // alter table auto_increment_id2 add c25 varchar(10) default 'abc' not null;
+        ddl.append(String.format(
+                "alter table %s add %s %s",
+                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
+        ));
+        if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
+            ddl.append(" default ").append(defaultValue(newColumn));
+        }
+        if (newColumn.isNotNull()) {
+            ddl.append(" not null");
+        }
+        ddl.append(";").append(LINE);
+        // comment on column auto_increment_id2.c25 is '测试';
+        if (StringUtils.isNotBlank(newColumn.getComment())) {
+            ddl.append(String.format(
+                    "comment on column %s.%s is '%s';",
+                    toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+            )).append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String alterPrimaryKey(PrimaryKey newPrimaryKey, PrimaryKey oldPrimaryKey) {
-        return null;
+        if (oldPrimaryKey == null && newPrimaryKey == null) {
+            return StringUtils.EMPTY;
+        }
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newPrimaryKey != null ? newPrimaryKey.getTableName() : oldPrimaryKey.getTableName();
+        if (oldPrimaryKey != null) {
+            // alter table auto_increment_id2 drop constraint auto_increment_id2_pk;
+            ddl.append(String.format("alter table %s drop constraint %s;", toLiteral(tableName), toLiteral(oldPrimaryKey.getName()))).append(LINE);
+        }
+        if (newPrimaryKey != null) {
+            // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (c1);
+            ddl.append(String.format(
+                    "alter table %s add constraint %s primary key (",
+                    toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+            ));
+            for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
+                Column column = newPrimaryKey.getColumns().get(i);
+                if (i > 0) {
+                    ddl.append(", ");
+                }
+                ddl.append(toLiteral(column.getName()));
+            }
+            ddl.append(");").append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String dropPrimaryKey(PrimaryKey oldPrimaryKey) {
-        return null;
+        Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
+        // alter table auto_increment_id2 drop constraint auto_increment_id2_pk;
+        return String.format(
+                "alter table %s drop constraint %s;",
+                toLiteral(oldPrimaryKey.getTableName()), toLiteral(oldPrimaryKey.getName())
+        ) + LINE;
     }
 
     @Override
     public String createPrimaryKey(PrimaryKey newPrimaryKey) {
-        return null;
+        Assert.notNull(newPrimaryKey, "参数 newPrimaryKey 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (c1, c2);
+        ddl.append(String.format(
+                "alter table %s add constraint %s primary key (",
+                toLiteral(newPrimaryKey.getTableName()), toLiteral(newPrimaryKey.getName())
+        ));
+        for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
+            Column column = newPrimaryKey.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        return ddl.toString();
     }
 
     @Override
     public String alterIndex(Index newIndex, Index oldIndex) {
-        return null;
+        if (newIndex == null && oldIndex == null) {
+            return StringUtils.EMPTY;
+        }
+        final StringBuilder ddl = new StringBuilder();
+        final String tableName = newIndex != null ? newIndex.getTableName() : oldIndex.getTableName();
+        if (oldIndex != null) {
+            // drop index auto_increment_id2_c1_idx;
+            ddl.append(String.format("drop index %s;", toLiteral(oldIndex.getName()))).append(LINE);
+        }
+        if (newIndex != null) {
+            // create unique index auto_increment_id2_c1_idx on auto_increment_id2 (c1);
+            ddl.append("create ");
+            if (newIndex.isUnique()) {
+                ddl.append("unique ");
+            }
+            ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(tableName)));
+            for (int i = 0; i < newIndex.getColumns().size(); i++) {
+                Column column = newIndex.getColumns().get(i);
+                if (i > 0) {
+                    ddl.append(", ");
+                }
+                ddl.append(toLiteral(column.getName()));
+            }
+            ddl.append(");").append(LINE);
+        }
+        return ddl.toString();
     }
 
     @Override
     public String dropIndex(Index oldIndex) {
-        return null;
+        Assert.notNull(oldIndex, "参数 oldPrimaryKey 不能为空");
+        // drop index auto_increment_id2_c1_idx;
+        return String.format("drop index %s;", toLiteral(oldIndex.getName())) + LINE;
     }
 
     @Override
     public String createIndex(Index newIndex) {
-        return null;
+        Assert.notNull(newIndex, "参数 newIndex 不能为空");
+        final StringBuilder ddl = new StringBuilder();
+        // create unique index auto_increment_id2_c1_idx on auto_increment_id2 (c1);
+        ddl.append("create ");
+        if (newIndex.isUnique()) {
+            ddl.append("unique ");
+        }
+        ddl.append(String.format("index %s on %s (", toLiteral(newIndex.getName()), toLiteral(newIndex.getTableName())));
+        for (int i = 0; i < newIndex.getColumns().size(); i++) {
+            Column column = newIndex.getColumns().get(i);
+            if (i > 0) {
+                ddl.append(", ");
+            }
+            ddl.append(toLiteral(column.getName()));
+        }
+        ddl.append(");").append(LINE);
+        return ddl.toString();
+    }
+
+    protected String toLiteral(String objName) {
+        Assert.isNotBlank(objName, "参数 objName 不能为空");
+        final String special = "@#$%^&*+-/|<>=?![]{};,`. ";
+        objName = StringUtils.trim(objName).toLowerCase();
+        if (StringUtils.containsAny(objName, special)) {
+            return "\"" + objName + "\"";
+        }
+        return objName;
     }
 
     protected String columnType(Column column) {
         Assert.notNull(column, "参数 column 不能为空");
+        String dataType = column.getAttribute("data_type");
+        final String[] dataTypes = new String[]{
+                "smallint", "integer", "bigint", "real", "double precision",
+                "boolean", "bytea",
+        };
+        if (StringUtils.equalsAnyIgnoreCase(dataType, dataTypes)) {
+            return dataType;
+        }
         column = columnTypeMapping(column, DbType.POSTGRE_SQL);
-        String dataType = StringUtils.lowerCase(column.getDataType());
+        dataType = StringUtils.lowerCase(column.getDataType());
         final String[] noParamType = new String[]{
                 "int2", "int4", "int8", "float4", "float8",
                 "timestamp", "timestamptz", "date", "time", "timetz",
