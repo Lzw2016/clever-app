@@ -104,7 +104,7 @@ public class OracleMetaData extends AbstractMetaData {
             if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
                 continue;
             }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, name));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.ORACLE, name));
             Table table = new Table(schema);
             table.setName(tableName);
             table.setComment(comment);
