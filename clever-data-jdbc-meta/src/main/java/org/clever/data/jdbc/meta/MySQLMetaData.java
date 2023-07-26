@@ -276,13 +276,13 @@ public class MySQLMetaData extends AbstractMetaData {
                 column.setPartOfIndex(true);
                 break;
         }
-        // EXTRA 可以有以下取值：
+        // extra 可以有以下取值：
         //   auto_increment: 表示该列是自动递增的
-        //   DEFAULT_GENERATED: 表示该列使用了生成的默认值（如序列或自增字段）
-        //   VIRTUAL GENERATED: 表示该列是虚拟生成的
-        //   STORED GENERATED: 表示该列是存储生成的
+        //   default_generated: 表示该列使用了生成的默认值（如序列或自增字段）
+        //   virtual generated: 表示该列是虚拟生成的
+        //   stored generated: 表示该列是存储生成的
         //   ''（空字符串）：表示该列没有任何特殊属性
-        if (Conv.asString(map.get("extra")).toUpperCase().contains("AUTO_INCREMENT")) {
+        if (Conv.asString(map.get("extra")).toLowerCase().contains("auto_increment")) {
             column.setAutoIncremented(true);
         }
         column.setNotNull(!Conv.asBoolean(map.get("notNull"), true));
@@ -356,14 +356,14 @@ public class MySQLMetaData extends AbstractMetaData {
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             ddl.append(TAB).append(String.format("%s %s", toLiteral(column.getName()), columnType(column)));
-            if (StringUtils.isNotBlank(column.getDefaultValue())) {
-                ddl.append(" default ").append(defaultValue(column));
+            String defaultValue = defaultValue(column);
+            if (StringUtils.isNotBlank(defaultValue)) {
+                ddl.append(" default ").append(defaultValue);
             }
             if (column.isNotNull()) {
-                ddl.append(" not");
+                ddl.append(" not null");
             }
-            ddl.append(" null");
-            if (column.isAutoIncremented()) {
+            if (column.isAutoIncremented() && column.isPartOfPrimaryKey()) {
                 ddl.append(" auto_increment");
             }
             if (StringUtils.isNotBlank(column.getComment())) {
@@ -428,9 +428,11 @@ public class MySQLMetaData extends AbstractMetaData {
             ));
         }
         if (newColumn.isNotNull()) {
-            ddl.append(" not");
+            ddl.append(" not null");
         }
-        ddl.append(" null");
+        if (newColumn.isAutoIncremented() && newColumn.isPartOfPrimaryKey()) {
+            ddl.append(" auto_increment");
+        }
         if (StringUtils.isNotBlank(newColumn.getComment())) {
             ddl.append(String.format(" comment '%s'", toComment(newColumn.getComment())));
         }
@@ -457,9 +459,11 @@ public class MySQLMetaData extends AbstractMetaData {
             ddl.append(" default ").append(defaultValue(newColumn));
         }
         if (newColumn.isNotNull()) {
-            ddl.append(" not");
+            ddl.append(" not null");
         }
-        ddl.append(" null");
+        if (newColumn.isAutoIncremented() && newColumn.isPartOfPrimaryKey()) {
+            ddl.append(" auto_increment");
+        }
         if (StringUtils.isNotBlank(newColumn.getComment())) {
             ddl.append(String.format(" comment '%s'", toComment(newColumn.getComment())));
         }
@@ -483,13 +487,13 @@ public class MySQLMetaData extends AbstractMetaData {
                             "alter table %s modify %s %s",
                             toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                     ));
-                    if (StringUtils.isNotBlank(column.getDefaultValue())) {
-                        ddl.append(" default ").append(defaultValue(column));
+                    String defaultValue = defaultValue(column);
+                    if (StringUtils.isNotBlank(defaultValue)) {
+                        ddl.append(" default ").append(defaultValue);
                     }
                     if (column.isNotNull()) {
-                        ddl.append(" not");
+                        ddl.append(" not null");
                     }
-                    ddl.append(" null");
                     if (StringUtils.isNotBlank(column.getComment())) {
                         ddl.append(String.format(" comment '%s'", toComment(column.getComment())));
                     }
@@ -523,8 +527,9 @@ public class MySQLMetaData extends AbstractMetaData {
                             "alter table %s modify %s %s",
                             toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                     ));
-                    if (StringUtils.isNotBlank(column.getDefaultValue())) {
-                        ddl.append(" default ").append(defaultValue(column));
+                    String defaultValue = defaultValue(column);
+                    if (StringUtils.isNotBlank(defaultValue)) {
+                        ddl.append(" default ").append(defaultValue);
                     }
                     if (column.isNotNull()) {
                         ddl.append(" not");
@@ -557,13 +562,13 @@ public class MySQLMetaData extends AbstractMetaData {
                         "alter table %s modify %s %s",
                         toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                 ));
-                if (StringUtils.isNotBlank(column.getDefaultValue())) {
-                    ddl.append(" default ").append(defaultValue(column));
+                String defaultValue = defaultValue(column);
+                if (StringUtils.isNotBlank(defaultValue)) {
+                    ddl.append(" default ").append(defaultValue);
                 }
                 if (column.isNotNull()) {
-                    ddl.append(" not");
+                    ddl.append(" not null");
                 }
-                ddl.append(" null");
                 if (StringUtils.isNotBlank(column.getComment())) {
                     ddl.append(String.format(" comment '%s'", toComment(column.getComment())));
                 }
@@ -602,8 +607,9 @@ public class MySQLMetaData extends AbstractMetaData {
                         "alter table %s modify %s %s",
                         toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                 ));
-                if (StringUtils.isNotBlank(column.getDefaultValue())) {
-                    ddl.append(" default ").append(defaultValue(column));
+                String defaultValue = defaultValue(column);
+                if (StringUtils.isNotBlank(defaultValue)) {
+                    ddl.append(" default ").append(defaultValue);
                 }
                 if (column.isNotNull()) {
                     ddl.append(" not");

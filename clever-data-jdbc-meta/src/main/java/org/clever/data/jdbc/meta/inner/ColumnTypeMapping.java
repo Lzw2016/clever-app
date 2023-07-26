@@ -38,7 +38,7 @@ public class ColumnTypeMapping {
     public static final TypeConvert NONE_CONVERT = (dataType, size, width, decimalDigits, column) -> {
     };
 
-    // Map<srcDbType, Map<dataType, Map<dataType, List<Tuple<support, convert>>>>>
+    // Map<srcDbType, Map<targetDbType, Map<dataType, List<Tuple<support, convert>>>>>
     public static final ConcurrentMap<DbType, ConcurrentMap<DbType, ConcurrentMap<String, LinkedList<TupleTwo<SupportConvert, TypeConvert>>>>> CONVERT_MAP = new ConcurrentHashMap<>();
 
     /**

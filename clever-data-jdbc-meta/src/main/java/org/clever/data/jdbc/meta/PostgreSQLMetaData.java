@@ -498,8 +498,9 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
             ddl.append(TAB).append(String.format("%s %s", toLiteral(column.getName()), columnType(column)));
-            if (StringUtils.isNotBlank(column.getDefaultValue())) {
-                ddl.append(" default ").append(defaultValue(column));
+            String defaultValue = defaultValue(column);
+            if (StringUtils.isNotBlank(defaultValue)) {
+                ddl.append(" default ").append(defaultValue);
             }
             if (column.isNotNull()) {
                 ddl.append(" not null");

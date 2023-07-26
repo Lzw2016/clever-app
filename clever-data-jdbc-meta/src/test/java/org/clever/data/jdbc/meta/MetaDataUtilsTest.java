@@ -124,7 +124,7 @@ public class MetaDataUtilsTest {
     public void t09() {
         Jdbc jdbc = BaseTest.newPostgresql();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
-        Table table = metaData.getTable("public", "auto_increment_id2");
+        Table table = metaData.getTable("public", "auto_increment_id");
         MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
         log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
