@@ -151,22 +151,22 @@ public class DefaultValueMapping {
     }
 
     public static String mysql(Column column) {
-        String defaultValue = StringUtils.lowerCase(StringUtils.trimToEmpty(column.getDefaultValue()));
         TypeConvert convert = getConvert(column, DbType.MYSQL);
+        String defaultValue = StringUtils.trimToEmpty(column.getDefaultValue());
         defaultValue = convert.convert(defaultValue, column);
         return defaultValue(defaultValue);
     }
 
     public static String oracle(Column column) {
-        String defaultValue = StringUtils.lowerCase(StringUtils.trimToEmpty(column.getDefaultValue()));
         TypeConvert convert = getConvert(column, DbType.ORACLE);
+        String defaultValue = StringUtils.trimToEmpty(column.getDefaultValue());
         defaultValue = convert.convert(defaultValue, column);
         return defaultValue(defaultValue);
     }
 
     public static String postgresql(Column column) {
-        String defaultValue = StringUtils.lowerCase(StringUtils.trimToEmpty(column.getDefaultValue()));
         TypeConvert convert = getConvert(column, DbType.POSTGRE_SQL);
+        String defaultValue = StringUtils.trimToEmpty(column.getDefaultValue());
         defaultValue = convert.convert(defaultValue, column);
         return defaultValue(defaultValue);
     }

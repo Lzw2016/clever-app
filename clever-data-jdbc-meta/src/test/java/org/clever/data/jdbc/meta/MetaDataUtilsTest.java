@@ -112,7 +112,7 @@ public class MetaDataUtilsTest {
     public void t08() {
         Jdbc jdbc = BaseTest.newOracle();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
-        Table table = metaData.getTable("wms8dev", "sys_user3");
+        Table table = metaData.getTable("wms8dev", "sys_user");
         MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
         log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
@@ -124,10 +124,22 @@ public class MetaDataUtilsTest {
     public void t09() {
         Jdbc jdbc = BaseTest.newPostgresql();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
-        Table table = metaData.getTable("public", "auto_increment_id");
+        Table table = metaData.getTable("public", "biz_code");
         MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
         log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
+        // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        jdbc.close();
+    }
+
+    @Test
+    public void t10() {
+        Jdbc jdbc = BaseTest.newMysql();
+        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
+        Table table = metaData.getTable("test", "sys_user");
+        PostgreSQLMetaData postgreSQLMetaData = new PostgreSQLMetaData(jdbc);
+        // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
+        log.info("--> \n\n{}\n", postgreSQLMetaData.createTable(table));
         // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
         jdbc.close();
     }
