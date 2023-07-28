@@ -8,6 +8,7 @@ import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.inner.ColumnTypeMapping;
 import org.clever.data.jdbc.meta.inner.DefaultValueMapping;
 import org.clever.data.jdbc.meta.model.*;
+import org.clever.util.Assert;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -133,12 +134,7 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         return doGetSchemas(schemasName, tablesName, ignoreSchemas, ignoreTables, ignoreTablesPrefix, ignoreTablesSuffix);
     }
 
-    protected abstract List<Schema> doGetSchemas(Collection<String> schemasName,
-                                                 Collection<String> tablesName,
-                                                 Set<String> ignoreSchemas,
-                                                 Set<String> ignoreTables,
-                                                 Set<String> ignoreTablesPrefix,
-                                                 Set<String> ignoreTablesSuffix);
+    protected abstract List<Schema> doGetSchemas(Collection<String> schemasName, Collection<String> tablesName, Set<String> ignoreSchemas, Set<String> ignoreTables, Set<String> ignoreTablesPrefix, Set<String> ignoreTablesSuffix);
 
     @Override
     public List<Schema> getSchemas() {
@@ -208,6 +204,8 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         comment = StringUtils.trimToEmpty(comment);
         return StringUtils.replace(comment, "'", "''");
     }
+
+    protected abstract String toLiteral(String objName);
 
     protected String columnType(Column column) {
         String dataType = StringUtils.lowerCase(column.getDataType());
@@ -315,15 +313,7 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
                 continue;
             }
             // 对比两个字段有无变化
-            if (Objects.equals(newColumn.getName(), oldColumn.getName())
-                    && Objects.equals(newColumn.getComment(), oldColumn.getComment())
-                    && Objects.equals(newColumn.isAutoIncremented(), oldColumn.isAutoIncremented())
-                    && Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())
-                    && Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
-                    && Objects.equals(newColumn.getSize(), oldColumn.getSize())
-                    && Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
-                    && Objects.equals(newColumn.getWidth(), oldColumn.getWidth())
-                    && Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
+            if (Objects.equals(newColumn.getName(), oldColumn.getName()) && Objects.equals(newColumn.getComment(), oldColumn.getComment()) && Objects.equals(newColumn.isAutoIncremented(), oldColumn.isAutoIncremented()) && Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull()) && Objects.equals(newColumn.getDataType(), oldColumn.getDataType()) && Objects.equals(newColumn.getSize(), oldColumn.getSize()) && Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits()) && Objects.equals(newColumn.getWidth(), oldColumn.getWidth()) && Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
                 continue;
             }
             diffColumns.add(TupleTwo.creat(newColumn, oldColumn));
@@ -344,12 +334,8 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         if (!Objects.equals(newPrimaryKey.getName(), oldPrimaryKey.getName())) {
             return true;
         }
-        List<String> newNames = newPrimaryKey.getColumns().stream()
-                .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
-                .collect(Collectors.toList());
-        List<String> oldNames = oldPrimaryKey.getColumns().stream()
-                .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
-                .collect(Collectors.toList());
+        List<String> newNames = newPrimaryKey.getColumns().stream().map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName()))).collect(Collectors.toList());
+        List<String> oldNames = oldPrimaryKey.getColumns().stream().map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName()))).collect(Collectors.toList());
         return !Objects.equals(StringUtils.join(newNames), StringUtils.join(oldNames));
     }
 
@@ -394,12 +380,8 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
             // 对比两个索引有无变化
             boolean change = !Objects.equals(newIndex.getName(), oldIndex.getName()) || !Objects.equals(newIndex.isUnique(), oldIndex.isUnique());
             if (!change) {
-                List<String> newNames = newIndex.getColumns().stream()
-                        .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
-                        .collect(Collectors.toList());
-                List<String> oldNames = oldIndex.getColumns().stream()
-                        .map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName())))
-                        .collect(Collectors.toList());
+                List<String> newNames = newIndex.getColumns().stream().map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName()))).collect(Collectors.toList());
+                List<String> oldNames = oldIndex.getColumns().stream().map(column -> StringUtils.lowerCase(StringUtils.trim(column.getName()))).collect(Collectors.toList());
                 change = !Objects.equals(StringUtils.join(newNames), StringUtils.join(oldNames));
             }
             if (change) {
@@ -422,6 +404,7 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         }
         Column newColumn = new Column(column.getTable());
         BeanUtils.copyProperties(column, newColumn);
+        newColumn.getAttributes().putAll(column.getAttributes());
         // 不同数据库需要做类型映射 dataType size width decimalDigits
         switch (targetDb) {
             case MYSQL:
@@ -458,5 +441,47 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
                 return DefaultValueMapping.postgresql(column);
         }
         return StringUtils.trim(column.getDefaultValue());
+    }
+
+    public String updateColumnPosition(Table table) {
+        Assert.notNull(table, "参数 newTable 不能为空");
+        final Table tmpTable = new Table(table.getSchema());
+        BeanUtils.copyProperties(table, tmpTable);
+        tmpTable.getAttributes().putAll(table.getAttributes());
+        table.getColumns().forEach(tmpTable::addColumn);
+        for (Index index : table.getIndices()) {
+            Index tmpIndex = new Index(tmpTable);
+            BeanUtils.copyProperties(index, tmpIndex);
+            index.getColumns().forEach(tmpIndex::addColumn);
+            tmpTable.addIndex(tmpIndex);
+        }
+        tmpTable.setName(table.getName() + "__tmp");
+        final StringBuilder sql = new StringBuilder();
+        // 创建临时表 | create table sys_lock__tmp
+        sql.append(createTable(tmpTable)).append(LINE);
+        // 把数据转移到临时表 | insert into sys_lock__tmp(lock_id, lock_name) select lock_id, lock_name from sys_lock;
+        sql.append("insert into ").append(toLiteral(tmpTable.getName())).append("(");
+        final List<Column> columns = table.getColumns();
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            if (i > 0) {
+                sql.append(", ");
+            }
+            sql.append(toLiteral(column.getName()));
+        }
+        sql.append(") select ");
+        for (int i = 0; i < columns.size(); i++) {
+            Column column = columns.get(i);
+            if (i > 0) {
+                sql.append(", ");
+            }
+            sql.append(toLiteral(column.getName()));
+        }
+        sql.append(" from ").append(toLiteral(table.getName())).append(";").append(LINE).append(LINE);
+        // 删除目标表 | drop table sys_lock;
+        sql.append(dropTable(table));
+        // 修改零时表为目标表 alter table sys_lock__tmp rename to sys_lock;
+        sql.append(alterTable(table, tmpTable));
+        return sql.toString();
     }
 }

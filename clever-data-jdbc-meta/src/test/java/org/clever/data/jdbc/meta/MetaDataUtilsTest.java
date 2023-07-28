@@ -143,4 +143,13 @@ public class MetaDataUtilsTest {
         // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
         jdbc.close();
     }
+
+    @Test
+    public void t11() {
+        Jdbc jdbc = BaseTest.newMysql();
+        AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
+        Table table = metaData.getTable("test", "sys_login_log");
+        log.info("--> \n\n{}\n", metaData.updateColumnPosition(table));
+        jdbc.close();
+    }
 }

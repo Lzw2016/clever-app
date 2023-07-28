@@ -121,14 +121,12 @@ public interface DataBaseMetaData {
      * 新增“索引”的 DDL 语句
      */
     String createIndex(Index newIndex);
+
+    /**
+     * 字段顺序调整
+     */
+    String updateColumnPosition(Table newTable);
 }
-// 1.表重命名: 表名、表备注
-// 2.表字段: 新增、删除、修改
-// 3.表索引: 新增、删除、修改
-// 4.表主键: 新增、删除、修改
-// 5.字段顺序调整
-// 6.新增表
-// 7.删除表
 
 //ModifyProcedureSQL
 //executeModifyProcedureSQL

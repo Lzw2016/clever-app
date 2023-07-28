@@ -692,6 +692,7 @@ public class OracleMetaData extends AbstractMetaData {
         return ddl.toString();
     }
 
+    @Override
     protected String toLiteral(String objName) {
         Assert.isNotBlank(objName, "参数 objName 不能为空");
         final String special = "@#$%^&*+-/|<>=?![]{};,`. ";
