@@ -349,6 +349,26 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
+     * 查询返回一个 Integer
+     *
+     * @param sqlId SQL ID
+     * @param param 参数
+     */
+    public Integer queryInt(String sqlId, Object param) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryInt(sqlInfo.getValue1(), sqlInfo.getValue2());
+    }
+
+    /**
+     * 查询返回一个 Integer
+     *
+     * @param sqlId SQL ID
+     */
+    public Integer queryInt(String sqlId) {
+        return jdbc.queryInt(getSql(sqlId));
+    }
+
+    /**
      * 查询返回一个 Double
      *
      * @param sqlId SQL ID
@@ -366,6 +386,26 @@ public class MyBatis extends AbstractDataSource {
      */
     public Double queryDouble(String sqlId) {
         return jdbc.queryDouble(getSql(sqlId));
+    }
+
+    /**
+     * 查询返回一个 Float
+     *
+     * @param sqlId SQL ID
+     * @param param 参数
+     */
+    public Float queryFloat(String sqlId, Object param) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFloat(sqlInfo.getValue1(), sqlInfo.getValue2());
+    }
+
+    /**
+     * 查询返回一个 Float
+     *
+     * @param sqlId SQL ID
+     */
+    public Float queryFloat(String sqlId) {
+        return jdbc.queryFloat(getSql(sqlId));
     }
 
     /**

@@ -666,6 +666,35 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
+     * 查询返回一个 Integer (sql返回多条数据会抛出异常)
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Integer queryInt(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, Integer.class));
+    }
+
+    /**
+     * 查询返回一个 Integer (sql返回多条数据会抛出异常)
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Integer queryInt(String sql, Object param) {
+        return queryInt(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询返回一个 Integer (sql返回多条数据会抛出异常)
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Integer queryInt(String sql) {
+        return queryInt(sql, Collections.emptyMap());
+    }
+
+    /**
      * 查询返回一个 Double (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
@@ -694,6 +723,35 @@ public class Jdbc extends AbstractDataSource {
         return queryDouble(sql, Collections.emptyMap());
     }
 
+    /**
+     * 查询返回一个 Float (sql返回多条数据会抛出异常)
+     *
+     * @param sql      sql脚本，参数格式[:param]
+     * @param paramMap 参数，参数格式[:param]
+     */
+    public Float queryFloat(String sql, Map<String, Object> paramMap) {
+        return queryData(sql, paramMap, new QueryObject<>(this, Float.class));
+    }
+
+    /**
+     * 查询返回一个 Float (sql返回多条数据会抛出异常)
+     *
+     * @param sql   sql脚本，参数格式[:param]
+     * @param param 参数，参数格式[:param]
+     */
+    public Float queryFloat(String sql, Object param) {
+        return queryFloat(sql, BeanCopyUtils.toMap(param));
+    }
+
+    /**
+     * 查询返回一个 Float (sql返回多条数据会抛出异常)
+     *
+     * @param sql sql脚本，参数格式[:param]
+     */
+    public Float queryFloat(String sql) {
+        return queryFloat(sql, Collections.emptyMap());
+    }
+    
     /**
      * 查询返回一个 BigDecimal (sql返回多条数据会抛出异常)
      *
