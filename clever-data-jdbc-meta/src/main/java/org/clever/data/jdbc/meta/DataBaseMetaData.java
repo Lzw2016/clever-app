@@ -127,8 +127,3 @@ public interface DataBaseMetaData {
      */
     String updateColumnPosition(Table newTable);
 }
-
-//ModifyProcedureSQL
-//executeModifyProcedureSQL
-//executeDDL
-//DataSync
