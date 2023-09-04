@@ -45,7 +45,9 @@ public class TaskBootstrap {
         logs.add("  jobExecutorQueueSize      : " + schedulerConfig.getJobExecutorQueueSize());
         logs.add("  loadWeight                : " + schedulerConfig.getLoadWeight());
         logs.add("  shellJobWorkingDir        : " + schedulerConfig.getShellJobWorkingDir());
-        BannerUtils.printConfig(log, "定时任务配置", logs.toArray(new String[0]));
+        if (schedulerConfig.isEnable()) {
+            BannerUtils.printConfig(log, "定时任务配置", logs.toArray(new String[0]));
+        }
         TaskBootstrap taskBootstrap = create(schedulerConfig);
         AppContextHolder.registerBean("taskBootstrap", taskBootstrap, true);
         AppContextHolder.registerBean("taskInstance", taskBootstrap.taskInstance, true);

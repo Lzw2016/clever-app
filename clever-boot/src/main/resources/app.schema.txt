@@ -1,7 +1,0 @@
-"TODO":
-
-  "allOf": [
-    {
-      "$ref": "#/definitions/loggingDefinition"
-    }
-  ],

@@ -100,7 +100,9 @@ public class RedisBootstrap {
                 logs.add("        maxWait      : " + pool.getMaxWait().toMillis() + "ms");
             }
         });
-        BannerUtils.printConfig(log, "redis数据源配置", logs.toArray(new String[0]));
+        if (redisConfig.isEnable()) {
+            BannerUtils.printConfig(log, "redis数据源配置", logs.toArray(new String[0]));
+        }
         if (!redisConfig.isEnable()) {
             return;
         }

@@ -36,20 +36,22 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
     public static CorsFilter create(Environment environment) {
         CorsConfig corsConfig = Binder.get(environment).bind(CorsConfig.PREFIX, CorsConfig.class).orElseGet(CorsConfig::new);
         AppContextHolder.registerBean("corsConfig", corsConfig, true);
-        BannerUtils.printConfig(log, "cors跨域配置",
-                new String[]{
-                        "cors:",
-                        "  enable               : " + corsConfig.isEnable(),
-                        "  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "),
-                        "  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "),
-                        "  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "),
-                        "  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "),
-                        "  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "),
-                        "  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "),
-                        "  allowCredentials     : " + corsConfig.getAllowCredentials(),
-                        "  maxAge               : " + corsConfig.getMaxAge(),
-                }
-        );
+        if (corsConfig.isEnable()) {
+            BannerUtils.printConfig(log, "cors跨域配置",
+                    new String[]{
+                            "cors:",
+                            "  enable               : " + corsConfig.isEnable(),
+                            "  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "),
+                            "  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "),
+                            "  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "),
+                            "  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "),
+                            "  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "),
+                            "  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "),
+                            "  allowCredentials     : " + corsConfig.getAllowCredentials(),
+                            "  maxAge               : " + corsConfig.getMaxAge(),
+                    }
+            );
+        }
         return create(corsConfig);
     }
 

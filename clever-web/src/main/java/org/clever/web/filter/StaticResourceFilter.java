@@ -60,7 +60,9 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
                 .map(handler -> StringUtils.rightPad(handler.getHostedPath(), maxLength) + ": " + handler.getLocationAbsPath())
                 .collect(Collectors.toList())
         );
-        BannerUtils.printConfig(log, "StaticResource配置", logs.toArray(new String[0]));
+        if (staticResourceConfig.isEnable()) {
+            BannerUtils.printConfig(log, "StaticResource配置", logs.toArray(new String[0]));
+        }
         return create(rootPath, staticResourceConfig);
     }
 

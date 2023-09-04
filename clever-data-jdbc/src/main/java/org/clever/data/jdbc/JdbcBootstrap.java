@@ -73,16 +73,18 @@ public class JdbcBootstrap {
 
     private void initP6Spy() {
         final JdbcConfig.JdbcMetrics metrics = Optional.of(jdbcConfig.getMetrics()).orElse(new JdbcConfig.JdbcMetrics());
-        BannerUtils.printConfig(log, "jdbc性能监控配置",
-                new String[]{
-                        "metrics: ",
-                        "  enable       : " + metrics.isEnable(),
-                        "  ignoreSql    : " + metrics.getIgnoreSql().stream().map(sql -> String.format("\"%s\"", SqlLoggerUtils.deleteWhitespace(sql))).collect(Collectors.toList()),
-                        "  maxSqlCount  : " + metrics.getMaxSqlCount(),
-                        "  histogram    : " + metrics.getHistogram(),
-                        "  histogramTopN: " + metrics.getHistogramTopN(),
-                }
-        );
+        if (metrics.isEnable()) {
+            BannerUtils.printConfig(log, "jdbc性能监控配置",
+                    new String[]{
+                            "metrics: ",
+                            "  enable       : " + metrics.isEnable(),
+                            "  ignoreSql    : " + metrics.getIgnoreSql().stream().map(sql -> String.format("\"%s\"", SqlLoggerUtils.deleteWhitespace(sql))).collect(Collectors.toList()),
+                            "  maxSqlCount  : " + metrics.getMaxSqlCount(),
+                            "  histogram    : " + metrics.getHistogram(),
+                            "  histogramTopN: " + metrics.getHistogramTopN(),
+                    }
+            );
+        }
         P6SpyMeter.init(metrics);
         Slf4JLogger.init(metrics);
     }
@@ -106,7 +108,9 @@ public class JdbcBootstrap {
             logs.add("      location: " + path);
             logs.add("      filter  : " + location.getFilter());
         }
-        BannerUtils.printConfig(log, "mybatis配置", logs.toArray(new String[0]));
+        if (mybatisConfig.isEnable()) {
+            BannerUtils.printConfig(log, "mybatis配置", logs.toArray(new String[0]));
+        }
         if (!mybatisConfig.isEnable()) {
             return;
         }
@@ -163,7 +167,9 @@ public class JdbcBootstrap {
             logs.add("      minimumIdle    : " + config.getMinimumIdle());
             logs.add("      maximumPoolSize: " + config.getMaximumPoolSize());
         });
-        BannerUtils.printConfig(log, "jdbc数据源配置", logs.toArray(new String[0]));
+        if (jdbcConfig.isEnable()) {
+            BannerUtils.printConfig(log, "jdbc数据源配置", logs.toArray(new String[0]));
+        }
         if (!jdbcConfig.isEnable()) {
             return;
         }

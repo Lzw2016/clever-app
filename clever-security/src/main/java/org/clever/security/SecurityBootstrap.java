@@ -210,7 +210,9 @@ public class SecurityBootstrap {
         logs.add("    enableRefreshToken  : " + token.isEnableRefreshToken());
         logs.add("    refreshTokenName    : " + token.getRefreshTokenName());
         logs.add("    refreshTokenValidity: " + token.getRefreshTokenValidity().toDays() + "d");
-        BannerUtils.printConfig(log, "security配置", logs.toArray(new String[0]));
+        if (securityConfig.isEnable()) {
+            BannerUtils.printConfig(log, "security配置", logs.toArray(new String[0]));
+        }
         return create(securityConfig);
     }
 
