@@ -13,16 +13,16 @@ val buildSnapshot: Boolean =
     (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
-    const val springBootVersion = "2.6.14"
-    const val springCloudVersion = "2021.0.5"
+    const val springBootVersion = "2.6.15"
+    const val springCloudVersion = "2021.0.8"
     const val javalinVersion = "4.6.8"
     const val kotlinVersion = "1.6.21"
     const val kotlinxCoroutinesVersion = "1.6.4"
     const val groovyVersion = "4.0.8"
     const val antlr4Version = "4.9.3"
-    const val jmhVersion = "1.36"
+    const val jmhVersion = "1.37"
     const val querydslVersion = "5.0.0"
-    const val schemacrawlerVersion = "16.19.9"
+    const val schemacrawlerVersion = "16.19.11"
     const val poiVersion = "5.2.3"
 }
 
