@@ -164,7 +164,7 @@ subprojects {
             dependency("org.apache.poi:poi-ooxml:${Ver.poiVersion}")
             dependency("org.apache.poi:poi-ooxml:${Ver.poiVersion}")
             dependency("org.apache.poi:poi-ooxml-schemas:${Ver.poiVersion}")
-            dependency("com.alibaba:easyexcel:3.1.1")
+            dependency("com.alibaba:easyexcel:3.3.2")
             // querydsl
             dependency("com.querydsl:querydsl-core:${Ver.querydslVersion}")
             dependency("com.querydsl:querydsl-sql:${Ver.querydslVersion}")
@@ -196,7 +196,6 @@ subprojects {
             dependency("org.javassist:javassist:3.28.0-GA")
             dependency("org.redisson:redisson:3.19.3")
             dependency("de.ruedigermoeller:fst:2.57")
-            dependency("com.alibaba:easyexcel:3.3.2")
         }
     }
 
