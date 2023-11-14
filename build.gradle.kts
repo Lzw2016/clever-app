@@ -9,7 +9,7 @@ val localProperty = Properties().apply {
 }
 
 val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVersion"]
-val buildSnapshot: Boolean = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
+val buildSnapshot = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
     const val springBootVersion = "2.6.15"
@@ -77,6 +77,12 @@ allprojects {
     java.targetCompatibility = JavaVersion.VERSION_1_8
 
     tasks.compileJava {
+        options.encoding = "UTF-8"
+        // options.isWarnings = false
+        // options.isDeprecation = true
+        options.compilerArgs.add("-parameters")
+    }
+    tasks.compileTestJava {
         options.encoding = "UTF-8"
         // options.isWarnings = false
         // options.isDeprecation = true
