@@ -1,6 +1,7 @@
 dependencies {
     api(project(":clever-spring"))
     api("cglib:cglib")
+    api("javax.xml.bind:jaxb-api")
     api("com.fasterxml.jackson.core:jackson-databind")
     api("org.apache.commons:commons-lang3")
     api("commons-io:commons-io")

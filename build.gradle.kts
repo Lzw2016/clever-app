@@ -9,21 +9,20 @@ val localProperty = Properties().apply {
 }
 
 val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVersion"]
-val buildSnapshot: Boolean =
-    (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
+val buildSnapshot: Boolean = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
     const val springBootVersion = "2.6.15"
     const val springCloudVersion = "2021.0.8"
     const val javalinVersion = "4.6.8"
     const val kotlinVersion = "1.6.21"
-    const val kotlinxCoroutinesVersion = "1.6.4"
-    const val groovyVersion = "4.0.8"
+    const val kotlinxCoroutinesVersion = "1.7.3"
+    const val groovyVersion = "4.0.15"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.37"
     const val querydslVersion = "5.0.0"
     const val schemacrawlerVersion = "16.19.11"
-    const val poiVersion = "5.2.3"
+    const val poiVersion = "5.2.4"
 }
 
 buildscript {
@@ -109,6 +108,8 @@ subprojects {
             dependency("jakarta.persistence:jakarta.persistence-api:2.2.3")
             dependency("com.google.code.findbugs:jsr305:3.0.2")
             dependency("org.glassfish:javax.el:3.0.0")
+            // 新版本jdk缺少的lib
+            dependency("javax.xml.bind:jaxb-api:2.3.1")
             // validation
             dependency("javax.validation:validation-api:2.0.1.Final")
             dependency("org.hibernate.validator:hibernate-validator:6.2.5.Final")
