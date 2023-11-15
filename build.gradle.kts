@@ -22,7 +22,7 @@ object Ver {
     const val jmhVersion = "1.37"
     const val querydslVersion = "5.0.0"
     const val schemacrawlerVersion = "16.19.11"
-    const val poiVersion = "5.2.4"
+    const val poiVersion = "4.1.2"
 }
 
 buildscript {
