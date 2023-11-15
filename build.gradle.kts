@@ -216,9 +216,10 @@ subprojects {
         annotationProcessor("org.projectlombok:lombok")
         testCompileOnly("org.projectlombok:lombok")
         testAnnotationProcessor("org.projectlombok:lombok")
+        testImplementation("org.junit.jupiter:junit-jupiter")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("org.openjdk.jmh:jmh-core")
         testImplementation("org.openjdk.jmh:jmh-generator-annprocess")
-        testImplementation("org.junit.jupiter:junit-jupiter")
     }
 
     tasks.withType<Copy>().all {
