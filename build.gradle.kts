@@ -1,3 +1,5 @@
+@file:Suppress("ConstPropertyName")
+
 import org.gradle.plugins.ide.idea.model.IdeaLanguageLevel
 import java.util.*
 
@@ -15,7 +17,7 @@ object Ver {
     const val springBootVersion = "2.6.15"
     const val springCloudVersion = "2021.0.8"
     const val javalinVersion = "4.6.8"
-    const val kotlinVersion = "1.6.21"
+    const val kotlinVersion = "1.9.20"
     const val kotlinxCoroutinesVersion = "1.7.3"
     const val groovyVersion = "4.0.15"
     const val antlr4Version = "4.9.3"
@@ -88,6 +90,9 @@ allprojects {
         // options.isDeprecation = true
         options.compilerArgs.add("-parameters")
     }
+
+    // 让Spring使用相同的Kotlin版本
+    extra["kotlin.version"] = Ver.kotlinVersion
 }
 
 subprojects {
