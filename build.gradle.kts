@@ -4,7 +4,7 @@ import org.gradle.plugins.ide.idea.model.IdeaLanguageLevel
 import java.util.*
 
 val localProperty = Properties().apply {
-    val local = project.rootProject.file("local.properties2")
+    val local = project.rootProject.file("local.properties")
     if (local.exists()) {
         local.inputStream().use { this.load(it) }
     }
