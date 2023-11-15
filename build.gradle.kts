@@ -4,7 +4,7 @@ import org.gradle.plugins.ide.idea.model.IdeaLanguageLevel
 import java.util.*
 
 val localProperty = Properties().apply {
-    val local = project.rootProject.file("local.properties")
+    val local = project.rootProject.file("local.properties2")
     if (local.exists()) {
         local.inputStream().use { this.load(it) }
     }
@@ -259,14 +259,14 @@ subprojects {
                 isAllowInsecureProtocol = true
                 credentials(HttpHeaderCredentials::class) {
                     name = "Authorization"
-                    value = "token ${localProperty["GITEA_TOKEN"] as String}"
+                    value = "token ${localProperty["GITEA_TOKEN"]}"
                 }
                 authentication {
                     create<HttpHeaderAuthentication>("header")
                 }
                 // credentials(PasswordCredentials::class) {
-                //     username = localProperty["NEXUS_USERNAME"] as String?
-                //     password = localProperty["NEXUS_PASSWORD"] as String?
+                //     username = "${localProperty["NEXUS_USERNAME"]}"
+                //     password = "${localProperty["NEXUS_PASSWORD"]}"
                 // }
             }
         }
