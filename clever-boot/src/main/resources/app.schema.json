@@ -1235,6 +1235,36 @@
                             "description": "异步请求超时时间，默认：0s (0表示不超时)",
                             "$ref": "#/definitions/duration"
                         },
+                        "multipart": {
+                            "type": "object",
+                            "description": "用于配置http分段上传",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "description": "是否启用分段上传支持"
+                                },
+                                "location": {
+                                    "type": "string",
+                                    "description": "上传文件的临时位置，默认值：“System.getProperty('java.io.tmpdir')”"
+                                },
+                                "maxFileSize": {
+                                    "description": "最大文件大小，默认值：“10MB”",
+                                    "$ref": "#/definitions/dataSize"
+                                },
+                                "maxRequestSize": {
+                                    "description": "最大请求大小，默认值：“50MB”",
+                                    "$ref": "#/definitions/dataSize"
+                                },
+                                "fileSizeThreshold": {
+                                    "description": "将文件写入磁盘的阈值，，默认值：“4KB”",
+                                    "$ref": "#/definitions/dataSize"
+                                },
+                                "resolveLazily": {
+                                    "type": "boolean",
+                                    "description": "是否在文件或参数访问时延迟解析多部分请求"
+                                }
+                            }
+                        },
                         "singlePageRoot": {
                             "type": "array",
                             "description": "花哨的 404 处理程序，在 '/path' 上返回 404 的指定文件(常用于单页面应用)",
