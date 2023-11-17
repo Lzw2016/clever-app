@@ -96,11 +96,11 @@ redis:
       password: 'admin123456'
     sentinel:
       master: 'node_1'
-      nodes: ['node_1:6379', 'node_2:6379', 'node_3:6379']
+      nodes: [ 'node_1:6379', 'node_2:6379', 'node_3:6379' ]
       database: 0
       password: 'admin123456'
     cluster:
-      nodes: ['node_1:6379', 'node_2:6379', 'node_3:6379']
+      nodes: [ 'node_1:6379', 'node_2:6379', 'node_3:6379' ]
       maxRedirects: 16
       password: 'admin123456'
       refresh:
@@ -108,7 +108,7 @@ redis:
         period: 16s
         adaptive: false
     validateConnection: true
-    ssl:  false
+    ssl: false
     readTimeout: 30s
     connectTimeout: 10s
     shutdownTimeout: 100ms
@@ -223,8 +223,8 @@ web:
     packagePrefix: 'org.clever.app.mvc.'
     allowPackages: [ 'org.clever.app.mvc.' ]
     defTransactional:
-      defDatasource: ['mysql']
-      datasource: ['mysql', 'postgresql']
+      defDatasource: [ 'mysql' ]
+      datasource: [ 'mysql', 'postgresql' ]
       propagation: REQUIRED
       isolation: DEFAULT
       timeout: -1
