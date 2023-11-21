@@ -70,7 +70,8 @@
         select * from entity_a
         where a=#{a}
           and b=#{b}
-          and id in ('@{join(arr)}')
+          and id in ('@{join(arr, long)}')
+          and id2 in ('@{join(arr)}')
           and c=#{c}
     </select>
 

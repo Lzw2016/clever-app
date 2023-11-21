@@ -3,7 +3,7 @@ package org.clever.data.dynamic.sql;
 import lombok.Getter;
 import org.clever.data.dynamic.sql.reflection.MetaObject;
 import org.clever.data.dynamic.sql.reflection.property.PropertyTokenizer;
-import org.clever.data.dynamic.sql.utils.Conv;
+import org.clever.data.dynamic.sql.utils.JavaType;
 
 import java.util.*;
 
@@ -123,43 +123,7 @@ public class BoundSql {
                 value = metaObject.getValue(name);
             }
             String javaType = parameterMapping.getJavaType();
-            if (value != null && javaType != null) {
-                Object newValue = null;
-                switch (javaType) {
-                    case "int":
-                        newValue = Conv.asInteger(value, null);
-                        break;
-                    case "long":
-                        newValue = Conv.asLong(value, null);
-                        break;
-                    case "decimal":
-                        newValue = Conv.asDecimal(value, null);
-                        break;
-                    case "char":
-                        newValue = Conv.asString(value, null);
-                        if (newValue != null) {
-                            if (!newValue.toString().isEmpty()) {
-                                newValue = newValue.toString().charAt(0);
-                            } else {
-                                newValue = null;
-                            }
-                        }
-                        break;
-                    case "string":
-                        newValue = Conv.asString(value, null);
-                        break;
-                    case "date":
-                        newValue = Conv.asDate(value, null);
-                        break;
-                    case "bool":
-                        newValue = Conv.asBoolean(value, null);
-                        break;
-                }
-                if (newValue == null) {
-                    throw new RuntimeException("参数类型转换失败，javaType=" + javaType + "，参数名=" + name + "参数值=" + value);
-                }
-                value = newValue;
-            }
+            value = JavaType.conv(javaType, value);
             parameterValueList.add(value);
             String newName = name;
             if (needRename(name)) {

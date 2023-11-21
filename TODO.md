@@ -560,6 +560,7 @@ DAO数据访问层
 
 ### clever-data-jdbc
 - [OK] 需要支持 `#{varName,javaType=int|long|decimal|char|string|date|bool}` 语法
+- [OK] join函数支持 `join(java_arr)` 和 `join(java_arr, javaType)` 两种调用形式
 
 ### clever-data-jdbc-meta
 ```

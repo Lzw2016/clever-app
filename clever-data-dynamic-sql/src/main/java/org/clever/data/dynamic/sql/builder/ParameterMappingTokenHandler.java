@@ -4,9 +4,12 @@ import lombok.Getter;
 import org.clever.data.dynamic.sql.ParameterMapping;
 import org.clever.data.dynamic.sql.exception.BuilderException;
 import org.clever.data.dynamic.sql.parsing.TokenHandler;
+import org.clever.data.dynamic.sql.utils.JavaType;
 import org.clever.data.dynamic.sql.utils.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 作者：lizw <br/>
@@ -15,17 +18,7 @@ import java.util.*;
 @Getter
 public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
     private static final String PARAMETER_PROPERTIES = "javaType";
-    private static final Set<String> SUPPORT_JAVA_TYPE = new HashSet<>();
 
-    static {
-        SUPPORT_JAVA_TYPE.add("int");
-        SUPPORT_JAVA_TYPE.add("long");
-        SUPPORT_JAVA_TYPE.add("decimal");
-        SUPPORT_JAVA_TYPE.add("char");
-        SUPPORT_JAVA_TYPE.add("string");
-        SUPPORT_JAVA_TYPE.add("date");
-        SUPPORT_JAVA_TYPE.add("bool");
-    }
 
     protected final List<ParameterMapping> parameterList = new ArrayList<>();
 
@@ -51,8 +44,8 @@ public class ParameterMappingTokenHandler extends BaseBuilder implements TokenHa
                 if (value != null) {
                     value = value.toLowerCase().trim();
                 }
-                if (!SUPPORT_JAVA_TYPE.contains(value)) {
-                    throw new BuilderException("An invalid javaType #{" + content + "}.  Valid properties are " + SUPPORT_JAVA_TYPE);
+                if (!JavaType.supportType(value)) {
+                    throw new BuilderException("An invalid javaType #{" + content + "}.  Valid properties are " + JavaType.allType());
                 }
                 parameterMapping.setJavaType(value);
             } else if ("expression".equals(name)) {

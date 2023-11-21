@@ -170,7 +170,7 @@ public class MapperXmlParserTest {
         params.put("a", "aaa");
         params.put("b", "bbb");
         params.put("c", "ccc");
-        params.put("arr", Arrays.asList(1, 2, 8, 4, 5, 6));
+        params.put("arr", Arrays.asList("1", "2", "8", "4", "5", "6"));
 
         BoundSql boundSql = sqlSource.getBoundSql(DbType.MYSQL, params);
         log.info("--> {}", TestUtils.deleteWhitespace(boundSql.getSql()));
