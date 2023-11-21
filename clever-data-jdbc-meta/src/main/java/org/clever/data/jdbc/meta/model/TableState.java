@@ -11,7 +11,10 @@ import java.util.Objects;
  * 创建时间：2023/07/30 22:04 <br/>
  */
 @Data
-public class TableSyncInfo {
+public class TableState {
+    /**
+     * 表名称
+     */
     private String tableName;
     /**
      * 总数据量
