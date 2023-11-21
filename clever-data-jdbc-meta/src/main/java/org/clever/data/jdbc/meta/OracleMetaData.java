@@ -312,7 +312,7 @@ public class OracleMetaData extends AbstractMetaData {
             String key = String.format("schemaName=%s|type=%s|name=%s", schemaName, type, name);
             TupleTwo<StringBuilder, Procedure> tuple = routineMap.get(key);
             if (tuple == null) {
-                tuple = TupleTwo.creat(new StringBuilder(), new Procedure(schema));
+                tuple = TupleTwo.creat(new StringBuilder("create or replace "), new Procedure(schema));
                 routineMap.put(key, tuple);
                 schema.addProcedure(tuple.getValue2());
             }
@@ -327,7 +327,11 @@ public class OracleMetaData extends AbstractMetaData {
             tuple.getValue2().getAttributes().putAll(map);
         }
         for (TupleTwo<StringBuilder, Procedure> tuple : routineMap.values()) {
-            tuple.getValue2().setDefinition(tuple.getValue1().toString());
+            String def = StringUtils.trim(tuple.getValue1().toString());
+            if (!StringUtils.endsWith(def, ";")) {
+                def = def + ";";
+            }
+            tuple.getValue2().setDefinition(def);
         }
         // 查询序列
         sql.setLength(0);
@@ -403,16 +407,16 @@ public class OracleMetaData extends AbstractMetaData {
         if (!Objects.equals(newTable.getName(), oldTable.getName())) {
             // rename sys_user to "sys_user1"
             ddl.append(String.format(
-                    "rename %s to %s;",
-                    toLiteral(oldTable.getName()), toLiteral(newTable.getName())
+                "rename %s to %s;",
+                toLiteral(oldTable.getName()), toLiteral(newTable.getName())
             )).append(LINE);
         }
         // 修改表备注
         if (!Objects.equals(newTable.getComment(), oldTable.getComment())) {
             // comment on table "sys_user1" is '用户表''u'''
             ddl.append(String.format(
-                    "comment on table %s is '%s';",
-                    toLiteral(newTable.getName()), toComment(newTable.getComment())
+                "comment on table %s is '%s';",
+                toLiteral(newTable.getName()), toComment(newTable.getComment())
             )).append(LINE);
         }
         // 字段变化、主键变化、索引变化
@@ -480,8 +484,8 @@ public class OracleMetaData extends AbstractMetaData {
         // 表备注
         if (StringUtils.isNotBlank(newTable.getComment())) {
             ddl.append(String.format(
-                    "comment on table %s is '%s';",
-                    toLiteral(newTable.getName()), toComment(newTable.getComment()))
+                "comment on table %s is '%s';",
+                toLiteral(newTable.getName()), toComment(newTable.getComment()))
             ).append(LINE);
         }
         // 字段备注
@@ -490,8 +494,8 @@ public class OracleMetaData extends AbstractMetaData {
                 continue;
             }
             ddl.append(String.format(
-                    "comment on column %s.%s is '%s';",
-                    toLiteral(newTable.getName()), toLiteral(column.getName()), toComment(column.getComment()))
+                "comment on column %s.%s is '%s';",
+                toLiteral(newTable.getName()), toLiteral(column.getName()), toComment(column.getComment()))
             ).append(LINE);
         }
         // 索引
@@ -513,27 +517,27 @@ public class OracleMetaData extends AbstractMetaData {
         // alter table sys_user2 rename column is_enable2 to is_enable3
         if (!Objects.equals(newColumn.getName(), oldColumn.getName())) {
             ddl.append(String.format(
-                    "alter table %s rename column %s to %s;",
-                    toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())
+                "alter table %s rename column %s to %s;",
+                toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())
             )).append(LINE);
         }
         // comment on column sys_user.is_enable_1 is '是否启用: 0:禁用，1:启用_1'
         if (!Objects.equals(newColumn.getComment(), oldColumn.getComment())) {
             ddl.append(String.format(
-                    "comment on column %s.%s is '%s';",
-                    toLiteral(tableName), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+                "comment on column %s.%s is '%s';",
+                toLiteral(tableName), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
             )).append(LINE);
         }
         // alter table sys_user modify is_enable_1 number(16) default 16 not null
         if (!Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
-                || !Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())
-                || !Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())
-                || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
-                || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
-                || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
+            || !Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())
+            || !Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())
+            || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
+            || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
+            || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
             ddl.append(String.format(
-                    "alter table %s modify %s %s",
-                    toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)
+                "alter table %s modify %s %s",
+                toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)
             ));
             if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
                 ddl.append(" default ").append(defaultValue(newColumn));
@@ -558,8 +562,8 @@ public class OracleMetaData extends AbstractMetaData {
         final StringBuilder ddl = new StringBuilder();
         // alter table sys_user add column_name varchar2(100) default 'aaa' not null
         ddl.append(String.format(
-                "alter table %s add %s %s",
-                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
+            "alter table %s add %s %s",
+            toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
         ));
         if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
             ddl.append(" default ").append(defaultValue(newColumn));
@@ -571,8 +575,8 @@ public class OracleMetaData extends AbstractMetaData {
         // comment on column sys_user.column_name is '测试'
         if (StringUtils.isNotBlank(newColumn.getComment())) {
             ddl.append(String.format(
-                    "comment on column %s.%s is '%s';",
-                    toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+                "comment on column %s.%s is '%s';",
+                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
             )).append(LINE);
         }
         return ddl.toString();
@@ -592,8 +596,8 @@ public class OracleMetaData extends AbstractMetaData {
         if (newPrimaryKey != null) {
             // alter table sys_user2 add constraint "sys_user2_pk"  primary key (user_id, user_code)
             ddl.append(String.format(
-                    "alter table %s add constraint %s primary key (",
-                    toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+                "alter table %s add constraint %s primary key (",
+                toLiteral(tableName), toLiteral(newPrimaryKey.getName())
             ));
             for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
                 Column column = newPrimaryKey.getColumns().get(i);
@@ -620,8 +624,8 @@ public class OracleMetaData extends AbstractMetaData {
         final StringBuilder ddl = new StringBuilder();
         // alter table sys_user2 add constraint "sys_user2_pk"  primary key (user_id, user_code)
         ddl.append(String.format(
-                "alter table %s add constraint %s primary key (",
-                toLiteral(newPrimaryKey.getTableName()), toLiteral(newPrimaryKey.getName())
+            "alter table %s add constraint %s primary key (",
+            toLiteral(newPrimaryKey.getTableName()), toLiteral(newPrimaryKey.getName())
         ));
         for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
             Column column = newPrimaryKey.getColumns().get(i);
@@ -708,10 +712,10 @@ public class OracleMetaData extends AbstractMetaData {
         column = columnTypeMapping(column, DbType.ORACLE);
         String dataType = StringUtils.lowerCase(column.getDataType());
         final String[] noParamType = new String[]{
-                "float", "binary_float", "binary_double",
-                "clob", "nclob",
-                "date",
-                "blob", "long raw",
+            "float", "binary_float", "binary_double",
+            "clob", "nclob",
+            "date",
+            "blob", "long raw",
         };
         if (StringUtils.equalsAnyIgnoreCase(dataType, noParamType)) {
             return dataType;
@@ -723,5 +727,103 @@ public class OracleMetaData extends AbstractMetaData {
     protected String defaultValue(Column column) {
         Assert.notNull(column, "参数 column 不能为空");
         return defaultValueMapping(column, DbType.ORACLE);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  其它(序列、存储过程、函数)元数据 DDL 语句
+    // --------------------------------------------------------------------------------------------
+
+    @Override
+    public String alterSequence(Sequence newSequence, Sequence oldSequence) {
+        Assert.notNull(newSequence, "参数 newSequence 不能为空");
+        Assert.notNull(oldSequence, "参数 oldSequence 不能为空");
+        StringBuilder ddl = new StringBuilder();
+        final String newName = toLiteral(newSequence.getName());
+        // rename seq_app_version to seq_app_version2;
+        if (!Objects.equals(oldSequence.getName(), newSequence.getName())) {
+            ddl.append(String.format(
+                "rename %s to %s;", toLiteral(oldSequence.getName()), newName
+            )).append(LINE);
+        }
+        // alter sequence SEQ_APP_VERSION2 cache 30;
+        // alter sequence SEQ_APP_VERSION2 cycle; nocycle
+        // alter sequence SEQ_APP_VERSION2 order; noorder
+        // alter sequence SEQ_APP_VERSION2 increment by 2 minvalue 0 maxvalue 10;
+        if (!Objects.equals(oldSequence.isCycle(), newSequence.isCycle())) {
+            ddl.append(String.format(
+                "alter sequence %s %scycle;", newName, (newSequence.isCycle() ? " no" : "")
+            )).append(LINE);
+        }
+        final boolean incrementChange = !Objects.equals(oldSequence.getIncrement(), newSequence.getIncrement());
+        final boolean minValueChange = !Objects.equals(oldSequence.getMinValue(), newSequence.getMinValue());
+        final boolean maxValueChange = !Objects.equals(oldSequence.getMaxValue(), newSequence.getMaxValue());
+        if (incrementChange || minValueChange || maxValueChange) {
+            ddl.append("alter sequence ").append(newName);
+            if (incrementChange) {
+                ddl.append(" increment by ").append(newSequence.getIncrement());
+            }
+            if (minValueChange) {
+                ddl.append(" minvalue ").append(newSequence.getMinValue());
+            }
+            if (maxValueChange) {
+                ddl.append(" maxvalue ").append(newSequence.getMaxValue());
+            }
+            ddl.append(";").append(LINE);
+        }
+        return ddl.toString();
+    }
+
+    @Override
+    public String dropSequence(Sequence oldSequence) {
+        Assert.notNull(oldSequence, "参数 oldSequence 不能为空");
+        // drop sequence seq_app_version;
+        return String.format("drop sequence %s;%s", toLiteral(oldSequence.getName()), LINE);
+    }
+
+    @Override
+    public String createSequence(Sequence newSequence) {
+        Assert.notNull(newSequence, "参数 newSequence 不能为空");
+        // create sequence aaa increment by 2 minvalue 0 maxvalue 10 order cycle cache 5;
+        StringBuilder ddl = new StringBuilder();
+        ddl.append("create sequence ").append(toLiteral(newSequence.getName()));
+        if (newSequence.getIncrement() != null) {
+            ddl.append(" increment by ").append(newSequence.getIncrement());
+        }
+        if (newSequence.getMinValue() != null) {
+            ddl.append(" minvalue ").append(newSequence.getMinValue());
+        }
+        if (newSequence.getMaxValue() != null) {
+            ddl.append(" maxvalue ").append(newSequence.getMaxValue());
+        }
+        if (newSequence.isCycle()) {
+            ddl.append(" cycle");
+        }
+        ddl.append(";").append(LINE);
+        return ddl.toString();
+    }
+
+    @Override
+    public String dropProcedure(Procedure oldProcedure) {
+        Assert.notNull(oldProcedure, "参数 oldProcedure 不能为空");
+        if (!Objects.equals(oldProcedure.getDbType(), jdbc.getDbType())) {
+            return StringUtils.EMPTY;
+        }
+        // drop procedure p_log;
+        String typeName = oldProcedure.isFunction() ? "function" : "procedure";
+        return String.format(
+            "drop %s %s;%s",
+            typeName,
+            toLiteral(oldProcedure.getName()),
+            LINE
+        );
+    }
+
+    @Override
+    public String createProcedure(Procedure newProcedure) {
+        Assert.notNull(newProcedure, "参数 newProcedure 不能为空");
+        if (!Objects.equals(newProcedure.getDbType(), jdbc.getDbType())) {
+            return StringUtils.EMPTY;
+        }
+        return newProcedure.getDefinition() + LINE;
     }
 }

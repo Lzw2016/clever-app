@@ -126,4 +126,33 @@ public interface DataBaseMetaData {
      * 字段顺序调整
      */
     String updateColumnPosition(Table newTable);
+
+    // --------------------------------------------------------------------------------------------
+    //  其它(序列、存储过程、函数)元数据 DDL 语句
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 修改“序列”的 DDL 语句
+     */
+    String alterSequence(Sequence newSequence, Sequence oldSequence);
+
+    /**
+     * 删除“序列”的 DDL 语句
+     */
+    String dropSequence(Sequence oldSequence);
+
+    /**
+     * 新增“序列”的 DDL 语句
+     */
+    String createSequence(Sequence newSequence);
+
+    /**
+     * 删除“存储过程、函数”的 DDL 语句
+     */
+    String dropProcedure(Procedure oldProcedure);
+
+    /**
+     * 新增“存储过程、函数”的 DDL 语句
+     */
+    String createProcedure(Procedure newProcedure);
 }

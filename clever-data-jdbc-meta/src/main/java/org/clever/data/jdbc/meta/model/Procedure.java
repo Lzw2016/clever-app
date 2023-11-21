@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.util.Assert;
 
 /**
@@ -44,5 +45,12 @@ public class Procedure extends AttributedObject {
             return null;
         }
         return schema.getName();
+    }
+
+    public DbType getDbType() {
+        if (schema == null) {
+            return null;
+        }
+        return schema.getDbType();
     }
 }

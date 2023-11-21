@@ -29,20 +29,20 @@ public class MetaDataUtilsTest {
         // Jdbc jdbc = BaseTest.newPostgresql();
         Jdbc jdbc = BaseTest.newMysql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-                .setOutDir("./src/test/java/org/clever/model")
-//                .setOutDir("./src/test/groovy/org/clever/model")
-//                .setOutDir("./src/test/kotlin/org/clever/model")
-                .setPackageName("org.clever.model")
-//                .removeCodegenType(CodegenType.JAVA_ENTITY)
-//                .removeCodegenType(CodegenType.JAVA_QUERYDSL)
-//                .addCodegenType(CodegenType.GROOVY_ENTITY)
-//                .addCodegenType(CodegenType.GROOVY_QUERYDSL)
-//                .addCodegenType(CodegenType.KOTLIN_ENTITY)
-//                .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
-                .addSchema("public")
-                .addSchema("test")
-//                .addTable("auto_increment_id")
-                .addSchema("__occupyPosition");
+            .setOutDir("./src/test/java/org/clever/model")
+//          .setOutDir("./src/test/groovy/org/clever/model")
+//          .setOutDir("./src/test/kotlin/org/clever/model")
+            .setPackageName("org.clever.model")
+//          .removeCodegenType(CodegenType.JAVA_ENTITY)
+//          .removeCodegenType(CodegenType.JAVA_QUERYDSL)
+//          .addCodegenType(CodegenType.GROOVY_ENTITY)
+//          .addCodegenType(CodegenType.GROOVY_QUERYDSL)
+//          .addCodegenType(CodegenType.KOTLIN_ENTITY)
+//          .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
+            .addSchema("public")
+            .addSchema("test")
+//           .addTable("auto_increment_id")
+            .addSchema("__occupyPosition");
         CodegenUtils.genCode(jdbc, config);
         log.info("-->");
         jdbc.close();
@@ -52,16 +52,16 @@ public class MetaDataUtilsTest {
     public void t03() {
         Jdbc jdbc = BaseTest.newMysql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-                .setOutDir("./src/test/resources/doc")
-                .setPackageName("org.clever.model")
-                .removeCodegenType(CodegenType.JAVA_ENTITY)
-                .removeCodegenType(CodegenType.JAVA_QUERYDSL)
-                .addCodegenType(CodegenType.DB_DOC_MARKDOWN)
-                .addCodegenType(CodegenType.DB_DOC_HTML)
-                .addCodegenType(CodegenType.DB_DOC_WORD)
-                .addSchema("public")
-                .addSchema("test")
-                .addSchema("__occupyPosition");
+            .setOutDir("./src/test/resources/doc")
+            .setPackageName("org.clever.model")
+            .removeCodegenType(CodegenType.JAVA_ENTITY)
+            .removeCodegenType(CodegenType.JAVA_QUERYDSL)
+            .addCodegenType(CodegenType.DB_DOC_MARKDOWN)
+            .addCodegenType(CodegenType.DB_DOC_HTML)
+            .addCodegenType(CodegenType.DB_DOC_WORD)
+            .addSchema("public")
+            .addSchema("test")
+            .addSchema("__occupyPosition");
         CodegenUtils.genCode(jdbc, config);
         log.info("-->");
         jdbc.close();
@@ -74,6 +74,10 @@ public class MetaDataUtilsTest {
         log.info("--> {}", schema.getTables().size());
         jdbc.close();
     }
+
+    // --------------------------------------------------------------------------------------------
+    // 连接数据库，读取表结构元数据，生成建表语句
+    // --------------------------------------------------------------------------------------------
 
     @Test
     public void t05() {
@@ -108,15 +112,21 @@ public class MetaDataUtilsTest {
         jdbc.close();
     }
 
+    // --------------------------------------------------------------------------------------------
+    // 连接数据库，读取表结构元数据，生成其它数据库的建表语句
+    // --------------------------------------------------------------------------------------------
+
     @Test
     public void t08() {
         Jdbc jdbc = BaseTest.newOracle();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
         Table table = metaData.getTable("wms8dev", "sys_user");
-        MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
-        log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
         // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
+        log.info("MySQL--> \n\n{}\n", mysqlMetaData.createTable(table));
+        PostgreSQLMetaData postgreSQLMetaData = new PostgreSQLMetaData(jdbc);
+        log.info("PostgreSQL--> \n\n{}\n", postgreSQLMetaData.createTable(table));
         jdbc.close();
     }
 
@@ -125,10 +135,12 @@ public class MetaDataUtilsTest {
         Jdbc jdbc = BaseTest.newPostgresql();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
         Table table = metaData.getTable("public", "biz_code");
-        MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
-        log.info("--> \n\n{}\n", mysqlMetaData.createTable(table));
         // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        MySQLMetaData mysqlMetaData = new MySQLMetaData(jdbc);
+        log.info("MySQL--> \n\n{}\n", mysqlMetaData.createTable(table));
+        OracleMetaData oracleMetaData = new OracleMetaData(jdbc);
+        log.info("Oracle--> \n\n{}\n", oracleMetaData.createTable(table));
         jdbc.close();
     }
 
@@ -137,12 +149,18 @@ public class MetaDataUtilsTest {
         Jdbc jdbc = BaseTest.newMysql();
         AbstractMetaData metaData = MetaDataUtils.createMetaData(jdbc);
         Table table = metaData.getTable("test", "sys_user");
-        PostgreSQLMetaData postgreSQLMetaData = new PostgreSQLMetaData(jdbc);
         // log.info("--> \n\n{}\n", JacksonMapper.getInstance().toJson(table));
-        log.info("--> \n\n{}\n", postgreSQLMetaData.createTable(table));
         // log.info("--> \n\n{}\n", metaData.alterTable(table, table));
+        PostgreSQLMetaData postgreSQLMetaData = new PostgreSQLMetaData(jdbc);
+        log.info("PostgreSQL--> \n\n{}\n", postgreSQLMetaData.createTable(table));
+        OracleMetaData oracleMetaData = new OracleMetaData(jdbc);
+        log.info("Oracle--> \n\n{}\n", oracleMetaData.createTable(table));
         jdbc.close();
     }
+
+    // --------------------------------------------------------------------------------------------
+    // 连接数据库，读取表结构元数据，更新表字段位置
+    // --------------------------------------------------------------------------------------------
 
     @Test
     public void t11() {

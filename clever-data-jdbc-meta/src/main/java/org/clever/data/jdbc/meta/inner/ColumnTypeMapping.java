@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * 不同数据库需要做类型映射 dataType size width decimalDigits
+ * 对于数据库的表字段类型(dataType size width decimalDigits)不同数据库需要做映射
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/07/20 12:01 <br/>
@@ -428,6 +428,10 @@ public class ColumnTypeMapping {
         }
         return NONE_CONVERT;
     }
+
+    // --------------------------------------------------------------------------------------------
+    // 提供外部使用的函数
+    // --------------------------------------------------------------------------------------------
 
     public static void mysql(Column column) {
         TypeConvert convert = getConvert(column, DbType.MYSQL);

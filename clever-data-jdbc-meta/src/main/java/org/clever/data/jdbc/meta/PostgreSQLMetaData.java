@@ -323,52 +323,58 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         sql.setLength(0);
         params.clear();
         sql.append("select ");
-        sql.append("    routine_schema              as schemaName, ");
-        sql.append("    routine_name                as name, ");
-        sql.append("    routine_type                as type, ");
-        sql.append("    routine_definition          as definition, ");
-        sql.append("    routine_body , ");
-        sql.append("    specific_catalog, ");
-        sql.append("    specific_schema , ");
-        sql.append("    specific_name , ");
-        sql.append("    routine_catalog, ");
-        sql.append("    data_type, ");
-        sql.append("    character_maximum_length, ");
-        sql.append("    character_octet_length, ");
-        sql.append("    numeric_precision, ");
-        sql.append("    numeric_scale, ");
-        sql.append("    datetime_precision, ");
-        sql.append("    interval_precision, ");
-        sql.append("    udt_name, ");
-        sql.append("    external_language, ");
-        sql.append("    external_name, ");
-        sql.append("    parameter_style ");
-        sql.append("from information_schema.routines ");
-        sql.append("where 1=1 ");
+        sql.append("    b.nspname                                               as schemaName, ");
+        sql.append("    a.proname                                               as name, ");
+        sql.append("    a.prokind                                               as type, ");
+        sql.append("    pg_catalog.pg_get_functiondef(a.oid)                    as definition, ");
+        sql.append("    pg_catalog.pg_get_function_result(a.oid)                as returnType, ");
+        sql.append("    pg_catalog.pg_get_function_arguments(a.oid)             as arguments, ");
+        sql.append("    a.prosrc                                                as proSrc, ");
+        sql.append("    c.lanname                                               as lanName, ");
+        sql.append("    pg_catalog.pg_get_function_identity_arguments(a.oid)    as identityArguments ");
+        sql.append("from pg_catalog.pg_proc a ");
+        sql.append("    left join pg_catalog.pg_namespace b on (b.oid = a.pronamespace) ");
+        sql.append("    left join pg_catalog.pg_language c on (c.oid = a.prolang) ");
+        sql.append("where 1 = 1 ");
         if (!schemasName.isEmpty()) {
-            sql.append("and lower(routine_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
+            sql.append("and lower(b.nspname) in (").append(createWhereIn(params, schemasName)).append(") ");
         }
         if (!ignoreSchemas.isEmpty()) {
-            sql.append("and lower(routine_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+            sql.append("and lower(b.nspname) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
-        sql.append("order by routine_schema, routine_type, routine_name ");
+        sql.append("order by b.nspname, a.prokind, a.proname");
         List<Map<String, Object>> routines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : routines) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String name = Conv.asString(map.get("name")).toLowerCase();
             String type = Conv.asString(map.get("type")).toLowerCase();
-            String definition = Conv.asString(map.get("definition"));
+            // String definition = Conv.asString(map.get("definition"));
+            String returnType = Conv.asString(map.get("returnType"));
+            String arguments = Conv.asString(map.get("arguments"));
+            String proSrc = Conv.asString(map.get("proSrc"));
+            String lanName = Conv.asString(map.get("lanName"));
             Schema schema = mapSchema.get(schemaName);
             if (schema == null) {
                 continue;
             }
             Procedure procedure = new Procedure(schema);
             procedure.setName(name);
-            // ROUTINE_TYPE 可能的值包括：
-            //   PROCEDURE 表示存储过程
-            //   FUNCTION 表示函数
-            procedure.setFunction("FUNCTION".equalsIgnoreCase(type));
-            procedure.setDefinition(definition);
+            // a.prokind 可能的值包括：
+            //   p,procedure    表示存储过程
+            //   f,function     表示函数
+            procedure.setFunction(StringUtils.equalsAnyIgnoreCase(type, "function", "f"));
+            String stripChars = "\r\n";
+            String typeName = procedure.isFunction() ? "function" : "procedure";
+            String customDefinition = "create or replace " + typeName + " " + toLiteral(name) + "(" + LINE +
+                StringUtils.strip(arguments, stripChars) + LINE +
+                ")" + LINE +
+                "returns " + StringUtils.trim(returnType) + LINE +
+                "language " + lanName + LINE +
+                "as" + LINE +
+                "$" + typeName + "$" + LINE +
+                StringUtils.strip(proSrc, stripChars) + LINE +
+                "$" + typeName + "$;";
+            procedure.setDefinition(customDefinition);
             procedure.getAttributes().putAll(map);
             schema.addProcedure(procedure);
         }
@@ -452,16 +458,16 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         if (!Objects.equals(newTable.getName(), oldTable.getName())) {
             // alter table auto_increment_id rename to auto_increment_id2;
             ddl.append(String.format(
-                    "alter table %s rename to %s;",
-                    toLiteral(oldTable.getName()), toLiteral(newTable.getName())
+                "alter table %s rename to %s;",
+                toLiteral(oldTable.getName()), toLiteral(newTable.getName())
             )).append(LINE);
         }
         // 修改表备注
         if (!Objects.equals(newTable.getComment(), oldTable.getComment())) {
             // comment on table auto_increment_id2 is '自增长ID数据表2';
             ddl.append(String.format(
-                    "comment on table %s is '%s';",
-                    toLiteral(newTable.getName()), toComment(newTable.getComment())
+                "comment on table %s is '%s';",
+                toLiteral(newTable.getName()), toComment(newTable.getComment())
             )).append(LINE);
         }
         // 字段变化、主键变化、索引变化
@@ -531,8 +537,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         // 表备注
         if (StringUtils.isNotBlank(newTable.getComment())) {
             ddl.append(String.format(
-                    "comment on table %s is '%s';",
-                    toLiteral(newTable.getName()), toComment(newTable.getComment()))
+                "comment on table %s is '%s';",
+                toLiteral(newTable.getName()), toComment(newTable.getComment()))
             ).append(LINE);
         }
         // 字段备注
@@ -541,8 +547,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
                 continue;
             }
             ddl.append(String.format(
-                    "comment on column %s.%s is '%s';",
-                    toLiteral(newTable.getName()), toLiteral(column.getName()), toComment(column.getComment()))
+                "comment on column %s.%s is '%s';",
+                toLiteral(newTable.getName()), toLiteral(column.getName()), toComment(column.getComment()))
             ).append(LINE);
         }
         // 索引
@@ -564,39 +570,39 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         // alter table sys_user2 rename column is_enable2 to is_enable3
         if (!Objects.equals(newColumn.getName(), oldColumn.getName())) {
             ddl.append(String.format(
-                    "alter table %s rename column %s to %s;",
-                    toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())
+                "alter table %s rename column %s to %s;",
+                toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())
             )).append(LINE);
         }
         // comment on column sys_user.is_enable_1 is '是否启用: 0:禁用，1:启用_1'
         if (!Objects.equals(newColumn.getComment(), oldColumn.getComment())) {
             ddl.append(String.format(
-                    "comment on column %s.%s is '%s';",
-                    toLiteral(tableName), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+                "comment on column %s.%s is '%s';",
+                toLiteral(tableName), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
             )).append(LINE);
         }
         // alter table auto_increment_id2 alter column c11 set default 'abc';
         if (!Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
             ddl.append(String.format(
-                    "alter table %s alter column %s set default %s;",
-                    toLiteral(tableName), toLiteral(newColumn.getName()), defaultValue(newColumn)
+                "alter table %s alter column %s set default %s;",
+                toLiteral(tableName), toLiteral(newColumn.getName()), defaultValue(newColumn)
             )).append(LINE);
         }
         // alter table auto_increment_id2 alter column c11 type varchar(12) using c11::varchar(12);
         if (!Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
-                || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
-                || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
-                || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
+            || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
+            || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
+            || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
             ddl.append(String.format(
-                    "alter table %s alter column %s type %s using %s::%s;",
-                    toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn), toLiteral(newColumn.getName()), columnType(newColumn)
+                "alter table %s alter column %s type %s using %s::%s;",
+                toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn), toLiteral(newColumn.getName()), columnType(newColumn)
             )).append(LINE);
         }
         // alter table auto_increment_id2 alter column c11 set not null;
         if (!Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())) {
             ddl.append(String.format(
-                    "alter table %s alter column %s set",
-                    toLiteral(tableName), toLiteral(newColumn.getName())
+                "alter table %s alter column %s set",
+                toLiteral(tableName), toLiteral(newColumn.getName())
             ));
             if (newColumn.isNotNull()) {
                 ddl.append(" not");
@@ -619,8 +625,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         final StringBuilder ddl = new StringBuilder();
         // alter table auto_increment_id2 add c25 varchar(10) default 'abc' not null;
         ddl.append(String.format(
-                "alter table %s add %s %s",
-                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
+            "alter table %s add %s %s",
+            toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
         ));
         if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
             ddl.append(" default ").append(defaultValue(newColumn));
@@ -632,8 +638,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         // comment on column auto_increment_id2.c25 is '测试';
         if (StringUtils.isNotBlank(newColumn.getComment())) {
             ddl.append(String.format(
-                    "comment on column %s.%s is '%s';",
-                    toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
+                "comment on column %s.%s is '%s';",
+                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
             )).append(LINE);
         }
         return ddl.toString();
@@ -653,8 +659,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         if (newPrimaryKey != null) {
             // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (c1);
             ddl.append(String.format(
-                    "alter table %s add constraint %s primary key (",
-                    toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+                "alter table %s add constraint %s primary key (",
+                toLiteral(tableName), toLiteral(newPrimaryKey.getName())
             ));
             for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
                 Column column = newPrimaryKey.getColumns().get(i);
@@ -673,8 +679,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         Assert.notNull(oldPrimaryKey, "参数 oldPrimaryKey 不能为空");
         // alter table auto_increment_id2 drop constraint auto_increment_id2_pk;
         return String.format(
-                "alter table %s drop constraint %s;",
-                toLiteral(oldPrimaryKey.getTableName()), toLiteral(oldPrimaryKey.getName())
+            "alter table %s drop constraint %s;",
+            toLiteral(oldPrimaryKey.getTableName()), toLiteral(oldPrimaryKey.getName())
         ) + LINE;
     }
 
@@ -684,8 +690,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         final StringBuilder ddl = new StringBuilder();
         // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (c1, c2);
         ddl.append(String.format(
-                "alter table %s add constraint %s primary key (",
-                toLiteral(newPrimaryKey.getTableName()), toLiteral(newPrimaryKey.getName())
+            "alter table %s add constraint %s primary key (",
+            toLiteral(newPrimaryKey.getTableName()), toLiteral(newPrimaryKey.getName())
         ));
         for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
             Column column = newPrimaryKey.getColumns().get(i);
@@ -771,8 +777,8 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         Assert.notNull(column, "参数 column 不能为空");
         String dataType = column.getAttribute("data_type");
         final String[] dataTypes = new String[]{
-                "smallint", "integer", "bigint", "real", "double precision",
-                "boolean", "bytea",
+            "smallint", "integer", "bigint", "real", "double precision",
+            "boolean", "bytea",
         };
         if (StringUtils.equalsAnyIgnoreCase(dataType, dataTypes)) {
             return dataType;
@@ -780,9 +786,9 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         column = columnTypeMapping(column, DbType.POSTGRE_SQL);
         dataType = StringUtils.lowerCase(column.getDataType());
         final String[] noParamType = new String[]{
-                "int2", "int4", "int8", "float4", "float8",
-                "timestamp", "timestamptz", "date", "time", "timetz",
-                "bool", "bytea",
+            "int2", "int4", "int8", "float4", "float8",
+            "timestamp", "timestamptz", "date", "time", "timetz",
+            "bool", "bytea",
         };
         if (StringUtils.equalsAnyIgnoreCase(dataType, noParamType)) {
             return dataType;
@@ -794,5 +800,104 @@ public class PostgreSQLMetaData extends AbstractMetaData {
     protected String defaultValue(Column column) {
         Assert.notNull(column, "参数 column 不能为空");
         return defaultValueMapping(column, DbType.POSTGRE_SQL);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  其它(序列、存储过程、函数)元数据 DDL 语句
+    // --------------------------------------------------------------------------------------------
+
+    @Override
+    public String alterSequence(Sequence newSequence, Sequence oldSequence) {
+        Assert.notNull(newSequence, "参数 newSequence 不能为空");
+        Assert.notNull(oldSequence, "参数 oldSequence 不能为空");
+        StringBuilder ddl = new StringBuilder();
+        final String newName = toLiteral(newSequence.getName());
+        // alter sequence q_name rename to q_name2;
+        if (!Objects.equals(oldSequence.getName(), newSequence.getName())) {
+            ddl.append(String.format(
+                "alter sequence %s rename to %s;", toLiteral(oldSequence.getName()), newName
+            )).append(LINE);
+        }
+        // alter sequence q_name2 cache 10;
+        // alter sequence q_name2 no cycle;
+        // alter sequence q_name2 start with 1 increment by 1 minvalue 0 maxvalue 999;
+        if (!Objects.equals(oldSequence.isCycle(), newSequence.isCycle())) {
+            ddl.append(String.format(
+                "alter sequence %s %s cycle;", newName, (newSequence.isCycle() ? " no" : "")
+            )).append(LINE);
+        }
+        final boolean incrementChange = !Objects.equals(oldSequence.getIncrement(), newSequence.getIncrement());
+        final boolean minValueChange = !Objects.equals(oldSequence.getMinValue(), newSequence.getMinValue());
+        final boolean maxValueChange = !Objects.equals(oldSequence.getMaxValue(), newSequence.getMaxValue());
+        if (incrementChange || minValueChange || maxValueChange) {
+            ddl.append("alter sequence ").append(newName);
+            if (incrementChange) {
+                ddl.append(" increment by ").append(newSequence.getIncrement());
+            }
+            if (minValueChange) {
+                ddl.append(" minvalue ").append(newSequence.getMinValue());
+            }
+            if (maxValueChange) {
+                ddl.append(" maxvalue ").append(newSequence.getMaxValue());
+            }
+            ddl.append(";").append(LINE);
+        }
+        return ddl.toString();
+    }
+
+    @Override
+    public String dropSequence(Sequence oldSequence) {
+        Assert.notNull(oldSequence, "参数 oldSequence 不能为空");
+        // drop sequence q_name;
+        return String.format("drop sequence %s;%s", toLiteral(oldSequence.getName()), LINE);
+    }
+
+    @Override
+    public String createSequence(Sequence newSequence) {
+        Assert.notNull(newSequence, "参数 newSequence 不能为空");
+        // create sequence q_name start with 3 increment by 2 minvalue 2 maxvalue 100000 cache 8 cycle;
+        // comment on sequence q_name is '备注';
+        StringBuilder ddl = new StringBuilder();
+        ddl.append("create sequence ").append(toLiteral(newSequence.getName()));
+        if (newSequence.getIncrement() != null) {
+            ddl.append(" increment by ").append(newSequence.getIncrement());
+        }
+        if (newSequence.getMinValue() != null) {
+            ddl.append(" minvalue ").append(newSequence.getMinValue());
+        }
+        if (newSequence.getMaxValue() != null) {
+            ddl.append(" maxvalue ").append(newSequence.getMaxValue());
+        }
+        if (newSequence.isCycle()) {
+            ddl.append(" cycle");
+        }
+        ddl.append(";").append(LINE);
+        return ddl.toString();
+    }
+
+    @Override
+    public String dropProcedure(Procedure oldProcedure) {
+        Assert.notNull(oldProcedure, "参数 oldProcedure 不能为空");
+        if (!Objects.equals(oldProcedure.getDbType(), jdbc.getDbType())) {
+            return StringUtils.EMPTY;
+        }
+        // drop function nvl(item boolean, d boolean);
+        String typeName = oldProcedure.isFunction() ? "function" : "procedure";
+        return String.format(
+            "drop %s %s(%s);%s",
+            typeName,
+            toLiteral(oldProcedure.getName()),
+            Conv.asString(oldProcedure.getAttribute("identityArguments")),
+            LINE
+        );
+    }
+
+    @Override
+    public String createProcedure(Procedure newProcedure) {
+        Assert.notNull(newProcedure, "参数 newProcedure 不能为空");
+        if (!Objects.equals(newProcedure.getDbType(), jdbc.getDbType())) {
+            return StringUtils.EMPTY;
+        }
+        return newProcedure.getDefinition() + LINE;
     }
 }

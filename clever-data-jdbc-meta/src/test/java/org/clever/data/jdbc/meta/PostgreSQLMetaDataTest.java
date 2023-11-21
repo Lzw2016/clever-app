@@ -31,4 +31,15 @@ public class PostgreSQLMetaDataTest {
         log.info("--> {}", table);
         jdbc.close();
     }
+
+    @Test
+    public void t03() {
+        Jdbc jdbc = BaseTest.newPostgresql();
+        PostgreSQLMetaData metaData = new PostgreSQLMetaData(jdbc);
+        List<Schema> schemas = metaData.getSchemas(null, null);
+        log.info("--> \n{}", metaData.createSequence(schemas.get(0).getSequence("sys_lock_id_seq")));
+        log.info("--> \n{}", metaData.dropProcedure(schemas.get(0).getProcedures().get(0)));
+        log.info("--> \n{}", metaData.createProcedure(schemas.get(0).getProcedures().get(0)));
+        jdbc.close();
+    }
 }

@@ -12,23 +12,27 @@ import org.junit.jupiter.api.Test;
  */
 @Slf4j
 public class CodegenUtilsTest {
+    // --------------------------------------------------------------------------------------------
+    // 连接数据库，读取表结构元数据，生成代码
+    // --------------------------------------------------------------------------------------------
+
     @Test
     public void t01() {
         Jdbc jdbc = BaseTest.newMysql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-                .setOutDir("../clever-task/src/main/java/org/clever/task/core/model")
-                .setPackageName("org.clever.task.core.model")
-                // .removeCodegenType(CodegenType.JAVA_ENTITY)
-                // .removeCodegenType(CodegenType.JAVA_QUERYDSL)
-                // .addCodegenType(CodegenType.GROOVY_ENTITY)
-                // .addCodegenType(CodegenType.GROOVY_QUERYDSL)
-                // .addCodegenType(CodegenType.KOTLIN_ENTITY)
-                // .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
-                .addTablePrefix("task_")
-                .addTable("task_scheduler")
-                .addSchema("public")
-                .addSchema("test")
-                .addSchema("__occupyPosition");
+            .setOutDir("../clever-task/src/main/java/org/clever/task/core/model")
+            .setPackageName("org.clever.task.core.model")
+            // .removeCodegenType(CodegenType.JAVA_ENTITY)
+            // .removeCodegenType(CodegenType.JAVA_QUERYDSL)
+            // .addCodegenType(CodegenType.GROOVY_ENTITY)
+            // .addCodegenType(CodegenType.GROOVY_QUERYDSL)
+            // .addCodegenType(CodegenType.KOTLIN_ENTITY)
+            // .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
+            .addTablePrefix("task_")
+            .addTable("task_scheduler")
+            .addSchema("public")
+            .addSchema("test")
+            .addSchema("__occupyPosition");
         CodegenUtils.genCode(jdbc, config);
         log.info("-->");
         jdbc.close();
@@ -38,14 +42,14 @@ public class CodegenUtilsTest {
     public void t02() {
         Jdbc jdbc = BaseTest.newMysql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-                .setOutDir("../clever-data-jdbc/src/main/java/org/clever/data/jdbc/support")
-                .setPackageName("org.clever.data.jdbc.support")
-                .addTable("biz_code")
-                .addTable("auto_increment_id")
-                .addTable("sys_lock")
-                .addSchema("public")
-                .addSchema("test")
-                .addSchema("__occupyPosition");
+            .setOutDir("../clever-data-jdbc/src/main/java/org/clever/data/jdbc/support")
+            .setPackageName("org.clever.data.jdbc.support")
+            .addTable("biz_code")
+            .addTable("auto_increment_id")
+            .addTable("sys_lock")
+            .addSchema("public")
+            .addSchema("test")
+            .addSchema("__occupyPosition");
         CodegenUtils.genCode(jdbc, config);
         log.info("-->");
         jdbc.close();

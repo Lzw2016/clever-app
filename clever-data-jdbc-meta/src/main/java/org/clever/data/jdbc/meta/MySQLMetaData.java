@@ -8,6 +8,7 @@ import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
 import org.clever.util.Assert;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -189,31 +190,32 @@ public class MySQLMetaData extends AbstractMetaData {
         sql.setLength(0);
         params.clear();
         sql.append("select ");
-        sql.append("    routine_schema      as `schemaName`, ");
-        sql.append("    routine_name        as `name`, ");
-        sql.append("    routine_type        as `type`, ");
-        sql.append("    routine_definition  as `definition`, ");
-        sql.append("    routine_body        as `body`, ");
-        sql.append("    specific_name       as `specific_name`, ");
-        sql.append("    external_name       as `external_name`, ");
-        sql.append("    external_language   as `external_language`, ");
-        sql.append("    parameter_style     as `parameter_style`, ");
-        sql.append("    routine_comment     as `routine_comment` ");
-        sql.append("from information_schema.routines ");
-        sql.append("where lower(routine_type) in ('procedure','function') ");
+        sql.append("    db          as `schemaName`, ");
+        sql.append("    name        as `name`, ");
+        sql.append("    type        as `type`, ");
+        sql.append("    param_list, ");
+        sql.append("    returns, ");
+        sql.append("    body_utf8, ");
+        sql.append("    language, ");
+        sql.append("    specific_name, ");
+        sql.append("    comment ");
+        sql.append("from mysql.proc ");
+        sql.append("where lower(type) in ('procedure','function') ");
         if (!schemasName.isEmpty()) {
-            sql.append("and lower(routine_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
+            sql.append("and lower(db) in (").append(createWhereIn(params, schemasName)).append(") ");
         }
         if (!ignoreSchemas.isEmpty()) {
-            sql.append("and lower(routine_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+            sql.append("and lower(db) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
-        sql.append("order by routine_schema, type, routine_name");
+        sql.append("order by db, type, name, specific_name ");
         List<Map<String, Object>> routines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : routines) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
             String name = Conv.asString(map.get("name")).toLowerCase();
             String type = Conv.asString(map.get("type")).toLowerCase();
-            String definition = Conv.asString(map.get("definition"));
+            String paramList = StringUtils.toEncodedString((byte[]) map.get("param_list"), StandardCharsets.UTF_8);
+            String returns = StringUtils.toEncodedString((byte[]) map.get("returns"), StandardCharsets.UTF_8);
+            String body = StringUtils.toEncodedString((byte[]) map.get("body_utf8"), StandardCharsets.UTF_8);
             Schema schema = mapSchema.get(schemaName);
             if (schema == null) {
                 continue;
@@ -224,7 +226,32 @@ public class MySQLMetaData extends AbstractMetaData {
             //   PROCEDURE 表示存储过程
             //   FUNCTION 表示函数
             procedure.setFunction("FUNCTION".equalsIgnoreCase(type));
-            procedure.setDefinition(definition);
+            StringBuilder definition = new StringBuilder();
+            String stripChars = "\r\n";
+            if (procedure.isFunction()) {
+                // CREATE FUNCTION function_name(parameter_list)
+                // RETURNS return_datatype
+                // [characteristic ...]
+                // routine_body
+                definition.append("create function ").append(toLiteral(name)).append("(").append(LINE)
+                    .append(StringUtils.strip(paramList, stripChars)).append(LINE)
+                    .append(")").append(LINE)
+                    .append("returns ").append(returns).append(LINE)
+                    .append(StringUtils.strip(body, stripChars));
+            } else {
+                // CREATE PROCEDURE procedure_name(parameter_list)
+                // [characteristics]
+                // routine_body
+                definition.append("create procedure ").append(toLiteral(name)).append("(").append(LINE)
+                    .append(StringUtils.strip(paramList, stripChars)).append(LINE)
+                    .append(")").append(LINE)
+                    .append(StringUtils.strip(body, stripChars));
+            }
+            String def = StringUtils.trim(definition.toString());
+            if (!StringUtils.endsWith(def, ";")) {
+                def = def + ";";
+            }
+            procedure.setDefinition(def);
             procedure.getAttributes().putAll(map);
             schema.addProcedure(procedure);
         }
@@ -310,16 +337,16 @@ public class MySQLMetaData extends AbstractMetaData {
         if (!Objects.equals(newTable.getName(), oldTable.getName())) {
             // rename table auto_increment_id to auto_increment_id2;
             ddl.append(String.format(
-                    "rename table %s to %s;",
-                    toLiteral(oldTable.getName()), toLiteral(newTable.getName())
+                "rename table %s to %s;",
+                toLiteral(oldTable.getName()), toLiteral(newTable.getName())
             )).append(LINE);
         }
         // 修改表备注
         if (!Objects.equals(newTable.getComment(), oldTable.getComment())) {
             // alter table biz_code comment '业务编码表A';
             ddl.append(String.format(
-                    "alter table %s comment '%s';",
-                    toLiteral(newTable.getName()), toComment(newTable.getComment())
+                "alter table %s comment '%s';",
+                toLiteral(newTable.getName()), toComment(newTable.getComment())
             )).append(LINE);
         }
         // 字段变化、主键变化、索引变化
@@ -376,7 +403,7 @@ public class MySQLMetaData extends AbstractMetaData {
                 ddl.append(",").append(LINE);
                 ddl.append(TAB);
                 if (StringUtils.isNotBlank(primaryKey.getName())
-                        && !StringUtils.trimToEmpty(primaryKey.getName()).equalsIgnoreCase("primary")) {
+                    && !StringUtils.trimToEmpty(primaryKey.getName()).equalsIgnoreCase("primary")) {
                     ddl.append(String.format("constraint %s ", toLiteral(primaryKey.getName())));
                 }
                 ddl.append("primary key (");
@@ -418,13 +445,13 @@ public class MySQLMetaData extends AbstractMetaData {
         // alter table auto_increment_id2 change description description2 varchar(511) not null comment '说明2';
         if (Objects.equals(toLiteral(oldColumn.getName()), toLiteral(newColumn.getName()))) {
             ddl.append(String.format(
-                    "alter table %s modify %s %s",
-                    toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)
+                "alter table %s modify %s %s",
+                toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)
             ));
         } else {
             ddl.append(String.format(
-                    "alter table %s change %s %s %s",
-                    toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName()), columnType(newColumn)
+                "alter table %s change %s %s %s",
+                toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName()), columnType(newColumn)
             ));
         }
         if (newColumn.isNotNull()) {
@@ -452,8 +479,8 @@ public class MySQLMetaData extends AbstractMetaData {
         final StringBuilder ddl = new StringBuilder();
         // alter table auto_increment_id2 add col varchar(100) default 'abc' not null comment '测试';
         ddl.append(String.format(
-                "alter table %s add %s %s",
-                toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
+            "alter table %s add %s %s",
+            toLiteral(newColumn.getTableName()), toLiteral(newColumn.getName()), columnType(newColumn)
         ));
         if (StringUtils.isNotBlank(newColumn.getDefaultValue())) {
             ddl.append(" default ").append(defaultValue(newColumn));
@@ -484,8 +511,8 @@ public class MySQLMetaData extends AbstractMetaData {
                 // alter table auto_increment_id2 modify id bigint not null comment '主键';
                 if (column.isAutoIncremented()) {
                     ddl.append(String.format(
-                            "alter table %s modify %s %s",
-                            toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                        "alter table %s modify %s %s",
+                        toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                     ));
                     String defaultValue = defaultValue(column);
                     if (StringUtils.isNotBlank(defaultValue)) {
@@ -507,8 +534,8 @@ public class MySQLMetaData extends AbstractMetaData {
         if (newPrimaryKey != null) {
             // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (id, sequence_name);
             ddl.append(String.format(
-                    "alter table %s add constraint %s primary key ",
-                    toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+                "alter table %s add constraint %s primary key ",
+                toLiteral(tableName), toLiteral(newPrimaryKey.getName())
             ));
             for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
                 Column column = newPrimaryKey.getColumns().get(i);
@@ -524,8 +551,8 @@ public class MySQLMetaData extends AbstractMetaData {
                 if (column.isAutoIncremented()) {
                     hasAutoInc = true;
                     ddl.append(String.format(
-                            "alter table %s modify %s %s",
-                            toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                        "alter table %s modify %s %s",
+                        toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                     ));
                     String defaultValue = defaultValue(column);
                     if (StringUtils.isNotBlank(defaultValue)) {
@@ -559,8 +586,8 @@ public class MySQLMetaData extends AbstractMetaData {
             // alter table auto_increment_id2 modify id bigint not null comment '主键';
             if (column.isAutoIncremented()) {
                 ddl.append(String.format(
-                        "alter table %s modify %s %s",
-                        toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                    "alter table %s modify %s %s",
+                    toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                 ));
                 String defaultValue = defaultValue(column);
                 if (StringUtils.isNotBlank(defaultValue)) {
@@ -587,8 +614,8 @@ public class MySQLMetaData extends AbstractMetaData {
         final String tableName = newPrimaryKey.getTableName();
         // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (id, sequence_name);
         ddl.append(String.format(
-                "alter table %s add constraint %s primary key ",
-                toLiteral(tableName), toLiteral(newPrimaryKey.getName())
+            "alter table %s add constraint %s primary key ",
+            toLiteral(tableName), toLiteral(newPrimaryKey.getName())
         ));
         for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
             Column column = newPrimaryKey.getColumns().get(i);
@@ -604,8 +631,8 @@ public class MySQLMetaData extends AbstractMetaData {
             if (column.isAutoIncremented()) {
                 hasAutoInc = true;
                 ddl.append(String.format(
-                        "alter table %s modify %s %s",
-                        toLiteral(tableName), toLiteral(column.getName()), columnType(column)
+                    "alter table %s modify %s %s",
+                    toLiteral(tableName), toLiteral(column.getName()), columnType(column)
                 ));
                 String defaultValue = defaultValue(column);
                 if (StringUtils.isNotBlank(defaultValue)) {
@@ -639,14 +666,14 @@ public class MySQLMetaData extends AbstractMetaData {
             // alter table auto_increment_id2 drop key auto_increment_uidx1;
             if (oldIndex.isUnique()) {
                 ddl.append(String.format(
-                        "alter table %s drop key %s;",
-                        toLiteral(tableName), toLiteral(oldIndex.getName())
+                    "alter table %s drop key %s;",
+                    toLiteral(tableName), toLiteral(oldIndex.getName())
                 )).append(LINE);
             } else {
                 // drop index auto_increment_idx1 on auto_increment_id2;
                 ddl.append(String.format(
-                        "drop index %s on %s;",
-                        toLiteral(oldIndex.getName()), toLiteral(tableName)
+                    "drop index %s on %s;",
+                    toLiteral(oldIndex.getName()), toLiteral(tableName)
                 )).append(LINE);
             }
         }
@@ -675,14 +702,14 @@ public class MySQLMetaData extends AbstractMetaData {
         // alter table auto_increment_id2 drop key auto_increment_uidx1;
         if (oldIndex.isUnique()) {
             return String.format(
-                    "alter table %s drop key %s;",
-                    toLiteral(oldIndex.getTableName()), toLiteral(oldIndex.getName())
+                "alter table %s drop key %s;",
+                toLiteral(oldIndex.getTableName()), toLiteral(oldIndex.getName())
             ) + LINE;
         }
         // drop index auto_increment_idx1 on auto_increment_id2;
         return String.format(
-                "drop index %s on %s;",
-                toLiteral(oldIndex.getName()), toLiteral(oldIndex.getTableName())
+            "drop index %s on %s;",
+            toLiteral(oldIndex.getName()), toLiteral(oldIndex.getTableName())
         ) + LINE;
     }
 
@@ -736,10 +763,10 @@ public class MySQLMetaData extends AbstractMetaData {
             return "time(3)";
         }
         final String[] noParamType = new String[]{
-                "tinyint", "smallint", "mediumint", "int", "bigint", "float", "double",
-                "tinytext", "text", "mediumtext", "longtext",
-                "year", "date",
-                "tinyblob", "mediumblob", "longblob",
+            "tinyint", "smallint", "mediumint", "int", "bigint", "float", "double",
+            "tinytext", "text", "mediumtext", "longtext",
+            "year", "date",
+            "tinyblob", "mediumblob", "longblob",
         };
         if (StringUtils.equalsAnyIgnoreCase(dataType, noParamType)) {
             return dataType;
@@ -751,5 +778,52 @@ public class MySQLMetaData extends AbstractMetaData {
     protected String defaultValue(Column column) {
         Assert.notNull(column, "参数 column 不能为空");
         return defaultValueMapping(column, DbType.MYSQL);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //  其它(序列、存储过程、函数)元数据 DDL 语句
+    // --------------------------------------------------------------------------------------------
+
+    @Override
+    public String alterSequence(Sequence newSequence, Sequence oldSequence) {
+        // throw new UnsupportedOperationException("MySQL不支持“序列”功能");
+        return StringUtils.EMPTY;
+    }
+
+    @Override
+    public String dropSequence(Sequence oldSequence) {
+        // throw new UnsupportedOperationException("MySQL不支持“序列”功能");
+        return StringUtils.EMPTY;
+    }
+
+    @Override
+    public String createSequence(Sequence newSequence) {
+        // throw new UnsupportedOperationException("MySQL不支持“序列”功能");
+        return StringUtils.EMPTY;
+    }
+
+    @Override
+    public String dropProcedure(Procedure oldProcedure) {
+        Assert.notNull(oldProcedure, "参数 oldProcedure 不能为空");
+        if (!Objects.equals(oldProcedure.getDbType(), jdbc.getDbType())) {
+            return StringUtils.EMPTY;
+        }
+        // drop function hello_world;
+        String typeName = oldProcedure.isFunction() ? "function" : "procedure";
+        return String.format(
+            "drop %s %s;%s",
+            typeName,
+            toLiteral(oldProcedure.getName()),
+            LINE
+        );
+    }
+
+    @Override
+    public String createProcedure(Procedure newProcedure) {
+        Assert.notNull(newProcedure, "参数 newProcedure 不能为空");
+        if (!Objects.equals(newProcedure.getDbType(), jdbc.getDbType())) {
+            return StringUtils.EMPTY;
+        }
+        return newProcedure.getDefinition() + LINE;
     }
 }

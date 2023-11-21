@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * 不同数据库需要做映射 defaultValue
+ * 对于表字段的默认值(defaultValue)不同数据库需要做映射
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2023/07/20 17:57 <br/>
@@ -149,6 +149,10 @@ public class DefaultValueMapping {
     protected static String defaultValue(String defaultValue) {
         return StringUtils.trim(defaultValue);
     }
+
+    // --------------------------------------------------------------------------------------------
+    // 提供外部使用的函数
+    // --------------------------------------------------------------------------------------------
 
     public static String mysql(Column column) {
         TypeConvert convert = getConvert(column, DbType.MYSQL);

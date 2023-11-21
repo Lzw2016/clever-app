@@ -10,14 +10,14 @@ import java.util.List;
 
 /**
  * 作者：lizw <br/>
- * 创建时间：2023/04/27 23:13 <br/>
+ * 创建时间：2023/11/20 14:31 <br/>
  */
 @Slf4j
-public class MySQLMetaDataTest {
+public class OracleMetaDataTest {
     @Test
     public void t01() {
-        Jdbc jdbc = BaseTest.newMysql();
-        MySQLMetaData metaData = new MySQLMetaData(jdbc);
+        Jdbc jdbc = BaseTest.newOracle();
+        OracleMetaData metaData = new OracleMetaData(jdbc);
         List<Schema> schemas = metaData.getSchemas(null, null);
         log.info("--> {}", schemas);
         jdbc.close();
@@ -25,18 +25,19 @@ public class MySQLMetaDataTest {
 
     @Test
     public void t02() {
-        Jdbc jdbc = BaseTest.newMysql();
-        MySQLMetaData metaData = new MySQLMetaData(jdbc);
-        Table table = metaData.getTable(metaData.currentSchema(), "biz_code");
+        Jdbc jdbc = BaseTest.newOracle();
+        OracleMetaData metaData = new OracleMetaData(jdbc);
+        Table table = metaData.getTable(metaData.currentSchema(), "sys_jwt_token");
         log.info("--> {}", table);
         jdbc.close();
     }
 
     @Test
     public void t03() {
-        Jdbc jdbc = BaseTest.newMysql();
-        MySQLMetaData metaData = new MySQLMetaData(jdbc);
+        Jdbc jdbc = BaseTest.newOracle();
+        OracleMetaData metaData = new OracleMetaData(jdbc);
         List<Schema> schemas = metaData.getSchemas(null, null);
+        log.info("--> \n{}", metaData.createSequence(schemas.get(1).getSequence("SEQ_ASN_IN")));
         log.info("--> \n{}", metaData.dropProcedure(schemas.get(1).getProcedures().get(0)));
         log.info("--> \n{}", metaData.createProcedure(schemas.get(1).getProcedures().get(0)));
         jdbc.close();
