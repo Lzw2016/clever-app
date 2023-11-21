@@ -14,7 +14,7 @@ public class ObjectUtils {
     }
 
     public boolean isIn(final Object obj, final Object... array) {
-        if (array == null || array.length <= 0) {
+        if (array == null) {
             return false;
         }
         for (Object obj2 : array) {

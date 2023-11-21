@@ -3,7 +3,7 @@ dependencies {
     api("ognl:ognl")
     api("org.antlr:antlr4")
     api("org.antlr:antlr4-runtime")
-    testImplementation("org.apache.commons:commons-lang3")
+    api("org.apache.commons:commons-lang3")
     testImplementation("commons-io:commons-io")
     testImplementation("ch.qos.logback:logback-classic")
 }

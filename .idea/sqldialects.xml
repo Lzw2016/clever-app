@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/clever-data-dynamic-sql/src/test/resources/sql.xml" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/clever-data-jdbc/src/main/resources/mysql.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/clever-data-jdbc/src/main/resources/oracle.sql" dialect="Oracle" />
     <file url="file://$PROJECT_DIR$/clever-data-jdbc/src/main/resources/postgresql.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/clever-security/src/main/resources/mysql.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/clever-task/src/main/resources/mysql.sql" dialect="MySQL" />
+    <file url="PROJECT" dialect="MySQL" />
   </component>
 </project>

@@ -3,6 +3,7 @@ package org.clever.data.dynamic.sql;
 import lombok.Getter;
 import org.clever.data.dynamic.sql.reflection.MetaObject;
 import org.clever.data.dynamic.sql.reflection.property.PropertyTokenizer;
+import org.clever.data.dynamic.sql.utils.Conv;
 
 import java.util.*;
 
@@ -29,7 +30,7 @@ public class BoundSql {
      * Sql参数名称列表(有顺序)
      */
     @Getter
-    private final List<String> parameterList;
+    private final List<ParameterMapping> parameterList;
     /**
      * 附加的参数
      */
@@ -58,7 +59,7 @@ public class BoundSql {
      * @param parameterList     Sql参数名称列表(有顺序)
      * @param parameterObject   原始参数对象
      */
-    public BoundSql(String sql, String namedParameterSql, List<String> parameterList, Object parameterObject) {
+    public BoundSql(String sql, String namedParameterSql, List<ParameterMapping> parameterList, Object parameterObject) {
         this.sql = sql;
         this.rawNamedParameterSql = namedParameterSql;
         this.parameterList = parameterList;
@@ -110,7 +111,8 @@ public class BoundSql {
         Map<String, String> renameParameter = new HashMap<>(parameterList.size());
         parameterValueList = new ArrayList<>(parameterList.size());
         parameterMap = new HashMap<>(parameterList.size());
-        for (final String name : parameterList) {
+        parameterList.forEach(parameterMapping -> {
+            final String name = parameterMapping.getProperty();
             Object value;
             if (hasAdditionalParameter(name)) {
                 value = getAdditionalParameter(name);
@@ -120,6 +122,44 @@ public class BoundSql {
                 MetaObject metaObject = MetaObject.newMetaObject(parameterObject);
                 value = metaObject.getValue(name);
             }
+            String javaType = parameterMapping.getJavaType();
+            if (value != null && javaType != null) {
+                Object newValue = null;
+                switch (javaType) {
+                    case "int":
+                        newValue = Conv.asInteger(value, null);
+                        break;
+                    case "long":
+                        newValue = Conv.asLong(value, null);
+                        break;
+                    case "decimal":
+                        newValue = Conv.asDecimal(value, null);
+                        break;
+                    case "char":
+                        newValue = Conv.asString(value, null);
+                        if (newValue != null) {
+                            if (!newValue.toString().isEmpty()) {
+                                newValue = newValue.toString().charAt(0);
+                            } else {
+                                newValue = null;
+                            }
+                        }
+                        break;
+                    case "string":
+                        newValue = Conv.asString(value, null);
+                        break;
+                    case "date":
+                        newValue = Conv.asDate(value, null);
+                        break;
+                    case "bool":
+                        newValue = Conv.asBoolean(value, null);
+                        break;
+                }
+                if (newValue == null) {
+                    throw new RuntimeException("参数类型转换失败，javaType=" + javaType + "，参数名=" + name + "参数值=" + value);
+                }
+                value = newValue;
+            }
             parameterValueList.add(value);
             String newName = name;
             if (needRename(name)) {
@@ -127,7 +167,7 @@ public class BoundSql {
                 renameParameter.put(name, newName);
             }
             parameterMap.put(newName, value);
-        }
+        });
         String namedSql = rawNamedParameterSql;
         for (Map.Entry<String, String> entry : renameParameter.entrySet()) {
             String name = ":" + entry.getKey();

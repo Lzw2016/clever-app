@@ -75,6 +75,6 @@
     </select>
 
     <sql id="t07">
-
+        select * from entity_a where a=#{a, javaType=decimal}
     </sql>
 </mapper>

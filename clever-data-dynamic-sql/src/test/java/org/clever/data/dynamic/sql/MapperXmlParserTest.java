@@ -178,4 +178,15 @@ public class MapperXmlParserTest {
         log.info("--> {} ", TestUtils.deleteWhitespace(boundSql.getNamedParameterSql()));
         log.info("--> {}", boundSql.getParameterMap());
     }
+
+    @Test
+    public void t07() {
+        SqlFuncTransformUtils.register(new JoinFuncTransform());
+        SqlSource sqlSource = DynamicSqlParser.parserSql(getXNode("t07"));
+        Map<String, Object> params = new HashMap<>();
+        params.put("a", "123");
+        BoundSql boundSql = sqlSource.getBoundSql(DbType.MYSQL, params);
+        log.info("--> {}", TestUtils.deleteWhitespace(boundSql.getSql()));
+        log.info("--> {}", boundSql.getParameterMap());
+    }
 }

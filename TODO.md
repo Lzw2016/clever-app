@@ -559,7 +559,7 @@ DAO数据访问层
 ### clever-data-dynamic-sql
 
 ### clever-data-jdbc
-- [  ] 需要支持 `#{height,javaType=double,jdbcType=NUMERIC,numericScale=2,typeHandler=MyTypeHandler}` 语法
+- [OK] 需要支持 `#{varName,javaType=int|long|decimal|char|string|date|bool}` 语法
 
 ### clever-data-jdbc-meta
 ```

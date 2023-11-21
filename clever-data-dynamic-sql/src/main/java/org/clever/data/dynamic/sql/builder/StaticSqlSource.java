@@ -2,6 +2,7 @@ package org.clever.data.dynamic.sql.builder;
 
 
 import org.clever.data.dynamic.sql.BoundSql;
+import org.clever.data.dynamic.sql.ParameterMapping;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.dynamic.sql.node.DynamicContext;
 import org.clever.data.dynamic.sql.parsing.GenericTokenParser;
@@ -35,9 +36,9 @@ public class StaticSqlSource implements SqlSource {
             @Override
             public String handleToken(String content) {
                 context.addParameterExpression(content);
-                String parameterName = buildParameterMapping(content);
-                parameterList.add(parameterName);
-                return ":" + parameterName;
+                ParameterMapping parameterMapping = buildParameterMapping(content);
+                parameterList.add(parameterMapping);
+                return ":" + parameterMapping.getProperty();
             }
         };
         parser = new GenericTokenParser("#{", "}", handler);
