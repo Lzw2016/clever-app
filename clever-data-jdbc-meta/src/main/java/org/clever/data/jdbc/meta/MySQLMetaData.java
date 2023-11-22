@@ -546,7 +546,7 @@ public class MySQLMetaData extends AbstractMetaData {
         if (newPrimaryKey != null) {
             // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (id, sequence_name);
             ddl.append(String.format(
-                "alter table %s add constraint %s primary key ",
+                "alter table %s add constraint %s primary key (",
                 toLiteral(tableName), toLiteral(newPrimaryKey.getName())
             ));
             for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {
@@ -626,7 +626,7 @@ public class MySQLMetaData extends AbstractMetaData {
         final String tableName = newPrimaryKey.getTableName();
         // alter table auto_increment_id2 add constraint auto_increment_id2_pk primary key (id, sequence_name);
         ddl.append(String.format(
-            "alter table %s add constraint %s primary key ",
+            "alter table %s add constraint %s primary key (",
             toLiteral(tableName), toLiteral(newPrimaryKey.getName())
         ));
         for (int i = 0; i < newPrimaryKey.getColumns().size(); i++) {

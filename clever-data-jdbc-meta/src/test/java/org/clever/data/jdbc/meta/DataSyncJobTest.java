@@ -75,4 +75,22 @@ public class DataSyncJobTest {
         postgresql.close();
         oracle.close();
     }
+
+    @Test
+    public void t05() {
+        Jdbc mysql = BaseTest.newMysql();
+        Jdbc oracle = BaseTest.newOracle();
+        String ddl = DataSyncJob.structSync(
+            oracle,
+            mysql,
+            "WMS8DEV",
+            "test",
+            false,
+            "ASN_IN",
+            "ASN_IN_DETAILS"
+        );
+        log.info("--> \n{}", ddl);
+        mysql.close();
+        oracle.close();
+    }
 }
