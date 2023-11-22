@@ -3,6 +3,7 @@ package org.clever.data.jdbc.meta;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
@@ -589,18 +590,16 @@ public class PostgreSQLMetaData extends AbstractMetaData {
                 toLiteral(tableName), toLiteral(newColumn.getName()), toComment(newColumn.getComment())
             )).append(LINE);
         }
+        TupleTwo<Boolean, Boolean> typeAndDelValue = equalsColumnTypeAndDelValue(newColumn, oldColumn);
         // alter table auto_increment_id2 alter column c11 set default 'abc';
-        if (!Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
+        if (typeAndDelValue.getValue2()) {
             ddl.append(String.format(
                 "alter table %s alter column %s set default %s;",
                 toLiteral(tableName), toLiteral(newColumn.getName()), defaultValue(newColumn)
             )).append(LINE);
         }
         // alter table auto_increment_id2 alter column c11 type varchar(12) using c11::varchar(12);
-        if (!Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
-            || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
-            || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
-            || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
+        if (typeAndDelValue.getValue1()) {
             ddl.append(String.format(
                 "alter table %s alter column %s type %s using %s::%s;",
                 toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn), toLiteral(newColumn.getName()), columnType(newColumn)

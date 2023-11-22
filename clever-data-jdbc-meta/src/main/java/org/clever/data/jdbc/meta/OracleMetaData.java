@@ -537,12 +537,8 @@ public class OracleMetaData extends AbstractMetaData {
             )).append(LINE);
         }
         // alter table sys_user modify is_enable_1 number(16) default 16 not null
-        if (!Objects.equals(newColumn.getDataType(), oldColumn.getDataType())
-            || !Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())
-            || !Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())
-            || !Objects.equals(newColumn.getSize(), oldColumn.getSize())
-            || !Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits())
-            || !Objects.equals(newColumn.getWidth(), oldColumn.getWidth())) {
+        TupleTwo<Boolean, Boolean> typeAndDelValue = equalsColumnTypeAndDelValue(newColumn, oldColumn);
+        if (typeAndDelValue.getValue1() || typeAndDelValue.getValue2() || !Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())) {
             ddl.append(String.format(
                 "alter table %s modify %s %s",
                 toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)

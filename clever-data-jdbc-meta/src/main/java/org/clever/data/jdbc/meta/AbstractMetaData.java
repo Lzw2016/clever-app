@@ -324,28 +324,36 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
                 || !Objects.equals(newColumn.isAutoIncremented(), oldColumn.isAutoIncremented())
                 || !Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull());
             if (!change) {
-                DbType dbType = (jdbc != null) ? jdbc.getDbType() : null;
-                if (dbType == null && oldTable.getSchema() != null) {
-                    dbType = oldTable.getSchema().getDbType();
-                }
-                if (dbType == null && newTable.getSchema() != null) {
-                    dbType = newTable.getSchema().getDbType();
-                }
-                Column newColumnCopy = columnTypeMapping(newColumn, dbType);
-                Column oldColumnCopy = columnTypeMapping(oldColumn, dbType);
-                change = !Objects.equals(newColumnCopy.getDataType(), oldColumnCopy.getDataType())
-                    || !Objects.equals(newColumnCopy.getSize(), oldColumnCopy.getSize())
-                    || !Objects.equals(newColumnCopy.getDecimalDigits(), oldColumnCopy.getDecimalDigits())
-                    || !Objects.equals(newColumnCopy.getWidth(), oldColumnCopy.getWidth());
-                if (!change) {
-                    change = !Objects.equals(defaultValueMapping(newColumnCopy, dbType), defaultValueMapping(oldColumnCopy, dbType));
-                }
+                TupleTwo<Boolean, Boolean> typeAndDelValue = equalsColumnTypeAndDelValue(newColumn, oldColumn);
+                change = typeAndDelValue.getValue1() || typeAndDelValue.getValue2();
             }
             if (change) {
                 diffColumns.add(TupleTwo.creat(newColumn, oldColumn));
             }
         }
         return diffColumns;
+    }
+
+    protected TupleTwo<Boolean, Boolean> equalsColumnTypeAndDelValue(Column newColumn, Column oldColumn) {
+        boolean typeChange;
+        boolean delValueChange = false;
+        DbType dbType = (jdbc != null) ? jdbc.getDbType() : null;
+        if (dbType == null && oldColumn.getTable() != null && oldColumn.getTable().getSchema() != null) {
+            dbType = oldColumn.getTable().getSchema().getDbType();
+        }
+        if (dbType == null && newColumn.getTable() != null && newColumn.getTable().getSchema() != null) {
+            dbType = newColumn.getTable().getSchema().getDbType();
+        }
+        Column newColumnCopy = columnTypeMapping(newColumn, dbType);
+        Column oldColumnCopy = columnTypeMapping(oldColumn, dbType);
+        typeChange = !Objects.equals(newColumnCopy.getDataType(), oldColumnCopy.getDataType())
+            || !Objects.equals(newColumnCopy.getSize(), oldColumnCopy.getSize())
+            || !Objects.equals(newColumnCopy.getDecimalDigits(), oldColumnCopy.getDecimalDigits())
+            || !Objects.equals(newColumnCopy.getWidth(), oldColumnCopy.getWidth());
+        if (!Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
+            delValueChange = !Objects.equals(defaultValueMapping(newColumnCopy, dbType), defaultValueMapping(oldColumnCopy, dbType));
+        }
+        return TupleTwo.creat(typeChange, delValueChange);
     }
 
     /**
