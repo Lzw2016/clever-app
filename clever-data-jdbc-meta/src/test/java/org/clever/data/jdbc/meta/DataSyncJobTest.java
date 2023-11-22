@@ -40,7 +40,7 @@ public class DataSyncJobTest {
     public void t02() {
         Jdbc mysql = BaseTest.newMysql();
         Jdbc oracle = BaseTest.newOracle();
-        QuerySyncState syncState = DataSyncJob.querySync(oracle, mysql, false, "select * from bas_item where STOCK_ENV=2", "bas_item");
+        QuerySyncState syncState = DataSyncJob.querySync(oracle, mysql, false, "select * from bas_item where STOCK_ENV=11", "bas_item");
         while (syncState.getSuccess() == null) {
             log.info("State={}", syncState);
             Thread.sleep(1000);

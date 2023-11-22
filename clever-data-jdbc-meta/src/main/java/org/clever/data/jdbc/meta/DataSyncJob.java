@@ -3,10 +3,13 @@ package org.clever.data.jdbc.meta;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.AppShutdownHook;
+import org.clever.core.OrderIncrement;
 import org.clever.core.SharedThreadPoolExecutor;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.BusinessException;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.job.DaemonExecutor;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.QuerySyncState;
 import org.clever.data.jdbc.meta.model.TableState;
@@ -14,9 +17,7 @@ import org.clever.data.jdbc.meta.model.TablesSyncState;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,41 @@ import java.util.stream.Collectors;
 public class DataSyncJob {
     private static final ConcurrentHashMap<String, TablesSyncState> TABLE_SYNC_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, QuerySyncState> QUERY_SYNC_MAP = new ConcurrentHashMap<>();
+
+    static {
+        DaemonExecutor daemonExecutor = new DaemonExecutor("data-sync-clear");
+        daemonExecutor.scheduleAtFixedRate(DataSyncJob::clearExpireState, 1000 * 60 * 5);
+        AppShutdownHook.addShutdownHook(() -> {
+            daemonExecutor.shutdown();
+            TABLE_SYNC_MAP.keySet().forEach(DataSyncJob::interruptTableSync);
+            QUERY_SYNC_MAP.keySet().forEach(DataSyncJob::interruptQuerySync);
+        }, OrderIncrement.MIN, "停止DataSyncJob");
+    }
+
+    /**
+     * 清除过期的任务状态数据
+     */
+    public static void clearExpireState() {
+        final long ttl = 1000 * 60 * 60 * 24;
+        final long now = SystemClock.now();
+        final Set<String> removeIds = new HashSet<>();
+        TABLE_SYNC_MAP.forEach((id, state) -> {
+            Long startTime = state.getStartTime();
+            if (startTime != null && (now - startTime) > ttl) {
+                removeIds.add(id);
+            }
+        });
+        removeIds.forEach(TABLE_SYNC_MAP::remove);
+        removeIds.clear();
+        QUERY_SYNC_MAP.forEach((id, state) -> {
+            Long startTime = state.getStartTime();
+            if (startTime != null && (now - startTime) > ttl) {
+                removeIds.add(id);
+            }
+        });
+        removeIds.forEach(QUERY_SYNC_MAP::remove);
+        removeIds.clear();
+    }
 
     /**
      * 获取数据同步状态信息(数据库表-->表的同步)

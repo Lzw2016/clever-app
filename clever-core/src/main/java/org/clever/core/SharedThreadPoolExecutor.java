@@ -18,15 +18,29 @@ public class SharedThreadPoolExecutor {
     private static ThreadPoolExecutor LARGE;
     private static final Object LOCK_LARGE = new Object();
 
+    static {
+        AppShutdownHook.addShutdownHook(() -> {
+            if (SMALL != null) {
+                SMALL.shutdownNow();
+            }
+            if (NORMAL != null) {
+                NORMAL.shutdownNow();
+            }
+            if (LARGE != null) {
+                LARGE.shutdownNow();
+            }
+        }, OrderIncrement.MAX - 1, "停止SharedThreadPool");
+    }
+
     private static ThreadPoolExecutor createThreadPool(int core, int max, BlockingQueue<Runnable> queue, String namingPattern) {
         ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
-                core, max, 16, TimeUnit.SECONDS,
-                queue,
-                new BasicThreadFactory.Builder()
-                        .namingPattern(namingPattern)
-                        .daemon(true)
-                        .build(),
-                new ThreadPoolExecutor.CallerRunsPolicy()
+            core, max, 16, TimeUnit.SECONDS,
+            queue,
+            new BasicThreadFactory.Builder()
+                .namingPattern(namingPattern)
+                .daemon(true)
+                .build(),
+            new ThreadPoolExecutor.CallerRunsPolicy()
         );
         threadPool.allowCoreThreadTimeOut(true);
         return threadPool;
@@ -44,10 +58,10 @@ public class SharedThreadPoolExecutor {
         synchronized (LOCK_SMALL) {
             if (SMALL == null) {
                 SMALL = createThreadPool(
-                        2,
-                        32,
-                        new SynchronousQueue<>(),
-                        "small-shared-%d"
+                    2,
+                    32,
+                    new SynchronousQueue<>(),
+                    "small-shared-%d"
                 );
             }
         }
@@ -66,10 +80,10 @@ public class SharedThreadPoolExecutor {
         synchronized (LOCK_NORMAL) {
             if (NORMAL == null) {
                 NORMAL = createThreadPool(
-                        16,
-                        32,
-                        new ArrayBlockingQueue<>(64),
-                        "normal-shared-%d"
+                    16,
+                    32,
+                    new ArrayBlockingQueue<>(64),
+                    "normal-shared-%d"
                 );
             }
         }
@@ -88,10 +102,10 @@ public class SharedThreadPoolExecutor {
         synchronized (LOCK_LARGE) {
             if (LARGE == null) {
                 LARGE = createThreadPool(
-                        512,
-                        1024,
-                        new ArrayBlockingQueue<>(20480),
-                        "large-shared-%d"
+                    512,
+                    1024,
+                    new ArrayBlockingQueue<>(20480),
+                    "large-shared-%d"
                 );
             }
         }
