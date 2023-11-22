@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
  */
 @Slf4j
 public class DataSyncJobTest {
-    @SuppressWarnings("BusyWait")
-    @SneakyThrows
     @Test
     public void t01() {
         Jdbc mysql = BaseTest.newMysql();
@@ -24,12 +22,6 @@ public class DataSyncJobTest {
         OracleMetaData oracleMeta = new OracleMetaData(oracle);
         Table table = oracleMeta.getTable("WMS8DEV", "BAS_ITEM");
         log.info("--> \n{}", mySQLMeta.createTable(table));
-        TablesSyncState syncState = DataSyncJob.tableSync(oracle, mysql, false, false, "bas_item");
-        while (syncState.getSuccess() == null) {
-            log.info("State={}", syncState);
-            Thread.sleep(1000);
-        }
-        log.info("###完成 -> {}", syncState);
         mysql.close();
         oracle.close();
     }
@@ -47,6 +39,40 @@ public class DataSyncJobTest {
         }
         log.info("###完成 -> {}", syncState);
         mysql.close();
+        oracle.close();
+    }
+
+    @SuppressWarnings("BusyWait")
+    @SneakyThrows
+    @Test
+    public void t03() {
+        Jdbc mysql = BaseTest.newMysql();
+        Jdbc oracle = BaseTest.newOracle();
+        TablesSyncState syncState = DataSyncJob.tableSync(oracle, mysql, false, false, "bas_item");
+        while (syncState.getSuccess() == null) {
+            log.info("State={}", syncState);
+            Thread.sleep(1000);
+        }
+        log.info("###完成 -> {}", syncState);
+        mysql.close();
+        oracle.close();
+    }
+
+    @Test
+    public void t04() {
+        Jdbc postgresql = BaseTest.newPostgresql();
+        Jdbc oracle = BaseTest.newOracle();
+        String ddl = DataSyncJob.structSync(
+            oracle,
+            postgresql,
+            "WMS8DEV",
+            "public",
+            false,
+            "ASN_IN",
+            "ASN_IN_DETAILS"
+        );
+        log.info("--> \n{}", ddl);
+        postgresql.close();
         oracle.close();
     }
 }

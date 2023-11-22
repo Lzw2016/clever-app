@@ -54,6 +54,11 @@ public interface DataBaseMetaData {
     Schema getSchema();
 
     /**
+     * 获取指定的 Schema
+     */
+    Schema getSchema(String schemaName, Collection<String> tablesName);
+
+    /**
      * 获取指定的 Table
      */
     Table getTable(String schemaName, String tableName);
@@ -63,7 +68,7 @@ public interface DataBaseMetaData {
     // --------------------------------------------------------------------------------------------
 
     /***
-     * 修改“表”的 DDL 语句
+     * 修改“表”的 DDL 语句(包含: 表名、表备注、字段、主键、索引)
      */
     String alterTable(Table newTable, Table oldTable);
 
@@ -73,7 +78,7 @@ public interface DataBaseMetaData {
     String dropTable(Table oldTable);
 
     /**
-     * 新增“表”的 DDL 语句
+     * 新增“表”的 DDL 语句(包含: 表名、表备注、字段、主键、索引)
      */
     String createTable(Table newTable);
 

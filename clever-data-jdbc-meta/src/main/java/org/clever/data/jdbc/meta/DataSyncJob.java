@@ -9,11 +9,12 @@ import org.clever.core.SharedThreadPoolExecutor;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.BusinessException;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.function.CallFun;
 import org.clever.core.job.DaemonExecutor;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.data.jdbc.Jdbc;
-import org.clever.data.jdbc.meta.model.QuerySyncState;
-import org.clever.data.jdbc.meta.model.TableState;
-import org.clever.data.jdbc.meta.model.TablesSyncState;
+import org.clever.data.jdbc.meta.model.*;
+import org.clever.data.jdbc.meta.utils.MetaDataUtils;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
@@ -174,6 +175,172 @@ public class DataSyncJob {
         SharedThreadPoolExecutor.getSmall().execute(querySyncJob);
         QUERY_SYNC_MAP.put(querySyncState.getJobId(), querySyncState);
         return querySyncState;
+    }
+
+    /**
+     * 数据库表结构同步
+     *
+     * @param source           源数据库
+     * @param target           目标数据库
+     * @param sourceSchemaName 源数据库 schemaName
+     * @param targetSchemaName 目标数据库 schemaName
+     * @param sequence         是否同步序列
+     * @param tableNames       需要同步的表
+     * @return 需要执行的 ddl 语句
+     */
+    public static String structSync(Jdbc source, Jdbc target, String sourceSchemaName, String targetSchemaName, boolean sequence, String... tableNames) {
+        Assert.notNull(source, "参数 source 不能为null");
+        Assert.notNull(target, "参数 target 不能为null");
+        Assert.isNotBlank(sourceSchemaName, "参数 sourceSchemaName 不能为空");
+        Assert.isNotBlank(targetSchemaName, "参数 targetSchemaName 不能为空");
+        Assert.notEmpty(tableNames, "参数 tableNames 不能为空");
+        StringBuilder ddl = new StringBuilder();
+        CallFun addLine = () -> {
+            if (ddl.length() > 0) {
+                ddl.append(DataBaseMetaData.LINE);
+            }
+        };
+        Set<String> tabs = Arrays.stream(tableNames).collect(Collectors.toSet());
+        DataBaseMetaData sourceMeta = MetaDataUtils.createMetaData(source);
+        DataBaseMetaData targetMeta = MetaDataUtils.createMetaData(target);
+        Schema sourceSchema = sourceMeta.getSchema(sourceSchemaName, tabs);
+        Schema targetSchema = targetMeta.getSchema(targetSchemaName, tabs);
+        Assert.notNull(sourceSchema, String.format("源数据库不存在 schema=%s", sourceSchemaName));
+        Assert.notNull(targetSchema, String.format("目标数据库不存在 schema=%s", targetSchemaName));
+        List<Table> addTabs = new ArrayList<>();
+        List<Table> delTabs = new ArrayList<>();
+        List<TupleTwo<Table, Table>> alterTabs = new ArrayList<>();
+        for (Table sourceTable : sourceSchema.getTables()) {
+            Table targetTable = targetSchema.getTable(sourceTable.getName());
+            if (targetTable == null) {
+                addTabs.add(sourceTable);
+            } else {
+                alterTabs.add(TupleTwo.creat(sourceTable, targetTable));
+            }
+        }
+        for (Table targetTable : targetSchema.getTables()) {
+            Table sourceTable = sourceSchema.getTable(targetTable.getName());
+            if (sourceTable == null) {
+                delTabs.add(targetTable);
+            }
+        }
+        // 新增表
+        for (Table table : addTabs) {
+            String str = targetMeta.createTable(table);
+            ddl.append(str);
+            if (StringUtils.isNotBlank(str)) {
+                addLine.call();
+            }
+        }
+        if (!addTabs.isEmpty()) {
+            addLine.call();
+        }
+        // 修改表
+        for (TupleTwo<Table, Table> alterTab : alterTabs) {
+            String str = targetMeta.alterTable(alterTab.getValue1(), alterTab.getValue2());
+            ddl.append(str);
+            if (StringUtils.isNotBlank(str)) {
+                addLine.call();
+            }
+        }
+        if (!alterTabs.isEmpty()) {
+            addLine.call();
+        }
+        // 删除表
+        for (Table table : delTabs) {
+            String str = targetMeta.dropTable(table);
+            ddl.append(str);
+            if (StringUtils.isNotBlank(str)) {
+                addLine.call();
+            }
+        }
+        if (!delTabs.isEmpty()) {
+            addLine.call();
+        }
+        // 处理序列
+        if (sequence) {
+            List<Sequence> addSequences = new ArrayList<>();
+            List<Sequence> delSequences = new ArrayList<>();
+            List<TupleTwo<Sequence, Sequence>> alterSequences = new ArrayList<>();
+            for (Sequence sourceSequence : sourceSchema.getSequences()) {
+                Sequence targetSequence = targetSchema.getSequence(sourceSequence.getName());
+                if (targetSequence == null) {
+                    addSequences.add(sourceSequence);
+                } else {
+                    alterSequences.add(TupleTwo.creat(sourceSequence, targetSequence));
+                }
+            }
+            for (Sequence targetSequence : targetSchema.getSequences()) {
+                Sequence sourceSequence = sourceSchema.getSequence(targetSequence.getName());
+                if (sourceSequence == null) {
+                    delSequences.add(targetSequence);
+                }
+            }
+            // 新增序列
+            for (Sequence seq : addSequences) {
+                String str = targetMeta.createSequence(seq);
+                ddl.append(str);
+                if (StringUtils.isNotBlank(str)) {
+                    addLine.call();
+                }
+            }
+            if (!addSequences.isEmpty()) {
+                addLine.call();
+            }
+            // 修改序列
+            for (TupleTwo<Sequence, Sequence> alterSequence : alterSequences) {
+                String str = targetMeta.alterSequence(alterSequence.getValue1(), alterSequence.getValue2());
+                ddl.append(str);
+                if (StringUtils.isNotBlank(str)) {
+                    addLine.call();
+                }
+            }
+            if (!alterSequences.isEmpty()) {
+                addLine.call();
+            }
+            // 删除序列
+            for (Sequence seq : delSequences) {
+                String str = targetMeta.dropSequence(seq);
+                ddl.append(str);
+                if (StringUtils.isNotBlank(str)) {
+                    addLine.call();
+                }
+            }
+            if (!delSequences.isEmpty()) {
+                addLine.call();
+            }
+        }
+        return ddl.toString();
+    }
+
+    /**
+     * 数据库表结构同步
+     *
+     * @param source           源数据库
+     * @param target           目标数据库
+     * @param sourceSchemaName 源数据库 schemaName
+     * @param targetSchemaName 目标数据库 schemaName
+     * @param sequence         是否同步序列
+     * @param tableNames       需要同步的表
+     * @return 需要执行的 ddl 语句
+     */
+    public static String structSync(Jdbc source, Jdbc target, String sourceSchemaName, String targetSchemaName, boolean sequence, Collection<String> tableNames) {
+        return structSync(source, target, sourceSchemaName, targetSchemaName, sequence, tableNames.toArray(new String[0]));
+    }
+
+    /**
+     * 数据库存储过程同步
+     *
+     * @param source 源数据库
+     * @param target 目标数据库
+     * @return 需要执行的 ddl 语句
+     */
+    public static String procedureSync(Jdbc source, Jdbc target) {
+        Assert.notNull(source, "参数 source 不能为null");
+        Assert.notNull(target, "参数 target 不能为null");
+        StringBuilder ddl = new StringBuilder();
+
+        return ddl.toString();
     }
 
     @Getter

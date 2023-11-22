@@ -56,9 +56,23 @@ public class PostgreSQLMetaData extends AbstractMetaData {
                                         Set<String> ignoreTablesSuffix) {
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
-        // 查询表信息
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sql = new StringBuilder();
+        sql.append("select ");
+        sql.append("    schema_name as schemaName ");
+        sql.append("from information_schema.schemata ");
+        if (!schemasName.isEmpty()) {
+            sql.append("where lower(schema_name) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        sql.append("order by schema_name ");
+        List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : schemas) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, name));
+        }
+        // 查询表信息
+        sql.setLength(0);
+        params.clear();
         sql.append("SELECT ");
         sql.append("    nps.nspname             as schemaName, ");
         sql.append("    cls.relname             as tableName, ");
@@ -110,7 +124,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         // partOfIndex
         // partOfUniqueIndex
         // autoIncremented
-        sql.append("    a.is_nullable                                             as notNull, ");
+        sql.append("    a.is_nullable                                             as nullable, ");
         sql.append("    a.udt_name                                                as dataType, ");
         sql.append("    a.numeric_precision                                       as size, ");
         sql.append("    a.numeric_scale                                           as decimalDigits, ");
@@ -353,10 +367,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             String arguments = Conv.asString(map.get("arguments"));
             String proSrc = Conv.asString(map.get("proSrc"));
             String lanName = Conv.asString(map.get("lanName"));
-            Schema schema = mapSchema.get(schemaName);
-            if (schema == null) {
-                continue;
-            }
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.POSTGRE_SQL, sName));
             Procedure procedure = new Procedure(schema);
             procedure.setName(name);
             // a.prokind 可能的值包括：
@@ -411,10 +422,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             Long maxValue = Conv.asLong(map.get("maxValue"), null);
             Long increment = Conv.asLong(map.get("increment"), null);
             boolean cycle = Conv.asBoolean(map.get("cycle"));
-            Schema schema = mapSchema.get(schemaName);
-            if (schema == null) {
-                continue;
-            }
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.POSTGRE_SQL, sName));
             Sequence sequence = new Sequence(schema);
             sequence.setName(name);
             sequence.setMinValue(minValue);
@@ -431,7 +439,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
 
     private void fillColumn(Column column, Map<String, Object> map) {
         column.setName(Conv.asString(map.get("columnName"), null));
-        column.setNotNull(Conv.asBoolean(map.get("notNull")));
+        column.setNotNull(!Conv.asBoolean(map.get("nullable")));
         column.setDataType(Conv.asString(map.get("dataType"), null));
         column.setSize(Conv.asInteger(map.get("size")));
         if (column.getSize() == 0) {
@@ -455,7 +463,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         Assert.notNull(oldTable, "参数 oldTable 不能为空");
         final StringBuilder ddl = new StringBuilder();
         // 表名变化
-        if (!Objects.equals(newTable.getName(), oldTable.getName())) {
+        if (!StringUtils.equalsIgnoreCase(newTable.getName(), oldTable.getName())) {
             // alter table auto_increment_id rename to auto_increment_id2;
             ddl.append(String.format(
                 "alter table %s rename to %s;",
@@ -568,7 +576,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         final StringBuilder ddl = new StringBuilder();
         final String tableName = newColumn.getTableName();
         // alter table sys_user2 rename column is_enable2 to is_enable3
-        if (!Objects.equals(newColumn.getName(), oldColumn.getName())) {
+        if (!StringUtils.equalsIgnoreCase(newColumn.getName(), oldColumn.getName())) {
             ddl.append(String.format(
                 "alter table %s rename column %s to %s;",
                 toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())
@@ -599,15 +607,18 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             )).append(LINE);
         }
         // alter table auto_increment_id2 alter column c11 set not null;
+        // alter table auto_increment_id2 alter column c11 drop not null;
         if (!Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull())) {
             ddl.append(String.format(
-                "alter table %s alter column %s set",
+                "alter table %s alter column %s ",
                 toLiteral(tableName), toLiteral(newColumn.getName())
             ));
             if (newColumn.isNotNull()) {
-                ddl.append(" not");
+                ddl.append(" set");
+            } else {
+                ddl.append(" drop");
             }
-            ddl.append(" null;").append(LINE);
+            ddl.append(" not null;").append(LINE);
         }
         return ddl.toString();
     }

@@ -155,6 +155,12 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
     }
 
     @Override
+    public Schema getSchema(String schemaName, Collection<String> tablesName) {
+        List<Schema> schemas = getSchemas(Collections.singletonList(schemaName), tablesName);
+        return schemas.isEmpty() ? null : schemas.get(0);
+    }
+
+    @Override
     public Table getTable(String schemaName, String tableName) {
         List<Schema> schemas = getSchemas(Collections.singletonList(schemaName), Collections.singletonList(tableName));
         if (schemas.isEmpty()) {
@@ -313,10 +319,31 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
                 continue;
             }
             // 对比两个字段有无变化
-            if (Objects.equals(newColumn.getName(), oldColumn.getName()) && Objects.equals(newColumn.getComment(), oldColumn.getComment()) && Objects.equals(newColumn.isAutoIncremented(), oldColumn.isAutoIncremented()) && Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull()) && Objects.equals(newColumn.getDataType(), oldColumn.getDataType()) && Objects.equals(newColumn.getSize(), oldColumn.getSize()) && Objects.equals(newColumn.getDecimalDigits(), oldColumn.getDecimalDigits()) && Objects.equals(newColumn.getWidth(), oldColumn.getWidth()) && Objects.equals(newColumn.getDefaultValue(), oldColumn.getDefaultValue())) {
-                continue;
+            boolean change = !StringUtils.equalsIgnoreCase(newColumn.getName(), oldColumn.getName())
+                || !Objects.equals(newColumn.getComment(), oldColumn.getComment())
+                || !Objects.equals(newColumn.isAutoIncremented(), oldColumn.isAutoIncremented())
+                || !Objects.equals(newColumn.isNotNull(), oldColumn.isNotNull());
+            if (!change) {
+                DbType dbType = (jdbc != null) ? jdbc.getDbType() : null;
+                if (dbType == null && oldTable.getSchema() != null) {
+                    dbType = oldTable.getSchema().getDbType();
+                }
+                if (dbType == null && newTable.getSchema() != null) {
+                    dbType = newTable.getSchema().getDbType();
+                }
+                Column newColumnCopy = columnTypeMapping(newColumn, dbType);
+                Column oldColumnCopy = columnTypeMapping(oldColumn, dbType);
+                change = !Objects.equals(newColumnCopy.getDataType(), oldColumnCopy.getDataType())
+                    || !Objects.equals(newColumnCopy.getSize(), oldColumnCopy.getSize())
+                    || !Objects.equals(newColumnCopy.getDecimalDigits(), oldColumnCopy.getDecimalDigits())
+                    || !Objects.equals(newColumnCopy.getWidth(), oldColumnCopy.getWidth());
+                if (!change) {
+                    change = !Objects.equals(defaultValueMapping(newColumnCopy, dbType), defaultValueMapping(oldColumnCopy, dbType));
+                }
             }
-            diffColumns.add(TupleTwo.creat(newColumn, oldColumn));
+            if (change) {
+                diffColumns.add(TupleTwo.creat(newColumn, oldColumn));
+            }
         }
         return diffColumns;
     }

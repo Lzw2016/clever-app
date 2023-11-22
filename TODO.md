@@ -573,7 +573,7 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 - [OK] 生成数据库文档, 支持: markdown、html、word文档
 - [OK] Entity、QueryDS代码生成, 支持: java、groovy、kotlin语言
 - [OK] 支持数据库DDL语句生成, 支持: 表、字段、主键、索引、序列、存储过程、函数
-- [  ] 数据库结构同步
+- [50] 数据库结构同步
 - [OK] 数据库数据库同步, 支持查询SQL
 - [  ]
 

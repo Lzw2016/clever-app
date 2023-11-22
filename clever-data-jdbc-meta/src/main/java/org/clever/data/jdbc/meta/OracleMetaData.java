@@ -71,9 +71,23 @@ public class OracleMetaData extends AbstractMetaData {
                                         Set<String> ignoreTablesSuffix) {
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
-        // 查询表信息
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sql = new StringBuilder();
+        sql.append("select ");
+        sql.append("    username as \"schemaName\"");
+        sql.append("from sys.all_users ");
+        if (!schemasName.isEmpty()) {
+            sql.append("where lower(username) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        sql.append("order by username ");
+        List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : schemas) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.ORACLE, name));
+        }
+        // 查询表信息
+        sql.setLength(0);
+        params.clear();
         sql.append("select ");
         sql.append("    a.owner                                 as \"schemaName\", ");
         sql.append("    a.table_name                            as \"tableName\", ");
@@ -81,16 +95,16 @@ public class OracleMetaData extends AbstractMetaData {
         sql.append("from sys.all_tables a left join sys.all_tab_comments b on (a.owner = b.owner and a.table_name = b.table_name) ");
         sql.append("where a.iot_type is null ");
         if (!schemasName.isEmpty()) {
-            sql.append("  and lower(a.owner) in (").append(createWhereIn(params, schemasName)).append(")");
+            sql.append("  and lower(a.owner) in (").append(createWhereIn(params, schemasName)).append(") ");
         }
         if (!tablesName.isEmpty()) {
-            sql.append("  and lower(a.table_name) in (").append(createWhereIn(params, tablesName)).append(")");
+            sql.append("  and lower(a.table_name) in (").append(createWhereIn(params, tablesName)).append(") ");
         }
         if (!ignoreSchemas.isEmpty()) {
-            sql.append("  and lower(a.owner) not in (").append(createWhereIn(params, ignoreSchemas)).append(")");
+            sql.append("  and lower(a.owner) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
         if (!ignoreTables.isEmpty()) {
-            sql.append("  and lower(a.table_name) not in (").append(createWhereIn(params, ignoreTables)).append(")");
+            sql.append("  and lower(a.table_name) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
         }
         sql.append("order by a.owner, a.table_name ");
         List<Map<String, Object>> tables = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
@@ -131,16 +145,16 @@ public class OracleMetaData extends AbstractMetaData {
         sql.append("    left join sys.all_col_comments b on (a.owner=b.owner and a.table_name = b.table_name and a.column_name=b.column_name) ");
         sql.append("where 1=1 ");
         if (!schemasName.isEmpty()) {
-            sql.append("  and lower(a.owner) in (").append(createWhereIn(params, schemasName)).append(")");
+            sql.append("  and lower(a.owner) in (").append(createWhereIn(params, schemasName)).append(") ");
         }
         if (!tablesName.isEmpty()) {
-            sql.append("  and lower(a.table_name) in (").append(createWhereIn(params, tablesName)).append(")");
+            sql.append("  and lower(a.table_name) in (").append(createWhereIn(params, tablesName)).append(") ");
         }
         if (!ignoreSchemas.isEmpty()) {
-            sql.append("  and lower(a.owner) not in (").append(createWhereIn(params, ignoreSchemas)).append(")");
+            sql.append("  and lower(a.owner) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
         if (!ignoreTables.isEmpty()) {
-            sql.append("  and lower(a.table_name) not in (").append(createWhereIn(params, ignoreTables)).append(")");
+            sql.append("  and lower(a.table_name) not in (").append(createWhereIn(params, ignoreTables)).append(") ");
         }
         sql.append("order by a.owner, a.table_name, a.column_id ");
         List<Map<String, Object>> mapColumns = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
@@ -305,10 +319,7 @@ public class OracleMetaData extends AbstractMetaData {
             String name = Conv.asString(map.get("name")).toLowerCase();
             String type = Conv.asString(map.get("type")).toLowerCase();
             String definition = Conv.asString(map.get("definition"));
-            Schema schema = mapSchema.get(schemaName);
-            if (schema == null) {
-                continue;
-            }
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.ORACLE, sName));
             String key = String.format("schemaName=%s|type=%s|name=%s", schemaName, type, name);
             TupleTwo<StringBuilder, Procedure> tuple = routineMap.get(key);
             if (tuple == null) {
@@ -363,10 +374,7 @@ public class OracleMetaData extends AbstractMetaData {
             Long maxValue = Conv.asLong(map.get("maxValue"), null);
             Long increment = Conv.asLong(map.get("increment"), null);
             boolean cycle = Conv.asBoolean(map.get("cycle"));
-            Schema schema = mapSchema.get(schemaName);
-            if (schema == null) {
-                continue;
-            }
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.ORACLE, sName));
             Sequence sequence = new Sequence(schema);
             sequence.setName(name);
             sequence.setMinValue(minValue);
@@ -404,7 +412,7 @@ public class OracleMetaData extends AbstractMetaData {
         Assert.notNull(oldTable, "参数 oldTable 不能为空");
         final StringBuilder ddl = new StringBuilder();
         // 表名变化
-        if (!Objects.equals(newTable.getName(), oldTable.getName())) {
+        if (!StringUtils.equalsIgnoreCase(newTable.getName(), oldTable.getName())) {
             // rename sys_user to "sys_user1"
             ddl.append(String.format(
                 "rename %s to %s;",
@@ -515,7 +523,7 @@ public class OracleMetaData extends AbstractMetaData {
         final StringBuilder ddl = new StringBuilder();
         final String tableName = newColumn.getTableName();
         // alter table sys_user2 rename column is_enable2 to is_enable3
-        if (!Objects.equals(newColumn.getName(), oldColumn.getName())) {
+        if (!StringUtils.equalsIgnoreCase(newColumn.getName(), oldColumn.getName())) {
             ddl.append(String.format(
                 "alter table %s rename column %s to %s;",
                 toLiteral(tableName), toLiteral(oldColumn.getName()), toLiteral(newColumn.getName())

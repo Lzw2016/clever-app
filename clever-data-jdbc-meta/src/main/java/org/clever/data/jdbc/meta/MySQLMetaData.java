@@ -45,9 +45,24 @@ public class MySQLMetaData extends AbstractMetaData {
                                         Set<String> ignoreTablesSuffix) {
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
-        // 查询表信息
         final Map<String, Object> params = new HashMap<>();
         final StringBuilder sql = new StringBuilder();
+        // 查询 schemas
+        sql.append("select  ");
+        sql.append("    schema_name as `schemaName` ");
+        sql.append("from information_schema.schemata ");
+        if (!schemasName.isEmpty()) {
+            sql.append("where lower(schema_name) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        sql.append("order by schema_name ");
+        List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+        for (Map<String, Object> map : schemas) {
+            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, name));
+        }
+        // 查询表信息
+        sql.setLength(0);
+        params.clear();
         // TABLE_TYPE列可能的一些值：
         //   "BASE TABLE"：表示普通的表。
         //   "VIEW"：表示视图。
@@ -216,10 +231,7 @@ public class MySQLMetaData extends AbstractMetaData {
             String paramList = StringUtils.toEncodedString((byte[]) map.get("param_list"), StandardCharsets.UTF_8);
             String returns = StringUtils.toEncodedString((byte[]) map.get("returns"), StandardCharsets.UTF_8);
             String body = StringUtils.toEncodedString((byte[]) map.get("body_utf8"), StandardCharsets.UTF_8);
-            Schema schema = mapSchema.get(schemaName);
-            if (schema == null) {
-                continue;
-            }
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.MYSQL, sName));
             Procedure procedure = new Procedure(schema);
             procedure.setName(name);
             // ROUTINE_TYPE 可能的值包括：
@@ -334,7 +346,7 @@ public class MySQLMetaData extends AbstractMetaData {
         Assert.notNull(oldTable, "参数 oldTable 不能为空");
         final StringBuilder ddl = new StringBuilder();
         // 表名变化
-        if (!Objects.equals(newTable.getName(), oldTable.getName())) {
+        if (!StringUtils.equalsIgnoreCase(newTable.getName(), oldTable.getName())) {
             // rename table auto_increment_id to auto_increment_id2;
             ddl.append(String.format(
                 "rename table %s to %s;",
@@ -443,7 +455,7 @@ public class MySQLMetaData extends AbstractMetaData {
         final String tableName = newColumn.getTableName();
         // alter table auto_increment_id2 change sequence_name sequence_name2 varchar(128) collate utf8mb4_bin not null comment '序列名称';
         // alter table auto_increment_id2 change description description2 varchar(511) not null comment '说明2';
-        if (Objects.equals(toLiteral(oldColumn.getName()), toLiteral(newColumn.getName()))) {
+        if (StringUtils.equalsIgnoreCase(toLiteral(oldColumn.getName()), toLiteral(newColumn.getName()))) {
             ddl.append(String.format(
                 "alter table %s modify %s %s",
                 toLiteral(tableName), toLiteral(newColumn.getName()), columnType(newColumn)

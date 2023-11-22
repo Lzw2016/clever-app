@@ -84,6 +84,14 @@ public class MetaDataUtils {
     }
 
     /**
+     * 获取指定的 Schema
+     */
+    public static Schema getSchema(Jdbc jdbc, String schemaName, Collection<String> tablesName) {
+        DataBaseMetaData metaData = createMetaData(jdbc);
+        return metaData.getSchema(schemaName, tablesName);
+    }
+
+    /**
      * 获取指定的 Table
      */
     public static Table getTable(Jdbc jdbc, String schemaName, String tableName) {
