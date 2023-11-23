@@ -49,7 +49,8 @@ jdbc:
       minimumIdle: 2
       maximumPoolSize: 100
       connectionTestQuery: 'select 1'
-
+      dataSourceProperties:
+        stringtype: unspecified
 redis:
   enable: true
   defaultName: 'default'

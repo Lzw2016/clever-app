@@ -192,4 +192,12 @@ public class MvcTest {
         jdbc.insertTable("biz_code", res);
         return res;
     }
+
+    public static Object t16(Context ctx) {
+        Jdbc postgresql = DaoFactory.getJdbc("postgresql");
+        Map<String, Object> params = new LinkedHashMap<>();
+        // params.put("updateAt", new Date());
+        params.put("updateAt", "2023-11-23 11:50:19");
+        return postgresql.queryMany("select * from asn_in where update_at>=:updateAt", params);
+    }
 }
