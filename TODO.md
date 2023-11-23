@@ -538,6 +538,17 @@ DAO数据访问层
 ### clever-groovy
 
 ### clever-web
+- [OK] ApplyConfigFilter (应用web配置,如: ContentType、CharacterEncoding 等等)
+- [OK] EchoFilter (请求日志记录)
+- [OK] ExceptionHandlerFilter (异常处理)
+- [  ] GlobalRequestParamsFilter (获取全局请求参数: QueryBySort、QueryByPage)
+- [OK] CorsFilter (跨域支持)
+- [  ] CaptureHandlerFilter (http请求响应数据打印) - 耗性能先不做?
+- [OK] MvcHandlerMethodFilter (解析获取MVC的HandlerMethod)
+- [OK] StaticResourceFilter (静态资源映射)
+- [OK] MvcFilter (实现MVC拦截器逻辑 before-invoke-after-finally)
+- [OK] MVC支持注解：Transactional、CookieValue、RequestBody、RequestHeader、RequestParam、RequestPart、ValueConstants
+- [  ] 
 
 ### clever-security
 - [OK] 全局异常处理

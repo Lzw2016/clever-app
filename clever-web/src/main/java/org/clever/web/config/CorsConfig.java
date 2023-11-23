@@ -50,6 +50,7 @@ public class CorsConfig {
     /**
      * 允许的域(不支持匹配符，如："*")
      */
+    @Getter
     private List<String> allowedOrigins;
     /**
      * 允许的域(支持匹配符，如："*")
@@ -58,6 +59,7 @@ public class CorsConfig {
     /**
      * 允许客户端能发送的Http Method，"*"为所有Method
      */
+    @Getter
     private List<String> allowedMethods;
     /**
      * 允许客户端能发送的Http Method(解析后的HttpMethod对象)
@@ -66,18 +68,22 @@ public class CorsConfig {
     /**
      * 允许客户端能发送的Http Header，"*"为所有Header
      */
+    @Getter
     private List<String> allowedHeaders;
     /**
      * 允许客户端能获取的的Http Header，不支持"*"
      */
+    @Getter
     private List<String> exposedHeaders;
     /**
      * 是否允许凭证
      */
+    @Getter
     private Boolean allowCredentials;
     /**
      * 配置客户端可以缓存pre-flight请求的响应的持续时间
      */
+    @Getter
     private Long maxAge;
 
     public CorsConfig() {
@@ -103,10 +109,6 @@ public class CorsConfig {
     public void setAllowedOrigins(List<String> origins) {
         this.allowedOrigins = (origins == null ? null : origins.stream()
                 .filter(Objects::nonNull).map(this::trimTrailingSlash).collect(Collectors.toList()));
-    }
-
-    public List<String> getAllowedOrigins() {
-        return this.allowedOrigins;
     }
 
     public void addAllowedOrigin(String origin) {
@@ -171,10 +173,6 @@ public class CorsConfig {
         }
     }
 
-    public List<String> getAllowedMethods() {
-        return this.allowedMethods;
-    }
-
     public void addAllowedMethod(HttpMethod method) {
         addAllowedMethod(method.name());
     }
@@ -200,10 +198,6 @@ public class CorsConfig {
         this.allowedHeaders = (allowedHeaders != null ? new ArrayList<>(allowedHeaders) : null);
     }
 
-    public List<String> getAllowedHeaders() {
-        return this.allowedHeaders;
-    }
-
     public void addAllowedHeader(String allowedHeader) {
         if (this.allowedHeaders == null) {
             this.allowedHeaders = new ArrayList<>(4);
@@ -217,10 +211,6 @@ public class CorsConfig {
         this.exposedHeaders = (exposedHeaders != null ? new ArrayList<>(exposedHeaders) : null);
     }
 
-    public List<String> getExposedHeaders() {
-        return this.exposedHeaders;
-    }
-
     public void addExposedHeader(String exposedHeader) {
         if (this.exposedHeaders == null) {
             this.exposedHeaders = new ArrayList<>(4);
@@ -232,20 +222,12 @@ public class CorsConfig {
         this.allowCredentials = allowCredentials;
     }
 
-    public Boolean getAllowCredentials() {
-        return this.allowCredentials;
-    }
-
     public void setMaxAge(Duration maxAge) {
         this.maxAge = maxAge.getSeconds();
     }
 
     public void setMaxAge(Long maxAge) {
         this.maxAge = maxAge;
-    }
-
-    public Long getMaxAge() {
-        return this.maxAge;
     }
 
     /**
@@ -428,6 +410,7 @@ public class CorsConfig {
      * 作者：lizw <br/>
      * 创建时间：2022/12/23 11:10 <br/>
      */
+    @Getter
     public static class OriginPattern {
         private static final Pattern PORTS_PATTERN = Pattern.compile("(.*):\\[(\\*|\\d+(,\\d+)*)]");
 
@@ -452,14 +435,6 @@ public class CorsConfig {
                 patternValue += (portList.equals(ALL) ? "(:\\d+)?" : ":(" + portList.replace(',', '|') + ")");
             }
             return Pattern.compile(patternValue);
-        }
-
-        public String getDeclaredPattern() {
-            return this.declaredPattern;
-        }
-
-        public Pattern getPattern() {
-            return this.pattern;
         }
 
         @Override
