@@ -329,17 +329,38 @@ public class DataSyncJob {
     }
 
     /**
-     * 数据库存储过程同步
+     * 获取数据库存储过程创建语句(包含: 存储过程、函数)
      *
-     * @param source 源数据库
-     * @param target 目标数据库
+     * @param source           源数据库
+     * @param sourceSchemaName 源数据库 schemaName
+     * @param procedureNames   存储过程名称(为空表示获取所有的存储过程)
      * @return 需要执行的 ddl 语句
      */
-    public static String procedureSync(Jdbc source, Jdbc target) {
+    public static String procedureDLL(Jdbc source, String sourceSchemaName, String... procedureNames) {
         Assert.notNull(source, "参数 source 不能为null");
-        Assert.notNull(target, "参数 target 不能为null");
+        Assert.isNotBlank(sourceSchemaName, "参数 sourceSchemaName 不能为空");
         StringBuilder ddl = new StringBuilder();
-
+        CallFun addLine = () -> {
+            if (ddl.length() > 0) {
+                ddl.append(DataBaseMetaData.LINE);
+            }
+        };
+        DataBaseMetaData sourceMeta = MetaDataUtils.createMetaData(source);
+        Schema schema = sourceMeta.getSchema(sourceSchemaName, Collections.singletonList("000"));
+        if (procedureNames == null || procedureNames.length == 0) {
+            for (Procedure procedure : schema.getProcedures()) {
+                ddl.append(sourceMeta.createProcedure(procedure));
+                addLine.call();
+            }
+        } else {
+            for (String name : Arrays.stream(procedureNames).collect(Collectors.toSet())) {
+                Procedure procedure = schema.getProcedure(name);
+                if (procedure != null) {
+                    ddl.append(sourceMeta.createProcedure(procedure));
+                    addLine.call();
+                }
+            }
+        }
         return ddl.toString();
     }
 

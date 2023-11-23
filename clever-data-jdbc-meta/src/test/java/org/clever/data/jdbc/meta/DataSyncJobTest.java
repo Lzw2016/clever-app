@@ -93,4 +93,32 @@ public class DataSyncJobTest {
         mysql.close();
         oracle.close();
     }
+
+    @Test
+    public void t06() {
+        Jdbc mysql = BaseTest.newMysql();
+        String ddl = DataSyncJob.structSync(
+            mysql,
+            mysql,
+            "test",
+            "test",
+            false,
+            "ASN_IN",
+            "ASN_IN_DETAILS"
+        );
+        log.info("--> \n{}", ddl);
+        mysql.close();
+    }
+
+    @Test
+    public void t07() {
+        Jdbc mysql = BaseTest.newMysql();
+        String ddl = DataSyncJob.procedureDLL(
+            mysql,
+            "test",
+            "next_id"
+        );
+        log.info("--> \n{}", ddl);
+        mysql.close();
+    }
 }
