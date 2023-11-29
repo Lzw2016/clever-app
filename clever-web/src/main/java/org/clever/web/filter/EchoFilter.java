@@ -26,6 +26,7 @@ import java.util.List;
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 21:56 <br/>
  */
+@Getter
 @Slf4j
 public class EchoFilter implements FilterRegistrar.FilterFuc {
     public static EchoFilter create(EchoConfig echoConfig) {
@@ -37,6 +38,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
         EchoConfig echoConfig = Binder.get(environment).bind(EchoConfig.PREFIX, EchoConfig.class).orElseGet(EchoConfig::new);
         AppContextHolder.registerBean("echoConfig", echoConfig, true);
         if (echoConfig.isEnable()) {
+            // noinspection ConstantValue
             BannerUtils.printConfig(log, "Echo配置",
                     new String[]{
                             "enable     : " + echoConfig.isEnable(),
@@ -50,7 +52,6 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
     private static final Logger LOGGER = LoggerFactory.getLogger("ECHO");
     private static final PathMatcher MATCHER = new AntPathMatcher();
 
-    @Getter
     private final EchoConfig echoConfig;
 
     public EchoFilter(EchoConfig echoConfig) {

@@ -19,6 +19,7 @@ import java.util.Objects;
  * 作者：lizw <br/>
  * 创建时间：2023/02/23 20:32 <br/>
  */
+@Getter
 public class MvcHandlerMethodFilter implements FilterRegistrar.FilterFuc {
     private final static String IS_MVC_HANDLE_ATTRIBUTE = MvcHandlerMethodFilter.class.getName() + "_Is_Mvc_Handle";
     private final static String HANDLER_METHOD_ATTRIBUTE = MvcHandlerMethodFilter.class.getName() + "_Handler_Method";
@@ -55,9 +56,7 @@ public class MvcHandlerMethodFilter implements FilterRegistrar.FilterFuc {
         return handlerMethod instanceof HandlerMethod ? (HandlerMethod) handlerMethod : null;
     }
 
-    @Getter
     protected final MvcConfig mvcConfig;
-    @Getter
     protected final HandlerMethodResolver handlerMethodResolver;
 
     MvcHandlerMethodFilter(MvcConfig mvcConfig, HandlerMethodResolver handlerMethodResolver) {

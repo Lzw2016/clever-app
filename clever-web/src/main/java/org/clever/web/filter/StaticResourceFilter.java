@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 22:00 <br/>
  */
+@Getter
 @Slf4j
 public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
     public static StaticResourceFilter create(String rootPath, StaticResourceConfig staticResourceConfig) {
@@ -46,20 +47,13 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
     }
 
     public static StaticResourceFilter create(String rootPath, Environment environment) {
-        StaticResourceConfig staticResourceConfig = Binder.get(environment)
-                .bind(StaticResourceConfig.PREFIX, StaticResourceConfig.class)
-                .orElseGet(StaticResourceConfig::new);
+        StaticResourceConfig staticResourceConfig = Binder.get(environment).bind(StaticResourceConfig.PREFIX, StaticResourceConfig.class).orElseGet(StaticResourceConfig::new);
         AppContextHolder.registerBean("staticResourceConfig", staticResourceConfig, true);
         List<StaticResourceHandler> handlers = createHandler(rootPath, staticResourceConfig.getMappings());
-        int maxLength = handlers.stream().map(StaticResourceHandler::getHostedPath)
-                .max(Comparator.comparingInt(String::length))
-                .orElse("").length();
+        int maxLength = handlers.stream().map(StaticResourceHandler::getHostedPath).max(Comparator.comparingInt(String::length)).orElse("").length();
         List<String> logs = new ArrayList<>();
         logs.add(StringUtils.rightPad("enable", maxLength) + ": " + staticResourceConfig.isEnable());
-        logs.addAll(handlers.stream()
-                .map(handler -> StringUtils.rightPad(handler.getHostedPath(), maxLength) + ": " + handler.getLocationAbsPath())
-                .collect(Collectors.toList())
-        );
+        logs.addAll(handlers.stream().map(handler -> StringUtils.rightPad(handler.getHostedPath(), maxLength) + ": " + handler.getLocationAbsPath()).collect(Collectors.toList()));
         if (staticResourceConfig.isEnable()) {
             BannerUtils.printConfig(log, "StaticResource配置", logs.toArray(new String[0]));
         }
@@ -81,9 +75,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         add("HEAD");
     }};
 
-    @Getter
     private final boolean enable;
-    @Getter
     private final List<StaticResourceHandler> staticResourceHandlers;
 
     public StaticResourceFilter(boolean enable, List<StaticResourceHandler> staticResourceHandlers) {
@@ -138,7 +130,6 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
                 } else {
                     writeResourceRegions(ctx.res, resourceRegions);
                 }
-
             } catch (IllegalArgumentException ex) {
                 ctx.res.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
                 ctx.res.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
@@ -151,8 +142,8 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         String method = request.getMethod();
         if (!SUPPORTED_METHODS.contains(method.toUpperCase())) {
             throw new GenericHttpException(
-                    HttpStatus.METHOD_NOT_ALLOWED.value(),
-                    "Method Not Allowed, Allowed Methods: " + StringUtils.join(SUPPORTED_METHODS, ", ")
+                HttpStatus.METHOD_NOT_ALLOWED.value(),
+                "Method Not Allowed, Allowed Methods: " + StringUtils.join(SUPPORTED_METHODS, ", ")
             );
         }
     }
