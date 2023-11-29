@@ -4,7 +4,9 @@ import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.clever.core.http.CookieUtils;
+import org.clever.core.model.request.QueryByPage;
 import org.clever.core.validator.annotation.IntStatus;
 import org.clever.core.validator.annotation.NotBlank;
 import org.clever.data.jdbc.DaoFactory;
@@ -27,6 +29,7 @@ import java.util.Map;
  * 作者：lizw <br/>
  * 创建时间：2023/01/17 09:22 <br/>
  */
+@Slf4j
 public class MvcTest {
     // 无参数
     public static Object t01() {
@@ -199,5 +202,14 @@ public class MvcTest {
         // params.put("updateAt", new Date());
         params.put("updateAt", "2023-11-23 11:50:19");
         return postgresql.queryMany("select * from asn_in where update_at>=:updateAt", params);
+    }
+
+    @Transactional(disabled = true)
+    public static Object t17(ParamEntity param) {
+        QueryByPage queryByPage = QueryByPage.getCurrent();
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("queryByPage", queryByPage);
+        data.put("param", param);
+        return data;
     }
 }

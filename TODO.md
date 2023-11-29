@@ -541,7 +541,7 @@ DAO数据访问层
 - [OK] ApplyConfigFilter (应用web配置,如: ContentType、CharacterEncoding 等等)
 - [OK] EchoFilter (请求日志记录)
 - [OK] ExceptionHandlerFilter (异常处理)
-- [  ] GlobalRequestParamsFilter (获取全局请求参数: QueryBySort、QueryByPage)
+- [OK] GlobalRequestParamsFilter (获取全局请求参数: QueryBySort、QueryByPage)
 - [OK] CorsFilter (跨域支持)
 - [  ] CaptureHandlerFilter (http请求响应数据打印) - 耗性能先不做?
 - [OK] MvcHandlerMethodFilter (解析获取MVC的HandlerMethod)

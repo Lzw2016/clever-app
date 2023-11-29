@@ -751,7 +751,7 @@ public class Jdbc extends AbstractDataSource {
     public Float queryFloat(String sql) {
         return queryFloat(sql, Collections.emptyMap());
     }
-    
+
     /**
      * 查询返回一个 BigDecimal (sql返回多条数据会抛出异常)
      *
@@ -3236,7 +3236,7 @@ public class Jdbc extends AbstractDataSource {
         sql = StringUtils.trim(sql);
         Page<T> page = new Page<>(pagination.getPageNo(), Math.min(pagination.getPageSize(), PAGE_SIZE_MAX));
         // 执行 count 查询
-        if (pagination.isSearchCount()) {
+        if (pagination.isCountQuery()) {
             long total = queryCount(sql, paramMap);
             page.setTotal(total);
             // 溢出总页数，设置最后一页

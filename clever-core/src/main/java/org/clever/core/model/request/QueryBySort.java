@@ -18,6 +18,26 @@ import java.util.Map;
  */
 public class QueryBySort implements Serializable {
     private static final long serialVersionUID = 1L;
+    /**
+     * 保存当前请求对应的 QueryBySort 参数数据
+     */
+    private static final ThreadLocal<QueryBySort> HOLDER = new ThreadLocal<>();
+
+    public static QueryBySort getCurrent() {
+        QueryBySort queryBySort = HOLDER.get();
+        if (queryBySort == null) {
+            queryBySort = new QueryBySort();
+        }
+        return queryBySort;
+    }
+
+    public static void setCurrent(QueryBySort queryBySort) {
+        HOLDER.set(queryBySort);
+    }
+
+    public static void clearCurrent() {
+        HOLDER.remove();
+    }
 
     public static final String ASC = "ASC";
     public static final String DESC = "DESC";

@@ -15,6 +15,27 @@ import java.util.List;
 public class QueryByPage extends QueryBySort {
     private static final long serialVersionUID = 1L;
     /**
+     * 保存当前请求对应的 QueryByPage 参数数据
+     */
+    private static final ThreadLocal<QueryByPage> HOLDER = new ThreadLocal<>();
+
+    public static QueryByPage getCurrent() {
+        QueryByPage queryByPage = HOLDER.get();
+        if (queryByPage == null) {
+            queryByPage = new QueryByPage();
+        }
+        return queryByPage;
+    }
+
+    public static void setCurrent(QueryByPage queryByPage) {
+        HOLDER.set(queryByPage);
+    }
+
+    public static void clearCurrent() {
+        HOLDER.remove();
+    }
+
+    /**
      * 每页的数据量 - 最大值 1k
      */
     public static final int PAGE_SIZE_MAX = 1000;
@@ -32,7 +53,7 @@ public class QueryByPage extends QueryBySort {
      */
     @Setter
     @Getter
-    private boolean isSearchCount = true;
+    private boolean countQuery = true;
     // /**
     //  *  是否使用缓存 count 查询值(减少 count 频率)
     //  */
@@ -40,10 +61,10 @@ public class QueryByPage extends QueryBySort {
     // @Getter
     // private boolean useCacheCount = false;
 
-    public QueryByPage(int pageSize, int pageNo, boolean isSearchCount) {
+    public QueryByPage(int pageSize, int pageNo, boolean countQuery) {
         this.pageSize = pageSize;
         this.pageNo = pageNo;
-        this.isSearchCount = isSearchCount;
+        this.countQuery = countQuery;
     }
 
     public QueryByPage(int pageSize, int pageNo) {
