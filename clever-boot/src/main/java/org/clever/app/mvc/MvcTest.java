@@ -222,7 +222,7 @@ public class MvcTest {
     public static Object t18() {
         TaskJobTrigger trigger = queryDSL.selectFrom(taskJobTrigger).where(taskJobTrigger.id.eq(1653059609297231874L)).fetchOne();
         trigger.setDescription("AAA");
-        queryDSL.updateChange(
+        queryDSL.update(
             taskJobTrigger,
             taskJobTrigger.id.eq(trigger.getId()),
             trigger,

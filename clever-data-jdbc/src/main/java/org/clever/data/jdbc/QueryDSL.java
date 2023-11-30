@@ -66,7 +66,7 @@ public class QueryDSL extends SQLQueryFactory {
      * @return false: 数据库里不存在原始数据。true: 更新成功或者数据库里的数据与data一致
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public boolean updateChange(RelationalPath<?> qTable, Predicate where, Object data, Consumer<SQLUpdateClause> updateBefore, Path<?>... ignoreFields) {
+    public boolean update(RelationalPath<?> qTable, Predicate where, Object data, Consumer<SQLUpdateClause> updateBefore, Path<?>... ignoreFields) {
         Assert.notNull(qTable, "参数 qTable 不能为 null");
         Assert.notNull(where, "参数 where 不能为 null");
         Assert.notNull(data, "参数 data 不能为 null");
@@ -101,6 +101,19 @@ public class QueryDSL extends SQLQueryFactory {
             update.execute();
         }
         return true;
+    }
+
+    /**
+     * 单表单条数据更新，只更新变化字段
+     *
+     * @param qTable       Q类
+     * @param where        更新条件(只能查到一条数据)
+     * @param data         更新的数据
+     * @param ignoreFields 不需要更新的字段
+     * @return false: 数据库里不存在原始数据。true: 更新成功或者数据库里的数据与data一致
+     */
+    public boolean update(RelationalPath<?> qTable, Predicate where, Object data, Path<?>... ignoreFields) {
+        return update(qTable, where, data, null, ignoreFields);
     }
 
     // --------------------------------------------------------------------------------------------

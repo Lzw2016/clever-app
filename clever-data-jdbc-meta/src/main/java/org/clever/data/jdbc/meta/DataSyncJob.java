@@ -9,7 +9,7 @@ import org.clever.core.SharedThreadPoolExecutor;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.BusinessException;
 import org.clever.core.exception.ExceptionUtils;
-import org.clever.core.function.CallFun;
+import org.clever.core.function.ZeroConsumer;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.jdbc.Jdbc;
@@ -195,7 +195,7 @@ public class DataSyncJob {
         Assert.isNotBlank(targetSchemaName, "参数 targetSchemaName 不能为空");
         Assert.notEmpty(tableNames, "参数 tableNames 不能为空");
         StringBuilder ddl = new StringBuilder();
-        CallFun addLine = () -> {
+        ZeroConsumer addLine = () -> {
             if (ddl.length() > 0) {
                 ddl.append(DataBaseMetaData.LINE);
             }
@@ -340,7 +340,7 @@ public class DataSyncJob {
         Assert.notNull(source, "参数 source 不能为null");
         Assert.isNotBlank(sourceSchemaName, "参数 sourceSchemaName 不能为空");
         StringBuilder ddl = new StringBuilder();
-        CallFun addLine = () -> {
+        ZeroConsumer addLine = () -> {
             if (ddl.length() > 0) {
                 ddl.append(DataBaseMetaData.LINE);
             }
