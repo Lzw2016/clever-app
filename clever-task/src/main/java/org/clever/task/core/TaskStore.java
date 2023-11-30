@@ -321,14 +321,6 @@ public class TaskStore {
             .fetchOne();
     }
 
-    public Long getTriggerId(String namespace, Long jobId) {
-        return queryDSL.select(taskJobTrigger.id)
-            .from(taskJobTrigger)
-            .where(taskJobTrigger.namespace.eq(namespace))
-            .where(taskJobTrigger.jobId.eq(jobId))
-            .fetchOne();
-    }
-
     public Long getTriggerId(Long jobId) {
         return queryDSL.select(taskJobTrigger.id)
             .from(taskJobTrigger)
@@ -894,46 +886,28 @@ public class TaskStore {
         ) ? 1 : 0;
     }
 
-    public void delTriggerByJobId(String namespace, Long jobId) {
-        queryDSL.delete(taskJobTrigger)
-            .where(taskJobTrigger.namespace.eq(namespace))
-            .where(taskJobTrigger.jobId.eq(jobId))
-            .execute();
+    public void delTriggerByJobId(Long jobId) {
+        queryDSL.delete(taskJobTrigger).where(taskJobTrigger.jobId.eq(jobId)).execute();
     }
 
-    public void delJobByJobId(String namespace, Long jobId) {
-        queryDSL.delete(taskJob)
-            .where(taskJob.namespace.eq(namespace))
-            .where(taskJob.id.eq(jobId))
-            .execute();
+    public void delJobByJobId(Long jobId) {
+        queryDSL.delete(taskJob).where(taskJob.id.eq(jobId)).execute();
     }
 
-    public void delHttpJobByJobId(String namespace, Long jobId) {
-        queryDSL.delete(taskHttpJob)
-            .where(taskHttpJob.namespace.eq(namespace))
-            .where(taskHttpJob.jobId.eq(jobId))
-            .execute();
+    public void delHttpJobByJobId(Long jobId) {
+        queryDSL.delete(taskHttpJob).where(taskHttpJob.jobId.eq(jobId)).execute();
     }
 
-    public void delJavaJobByJobId(String namespace, Long jobId) {
-        queryDSL.delete(taskJavaJob)
-            .where(taskJavaJob.namespace.eq(namespace))
-            .where(taskJavaJob.jobId.eq(jobId))
-            .execute();
+    public void delJavaJobByJobId(Long jobId) {
+        queryDSL.delete(taskJavaJob).where(taskJavaJob.jobId.eq(jobId)).execute();
     }
 
-    public void delJsJobByJobId(String namespace, Long jobId) {
-        queryDSL.delete(taskJsJob)
-            .where(taskJsJob.namespace.eq(namespace))
-            .where(taskJsJob.jobId.eq(jobId))
-            .execute();
+    public void delJsJobByJobId(Long jobId) {
+        queryDSL.delete(taskJsJob).where(taskJsJob.jobId.eq(jobId)).execute();
     }
 
-    public void delShellJobByJobId(String namespace, Long jobId) {
-        queryDSL.delete(taskShellJob)
-            .where(taskShellJob.namespace.eq(namespace))
-            .where(taskShellJob.jobId.eq(jobId))
-            .execute();
+    public void delShellJobByJobId(Long jobId) {
+        queryDSL.delete(taskShellJob).where(taskShellJob.jobId.eq(jobId)).execute();
     }
 
     public List<String> allNamespace() {

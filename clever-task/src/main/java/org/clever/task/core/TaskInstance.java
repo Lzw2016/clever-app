@@ -608,23 +608,22 @@ public class TaskInstance {
         TaskJob job = res.getJob();
         Assert.notNull(job, "定时任务不存在");
         TupleOne<Long> triggerId = TupleOne.creat(null);
-        final String namespace = job.getNamespace();
         taskStore.beginTX(status -> {
-            taskStore.delJobByJobId(namespace, jobId);
-            triggerId.setValue1(taskStore.getTriggerId(namespace, jobId));
-            taskStore.delTriggerByJobId(namespace, jobId);
+            taskStore.delJobByJobId(jobId);
+            triggerId.setValue1(taskStore.getTriggerId(jobId));
+            taskStore.delTriggerByJobId(jobId);
             switch (job.getType()) {
                 case EnumConstant.JOB_TYPE_1:
-                    taskStore.delHttpJobByJobId(namespace, jobId);
+                    taskStore.delHttpJobByJobId(jobId);
                     break;
                 case EnumConstant.JOB_TYPE_2:
-                    taskStore.delJavaJobByJobId(namespace, jobId);
+                    taskStore.delJavaJobByJobId(jobId);
                     break;
                 case EnumConstant.JOB_TYPE_3:
-                    taskStore.delJsJobByJobId(namespace, jobId);
+                    taskStore.delJsJobByJobId(jobId);
                     break;
                 case EnumConstant.JOB_TYPE_4:
-                    taskStore.delShellJobByJobId(namespace, jobId);
+                    taskStore.delShellJobByJobId(jobId);
                     break;
                 default:
                     throw new IllegalArgumentException("不支持的任务类型: Type=" + job.getType());
