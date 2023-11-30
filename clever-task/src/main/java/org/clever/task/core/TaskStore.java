@@ -25,12 +25,12 @@ import org.clever.data.jdbc.querydsl.utils.QueryDslUtils;
 import org.clever.task.TaskDataSource;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
+import org.clever.task.core.model.JobInfo;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.SchedulerLogReq;
 import org.clever.task.core.model.request.TaskJobLogReq;
 import org.clever.task.core.model.request.TaskJobReq;
-import org.clever.task.core.model.response.TaskInfoRes;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
@@ -105,15 +105,15 @@ public class TaskStore {
      */
     public TaskScheduler addOrUpdateScheduler(TaskScheduler scheduler) {
         List<TaskScheduler> schedulerList = queryDSL.select(taskScheduler)
-                .from(taskScheduler)
-                .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
-                .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
-                .fetch();
+            .from(taskScheduler)
+            .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
+            .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
+            .fetch();
         if (schedulerList.size() > 1) {
             throw new SchedulerException(String.format(
-                    "集群[namespace=%s]的调度器实例[instanceName=%s]存在多个",
-                    scheduler.getNamespace(),
-                    scheduler.getInstanceName()
+                "集群[namespace=%s]的调度器实例[instanceName=%s]存在多个",
+                scheduler.getNamespace(),
+                scheduler.getInstanceName()
             ));
         }
         TaskScheduler registered = null;
@@ -130,26 +130,26 @@ public class TaskStore {
         } else {
             // 需要更新
             queryDSL.update(taskScheduler)
-                    // .set(taskScheduler.lastHeartbeatTime, now)
-                    .set(taskScheduler.heartbeatInterval, scheduler.getHeartbeatInterval())
-                    .set(taskScheduler.config, scheduler.getConfig())
-                    .set(taskScheduler.description, scheduler.getDescription())
-                    .set(taskScheduler.updateAt, now)
-                    .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
-                    .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
-                    .execute();
+                // .set(taskScheduler.lastHeartbeatTime, now)
+                .set(taskScheduler.heartbeatInterval, scheduler.getHeartbeatInterval())
+                .set(taskScheduler.config, scheduler.getConfig())
+                .set(taskScheduler.description, scheduler.getDescription())
+                .set(taskScheduler.updateAt, now)
+                .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
+                .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
+                .execute();
         }
         // 查询
         schedulerList = queryDSL.select(taskScheduler)
-                .from(taskScheduler)
-                .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
-                .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
-                .fetch();
+            .from(taskScheduler)
+            .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
+            .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
+            .fetch();
         if (schedulerList.isEmpty()) {
             throw new SchedulerException(String.format(
-                    "调度器注册失败[namespace=%s, instanceName=%s]",
-                    scheduler.getNamespace(),
-                    scheduler.getInstanceName()
+                "调度器注册失败[namespace=%s, instanceName=%s]",
+                scheduler.getNamespace(),
+                scheduler.getInstanceName()
             ));
         }
         registered = schedulerList.get(0);
@@ -162,18 +162,18 @@ public class TaskStore {
     public int heartbeat(TaskScheduler scheduler) {
         final Date now = currentDate();
         int count = (int) queryDSL.update(taskScheduler)
-                .set(taskScheduler.lastHeartbeatTime, now)
-                .set(taskScheduler.heartbeatInterval, scheduler.getHeartbeatInterval())
-                .set(taskScheduler.config, scheduler.getConfig())
-                .set(taskScheduler.description, scheduler.getDescription())
-                .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
-                .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
-                .execute();
+            .set(taskScheduler.lastHeartbeatTime, now)
+            .set(taskScheduler.heartbeatInterval, scheduler.getHeartbeatInterval())
+            .set(taskScheduler.config, scheduler.getConfig())
+            .set(taskScheduler.description, scheduler.getDescription())
+            .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
+            .where(taskScheduler.instanceName.eq(scheduler.getInstanceName()))
+            .execute();
         if (count != 1) {
             throw new SchedulerException(String.format(
-                    "心跳维持失败[namespace=%s, instanceName=%s]",
-                    scheduler.getNamespace(),
-                    scheduler.getInstanceName()
+                "心跳维持失败[namespace=%s, instanceName=%s]",
+                scheduler.getNamespace(),
+                scheduler.getInstanceName()
             ));
         }
         return count;
@@ -185,16 +185,16 @@ public class TaskStore {
     public List<TaskScheduler> queryAvailableSchedulerList(String namespace) {
         // heartbeat_interval * 2 > now - last_heartbeat_time
         BooleanExpression whereCondition = taskScheduler.heartbeatInterval.multiply(2).gt(
-                Expressions.numberOperation(
-                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, taskScheduler.lastHeartbeatTime, Expressions.currentTimestamp()
-                ).multiply(1000)
+            Expressions.numberOperation(
+                Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, taskScheduler.lastHeartbeatTime, Expressions.currentTimestamp()
+            ).multiply(1000)
         );
         return queryDSL.select(taskScheduler)
-                .from(taskScheduler)
-                .where(taskScheduler.namespace.eq(namespace))
-                .where(taskScheduler.lastHeartbeatTime.isNotNull())
-                .where(whereCondition)
-                .fetch();
+            .from(taskScheduler)
+            .where(taskScheduler.namespace.eq(namespace))
+            .where(taskScheduler.lastHeartbeatTime.isNotNull())
+            .where(whereCondition)
+            .fetch();
     }
 
     /**
@@ -203,18 +203,18 @@ public class TaskStore {
     public List<SchedulerInfo> queryAllSchedulerList(String namespace) {
         // heartbeat_interval * 2 > now - last_heartbeat_time
         BooleanExpression available = taskScheduler.heartbeatInterval.multiply(2).gt(
-                Expressions.numberOperation(
-                        Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, taskScheduler.lastHeartbeatTime, Expressions.currentTimestamp()
-                ).multiply(1000)
+            Expressions.numberOperation(
+                Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, taskScheduler.lastHeartbeatTime, Expressions.currentTimestamp()
+            ).multiply(1000)
         ).as("available");
         SQLQuery<Tuple> sqlQuery = queryDSL.select(taskScheduler, available).from(taskScheduler);
         if (StringUtils.isNotBlank(namespace)) {
             sqlQuery.where(taskScheduler.namespace.eq(namespace));
         }
         List<Tuple> list = sqlQuery
-                .orderBy(taskScheduler.namespace.asc())
-                .orderBy(taskScheduler.instanceName.asc())
-                .fetch();
+            .orderBy(taskScheduler.namespace.asc())
+            .orderBy(taskScheduler.instanceName.asc())
+            .fetch();
         return list.stream().map(tuple -> {
             TaskScheduler scheduler = tuple.get(taskScheduler);
             Assert.notNull(scheduler, "scheduler 不能为 null, 未知的错误");
@@ -239,11 +239,11 @@ public class TaskStore {
      */
     public int countInvalidTrigger(String namespace) {
         return (int) queryDSL.select(taskJobTrigger)
-                .from(taskJobTrigger)
-                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-                .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2).and(taskJobTrigger.fixedInterval.loe(0)))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .fetchCount();
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2).and(taskJobTrigger.fixedInterval.loe(0)))
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .fetchCount();
     }
 
     /**
@@ -251,10 +251,10 @@ public class TaskStore {
      */
     public List<TaskJobTrigger> queryEnableTrigger(String namespace) {
         return queryDSL.select(taskJobTrigger)
-                .from(taskJobTrigger)
-                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .fetch();
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .fetch();
     }
 
     /**
@@ -262,11 +262,11 @@ public class TaskStore {
      */
     public List<TaskJobTrigger> queryEnableCronTrigger(String namespace) {
         return queryDSL.select(taskJobTrigger)
-                .from(taskJobTrigger)
-                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-                .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_1))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .fetch();
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_1))
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .fetch();
     }
 
     /**
@@ -277,17 +277,17 @@ public class TaskStore {
     public List<TaskJobTrigger> queryNextTrigger(String namespace, int nextTime) {
         final Date now = currentDate();
         return queryDSL.select(taskJobTrigger)
-                .from(taskJobTrigger)
-                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .where(taskJobTrigger.startTime.loe(now))
-                .where(taskJobTrigger.endTime.isNull().or(taskJobTrigger.endTime.goe(now)))
-                .where(taskJobTrigger.nextFireTime.isNotNull())
-                // next_fire_time - now <= nextTime --> next_fire_time <= now + nextTime
-                .where(taskJobTrigger.nextFireTime.loe(DateUtils.addMilliseconds(now, nextTime)))
-                .orderBy(taskJobTrigger.nextFireTime.asc())
-                .limit(2000)
-                .fetch();
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .where(taskJobTrigger.startTime.loe(now))
+            .where(taskJobTrigger.endTime.isNull().or(taskJobTrigger.endTime.goe(now)))
+            .where(taskJobTrigger.nextFireTime.isNotNull())
+            // next_fire_time - now <= nextTime --> next_fire_time <= now + nextTime
+            .where(taskJobTrigger.nextFireTime.loe(DateUtils.addMilliseconds(now, nextTime)))
+            .orderBy(taskJobTrigger.nextFireTime.asc())
+            .limit(2000)
+            .fetch();
     }
 
     /**
@@ -295,27 +295,45 @@ public class TaskStore {
      */
     public TaskJobTrigger getTrigger(String namespace, Long jobTriggerId) {
         return queryDSL.select(taskJobTrigger)
-                .from(taskJobTrigger)
-                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .where(taskJobTrigger.id.eq(jobTriggerId))
-                .fetchOne();
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .where(taskJobTrigger.id.eq(jobTriggerId))
+            .fetchOne();
+    }
+
+    /**
+     * 根据 jobTriggerId 查询
+     */
+    public TaskJobTrigger getTrigger(Long jobTriggerId) {
+        return queryDSL.select(taskJobTrigger)
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.id.eq(jobTriggerId))
+            .fetchOne();
     }
 
     public Long getTriggerFireCount(String namespace, Long jobTriggerId) {
         return queryDSL.select(taskJobTrigger.fireCount)
-                .from(taskJobTrigger)
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .where(taskJobTrigger.id.eq(jobTriggerId))
-                .fetchOne();
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .where(taskJobTrigger.id.eq(jobTriggerId))
+            .fetchOne();
     }
 
     public Long getTriggerId(String namespace, Long jobId) {
         return queryDSL.select(taskJobTrigger.id)
-                .from(taskJobTrigger)
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .where(taskJobTrigger.jobId.eq(jobId))
-                .fetchOne();
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .where(taskJobTrigger.jobId.eq(jobId))
+            .fetchOne();
+    }
+
+    public Long getTriggerId(Long jobId) {
+        return queryDSL.select(taskJobTrigger.id)
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.jobId.eq(jobId))
+            .fetchOne();
     }
 
     /**
@@ -334,10 +352,10 @@ public class TaskStore {
      */
     public int updateJodData(String namespace, Long jobId, String jobData) {
         return (int) queryDSL.update(taskJob)
-                .set(taskJob.jobData, jobData)
-                .where(taskJob.namespace.eq(namespace))
-                .where(taskJob.id.eq(jobId))
-                .execute();
+            .set(taskJob.jobData, jobData)
+            .where(taskJob.namespace.eq(namespace))
+            .where(taskJob.id.eq(jobId))
+            .execute();
     }
 
     /**
@@ -345,10 +363,20 @@ public class TaskStore {
      */
     public TaskJob getJob(String namespace, Long jobId) {
         return queryDSL.select(taskJob)
-                .from(taskJob)
-                .where(taskJob.namespace.eq(namespace))
-                .where(taskJob.id.eq(jobId))
-                .fetchOne();
+            .from(taskJob)
+            .where(taskJob.namespace.eq(namespace))
+            .where(taskJob.id.eq(jobId))
+            .fetchOne();
+    }
+
+    /**
+     * 根据 jobId 查询
+     */
+    public TaskJob getJob(Long jobId) {
+        return queryDSL.select(taskJob)
+            .from(taskJob)
+            .where(taskJob.id.eq(jobId))
+            .fetchOne();
     }
 
     /**
@@ -356,10 +384,10 @@ public class TaskStore {
      */
     public Long getJobRunCount(String namespace, Long jobId) {
         return queryDSL.select(taskJob.runCount)
-                .from(taskJob)
-                .where(taskJob.namespace.eq(namespace))
-                .where(taskJob.id.eq(jobId))
-                .fetchOne();
+            .from(taskJob)
+            .where(taskJob.namespace.eq(namespace))
+            .where(taskJob.id.eq(jobId))
+            .fetchOne();
     }
 
     /**
@@ -367,10 +395,10 @@ public class TaskStore {
      */
     public int updateJobRunCount(String namespace, Long jobId) {
         return (int) queryDSL.update(taskJob)
-                .set(taskJob.runCount, taskJob.runCount.add(1))
-                .where(taskJob.namespace.eq(namespace))
-                .where(taskJob.id.eq(jobId))
-                .execute();
+            .set(taskJob.runCount, taskJob.runCount.add(1))
+            .where(taskJob.namespace.eq(namespace))
+            .where(taskJob.id.eq(jobId))
+            .execute();
     }
 
     /**
@@ -378,25 +406,23 @@ public class TaskStore {
      */
     public List<TaskJob> queryAllJob(String namespace) {
         return queryDSL.select(taskJob)
-                .from(taskJob)
-                .where(taskJob.namespace.eq(namespace))
-                .fetch();
+            .from(taskJob)
+            .where(taskJob.namespace.eq(namespace))
+            .fetch();
     }
 
-    public int updateDisableJob(String namespace, Integer disable, Long... jobIds) {
+    public int updateDisableJob(Integer disable, Long... jobIds) {
         return (int) queryDSL.update(taskJob)
-                .set(taskJob.disable, disable)
-                .where(taskJob.namespace.eq(namespace))
-                .where(taskJob.id.in(jobIds))
-                .execute();
+            .set(taskJob.disable, disable)
+            .where(taskJob.id.in(jobIds))
+            .execute();
     }
 
-    public int updateDisableTrigger(String namespace, Integer disable, Long... triggerIds) {
+    public int updateDisableTrigger(Integer disable, Long... triggerIds) {
         return (int) queryDSL.update(taskJobTrigger)
-                .set(taskJobTrigger.disable, disable)
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .where(taskJobTrigger.id.in(triggerIds))
-                .execute();
+            .set(taskJobTrigger.disable, disable)
+            .where(taskJobTrigger.id.in(triggerIds))
+            .execute();
     }
 
     /**
@@ -404,10 +430,10 @@ public class TaskStore {
      */
     public TaskHttpJob getHttpJob(String namespace, Long jobId) {
         return queryDSL.select(taskHttpJob)
-                .from(taskHttpJob)
-                .where(taskHttpJob.namespace.eq(namespace))
-                .where(taskHttpJob.jobId.eq(jobId))
-                .fetchOne();
+            .from(taskHttpJob)
+            .where(taskHttpJob.namespace.eq(namespace))
+            .where(taskHttpJob.jobId.eq(jobId))
+            .fetchOne();
     }
 
     /**
@@ -415,10 +441,10 @@ public class TaskStore {
      */
     public TaskJavaJob getJavaJob(String namespace, Long jobId) {
         return queryDSL.select(taskJavaJob)
-                .from(taskJavaJob)
-                .where(taskJavaJob.namespace.eq(namespace))
-                .where(taskJavaJob.jobId.eq(jobId))
-                .fetchOne();
+            .from(taskJavaJob)
+            .where(taskJavaJob.namespace.eq(namespace))
+            .where(taskJavaJob.jobId.eq(jobId))
+            .fetchOne();
     }
 
     /**
@@ -426,10 +452,10 @@ public class TaskStore {
      */
     public TaskJsJob getJsJob(String namespace, Long jobId) {
         return queryDSL.select(taskJsJob)
-                .from(taskJsJob)
-                .where(taskJsJob.namespace.eq(namespace))
-                .where(taskJsJob.jobId.eq(jobId))
-                .fetchOne();
+            .from(taskJsJob)
+            .where(taskJsJob.namespace.eq(namespace))
+            .where(taskJsJob.jobId.eq(jobId))
+            .fetchOne();
     }
 
     /**
@@ -437,10 +463,10 @@ public class TaskStore {
      */
     public TaskShellJob getShellJob(String namespace, Long jobId) {
         return queryDSL.select(taskShellJob)
-                .from(taskShellJob)
-                .where(taskShellJob.namespace.eq(namespace))
-                .where(taskShellJob.jobId.eq(jobId))
-                .fetchOne();
+            .from(taskShellJob)
+            .where(taskShellJob.namespace.eq(namespace))
+            .where(taskShellJob.jobId.eq(jobId))
+            .fetchOne();
     }
 
     /**
@@ -448,11 +474,11 @@ public class TaskStore {
      */
     public int updateInvalidTrigger(String namespace) {
         return (int) queryDSL.update(taskJobTrigger)
-                .set(taskJobTrigger.nextFireTime, Expressions.nullExpression())
-                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-                .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2).and(taskJobTrigger.fixedInterval.loe(0)))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .execute();
+            .set(taskJobTrigger.nextFireTime, Expressions.nullExpression())
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2).and(taskJobTrigger.fixedInterval.loe(0)))
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .execute();
     }
 
     /**
@@ -460,10 +486,10 @@ public class TaskStore {
      */
     public int updateNextFireTime(TaskJobTrigger jobTrigger) {
         int count = (int) queryDSL.update(taskJobTrigger)
-                .set(taskJobTrigger.nextFireTime, jobTrigger.getNextFireTime())
-                .where(taskJobTrigger.id.eq(jobTrigger.getId()))
-                .where(taskJobTrigger.namespace.eq(jobTrigger.getNamespace()))
-                .execute();
+            .set(taskJobTrigger.nextFireTime, jobTrigger.getNextFireTime())
+            .where(taskJobTrigger.id.eq(jobTrigger.getId()))
+            .where(taskJobTrigger.namespace.eq(jobTrigger.getNamespace()))
+            .execute();
         if (count != 1) {
             throw new SchedulerException(String.format("更新触发器下一次触发时间失败，JobTrigger(id=%s)", jobTrigger.getId()));
         }
@@ -481,21 +507,21 @@ public class TaskStore {
         // "    else date_add(now(), interval fixed_interval second) " +
         // "  end " +
         DateTimeExpression<Date> nextFireTime = Expressions.cases()
-                .when(taskJobTrigger.lastFireTime.isNull()) //
-                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
-                .when(taskJobTrigger.lastFireTime.goe(taskJobTrigger.startTime)) //
-                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
-                .when(taskJobTrigger.lastFireTime.lt(taskJobTrigger.startTime)) //
-                .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.lastFireTime, taskJobTrigger.fixedInterval)) //
-                .otherwise(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, Expressions.currentTimestamp(), taskJobTrigger.fixedInterval));
+            .when(taskJobTrigger.lastFireTime.isNull()) //
+            .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
+            .when(taskJobTrigger.lastFireTime.goe(taskJobTrigger.startTime)) //
+            .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.startTime, taskJobTrigger.fixedInterval)) //
+            .when(taskJobTrigger.lastFireTime.lt(taskJobTrigger.startTime)) //
+            .then(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, taskJobTrigger.lastFireTime, taskJobTrigger.fixedInterval)) //
+            .otherwise(Expressions.dateTimeOperation(Date.class, Ops.DateTimeOps.ADD_SECONDS, Expressions.currentTimestamp(), taskJobTrigger.fixedInterval));
         return (int) queryDSL.update(taskJobTrigger)
-                .set(taskJobTrigger.nextFireTime, nextFireTime)
-                .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-                .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2))
-                .where(taskJobTrigger.fixedInterval.gt(0))
-                .where(taskJobTrigger.nextFireTime.isNotNull().or(taskJobTrigger.nextFireTime.ne(nextFireTime)))
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .execute();
+            .set(taskJobTrigger.nextFireTime, nextFireTime)
+            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
+            .where(taskJobTrigger.type.eq(EnumConstant.JOB_TRIGGER_TYPE_2))
+            .where(taskJobTrigger.fixedInterval.gt(0))
+            .where(taskJobTrigger.nextFireTime.isNotNull().or(taskJobTrigger.nextFireTime.ne(nextFireTime)))
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .execute();
     }
 
     /**
@@ -503,12 +529,12 @@ public class TaskStore {
      */
     public long updateFireTime(TaskJobTrigger jobTrigger) {
         return queryDSL.update(taskJobTrigger)
-                .set(taskJobTrigger.lastFireTime, jobTrigger.getLastFireTime())
-                .set(taskJobTrigger.nextFireTime, jobTrigger.getNextFireTime())
-                .set(taskJobTrigger.fireCount, taskJobTrigger.fireCount.add(1))
-                .where(taskJobTrigger.id.eq(jobTrigger.getId()))
-                .where(taskJobTrigger.namespace.eq(jobTrigger.getNamespace()))
-                .execute();
+            .set(taskJobTrigger.lastFireTime, jobTrigger.getLastFireTime())
+            .set(taskJobTrigger.nextFireTime, jobTrigger.getNextFireTime())
+            .set(taskJobTrigger.fireCount, taskJobTrigger.fireCount.add(1))
+            .where(taskJobTrigger.id.eq(jobTrigger.getId()))
+            .where(taskJobTrigger.namespace.eq(jobTrigger.getNamespace()))
+            .execute();
     }
 
     /**
@@ -562,13 +588,13 @@ public class TaskStore {
         SQLUpdateClause update = queryDSL.update(taskJobLog);
         for (TaskJobLog jobLog : jobLogs) {
             update.set(taskJobLog.endTime, jobLog.getEndTime())
-                    .set(taskJobLog.runTime, jobLog.getRunTime())
-                    .set(taskJobLog.status, jobLog.getStatus())
-                    .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
-                    .set(taskJobLog.afterJobData, jobLog.getAfterJobData())
-                    .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
-                    .where(taskJobLog.id.eq(jobLog.getId()))
-                    .addBatch();
+                .set(taskJobLog.runTime, jobLog.getRunTime())
+                .set(taskJobLog.status, jobLog.getStatus())
+                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+                .set(taskJobLog.afterJobData, jobLog.getAfterJobData())
+                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+                .where(taskJobLog.id.eq(jobLog.getId()))
+                .addBatch();
         }
         update.execute();
     }
@@ -580,12 +606,12 @@ public class TaskStore {
         SQLUpdateClause update = queryDSL.update(taskJobLog);
         for (TaskJobLog jobLog : jobLogs) {
             update.set(taskJobLog.runTime, jobLog.getRunTime())
-                    .set(taskJobLog.status, jobLog.getStatus())
-                    .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
-                    .set(taskJobLog.retryCount, jobLog.getRetryCount())
-                    .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
-                    .where(taskJobLog.id.eq(jobLog.getId()))
-                    .addBatch();
+                .set(taskJobLog.status, jobLog.getStatus())
+                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+                .set(taskJobLog.retryCount, jobLog.getRetryCount())
+                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+                .where(taskJobLog.id.eq(jobLog.getId()))
+                .addBatch();
         }
         update.execute();
     }
@@ -608,25 +634,25 @@ public class TaskStore {
     public int updateJobLogByEnd(TaskJobLog jobLog) {
         jobLog.setEndTime(currentDate());
         return (int) queryDSL.update(taskJobLog)
-                .set(taskJobLog.endTime, jobLog.getEndTime())
-                .set(taskJobLog.runTime, jobLog.getRunTime())
-                .set(taskJobLog.status, jobLog.getStatus())
-                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
-                .set(taskJobLog.afterJobData, jobLog.getAfterJobData())
-                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
-                .where(taskJobLog.id.eq(jobLog.getId()))
-                .execute();
+            .set(taskJobLog.endTime, jobLog.getEndTime())
+            .set(taskJobLog.runTime, jobLog.getRunTime())
+            .set(taskJobLog.status, jobLog.getStatus())
+            .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+            .set(taskJobLog.afterJobData, jobLog.getAfterJobData())
+            .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+            .where(taskJobLog.id.eq(jobLog.getId()))
+            .execute();
     }
 
     public int updateJobLogByRetry(TaskJobLog jobLog) {
         return (int) queryDSL.update(taskJobLog)
-                .set(taskJobLog.runTime, jobLog.getRunTime())
-                .set(taskJobLog.status, jobLog.getStatus())
-                .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
-                .set(taskJobLog.retryCount, jobLog.getRetryCount())
-                .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
-                .where(taskJobLog.id.eq(jobLog.getId()))
-                .execute();
+            .set(taskJobLog.runTime, jobLog.getRunTime())
+            .set(taskJobLog.status, jobLog.getStatus())
+            .set(taskJobLog.exceptionInfo, jobLog.getExceptionInfo())
+            .set(taskJobLog.retryCount, jobLog.getRetryCount())
+            .where(taskJobLog.namespace.eq(jobLog.getNamespace()))
+            .where(taskJobLog.id.eq(jobLog.getId()))
+            .execute();
     }
 
     /**
@@ -669,10 +695,10 @@ public class TaskStore {
                 final SQLQueryFactory dsl = newDSL.apply(connection);
                 // 使用数据库行级锁保证并发性
                 long lock = dsl.update(taskSchedulerLock)
-                        .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
-                        .set(taskSchedulerLock.updateAt, Expressions.currentTimestamp())
-                        .where(taskSchedulerLock.lockName.eq(lockName))
-                        .execute();
+                    .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
+                    .set(taskSchedulerLock.updateAt, Expressions.currentTimestamp())
+                    .where(taskSchedulerLock.lockName.eq(lockName))
+                    .execute();
                 // 锁数据不存在就创建锁数据
                 if (lock <= 0) {
                     try {
@@ -680,13 +706,13 @@ public class TaskStore {
                         jdbc.newConnectionExecute(innerCon -> {
                             SQLQueryFactory tmpDSL = newDSL.apply(innerCon);
                             return tmpDSL.insert(taskSchedulerLock)
-                                    .set(taskSchedulerLock.id, snowFlake.nextId())
-                                    .set(taskSchedulerLock.namespace, namespace)
-                                    .set(taskSchedulerLock.lockName, lockName)
-                                    .set(taskSchedulerLock.lockCount, 0L)
-                                    .set(taskSchedulerLock.description, "系统自动生成")
-                                    .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
-                                    .execute();
+                                .set(taskSchedulerLock.id, snowFlake.nextId())
+                                .set(taskSchedulerLock.namespace, namespace)
+                                .set(taskSchedulerLock.lockName, lockName)
+                                .set(taskSchedulerLock.lockCount, 0L)
+                                .set(taskSchedulerLock.description, "系统自动生成")
+                                .set(taskSchedulerLock.createAt, Expressions.currentTimestamp())
+                                .execute();
                         });
                     } catch (DuplicateKeyException e) {
                         // 插入数据失败: 唯一约束错误
@@ -713,10 +739,10 @@ public class TaskStore {
                     }
                     // 使用数据库行级锁保证并发性
                     lock = dsl.update(taskSchedulerLock)
-                            .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
-                            .set(taskSchedulerLock.updateAt, Expressions.currentTimestamp())
-                            .where(taskSchedulerLock.lockName.eq(lockName))
-                            .execute();
+                        .set(taskSchedulerLock.lockCount, taskSchedulerLock.lockCount.add(1))
+                        .set(taskSchedulerLock.updateAt, Expressions.currentTimestamp())
+                        .where(taskSchedulerLock.lockName.eq(lockName))
+                        .execute();
                     if (lock <= 0) {
                         throw new RuntimeException(taskSchedulerLock.getTableName() + " 表数据不存在(未知的异常)");
                     }
@@ -752,82 +778,176 @@ public class TaskStore {
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- manage
 
-    public int addJob(TaskJob job) {
-        job.setId(snowFlake.nextId());
-        job.setCreateAt(queryDSL.currentDate());
-        return (int) queryDSL.insert(taskJob).populate(job).execute();
-    }
-
-    public int addJobTrigger(TaskJobTrigger jobTrigger) {
-        jobTrigger.setId(snowFlake.nextId());
+    public int addTrigger(TaskJobTrigger jobTrigger) {
+        if (jobTrigger.getId() == null) {
+            jobTrigger.setId(snowFlake.nextId());
+        }
         jobTrigger.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskJobTrigger).populate(jobTrigger).execute();
     }
 
+    public int addJob(TaskJob job) {
+        if (job.getId() == null) {
+            job.setId(snowFlake.nextId());
+        }
+        job.setCreateAt(queryDSL.currentDate());
+        return (int) queryDSL.insert(taskJob).populate(job).execute();
+    }
+
     public int addHttpJob(TaskHttpJob httpJob) {
-        httpJob.setId(snowFlake.nextId());
+        if (httpJob.getId() == null) {
+            httpJob.setId(snowFlake.nextId());
+        }
         httpJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskHttpJob).populate(httpJob).execute();
     }
 
     public int addJavaJob(TaskJavaJob javaJob) {
-        javaJob.setId(snowFlake.nextId());
+        if (javaJob.getId() == null) {
+            javaJob.setId(snowFlake.nextId());
+        }
         javaJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskJavaJob).populate(javaJob).execute();
     }
 
     public int addJsJob(TaskJsJob jsJob) {
-        jsJob.setId(snowFlake.nextId());
+        if (jsJob.getId() == null) {
+            jsJob.setId(snowFlake.nextId());
+        }
         jsJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskJsJob).populate(jsJob).execute();
     }
 
     public int addShellJob(TaskShellJob shellJob) {
-        shellJob.setId(snowFlake.nextId());
+        if (shellJob.getId() == null) {
+            shellJob.setId(snowFlake.nextId());
+        }
         shellJob.setCreateAt(queryDSL.currentDate());
         return (int) queryDSL.insert(taskShellJob).populate(shellJob).execute();
     }
 
+    public int updateTrigger(TaskJobTrigger jobTrigger) {
+        return queryDSL.update(
+            taskJobTrigger,
+            taskJobTrigger.id.eq(jobTrigger.getId()),
+            jobTrigger,
+            update -> update.set(taskJobTrigger.updateAt, queryDSL.currentDate()),
+            taskJobTrigger.fireCount,
+            taskJobTrigger.createAt,
+            taskJobTrigger.updateAt
+        ) ? 1 : 0;
+    }
+
+    public int updateJob(TaskJob job) {
+        return queryDSL.update(
+            taskJob,
+            taskJob.id.eq(job.getId()),
+            job,
+            update -> update.set(taskJob.updateAt, queryDSL.currentDate()),
+            taskJob.runCount,
+            taskJob.createAt,
+            taskJob.updateAt
+        ) ? 1 : 0;
+    }
+
+    public int updateHttpJob(TaskHttpJob httpJob) {
+        return queryDSL.update(
+            taskHttpJob,
+            taskHttpJob.id.eq(httpJob.getId()),
+            httpJob,
+            update -> update.set(taskHttpJob.updateAt, queryDSL.currentDate()),
+            taskHttpJob.createAt,
+            taskHttpJob.updateAt
+        ) ? 1 : 0;
+    }
+
+    public int updateJavaJob(TaskJavaJob javaJob) {
+        return queryDSL.update(
+            taskJavaJob,
+            taskJavaJob.id.eq(javaJob.getId()),
+            javaJob,
+            update -> update.set(taskJavaJob.updateAt, queryDSL.currentDate()),
+            taskJavaJob.createAt,
+            taskJavaJob.updateAt
+        ) ? 1 : 0;
+    }
+
+    public int updateJsJob(TaskJsJob jsJob) {
+        return queryDSL.update(
+            taskJsJob,
+            taskJsJob.id.eq(jsJob.getId()),
+            jsJob,
+            update -> update.set(taskJsJob.updateAt, queryDSL.currentDate()),
+            taskJsJob.createAt,
+            taskJsJob.updateAt
+        ) ? 1 : 0;
+    }
+
+    public int updateShellJob(TaskShellJob shellJob) {
+        return queryDSL.update(
+            taskShellJob,
+            taskShellJob.id.eq(shellJob.getId()),
+            shellJob,
+            update -> update.set(taskShellJob.updateAt, queryDSL.currentDate()),
+            taskShellJob.createAt,
+            taskShellJob.updateAt
+        ) ? 1 : 0;
+    }
+
     public void delTriggerByJobId(String namespace, Long jobId) {
         queryDSL.delete(taskJobTrigger)
-                .where(taskJobTrigger.namespace.eq(namespace))
-                .where(taskJobTrigger.jobId.eq(jobId))
-                .execute();
+            .where(taskJobTrigger.namespace.eq(namespace))
+            .where(taskJobTrigger.jobId.eq(jobId))
+            .execute();
     }
 
     public void delJobByJobId(String namespace, Long jobId) {
         queryDSL.delete(taskJob)
-                .where(taskJob.namespace.eq(namespace))
-                .where(taskJob.id.eq(jobId))
-                .execute();
+            .where(taskJob.namespace.eq(namespace))
+            .where(taskJob.id.eq(jobId))
+            .execute();
     }
 
     public void delHttpJobByJobId(String namespace, Long jobId) {
         queryDSL.delete(taskHttpJob)
-                .where(taskHttpJob.namespace.eq(namespace))
-                .where(taskHttpJob.jobId.eq(jobId))
-                .execute();
+            .where(taskHttpJob.namespace.eq(namespace))
+            .where(taskHttpJob.jobId.eq(jobId))
+            .execute();
     }
 
     public void delJavaJobByJobId(String namespace, Long jobId) {
         queryDSL.delete(taskJavaJob)
-                .where(taskJavaJob.namespace.eq(namespace))
-                .where(taskJavaJob.jobId.eq(jobId))
-                .execute();
+            .where(taskJavaJob.namespace.eq(namespace))
+            .where(taskJavaJob.jobId.eq(jobId))
+            .execute();
     }
 
     public void delJsJobByJobId(String namespace, Long jobId) {
         queryDSL.delete(taskJsJob)
-                .where(taskJsJob.namespace.eq(namespace))
-                .where(taskJsJob.jobId.eq(jobId))
-                .execute();
+            .where(taskJsJob.namespace.eq(namespace))
+            .where(taskJsJob.jobId.eq(jobId))
+            .execute();
     }
 
     public void delShellJobByJobId(String namespace, Long jobId) {
         queryDSL.delete(taskShellJob)
-                .where(taskShellJob.namespace.eq(namespace))
-                .where(taskShellJob.jobId.eq(jobId))
-                .execute();
+            .where(taskShellJob.namespace.eq(namespace))
+            .where(taskShellJob.jobId.eq(jobId))
+            .execute();
+    }
+
+    public List<String> allNamespace() {
+        return queryDSL.select(taskScheduler.namespace).distinct()
+            .from(taskScheduler)
+            .orderBy(taskScheduler.namespace.asc())
+            .fetch();
+    }
+
+    public List<String> allInstance() {
+        return queryDSL.select(taskScheduler.instanceName).distinct()
+            .from(taskScheduler)
+            .orderBy(taskScheduler.instanceName.asc())
+            .fetch();
     }
 
     public Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq query) {
@@ -874,16 +994,12 @@ public class TaskStore {
         return QueryDslUtils.queryByPage(sqlQuery, query);
     }
 
-    public Page<TaskInfoRes> queryJobs(TaskJobReq query) {
-        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJob, /*taskHttpJob, taskJavaJob, taskJsJob, taskShellJob,*/ taskJobTrigger)
-                .from(taskJob)
-                // .leftJoin(taskHttpJob).on(taskJob.id.eq(taskHttpJob.jobId))
-                // .leftJoin(taskJavaJob).on(taskJob.id.eq(taskJavaJob.jobId))
-                // .leftJoin(taskJsJob).on(taskJob.id.eq(taskJsJob.jobId))
-                // .leftJoin(taskShellJob).on(taskJob.id.eq(taskShellJob.jobId))
-                .leftJoin(taskJobTrigger).on(taskJob.id.eq(taskJobTrigger.jobId))
-                .orderBy(taskJob.namespace.asc())
-                .orderBy(taskJob.name.asc());
+    public Page<JobInfo> queryJobs(TaskJobReq query) {
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJob, taskJobTrigger)
+            .from(taskJob)
+            .leftJoin(taskJobTrigger).on(taskJob.id.eq(taskJobTrigger.jobId))
+            .orderBy(taskJob.namespace.asc())
+            .orderBy(taskJob.name.asc());
         if (StringUtils.isNotBlank(query.getNamespace())) {
             sqlQuery.where(taskJob.namespace.eq(query.getNamespace()));
         }
@@ -902,27 +1018,33 @@ public class TaskStore {
         Page<Tuple> page = QueryDslUtils.queryByPage(sqlQuery, query);
         return page.convertRecords(tuple -> {
             TaskJob job = tuple.get(taskJob);
-            // TaskHttpJob httpJob = tuple.get(taskHttpJob);
-            // TaskJavaJob javaJob = tuple.get(taskJavaJob);
-            // TaskJsJob jsJob = tuple.get(taskJsJob);
-            // TaskShellJob shellJob = tuple.get(taskShellJob);
             TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
-            return new TaskInfoRes(job, null, null, null, null, jobTrigger);
+            return new JobInfo(job, null, null, null, null, jobTrigger);
         });
     }
 
-    public List<String> allNamespace() {
-        return queryDSL.select(taskScheduler.namespace).distinct()
-                .from(taskScheduler)
-                .orderBy(taskScheduler.namespace.asc())
-                .fetch();
-    }
-
-    public List<String> allInstance() {
-        return queryDSL.select(taskScheduler.instanceName).distinct()
-                .from(taskScheduler)
-                .orderBy(taskScheduler.instanceName.asc())
-                .fetch();
+    public JobInfo getJobInfo(Long id) {
+        Tuple tuple = queryDSL.select(taskJob, taskHttpJob, taskJavaJob, taskJsJob, taskShellJob, taskJobTrigger)
+            .from(taskJob)
+            .leftJoin(taskHttpJob).on(taskJob.id.eq(taskHttpJob.jobId))
+            .leftJoin(taskJavaJob).on(taskJob.id.eq(taskJavaJob.jobId))
+            .leftJoin(taskJsJob).on(taskJob.id.eq(taskJsJob.jobId))
+            .leftJoin(taskShellJob).on(taskJob.id.eq(taskShellJob.jobId))
+            .leftJoin(taskJobTrigger).on(taskJob.id.eq(taskJobTrigger.jobId))
+            .where(taskJob.id.eq(id))
+            .orderBy(taskJob.namespace.asc())
+            .orderBy(taskJob.name.asc())
+            .fetchOne();
+        if (tuple == null) {
+            return null;
+        }
+        TaskJob job = tuple.get(taskJob);
+        TaskHttpJob httpJob = tuple.get(taskHttpJob);
+        TaskJavaJob javaJob = tuple.get(taskJavaJob);
+        TaskJsJob jsJob = tuple.get(taskJsJob);
+        TaskShellJob shellJob = tuple.get(taskShellJob);
+        TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
+        return new JobInfo(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

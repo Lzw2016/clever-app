@@ -7,9 +7,9 @@ import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.listeners.JobLogListener;
 import org.clever.task.core.listeners.JobTriggerLogListener;
 import org.clever.task.core.listeners.SchedulerLogListener;
-import org.clever.task.core.model.AddJobRes;
 import org.clever.task.core.model.CronTrigger;
 import org.clever.task.core.model.HttpJobModel;
+import org.clever.task.core.model.JobInfo;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -39,14 +39,14 @@ public class TaskInstanceTest {
         Jdbc jdbc = BaseTest.newMysql();
         QueryDSL queryDSL = QueryDSL.create(jdbc);
         TaskInstance taskInstance = new TaskInstance(
-                queryDSL,
-                newSchedulerConfig(instanceName),
-                // Arrays.asList(new MockJobExecutor(), new HttpJobExecutor()),
-                // Collections.singletonList(new MockJobExecutor()),
-                Collections.singletonList(new RedisMockJobExecutor()),
-                Collections.singletonList(new SchedulerLogListener()),
-                Collections.singletonList(new JobTriggerLogListener()),
-                Collections.singletonList(new JobLogListener())
+            queryDSL,
+            newSchedulerConfig(instanceName),
+            // Arrays.asList(new MockJobExecutor(), new HttpJobExecutor()),
+            // Collections.singletonList(new MockJobExecutor()),
+            Collections.singletonList(new RedisMockJobExecutor()),
+            Collections.singletonList(new SchedulerLogListener()),
+            Collections.singletonList(new JobTriggerLogListener()),
+            Collections.singletonList(new JobLogListener())
         );
         callback.accept(taskInstance);
         taskInstance.start();
@@ -66,8 +66,8 @@ public class TaskInstanceTest {
             job.setAllowConcurrent(0);
             CronTrigger trigger = new CronTrigger("访问百度_触发器", "0/1 * * * * ?");
             trigger.setAllowConcurrent(0);
-            AddJobRes res = taskInstance.addJob(job, trigger);
-            log.info("res -> {}", res);
+            JobInfo info = taskInstance.addJob(job, trigger);
+            log.info("info -> {}", info);
         });
     }
 

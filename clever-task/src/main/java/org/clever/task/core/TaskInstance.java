@@ -1,9 +1,11 @@
 package org.clever.task.core;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.function.ThreeConsumer;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.model.request.page.Page;
@@ -19,7 +21,6 @@ import org.clever.task.core.listeners.SchedulerListener;
 import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.TaskJobReq;
-import org.clever.task.core.model.response.TaskInfoRes;
 import org.clever.task.core.support.JobTriggerUtils;
 import org.clever.task.core.support.TaskContext;
 import org.clever.util.Assert;
@@ -68,7 +69,10 @@ public class TaskInstance {
     private final List<JobListener> jobListeners;
     /**
      * 调度器数据存储对象
+     * -- GETTER --
+     * 获取调度器 TaskStore
      */
+    @Getter
     private final TaskStore taskStore;
     /**
      * 调度器上下文
@@ -118,12 +122,12 @@ public class TaskInstance {
      * @param jobListeners        定时任务执行事件监听器列表
      */
     public TaskInstance(
-            QueryDSL queryDSL,
-            SchedulerConfig schedulerConfig,
-            List<JobExecutor> jobExecutors,
-            List<SchedulerListener> schedulerListeners,
-            List<JobTriggerListener> jobTriggerListeners,
-            List<JobListener> jobListeners) {
+        QueryDSL queryDSL,
+        SchedulerConfig schedulerConfig,
+        List<JobExecutor> jobExecutors,
+        List<SchedulerListener> schedulerListeners,
+        List<JobTriggerListener> jobTriggerListeners,
+        List<JobListener> jobListeners) {
         Assert.notNull(queryDSL, "参数 queryDSL 不能为空");
         Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为空");
         Assert.notEmpty(jobExecutors, "参数 jobExecutors 不能为空");
@@ -136,32 +140,32 @@ public class TaskInstance {
             log.error("[TaskInstance] 定时任务执行器实现列表为空 | instanceName={}", schedulerConfig.getInstanceName());
         }
         log.info(
-                "[TaskInstance] 定时任务执行器={} | instanceName={}",
-                StringUtils.join(this.jobExecutors.stream().map(exec -> exec.getClass().getSimpleName()).collect(Collectors.toList()), ", "),
-                schedulerConfig.getInstanceName()
+            "[TaskInstance] 定时任务执行器={} | instanceName={}",
+            StringUtils.join(this.jobExecutors.stream().map(exec -> exec.getClass().getSimpleName()).collect(Collectors.toList()), ", "),
+            schedulerConfig.getInstanceName()
         );
         this.schedulerListeners = schedulerListeners;
         this.jobTriggerListeners = jobTriggerListeners;
         this.jobListeners = jobListeners;
         final SnowFlake snowFlake = new SnowFlake(
-                Math.abs(schedulerConfig.getInstanceName().hashCode() % SnowFlake.MAX_WORKER_ID),
-                Math.abs(schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID)
+            Math.abs(schedulerConfig.getInstanceName().hashCode() % SnowFlake.MAX_WORKER_ID),
+            Math.abs(schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID)
         );
         this.taskStore = new TaskStore(snowFlake, queryDSL);
         this.taskContext = new TaskContext(schedulerConfig);
         this.scheduledExecutor = new ScheduledThreadPoolExecutor(
-                schedulerConfig.getSchedulerExecutorPoolSize(),
-                new BasicThreadFactory.Builder().namingPattern("task-scheduler-pool-%d").daemon(true).build(),
-                new ThreadPoolExecutor.CallerRunsPolicy()
+            schedulerConfig.getSchedulerExecutorPoolSize(),
+            new BasicThreadFactory.Builder().namingPattern("task-scheduler-pool-%d").daemon(true).build(),
+            new ThreadPoolExecutor.CallerRunsPolicy()
         );
         this.jobExecutor = new ThreadPoolExecutor(
-                schedulerConfig.getJobExecutorPoolSize(),
-                schedulerConfig.getJobExecutorPoolSize(),
-                GlobalConstant.THREAD_POOL_KEEP_ALIVE_SECONDS,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(schedulerConfig.getJobExecutorQueueSize()),
-                new BasicThreadFactory.Builder().namingPattern("task-worker-pool-%d").daemon(true).build(),
-                new ThreadPoolExecutor.AbortPolicy()
+            schedulerConfig.getJobExecutorPoolSize(),
+            schedulerConfig.getJobExecutorPoolSize(),
+            GlobalConstant.THREAD_POOL_KEEP_ALIVE_SECONDS,
+            TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(schedulerConfig.getJobExecutorQueueSize()),
+            new BasicThreadFactory.Builder().namingPattern("task-worker-pool-%d").daemon(true).build(),
+            new ThreadPoolExecutor.AbortPolicy()
         );
     }
 
@@ -262,13 +266,6 @@ public class TaskInstance {
     }
 
     /**
-     * 获取调度器 TaskStore
-     */
-    public TaskStore getTaskStore() {
-        return taskStore;
-    }
-
-    /**
      * 调度器上下文
      */
     public TaskContext getContext() {
@@ -302,149 +299,229 @@ public class TaskInstance {
     }
 
     /**
-     * 新增或更新 http 定时任务，基于 jobId 判断是更新还是新增
+     * 新增或更新触发器，基于 triggerId 判断是更新还是新增
+     *
+     * @param triggerId 触发器ID(可为null)
+     * @param trigger   触发器
+     * @param jobId     任务ID
+     * @param namespace 命名空间
      */
-    public void addOrUpdateHttpJob(long jobId, HttpJobModel httpJob, AbstractTrigger trigger) {
-        // TODO addOrUpdateHttpJob
-        // TODO 处理程序内部状态
-    }
-
-    /**
-     * 新增或更新 java 定时任务，基于 jobId 判断是更新还是新增
-     */
-    public void addOrUpdateJavaJob(long jobId, JavaJobModel javaJob, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 新增或更新 js 定时任务，基于 jobId 判断是更新还是新增
-     */
-    public void addOrUpdateJsJob(long jobId, JsJobModel jsJob, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 新增或更新 shell 定时任务，基于 jobId 判断是更新还是新增
-     */
-    public void addOrUpdateShellJob(long jobId, ShellJobModel shellJob, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 新增 http 定时任务
-     */
-    public void addHttpJob(HttpJobModel httpJob, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 新增 java 定时任务
-     */
-    public void addJavaJob(JavaJobModel javaJob, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 新增 js 定时任务
-     */
-    public void addJsJob(JsJobModel jsJob, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 新增 shell 定时任务
-     */
-    public void addShellJob(ShellJobModel shellJob, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 更新 http 定时任务
-     */
-    public void updateHttpJob(long jobId, HttpJobModel httpJob) {
-    }
-
-    /**
-     * 更新 java 定时任务
-     */
-    public void updateJavaJob(long jobId, JavaJobModel javaJob) {
-    }
-
-    /**
-     * 更新 js 定时任务
-     */
-    public void updateJsJob(long jobId, JsJobModel jsJob) {
-    }
-
-    /**
-     * 更新 shell 定时任务
-     */
-    public void updateShellJob(long jobId, ShellJobModel shellJob) {
-    }
-
-    /**
-     * 更新触发器
-     */
-    public void updateTrigger(long triggerId, AbstractTrigger trigger) {
-    }
-
-    /**
-     * 增加定时任务
-     */
-    public AddJobRes addJob(AbstractJob jobModel, AbstractTrigger trigger) {
-        Assert.notNull(jobModel, "参数jobModel不能为空");
-        Assert.notNull(trigger, "参数trigger不能为空");
-        final AddJobRes addJobRes = new AddJobRes();
-        final TaskJob job = jobModel.toJob();
-        job.setNamespace(getNamespace());
+    protected TaskJobTrigger addOrUpdateTrigger(Long triggerId, AbstractTrigger trigger, long jobId, String namespace) {
+        Assert.notNull(trigger, "参数 trigger 不能为 null");
+        Assert.isNotBlank(namespace, "参数 namespace 不能为空");
         final TaskJobTrigger jobTrigger = trigger.toJobTrigger();
-        jobTrigger.setNamespace(getNamespace());
-        taskStore.beginTX(status -> {
-            int count = 0;
+        jobTrigger.setNamespace(namespace);
+        jobTrigger.setJobId(jobId);
+        return taskStore.beginTX(status -> {
+            final TaskJobTrigger existsTrigger = triggerId != null ? taskStore.getTrigger(triggerId) : null;
+            final boolean exists = existsTrigger != null;
+            int count;
             final Date dbNow = taskStore.currentDate();
-            // 新增 job
-            count += taskStore.addJob(job);
-            // 新增 job_trigger
-            jobTrigger.setJobId(job.getId());
             if (jobTrigger.getStartTime() == null || jobTrigger.getStartTime().compareTo(dbNow) < 0) {
                 jobTrigger.setStartTime(JobTriggerUtils.removeMillisecond(dbNow));
             }
             final Date nextFireTime = JobTriggerUtils.getNextFireTime(jobTrigger);
             jobTrigger.setNextFireTime(nextFireTime);
-            count += taskStore.addJobTrigger(jobTrigger);
-            addJobRes.setJob(job);
-            addJobRes.setJobTrigger(jobTrigger);
-            if (jobModel instanceof HttpJobModel) {
-                // 新增 http_job
-                HttpJobModel httpJobModel = (HttpJobModel) jobModel;
-                TaskHttpJob httpJob = httpJobModel.toJobEntity();
-                httpJob.setNamespace(getNamespace());
-                httpJob.setJobId(job.getId());
-                count += taskStore.addHttpJob(httpJob);
-                addJobRes.setHttpJob(httpJob);
-            } else if (jobModel instanceof JavaJobModel) {
-                // 新增 java_job
-                JavaJobModel javaJobModel = (JavaJobModel) jobModel;
-                TaskJavaJob javaJob = javaJobModel.toJobEntity();
-                javaJob.setNamespace(getNamespace());
-                javaJob.setJobId(job.getId());
-                count += taskStore.addJavaJob(javaJob);
-                addJobRes.setJavaJob(javaJob);
-            } else if (jobModel instanceof JsJobModel) {
-                // 新增 js_job
-                JsJobModel javaJobModel = (JsJobModel) jobModel;
-                TaskJsJob jsJob = javaJobModel.toJobEntity();
-                jsJob.setNamespace(getNamespace());
-                jsJob.setJobId(job.getId());
-                count += taskStore.addJsJob(jsJob);
-                addJobRes.setJsJob(jsJob);
-            } else if (jobModel instanceof ShellJobModel) {
-                // 新增 shell_job
-                ShellJobModel shellJobModel = (ShellJobModel) jobModel;
-                TaskShellJob shellJob = shellJobModel.toJobEntity();
-                shellJob.setNamespace(getNamespace());
-                shellJob.setJobId(job.getId());
-                count += taskStore.addShellJob(shellJob);
-                addJobRes.setShellJob(shellJob);
+            if (exists) {
+                count = taskStore.updateTrigger(jobTrigger);
             } else {
-                throw new IllegalArgumentException("不支持的任务类型:" + jobModel.getClass().getName());
+                count = taskStore.addTrigger(jobTrigger);
             }
-            return count;
+            Assert.isTrue(count > 0, "更新 Trigger 失败");
+            return jobTrigger;
         });
-        return addJobRes;
+    }
+
+    /**
+     * 新增或更新定时任务，基于 jobId 判断是更新还是新增
+     *
+     * @param jobId     任务ID(可为null)
+     * @param jobModel  任务配置
+     * @param trigger   触发器配置(可为null,表示不新增或更新触发器)
+     * @param namespace 命名空间
+     * @param callback  自定义更新Job回调
+     */
+    protected JobInfo doAddOrUpdateJob(Long jobId, AbstractJob jobModel, AbstractTrigger trigger, String namespace, ThreeConsumer<JobInfo, TaskJob, Boolean> callback) {
+        return taskStore.beginTX(status -> {
+            final JobInfo info = new JobInfo();
+            final TaskJob existsJob = jobId != null ? taskStore.getJob(jobId) : null;
+            final boolean exists = existsJob != null;
+            int count;
+            // 更新job
+            final TaskJob job = jobModel.toJob();
+            job.setId(jobId);
+            job.setNamespace(namespace);
+            if (exists) {
+                count = taskStore.updateJob(job);
+            } else {
+                count = taskStore.addJob(job);
+            }
+            Assert.isTrue(count > 0, "更新 Job 失败");
+            info.setJob(job);
+            // 更新子job
+            callback.call(info, job, exists);
+            // 更新trigger
+            if (trigger != null) {
+                Long triggerId = taskStore.getTriggerId(jobId);
+                TaskJobTrigger jobTrigger = addOrUpdateTrigger(triggerId, trigger, job.getId(), namespace);
+                info.setJobTrigger(jobTrigger);
+            }
+            return info;
+        });
+    }
+
+    /**
+     * 新增或更新 http 定时任务，基于 jobId 判断是更新还是新增
+     *
+     * @param jobId     任务ID(可为null)
+     * @param httpJob   http任务配置
+     * @param trigger   触发器配置(可为null,表示不新增或更新触发器)
+     * @param namespace 命名空间
+     */
+    protected JobInfo addOrUpdateHttpJob(Long jobId, HttpJobModel httpJob, AbstractTrigger trigger, String namespace) {
+        Assert.notNull(httpJob, "参数 httpJob 不能为 null");
+        Assert.isNotBlank(namespace, "参数 namespace 不能为空");
+        return doAddOrUpdateJob(jobId, httpJob, trigger, namespace, (info, job, exists) -> {
+            final TaskHttpJob http = httpJob.toJobEntity();
+            http.setNamespace(namespace);
+            http.setJobId(job.getId());
+            int count;
+            if (exists) {
+                count = taskStore.updateHttpJob(http);
+            } else {
+                count = taskStore.addHttpJob(http);
+            }
+            Assert.isTrue(count > 0, "更新 HttpJob 失败");
+            info.setHttpJob(http);
+        });
+    }
+
+    /**
+     * 新增或更新 java 定时任务，基于 jobId 判断是更新还是新增
+     *
+     * @param jobId     任务ID(可为null)
+     * @param javaJob   java任务配置
+     * @param trigger   触发器配置(可为null,表示不新增或更新触发器)
+     * @param namespace 命名空间
+     */
+    protected JobInfo addOrUpdateJavaJob(Long jobId, JavaJobModel javaJob, AbstractTrigger trigger, String namespace) {
+        Assert.notNull(javaJob, "参数 javaJob 不能为 null");
+        Assert.isNotBlank(namespace, "参数 namespace 不能为空");
+        return doAddOrUpdateJob(jobId, javaJob, trigger, namespace, (info, job, exists) -> {
+            final TaskJavaJob java = javaJob.toJobEntity();
+            java.setNamespace(namespace);
+            java.setJobId(job.getId());
+            int count;
+            if (exists) {
+                count = taskStore.updateJavaJob(java);
+            } else {
+                count = taskStore.addJavaJob(java);
+            }
+            Assert.isTrue(count > 0, "更新 JavaJob 失败");
+            info.setJavaJob(java);
+        });
+    }
+
+    /**
+     * 新增或更新 js 定时任务，基于 jobId 判断是更新还是新增
+     *
+     * @param jobId     任务ID(可为null)
+     * @param jsJob     js任务配置
+     * @param trigger   触发器配置(可为null,表示不新增或更新触发器)
+     * @param namespace 命名空间
+     */
+    protected JobInfo addOrUpdateJsJob(Long jobId, JsJobModel jsJob, AbstractTrigger trigger, String namespace) {
+        Assert.notNull(jsJob, "参数 jsJob 不能为 null");
+        Assert.isNotBlank(namespace, "参数 namespace 不能为空");
+        return doAddOrUpdateJob(jobId, jsJob, trigger, namespace, (info, job, exists) -> {
+            final TaskJsJob js = jsJob.toJobEntity();
+            js.setNamespace(namespace);
+            js.setJobId(job.getId());
+            int count;
+            if (exists) {
+                count = taskStore.updateJsJob(js);
+            } else {
+                count = taskStore.addJsJob(js);
+            }
+            Assert.isTrue(count > 0, "更新 JsJob 失败");
+            info.setJsJob(js);
+        });
+    }
+
+    /**
+     * 新增或更新 shell 定时任务，基于 jobId 判断是更新还是新增
+     */
+    protected JobInfo addOrUpdateShellJob(Long jobId, ShellJobModel shellJob, AbstractTrigger trigger, String namespace) {
+        Assert.notNull(shellJob, "参数 shellJob 不能为 null");
+        Assert.isNotBlank(namespace, "参数 namespace 不能为空");
+        return doAddOrUpdateJob(jobId, shellJob, trigger, namespace, (info, job, exists) -> {
+            final TaskShellJob shell = shellJob.toJobEntity();
+            shell.setNamespace(namespace);
+            shell.setJobId(job.getId());
+            int count;
+            if (exists) {
+                count = taskStore.updateShellJob(shell);
+            } else {
+                count = taskStore.addShellJob(shell);
+            }
+            Assert.isTrue(count > 0, "更新 JsJob 失败");
+            info.setShellJob(shell);
+        });
+    }
+
+    /**
+     * 新增或更新定时任务，基于 jobId 判断是更新还是新增
+     *
+     * @param jobId     任务ID(可为null)
+     * @param jobModel  任务配置
+     * @param trigger   触发器配置
+     * @param namespace 命名空间
+     */
+    public JobInfo addOrUpdateJob(Long jobId, AbstractJob jobModel, AbstractTrigger trigger, String namespace) {
+        Assert.notNull(trigger, "参数 trigger 不能为 null");
+        if (jobModel instanceof HttpJobModel) {
+            return addOrUpdateHttpJob(jobId, (HttpJobModel) jobModel, trigger, namespace);
+        } else if (jobModel instanceof JavaJobModel) {
+            return addOrUpdateJavaJob(jobId, (JavaJobModel) jobModel, trigger, namespace);
+        } else if (jobModel instanceof JsJobModel) {
+            return addOrUpdateJsJob(jobId, (JsJobModel) jobModel, trigger, namespace);
+        } else if (jobModel instanceof ShellJobModel) {
+            return addOrUpdateShellJob(jobId, (ShellJobModel) jobModel, trigger, namespace);
+        } else {
+            throw new IllegalArgumentException("不支持的任务类型:" + jobModel.getClass().getName());
+        }
+    }
+
+    /**
+     * 新增或更新定时任务，基于 jobId 判断是更新还是新增
+     *
+     * @param jobId    任务ID(可为null)
+     * @param jobModel 任务配置
+     * @param trigger  触发器配置
+     */
+    public JobInfo addOrUpdateJob(Long jobId, AbstractJob jobModel, AbstractTrigger trigger) {
+        return addOrUpdateJob(jobId, jobModel, trigger, getNamespace());
+    }
+
+    /**
+     * 新增定时任务
+     *
+     * @param jobModel  任务配置
+     * @param trigger   触发器配置
+     * @param namespace 命名空间
+     */
+    public JobInfo addJob(AbstractJob jobModel, AbstractTrigger trigger, String namespace) {
+        return addOrUpdateJob(null, jobModel, trigger, namespace);
+    }
+
+    /**
+     * 新增定时任务
+     *
+     * @param jobModel 任务配置
+     * @param trigger  触发器配置
+     */
+    public JobInfo addJob(AbstractJob jobModel, AbstractTrigger trigger) {
+        return addOrUpdateJob(null, jobModel, trigger, getNamespace());
     }
 
     /**
@@ -452,8 +529,7 @@ public class TaskInstance {
      */
     public int disableJob(Long jobId) {
         Assert.notNull(jobId, "参数jobId不能为空");
-        return taskStore.beginTX(status -> taskStore.updateDisableJob(getNamespace(), EnumConstant.JOB_DISABLE_1, jobId));
-        // TODO 处理程序内部状态
+        return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_1, jobId));
     }
 
     /**
@@ -462,7 +538,7 @@ public class TaskInstance {
     public int disableJobs(Collection<Long> jobIds) {
         Assert.notEmpty(jobIds, "参数jobIds不能为空");
         Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
-        return taskStore.beginTX(status -> taskStore.updateDisableJob(getNamespace(), EnumConstant.JOB_DISABLE_1, jobIds.toArray(new Long[0])));
+        return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_1, jobIds.toArray(new Long[0])));
     }
 
     /**
@@ -470,8 +546,7 @@ public class TaskInstance {
      */
     public int enableJob(Long jobId) {
         Assert.notNull(jobId, "参数jobId不能为空");
-        return taskStore.beginTX(status -> taskStore.updateDisableJob(getNamespace(), EnumConstant.JOB_DISABLE_0, jobId));
-        // TODO 处理程序内部状态
+        return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_0, jobId));
     }
 
     /**
@@ -480,15 +555,18 @@ public class TaskInstance {
     public int enableJobs(Collection<Long> jobIds) {
         Assert.notEmpty(jobIds, "参数jobIds不能为空");
         Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
-        return taskStore.beginTX(status -> taskStore.updateDisableJob(getNamespace(), EnumConstant.JOB_DISABLE_0, jobIds.toArray(new Long[0])));
+        return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_0, jobIds.toArray(new Long[0])));
     }
 
     /**
      * 禁用触发器
      */
     public int disableTrigger(Long triggerId) {
-        return taskStore.beginTX(status -> taskStore.updateDisableTrigger(getNamespace(), EnumConstant.JOB_TRIGGER_DISABLE_1, triggerId));
-        // TODO 处理程序内部状态
+        int count = taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_1, triggerId));
+        if (count > 0) {
+            taskContext.removeNextTrigger(triggerId);
+        }
+        return count;
     }
 
     /**
@@ -497,15 +575,18 @@ public class TaskInstance {
     public int disableTriggers(Collection<Long> triggerIds) {
         Assert.notEmpty(triggerIds, "参数triggerIds不能为空");
         Assert.noNullElements(triggerIds, "参数triggerIds含有空triggerId");
-        return taskStore.beginTX(status -> taskStore.updateDisableTrigger(getNamespace(), EnumConstant.JOB_TRIGGER_DISABLE_1, triggerIds.toArray(new Long[0])));
+        int count = taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_1, triggerIds.toArray(new Long[0])));
+        if (count > 0) {
+            triggerIds.forEach(taskContext::removeNextTrigger);
+        }
+        return count;
     }
 
     /**
      * 启用触发器
      */
     public int enableTrigger(Long triggerId) {
-        return taskStore.beginTX(status -> taskStore.updateDisableTrigger(getNamespace(), EnumConstant.JOB_TRIGGER_DISABLE_0, triggerId));
-        // TODO 处理程序内部状态
+        return taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_0, triggerId));
     }
 
     /**
@@ -514,19 +595,21 @@ public class TaskInstance {
     public int enableTriggers(Collection<Long> triggerIds) {
         Assert.notEmpty(triggerIds, "参数jobIds不能为空");
         Assert.noNullElements(triggerIds, "参数triggerIds含有空triggerId");
-        return taskStore.beginTX(status -> taskStore.updateDisableTrigger(getNamespace(), EnumConstant.JOB_TRIGGER_DISABLE_0, triggerIds.toArray(new Long[0])));
+        return taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_0, triggerIds.toArray(new Long[0])));
     }
 
     /**
      * 删除定时任务(同时删除触发器)
      */
-    public void deleteJob(Long jobId) {
+    public JobInfo deleteJob(Long jobId) {
         Assert.notNull(jobId, "参数jobId不能为空");
+        JobInfo res = getJobInfo(jobId);
+        Assert.notNull(res, "定时任务不存在");
+        TaskJob job = res.getJob();
+        Assert.notNull(job, "定时任务不存在");
         TupleOne<Long> triggerId = TupleOne.creat(null);
-        final String namespace = getNamespace();
+        final String namespace = job.getNamespace();
         taskStore.beginTX(status -> {
-            TaskJob job = taskStore.getJob(namespace, jobId);
-            Assert.notNull(job, "job不存在");
             taskStore.delJobByJobId(namespace, jobId);
             triggerId.setValue1(taskStore.getTriggerId(namespace, jobId));
             taskStore.delTriggerByJobId(namespace, jobId);
@@ -551,8 +634,7 @@ public class TaskInstance {
         taskContext.removeJobReentryCount(jobId);
         taskContext.removeJobRunCount(jobId);
         taskContext.removeJobFireCount(triggerId.getValue1());
-        // TODO 处理程序内部状态
-        // taskContext & wheelTimer
+        return res;
     }
 
     /**
@@ -629,6 +711,14 @@ public class TaskInstance {
     }
 
     /**
+     * 获取所有调度器
+     */
+    public List<SchedulerInfo> allSchedulers() {
+        // getNamespace()
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryAllSchedulerList(null));
+    }
+
+    /**
      * 获取所有的 “命名空间”
      */
     public List<String> allNamespace() {
@@ -645,16 +735,15 @@ public class TaskInstance {
     /**
      * 分页查询定时任务列表
      */
-    public Page<TaskInfoRes> queryJobs(TaskJobReq query) {
+    public Page<JobInfo> queryJobs(TaskJobReq query) {
         return taskStore.beginReadOnlyTX(status -> taskStore.queryJobs(query));
     }
 
     /**
-     * 获取所有调度器
+     * 查询任务详情
      */
-    public List<SchedulerInfo> allSchedulers() {
-        // getNamespace()
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryAllSchedulerList(null));
+    public JobInfo getJobInfo(Long id) {
+        return taskStore.beginReadOnlyTX(status -> taskStore.getJobInfo(id));
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- service
@@ -665,59 +754,59 @@ public class TaskInstance {
         taskContext.setCurrentScheduler(taskScheduler);
         // 调度器节点注册&更新调度器运行信息
         registerSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
-                () -> {
-                    try {
-                        registerScheduler(taskContext.getCurrentScheduler());
-                    } catch (Exception e) {
-                        log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", getInstanceName(), e);
-                        TaskSchedulerLog schedulerLog = newSchedulerLog();
-                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_REGISTER_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                        schedulerErrorListener(schedulerLog, e);
-                    }
-                },
-                GlobalConstant.REGISTER_SCHEDULER_INTERVAL, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
+            () -> {
+                try {
+                    registerScheduler(taskContext.getCurrentScheduler());
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", getInstanceName(), e);
+                    TaskSchedulerLog schedulerLog = newSchedulerLog();
+                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_REGISTER_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                    schedulerErrorListener(schedulerLog, e);
+                }
+            },
+            GlobalConstant.REGISTER_SCHEDULER_INTERVAL, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
         );
         // 集群节点心跳保持
         heartbeatFuture = scheduledExecutor.scheduleAtFixedRate(
-                () -> {
-                    try {
-                        heartbeat();
-                    } catch (Exception e) {
-                        log.error("[TaskInstance] 心跳保持失败 | instanceName={}", getInstanceName(), e);
-                        TaskSchedulerLog schedulerLog = newSchedulerLog();
-                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_HEART_BEAT_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                        schedulerErrorListener(schedulerLog, e);
-                    }
-                },
-                initialDelay, taskScheduler.getHeartbeatInterval(), TimeUnit.MILLISECONDS
+            () -> {
+                try {
+                    heartbeat();
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 心跳保持失败 | instanceName={}", getInstanceName(), e);
+                    TaskSchedulerLog schedulerLog = newSchedulerLog();
+                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_HEART_BEAT_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                    schedulerErrorListener(schedulerLog, e);
+                }
+            },
+            initialDelay, taskScheduler.getHeartbeatInterval(), TimeUnit.MILLISECONDS
         );
         // 数据完整性校验&一致性校验
         dataCheckFuture = scheduledExecutor.scheduleAtFixedRate(
-                () -> {
-                    try {
-                        dataCheck();
-                    } catch (Exception e) {
-                        log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", getInstanceName(), e);
-                        TaskSchedulerLog schedulerLog = newSchedulerLog();
-                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                        schedulerErrorListener(schedulerLog, e);
-                    }
-                },
-                initialDelay, GlobalConstant.DATA_CHECK_INTERVAL, TimeUnit.MILLISECONDS
+            () -> {
+                try {
+                    dataCheck();
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", getInstanceName(), e);
+                    TaskSchedulerLog schedulerLog = newSchedulerLog();
+                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                    schedulerErrorListener(schedulerLog, e);
+                }
+            },
+            initialDelay, GlobalConstant.DATA_CHECK_INTERVAL, TimeUnit.MILLISECONDS
         );
         // 维护当前集群可用的调度器列表
         reloadSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
-                () -> {
-                    try {
-                        reloadScheduler();
-                    } catch (Exception e) {
-                        log.error("[TaskInstance] 维护当前集群可用的调度器列表失败 | instanceName={}", getInstanceName(), e);
-                        TaskSchedulerLog schedulerLog = newSchedulerLog();
-                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                        schedulerErrorListener(schedulerLog, e);
-                    }
-                },
-                initialDelay, GlobalConstant.RELOAD_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
+            () -> {
+                try {
+                    reloadScheduler();
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 维护当前集群可用的调度器列表失败 | instanceName={}", getInstanceName(), e);
+                    TaskSchedulerLog schedulerLog = newSchedulerLog();
+                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_RELOAD_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                    schedulerErrorListener(schedulerLog, e);
+                }
+            },
+            initialDelay, GlobalConstant.RELOAD_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
         );
         // 触发接下来(N+M)秒内需要触发的触发器
         fireTriggerFuture = scheduledExecutor.submit(this::fireTriggers);
@@ -897,10 +986,9 @@ public class TaskInstance {
     private void reloadNextTrigger() {
         final int nextTime = GlobalConstant.NEXT_TRIGGER_N + GlobalConstant.NEXT_TRIGGER_M;
         final List<TaskJobTrigger> nextJobTriggerList = taskStore.beginReadOnlyTX(status -> taskStore.queryNextTrigger(getNamespace(), nextTime));
-        final int size = nextJobTriggerList.size();
         // 添加任务到时间轮调度器
         for (TaskJobTrigger trigger : nextJobTriggerList) {
-            taskContext.addNextTriggers(trigger);
+            taskContext.addNextTrigger(trigger);
         }
     }
 
@@ -925,8 +1013,8 @@ public class TaskInstance {
             final int triggerCount = triggerMap.values().stream().mapToInt(ConcurrentLinkedQueue::size).sum();
             if (triggerCount > GlobalConstant.NEXT_TRIGGER_MAX_COUNT) {
                 log.warn(
-                        "[TaskInstance] 在1秒内需要触发的触发器列表超过最大值：{}，当前值：{} | instanceName={}",
-                        GlobalConstant.NEXT_TRIGGER_MAX_COUNT, triggerCount, getInstanceName()
+                    "[TaskInstance] 在1秒内需要触发的触发器列表超过最大值：{}，当前值：{} | instanceName={}",
+                    GlobalConstant.NEXT_TRIGGER_MAX_COUNT, triggerCount, getInstanceName()
                 );
             }
             final Set<Long> triggerIds = new HashSet<>(triggerCount);
@@ -968,8 +1056,8 @@ public class TaskInstance {
             long sleepTime = startTime + (count * 1000) - taskStore.currentTimeMillis();
             if (sleepTime <= -500) {
                 log.error(
-                        "[TaskInstance] 调度器超时，建议调整参数配置提高调度器性能 | instanceName={} | waitTrigger={} | waitReloadTrigger={} |sleepTime={}",
-                        getInstanceName(), waitTrigger, waitReloadTrigger, sleepTime
+                    "[TaskInstance] 调度器超时，建议调整参数配置提高调度器性能 | instanceName={} | waitTrigger={} | waitReloadTrigger={} |sleepTime={}",
+                    getInstanceName(), waitTrigger, waitReloadTrigger, sleepTime
                 );
             }
             if (sleepTime > 0) {
@@ -1155,7 +1243,7 @@ public class TaskInstance {
             return tmpTrigger;
         });
         if (newJobTrigger == null || newJobTrigger.getNextFireTime() == null) {
-            taskContext.removeNextTriggers(jobTrigger);
+            taskContext.removeNextTrigger(jobTrigger);
         }
     }
 

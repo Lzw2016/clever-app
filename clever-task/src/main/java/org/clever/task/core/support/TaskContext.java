@@ -45,7 +45,7 @@ public class TaskContext {
      * 接下来(N+M)秒内需要触发的触发器列表 {@code ConcurrentMap<触发时间戳(秒), Linked<TaskJobTrigger>>}
      */
     private final ConcurrentMap<Long, ConcurrentLinkedQueue<TaskJobTrigger>> nextTriggers = new ConcurrentHashMap<>(
-            GlobalConstant.NEXT_TRIGGER_N + GlobalConstant.NEXT_TRIGGER_M
+        GlobalConstant.NEXT_TRIGGER_N + GlobalConstant.NEXT_TRIGGER_M
     );
     /**
      * 当前节点任务运行的重入执行次数 {@code ConcurrentMap<jobId, jobReentryCount>}
@@ -65,7 +65,7 @@ public class TaskContext {
         this.schedulerConfig = schedulerConfig;
     }
 
-    public void addNextTriggers(TaskJobTrigger trigger) {
+    public void addNextTrigger(TaskJobTrigger trigger) {
         if (trigger.getNextFireTime() != null) {
             long second = JobTriggerUtils.getSecond(trigger.getNextFireTime());
             ConcurrentLinkedQueue<TaskJobTrigger> triggers = nextTriggers.computeIfAbsent(second, time -> new ConcurrentLinkedQueue<>());
@@ -73,9 +73,15 @@ public class TaskContext {
         }
     }
 
-    public void removeNextTriggers(TaskJobTrigger trigger) {
+    public void removeNextTrigger(TaskJobTrigger trigger) {
+        if (trigger == null) return;
+        removeNextTrigger(trigger.getId());
+    }
+
+    public void removeNextTrigger(Long triggerId) {
+        if (triggerId == null) return;
         for (ConcurrentLinkedQueue<TaskJobTrigger> triggers : nextTriggers.values()) {
-            triggers.removeIf(jobTrigger -> Objects.equals(jobTrigger.getId(), trigger.getId()));
+            triggers.removeIf(jobTrigger -> Objects.equals(jobTrigger.getId(), triggerId));
         }
     }
 
@@ -113,19 +119,19 @@ public class TaskContext {
         jobReentryCount.remove(jobId);
     }
 
-    public long incrementAndGetJobFireCount(Long jobTriggerId) {
-        return jobTriggerFireCount.computeIfAbsent(jobTriggerId, id -> new AtomicLong(0)).incrementAndGet();
+    public long incrementAndGetJobFireCount(Long triggerId) {
+        return jobTriggerFireCount.computeIfAbsent(triggerId, id -> new AtomicLong(0)).incrementAndGet();
     }
 
-    public void decrementAndGetJobFireCount(Long jobTriggerId) {
-        AtomicLong jobFireCount = jobTriggerFireCount.get(jobTriggerId);
+    public void decrementAndGetJobFireCount(Long triggerId) {
+        AtomicLong jobFireCount = jobTriggerFireCount.get(triggerId);
         if (jobFireCount != null) {
             jobFireCount.decrementAndGet();
         }
     }
 
-    public void removeJobFireCount(Long jobTriggerId) {
-        jobTriggerFireCount.remove(jobTriggerId);
+    public void removeJobFireCount(Long triggerId) {
+        jobTriggerFireCount.remove(triggerId);
     }
 
     public long incrementAndGetJobRunCount(Long jobId) {

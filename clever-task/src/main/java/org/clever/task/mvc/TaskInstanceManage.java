@@ -5,13 +5,17 @@ import org.clever.core.AppContextHolder;
 import org.clever.core.model.request.page.Page;
 import org.clever.task.core.TaskInstance;
 import org.clever.task.core.TaskStore;
+import org.clever.task.core.model.JobInfo;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
 import org.clever.task.core.model.request.SchedulerLogReq;
+import org.clever.task.core.model.request.TaskInfoReq;
 import org.clever.task.core.model.request.TaskJobLogReq;
 import org.clever.task.core.model.request.TaskJobReq;
-import org.clever.task.core.model.response.TaskInfoRes;
+import org.clever.validation.annotation.Validated;
+import org.clever.web.support.mvc.annotation.RequestBody;
+import org.clever.web.support.mvc.annotation.RequestParam;
 
 import java.util.List;
 
@@ -54,8 +58,32 @@ public class TaskInstanceManage {
     /**
      * 查询所有任务信息
      */
-    public static Page<TaskInfoRes> queryJobs(TaskJobReq query) {
+    public static Page<JobInfo> queryJobs(TaskJobReq query) {
         return getTaskInstance().queryJobs(query);
+    }
+
+    /**
+     * 查询任务详情
+     */
+    public static JobInfo getJob(@RequestParam("id") Long id) {
+        return getTaskInstance().getJobInfo(id);
+    }
+
+    /**
+     * 查询任务详情
+     */
+    public static JobInfo delJob(@RequestParam("id") Long id) {
+        return getTaskInstance().deleteJob(id);
+    }
+
+    /**
+     * 更新任务
+     */
+    public static JobInfo updateJob(@Validated @RequestBody TaskInfoReq req) {
+
+
+        // TODO 更新任务
+        return getTaskInstance().getJobInfo(req.getJobId());
     }
 
     /**

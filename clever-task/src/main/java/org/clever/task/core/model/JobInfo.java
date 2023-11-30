@@ -1,4 +1,4 @@
-package org.clever.task.core.model.response;
+package org.clever.task.core.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,7 @@ import org.clever.task.core.model.entity.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class TaskInfoRes {
+public class JobInfo {
     private TaskJob job;
     private TaskHttpJob httpJob;
     private TaskJavaJob javaJob;
