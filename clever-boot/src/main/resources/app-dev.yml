@@ -115,7 +115,7 @@ web:
       interval: 1s
       excludePackages: [ ]
       excludeClasses:
-        - 'org.clever.task.core.model.response.TaskInfoRes'
+        - 'org.clever.task.core.model.JobInfo'
       locations:
         - './clever-boot/out/production/classes'
         - './clever-task/out/production/classes'
