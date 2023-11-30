@@ -1,8 +1,14 @@
 package org.clever.data.jdbc;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.sql.*;
+import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.querydsl.SQLCoreListener;
 import org.clever.data.jdbc.querydsl.sql.SQLQueryFactory;
@@ -17,8 +23,7 @@ import org.clever.util.Assert;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -26,8 +31,8 @@ import java.util.function.Supplier;
  * 作者：lizw <br/>
  * 创建时间：2021/12/22 09:52 <br/>
  */
+@Getter
 public class QueryDSL extends SQLQueryFactory {
-    @Getter
     private final Jdbc jdbc;
 
     private QueryDSL(Configuration configuration, Supplier<Connection> connProvider, Jdbc jdbc) {
@@ -44,6 +49,58 @@ public class QueryDSL extends SQLQueryFactory {
         configuration.addListener(sqlCoreListener);
         // configuration.addListener(new SQLRewriteListener());
         return new QueryDSL(configuration, sqlCoreListener.getConnProvider(), jdbc);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // 常用操作封装
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * 单表单条数据更新，只更新变化字段
+     *
+     * @param qTable       Q类
+     * @param where        更新条件(只能查到一条数据)
+     * @param data         更新的数据
+     * @param updateBefore 执行更新之前的回调
+     * @param ignoreFields 不需要更新的字段
+     * @return false: 数据库里不存在原始数据。true: 更新成功或者数据库里的数据与data一致
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public boolean updateChange(RelationalPath<?> qTable, Predicate where, Object data, Consumer<SQLUpdateClause> updateBefore, Path<?>... ignoreFields) {
+        Assert.notNull(qTable, "参数 qTable 不能为 null");
+        Assert.notNull(where, "参数 where 不能为 null");
+        Assert.notNull(data, "参数 data 不能为 null");
+        final List<Path<?>> columns = new ArrayList<>();
+        for (Path<?> column : qTable.getColumns()) {
+            if (ignoreFields != null && Arrays.asList(ignoreFields).contains(column)) {
+                continue;
+            }
+            columns.add(column);
+        }
+        Assert.notEmpty(columns, "参数 ignoreFields 排除了所有字段");
+        Tuple existsData = select(columns.toArray(new Expression[0])).from(qTable).where(where).fetchOne();
+        if (existsData == null) {
+            return false;
+        }
+        SQLUpdateClause update = update(qTable).where(where);
+        Map<String, Object> dataMap = BeanCopyUtils.toMap(data);
+        int changeCount = 0;
+        for (Path column : columns) {
+            Object existsValue = existsData.get(column);
+            Object updateValue = dataMap.get(column.getMetadata().getName());
+            if (Objects.equals(existsValue, updateValue)) {
+                continue;
+            }
+            update.set(column, updateValue);
+            changeCount++;
+        }
+        if (changeCount > 0) {
+            if (updateBefore != null) {
+                updateBefore.accept(update);
+            }
+            update.execute();
+        }
+        return true;
     }
 
     // --------------------------------------------------------------------------------------------

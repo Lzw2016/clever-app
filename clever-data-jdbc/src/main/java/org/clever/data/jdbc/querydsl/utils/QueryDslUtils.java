@@ -6,7 +6,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.PathMetadata;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.sql.RelationalPathBase;
+import com.querydsl.sql.RelationalPath;
 import com.querydsl.sql.SQLQuery;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +21,7 @@ import org.clever.data.jdbc.querydsl.QArray;
 import org.clever.data.jdbc.querydsl.QLinkedMap;
 import org.clever.data.jdbc.querydsl.QList;
 import org.clever.data.jdbc.support.SqlUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -28,7 +29,6 @@ import java.sql.Connection;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * 为扩展querydsl功能提供的工具类
@@ -45,10 +45,10 @@ public class QueryDslUtils {
         return new QLinkedMap(fields.toArray(new Expression<?>[0]));
     }
 
-    public static QLinkedMap linkedMap(RelationalPathBase<?>... tables) {
+    public static QLinkedMap linkedMap(RelationalPath<?>... tables) {
         List<Expression<?>> fields = new LinkedList<>();
-        for (RelationalPathBase<?> table : tables) {
-            fields.addAll(Arrays.stream(table.all()).collect(Collectors.toList()));
+        for (RelationalPath<?> table : tables) {
+            fields.addAll(table.getColumns());
         }
         return new QLinkedMap(fields.toArray(new Expression<?>[0]));
     }
@@ -61,10 +61,10 @@ public class QueryDslUtils {
         return new QArray(fields.toArray(new Expression<?>[0]));
     }
 
-    public static QArray array(RelationalPathBase<?>... tables) {
+    public static QArray array(RelationalPath<?>... tables) {
         List<Expression<?>> fields = new LinkedList<>();
-        for (RelationalPathBase<?> table : tables) {
-            fields.addAll(Arrays.stream(table.all()).collect(Collectors.toList()));
+        for (RelationalPath<?> table : tables) {
+            fields.addAll(table.getColumns());
         }
         return new QArray(fields.toArray(new Expression<?>[0]));
     }
@@ -77,10 +77,10 @@ public class QueryDslUtils {
         return new QList(fields.toArray(new Expression<?>[0]));
     }
 
-    public static QList list(RelationalPathBase<?>... tables) {
+    public static QList list(RelationalPath<?>... tables) {
         List<Expression<?>> fields = new LinkedList<>();
-        for (RelationalPathBase<?> table : tables) {
-            fields.addAll(Arrays.stream(table.all()).collect(Collectors.toList()));
+        for (RelationalPath<?> table : tables) {
+            fields.addAll(table.getColumns());
         }
         return new QList(fields.toArray(new Expression<?>[0]));
     }
@@ -170,7 +170,7 @@ public class QueryDslUtils {
         Map<String, Path<?>> fieldMap = new LinkedHashMap<>();
         for (JoinExpression joinExpression : queryMetadata.getJoins()) {
             Object target = joinExpression.getTarget();
-            if (!(target instanceof RelationalPathBase)) {
+            if (!(target instanceof RelationalPath)) {
                 continue;
             }
             for (Field field : target.getClass().getFields()) {
@@ -180,9 +180,9 @@ public class QueryDslUtils {
                         Path<?> path = (Path<?>) fieldValue;
                         StringBuilder fieldName = new StringBuilder();
                         if (path.getMetadata() != null
-                                && path.getMetadata().getParent() != null
-                                && path.getMetadata().getParent().getMetadata() != null
-                                && StringUtils.isNotBlank(path.getMetadata().getParent().getMetadata().getName())) {
+                            && path.getMetadata().getParent() != null
+                            && path.getMetadata().getParent().getMetadata() != null
+                            && StringUtils.isNotBlank(path.getMetadata().getParent().getMetadata().getName())) {
                             fieldName.append(path.getMetadata().getParent().getMetadata().getName()).append(".");
                         }
                         if (path.getMetadata() != null && StringUtils.isNotBlank(path.getMetadata().getName())) {
@@ -199,23 +199,7 @@ public class QueryDslUtils {
     }
 
     private static Path<?> getPath(Map<String, Path<?>> fieldMap, String sqlField) {
-        RenameStrategy[] strategies = new RenameStrategy[]{
-                RenameStrategy.None,
-                RenameStrategy.ToCamel,
-                RenameStrategy.ToCamelUpper,
-                RenameStrategy.ToUnderline,
-                RenameStrategy.ToUnderlineUpper,
-                RenameStrategy.ToUpperCase,
-                RenameStrategy.ToLowerCase,
-        };
-        BiFunction<String, String, Boolean> match = (rawStr, matchStr) -> {
-            for (RenameStrategy strategy : strategies) {
-                if (NamingUtils.rename(matchStr, strategy).equals(rawStr)) {
-                    return true;
-                }
-            }
-            return false;
-        };
+        BiFunction<String, String, Boolean> match = getMatchFun();
         for (Map.Entry<String, Path<?>> entry : fieldMap.entrySet()) {
             String key = entry.getKey();
             Path<?> path = entry.getValue();
@@ -238,5 +222,26 @@ public class QueryDslUtils {
             }
         }
         return null;
+    }
+
+    @NotNull
+    private static BiFunction<String, String, Boolean> getMatchFun() {
+        RenameStrategy[] strategies = new RenameStrategy[]{
+            RenameStrategy.None,
+            RenameStrategy.ToCamel,
+            RenameStrategy.ToCamelUpper,
+            RenameStrategy.ToUnderline,
+            RenameStrategy.ToUnderlineUpper,
+            RenameStrategy.ToUpperCase,
+            RenameStrategy.ToLowerCase,
+        };
+        return (rawStr, matchStr) -> {
+            for (RenameStrategy strategy : strategies) {
+                if (NamingUtils.rename(matchStr, strategy).equals(rawStr)) {
+                    return true;
+                }
+            }
+            return false;
+        };
     }
 }

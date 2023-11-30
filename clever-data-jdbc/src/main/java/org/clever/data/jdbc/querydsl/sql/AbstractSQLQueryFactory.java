@@ -9,6 +9,7 @@ import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLMergeClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
+import lombok.Getter;
 import org.clever.data.jdbc.querydsl.sql.dml.SafeSQLDeleteClause;
 import org.clever.data.jdbc.querydsl.sql.dml.SafeSQLInsertClause;
 import org.clever.data.jdbc.querydsl.sql.dml.SafeSQLMergeClause;
@@ -25,6 +26,7 @@ import java.util.function.Supplier;
  * 创建时间：2022/01/28 22:00 <br/>
  */
 public abstract class AbstractSQLQueryFactory<Q extends SQLCommonQuery<?>> implements SQLCommonQueryFactory<Q, SQLDeleteClause, SQLUpdateClause, SQLInsertClause, SQLMergeClause> {
+    @Getter
     protected final Configuration configuration;
     protected final Supplier<Connection> connection;
 
@@ -69,10 +71,6 @@ public abstract class AbstractSQLQueryFactory<Q extends SQLCommonQuery<?>> imple
     @Override
     public SQLUpdateClause update(RelationalPath<?> path) {
         return new SafeSQLUpdateClause(connection, configuration, path);
-    }
-
-    public Configuration getConfiguration() {
-        return configuration;
     }
 
     public Connection getConnection() {

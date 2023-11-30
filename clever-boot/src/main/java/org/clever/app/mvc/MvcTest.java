@@ -11,6 +11,8 @@ import org.clever.core.validator.annotation.IntStatus;
 import org.clever.core.validator.annotation.NotBlank;
 import org.clever.data.jdbc.DaoFactory;
 import org.clever.data.jdbc.Jdbc;
+import org.clever.data.jdbc.QueryDSL;
+import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.util.MultiValueMap;
 import org.clever.validation.annotation.Validated;
 import org.clever.web.http.HttpStatus;
@@ -24,6 +26,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 
 /**
  * 作者：lizw <br/>
@@ -183,6 +187,7 @@ public class MvcTest {
     }
 
     private static final Jdbc jdbc = DaoFactory.getJdbc("mysql");
+    private static final QueryDSL queryDSL = DaoFactory.getQueryDSL("mysql");
 
     @Transactional
     public static Object t15(Context ctx) {
@@ -211,5 +216,21 @@ public class MvcTest {
         data.put("queryByPage", queryByPage);
         data.put("param", param);
         return data;
+    }
+
+    @Transactional(disabled = true)
+    public static Object t18() {
+        TaskJobTrigger trigger = queryDSL.selectFrom(taskJobTrigger).where(taskJobTrigger.id.eq(1653059609297231874L)).fetchOne();
+        trigger.setDescription("AAA");
+        queryDSL.updateChange(
+            taskJobTrigger,
+            taskJobTrigger.id.eq(trigger.getId()),
+            trigger,
+            update -> update.set(taskJobTrigger.updateAt, queryDSL.currentDate()),
+            taskJobTrigger.fireCount,
+            taskJobTrigger.createAt,
+            taskJobTrigger.updateAt
+        );
+        return trigger;
     }
 }
