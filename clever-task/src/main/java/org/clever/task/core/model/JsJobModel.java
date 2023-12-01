@@ -21,8 +21,10 @@ public class JsJobModel extends AbstractJob {
      */
     private boolean readOnly;
 
-    public JsJobModel(String content, boolean readOnly) {
+    public JsJobModel(String name, String content, boolean readOnly) {
+        Assert.hasText(name, "参数name不能为空");
         Assert.hasText(content, "参数 content 不能为空");
+        this.name = name;
         this.content = content;
         this.readOnly = readOnly;
     }

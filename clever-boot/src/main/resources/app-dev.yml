@@ -116,6 +116,7 @@ web:
       excludePackages: [ ]
       excludeClasses:
         - 'org.clever.task.core.model.JobInfo'
+        - 'org.clever.task.core.model.AbstractTrigger'
       locations:
         - './clever-boot/out/production/classes'
         - './clever-task/out/production/classes'

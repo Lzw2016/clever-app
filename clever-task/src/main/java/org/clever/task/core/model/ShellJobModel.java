@@ -17,6 +17,14 @@ public class ShellJobModel extends AbstractJob {
      */
     private String shellType;
     /**
+     * 执行终端的字符集编码，如：“UTF-8”
+     */
+    private String shellCharset;
+    /**
+     * 执行超时时间，单位：秒，默认：“10分钟”
+     */
+    private Integer shellTimeout;
+    /**
      * 文件内容
      */
     private String content;
@@ -25,8 +33,10 @@ public class ShellJobModel extends AbstractJob {
      */
     private boolean readOnly;
 
-    public ShellJobModel(String shellType, String content, boolean readOnly) {
+    public ShellJobModel(String name, String shellType, String content, boolean readOnly) {
+        Assert.hasText(name, "参数name不能为空");
         Assert.hasText(content, "参数 content 不能为空");
+        this.name = name;
         this.setShellType(shellType);
         this.content = content;
         this.readOnly = readOnly;
@@ -46,6 +56,8 @@ public class ShellJobModel extends AbstractJob {
     public TaskShellJob toJobEntity() {
         TaskShellJob shellJob = new TaskShellJob();
         shellJob.setShellType(getShellType());
+        shellJob.setShellCharset(getShellCharset());
+        shellJob.setShellTimeout(getShellTimeout());
         shellJob.setContent(getContent());
         shellJob.setReadOnly(isReadOnly() ? EnumConstant.FILE_CONTENT_READ_ONLY_0 : EnumConstant.FILE_CONTENT_READ_ONLY_1);
         return shellJob;

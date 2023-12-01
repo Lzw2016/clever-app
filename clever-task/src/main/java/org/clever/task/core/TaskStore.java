@@ -291,7 +291,7 @@ public class TaskStore {
     }
 
     /**
-     * 根据 namespace jobTriggerId 查询
+     * 根据 namespace jobTriggerId 查询启用状态的 Trigger
      */
     public TaskJobTrigger getTrigger(String namespace, Long jobTriggerId) {
         return queryDSL.select(taskJobTrigger)
@@ -302,29 +302,11 @@ public class TaskStore {
             .fetchOne();
     }
 
-    /**
-     * 根据 jobTriggerId 查询
-     */
-    public TaskJobTrigger getTrigger(Long jobTriggerId) {
-        return queryDSL.select(taskJobTrigger)
-            .from(taskJobTrigger)
-            .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
-            .where(taskJobTrigger.id.eq(jobTriggerId))
-            .fetchOne();
-    }
-
     public Long getTriggerFireCount(String namespace, Long jobTriggerId) {
         return queryDSL.select(taskJobTrigger.fireCount)
             .from(taskJobTrigger)
             .where(taskJobTrigger.namespace.eq(namespace))
             .where(taskJobTrigger.id.eq(jobTriggerId))
-            .fetchOne();
-    }
-
-    public Long getTriggerId(Long jobId) {
-        return queryDSL.select(taskJobTrigger.id)
-            .from(taskJobTrigger)
-            .where(taskJobTrigger.jobId.eq(jobId))
             .fetchOne();
     }
 
@@ -362,16 +344,6 @@ public class TaskStore {
     }
 
     /**
-     * 根据 jobId 查询
-     */
-    public TaskJob getJob(Long jobId) {
-        return queryDSL.select(taskJob)
-            .from(taskJob)
-            .where(taskJob.id.eq(jobId))
-            .fetchOne();
-    }
-
-    /**
      * 根据 namespace jobId 查询 runCount
      */
     public Long getJobRunCount(String namespace, Long jobId) {
@@ -401,20 +373,6 @@ public class TaskStore {
             .from(taskJob)
             .where(taskJob.namespace.eq(namespace))
             .fetch();
-    }
-
-    public int updateDisableJob(Integer disable, Long... jobIds) {
-        return (int) queryDSL.update(taskJob)
-            .set(taskJob.disable, disable)
-            .where(taskJob.id.in(jobIds))
-            .execute();
-    }
-
-    public int updateDisableTrigger(Integer disable, Long... triggerIds) {
-        return (int) queryDSL.update(taskJobTrigger)
-            .set(taskJobTrigger.disable, disable)
-            .where(taskJobTrigger.id.in(triggerIds))
-            .execute();
     }
 
     /**
@@ -770,6 +728,47 @@ public class TaskStore {
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- manage
 
+    /**
+     * 根据 jobTriggerId 查询
+     */
+    public TaskJobTrigger getTrigger(Long jobTriggerId) {
+        return queryDSL.select(taskJobTrigger)
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.id.eq(jobTriggerId))
+            .fetchOne();
+    }
+
+    public Long getTriggerId(Long jobId) {
+        return queryDSL.select(taskJobTrigger.id)
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.jobId.eq(jobId))
+            .fetchOne();
+    }
+
+    /**
+     * 根据 jobId 查询
+     */
+    public TaskJob getJob(Long jobId) {
+        return queryDSL.select(taskJob)
+            .from(taskJob)
+            .where(taskJob.id.eq(jobId))
+            .fetchOne();
+    }
+
+    public int updateDisableJob(Integer disable, Long... jobIds) {
+        return (int) queryDSL.update(taskJob)
+            .set(taskJob.disable, disable)
+            .where(taskJob.id.in(jobIds))
+            .execute();
+    }
+
+    public int updateDisableTrigger(Integer disable, Long... triggerIds) {
+        return (int) queryDSL.update(taskJobTrigger)
+            .set(taskJobTrigger.disable, disable)
+            .where(taskJobTrigger.id.in(triggerIds))
+            .execute();
+    }
+
     public int addTrigger(TaskJobTrigger jobTrigger) {
         if (jobTrigger.getId() == null) {
             jobTrigger.setId(snowFlake.nextId());
@@ -821,9 +820,10 @@ public class TaskStore {
     public int updateTrigger(TaskJobTrigger jobTrigger) {
         return queryDSL.update(
             taskJobTrigger,
-            taskJobTrigger.id.eq(jobTrigger.getId()),
+            jobTrigger.getId() != null ? taskJobTrigger.id.eq(jobTrigger.getId()) : taskJobTrigger.jobId.eq(jobTrigger.getJobId()),
             jobTrigger,
             update -> update.set(taskJobTrigger.updateAt, queryDSL.currentDate()),
+            taskJobTrigger.id,
             taskJobTrigger.fireCount,
             taskJobTrigger.createAt,
             taskJobTrigger.updateAt
@@ -836,6 +836,7 @@ public class TaskStore {
             taskJob.id.eq(job.getId()),
             job,
             update -> update.set(taskJob.updateAt, queryDSL.currentDate()),
+            taskJob.id,
             taskJob.runCount,
             taskJob.createAt,
             taskJob.updateAt
@@ -845,9 +846,10 @@ public class TaskStore {
     public int updateHttpJob(TaskHttpJob httpJob) {
         return queryDSL.update(
             taskHttpJob,
-            taskHttpJob.id.eq(httpJob.getId()),
+            httpJob.getId() != null ? taskHttpJob.id.eq(httpJob.getId()) : taskHttpJob.jobId.eq(httpJob.getJobId()),
             httpJob,
             update -> update.set(taskHttpJob.updateAt, queryDSL.currentDate()),
+            taskHttpJob.id,
             taskHttpJob.createAt,
             taskHttpJob.updateAt
         ) ? 1 : 0;
@@ -856,9 +858,10 @@ public class TaskStore {
     public int updateJavaJob(TaskJavaJob javaJob) {
         return queryDSL.update(
             taskJavaJob,
-            taskJavaJob.id.eq(javaJob.getId()),
+            javaJob.getId() != null ? taskJavaJob.id.eq(javaJob.getId()) : taskJavaJob.jobId.eq(javaJob.getJobId()),
             javaJob,
             update -> update.set(taskJavaJob.updateAt, queryDSL.currentDate()),
+            taskJavaJob.id,
             taskJavaJob.createAt,
             taskJavaJob.updateAt
         ) ? 1 : 0;
@@ -867,9 +870,10 @@ public class TaskStore {
     public int updateJsJob(TaskJsJob jsJob) {
         return queryDSL.update(
             taskJsJob,
-            taskJsJob.id.eq(jsJob.getId()),
+            jsJob.getId() != null ? taskJsJob.id.eq(jsJob.getId()) : taskJsJob.jobId.eq(jsJob.getJobId()),
             jsJob,
             update -> update.set(taskJsJob.updateAt, queryDSL.currentDate()),
+            taskJsJob.id,
             taskJsJob.createAt,
             taskJsJob.updateAt
         ) ? 1 : 0;
@@ -878,9 +882,10 @@ public class TaskStore {
     public int updateShellJob(TaskShellJob shellJob) {
         return queryDSL.update(
             taskShellJob,
-            taskShellJob.id.eq(shellJob.getId()),
+            shellJob.getId() != null ? taskShellJob.id.eq(shellJob.getId()) : taskShellJob.jobId.eq(shellJob.getJobId()),
             shellJob,
             update -> update.set(taskShellJob.updateAt, queryDSL.currentDate()),
+            taskShellJob.id,
             taskShellJob.createAt,
             taskShellJob.updateAt
         ) ? 1 : 0;
