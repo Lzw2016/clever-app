@@ -44,6 +44,13 @@ public abstract class GlobalExceptionHandler {
             res.setMessage("业务处理失败");
             return res;
         }));
+        // IllegalArgumentException
+        setHandle(IllegalArgumentException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
+            ErrorResponse res = newErrorResponse(request, exception);
+            res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            res.setMessage(exception.getMessage());
+            return res;
+        }));
         // NotImplementedException.class
         setHandle(NotImplementedException.class, SimpleExceptionHandlerWrapper.create((exception, request, response) -> {
             ErrorResponse res = newErrorResponse(request, exception);
