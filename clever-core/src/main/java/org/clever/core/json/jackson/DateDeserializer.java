@@ -23,6 +23,6 @@ public class DateDeserializer extends JsonDeserializer<Date> {
             return null;
         }
         String str = StringUtils.trim(p.getText());
-        return DateUtils.parseDate(str);
+        return DateUtils.parseDate(str, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd");
     }
 }

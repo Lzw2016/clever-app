@@ -5,6 +5,7 @@ import io.javalin.http.UploadedFile;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.DateUtils;
 import org.clever.core.http.CookieUtils;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.validator.annotation.IntStatus;
@@ -232,5 +233,14 @@ public class MvcTest {
             taskJobTrigger.updateAt
         );
         return trigger;
+    }
+
+    @SneakyThrows
+    @Transactional(disabled = true)
+    public static Object t19() {
+        // "yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        Date date = DateUtils.parseDate("2023-05-26T16:00:00.000Z");
+        log.info("date -> {}", date);
+        return date;
     }
 }

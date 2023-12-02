@@ -24,6 +24,7 @@ import org.clever.web.support.mvc.annotation.RequestParam;
 import org.clever.web.support.mvc.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 作者：lizw <br/>
@@ -69,7 +70,38 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static R<?> getCurrentScheduler() {
-        return R.success(getTaskInstance().getContext().getCurrentScheduler());
+        Map<String, Object> data = BeanCopyUtils.toMap(getTaskInstance().getContext().getCurrentScheduler());
+        data.put("state", getTaskInstance().getState());
+        data.put("stateText", getTaskInstance().getStateText());
+        return R.success(data);
+    }
+
+    /**
+     * 暂停调度器
+     */
+    @Transactional(disabled = true)
+    public static R<?> paused() {
+        getTaskInstance().paused();
+        return R.success();
+    }
+
+    /**
+     * 继续运行调度器
+     */
+    @Transactional(disabled = true)
+    public static R<?> resume() {
+        getTaskInstance().resume();
+        return R.success();
+    }
+
+    /**
+     * 获取调度器日志信息
+     */
+    @Transactional(disabled = true)
+    public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq req) {
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.querySchedulerLog(req));
     }
 
     /**
@@ -185,15 +217,5 @@ public class TaskInstanceManage {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobLog(req));
-    }
-
-    /**
-     * 获取调度器日志信息
-     */
-    @Transactional(disabled = true)
-    public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq req) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.querySchedulerLog(req));
     }
 }

@@ -25,10 +25,10 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
      * 参考: <a href="https://www.jianshu.com/p/cf2f1f26dd0a">连接</a>
      */
     private static final String[] parsePatterns = {
-            yyyy_MM_dd, yyyy_MM_dd_HH_mm_ss, yyyy_MM_dd_HH_mm,
-            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm",
-            "yyyyMMdd", "yyyyMMdd HH:mm:ss", "yyyyMMdd HH:mm",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        yyyy_MM_dd, yyyy_MM_dd_HH_mm_ss, yyyy_MM_dd_HH_mm,
+        "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm",
+        "yyyyMMdd", "yyyyMMdd HH:mm:ss", "yyyyMMdd HH:mm",
+        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
     };
 
     /**
@@ -154,15 +154,6 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     @SneakyThrows
     public static Date parseDate(final String str, final String... parsePatterns) {
         return org.apache.commons.lang3.time.DateUtils.parseDate(str, parsePatterns);
-    }
-
-    /**
-     * 日期型字符串转化为日期，转换格式（yyyy-MM-dd HH:mm:ss）
-     *
-     * @param str 日期格式字符串，如：2015-03-01 10:21:14
-     */
-    public static Date parseDate(String str) {
-        return parseDate(String.valueOf(str), "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd");
     }
 
     /**

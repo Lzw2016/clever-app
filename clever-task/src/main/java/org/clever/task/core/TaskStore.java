@@ -946,7 +946,9 @@ public class TaskStore {
         if (query.getCreateAtEnd() != null) {
             sqlQuery.where(taskSchedulerLog.createAt.loe(query.getCreateAtEnd()));
         }
-        sqlQuery.orderBy(taskSchedulerLog.createAt.desc());
+        if (query.isOrderEmpty()) {
+            query.addOrderField(ColumnMetadata.getName(taskSchedulerLog.createAt), QueryBySort.DESC);
+        }
         return QueryDslUtils.queryByPage(sqlQuery, query);
     }
 
