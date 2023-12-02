@@ -68,8 +68,8 @@ public class TaskInstanceManage {
      * 获取当前调度器
      */
     @Transactional(disabled = true)
-    public static R<String> currentNamespace() {
-        return R.success(getTaskInstance().getNamespace());
+    public static R<?> getCurrentScheduler() {
+        return R.success(getTaskInstance().getContext().getCurrentScheduler());
     }
 
     /**

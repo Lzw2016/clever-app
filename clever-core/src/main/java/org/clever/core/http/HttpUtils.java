@@ -1,5 +1,6 @@
 package org.clever.core.http;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
  * 作者：lzw <br/>
  * 创建时间：2017-09-02 20:14 <br/>
  */
+@Getter
 @Slf4j
 public class HttpUtils {
     public static final String MediaType_Json = "application/json;charset=UTF-8";
@@ -34,6 +36,8 @@ public class HttpUtils {
 
     /**
      * 内部 OkHttpClient (建议单例)
+     * -- GETTER --
+     * 返回内部OkHttpClient(建议单例)
      */
     private final OkHttpClient okHttpClient;
 
@@ -46,37 +50,37 @@ public class HttpUtils {
         long connectTimeout = 5L;
         long cacheSize = 1024 * 1024 * 100L;
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .addInterceptor(chain -> {
-                    Request request = chain.request().newBuilder()
-                            .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
-                            .build();
-                    long start = System.currentTimeMillis();
-                    log.info(String.format("---> 请求 [%1$s] %2$s ", request.method(), request.url()));
-                    Response response = chain.proceed(request);
-                    long end = System.currentTimeMillis();
-                    log.info(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start)));
-                    return response;
-                })
+            .addInterceptor(chain -> {
+                Request request = chain.request().newBuilder()
+                    .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
+                    .build();
+                long start = System.currentTimeMillis();
+                log.info(String.format("---> 请求 [%1$s] %2$s ", request.method(), request.url()));
+                Response response = chain.proceed(request);
+                long end = System.currentTimeMillis();
+                log.info(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start)));
+                return response;
+            })
 
-                .readTimeout(readTimeout, TimeUnit.SECONDS)
-                .connectTimeout(connectTimeout, TimeUnit.SECONDS)
-                .cache(new Cache(new File("./.httpCache"), cacheSize));
+            .readTimeout(readTimeout, TimeUnit.SECONDS)
+            .connectTimeout(connectTimeout, TimeUnit.SECONDS)
+            .cache(new Cache(new File("./.httpCache"), cacheSize));
         // Https 签名校验
         final TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                    }
-
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                    }
-
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new java.security.cert.X509Certificate[]{};
-                    }
+            new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
                 }
+
+                @Override
+                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new java.security.cert.X509Certificate[]{};
+                }
+            }
         };
         try {
             SSLContext sslContext = SSLContext.getInstance("SSL");
@@ -208,13 +212,6 @@ public class HttpUtils {
     // 对象方法
     // --------------------------------------------------------------------------------------------
 
-    /**
-     * 返回内部OkHttpClient(建议单例)
-     */
-    public OkHttpClient getOkHttpClient() {
-        return okHttpClient;
-    }
-
     // --------------------------------------------------------------------------------------------
     // GET请求
     // --------------------------------------------------------------------------------------------
@@ -278,7 +275,7 @@ public class HttpUtils {
      * @param jsonBody Json Body(非空)
      */
     public String postStr(final String url, final Map<String, String> headers, final Map<String, String> params, String jsonBody) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse(MediaType_Json), jsonBody);
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse(MediaType_Json));
         Request request = createPostRequest(url, headers, params, requestBody);
         return executeReturnStr(this.okHttpClient, request);
     }
@@ -291,7 +288,7 @@ public class HttpUtils {
      * @param jsonBody Json Body(非空)
      */
     public String postStr(final String url, final Map<String, String> params, String jsonBody) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse(MediaType_Json), jsonBody);
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse(MediaType_Json));
         Request request = createPostRequest(url, null, params, requestBody);
         return executeReturnStr(this.okHttpClient, request);
     }
@@ -303,7 +300,7 @@ public class HttpUtils {
      * @param jsonBody Json Body(非空)
      */
     public String postStr(String url, String jsonBody) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse(MediaType_Json), jsonBody);
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse(MediaType_Json));
         Request request = createPostRequest(url, null, null, requestBody);
         return executeReturnStr(this.okHttpClient, request);
     }
@@ -317,7 +314,7 @@ public class HttpUtils {
      * @param jsonBody Json Body(非空)
      */
     public byte[] postByte(final String url, final Map<String, String> headers, final Map<String, String> params, String jsonBody) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse(MediaType_Json), jsonBody);
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse(MediaType_Json));
         Request request = createPostRequest(url, headers, params, requestBody);
         return executeReturnByte(this.okHttpClient, request);
     }
