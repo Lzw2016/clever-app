@@ -8,6 +8,7 @@ import org.clever.core.exception.BusinessException;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.model.request.page.Page;
+import org.clever.core.model.response.R;
 import org.clever.task.core.TaskInstance;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.*;
@@ -20,6 +21,7 @@ import org.clever.task.core.model.request.TaskJobReq;
 import org.clever.validation.annotation.Validated;
 import org.clever.web.support.mvc.annotation.RequestBody;
 import org.clever.web.support.mvc.annotation.RequestParam;
+import org.clever.web.support.mvc.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,6 +43,7 @@ public class TaskInstanceManage {
     /**
      * 获取所有的调度器信息
      */
+    @Transactional(disabled = true)
     public static List<SchedulerInfo> allSchedulers() {
         return getTaskInstance().allSchedulers();
     }
@@ -48,6 +51,7 @@ public class TaskInstanceManage {
     /**
      * 获取所有的 “命名空间”
      */
+    @Transactional(disabled = true)
     public static List<String> allNamespace() {
         return getTaskInstance().allNamespace();
     }
@@ -55,13 +59,23 @@ public class TaskInstanceManage {
     /**
      * 获取所有的 “实例名”
      */
+    @Transactional(disabled = true)
     public List<String> allInstance() {
         return getTaskInstance().allInstance();
     }
 
     /**
+     * 获取当前调度器
+     */
+    @Transactional(disabled = true)
+    public static R<String> currentNamespace() {
+        return R.success(getTaskInstance().getNamespace());
+    }
+
+    /**
      * 查询所有任务信息
      */
+    @Transactional(disabled = true)
     public static Page<JobInfo> queryJobs(TaskJobReq query) {
         return getTaskInstance().queryJobs(query);
     }
@@ -69,6 +83,7 @@ public class TaskInstanceManage {
     /**
      * 查询任务详情
      */
+    @Transactional(disabled = true)
     public static JobInfo getJob(@RequestParam("id") Long id) {
         return getTaskInstance().getJobInfo(id);
     }
@@ -76,6 +91,7 @@ public class TaskInstanceManage {
     /**
      * 查询任务详情
      */
+    @Transactional(disabled = true)
     public static JobInfo delJob(@RequestParam("id") Long id) {
         return getTaskInstance().deleteJob(id);
     }
@@ -83,6 +99,7 @@ public class TaskInstanceManage {
     /**
      * 更新任务
      */
+    @Transactional(disabled = true)
     public static JobInfo updateJob(@Validated @RequestBody TaskInfoReq req) {
         final TaskInfoReq.TaskJob job = req.getJob();
         final TaskInfoReq.TaskHttpJob http = req.getHttpJob();
@@ -132,8 +149,38 @@ public class TaskInstanceManage {
     }
 
     /**
+     * 禁用任务
+     */
+    @Transactional(disabled = true)
+    public static R<?> disableJob(@RequestParam("jobId") Long jobId, @RequestParam("triggerId") Long triggerId) {
+        int count = getTaskInstance().disableJob(jobId);
+        count += getTaskInstance().disableTrigger(triggerId);
+        return R.success(count);
+    }
+
+    /**
+     * 启用任务
+     */
+    @Transactional(disabled = true)
+    public static R<?> enableJob(@RequestParam("jobId") Long jobId, @RequestParam("triggerId") Long triggerId) {
+        int count = getTaskInstance().enableJob(jobId);
+        count += getTaskInstance().enableTrigger(triggerId);
+        return R.success(count);
+    }
+
+    /**
+     * 立即执行任务
+     */
+    @Transactional(disabled = true)
+    public static R<?> execJob(@RequestParam("jobId") Long jobId) {
+        getTaskInstance().execJob(jobId);
+        return R.success();
+    }
+
+    /**
      * 获取任务日志信息
      */
+    @Transactional(disabled = true)
     public static Page<TaskJobLog> queryTaskJobLog(TaskJobLogReq req) {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();
@@ -143,6 +190,7 @@ public class TaskInstanceManage {
     /**
      * 获取调度器日志信息
      */
+    @Transactional(disabled = true)
     public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq req) {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();

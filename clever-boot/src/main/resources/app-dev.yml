@@ -113,7 +113,8 @@ web:
       enable: true
       # watchFile: './build/.hotReload'
       interval: 1s
-      excludePackages: [ ]
+      excludePackages:
+        - 'org.clever.task.core.model'
       excludeClasses:
         - 'org.clever.task.core.model.JobInfo'
         - 'org.clever.task.core.model.AbstractTrigger'
@@ -169,8 +170,8 @@ web:
 timed-task:
   enable: false
   jdbcName: 'mysql'
-  namespace: 'default'
-  instanceName: 'node01'
+  namespace: 'lzw'
+  instanceName: 'n01'
   heartbeatInterval: 10000
   description: 'dev节点01'
   schedulerExecutorPoolSize: 16

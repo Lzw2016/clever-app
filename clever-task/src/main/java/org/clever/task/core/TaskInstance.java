@@ -167,6 +167,8 @@ public class TaskInstance {
             new BasicThreadFactory.Builder().namingPattern("task-worker-pool-%d").daemon(true).build(),
             new ThreadPoolExecutor.AbortPolicy()
         );
+        // 初始化 TaskContext
+        this.taskContext.setCurrentScheduler(toScheduler(schedulerConfig));
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- api

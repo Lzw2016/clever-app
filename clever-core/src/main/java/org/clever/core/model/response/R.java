@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 import org.clever.core.validator.FieldError;
 
 import java.io.PrintWriter;
@@ -19,9 +20,34 @@ import java.util.List;
  */
 @JsonInclude(Include.NON_NULL)
 @EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
 @Data
-public class AjaxResponse<T> extends BaseResponse {
+public class R<T> extends BaseResponse {
     private static final long serialVersionUID = 1L;
+
+    public static <T> R<T> success(T data, String successMessage) {
+        return new R<>(data, successMessage);
+    }
+
+    public static <T> R<T> success(T data) {
+        return new R<>(data, "操作成功");
+    }
+
+    public static R<?> success() {
+        return new R<>(true, "操作成功", null);
+    }
+
+    public static <T> R<T> fail(String failMessage) {
+        return new R<>(false, null, failMessage);
+    }
+
+    public static <T> R<T> fail(Throwable throwable, String exceptionMessage) {
+        return new R<>(throwable, exceptionMessage);
+    }
+
+    public static R<?> fail() {
+        return new R<>(false, null, "操作失败");
+    }
 
     /**
      * 下次请求是否需要验证码
@@ -34,7 +60,7 @@ public class AjaxResponse<T> extends BaseResponse {
     /**
      * 请求响应返回的数据
      */
-    private T result;
+    private T data;
     /**
      * 请求成功后跳转地址
      */
@@ -71,7 +97,7 @@ public class AjaxResponse<T> extends BaseResponse {
     /**
      * 默认构造，默认请求操作失败 success=false
      */
-    public AjaxResponse() {
+    public R() {
     }
 
     /**
@@ -80,18 +106,18 @@ public class AjaxResponse<T> extends BaseResponse {
      * @param throwable        请求的异常对象
      * @param exceptionMessage 请求的异常时的消息
      */
-    public AjaxResponse(Throwable throwable, String exceptionMessage) {
+    public R(Throwable throwable, String exceptionMessage) {
         this(null, false, null, null, true, throwable, exceptionMessage);
     }
 
     /**
      * 服务端请求完成并且操作成功(success = true)<br/>
      *
-     * @param result         请求响应数据
+     * @param data           请求响应数据
      * @param successMessage success=true时，请求成功时的消息
      */
-    public AjaxResponse(T result, String successMessage) {
-        this(result, true, successMessage, null, false, null, null);
+    public R(T data, String successMessage) {
+        this(data, true, successMessage, null, false, null, null);
     }
 
     /**
@@ -101,24 +127,24 @@ public class AjaxResponse<T> extends BaseResponse {
      * @param successMessage success=true时，请求成功时的消息
      * @param failMessage    success=false时，请求失败时的消息
      */
-    public AjaxResponse(boolean success, String successMessage, String failMessage) {
+    public R(boolean success, String successMessage, String failMessage) {
         this(null, success, successMessage, failMessage, false, null, null);
     }
 
     /**
      * 服务端请求完成，没有发生异常时，使用的构造方法<br/>
      *
-     * @param result         请求响应数据
+     * @param data           请求响应数据
      * @param success        请求结果是否成功
      * @param successMessage success=true时，请求成功时的消息
      * @param failMessage    success=false时，请求失败时的消息
      */
-    public AjaxResponse(T result, boolean success, String successMessage, String failMessage) {
-        this(result, success, successMessage, failMessage, false, null, null);
+    public R(T data, boolean success, String successMessage, String failMessage) {
+        this(data, success, successMessage, failMessage, false, null, null);
     }
 
     /**
-     * @param result           请求响应数据
+     * @param data             请求响应数据
      * @param success          请求结果是否成功
      * @param successMessage   success=true时，请求成功时的消息
      * @param failMessage      success=false时，请求失败时的消息
@@ -126,8 +152,8 @@ public class AjaxResponse<T> extends BaseResponse {
      * @param throwable        请求的异常对象
      * @param exceptionMessage 请求的异常时的消息
      */
-    public AjaxResponse(T result, boolean success, String successMessage, String failMessage, boolean hasException, Throwable throwable, String exceptionMessage) {
-        this.result = result;
+    public R(T data, boolean success, String successMessage, String failMessage, boolean hasException, Throwable throwable, String exceptionMessage) {
+        this.data = data;
         this.success = success;
         this.successMessage = successMessage;
         this.failMessage = failMessage;
@@ -139,7 +165,7 @@ public class AjaxResponse<T> extends BaseResponse {
     /**
      * 增加验证错误消息<br/>
      */
-    public AjaxResponse<?> addFieldError(FieldError fieldError) {
+    public R<?> addFieldError(FieldError fieldError) {
         if (this.fieldErrors == null) {
             this.fieldErrors = new ArrayList<>();
         }
