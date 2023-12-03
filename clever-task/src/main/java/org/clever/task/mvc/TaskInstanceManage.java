@@ -148,7 +148,8 @@ public class TaskInstanceManage {
             if (StringUtils.isNotBlank(http.getRequestData())) {
                 try {
                     httpJob.setRequestData(JacksonMapper.getInstance().fromJson(http.getRequestData(), HttpJobModel.HttpRequestData.class));
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    throw new BusinessException("Http请求数据格式错误", e);
                 }
             }
             httpJob.setSuccessCheck(httpJob.getSuccessCheck());
@@ -200,7 +201,8 @@ public class TaskInstanceManage {
             if (StringUtils.isNotBlank(http.getRequestData())) {
                 try {
                     httpJob.setRequestData(JacksonMapper.getInstance().fromJson(http.getRequestData(), HttpJobModel.HttpRequestData.class));
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    throw new BusinessException("Http请求数据格式错误", e);
                 }
             }
             httpJob.setSuccessCheck(httpJob.getSuccessCheck());
