@@ -17,6 +17,7 @@ import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.redis.RedisBootstrap;
 import org.clever.security.SecurityBootstrap;
 import org.clever.task.TaskBootstrap;
+import org.clever.task.ext.job.ShellJobExecutor;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.MvcBootstrap;
 import org.clever.web.PathConstants;
@@ -76,18 +77,18 @@ public abstract class AppBootstrap {
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
-                .addFilter(ApplyConfigFilter.create(rootPath, webConfig.getHttp()), PathConstants.ALL, "ApplyConfigFilter", filterOrder.incrL1())
-                .addFilter(EchoFilter.create(environment), PathConstants.ALL, "EchoFilter", filterOrder.incrL1())
-                .addFilter(ExceptionHandlerFilter.INSTANCE, PathConstants.ALL, "ExceptionHandlerFilter", filterOrder.incrL1())
-                .addFilter(GlobalRequestParamsFilter.INSTANCE, PathConstants.ALL, "GlobalRequestParamsFilter", filterOrder.incrL1())
-                .addFilter(CorsFilter.create(environment), PathConstants.ALL, "CorsFilter", filterOrder.incrL1())
-                .addFilter(mvcBootstrap.getMvcHandlerMethodFilter(), PathConstants.ALL, "MvcHandlerMethodFilter", filterOrder.incrL1())
-                .addFilter(securityBootstrap.getAuthenticationFilter(), PathConstants.ALL, "AuthenticationFilter", filterOrder.incrL1())
-                .addFilter(securityBootstrap.getLoginFilter(), PathConstants.ALL, "LoginFilter", filterOrder.incrL1())
-                .addFilter(securityBootstrap.getLogoutFilter(), PathConstants.ALL, "LogoutFilter", filterOrder.incrL1())
-                .addFilter(securityBootstrap.getAuthorizationFilter(), PathConstants.ALL, "AuthorizationFilter", filterOrder.incrL1())
-                .addFilter(StaticResourceFilter.create(rootPath, environment), PathConstants.ALL, "StaticResourceFilter", filterOrder.incrL1())
-                .addFilter(mvcBootstrap.getMvcFilter(), PathConstants.ALL, "MvcFilter", filterOrder.incrL1());
+            .addFilter(ApplyConfigFilter.create(rootPath, webConfig.getHttp()), PathConstants.ALL, "ApplyConfigFilter", filterOrder.incrL1())
+            .addFilter(EchoFilter.create(environment), PathConstants.ALL, "EchoFilter", filterOrder.incrL1())
+            .addFilter(ExceptionHandlerFilter.INSTANCE, PathConstants.ALL, "ExceptionHandlerFilter", filterOrder.incrL1())
+            .addFilter(GlobalRequestParamsFilter.INSTANCE, PathConstants.ALL, "GlobalRequestParamsFilter", filterOrder.incrL1())
+            .addFilter(CorsFilter.create(environment), PathConstants.ALL, "CorsFilter", filterOrder.incrL1())
+            .addFilter(mvcBootstrap.getMvcHandlerMethodFilter(), PathConstants.ALL, "MvcHandlerMethodFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getAuthenticationFilter(), PathConstants.ALL, "AuthenticationFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getLoginFilter(), PathConstants.ALL, "LoginFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getLogoutFilter(), PathConstants.ALL, "LogoutFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getAuthorizationFilter(), PathConstants.ALL, "AuthorizationFilter", filterOrder.incrL1())
+            .addFilter(StaticResourceFilter.create(rootPath, environment), PathConstants.ALL, "StaticResourceFilter", filterOrder.incrL1())
+            .addFilter(mvcBootstrap.getMvcFilter(), PathConstants.ALL, "MvcFilter", filterOrder.incrL1());
         // 注册 Servlet
         // OrderIncrement servletOrder = new OrderIncrement();
         // webServerBootstrap.getServletRegistrar()
@@ -113,9 +114,9 @@ public abstract class AppBootstrap {
         // 注册插件
         OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
-                .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1())
-                .addPlugin(mvcBootstrap.getMvcFilter(), "MVC处理插件", pluginOrder.incrL1())
-                .addPlugin(NotFoundResponsePlugin.INSTANCE, "404处理插件", pluginOrder.incrL1());
+            .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1())
+            .addPlugin(mvcBootstrap.getMvcFilter(), "MVC处理插件", pluginOrder.incrL1())
+            .addPlugin(NotFoundResponsePlugin.INSTANCE, "404处理插件", pluginOrder.incrL1());
         // 注册 JavalinEventListener
         // OrderIncrement javalinListenerOrder = new OrderIncrement();
         // webServerBootstrap.getJavalinEventListenerRegistrar()
@@ -157,6 +158,7 @@ public abstract class AppBootstrap {
         }
         startupTaskBootstrap.start();
         // 分布式定时任务
+        TaskBootstrap.JOB_EXECUTORS.add(new ShellJobExecutor());
         TaskBootstrap taskBootstrap = TaskBootstrap.create(environment);
         taskBootstrap.start();
         // 系统启动完成日志
