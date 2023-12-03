@@ -567,7 +567,9 @@ public class TaskStore {
     }
 
     public int addJobTriggerLog(TaskJobTriggerLog jobTriggerLog) {
-        jobTriggerLog.setId(snowFlake.nextId());
+        if (jobTriggerLog.getId() == null) {
+            jobTriggerLog.setId(snowFlake.nextId());
+        }
         jobTriggerLog.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskJobTriggerLog).populate(jobTriggerLog).execute();
     }
@@ -1026,6 +1028,10 @@ public class TaskStore {
         TaskShellJob shellJob = tuple.get(taskShellJob);
         TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
         return new JobInfo(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
+    }
+
+    public TaskJobTriggerLog getTaskJobTriggerLog(Long jobTriggerLogId) {
+        return queryDSL.selectFrom(taskJobTriggerLog).where(taskJobTriggerLog.id.eq(jobTriggerLogId)).fetchOne();
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

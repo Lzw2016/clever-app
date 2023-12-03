@@ -87,7 +87,7 @@ public class QueryDSL extends SQLQueryFactory {
         int changeCount = 0;
         for (Path column : columns) {
             Object existsValue = existsData.get(column);
-            Object updateValue = dataMap.get(ColumnMetadata.getName(column));
+            Object updateValue = dataMap.get(column.getMetadata().getName());
             if (Objects.equals(existsValue, updateValue)) {
                 continue;
             }

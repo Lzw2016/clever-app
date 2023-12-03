@@ -364,7 +364,7 @@ public class TaskInstance {
             callback.call(info, job, exists);
             // 更新trigger
             if (trigger != null) {
-                Long triggerId = taskStore.getTriggerId(jobId);
+                Long triggerId = jobId != null ? taskStore.getTriggerId(jobId) : null;
                 TaskJobTrigger jobTrigger = addOrUpdateTrigger(triggerId, trigger, job.getId(), namespace);
                 info.setJobTrigger(jobTrigger);
             }

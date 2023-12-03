@@ -13,6 +13,7 @@ import org.clever.task.core.TaskInstance;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.TaskJobLog;
+import org.clever.task.core.model.entity.TaskJobTriggerLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
 import org.clever.task.core.model.request.SchedulerLogReq;
 import org.clever.task.core.model.request.TaskInfoReq;
@@ -129,8 +130,61 @@ public class TaskInstanceManage {
     }
 
     /**
+     * 新增任务
+     */
+    @SuppressWarnings("DuplicatedCode")
+    @Transactional(disabled = true)
+    public static JobInfo addJob(@Validated @RequestBody TaskInfoReq req) {
+        final TaskInfoReq.TaskJob job = req.getJob();
+        final TaskInfoReq.TaskHttpJob http = req.getHttpJob();
+        final TaskInfoReq.TaskJavaJob java = req.getJavaJob();
+        final TaskInfoReq.TaskJsJob js = req.getJsJob();
+        final TaskInfoReq.TaskShellJob shell = req.getShellJob();
+        final TaskInfoReq.TaskJobTrigger trigger = req.getJobTrigger();
+        AbstractJob jobModel;
+        AbstractTrigger jobTrigger;
+        if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_1)) {
+            HttpJobModel httpJob = new HttpJobModel(job.getName(), http.getRequestMethod(), http.getRequestUrl());
+            if (StringUtils.isNotBlank(http.getRequestData())) {
+                try {
+                    httpJob.setRequestData(JacksonMapper.getInstance().fromJson(http.getRequestData(), HttpJobModel.HttpRequestData.class));
+                } catch (Exception ignored) {
+                }
+            }
+            httpJob.setSuccessCheck(httpJob.getSuccessCheck());
+            jobModel = httpJob;
+        } else if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_2)) {
+            jobModel = new JavaJobModel(
+                job.getName(), Objects.equal(java.getIsStatic(), EnumConstant.JAVA_JOB_IS_STATIC_1), java.getClassName(), java.getClassMethod()
+            );
+        } else if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_3)) {
+            jobModel = new JsJobModel(
+                job.getName(), js.getContent(), Objects.equal(js.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
+            );
+        } else if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_4)) {
+            ShellJobModel shellJob = new ShellJobModel(
+                job.getName(), shell.getShellType(), shell.getContent(), Objects.equal(shell.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
+            );
+            shellJob.setShellCharset(shell.getShellCharset());
+            shellJob.setShellTimeout(shell.getShellTimeout());
+            jobModel = shellJob;
+        } else {
+            throw new BusinessException("任务类型错误type=" + job.getType());
+        }
+        BeanCopyUtils.copyTo(job, jobModel);
+        if (Objects.equal(trigger.getType(), EnumConstant.JOB_TRIGGER_TYPE_1)) {
+            jobTrigger = new CronTrigger(job.getName(), trigger.getCron());
+        } else {
+            jobTrigger = new FixedIntervalTrigger(job.getName(), trigger.getFixedInterval());
+        }
+        BeanCopyUtils.copyTo(trigger, jobTrigger);
+        return getTaskInstance().addJob(jobModel, jobTrigger, req.getNamespace());
+    }
+
+    /**
      * 更新任务
      */
+    @SuppressWarnings("DuplicatedCode")
     @Transactional(disabled = true)
     public static JobInfo updateJob(@Validated @RequestBody TaskInfoReq req) {
         final TaskInfoReq.TaskJob job = req.getJob();
@@ -176,8 +230,7 @@ public class TaskInstanceManage {
             jobTrigger = new FixedIntervalTrigger(job.getName(), trigger.getFixedInterval());
         }
         BeanCopyUtils.copyTo(trigger, jobTrigger);
-        getTaskInstance().addOrUpdateJob(req.getJobId(), jobModel, jobTrigger, req.getNamespace());
-        return getTaskInstance().getJobInfo(req.getJobId());
+        return getTaskInstance().addOrUpdateJob(req.getJobId(), jobModel, jobTrigger, req.getNamespace());
     }
 
     /**
@@ -217,5 +270,15 @@ public class TaskInstanceManage {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobLog(req));
+    }
+
+    /**
+     * 获取任务日志对应的触发器日志
+     */
+    @Transactional(disabled = true)
+    public static TaskJobTriggerLog getTaskJobTriggerLog(@RequestParam("jobTriggerLogId") Long jobTriggerLogId) {
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getTaskJobTriggerLog(jobTriggerLogId));
     }
 }
