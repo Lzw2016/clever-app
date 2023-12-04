@@ -31,6 +31,7 @@ import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.SchedulerLogReq;
 import org.clever.task.core.model.request.TaskJobLogReq;
 import org.clever.task.core.model.request.TaskJobReq;
+import org.clever.task.core.model.request.TaskJobTriggerLogReq;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
@@ -954,6 +955,7 @@ public class TaskStore {
         return QueryDslUtils.queryByPage(sqlQuery, query);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public Page<TaskJobLog> queryTaskJobLog(TaskJobLogReq query) {
         SQLQuery<TaskJobLog> sqlQuery = queryDSL.selectFrom(taskJobLog);
         if (StringUtils.isNotBlank(query.getNamespace())) {
@@ -1028,6 +1030,30 @@ public class TaskStore {
         TaskShellJob shellJob = tuple.get(taskShellJob);
         TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
         return new JobInfo(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    public Page<TaskJobTriggerLog> queryTaskJobTriggerLogs(TaskJobTriggerLogReq query) {
+        SQLQuery<TaskJobTriggerLog> sqlQuery = queryDSL.selectFrom(taskJobTriggerLog);
+        if (StringUtils.isNotBlank(query.getNamespace())) {
+            sqlQuery.where(taskJobTriggerLog.namespace.eq(query.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(query.getInstanceName())) {
+            sqlQuery.where(taskJobTriggerLog.instanceName.eq(query.getInstanceName()));
+        }
+        if (query.getJobTriggerId() != null) {
+            sqlQuery.where(taskJobTriggerLog.jobTriggerId.eq(query.getJobTriggerId()));
+        }
+        if (query.getFireTimeStart() != null) {
+            sqlQuery.where(taskJobTriggerLog.fireTime.goe(query.getFireTimeStart()));
+        }
+        if (query.getFireTimeEnd() != null) {
+            sqlQuery.where(taskJobTriggerLog.fireTime.loe(query.getFireTimeEnd()));
+        }
+        if (query.isOrderEmpty()) {
+            query.addOrderField(ColumnMetadata.getName(taskJobTriggerLog.fireTime), QueryBySort.DESC);
+        }
+        return QueryDslUtils.queryByPage(sqlQuery, query);
     }
 
     public TaskJobTriggerLog getTaskJobTriggerLog(Long jobTriggerLogId) {

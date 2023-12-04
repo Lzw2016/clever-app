@@ -8,7 +8,6 @@ import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.function.ThreeConsumer;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
-import org.clever.core.model.request.page.Page;
 import org.clever.core.tuples.TupleOne;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.config.SchedulerConfig;
@@ -20,7 +19,6 @@ import org.clever.task.core.listeners.JobTriggerListener;
 import org.clever.task.core.listeners.SchedulerListener;
 import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.*;
-import org.clever.task.core.model.request.TaskJobReq;
 import org.clever.task.core.support.JobTriggerUtils;
 import org.clever.task.core.support.TaskContext;
 import org.clever.util.Assert;
@@ -605,7 +603,7 @@ public class TaskInstance {
      */
     public JobInfo deleteJob(Long jobId) {
         Assert.notNull(jobId, "参数jobId不能为空");
-        JobInfo res = getJobInfo(jobId);
+        JobInfo res = taskStore.beginReadOnlyTX(status -> taskStore.getJobInfo(jobId));
         Assert.notNull(res, "定时任务不存在");
         TaskJob job = res.getJob();
         Assert.notNull(job, "定时任务不存在");
@@ -731,20 +729,6 @@ public class TaskInstance {
      */
     public List<String> allInstance() {
         return taskStore.beginReadOnlyTX(status -> taskStore.allInstance());
-    }
-
-    /**
-     * 分页查询定时任务列表
-     */
-    public Page<JobInfo> queryJobs(TaskJobReq query) {
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryJobs(query));
-    }
-
-    /**
-     * 查询任务详情
-     */
-    public JobInfo getJobInfo(Long id) {
-        return taskStore.beginReadOnlyTX(status -> taskStore.getJobInfo(id));
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- service

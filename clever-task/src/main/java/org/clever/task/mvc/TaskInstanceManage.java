@@ -16,10 +16,7 @@ import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
-import org.clever.task.core.model.request.SchedulerLogReq;
-import org.clever.task.core.model.request.TaskInfoReq;
-import org.clever.task.core.model.request.TaskJobLogReq;
-import org.clever.task.core.model.request.TaskJobReq;
+import org.clever.task.core.model.request.*;
 import org.clever.validation.annotation.Validated;
 import org.clever.web.support.mvc.annotation.RequestBody;
 import org.clever.web.support.mvc.annotation.RequestParam;
@@ -105,13 +102,13 @@ public class TaskInstanceManage {
     }
 
     /**
-     * 获取调度器日志信息
+     * 查询所有调度器日志信息
      */
     @Transactional(disabled = true)
-    public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq req) {
+    public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq query) {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.querySchedulerLog(req));
+        return taskStore.beginReadOnlyTX(status -> taskStore.querySchedulerLog(query));
     }
 
     /**
@@ -119,7 +116,9 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<JobInfo> queryJobs(TaskJobReq query) {
-        return getTaskInstance().queryJobs(query);
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryJobs(query));
     }
 
     /**
@@ -127,7 +126,9 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static JobInfo getJob(@RequestParam("id") Long id) {
-        return getTaskInstance().getJobInfo(id);
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getJobInfo(id));
     }
 
     /**
@@ -274,13 +275,31 @@ public class TaskInstanceManage {
     }
 
     /**
-     * 获取任务日志信息
+     * 查询所有任务日志信息
      */
     @Transactional(disabled = true)
-    public static Page<TaskJobLog> queryTaskJobLog(TaskJobLogReq req) {
+    public static Page<TaskJobLog> queryTaskJobLog(TaskJobLogReq query) {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobLog(req));
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobLog(query));
+    }
+
+    /**
+     * 查询所有触发器
+     */
+    @Transactional(disabled = true)
+    public static Page<JobInfo> queryTaskJobTriggers() {
+        return null;
+    }
+
+    /**
+     * 查询所有触发器日志
+     */
+    @Transactional(disabled = true)
+    public static Page<TaskJobTriggerLog> queryTaskJobTriggerLogs(TaskJobTriggerLogReq query) {
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobTriggerLogs(query));
     }
 
     /**
