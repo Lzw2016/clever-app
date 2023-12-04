@@ -51,8 +51,12 @@ public class MySQLMetaData extends AbstractMetaData {
         sql.append("select  ");
         sql.append("    schema_name as `schemaName` ");
         sql.append("from information_schema.schemata ");
+        sql.append("where 1=1 ");
         if (!schemasName.isEmpty()) {
-            sql.append("where lower(schema_name) in (").append(createWhereIn(params, schemasName)).append(") ");
+            sql.append("and lower(schema_name) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        if (!ignoreSchemas.isEmpty()) {
+            sql.append("and lower(schema_name) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
         sql.append("order by schema_name ");
         List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);

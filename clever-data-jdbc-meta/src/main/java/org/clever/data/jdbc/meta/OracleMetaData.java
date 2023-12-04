@@ -76,8 +76,12 @@ public class OracleMetaData extends AbstractMetaData {
         sql.append("select ");
         sql.append("    username as \"schemaName\"");
         sql.append("from sys.all_users ");
+        sql.append("where 1=1 ");
         if (!schemasName.isEmpty()) {
-            sql.append("where lower(username) in (").append(createWhereIn(params, schemasName)).append(") ");
+            sql.append("and lower(username) in (").append(createWhereIn(params, schemasName)).append(") ");
+        }
+        if (!ignoreSchemas.isEmpty()) {
+            sql.append("and lower(username) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
         }
         sql.append("order by username ");
         List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
