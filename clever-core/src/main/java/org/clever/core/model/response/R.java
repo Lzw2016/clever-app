@@ -49,6 +49,10 @@ public class R<T> extends BaseResponse {
         return new R<>(false, null, "操作失败");
     }
 
+    public static <T> R<T> create(boolean success, String successMessage, String failMessage) {
+        return new R<>(success, successMessage, failMessage);
+    }
+
     /**
      * 下次请求是否需要验证码
      */

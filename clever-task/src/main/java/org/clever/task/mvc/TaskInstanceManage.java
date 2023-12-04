@@ -11,6 +11,7 @@ import org.clever.core.model.request.page.Page;
 import org.clever.core.model.response.R;
 import org.clever.task.core.TaskInstance;
 import org.clever.task.core.TaskStore;
+import org.clever.task.core.cron.CronExpressionUtil;
 import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
@@ -40,6 +41,14 @@ public class TaskInstanceManage {
             TASK_INSTANCE = AppContextHolder.getBean(TaskInstance.class);
         }
         return TASK_INSTANCE;
+    }
+
+    /**
+     * 验证cron表达式
+     */
+    @Transactional(disabled = true)
+    public static R<?> validateCron(@RequestParam("cron") String cron) {
+        return R.create(CronExpressionUtil.isValidExpression(cron), "cron表达式格式正确", "cron表达式格式错误");
     }
 
     /**
