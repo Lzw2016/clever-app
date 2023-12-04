@@ -59,7 +59,7 @@ public class ShellJobModel extends AbstractJob {
         shellJob.setShellCharset(getShellCharset());
         shellJob.setShellTimeout(getShellTimeout());
         shellJob.setContent(getContent());
-        shellJob.setReadOnly(isReadOnly() ? EnumConstant.FILE_CONTENT_READ_ONLY_0 : EnumConstant.FILE_CONTENT_READ_ONLY_1);
+        shellJob.setReadOnly(isReadOnly() ? EnumConstant.FILE_CONTENT_READ_ONLY_1 : EnumConstant.FILE_CONTENT_READ_ONLY_0);
         return shellJob;
     }
 }

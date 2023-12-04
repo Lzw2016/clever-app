@@ -37,7 +37,7 @@ public class JsJobModel extends AbstractJob {
     public TaskJsJob toJobEntity() {
         TaskJsJob jsJob = new TaskJsJob();
         jsJob.setContent(getContent());
-        jsJob.setReadOnly(isReadOnly() ? EnumConstant.FILE_CONTENT_READ_ONLY_0 : EnumConstant.FILE_CONTENT_READ_ONLY_1);
+        jsJob.setReadOnly(isReadOnly() ? EnumConstant.FILE_CONTENT_READ_ONLY_1 : EnumConstant.FILE_CONTENT_READ_ONLY_0);
         return jsJob;
     }
 }
