@@ -62,6 +62,7 @@ create table sys_lock
 /* ====================================================================================================================
     存储过程 procedure
 ==================================================================================================================== */
+-- MySQL 存储过程不支持嵌套事务!
 -- #使用数据库工具调用mysql存储过程
 -- call next_ids('t01', 1, @p1,@p2);
 -- select @p1, @p2;
@@ -70,53 +71,75 @@ create table sys_lock
 
 -- [存储过程]批量获取自增长序列值
 create procedure next_ids(
-    in  p_sequence_name      varchar(127),  -- 序列名称
-    in  p_step               bigint,        -- 序列步进长度(必须大于0,默认为1)
-    out p_old_value          bigint,        -- 序列自动增长之前的值
-    out p_current_value      bigint         -- 序列自动增长后的值
+    in  seq_name        varchar(127),   -- 序列名称
+    in  size            int,            -- 批量值大小
+    in  step            bigint,         -- 序列步进长度(必须大于0,默认为1)
+    out old_val         bigint,         -- 序列自动增长之前的值
+    out current_val     bigint          -- 序列自动增长后的值
 )
 begin
     -- 数据主键
-    declare row_id bigint default null;
-    -- p_step 默认值为 1
-    if (p_step is null or trim(p_step)='' or p_step<=0 ) then
-        set p_step = 1;
+    declare _row_id     bigint  default null;
+    declare _add_value  int     default null;
+    -- seq_name 不能为空
+    if (seq_name is null or length(trim(seq_name)) <= 0) then
+        signal sqlstate '45000' set message_text = '参数seq_name不能为空', mysql_errno = 1001;
     end if;
+    set seq_name := trim(seq_name);
+    -- size 默认值为 1
+    if (size is null or trim(size) = '' or size <= 0) then
+        set size := 1;
+    end if;
+    -- step 默认值为 1
+    if (step is null or trim(step) = '' or step <= 0) then
+        set step := 1;
+    end if;
+    set _add_value := size * step;
     -- 查询数据主键
     select
-        id, current_value into row_id, p_old_value
+        id, current_value into _row_id, old_val
     from auto_increment_id
-    where sequence_name=p_sequence_name;
-    -- 开启事务
-    start transaction;
-    if (row_id is null or trim(row_id)='' or p_old_value is null) then
+    where sequence_name = seq_name;
+    if (_row_id is null or trim(_row_id) = '' or old_val is null) then
         -- 插入新数据
         insert into auto_increment_id
             (sequence_name, description)
         values
-            (p_sequence_name, '系统自动生成')
-        on duplicate key update update_at=now();
+            (seq_name, '系统自动生成')
+        on duplicate key update update_at = now();
         -- 查询数据主键
         select
-            id, current_value into row_id, p_old_value
+            id, current_value into _row_id, old_val
         from auto_increment_id
-        where sequence_name=p_sequence_name;
+        where sequence_name = seq_name;
     end if;
     -- 更新序列数据(使用Mysql行级锁保证并发性)
-    update auto_increment_id set current_value=current_value+p_step where id=row_id;
+    update auto_increment_id set current_value = current_value + _add_value where id = _row_id;
     -- 查询更新之后的值
-    select current_value into p_current_value from auto_increment_id where id=row_id;
-    set p_old_value = p_current_value - p_step;
-    -- 提交事务
-    commit;
+    select current_value into current_val from auto_increment_id where id = _row_id;
+    set old_val := current_val - _add_value;
 end;
 
 -- [存储过程]获取下一个自增长序列值
-create procedure next_id(
-    in  p_sequence_name      varchar(127),  -- 序列名称
-    out p_current_value      bigint         -- 序列自动增长后的值
+create function next_id(
+    seq_name        varchar(127)   -- 序列名称
 )
+returns bigint
 begin
-    declare old_value       bigint;
-    call next_ids(p_sequence_name, 1, old_value, p_current_value);
+    declare _old_val        bigint  default null;
+    declare _current_val    bigint  default null;
+    call next_ids(seq_name, 1, 1, _old_val, _current_val);
+    return _current_val;
+end;
+
+-- [存储过程]获取当前自增长序列值
+create function current_id(
+    seq_name        varchar(127)   -- 序列名称
+)
+returns bigint
+begin
+    declare _current_val    int default null;
+    set seq_name := trim(seq_name);
+    select current_value into _current_val from auto_increment_id where sequence_name = seq_name;
+    return _current_val;
 end;

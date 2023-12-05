@@ -85,12 +85,14 @@ create unique index sys_lock_lock_name on sys_lock (lock_name);
 /* ====================================================================================================================
     存储过程 procedure
 ==================================================================================================================== */
+-- PostgreSQL 存储过程不支持嵌套事务!
 -- #存储过程授权
 -- alter procedure next_codes(varchar, int4, out varchar[]) owner to db_user;
 
 -- [存储过程]与Java语言相同的DateFormat规则的时间格式化函数
 create or replace function java_date_format(
-    date_time timestamp, pattern varchar
+    date_time   timestamp,  -- 时间值
+    pattern     varchar     -- java时间格式
 )
 returns varchar
 language plpgsql
@@ -149,7 +151,8 @@ $function$
 
 -- [存储过程]批量获取业务code值
 create or replace function next_codes(
-    codename varchar, size int4
+    codename    varchar,    -- 业务编码规则
+    size        int         -- 批量值大小
 )
 returns varchar[]
 language plpgsql
@@ -241,7 +244,7 @@ $function$
 
 -- [存储过程]获取下一个业务code值
 create or replace function next_code(
-    codename varchar
+    codename    varchar -- 业务编码规则
 )
 returns varchar
 language plpgsql
