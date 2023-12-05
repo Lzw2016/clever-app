@@ -62,14 +62,13 @@ create table sys_lock
 /* ====================================================================================================================
     存储过程 procedure
 ==================================================================================================================== */
+-- grant execute on procedure next_id to `db_user`@`%`;
 -- [存储过程]获取自增长序列值
-delimiter $
--- create definer = `dbuser`@`%` procedure next_id
 create procedure next_id(
-    in p_sequence_name      varchar(127),   -- 序列名称
-    in p_step               bigint,         -- 序列步进长度(必须大于0,默认为1)
-    out p_old_value         bigint,         -- 序列自动增长之前的值
-    out p_current_value     bigint          -- 序列自动增长后的值
+    in  p_sequence_name      varchar(127),  -- 序列名称
+    in  p_step               bigint,        -- 序列步进长度(必须大于0,默认为1)
+    out p_old_value          bigint,        -- 序列自动增长之前的值
+    out p_current_value      bigint         -- 序列自动增长后的值
 )
 begin
     -- 数据主键
@@ -87,10 +86,7 @@ begin
     start transaction;
     if (row_id is null or trim(row_id)='' or p_old_value is null) then
         -- 插入新数据
-        insert into auto_increment_id
-            (sequence_name, description)
-        values
-            (p_sequence_name, '系统自动生成')
+        insert into auto_increment_id (sequence_name, description) values (p_sequence_name, '系统自动生成')
         on duplicate key update update_at=now();
         -- 查询数据主键
         select
@@ -105,6 +101,6 @@ begin
     set p_old_value = p_current_value - p_step;
     -- 提交事务
     commit;
-end
-$
+end;
+
 

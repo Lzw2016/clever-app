@@ -1,5 +1,6 @@
 package org.clever.jdbc.core.simple;
 
+import lombok.Getter;
 import org.clever.dao.InvalidDataAccessApiUsageException;
 import org.clever.jdbc.core.*;
 import org.clever.jdbc.core.metadata.CallMetaDataContext;
@@ -27,6 +28,7 @@ public abstract class AbstractJdbcCall {
     /**
      * 用于执行 SQL 的低级类。
      */
+    @Getter
     private final JdbcTemplate jdbcTemplate;
     /**
      * 用于检索和管理数据库元数据的上下文。
@@ -43,10 +45,12 @@ public abstract class AbstractJdbcCall {
     /**
      * 这个操作编译了吗？编译意味着至少检查是否提供了 DataSource 或 JdbcTemplate。
      */
+    @Getter
     private volatile boolean compiled;
     /**
      * 生成的字符串用于调用语句。
      */
+    @Getter
     protected String callString;
     /**
      * 一个委托，使我们能够根据此类声明的参数有效地创建 CallableStatementCreators
@@ -70,13 +74,6 @@ public abstract class AbstractJdbcCall {
     protected AbstractJdbcCall(JdbcTemplate jdbcTemplate) {
         Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
         this.jdbcTemplate = jdbcTemplate;
-    }
-
-    /**
-     * 获取配置的 {@link JdbcTemplate}
-     */
-    public JdbcTemplate getJdbcTemplate() {
-        return this.jdbcTemplate;
     }
 
     /**
@@ -185,13 +182,6 @@ public abstract class AbstractJdbcCall {
     }
 
     /**
-     * 根据参数和元数据获取应使用的调用字符串
-     */
-    public String getCallString() {
-        return this.callString;
-    }
-
-    /**
      * 获取正在使用的 {@link CallableStatementCreatorFactory}
      */
     protected CallableStatementCreatorFactory getCallableStatementFactory() {
@@ -282,15 +272,6 @@ public abstract class AbstractJdbcCall {
      * 这个实现什么都不做。
      */
     protected void onCompileInternal() {
-    }
-
-    /**
-     * 这个操作是“编译”的吗？
-     *
-     * @return 此操作是否已编译并可以使用
-     */
-    public boolean isCompiled() {
-        return this.compiled;
     }
 
     /**

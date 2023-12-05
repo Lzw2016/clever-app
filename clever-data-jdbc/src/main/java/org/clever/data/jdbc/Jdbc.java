@@ -169,7 +169,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = hikariConfig.getPoolName();
         this.dataSource = new HikariDataSource(hikariConfig);
         this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
-                this.dataSource, this.enableSqlWarning, this.sqlWarningBuffer
+            this.dataSource, this.enableSqlWarning, this.sqlWarningBuffer
         ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
@@ -189,7 +189,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSourceName = dataSourceName;
         this.dataSource = dataSource;
         this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
-                this.dataSource, this.enableSqlWarning, this.sqlWarningBuffer
+            this.dataSource, this.enableSqlWarning, this.sqlWarningBuffer
         ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
@@ -207,7 +207,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSource = jdbcTemplate.getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
         this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
-                jdbcTemplate, this.enableSqlWarning, this.sqlWarningBuffer
+            jdbcTemplate, this.enableSqlWarning, this.sqlWarningBuffer
         ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
@@ -225,7 +225,7 @@ public class Jdbc extends AbstractDataSource {
         this.dataSource = namedParameterJdbcTemplate.getJdbcTemplate().getDataSource();
         Assert.notNull(this.dataSource, "DataSource不能为空");
         this.jdbcTemplate = new NamedParameterJdbcTemplate(new JdbcTemplateWrapper(
-                namedParameterJdbcTemplate.getJdbcTemplate(), this.enableSqlWarning, this.sqlWarningBuffer
+            namedParameterJdbcTemplate.getJdbcTemplate(), this.enableSqlWarning, this.sqlWarningBuffer
         ));
         this.jdbcTemplate.getJdbcTemplate().setFetchSize(FETCH_SIZE);
         this.dbType = getDbType();
@@ -2793,11 +2793,11 @@ public class Jdbc extends AbstractDataSource {
                     newConnectionExecute(innerCon -> {
                         SQLQueryFactory tmpDSL = newDSL.apply(innerCon);
                         return tmpDSL.insert(autoIncrementId)
-                                .set(autoIncrementId.id, SnowFlake.SNOW_FLAKE.nextId())
-                                .set(autoIncrementId.sequenceName, idName)
-                                .set(autoIncrementId.description, "系统自动生成")
-                                .set(autoIncrementId.createAt, Expressions.currentTimestamp())
-                                .execute();
+                            .set(autoIncrementId.id, SnowFlake.SNOW_FLAKE.nextId())
+                            .set(autoIncrementId.sequenceName, idName)
+                            .set(autoIncrementId.description, "系统自动生成")
+                            .set(autoIncrementId.createAt, Expressions.currentTimestamp())
+                            .execute();
                     });
                 } catch (DuplicateKeyException e) {
                     // 插入数据失败: 唯一约束错误
@@ -2824,10 +2824,10 @@ public class Jdbc extends AbstractDataSource {
             }
             // 更新序列数据(使用数据库行级锁保证并发性)
             long count = dsl.update(autoIncrementId)
-                    .set(autoIncrementId.currentValue, autoIncrementId.currentValue.add(size))
-                    .set(autoIncrementId.updateAt, Expressions.currentTimestamp())
-                    .where(autoIncrementId.id.eq(rowId))
-                    .execute();
+                .set(autoIncrementId.currentValue, autoIncrementId.currentValue.add(size))
+                .set(autoIncrementId.updateAt, Expressions.currentTimestamp())
+                .where(autoIncrementId.id.eq(rowId))
+                .execute();
             if (count <= 0) {
                 throw new RuntimeException(autoIncrementId.getTableName() + " 表数据不存在(未知的异常)");
             }
@@ -2887,9 +2887,9 @@ public class Jdbc extends AbstractDataSource {
             final SQLQueryFactory dsl = newDSL.apply(connection);
             DateTimeExpression<Date> nowField = Expressions.currentTimestamp().as("now");
             Tuple result = dsl.select(bizCode.id, bizCode.pattern, bizCode.sequence, bizCode.resetPattern, bizCode.resetFlag, nowField)
-                    .from(bizCode)
-                    .where(bizCode.codeName.eq(codeName))
-                    .forUpdate().fetchFirst();
+                .from(bizCode)
+                .where(bizCode.codeName.eq(codeName))
+                .forUpdate().fetchFirst();
             if (result == null) {
                 throw new RuntimeException(bizCode.getTableName() + " 表数据不存在: code_name=" + codeName);
             }
@@ -2915,11 +2915,11 @@ public class Jdbc extends AbstractDataSource {
             newSequence = newSequence + size;
             // 更新数据库值
             dsl.update(bizCode)
-                    .set(bizCode.sequence, newSequence)
-                    .set(bizCode.resetFlag, newResetFlag)
-                    .set(bizCode.updateAt, Expressions.currentTimestamp())
-                    .where(bizCode.id.eq(rowId))
-                    .execute();
+                .set(bizCode.sequence, newSequence)
+                .set(bizCode.resetFlag, newResetFlag)
+                .set(bizCode.updateAt, Expressions.currentTimestamp())
+                .where(bizCode.id.eq(rowId))
+                .execute();
             return TupleThree.creat(pattern, now, newSequence);
         });
         long oldValue = res.getValue3() - size;
@@ -2958,9 +2958,9 @@ public class Jdbc extends AbstractDataSource {
             SQLQueryFactory dsl = new SQLQueryFactory(QueryDSL.getSQLTemplates(dbType), () -> connection);
             DateTimeExpression<Date> nowField = Expressions.currentTimestamp().as("now");
             Tuple result = dsl.select(bizCode.pattern, bizCode.sequence, nowField)
-                    .from(bizCode)
-                    .where(bizCode.codeName.eq(codeName))
-                    .fetchFirst();
+                .from(bizCode)
+                .where(bizCode.codeName.eq(codeName))
+                .fetchFirst();
             String code = null;
             if (result != null) {
                 final String pattern = result.get(bizCode.pattern);
@@ -3017,10 +3017,10 @@ public class Jdbc extends AbstractDataSource {
                 final SQLQueryFactory dsl = new SQLQueryFactory(newConfiguration.get(), () -> connection);
                 // 使用数据库行级锁保证并发性
                 long lock = dsl.update(sysLock)
-                        .set(sysLock.lockCount, sysLock.lockCount.add(1))
-                        .set(sysLock.updateAt, Expressions.currentTimestamp())
-                        .where(sysLock.lockName.eq(lockName))
-                        .execute();
+                    .set(sysLock.lockCount, sysLock.lockCount.add(1))
+                    .set(sysLock.updateAt, Expressions.currentTimestamp())
+                    .where(sysLock.lockName.eq(lockName))
+                    .execute();
                 // 锁数据不存在就创建锁数据
                 if (lock <= 0) {
                     try {
@@ -3028,12 +3028,12 @@ public class Jdbc extends AbstractDataSource {
                         newConnectionExecute(innerCon -> {
                             SQLQueryFactory tmpDSL = new SQLQueryFactory(newConfiguration.get(), () -> innerCon);
                             return tmpDSL.insert(sysLock)
-                                    .set(sysLock.id, SnowFlake.SNOW_FLAKE.nextId())
-                                    .set(sysLock.lockName, lockName)
-                                    .set(sysLock.lockCount, 0L)
-                                    .set(sysLock.description, "系统自动生成")
-                                    .set(sysLock.createAt, Expressions.currentTimestamp())
-                                    .execute();
+                                .set(sysLock.id, SnowFlake.SNOW_FLAKE.nextId())
+                                .set(sysLock.lockName, lockName)
+                                .set(sysLock.lockCount, 0L)
+                                .set(sysLock.description, "系统自动生成")
+                                .set(sysLock.createAt, Expressions.currentTimestamp())
+                                .execute();
                         });
                     } catch (DuplicateKeyException e) {
                         // 插入数据失败: 唯一约束错误
@@ -3060,10 +3060,10 @@ public class Jdbc extends AbstractDataSource {
                     }
                     // 使用数据库行级锁保证并发性
                     lock = dsl.update(sysLock)
-                            .set(sysLock.lockCount, sysLock.lockCount.add(1))
-                            .set(sysLock.updateAt, Expressions.currentTimestamp())
-                            .where(sysLock.lockName.eq(lockName))
-                            .execute();
+                        .set(sysLock.lockCount, sysLock.lockCount.add(1))
+                        .set(sysLock.updateAt, Expressions.currentTimestamp())
+                        .where(sysLock.lockName.eq(lockName))
+                        .execute();
                     if (lock <= 0) {
                         throw new RuntimeException(sysLock.getTableName() + " 表数据不存在(未知的异常)");
                     }
@@ -3393,25 +3393,28 @@ public class Jdbc extends AbstractDataSource {
      */
     private SimpleJdbcCall getJdbcCall(String procedureName) {
         return PROCEDURE_CACHE.computeIfAbsent(
-                String.format("%s@%s", dataSourceName, procedureName),
-                key -> {
-                    SimpleJdbcCall procedure = new ProcedureJdbcCall(this)
-                            .withProcedureName(procedureName)
-                            .withNamedBinding();
-                    // 默认调用当前连接的数据库的存储过程
-                    String schemaName = null;
-                    // noinspection SwitchStatementWithTooFewBranches
-                    switch (getDbType()) {
-                        case POSTGRE_SQL:
-                            schemaName = queryString("select current_schema()");
-                            break;
-                    }
-                    if (StringUtils.isNotBlank(schemaName)) {
-                        procedure.setSchemaName(schemaName);
-                    }
-                    procedure.compile();
-                    return procedure;
+            String.format("%s@%s", dataSourceName, procedureName),
+            key -> {
+                SimpleJdbcCall procedure = new ProcedureJdbcCall(this)
+                    .withProcedureName(procedureName)
+                    .withNamedBinding();
+                // 默认调用当前连接的数据库的存储过程
+                String schemaName = null;
+                switch (getDbType()) {
+                    case POSTGRE_SQL:
+                        schemaName = queryString("select current_schema()");
+                        break;
+                    case MYSQL:
+                        // mysql 调用存储过程不支持 withNamedBinding 语法
+                        procedure.setNamedBinding(false);
+                        break;
                 }
+                if (StringUtils.isNotBlank(schemaName)) {
+                    procedure.setSchemaName(schemaName);
+                }
+                procedure.compile();
+                return procedure;
+            }
         );
     }
 
