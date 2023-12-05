@@ -72,7 +72,7 @@ create table sys_lock
 -- [存储过程]批量获取自增长序列值
 create procedure next_ids(
     in  seq_name        varchar(127),   -- 序列名称
-    in  size            int,            -- 批量值大小
+    in  size            int,            -- 批量值大小(必须大于0,默认为1)
     in  step            bigint,         -- 序列步进长度(必须大于0,默认为1)
     out old_val         bigint,         -- 序列自动增长之前的值
     out current_val     bigint          -- 序列自动增长后的值

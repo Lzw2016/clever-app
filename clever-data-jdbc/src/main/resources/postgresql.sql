@@ -89,6 +89,84 @@ create unique index sys_lock_lock_name on sys_lock (lock_name);
 -- #存储过程授权
 -- alter procedure next_codes(varchar, int4, out varchar[]) owner to db_user;
 
+-- [存储过程]批量获取自增长序列值
+create or replace function next_ids(
+    seq_name        varchar(127),   -- 序列名称
+    size            int,            -- 批量值大小(必须大于0,默认为1)
+    step            bigint          -- 序列步进长度(必须大于0,默认为1)
+)
+returns bigint[]
+language plpgsql
+as
+$function$
+DECLARE
+    _row_id         bigint;     -- auto_increment_id 行数据id
+    _add_value      bigint;     -- auto_increment_id 增长值
+    _old_val        bigint;     -- 序列自动增长之前的值
+    _current_val    bigint;     -- 序列自动增长后的值
+    _res            bigint[];   -- 返回序列集合
+BEGIN
+    -- seq_name 不能为空
+    if (seq_name is null or length(trim(seq_name)) <= 0) then
+        raise exception using message = -20000, hint = ('参数seq_name不能为空');
+    end if;
+    seq_name := trim(seq_name);
+    -- size 默认值为 1
+    if (size is null or size <= 0) then
+        size := 1;
+    end if;
+    -- step 默认值为 1
+    if (step is null or step <= 0) then
+        step := 1;
+    end if;
+    _add_value := size * step;
+    -- 查询数据主键
+    select
+        id, current_value into _row_id, _old_val
+    from auto_increment_id
+    where sequence_name = seq_name;
+    if (_row_id is null or _old_val is null) then
+        -- 插入新数据
+        insert into auto_increment_id
+            (sequence_name, description)
+        values
+            (seq_name, '系统自动生成')
+        on conflict (sequence_name) do update set update_at = now();
+        -- 查询数据主键
+        select
+            id, current_value into _row_id, _old_val
+        from auto_increment_id
+        where sequence_name = seq_name;
+    end if;
+    -- 更新序列数据(使用Mysql行级锁保证并发性)
+    update auto_increment_id set current_value = current_value + _add_value where id = _row_id;
+    -- 查询更新之后的值
+    select current_value into _current_val from auto_increment_id where id = _row_id;
+    _old_val := _current_val - _add_value;
+    -- 生成返回值
+    _res := array[size];
+    for i in 1..size loop
+        _res[i] := _old_val + i * step;
+    end loop;
+    return _res;
+END;
+$function$
+;
+
+-- [存储过程]获取下一个自增长序列值
+create or replace function next_id(
+    seq_name        varchar(127)    -- 序列名称
+)
+returns bigint
+language plpgsql
+as
+$function$
+BEGIN
+    return (next_ids(seq_name, 1, 1)::bigint[])[1];
+END;
+$function$
+;
+
 -- [存储过程]与Java语言相同的DateFormat规则的时间格式化函数
 create or replace function java_date_format(
     date_time   timestamp,  -- 时间值
@@ -197,7 +275,7 @@ BEGIN
     update biz_code set sequence=_new_sequence, reset_flag=_new_reset_flag, update_at=now() where id = _row.id;
     -- 处理 pattern
     _new_pattern := _row.pattern;
-    _res := array[size]; -- ::varchar[];
+    _res := array[size];
     for _matches in
         select regexp_matches(_row.pattern, '\$\{.*?}', 'g')
         loop
