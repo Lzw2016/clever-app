@@ -148,7 +148,7 @@ $function$
 ;
 
 -- [存储过程]批量获取业务code值
-create or replace function next_code(
+create or replace function next_codes(
     codename varchar, size int4
 )
 returns varchar[]
@@ -248,7 +248,7 @@ language plpgsql
 as
 $function$
 BEGIN
-    return (next_code(codename, 1)::varchar[])[1];
+    return (next_codes(codename, 1)::varchar[])[1];
 END;
 $function$
 ;
