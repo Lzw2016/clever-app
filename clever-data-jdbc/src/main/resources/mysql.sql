@@ -62,9 +62,14 @@ create table sys_lock
 /* ====================================================================================================================
     存储过程 procedure
 ==================================================================================================================== */
--- grant execute on procedure next_id to `db_user`@`%`;
--- [存储过程]获取自增长序列值
-create procedure next_id(
+# 使用数据库工具调用mysql存储过程
+-- call next_ids('t01', 1, @p1,@p2);
+-- select @p1, @p2;
+# 存储过程授权
+-- grant execute on procedure next_ids to `db_user`@`%`;
+
+-- [存储过程]批量获取自增长序列值
+create procedure next_ids(
     in  p_sequence_name      varchar(127),  -- 序列名称
     in  p_step               bigint,        -- 序列步进长度(必须大于0,默认为1)
     out p_old_value          bigint,        -- 序列自动增长之前的值
@@ -86,7 +91,10 @@ begin
     start transaction;
     if (row_id is null or trim(row_id)='' or p_old_value is null) then
         -- 插入新数据
-        insert into auto_increment_id (sequence_name, description) values (p_sequence_name, '系统自动生成')
+        insert into auto_increment_id
+            (sequence_name, description)
+        values
+            (p_sequence_name, '系统自动生成')
         on duplicate key update update_at=now();
         -- 查询数据主键
         select
@@ -103,4 +111,12 @@ begin
     commit;
 end;
 
-
+-- [存储过程]获取下一个自增长序列值
+create procedure next_id(
+    in  p_sequence_name      varchar(127),  -- 序列名称
+    out p_current_value      bigint         -- 序列自动增长后的值
+)
+begin
+    declare old_value       bigint;
+    call next_ids(p_sequence_name, 1, old_value, p_current_value);
+end;
