@@ -85,6 +85,9 @@ create unique index sys_lock_lock_name on sys_lock (lock_name);
 /* ====================================================================================================================
     存储过程 procedure
 ==================================================================================================================== */
+-- #存储过程授权
+-- alter procedure next_codes(varchar, int4, out varchar[]) owner to db_user;
+
 -- [存储过程]与Java语言相同的DateFormat规则的时间格式化函数
 create or replace function java_date_format(
     date_time timestamp, pattern varchar
