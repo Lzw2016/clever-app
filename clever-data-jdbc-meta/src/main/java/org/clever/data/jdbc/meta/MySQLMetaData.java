@@ -758,6 +758,12 @@ public class MySQLMetaData extends AbstractMetaData {
         if (StringUtils.containsAny(objName, special)) {
             return String.format("`%s`", objName);
         }
+        String[] keywords = new String[]{
+            "primary","unique",
+        };
+        if (StringUtils.equalsAnyIgnoreCase(objName, keywords)) {
+            return String.format("`%s`", objName);
+        }
         return objName;
     }
 

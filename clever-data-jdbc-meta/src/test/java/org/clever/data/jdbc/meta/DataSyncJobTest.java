@@ -81,13 +81,14 @@ public class DataSyncJobTest {
         Jdbc mysql = BaseTest.newMysql();
         Jdbc oracle = BaseTest.newOracle();
         String ddl = DataSyncJob.structSync(
-            oracle,
             mysql,
-            "WMS8DEV",
+            oracle,
             "test",
+            "WMSYS",
             false,
-            "ASN_IN",
-            "ASN_IN_DETAILS"
+            "auto_increment_id",
+            "biz_code",
+            "sys_lock"
         );
         log.info("--> \n{}", ddl);
         mysql.close();

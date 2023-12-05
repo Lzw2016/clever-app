@@ -126,8 +126,10 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         schemasName = schemasName.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
         tablesName = tablesName.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
         // 过滤 ignoreSchemas ignoreTables
-        final Set<String> ignoreSchemas = getIgnoreSchemas();
-        final Set<String> ignoreTables = getIgnoreTables();
+        final Set<String> ignoreSchemas = new HashSet<>(getIgnoreSchemas());
+        final Set<String> ignoreTables = new HashSet<>(getIgnoreTables());
+        ignoreSchemas.removeAll(schemasName);
+        ignoreTables.removeAll(tablesName);
         // 过滤 ignoreTablesPrefix ignoreTablesSuffix
         final Set<String> ignoreTablesPrefix = getIgnoreTablesPrefix();
         final Set<String> ignoreTablesSuffix = getIgnoreTablesSuffix();

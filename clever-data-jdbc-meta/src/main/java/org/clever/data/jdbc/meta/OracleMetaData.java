@@ -712,6 +712,12 @@ public class OracleMetaData extends AbstractMetaData {
         if (StringUtils.containsAny(objName, special)) {
             return "\"" + objName + "\"";
         }
+        String[] keywords = new String[]{
+            "primary","unique",
+        };
+        if (StringUtils.equalsAnyIgnoreCase(objName, keywords)) {
+            return "\"" + objName + "\"";
+        }
         return objName;
     }
 
