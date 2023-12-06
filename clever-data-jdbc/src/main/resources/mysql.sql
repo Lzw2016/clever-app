@@ -138,7 +138,7 @@ create function current_id(
 )
 returns bigint
 begin
-    declare _current_val    int default null;
+    declare _current_val    bigint  default null;
     set seq_name := trim(seq_name);
     select current_value into _current_val from auto_increment_id where sequence_name = seq_name;
     return _current_val;

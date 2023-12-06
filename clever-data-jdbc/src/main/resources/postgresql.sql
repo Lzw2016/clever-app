@@ -167,6 +167,24 @@ END;
 $function$
 ;
 
+-- [存储过程]获取当前自增长序列值
+create or replace function current_id(
+    seq_name        varchar(127)   -- 序列名称
+)
+returns bigint
+language plpgsql
+as
+$function$
+DECLARE
+    _current_val    bigint;
+BEGIN
+    seq_name := trim(seq_name);
+    select current_value into _current_val from auto_increment_id where sequence_name = seq_name;
+    return _current_val;
+END;
+$function$
+;
+
 -- [存储过程]与Java语言相同的DateFormat规则的时间格式化函数
 create or replace function java_date_format(
     date_time   timestamp,  -- 时间值
