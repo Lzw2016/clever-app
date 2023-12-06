@@ -143,3 +143,168 @@ begin
     select current_value into _current_val from auto_increment_id where sequence_name = seq_name;
     return _current_val;
 end;
+
+-- [存储过程]与Java语言相同的DateFormat规则的时间格式化函数
+create function java_date_format(
+    date_time   datetime(3),    -- 时间值
+    pattern     text            -- java时间格式
+)
+returns text
+begin
+    declare _pg_pattern     text    default pattern;
+    -- set @debug_msg = null;
+    -- 参数验证
+    if(pattern is null or length(trim(pattern))<=0) then
+        return '';
+    end if;
+    if(date_time is null) then
+        return '';
+    end if;
+    /*
+    DateFormat 规则
+    ----------------------------------------
+    MySQL       Java    描述
+    ----------------------------------------
+    %j          D       年份中的天数
+    %Y          yyyy    4位年份
+    %y          yy      2位年份
+    %m          MM      月份
+    %d          dd      月份中的天数
+    %H          HH      24小时数
+    %h          hh      12小时数
+    %i          mm      分钟数
+    %s          ss      秒数
+    %f(μs)      SSS     毫秒数
+    */
+    if (locate('D', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'D', '%j');
+    end if;
+    if (locate('yyyy', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'yyyy', '%Y');
+    end if;
+    if (locate('yy', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'yy', '%y');
+    end if;
+    if (locate('MM', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'MM', '%m');
+    end if;
+    if (locate('dd', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'dd', '%d');
+    end if;
+    if (locate('HH', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'HH', '%H');
+    end if;
+    if (locate('hh', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'hh', '%h');
+    end if;
+    if (locate('mm', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'mm', '%i');
+    end if;
+    if (locate('ss', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'ss', '%s');
+    end if;
+    if (locate('SSS', _pg_pattern) > 0) then
+        set _pg_pattern := replace(_pg_pattern, 'SSS', substr(date_format(date_time, '%f'), 1, 3));
+        -- set @debug_msg := date_time;
+    end if;
+    return date_format(date_time, _pg_pattern);
+end;
+
+-- [存储过程]获取下一个业务code值
+create function next_code(
+    codename        varchar(127)   -- 业务编码规则
+)
+returns text
+begin
+    declare _size               int         default 1;
+    declare _id                 bigint      default null;
+    declare _pattern            text        default null;
+    declare _sequence           bigint      default null;
+    declare _reset_pattern      text        default null;
+    declare _reset_flag         text        default null;
+    declare _now                datetime(3) default null;
+    declare _new_reset_flag     text        default null;
+    declare _new_sequence       bigint      default null;
+    declare _new_pattern        text        default null;
+    declare _match_idx_1        int         default null;
+    declare _match_idx_2        int         default null;
+    declare _match              text        default null;
+    declare _match_pattern      text        default null;
+    declare _match_value        text        default null;
+    declare _seq_digit_str      text        default null;
+    declare _seq_digit          int4        default null;
+    declare _seq_placeholder    text        default '@@@_seq_@@@';
+    declare _res_seq            text        default null;
+    -- set @debug_msg = null;
+    if (codename is null or length(trim(codename)) <= 0) then
+        signal sqlstate '45000' set message_text = '参数codename不能为空', mysql_errno = 1001;
+    end if;
+    select
+        id, pattern, sequence, reset_pattern, reset_flag, now(3)
+    into
+        _id, _pattern, _sequence, _reset_pattern, _reset_flag, _now
+    from biz_code where code_name = codename for update;
+    if (_id is null) then
+        set codename := concat('biz_code 表数据 code_name=[', codename, ']不存在');
+        signal sqlstate '45000' set message_text = codename, mysql_errno = 1001;
+    end if;
+    -- 计算 reset_flag
+    set _new_reset_flag := _reset_flag;
+    set _new_sequence := _sequence;
+    if (_reset_pattern is not null and length(trim(_reset_pattern)) > 0) then
+        set _new_reset_flag := java_date_format(_now, _reset_pattern);
+    end if;
+    -- 判断是否需要重置 sequence 计数
+    if ((_new_reset_flag is null and _reset_flag is not null) or (_new_reset_flag is not null and _reset_flag is null) or _new_reset_flag != _reset_flag) then
+        set _new_sequence := 0;
+    end if;
+    set _new_sequence := _new_sequence + _size;
+    -- 更新数据库值
+    update biz_code set sequence=_new_sequence, reset_flag=_new_reset_flag, update_at=now(3) where id = _id;
+    -- 处理 pattern | MySQL8.0+才引入 regexp_substr、regexp_instr、regexp_like、regexp_replace 四个函数
+    set _new_pattern := _pattern;
+    set _match_idx_1 := locate('${', _new_pattern);
+    set _match_idx_2 := locate('}', _new_pattern);
+    while(_match_idx_1 > 0 and _match_idx_2 > 0) do
+        set _match := substr(_new_pattern, _match_idx_1, _match_idx_2 - _match_idx_1 + 1);
+        set _match_pattern := substr(_new_pattern, _match_idx_1 + 2, _match_idx_2 - (_match_idx_1 + 2));
+        if (_match_pattern like 'seq%') then
+            set _seq_digit_str := substr(_match_pattern, 4);
+            if (_seq_digit_str is not null and length(trim(_seq_digit_str)) > 0) then
+                set _seq_digit := convert(_seq_digit_str, signed);
+            end if;
+            set _new_pattern := replace(_new_pattern, _match, _seq_placeholder);
+        elseif (_match_pattern like 'id%') then
+            set _seq_digit_str := substr(_match_pattern, 3);
+            if (_seq_digit_str is not null and length(trim(_seq_digit_str)) > 0) then
+                set _seq_digit := convert(_seq_digit_str, signed);
+            end if;
+            set _new_pattern := replace(_new_pattern, _match, _seq_placeholder);
+        else
+            set _match_value := java_date_format(_now, _match_pattern);
+            set _new_pattern := replace(_new_pattern, _match, _match_value);
+        end if;
+        set _match_idx_1 := locate('${', _new_pattern);
+        set _match_idx_2 := locate('}', _new_pattern);
+    end while;
+    -- 生成返回值
+    -- declare _idx                int         default 0;
+    -- set _idx := 0;
+    -- while _idx <= _size do
+    --     set _idx := _idx + 1;
+    -- end while;
+    set _new_sequence := _new_sequence - _size;
+    if(_seq_digit_str is not null) then
+        set _res_seq := convert(_new_sequence + 1, char);
+        if(_seq_digit is not null) then
+            if (length(_res_seq) > _seq_digit) then
+                set _res_seq := substr(_res_seq, length(_res_seq) + 1 - _seq_digit);
+            else
+                set _res_seq := lpad(_res_seq, _seq_digit, '0');
+            end if;
+        end if;
+        return replace(_new_pattern, _seq_placeholder, _res_seq);
+    else
+        return _new_pattern;
+    end if;
+end;

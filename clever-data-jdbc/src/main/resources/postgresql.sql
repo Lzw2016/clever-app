@@ -321,12 +321,14 @@ BEGIN
     -- 生成返回值
     _new_sequence := _new_sequence - size;
     for i in 1..size loop
-        if(_seq_digit is not null) then
+        if(_seq_digit_str is not null) then
             _res_seq := (_new_sequence + i)::varchar;
-            if (length(_res_seq) > _seq_digit) then
-                _res_seq := substring(_res_seq, length(_res_seq) + 1 - _seq_digit);
-            else
-                _res_seq := lpad(_res_seq, _seq_digit, '0');
+            if(_seq_digit is not null) then
+                if (length(_res_seq) > _seq_digit) then
+                    _res_seq := substring(_res_seq, length(_res_seq) + 1 - _seq_digit);
+                else
+                    _res_seq := lpad(_res_seq, _seq_digit, '0');
+                end if;
             end if;
             _res[i] := replace(_new_pattern, _seq_placeholder, _res_seq);
         else
