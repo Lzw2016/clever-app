@@ -308,3 +308,29 @@ begin
         return _new_pattern;
     end if;
 end;
+
+-- [存储过程]获取当前自增长序列值
+create function lock_it(
+    name    text    -- 序列名称
+)
+returns text
+begin
+    declare _lock_name  text    default null;
+    -- 参数校验
+    if (name is null or length(trim(name)) <= 0) then
+        signal sqlstate '45000' set message_text = '参数name不能为空', mysql_errno = 1001;
+    end if;
+    set name := trim(name);
+    -- 查询lock数据
+    select lock_name into _lock_name from sys_lock where lock_name = name;
+    if (_lock_name is null) then
+        insert into sys_lock
+            (lock_name, description)
+        values
+            (name, '系统自动生成')
+        on duplicate key update update_at = now(3);
+    end if;
+    -- 利用数据库行级锁实现全局锁
+    update sys_lock set lock_count=lock_count+1, update_at=now() where lock_name = name;
+    return name;
+end;

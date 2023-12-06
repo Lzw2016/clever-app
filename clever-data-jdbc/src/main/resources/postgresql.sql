@@ -355,7 +355,7 @@ $function$
 ;
 
 -- [存储过程]获取全局锁
-create or replace function lock(
+create or replace function lock_it(
     name    varchar -- 锁名称
 )
 returns varchar
@@ -367,10 +367,10 @@ DECLARE
 BEGIN
     -- 参数校验
     if (name is null or length(trim(name)) <= 0) then
-        raise exception using message = -20000, hint = '参数lock_name不能为空';
+        raise exception using message = -20000, hint = '参数name不能为空';
     end if;
     name := trim(name);
-    -- 尝试获取 lock_name 行级锁
+    -- 查询lock数据
     select lock_name into _lock_name from sys_lock where lock_name = name;
     if (_lock_name is null) then
         insert into sys_lock
