@@ -353,3 +353,35 @@ BEGIN
 END;
 $function$
 ;
+
+-- [存储过程]获取全局锁
+create or replace function lock(
+    name    varchar -- 锁名称
+)
+returns varchar
+language plpgsql
+as
+$function$
+DECLARE
+    _lock_name      varchar;
+BEGIN
+    -- 参数校验
+    if (name is null or length(trim(name)) <= 0) then
+        raise exception using message = -20000, hint = '参数lock_name不能为空';
+    end if;
+    name := trim(name);
+    -- 尝试获取 lock_name 行级锁
+    select lock_name into _lock_name from sys_lock where lock_name = name;
+    if (_lock_name is null) then
+        insert into sys_lock
+            (lock_name, description)
+        values
+            (name, '系统自动生成')
+        on conflict (lock_name) do update set update_at = now();
+    end if;
+    -- 利用数据库行级锁实现全局锁
+    update sys_lock set lock_count=lock_count+1, update_at=now() where lock_name = name;
+    return name;
+END;
+$function$
+;
