@@ -18,6 +18,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.RenameStrategy;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.function.ZeroConsumer;
 import org.clever.core.id.BusinessCodeUtils;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.BeanCopyUtils;
@@ -2976,7 +2977,7 @@ public class Jdbc extends AbstractDataSource {
      * 借助数据库行级锁实现的分布式排他锁 <br/>
      * <b>此功能需要数据库表支持</b>
      * <pre>{@code
-     *   lock("lockName", waitSeconds, locked -> {
+     *   tryLock("lockName", waitSeconds, locked -> {
      *      if(locked) {
      *          // 同步业务逻辑处理...
      *      }
@@ -3085,7 +3086,7 @@ public class Jdbc extends AbstractDataSource {
      * 借助数据库行级锁实现的分布式排他锁 <br/>
      * <b>此功能需要数据库表支持</b>
      * <pre>{@code
-     *   lock("lockName", waitSeconds, locked -> {
+     *   tryLock("lockName", waitSeconds, locked -> {
      *      if(locked) {
      *          // 同步业务逻辑处理...
      *      }
@@ -3137,11 +3138,78 @@ public class Jdbc extends AbstractDataSource {
      * @param lockName  锁名称
      * @param syncBlock 同步代码块(可保证分布式串行执行)
      */
-    public void lock(String lockName, Runnable syncBlock) {
+    public void lock(String lockName, ZeroConsumer syncBlock) {
         lock(lockName, () -> {
-            syncBlock.run();
+            syncBlock.call();
             return null;
         });
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   nativeTryLock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *      return result;
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public <T> T nativeTryLock(String lockName, int waitSeconds, Function<T, Boolean> syncBlock) {
+        // TODO 利用数据库原生的锁支持实现 nativeLock 相关功能
+        return null;
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   nativeTryLock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *      return result;
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public void nativeTryLock(String lockName, int waitSeconds, Consumer<Boolean> syncBlock) {
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块(可保证分布式串行执行)
+     */
+    public <T> T nativeLock(String lockName, Supplier<T> syncBlock) {
+        return null;
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块(可保证分布式串行执行)
+     */
+    public void nativeLock(String lockName, ZeroConsumer syncBlock) {
     }
 
     // --------------------------------------------------------------------------------------------
@@ -3699,7 +3767,7 @@ public class Jdbc extends AbstractDataSource {
         public InsertResult execute(JdbcContext context) {
             final Map<String, Object> paramMap = context.getParamMap();
             SqlParameterSource sqlParameterSource;
-            if (paramMap != null && paramMap.size() > 0) {
+            if (paramMap != null && !paramMap.isEmpty()) {
                 sqlParameterSource = new MapSqlParameterSource(paramMap);
             } else {
                 sqlParameterSource = new EmptySqlParameterSource();

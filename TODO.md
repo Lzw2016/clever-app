@@ -597,6 +597,7 @@ Oracle(锁名称为字符串，支持超时):
 ```
 - [OK] 需要支持 `#{varName,javaType=int|long|decimal|char|string|date|bool}` 语法
 - [OK] join函数支持 `join(java_arr)` 和 `join(java_arr, javaType)` 两种调用形式
+- [  ] 利用数据库原生的锁支持实现 nativeLock 相关功能
 
 ### clever-data-jdbc-meta
 ```

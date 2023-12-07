@@ -62,10 +62,6 @@ public class SQLCoreListener extends SQLBaseListener {
     }
 
     @Override
-    public void executed(SQLListenerContext context) {
-    }
-
-    @Override
     public void end(SQLListenerContext context) {
         try {
             listeners.afterExec(dbType, jdbcTemplate, context.getException());

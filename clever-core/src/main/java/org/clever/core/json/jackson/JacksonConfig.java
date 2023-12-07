@@ -10,7 +10,7 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.beans.BeanUtils;
 import org.clever.beans.FatalBeanException;
-import org.clever.core.tuples.TupleThree;
+import org.clever.core.function.ThreeConsumer;
 import org.clever.util.Assert;
 import org.clever.util.ClassUtils;
 import org.clever.util.ReflectionUtils;
@@ -21,7 +21,6 @@ import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.function.Consumer;
 
 /**
  * Jackson 序列化反序列化配置
@@ -123,10 +122,7 @@ public class JacksonConfig {
         if (jackson.getVisibility() != null) {
             jackson.getVisibility().forEach(mapper::setVisibility);
         }
-        Consumer<TupleThree<ObjectMapper, Object, Boolean>> configureFeature = tuple -> {
-            ObjectMapper objectMapper = tuple.getValue1();
-            Object feature = tuple.getValue2();
-            Boolean enabled = tuple.getValue3();
+        ThreeConsumer<ObjectMapper, Object, Boolean> configureFeature = (objectMapper, feature, enabled) -> {
             if (feature instanceof JsonParser.Feature) {
                 objectMapper.configure((JsonParser.Feature) feature, enabled);
             } else if (feature instanceof JsonGenerator.Feature) {
@@ -144,23 +140,23 @@ public class JacksonConfig {
         };
         // serialization
         if (jackson.getSerialization() != null) {
-            jackson.getSerialization().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+            jackson.getSerialization().forEach((feature, enabled) -> configureFeature.call(mapper, feature, enabled));
         }
         // deserialization
         if (jackson.getDeserialization() != null) {
-            jackson.getDeserialization().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+            jackson.getDeserialization().forEach((feature, enabled) -> configureFeature.call(mapper, feature, enabled));
         }
         // mapper
         if (jackson.getMapper() != null) {
-            jackson.getMapper().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+            jackson.getMapper().forEach((feature, enabled) -> configureFeature.call(mapper, feature, enabled));
         }
         // parser
         if (jackson.getParser() != null) {
-            jackson.getParser().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+            jackson.getParser().forEach((feature, enabled) -> configureFeature.call(mapper, feature, enabled));
         }
         // generator
         if (jackson.getGenerator() != null) {
-            jackson.getGenerator().forEach((feature, enabled) -> configureFeature.accept(TupleThree.creat(mapper, feature, enabled)));
+            jackson.getGenerator().forEach((feature, enabled) -> configureFeature.call(mapper, feature, enabled));
         }
     }
 }

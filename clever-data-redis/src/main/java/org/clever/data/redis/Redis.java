@@ -6,9 +6,9 @@ import io.lettuce.core.resource.DefaultClientResources;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
+import org.clever.core.function.ZeroConsumer;
 import org.clever.core.io.ClassPathResource;
 import org.clever.core.mapper.JacksonMapper;
-import org.clever.core.tuples.TupleTwo;
 import org.clever.data.AbstractDataSource;
 import org.clever.data.geo.Distance;
 import org.clever.data.geo.Point;
@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class Redis extends AbstractDataSource {
 
     static {
         RATE_LIMIT_SCRIPT.setScriptSource(new ResourceScriptSource(
-                new ClassPathResource("scripts/request_rate_limiter.lua")
+            new ClassPathResource("scripts/request_rate_limiter.lua")
         ));
         RATE_LIMIT_SCRIPT.setResultType(List.class);
     }
@@ -121,7 +122,7 @@ public class Redis extends AbstractDataSource {
         this.clientResources = clientResources;
         this.jacksonMapper = new JacksonMapper(objectMapper);
         RedisTemplate<String, String> redisTemplate = RedisTemplateFactory.createRedisTemplate(
-                properties, clientResources, redisCustomizers, objectMapper
+            properties, clientResources, redisCustomizers, objectMapper
         );
         this.connectionFactory = redisTemplate.getRequiredConnectionFactory();
         this.redisTemplate = redisTemplate;
@@ -208,12 +209,12 @@ public class Redis extends AbstractDataSource {
                  LettuceClientConfigurationBuilderCustomizer redisCustomizer,
                  RedissonClientConfigurationCustomizer redissonCustomizer) {
         this(
-                redisName,
-                properties,
-                DefaultClientResources.create(),
-                JacksonMapper.getInstance().getMapper(),
-                Collections.singletonList(redisCustomizer),
-                Collections.singletonList(redissonCustomizer)
+            redisName,
+            properties,
+            DefaultClientResources.create(),
+            JacksonMapper.getInstance().getMapper(),
+            Collections.singletonList(redisCustomizer),
+            Collections.singletonList(redissonCustomizer)
         );
     }
 
@@ -2482,98 +2483,243 @@ public class Redis extends AbstractDataSource {
     // --------------------------------------------------------------------------------------------
 
     /**
-     * 使用基于Redis实现的可重入锁，保证 {@code callback} 回调逻辑串行执行
+     * 使用基于Redis实现的可重入锁，保证 {@code syncBlock} 回调逻辑串行执行
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
      *
-     * @param lockName 锁名称
-     * @param callback 保证串行执行的回调函数
+     * @param lockName  锁名称
+     * @param syncBlock 保证串行执行的回调函数
      */
-    public <T> T lock(String lockName, Supplier<T> callback) {
+    public <T> T lock(String lockName, Supplier<T> syncBlock) {
         Assert.hasText(lockName, "参数 lockName 不能为空");
-        Assert.notNull(callback, "参数 callback 不能为null");
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为null");
         RLock lock = redisson.getFairLock(lockName);
         try {
             lock.lock();
-            return callback.get();
+            return syncBlock.get();
         } finally {
             lock.unlock();
         }
     }
 
     /**
-     * 尝试获取锁，如果锁获取失败则不执行 {@code callback} <br />
-     * 使用基于Redis实现的可重入锁，保证 {@code callback} 回调逻辑串行执行
+     * 使用基于Redis实现的可重入锁，保证 {@code syncBlock} 回调逻辑串行执行
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
      *
-     * @param lockName 锁名称
-     * @param callback 保证串行执行的回调函数
-     * @return 二元组对象 {@code TupleTwo<是否获取到Redis锁, callback函数的返回值>}
+     * @param lockName  锁名称
+     * @param syncBlock 保证串行执行的回调函数
      */
-    public <T> TupleTwo<Boolean, T> tryLock(String lockName, Supplier<T> callback) {
+    public void lock(String lockName, ZeroConsumer syncBlock) {
+        lock(lockName, () -> {
+            syncBlock.call();
+            return null;
+        });
+    }
+
+    /**
+     * 尝试获取锁，如果锁获取失败则不执行 {@code syncBlock} <br />
+     * 使用基于Redis实现的可重入锁，保证 {@code syncBlock} 回调逻辑串行执行
+     * <pre>{@code
+     *   tryLock("lockName", locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 保证串行执行的回调函数
+     */
+    public <T> T tryLock(String lockName, Function<Boolean, T> syncBlock) {
         Assert.hasText(lockName, "参数 lockName 不能为空");
-        Assert.notNull(callback, "参数 callback 不能为null");
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为null");
         RLock lock = redisson.getFairLock(lockName);
-        boolean flag = false;
+        boolean locked = false;
         try {
-            flag = lock.tryLock();
-            T result = null;
-            if (flag) {
-                result = callback.get();
+            try {
+                locked = lock.tryLock();
+            } catch (Exception e) {
+                log.warn("RLock.tryLock 失败", e);
             }
-            return TupleTwo.creat(flag, result);
+            return syncBlock.apply(locked);
         } finally {
-            if (flag) {
+            if (locked) {
                 lock.unlock();
             }
         }
     }
 
     /**
-     * 尝试获取锁，如果锁获取失败则不执行 {@code callback} <br />
-     * 使用基于Redis实现的可重入锁，保证 {@code callback} 回调逻辑串行执行
+     * 尝试获取锁，如果锁获取失败则不执行 {@code syncBlock} <br />
+     * 使用基于Redis实现的可重入锁，保证 {@code syncBlock} 回调逻辑串行执行
+     * <pre>{@code
+     *   tryLock("lockName", locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
      *
-     * @param lockName 锁名称
-     * @param waitTime 等待锁定的最长时间(毫秒)
-     * @param callback 保证串行执行的回调函数
-     * @return 二元组对象 {@code TupleTwo<是否获取到Redis锁, callback函数的返回值>}
+     * @param lockName  锁名称
+     * @param syncBlock 保证串行执行的回调函数
      */
-    public <T> TupleTwo<Boolean, T> tryLock(String lockName, long waitTime, Supplier<T> callback) {
+    public void tryLock(String lockName, Consumer<Boolean> syncBlock) {
+        tryLock(lockName, locked -> {
+            syncBlock.accept(locked);
+            return null;
+        });
+    }
+
+    /**
+     * 尝试获取锁，如果锁获取失败则不执行 {@code syncBlock} <br />
+     * 使用基于Redis实现的可重入锁，保证 {@code syncBlock} 回调逻辑串行执行
+     * <pre>{@code
+     *   tryLock("lockName", waitTime, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param waitTime  等待锁定的最长时间(毫秒)
+     * @param syncBlock 保证串行执行的回调函数
+     */
+    public <T> T tryLock(String lockName, long waitTime, Function<Boolean, T> syncBlock) {
         Assert.hasText(lockName, "参数 lockName 不能为空");
-        Assert.notNull(callback, "参数 callback 不能为null");
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为null");
         RLock lock = redisson.getFairLock(lockName);
-        boolean flag = false;
+        boolean locked = false;
         try {
-            flag = lock.tryLock(waitTime, TimeUnit.MILLISECONDS);
-            T result = null;
-            if (flag) {
-                result = callback.get();
+            try {
+                locked = lock.tryLock(waitTime, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                log.warn("RLock.tryLock 被中断", e);
+            } catch (Exception e) {
+                log.warn("RLock.tryLock 失败", e);
             }
-            return TupleTwo.creat(flag, result);
-        } catch (InterruptedException e) {
-            log.warn("RLock.tryLock 被中断", e);
-            return TupleTwo.creat(false, null);
+            return syncBlock.apply(locked);
         } finally {
-            if (flag) {
+            if (locked) {
                 lock.unlock();
+            }
+        }
+    }
+
+    /**
+     * 尝试获取锁，如果锁获取失败则不执行 {@code syncBlock} <br />
+     * 使用基于Redis实现的可重入锁，保证 {@code syncBlock} 回调逻辑串行执行
+     * <pre>{@code
+     *   tryLock("lockName", waitTime, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param waitTime  等待锁定的最长时间(毫秒)
+     * @param syncBlock 保证串行执行的回调函数
+     */
+    public void tryLock(String lockName, long waitTime, Consumer<Boolean> syncBlock) {
+        tryLock(lockName, waitTime, locked -> {
+            syncBlock.accept(locked);
+            return null;
+        });
+    }
+
+    /**
+     * 使用基于Redis实现的可重入锁，可设置最大锁定时间
+     * <pre>{@code
+     *   lockMaxTime("lockName", lockMaxTime, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param lockMaxTime 最大的锁定时间(毫秒)
+     * @param syncBlock   得到锁后需要执行的回调
+     */
+    public <T> T lockMaxTime(String lockName, long lockMaxTime, Supplier<T> syncBlock) {
+        Assert.hasText(lockName, "参数 lockName 不能为空");
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为null");
+        RLock lock = redisson.getFairLock(lockName);
+        try {
+            lock.lock(lockMaxTime, TimeUnit.MILLISECONDS);
+            return syncBlock.get();
+        } finally {
+            try {
+                lock.unlock();
+            } catch (IllegalMonitorStateException e) {
+                log.warn("已经自动释放Redis锁: {}", e.getMessage());
             }
         }
     }
 
     /**
      * 使用基于Redis实现的可重入锁，可设置最大锁定时间
+     * <pre>{@code
+     *   lockMaxTime("lockName", lockMaxTime, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
      *
      * @param lockName    锁名称
      * @param lockMaxTime 最大的锁定时间(毫秒)
-     * @param callback    得到锁后需要执行的回调
+     * @param syncBlock   得到锁后需要执行的回调
      */
-    public <T> T lockMaxTime(String lockName, long lockMaxTime, Supplier<T> callback) {
+    public void lockMaxTime(String lockName, long lockMaxTime, ZeroConsumer syncBlock) {
+        lockMaxTime(lockName, lockMaxTime, () -> {
+            syncBlock.call();
+            return null;
+        });
+    }
+
+    /**
+     * 尝试获取锁，如果锁获取失败则不执行 {@code syncBlock}，可设置最大锁定时间 <br />
+     * <pre>{@code
+     *   tryLockMaxTime("lockName", waitTime, lockMaxTime, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitTime    等待锁定的最长时间(毫秒)
+     * @param lockMaxTime 最大的锁定时间(毫秒)
+     * @param syncBlock   保证串行执行的回调函数
+     */
+    public <T> T tryLockMaxTime(String lockName, long waitTime, long lockMaxTime, Function<Boolean, T> syncBlock) {
         Assert.hasText(lockName, "参数 lockName 不能为空");
-        Assert.notNull(callback, "参数 callback 不能为null");
+        Assert.notNull(syncBlock, "参数 syncBlock 不能为null");
         RLock lock = redisson.getFairLock(lockName);
+        boolean locked = false;
         try {
-            lock.lock(lockMaxTime, TimeUnit.MILLISECONDS);
-            return callback.get();
+            try {
+                locked = lock.tryLock(waitTime, lockMaxTime, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                log.warn("RLock.tryLock 被中断", e);
+            } catch (Exception e) {
+                log.warn("RLock.tryLock 失败", e);
+            }
+            return syncBlock.apply(locked);
         } finally {
             try {
-                lock.unlock();
+                if (locked) {
+                    lock.unlock();
+                }
             } catch (IllegalMonitorStateException e) {
                 log.warn("已经自动释放Redis锁: {}", e.getMessage());
             }
@@ -2581,35 +2727,25 @@ public class Redis extends AbstractDataSource {
     }
 
     /**
-     * 尝试获取锁，如果锁获取失败则不执行 {@code callback}，可设置最大锁定时间 <br />
+     * 尝试获取锁，如果锁获取失败则不执行 {@code syncBlock}，可设置最大锁定时间 <br />
+     * <pre>{@code
+     *   tryLockMaxTime("lockName", waitTime, lockMaxTime, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
      *
      * @param lockName    锁名称
      * @param waitTime    等待锁定的最长时间(毫秒)
      * @param lockMaxTime 最大的锁定时间(毫秒)
-     * @param callback    保证串行执行的回调函数
-     * @return 二元组对象 {@code TupleTwo<是否获取到Redis锁, callback函数的返回值>}
+     * @param syncBlock   保证串行执行的回调函数
      */
-    public <T> TupleTwo<Boolean, T> tryLockMaxTime(String lockName, long waitTime, long lockMaxTime, Supplier<T> callback) {
-        Assert.hasText(lockName, "参数 lockName 不能为空");
-        Assert.notNull(callback, "参数 callback 不能为null");
-        RLock lock = redisson.getFairLock(lockName);
-        try {
-            boolean flag = lock.tryLock(waitTime, lockMaxTime, TimeUnit.MILLISECONDS);
-            T result = null;
-            if (flag) {
-                result = callback.get();
-            }
-            return TupleTwo.creat(flag, result);
-        } catch (InterruptedException e) {
-            log.warn("RLock.tryLock 被中断", e);
-            return TupleTwo.creat(false, null);
-        } finally {
-            try {
-                lock.unlock();
-            } catch (IllegalMonitorStateException e) {
-                log.warn("已经自动释放Redis锁: {}", e.getMessage());
-            }
-        }
+    public void tryLockMaxTime(String lockName, long waitTime, long lockMaxTime, Consumer<Boolean> syncBlock) {
+        tryLockMaxTime(lockName, waitTime, lockMaxTime, (locked) -> {
+            syncBlock.accept(locked);
+            return null;
+        });
     }
 
     // --------------------------------------------------------------------------------------------

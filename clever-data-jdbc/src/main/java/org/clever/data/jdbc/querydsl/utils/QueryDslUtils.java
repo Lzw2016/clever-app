@@ -12,6 +12,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
 import org.clever.core.RenameStrategy;
+import org.clever.core.function.TwoPredicate;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.OrderItem;
@@ -27,7 +28,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
@@ -199,7 +199,7 @@ public class QueryDslUtils {
     }
 
     private static Path<?> getPath(Map<String, Path<?>> fieldMap, String sqlField) {
-        BiFunction<String, String, Boolean> match = getMatchFun();
+        TwoPredicate<String, String> match = getMatchFun();
         for (Map.Entry<String, Path<?>> entry : fieldMap.entrySet()) {
             String key = entry.getKey();
             Path<?> path = entry.getValue();
@@ -209,7 +209,7 @@ public class QueryDslUtils {
             PathMetadata pathMetadata = path.getMetadata();
             if (pathMetadata != null) {
                 String field = pathMetadata.getName();
-                if (match.apply(field, sqlField)) {
+                if (match.test(field, sqlField)) {
                     return path;
                 }
             }
@@ -217,7 +217,7 @@ public class QueryDslUtils {
             if (StringUtils.isBlank(key)) {
                 key = entry.getKey();
             }
-            if (match.apply(key, sqlField)) {
+            if (match.test(key, sqlField)) {
                 return path;
             }
         }
@@ -225,7 +225,7 @@ public class QueryDslUtils {
     }
 
     @NotNull
-    private static BiFunction<String, String, Boolean> getMatchFun() {
+    private static TwoPredicate<String, String> getMatchFun() {
         RenameStrategy[] strategies = new RenameStrategy[]{
             RenameStrategy.None,
             RenameStrategy.ToCamel,

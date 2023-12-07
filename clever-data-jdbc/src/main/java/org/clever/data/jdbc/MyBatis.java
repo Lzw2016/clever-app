@@ -3,6 +3,7 @@ package org.clever.data.jdbc;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.clever.core.RenameStrategy;
+import org.clever.core.function.ZeroConsumer;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.IPage;
@@ -1642,6 +1643,45 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
+     * 借助数据库行级锁实现的分布式排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   tryLock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *      return result;
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public <T> T tryLock(String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
+        return jdbc.tryLock(lockName, waitSeconds, syncBlock);
+    }
+
+    /**
+     * 借助数据库行级锁实现的分布式排他锁 <br/>
+     * <b>此功能需要数据库表支持</b>
+     * <pre>{@code
+     *   tryLock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public void tryLock(String lockName, int waitSeconds, Consumer<Boolean> syncBlock) {
+        jdbc.tryLock(lockName, waitSeconds, syncBlock);
+    }
+
+    /**
      * 借助数据库表实现的排他锁 <br/>
      * <b>此功能需要数据库表支持</b>
      * <pre>{@code
@@ -1672,8 +1712,76 @@ public class MyBatis extends AbstractDataSource {
      * @param syncBlock 同步代码块
      */
     @SneakyThrows
-    public void lock(String lockName, Runnable syncBlock) {
+    public void lock(String lockName, ZeroConsumer syncBlock) {
         jdbc.lock(lockName, syncBlock);
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   nativeTryLock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *      return result;
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public <T> T nativeTryLock(String lockName, int waitSeconds, Function<T, Boolean> syncBlock) {
+        return jdbc.nativeTryLock(lockName, waitSeconds, syncBlock);
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   nativeTryLock("lockName", waitSeconds, locked -> {
+     *      if(locked) {
+     *          // 同步业务逻辑处理...
+     *      }
+     *      return result;
+     *   })
+     * }</pre>
+     *
+     * @param lockName    锁名称
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步代码块(可保证分布式串行执行)
+     */
+    public void nativeTryLock(String lockName, int waitSeconds, Consumer<Boolean> syncBlock) {
+        jdbc.nativeTryLock(lockName, waitSeconds, syncBlock);
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块(可保证分布式串行执行)
+     */
+    public <T> T nativeLock(String lockName, Supplier<T> syncBlock) {
+        return jdbc.nativeLock(lockName, syncBlock);
+    }
+
+    /**
+     * 直接使用数据库提供的lock功能实现的分布式排他锁 <br/>
+     * <pre>{@code
+     *   lock("lockName", () -> {
+     *      // 同步业务逻辑处理...
+     *   })
+     * }</pre>
+     *
+     * @param lockName  锁名称
+     * @param syncBlock 同步代码块(可保证分布式串行执行)
+     */
+    public void nativeLock(String lockName, ZeroConsumer syncBlock) {
+        jdbc.nativeLock(lockName, syncBlock);
     }
 
     // --------------------------------------------------------------------------------------------
