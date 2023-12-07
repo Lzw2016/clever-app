@@ -578,7 +578,7 @@ MySQL(锁名称为字符串，支持超时):
     release_all_locks
     is_free_lock
     is_used_lock
-PostgreSQL(锁名称为数字，不支持超时，但可以使用pg_sleep函数实现超时功能):    
+PostgreSQL(锁名称为数字，不支持超时，但可以使用hashtext函数将字符串转数字和pg_sleep函数实现超时功能):    
     pg_advisory_lock
     pg_advisory_unlock
     pg_advisory_unlock_all

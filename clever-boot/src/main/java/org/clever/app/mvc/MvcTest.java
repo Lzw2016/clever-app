@@ -279,6 +279,7 @@ public class MvcTest {
     public static R<?> t21() {
         Long a = jdbc.queryLong("select get_lock('lock001', 300) from dual");
         Long b = jdbc.queryLong("select release_lock('lock001') from dual");
-        return R.success(new Object[]{a, b});
+        int c = "001".hashCode();
+        return R.success(new Object[]{a, b, c});
     }
 }
