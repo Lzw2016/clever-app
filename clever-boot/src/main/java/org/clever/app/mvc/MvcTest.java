@@ -5,9 +5,11 @@ import io.javalin.http.UploadedFile;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.DateUtils;
 import org.clever.core.http.CookieUtils;
 import org.clever.core.model.request.QueryByPage;
+import org.clever.core.model.response.R;
 import org.clever.core.validator.annotation.IntStatus;
 import org.clever.core.validator.annotation.NotBlank;
 import org.clever.data.jdbc.DaoFactory;
@@ -23,10 +25,7 @@ import org.clever.web.support.mvc.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 
@@ -237,10 +236,49 @@ public class MvcTest {
 
     @SneakyThrows
     @Transactional(disabled = true)
-    public static Object t19() {
+    public static R<?> t19() {
         // "yyyy-MM-dd'T'HH:mm:ss.SSSZ", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        Date date = DateUtils.parseDate("2023-05-26T16:00:00.000Z");
+        Date date = DateUtils.parseDate("2023-05-26 16:05:06.019", "yyyy-MM-dd HH:mm:ss.SSS");
         log.info("date -> {}", date);
-        return date;
+        String str = DateFormatUtils.format(date, "yy|yyyy|MM|dd|HH|hh|mm|ss|SSS|D");
+        log.info("str -> {}", str);
+        // next_id('t01', 1, 0, 0)
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("seq_name", "t01");
+        paramMap.put("size", 1);
+        paramMap.put("step", 1);
+        Map<String, Object> data1 = jdbc.callGet("next_ids", paramMap);
+        Map<String, Object> data2 = jdbc.callGet("next_ids", "t01", 1, 1);
+        Long id = jdbc.queryLong("select next_id('t01') from dual");
+        return R.success(new Object[]{data1, data2, id});
+    }
+
+    @SneakyThrows
+    @Transactional(disabled = true)
+    public static R<?> t20() {
+        Jdbc postgresql = DaoFactory.getJdbc("postgresql");
+        // Map<String, Object> data = postgresql.callGet("next_codes", "RULE_QUALITY", 1);
+        // Long id = jdbc.queryLong("select next_id('t05')");
+        String sql = " " +
+            "DO $$" +
+            "DECLARE" +
+            "    _res_1 varchar;" +
+            "    _res_2 bool;" +
+            "BEGIN" +
+            "    select pg_advisory_lock(123) into _res_1;" +
+            "    select pg_advisory_unlock(123) into _res_2;" +
+            "END;" +
+            "$$;";
+        int count = postgresql.update(sql);
+        // postgresql.getJdbcTemplate().getJdbcTemplate().execute(sql);
+        return R.success(count);
+    }
+
+    @SneakyThrows
+    @Transactional(disabled = true)
+    public static R<?> t21() {
+        Long a = jdbc.queryLong("select get_lock('lock001', 300) from dual");
+        Long b = jdbc.queryLong("select release_lock('lock001') from dual");
+        return R.success(new Object[]{a, b});
     }
 }
