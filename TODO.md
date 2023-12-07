@@ -570,6 +570,31 @@ DAO数据访问层
 ### clever-data-dynamic-sql
 
 ### clever-data-jdbc
+```
+数据库原生的锁支持
+MySQL(锁名称为字符串，支持超时):
+    get_lock
+    release_lock
+    release_all_locks
+    is_free_lock
+    is_used_lock
+PostgreSQL(锁名称为数字，不支持超时，但可以使用pg_sleep函数实现超时功能):    
+    pg_advisory_lock
+    pg_advisory_unlock
+    pg_advisory_unlock_all
+    pg_advisory_lock_shared
+    pg_advisory_unlock_shared
+    pg_advisory_xact_lock
+    pg_advisory_xact_lock_shared
+    pg_try_advisory_lock
+    pg_try_advisory_lock_shared
+    pg_try_advisory_xact_lock
+    pg_try_advisory_xact_lock_shared
+Oracle(锁名称为字符串，支持超时):
+    dbms_lock.allocate_unique
+    dbms_lock.request
+    dbms_lock.release
+```
 - [OK] 需要支持 `#{varName,javaType=int|long|decimal|char|string|date|bool}` 语法
 - [OK] join函数支持 `join(java_arr)` 和 `join(java_arr, javaType)` 两种调用形式
 
