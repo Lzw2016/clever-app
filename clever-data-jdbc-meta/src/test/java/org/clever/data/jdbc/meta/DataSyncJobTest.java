@@ -122,4 +122,39 @@ public class DataSyncJobTest {
         log.info("--> \n{}", ddl);
         mysql.close();
     }
+
+//    @Test
+//    public void t08() {
+//        HikariConfig hikariConfig = new HikariConfig();
+//        hikariConfig.setDriverClassName("org.postgresql.Driver");
+//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d100?currentSchema=wms8prod");
+//        hikariConfig.setUsername("wms8prod");
+//        hikariConfig.setPassword("lmis9system");
+//        hikariConfig.setAutoCommit(false);
+//        hikariConfig.setMinimumIdle(1);
+//        hikariConfig.setMaximumPoolSize(512);
+//        Jdbc postgresql = new Jdbc(hikariConfig);
+//
+//        hikariConfig = new HikariConfig();
+//        hikariConfig.setDriverClassName("oracle.jdbc.OracleDriver");
+//        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@10.0.30.221:1521:wms8prod");
+//        hikariConfig.setUsername("wms8prod");
+//        hikariConfig.setPassword("lmis9system");
+//        hikariConfig.setAutoCommit(false);
+//        hikariConfig.setMinimumIdle(1);
+//        hikariConfig.setMaximumPoolSize(512);
+//        Jdbc oracle = new Jdbc(hikariConfig);
+//
+//        String ddl = DataSyncJob.structSync(
+//            oracle,
+//            postgresql,
+//            "wms8prod",
+//            "wms8prod",
+//            false,
+//            "COLD_REJECT_RECORDS"
+//        );
+//        log.info("--> \n{}", ddl);
+//        postgresql.close();
+//        oracle.close();
+//    }
 }

@@ -15,6 +15,10 @@ import org.clever.core.validator.annotation.NotBlank;
 import org.clever.data.jdbc.DaoFactory;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
+import org.clever.data.jdbc.support.ProcedureJdbcCall;
+import org.clever.jdbc.core.SqlOutParameter;
+import org.clever.jdbc.core.SqlParameter;
+import org.clever.jdbc.core.simple.SimpleJdbcCall;
 import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.util.MultiValueMap;
 import org.clever.validation.annotation.Validated;
@@ -25,6 +29,7 @@ import org.clever.web.support.mvc.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
+import java.sql.Types;
 import java.util.*;
 
 import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
@@ -281,5 +286,31 @@ public class MvcTest {
         Long b = jdbc.queryLong("select release_lock('lock001') from dual");
         int c = "001".hashCode();
         return R.success(new Object[]{a, b, c});
+    }
+
+    @SneakyThrows
+    @Transactional(disabled = true)
+    public static R<?> t22() {
+        Jdbc oracle = DaoFactory.getJdbc("oracle");
+        SimpleJdbcCall request = new ProcedureJdbcCall(oracle)
+            .withoutProcedureColumnMetaDataAccess()
+            .withCatalogName("dbms_lock")
+            .withFunctionName("request")
+            .declareParameters(
+                new SqlOutParameter("result", Types.INTEGER),
+                new SqlParameter("lockhandle", Types.VARCHAR),
+                new SqlParameter("lockmode", Types.TINYINT),
+                new SqlParameter("timeout", Types.INTEGER)
+                // new SqlParameter("release_on_commit", Types.BOOLEAN)
+            );
+        request.compile();
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("lockhandle", "123456");
+        paramMap.put("lockmode", 6);
+        paramMap.put("timeout", 0);
+        // paramMap.put("release_on_commit", false);
+        Integer res2 = request.executeFunction(Integer.class, paramMap);
+        log.info("--> {}", res2);
+        return R.success(new Object[]{"res", res2});
     }
 }

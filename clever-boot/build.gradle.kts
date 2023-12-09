@@ -23,6 +23,7 @@ dependencies {
     // api("org.jetbrains.kotlin:kotlin-reflect")
     api("org.postgresql:postgresql")
     api("mysql:mysql-connector-java")
+    api("com.oracle.database.jdbc:ojdbc8")
 }
 
 sourceSets {

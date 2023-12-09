@@ -3161,6 +3161,9 @@ public class Jdbc extends AbstractDataSource {
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
     public <T> T nativeTryLock(String lockName, int waitSeconds, Function<T, Boolean> syncBlock) {
+
+
+
         // TODO 利用数据库原生的锁支持实现 nativeLock 相关功能
         return null;
     }

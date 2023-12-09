@@ -4,11 +4,18 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.tuples.TupleOne;
+import org.clever.data.jdbc.support.ProcedureJdbcCall;
 import org.clever.jdbc.core.ConnectionCallback;
+import org.clever.jdbc.core.SqlOutParameter;
+import org.clever.jdbc.core.SqlParameter;
+import org.clever.jdbc.core.simple.SimpleJdbcCall;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -21,13 +28,13 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class JdbcTest {
     private static final ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(
-            16, 16, 60, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(64),
-            new BasicThreadFactory.Builder()
-                    .namingPattern("test-%d")
-                    .daemon(true)
-                    .build(),
-            new ThreadPoolExecutor.CallerRunsPolicy()
+        16, 16, 60, TimeUnit.SECONDS,
+        new ArrayBlockingQueue<>(64),
+        new BasicThreadFactory.Builder()
+            .namingPattern("test-%d")
+            .daemon(true)
+            .build(),
+        new ThreadPoolExecutor.CallerRunsPolicy()
     );
 
     private Jdbc newJdbc() {
@@ -223,5 +230,51 @@ public class JdbcTest {
             });
         });
         jdbc.close();
+    }
+
+    @Test
+    public void t10() {
+        Jdbc oracle = BaseTest.newOracle();
+        SimpleJdbcCall allocateUnique = new ProcedureJdbcCall(oracle)
+            .withoutProcedureColumnMetaDataAccess()
+            .withCatalogName("dbms_lock")
+            .withProcedureName("allocate_unique")
+            .withNamedBinding()
+            .declareParameters(
+                new SqlParameter("lockname", Types.VARCHAR),
+                new SqlOutParameter("lockhandle", Types.VARCHAR)
+            );
+        allocateUnique.compile();
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("lockname", "test");
+        Map<String, Object> res = allocateUnique.execute(paramMap);
+        log.info("--> {}", res);
+        // lock_result := dbms_lock.request(
+        //     lockhandle => lock_handle,
+        //     lockmode => dbms_lock.x_mode,
+        //     timeout => 3,
+        //     release_on_commit => true
+        // );
+        SimpleJdbcCall request = new ProcedureJdbcCall(oracle)
+            .withoutProcedureColumnMetaDataAccess()
+            .withCatalogName("dbms_lock")
+            .withFunctionName("request")
+            .withNamedBinding()
+            .declareParameters(
+                new SqlOutParameter("result", Types.INTEGER),
+                new SqlParameter("lockhandle", Types.VARCHAR),
+                new SqlParameter("lockmode", Types.TINYINT),
+                new SqlParameter("timeout", Types.INTEGER)
+                // new SqlParameter("release_on_commit", Types.BOOLEAN)
+            );
+        request.compile();
+        paramMap = new HashMap<>();
+        paramMap.put("lockhandle", res.get("lockhandle"));
+        paramMap.put("lockmode", 6);
+        paramMap.put("timeout", 0);
+        // paramMap.put("release_on_commit", false);
+        Integer res2 = request.executeFunction(Integer.class, paramMap);
+        log.info("--> {}", res2);
+        oracle.close();
     }
 }

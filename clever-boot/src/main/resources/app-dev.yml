@@ -51,6 +51,14 @@ jdbc:
       connectionTestQuery: 'select 1'
       dataSourceProperties:
         stringtype: unspecified
+    oracle:
+      jdbcUrl: jdbc:p6spy:oracle:thin:@122.9.140.63:1521:wms8dev
+      username: wms8dev
+      password: lmis9system
+      minimumIdle: 2
+      maximumPoolSize: 100
+      connectionTestQuery: 'select 1 from dual'
+
 redis:
   enable: true
   defaultName: 'default'
