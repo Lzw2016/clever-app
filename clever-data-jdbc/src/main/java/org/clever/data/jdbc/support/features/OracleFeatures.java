@@ -78,8 +78,8 @@ public class OracleFeatures extends DataBaseFeatures {
                 new SqlOutParameter("result", Types.INTEGER),
                 new SqlParameter("lockhandle", Types.VARCHAR),
                 new SqlParameter("lockmode", Types.INTEGER),
-                new SqlOutParameter("timeout", Types.INTEGER)
-                // new SqlOutParameter("release_on_commit", Types.BOOLEAN)
+                new SqlParameter("timeout", Types.INTEGER)
+                // new SqlParameter("release_on_commit", Types.BOOLEAN)
             );
         request.compile();
         requestWithoutTimeout = new ProcedureJdbcCall(jdbc)

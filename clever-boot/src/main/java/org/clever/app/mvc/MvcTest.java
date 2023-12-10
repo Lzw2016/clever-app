@@ -314,18 +314,26 @@ public class MvcTest {
         return R.success(new Object[]{"res", res2});
     }
 
+    @SneakyThrows
     @Transactional(disabled = true)
     public static R<?> t23() {
         // mysql postgresql oracle
         Jdbc db = DaoFactory.getJdbc("oracle");
+        Thread thread = new Thread(() -> {
+            db.nativeTryLock("test", 3, locked -> {
+                log.info("locked={}", locked);
+            });
+        });
         db.nativeLock("test", () -> {
             log.info("测试1");
             log.info("测试2");
+            thread.start();
             try {
-                Thread.sleep(1000 * 3);
+                Thread.sleep(1000 * 6);
             } catch (InterruptedException ignored) {
             }
         });
+        thread.join();
         return R.success(new Object[]{"res"});
     }
 }

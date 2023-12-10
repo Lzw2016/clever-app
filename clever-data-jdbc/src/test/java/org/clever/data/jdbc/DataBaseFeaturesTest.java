@@ -20,7 +20,7 @@ public class DataBaseFeaturesTest {
     private void newThreadGetLock(DataBaseFeatures features) {
         Thread thread = new Thread(() -> {
             features.getJdbc().beginTX(status -> {
-                boolean res = features.getLock(lockName, 1);
+                boolean res = features.getLock(lockName, 3);
                 log.info("#Thread\tgetLock={}", res);
             });
         });
@@ -57,6 +57,7 @@ public class DataBaseFeaturesTest {
     public void t01() {
         Jdbc mysql = BaseTest.newMysql();
         MySQLFeatures features = new MySQLFeatures(mysql);
+        // mysql: lock多次 release也要多次 才能能释放锁
         check(features);
         mysql.close();
     }
@@ -65,6 +66,7 @@ public class DataBaseFeaturesTest {
     public void t02() {
         Jdbc postgresql = BaseTest.newPostgresql();
         PostgreSQLFeatures features = new PostgreSQLFeatures(postgresql);
+        // postgresql: lock多次 release也要多次 才能能释放锁
         check(features);
         postgresql.close();
     }
@@ -73,6 +75,7 @@ public class DataBaseFeaturesTest {
     public void t03() {
         Jdbc oracle = BaseTest.newOracle();
         OracleFeatures features = new OracleFeatures(oracle);
+        // oracle: lock多次 release一次 就能释放锁
         check(features);
         oracle.close();
     }
