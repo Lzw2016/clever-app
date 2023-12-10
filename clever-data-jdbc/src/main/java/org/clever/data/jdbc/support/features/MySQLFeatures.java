@@ -19,6 +19,7 @@ public class MySQLFeatures extends DataBaseFeatures {
 
     @Override
     public boolean getLock(String lockName) {
+        checkLockName(lockName);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("lockName", lockName);
         Long locked = jdbc.queryLong("select get_lock(:lockName) from dual", paramMap);
@@ -27,6 +28,7 @@ public class MySQLFeatures extends DataBaseFeatures {
 
     @Override
     public boolean getLock(String lockName, int waitSeconds) {
+        checkLockNameAndWait(lockName, waitSeconds);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("lockName", lockName);
         paramMap.put("waitSeconds", waitSeconds);
@@ -36,6 +38,7 @@ public class MySQLFeatures extends DataBaseFeatures {
 
     @Override
     public boolean releaseLock(String lockName) {
+        checkLockName(lockName);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("lockName", lockName);
         Long released = jdbc.queryLong("select release_lock(:lockName) from dual", paramMap);

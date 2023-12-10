@@ -157,4 +157,47 @@ public class DataSyncJobTest {
 //        postgresql.close();
 //        oracle.close();
 //    }
+
+//    @Test
+//    public void t09() {
+//        HikariConfig hikariConfig = new HikariConfig();
+//        hikariConfig.setDriverClassName("org.postgresql.Driver");
+//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d100?currentSchema=wms8prod");
+//        hikariConfig.setUsername("wms8prod");
+//        hikariConfig.setPassword("lmis9system");
+//        hikariConfig.setAutoCommit(false);
+//        hikariConfig.setMinimumIdle(1);
+//        hikariConfig.setMaximumPoolSize(512);
+//        Jdbc d100 = new Jdbc(hikariConfig);
+//
+//        hikariConfig = new HikariConfig();
+//        hikariConfig.setDriverClassName("org.postgresql.Driver");
+//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d300?currentSchema=wms8prod");
+//        hikariConfig.setUsername("wms8prod");
+//        hikariConfig.setPassword("lmis9system");
+//        hikariConfig.setAutoCommit(true);
+//        hikariConfig.setMinimumIdle(1);
+//        hikariConfig.setMaximumPoolSize(512);
+//        Jdbc d300 = new Jdbc(hikariConfig);
+//
+//        List<Map<String, Object>> d100_rows = d100.queryMany("select report_name, query_sql, summary_sql, report from dev_report");
+//        for (Map<String, Object> row : d100_rows) {
+//            Map<String, Object> fields = new HashMap<>(row);
+//            fields.remove("report_name");
+//            Map<String, Object> whereMap = new HashMap<>();
+//            whereMap.put("report_name", row.get("report_name"));
+//            d300.updateTable("dev_report", fields, whereMap);
+//        }
+//
+//        d100_rows = d100.queryMany("select plan_code, plan_sql from sys_print_plan_inf");
+//        for (Map<String, Object> row : d100_rows) {
+//            Map<String, Object> fields = new HashMap<>(row);
+//            fields.remove("plan_code");
+//            Map<String, Object> whereMap = new HashMap<>();
+//            whereMap.put("plan_code", row.get("plan_code"));
+//            d300.updateTable("sys_print_plan_inf", fields, whereMap);
+//        }
+//        d100.close();
+//        d300.close();
+//    }
 }

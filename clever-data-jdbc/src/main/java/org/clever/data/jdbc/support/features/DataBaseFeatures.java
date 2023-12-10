@@ -14,8 +14,17 @@ public abstract class DataBaseFeatures {
     protected final Jdbc jdbc;
 
     public DataBaseFeatures(Jdbc jdbc) {
-        Assert.notNull(jdbc, "参数 jdbc 不能为空");
+        Assert.notNull(jdbc, "参数 jdbc 不能为null");
         this.jdbc = jdbc;
+    }
+
+    protected void checkLockName(String lockName) {
+        Assert.isNotBlank(lockName, "参数 lockName 不能为空");
+    }
+
+    protected void checkLockNameAndWait(String lockName, int waitSeconds) {
+        Assert.isNotBlank(lockName, "参数 lockName 不能为空");
+        Assert.isTrue(waitSeconds > 0 && waitSeconds <= MAX_WAIT_SECONDS, "参数 waitSeconds 取值必须在：1 ~ " + MAX_WAIT_SECONDS + "范围内");
     }
 
     /**

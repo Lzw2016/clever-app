@@ -114,6 +114,7 @@ public class OracleFeatures extends DataBaseFeatures {
     @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean getLock(String lockName) {
+        checkLockName(lockName);
         String lockHandle = getLockHandle(lockName);
         if (StringUtils.isBlank(lockHandle)) {
             return false;
@@ -135,6 +136,7 @@ public class OracleFeatures extends DataBaseFeatures {
     @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean getLock(String lockName, int waitSeconds) {
+        checkLockNameAndWait(lockName, waitSeconds);
         String lockHandle = getLockHandle(lockName);
         if (StringUtils.isBlank(lockHandle)) {
             return false;
@@ -156,6 +158,7 @@ public class OracleFeatures extends DataBaseFeatures {
 
     @Override
     public boolean releaseLock(String lockName) {
+        checkLockName(lockName);
         String lockHandle = getLockHandle(lockName);
         if (StringUtils.isBlank(lockHandle)) {
             return false;

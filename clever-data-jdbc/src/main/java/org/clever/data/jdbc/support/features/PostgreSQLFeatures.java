@@ -29,8 +29,10 @@ public class PostgreSQLFeatures extends DataBaseFeatures {
         return TupleTwo.creat(lockName.hashCode(), -1 * lockName.length());
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean getLock(String lockName) {
+        checkLockName(lockName);
         TupleTwo<Integer, Integer> lockKey = getLockKey(lockName);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("lockKey1", lockKey.getValue1());
@@ -41,6 +43,7 @@ public class PostgreSQLFeatures extends DataBaseFeatures {
 
     @Override
     public boolean getLock(String lockName, int waitSeconds) {
+        checkLockNameAndWait(lockName, waitSeconds);
         long now = SystemClock.now();
         final long waitEndTime = now + (waitSeconds * 1000L);
         Boolean locked;
@@ -68,8 +71,10 @@ public class PostgreSQLFeatures extends DataBaseFeatures {
         return Optional.of(locked).orElse(false);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public boolean releaseLock(String lockName) {
+        checkLockName(lockName);
         TupleTwo<Integer, Integer> lockKey = getLockKey(lockName);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("lockKey1", lockKey.getValue1());

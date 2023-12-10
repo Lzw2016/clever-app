@@ -776,7 +776,7 @@ public class QueryDSL extends SQLQueryFactory {
      * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
-    public <T> T nativeTryLock(String lockName, int waitSeconds, Function<T, Boolean> syncBlock) {
+    public <T> T nativeTryLock(String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
         return jdbc.nativeTryLock(lockName, waitSeconds, syncBlock);
     }
 

@@ -38,6 +38,8 @@ import org.clever.data.jdbc.dialects.DialectFactory;
 import org.clever.data.jdbc.listener.JdbcListeners;
 import org.clever.data.jdbc.listener.OracleDbmsOutputListener;
 import org.clever.data.jdbc.support.*;
+import org.clever.data.jdbc.support.features.DataBaseFeatures;
+import org.clever.data.jdbc.support.features.DataBaseFeaturesFactory;
 import org.clever.jdbc.UncategorizedSQLException;
 import org.clever.jdbc.core.*;
 import org.clever.jdbc.core.namedparam.EmptySqlParameterSource;
@@ -3160,12 +3162,17 @@ public class Jdbc extends AbstractDataSource {
      * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
-    public <T> T nativeTryLock(String lockName, int waitSeconds, Function<T, Boolean> syncBlock) {
-
-
-
-        // TODO 利用数据库原生的锁支持实现 nativeLock 相关功能
-        return null;
+    public <T> T nativeTryLock(String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
+        DataBaseFeatures features = DataBaseFeaturesFactory.getDataBaseFeatures(this);
+        try {
+            boolean locked = features.getLock(lockName, waitSeconds);
+            return syncBlock.apply(locked);
+        } finally {
+            boolean released = features.releaseLock(lockName);
+            if (!released) {
+                log.warn("释放数据库锁失败, dbType={}, dataSourceName={}", dbType, dataSourceName);
+            }
+        }
     }
 
     /**
@@ -3184,6 +3191,10 @@ public class Jdbc extends AbstractDataSource {
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
     public void nativeTryLock(String lockName, int waitSeconds, Consumer<Boolean> syncBlock) {
+        nativeTryLock(lockName, waitSeconds, locked -> {
+            syncBlock.accept(locked);
+            return null;
+        });
     }
 
     /**
@@ -3198,7 +3209,17 @@ public class Jdbc extends AbstractDataSource {
      * @param syncBlock 同步代码块(可保证分布式串行执行)
      */
     public <T> T nativeLock(String lockName, Supplier<T> syncBlock) {
-        return null;
+        DataBaseFeatures features = DataBaseFeaturesFactory.getDataBaseFeatures(this);
+        try {
+            boolean locked = features.getLock(lockName);
+            Assert.isTrue(locked, "获取锁失败, lockName=" + lockName);
+            return syncBlock.get();
+        } finally {
+            boolean released = features.releaseLock(lockName);
+            if (!released) {
+                log.warn("释放数据库锁失败, dbType={}, dataSourceName={}", dbType, dataSourceName);
+            }
+        }
     }
 
     /**
@@ -3213,6 +3234,10 @@ public class Jdbc extends AbstractDataSource {
      * @param syncBlock 同步代码块(可保证分布式串行执行)
      */
     public void nativeLock(String lockName, ZeroConsumer syncBlock) {
+        nativeLock(lockName, () -> {
+            syncBlock.call();
+            return null;
+        });
     }
 
     // --------------------------------------------------------------------------------------------
