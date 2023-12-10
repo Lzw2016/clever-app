@@ -3163,19 +3163,22 @@ public class Jdbc extends AbstractDataSource {
      * </strong>
      *
      * @param lockName    锁名称
-     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param waitSeconds 等待锁的最大时间
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
     public <T> T nativeTryLock(String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
         DataBaseFeatures features = DataBaseFeaturesFactory.getDataBaseFeatures(this);
         return beginTX(status -> {
+            boolean locked = false;
             try {
-                boolean locked = features.getLock(lockName, waitSeconds);
+                locked = features.getLock(lockName, waitSeconds);
                 return syncBlock.apply(locked);
             } finally {
-                boolean released = features.releaseLock(lockName);
-                if (!released) {
-                    log.warn("释放数据库锁失败, dbType={}, dataSourceName={}", dbType, dataSourceName);
+                if (locked) {
+                    boolean released = features.releaseLock(lockName);
+                    if (!released) {
+                        log.warn("释放数据库锁失败, dbType={}, dataSourceName={}", dbType, dataSourceName);
+                    }
                 }
             }
         });
@@ -3197,7 +3200,7 @@ public class Jdbc extends AbstractDataSource {
      * </strong>
      *
      * @param lockName    锁名称
-     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param waitSeconds 等待锁的最大时间
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
     public void nativeTryLock(String lockName, int waitSeconds, Consumer<Boolean> syncBlock) {

@@ -171,7 +171,7 @@ public class OracleFeatures extends DataBaseFeatures {
         //      3   参数错误
         //      4   不拥有lock_handle指定的锁
         //      5   非法锁lock_handle
-        return Objects.equals(released, 0);
+        return Objects.equals(released, 0) || Objects.equals(released, 4);
     }
 
     protected String getLockHandle(String lockName) {

@@ -313,4 +313,19 @@ public class MvcTest {
         log.info("--> {}", res2);
         return R.success(new Object[]{"res", res2});
     }
+
+    @Transactional(disabled = true)
+    public static R<?> t23() {
+        // mysql postgresql oracle
+        Jdbc db = DaoFactory.getJdbc("oracle");
+        db.nativeLock("test", () -> {
+            log.info("测试1");
+            log.info("测试2");
+            try {
+                Thread.sleep(1000 * 3);
+            } catch (InterruptedException ignored) {
+            }
+        });
+        return R.success(new Object[]{"res"});
+    }
 }

@@ -2,7 +2,12 @@ package org.clever.data.jdbc;
 
 import com.zaxxer.hikari.HikariConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 作者：lizw <br/>
@@ -10,6 +15,16 @@ import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
  */
 @Slf4j
 public class BaseTest {
+    public static final ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(
+        64, 64, 60, TimeUnit.SECONDS,
+        new ArrayBlockingQueue<>(128),
+        new BasicThreadFactory.Builder()
+            .namingPattern("test-%d")
+            .daemon(true)
+            .build(),
+        new ThreadPoolExecutor.CallerRunsPolicy()
+    );
+
     public static HikariConfig mysqlConfig() {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");

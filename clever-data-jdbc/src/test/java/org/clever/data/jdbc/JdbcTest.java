@@ -2,24 +2,12 @@ package org.clever.data.jdbc;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.clever.core.tuples.TupleOne;
-import org.clever.data.jdbc.support.ProcedureJdbcCall;
 import org.clever.jdbc.core.ConnectionCallback;
-import org.clever.jdbc.core.SqlOutParameter;
-import org.clever.jdbc.core.SqlParameter;
-import org.clever.jdbc.core.simple.SimpleJdbcCall;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 作者：lizw <br/>
@@ -27,16 +15,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class JdbcTest {
-    private static final ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(
-        16, 16, 60, TimeUnit.SECONDS,
-        new ArrayBlockingQueue<>(64),
-        new BasicThreadFactory.Builder()
-            .namingPattern("test-%d")
-            .daemon(true)
-            .build(),
-        new ThreadPoolExecutor.CallerRunsPolicy()
-    );
-
     private Jdbc newJdbc() {
         return BaseTest.newMysql();
         // return BaseTest.newPostgresql();
@@ -49,7 +27,7 @@ public class JdbcTest {
         final int count = 100;
         List<Future<?>> futures = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
-            Future<?> future = EXECUTOR.submit(() -> {
+            Future<?> future = BaseTest.EXECUTOR.submit(() -> {
                 try {
                     for (int j = 0; j < 100; j++) {
                         jdbc.nextId(idName);
@@ -119,7 +97,7 @@ public class JdbcTest {
         final int count = 100;
         List<Future<?>> futures = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
-            Future<?> future = EXECUTOR.submit(() -> {
+            Future<?> future = BaseTest.EXECUTOR.submit(() -> {
                 for (int j = 0; j < 100; j++) {
                     jdbc.nextCode(codeName);
                 }
@@ -156,68 +134,6 @@ public class JdbcTest {
     }
 
     @Test
-    public void t07() {
-        final String lockName = "t07";
-        TupleOne<Integer> sum = new TupleOne<>(0);
-        Jdbc jdbc = newJdbc();
-        final int count = 100;
-        List<Future<?>> futures = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            Future<?> future = EXECUTOR.submit(() -> {
-                for (int j = 0; j < 100; j++) {
-                    jdbc.lock(lockName, () -> {
-                        sum.setValue1(sum.getValue1() + 1);
-                        try {
-                            Thread.sleep(1);
-                        } catch (InterruptedException ignored) {
-                        }
-                    });
-                }
-            });
-            futures.add(future);
-        }
-        // 等待结束
-        for (Future<?> future : futures) {
-            try {
-                future.get();
-            } catch (Exception e) {
-                log.info("异常", e);
-            }
-        }
-        // sum -> 10000
-        log.info("sum -> {}", sum.getValue1());
-        jdbc.close();
-    }
-
-    @SneakyThrows
-    @Test
-    public void t08() {
-        final String lockName = "t08";
-        Jdbc jdbc = newJdbc();
-        Thread thread = new Thread(() -> {
-            jdbc.tryLock(lockName, -1, locked -> {
-                log.info("### 1 locked={}", locked);
-                try {
-                    Thread.sleep(10_000);
-                } catch (InterruptedException ignored) {
-                    Thread.yield();
-                }
-            });
-        });
-        thread.start();
-        Thread.sleep(1_000);
-        Thread thread2 = new Thread(() -> {
-            jdbc.tryLock(lockName, 3, locked -> {
-                log.info("### 2 locked={}", locked);
-            });
-        });
-        thread2.start();
-        thread.join();
-        thread2.join();
-        jdbc.close();
-    }
-
-    @Test
     public void t09() {
         final String lockName = "t09";
         Jdbc jdbc = newJdbc();
@@ -230,51 +146,5 @@ public class JdbcTest {
             });
         });
         jdbc.close();
-    }
-
-    @Test
-    public void t10() {
-        Jdbc oracle = BaseTest.newOracle();
-        SimpleJdbcCall allocateUnique = new ProcedureJdbcCall(oracle)
-            .withoutProcedureColumnMetaDataAccess()
-            .withCatalogName("dbms_lock")
-            .withProcedureName("allocate_unique")
-            .withNamedBinding()
-            .declareParameters(
-                new SqlParameter("lockname", Types.VARCHAR),
-                new SqlOutParameter("lockhandle", Types.VARCHAR)
-            );
-        allocateUnique.compile();
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("lockname", "test");
-        Map<String, Object> res = allocateUnique.execute(paramMap);
-        log.info("--> {}", res);
-        // lock_result := dbms_lock.request(
-        //     lockhandle => lock_handle,
-        //     lockmode => dbms_lock.x_mode,
-        //     timeout => 3,
-        //     release_on_commit => true
-        // );
-        SimpleJdbcCall request = new ProcedureJdbcCall(oracle)
-            .withoutProcedureColumnMetaDataAccess()
-            .withCatalogName("dbms_lock")
-            .withFunctionName("request")
-            .withNamedBinding()
-            .declareParameters(
-                new SqlOutParameter("result", Types.INTEGER),
-                new SqlParameter("lockhandle", Types.VARCHAR),
-                new SqlParameter("lockmode", Types.TINYINT),
-                new SqlParameter("timeout", Types.INTEGER)
-                // new SqlParameter("release_on_commit", Types.BOOLEAN)
-            );
-        request.compile();
-        paramMap = new HashMap<>();
-        paramMap.put("lockhandle", res.get("lockhandle"));
-        paramMap.put("lockmode", 6);
-        paramMap.put("timeout", 0);
-        // paramMap.put("release_on_commit", false);
-        Integer res2 = request.executeFunction(Integer.class, paramMap);
-        log.info("--> {}", res2);
-        oracle.close();
     }
 }

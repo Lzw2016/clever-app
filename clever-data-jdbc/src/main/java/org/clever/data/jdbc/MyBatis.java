@@ -1732,7 +1732,7 @@ public class MyBatis extends AbstractDataSource {
      * </strong>
      *
      * @param lockName    锁名称
-     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param waitSeconds 等待锁的最大时间
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
     public <T> T nativeTryLock(String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
@@ -1755,7 +1755,7 @@ public class MyBatis extends AbstractDataSource {
      * </strong>
      *
      * @param lockName    锁名称
-     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param waitSeconds 等待锁的最大时间
      * @param syncBlock   同步代码块(可保证分布式串行执行)
      */
     public void nativeTryLock(String lockName, int waitSeconds, Consumer<Boolean> syncBlock) {
