@@ -37,8 +37,8 @@ public class PostgreSQLFeatures extends DataBaseFeatures {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("lockKey1", lockKey.getValue1());
         paramMap.put("lockKey2", lockKey.getValue2());
-        Boolean locked = jdbc.queryBoolean("select pg_advisory_lock(:lockKey1, :lockKey2)", paramMap);
-        return Optional.of(locked).orElse(false);
+        jdbc.queryString("select pg_advisory_lock(:lockKey1, :lockKey2)", paramMap);
+        return true;
     }
 
     @Override

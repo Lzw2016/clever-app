@@ -771,6 +771,10 @@ public class QueryDSL extends SQLQueryFactory {
      *      return result;
      *   })
      * }</pre>
+     * <strong>
+     * 注意: 如果调用上下文中没有开启事务，会自动开启一个新事务 syncBlock 会在这个事务环境中执行。
+     * 如果调用上下文中已经存在事务，就不会开启事务，而是在当前的事务环境中执行数据库锁操作。
+     * </strong>
      *
      * @param lockName    锁名称
      * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
@@ -790,6 +794,10 @@ public class QueryDSL extends SQLQueryFactory {
      *      return result;
      *   })
      * }</pre>
+     * <strong>
+     * 注意: 如果调用上下文中没有开启事务，会自动开启一个新事务 syncBlock 会在这个事务环境中执行。
+     * 如果调用上下文中已经存在事务，就不会开启事务，而是在当前的事务环境中执行数据库锁操作。
+     * </strong>
      *
      * @param lockName    锁名称
      * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
@@ -806,6 +814,10 @@ public class QueryDSL extends SQLQueryFactory {
      *      // 同步业务逻辑处理...
      *   })
      * }</pre>
+     * <strong>
+     * 注意: 如果调用上下文中没有开启事务，会自动开启一个新事务 syncBlock 会在这个事务环境中执行。
+     * 如果调用上下文中已经存在事务，就不会开启事务，而是在当前的事务环境中执行数据库锁操作。
+     * </strong>
      *
      * @param lockName  锁名称
      * @param syncBlock 同步代码块(可保证分布式串行执行)
@@ -821,6 +833,10 @@ public class QueryDSL extends SQLQueryFactory {
      *      // 同步业务逻辑处理...
      *   })
      * }</pre>
+     * <strong>
+     * 注意: 如果调用上下文中没有开启事务，会自动开启一个新事务 syncBlock 会在这个事务环境中执行。
+     * 如果调用上下文中已经存在事务，就不会开启事务，而是在当前的事务环境中执行数据库锁操作。
+     * </strong>
      *
      * @param lockName  锁名称
      * @param syncBlock 同步代码块(可保证分布式串行执行)

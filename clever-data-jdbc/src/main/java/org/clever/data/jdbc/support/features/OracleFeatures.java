@@ -102,7 +102,7 @@ public class OracleFeatures extends DataBaseFeatures {
         release = new ProcedureJdbcCall(jdbc)
             .withoutProcedureColumnMetaDataAccess()
             .withCatalogName("dbms_lock")
-            .withProcedureName("release")
+            .withFunctionName("release")
             .withNamedBinding()
             .declareParameters(
                 new SqlOutParameter("result", Types.INTEGER),

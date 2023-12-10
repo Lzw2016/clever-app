@@ -22,7 +22,7 @@ public class MySQLFeatures extends DataBaseFeatures {
         checkLockName(lockName);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("lockName", lockName);
-        Long locked = jdbc.queryLong("select get_lock(:lockName) from dual", paramMap);
+        Long locked = jdbc.queryLong("select get_lock(:lockName, -1) from dual", paramMap);
         return Conv.asBoolean(locked, false);
     }
 

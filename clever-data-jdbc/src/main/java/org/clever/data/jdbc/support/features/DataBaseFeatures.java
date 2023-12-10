@@ -1,5 +1,6 @@
 package org.clever.data.jdbc.support.features;
 
+import lombok.Getter;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.util.Assert;
 
@@ -11,6 +12,7 @@ import org.clever.util.Assert;
  */
 public abstract class DataBaseFeatures {
     public static int MAX_WAIT_SECONDS = 60 * 30;
+    @Getter
     protected final Jdbc jdbc;
 
     public DataBaseFeatures(Jdbc jdbc) {
