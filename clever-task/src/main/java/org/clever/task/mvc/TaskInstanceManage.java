@@ -288,8 +288,10 @@ public class TaskInstanceManage {
      * 查询所有触发器
      */
     @Transactional(disabled = true)
-    public static Page<JobInfo> queryTaskJobTriggers() {
-        return null;
+    public static Page<JobInfo> queryTaskJobTriggers(TaskJobTriggerReq query) {
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobTriggers(query));
     }
 
     /**
@@ -303,7 +305,7 @@ public class TaskInstanceManage {
     }
 
     /**
-     * 获取任务日志对应的触发器日志
+     * 获取任务对应的触发器日志
      */
     @Transactional(disabled = true)
     public static TaskJobTriggerLog getTaskJobTriggerLog(@RequestParam("jobTriggerLogId") Long jobTriggerLogId) {

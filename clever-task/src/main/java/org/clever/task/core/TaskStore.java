@@ -885,6 +885,7 @@ public class TaskStore {
         return QueryDslUtils.queryByPage(sqlQuery, query);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public Page<JobInfo> queryJobs(TaskJobReq query) {
         SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJob, taskJobTrigger)
             .from(taskJob)
@@ -936,6 +937,36 @@ public class TaskStore {
         TaskShellJob shellJob = tuple.get(taskShellJob);
         TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
         return new JobInfo(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    public Page<JobInfo> queryTaskJobTriggers(TaskJobTriggerReq query) {
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobTrigger, taskJob)
+            .from(taskJobTrigger)
+            .leftJoin(taskJob).on(taskJob.id.eq(taskJobTrigger.jobId))
+            .orderBy(taskJobTrigger.namespace.asc())
+            .orderBy(taskJobTrigger.name.asc());
+        if (StringUtils.isNotBlank(query.getNamespace())) {
+            sqlQuery.where(taskJob.namespace.eq(query.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(query.getName())) {
+            sqlQuery.where(taskJobTrigger.name.like(query.getName()));
+        }
+        if (query.getType() != null) {
+            sqlQuery.where(taskJobTrigger.type.eq(query.getType()));
+        }
+        if (query.getCreateStart() != null) {
+            sqlQuery.where(taskJobTrigger.createAt.goe(query.getCreateStart()));
+        }
+        if (query.getCreateEnd() != null) {
+            sqlQuery.where(taskJobTrigger.createAt.loe(query.getCreateEnd()));
+        }
+        Page<Tuple> page = QueryDslUtils.queryByPage(sqlQuery, query);
+        return page.convertRecords(tuple -> {
+            TaskJob job = tuple.get(taskJob);
+            TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
+            return new JobInfo(job, null, null, null, null, jobTrigger);
+        });
     }
 
     @SuppressWarnings("DuplicatedCode")

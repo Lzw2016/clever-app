@@ -162,7 +162,7 @@ public class DataSyncJobTest {
 //    public void t09() {
 //        HikariConfig hikariConfig = new HikariConfig();
 //        hikariConfig.setDriverClassName("org.postgresql.Driver");
-//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d100?currentSchema=wms8prod");
+//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d300?currentSchema=wms8prod");
 //        hikariConfig.setUsername("wms8prod");
 //        hikariConfig.setPassword("lmis9system");
 //        hikariConfig.setAutoCommit(false);
@@ -172,7 +172,7 @@ public class DataSyncJobTest {
 //
 //        hikariConfig = new HikariConfig();
 //        hikariConfig.setDriverClassName("org.postgresql.Driver");
-//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d300?currentSchema=wms8prod");
+//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d900?currentSchema=wms8d900");
 //        hikariConfig.setUsername("wms8prod");
 //        hikariConfig.setPassword("lmis9system");
 //        hikariConfig.setAutoCommit(true);
