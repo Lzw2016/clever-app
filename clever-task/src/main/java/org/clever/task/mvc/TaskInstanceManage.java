@@ -285,6 +285,16 @@ public class TaskInstanceManage {
     }
 
     /**
+     * 查询所有任务日志信息
+     */
+    @Transactional(disabled = true)
+    public static Page<JobLogInfo> queryJobLogInfo(TaskJobLogReq query) {
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.queryJobLogInfo(query));
+    }
+
+    /**
      * 查询所有触发器
      */
     @Transactional(disabled = true)

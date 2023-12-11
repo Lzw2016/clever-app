@@ -23,6 +23,7 @@ import org.clever.task.TaskDataSource;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.JobInfo;
+import org.clever.task.core.model.JobLogInfo;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.*;
@@ -883,6 +884,41 @@ public class TaskStore {
             query.addOrderField(ColumnMetadata.getName(taskJobLog.fireTime), QueryBySort.DESC);
         }
         return QueryDslUtils.queryByPage(sqlQuery, query);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    public Page<JobLogInfo> queryJobLogInfo(TaskJobLogReq query) {
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobLog, taskJob, taskJobTrigger)
+            .from(taskJobLog)
+            .leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
+            .leftJoin(taskJobTrigger).on(taskJobLog.jobTriggerId.eq(taskJobTrigger.id))
+            .orderBy(taskJob.namespace.asc())
+            .orderBy(taskJob.name.asc());
+        if (StringUtils.isNotBlank(query.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(query.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(query.getInstanceName())) {
+            sqlQuery.where(taskJobLog.instanceName.eq(query.getInstanceName()));
+        }
+        if (query.getJobId() != null) {
+            sqlQuery.where(taskJobLog.jobId.eq(query.getJobId()));
+        }
+        if (query.getFireTimeStart() != null) {
+            sqlQuery.where(taskJobLog.fireTime.goe(query.getFireTimeStart()));
+        }
+        if (query.getFireTimeEnd() != null) {
+            sqlQuery.where(taskJobLog.fireTime.loe(query.getFireTimeEnd()));
+        }
+        if (query.isOrderEmpty()) {
+            query.addOrderField(ColumnMetadata.getName(taskJobLog.fireTime), QueryBySort.DESC);
+        }
+        Page<Tuple> page = QueryDslUtils.queryByPage(sqlQuery, query);
+        return page.convertRecords(tuple -> {
+            TaskJobLog jobLog = tuple.get(taskJobLog);
+            TaskJob job = tuple.get(taskJob);
+            TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
+            return new JobLogInfo(jobLog, job, jobTrigger);
+        });
     }
 
     @SuppressWarnings("DuplicatedCode")
