@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.clever.task.core.model.entity.TaskJob;
 import org.clever.task.core.model.entity.TaskJobLog;
-import org.clever.task.core.model.entity.TaskJobTrigger;
+import org.clever.task.core.model.entity.TaskJobTriggerLog;
 
 /**
  * 作者：lizw <br/>
@@ -16,6 +16,6 @@ import org.clever.task.core.model.entity.TaskJobTrigger;
 @Data
 public class JobLogInfo {
     private TaskJobLog log;
+    private TaskJobTriggerLog triggerLog;
     private TaskJob job;
-    private TaskJobTrigger jobTrigger;
 }

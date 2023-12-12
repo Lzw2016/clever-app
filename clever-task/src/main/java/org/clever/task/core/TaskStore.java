@@ -888,10 +888,10 @@ public class TaskStore {
 
     @SuppressWarnings("DuplicatedCode")
     public Page<JobLogInfo> queryJobLogInfo(TaskJobLogReq query) {
-        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobLog, taskJob, taskJobTrigger)
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobLog, taskJobTriggerLog, taskJob)
             .from(taskJobLog)
+            .leftJoin(taskJobTriggerLog).on(taskJobLog.jobTriggerLogId.eq(taskJobTriggerLog.id))
             .leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
-            .leftJoin(taskJobTrigger).on(taskJobLog.jobTriggerId.eq(taskJobTrigger.id))
             .orderBy(taskJob.namespace.asc())
             .orderBy(taskJob.name.asc());
         if (StringUtils.isNotBlank(query.getNamespace())) {
@@ -915,9 +915,9 @@ public class TaskStore {
         Page<Tuple> page = QueryDslUtils.queryByPage(sqlQuery, query);
         return page.convertRecords(tuple -> {
             TaskJobLog jobLog = tuple.get(taskJobLog);
+            TaskJobTriggerLog triggerLog = tuple.get(taskJobTriggerLog);
             TaskJob job = tuple.get(taskJob);
-            TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
-            return new JobLogInfo(jobLog, job, jobTrigger);
+            return new JobLogInfo(jobLog, triggerLog, job);
         });
     }
 
