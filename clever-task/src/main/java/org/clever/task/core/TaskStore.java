@@ -12,6 +12,7 @@ import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Conv;
 import org.clever.core.DateUtils;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.model.request.QueryBySort;
@@ -27,12 +28,15 @@ import org.clever.task.core.model.JobLogInfo;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.*;
+import org.clever.task.core.model.response.StatisticsInfoRes;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1031,6 +1035,60 @@ public class TaskStore {
 
     public TaskJobTriggerLog getTaskJobTriggerLog(Long jobTriggerLogId) {
         return queryDSL.selectFrom(taskJobTriggerLog).where(taskJobTriggerLog.id.eq(jobTriggerLogId)).fetchOne();
+    }
+
+    @SuppressWarnings("ExtractMethodRecommender")
+    public StatisticsInfoRes getStatistics() {
+        StatisticsInfoRes res = new StatisticsInfoRes();
+        res.setJobCount(Conv.asInteger(queryDSL.selectFrom(taskJob).fetchCount()));
+        res.setTriggerCount(Conv.asInteger(queryDSL.select(taskJobTrigger.fireCount.sum()).from(taskJobTrigger).fetchOne()));
+        Tuple tuple = queryDSL.select(taskScheduler.namespace.countDistinct(), taskScheduler.instanceName.count()).from(taskScheduler).fetchOne();
+        if (tuple != null) {
+            res.setNamespaceCount(Conv.asInteger(tuple.get(taskScheduler.namespace.countDistinct())));
+            res.setInstanceCount(Conv.asInteger(tuple.get(taskScheduler.instanceName.count())));
+        }
+        // heartbeat_interval * 2 > now - last_heartbeat_time
+        BooleanExpression available = taskScheduler.heartbeatInterval.multiply(2).gt(
+            Expressions.numberOperation(
+                Long.TYPE, Ops.DateTimeOps.DIFF_SECONDS, taskScheduler.lastHeartbeatTime, Expressions.currentTimestamp()
+            ).multiply(1000)
+        );
+        res.setActiveInstanceCount(Conv.asInteger(queryDSL.selectFrom(taskScheduler).where(available).fetchCount()));
+        List<Tuple> list = queryDSL.select(taskJob.namespace, taskJob.type, taskJob.type.count())
+            .from(taskJob)
+            .groupBy(taskJob.namespace, taskJob.type)
+            .fetch();
+        Map<String, StatisticsInfoRes.JobTypeCount> namespaceJobTypeCountMap = new HashMap<>();
+        for (Tuple item : list) {
+            String namespace = item.get(taskJob.namespace);
+            int type = Conv.asInteger(item.get(taskJob.type));
+            int count = Conv.asInteger(item.get(taskJob.type.count()));
+            StatisticsInfoRes.JobTypeCount jobTypeCount = namespaceJobTypeCountMap.computeIfAbsent(namespace, name -> new StatisticsInfoRes.JobTypeCount());
+            switch (type) {
+                case EnumConstant.JOB_TYPE_1:
+                    jobTypeCount.setHttp(jobTypeCount.getHttp() + count);
+                    break;
+                case EnumConstant.JOB_TYPE_2:
+                    jobTypeCount.setJava(jobTypeCount.getJava() + count);
+                    break;
+                case EnumConstant.JOB_TYPE_3:
+                    jobTypeCount.setJs(jobTypeCount.getJs() + count);
+                    break;
+                case EnumConstant.JOB_TYPE_4:
+                    jobTypeCount.setShell(jobTypeCount.getShell() + count);
+                    break;
+            }
+        }
+        res.setNamespaceJobTypeCountMap(namespaceJobTypeCountMap);
+        StatisticsInfoRes.JobTypeCount jobTypeCountSum = new StatisticsInfoRes.JobTypeCount();
+        for (StatisticsInfoRes.JobTypeCount count : namespaceJobTypeCountMap.values()) {
+            jobTypeCountSum.setHttp(jobTypeCountSum.getHttp() + count.getHttp());
+            jobTypeCountSum.setJava(jobTypeCountSum.getJava() + count.getJava());
+            jobTypeCountSum.setJs(jobTypeCountSum.getJs() + count.getJs());
+            jobTypeCountSum.setShell(jobTypeCountSum.getShell() + count.getShell());
+        }
+        res.setJobTypeCount(jobTypeCountSum);
+        return res;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

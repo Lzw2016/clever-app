@@ -33,20 +33,20 @@ public class StatisticsInfoRes {
     /**
      * 任务类型比例
      */
-    private JobTypeRatio jobTypeRatio;
+    private JobTypeCount jobTypeCount;
     /**
      * 命名空间任务数比例{@code Map<namespaceName, JobTypeRatio>}
      */
-    private Map<String, JobTypeRatio> namespaceJobTypeRatioMap;
+    private Map<String, JobTypeCount> namespaceJobTypeCountMap;
 
     /**
      * 任务类型比例(百分比)
      */
     @Data
-    public static class JobTypeRatio {
-        private Integer http;
-        private Integer java;
-        private Integer js;
-        private Integer shell;
+    public static class JobTypeCount {
+        private Integer http = 0;
+        private Integer java = 0;
+        private Integer js = 0;
+        private Integer shell = 0;
     }
 }

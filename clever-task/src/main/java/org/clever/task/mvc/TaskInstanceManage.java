@@ -17,6 +17,9 @@ import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
 import org.clever.task.core.model.request.*;
+import org.clever.task.core.model.response.JobErrorRankRes;
+import org.clever.task.core.model.response.RunJobsRes;
+import org.clever.task.core.model.response.StatisticsInfoRes;
 import org.clever.validation.annotation.Validated;
 import org.clever.web.support.mvc.annotation.RequestBody;
 import org.clever.web.support.mvc.annotation.RequestParam;
@@ -322,5 +325,31 @@ public class TaskInstanceManage {
         TaskInstance taskInstance = getTaskInstance();
         TaskStore taskStore = taskInstance.getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.getTaskJobTriggerLog(jobTriggerLogId));
+    }
+
+    /**
+     * 获取任务对应的触发器日志
+     */
+    @Transactional(disabled = true)
+    public static StatisticsInfoRes getStatistics() {
+        TaskInstance taskInstance = getTaskInstance();
+        TaskStore taskStore = taskInstance.getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getStatistics());
+    }
+
+    /**
+     * 最近运行的任务、正在运行的任务、即将运行的任务
+     */
+    @Transactional(disabled = true)
+    public static RunJobsRes getRunJobs(RunJobsReq req) {
+        return null;
+    }
+
+    /**
+     * 错过触发最多的任务、运行失败最多的任务、运行耗时最长的任务、重试最多的任务
+     */
+    @Transactional(disabled = true)
+    public static JobErrorRankRes getErrorJobs(JobErrorRankReq req) {
+        return null;
     }
 }
