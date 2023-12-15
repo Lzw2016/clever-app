@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.Conv;
 import org.clever.core.DateUtils;
+import org.clever.core.exception.BusinessException;
 import org.clever.core.id.SnowFlake;
+import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.Page;
 import org.clever.data.jdbc.Jdbc;
@@ -28,15 +30,14 @@ import org.clever.task.core.model.JobLogInfo;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.model.request.*;
+import org.clever.task.core.model.response.JobErrorRankRes;
+import org.clever.task.core.model.response.RunJobsRes;
 import org.clever.task.core.model.response.StatisticsInfoRes;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -1088,6 +1089,165 @@ public class TaskStore {
             jobTypeCountSum.setShell(jobTypeCountSum.getShell() + count.getShell());
         }
         res.setJobTypeCount(jobTypeCountSum);
+        return res;
+    }
+
+    public RunJobsRes getRunJobs(RunJobsReq req) {
+        if (req.getLimit() == null || req.getLimit() <= 0) {
+            req.setLimit(50);
+        }
+        if (req.getLimit() > QueryByPage.PAGE_SIZE_MAX) {
+            req.setLimit(QueryByPage.PAGE_SIZE_MAX);
+        }
+        RunJobsRes res = new RunJobsRes();
+        // 最近运行的任务
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobLog, taskJob)
+            .from(taskJobLog).leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
+            .where(taskJobLog.status.isNotNull())
+            .orderBy(taskJobLog.fireTime.desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(req.getNamespace()));
+        }
+        List<Tuple> list = sqlQuery.fetch();
+        res.setLastRunJobs(list.stream().map(tuple -> {
+            JobLogInfo jobLogInfo = new JobLogInfo();
+            jobLogInfo.setJob(tuple.get(taskJob));
+            jobLogInfo.setLog(tuple.get(taskJobLog));
+            return jobLogInfo;
+        }).collect(Collectors.toList()));
+        // 正在运行的任务
+        sqlQuery = queryDSL.select(taskJobLog, taskJob)
+            .from(taskJobLog).leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
+            .where(taskJobLog.status.isNull())
+            .orderBy(taskJobLog.fireTime.desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(req.getNamespace()));
+        }
+        list = sqlQuery.fetch();
+        res.setLastRunningJobs(list.stream().map(tuple -> {
+            JobLogInfo jobLogInfo = new JobLogInfo();
+            jobLogInfo.setJob(tuple.get(taskJob));
+            jobLogInfo.setLog(tuple.get(taskJobLog));
+            return jobLogInfo;
+        }).collect(Collectors.toList()));
+        // 即将运行的任务
+        sqlQuery = queryDSL.select(taskJobTrigger, taskJob)
+            .from(taskJobTrigger).leftJoin(taskJob).on(taskJobTrigger.jobId.eq(taskJob.id))
+            .orderBy(taskJobTrigger.nextFireTime.desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobTrigger.namespace.eq(req.getNamespace()));
+        }
+        list = sqlQuery.fetch();
+        res.setWaitRunJobs(list.stream().map(tuple -> {
+            JobLogInfo jobLogInfo = new JobLogInfo();
+            jobLogInfo.setJob(tuple.get(taskJob));
+            jobLogInfo.setTrigger(tuple.get(taskJobTrigger));
+            return jobLogInfo;
+        }).collect(Collectors.toList()));
+        return res;
+    }
+
+    public JobErrorRankRes getErrorJobs(JobErrorRankReq req) {
+        if (req.getEnd() == null) {
+            req.setEnd(new Date());
+        }
+        if (req.getStart() == null) {
+            req.setStart(DateUtils.addMonths(req.getEnd(), -1));
+        }
+        if (req.getLimit() == null || req.getLimit() <= 0) {
+            req.setLimit(50);
+        }
+        if (req.getLimit() > QueryByPage.PAGE_SIZE_MAX) {
+            req.setLimit(QueryByPage.PAGE_SIZE_MAX);
+        }
+        JobErrorRankRes res = new JobErrorRankRes();
+        // 错过触发最多的任务
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobTriggerLog.jobId, taskJobTriggerLog.jobId.count())
+            .from(taskJobTriggerLog)
+            .where(taskJobTriggerLog.createAt.goe(req.getStart()))
+            .where(taskJobTriggerLog.createAt.loe(req.getEnd()))
+            .where(taskJobTriggerLog.misFired.eq(EnumConstant.JOB_TRIGGER_MIS_FIRED_1))
+            .groupBy(taskJobTriggerLog.jobId)
+            .orderBy(taskJobTriggerLog.jobId.count().desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobTriggerLog.namespace.eq(req.getNamespace()));
+        }
+        List<Tuple> tuples = sqlQuery.fetch();
+        tuples.forEach(tuple -> res.getMisfireJobMap().put(tuple.get(taskJobTriggerLog.jobId), Conv.asInteger(tuple.get(taskJobTriggerLog.jobId.count()))));
+        List<TaskJob> jobs = queryDSL.selectFrom(taskJob).where(taskJob.id.in(res.getMisfireJobMap().keySet())).fetch();
+        for (Long jobId : res.getMisfireJobMap().keySet()) {
+            TaskJob jobEntity = jobs.stream()
+                .filter(job -> Objects.equals(job.getId(), jobId))
+                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+            res.getMisfireJobs().add(jobEntity);
+        }
+        // 运行失败最多的任务
+        sqlQuery = queryDSL.select(taskJobLog.jobId, taskJobLog.jobId.count())
+            .from(taskJobLog)
+            .where(taskJobLog.fireTime.goe(req.getStart()))
+            .where(taskJobLog.fireTime.loe(req.getEnd()))
+            .where(taskJobLog.status.eq(EnumConstant.JOB_LOG_STATUS_1))
+            .groupBy(taskJobLog.jobId)
+            .orderBy(taskJobLog.jobId.count().desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(req.getNamespace()));
+        }
+        tuples = sqlQuery.fetch();
+        tuples.forEach(tuple -> res.getFailJobMap().put(tuple.get(taskJobLog.jobId), Conv.asInteger(tuple.get(taskJobLog.jobId.count()))));
+        jobs = queryDSL.selectFrom(taskJob).where(taskJob.id.in(res.getFailJobMap().keySet())).fetch();
+        for (Long jobId : res.getFailJobMap().keySet()) {
+            TaskJob jobEntity = jobs.stream()
+                .filter(job -> Objects.equals(job.getId(), jobId))
+                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+            res.getFailJobs().add(jobEntity);
+        }
+        // 运行耗时最长的任务
+        sqlQuery = queryDSL.select(taskJobLog.jobId, taskJobLog.runTime.sum())
+            .from(taskJobLog)
+            .where(taskJobLog.fireTime.goe(req.getStart()))
+            .where(taskJobLog.fireTime.loe(req.getEnd()))
+            .where(taskJobLog.runTime.isNotNull())
+            .groupBy(taskJobLog.jobId)
+            .orderBy(taskJobLog.runTime.sum().desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(req.getNamespace()));
+        }
+        tuples = sqlQuery.fetch();
+        tuples.forEach(tuple -> res.getSumRunTimeJobMap().put(tuple.get(taskJobLog.jobId), Conv.asInteger(tuple.get(taskJobLog.runTime.sum()))));
+        jobs = queryDSL.selectFrom(taskJob).where(taskJob.id.in(res.getSumRunTimeJobMap().keySet())).fetch();
+        for (Long jobId : res.getSumRunTimeJobMap().keySet()) {
+            TaskJob jobEntity = jobs.stream()
+                .filter(job -> Objects.equals(job.getId(), jobId))
+                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+            res.getMaxRunTimeJobs().add(jobEntity);
+        }
+        // 重试次数最多的任务
+        sqlQuery = queryDSL.select(taskJobLog.jobId, taskJobLog.retryCount.count())
+            .from(taskJobLog)
+            .where(taskJobLog.fireTime.goe(req.getStart()))
+            .where(taskJobLog.fireTime.loe(req.getEnd()))
+            .where(taskJobLog.retryCount.goe(1))
+            .groupBy(taskJobLog.jobId)
+            .orderBy(taskJobLog.retryCount.count().desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(req.getNamespace()));
+        }
+        tuples = sqlQuery.fetch();
+        tuples.forEach(tuple -> res.getRetryJobMap().put(tuple.get(taskJobLog.jobId), Conv.asInteger(tuple.get(taskJobLog.runTime.sum()))));
+        jobs = queryDSL.selectFrom(taskJob).where(taskJob.id.in(res.getRetryJobMap().keySet())).fetch();
+        for (Long jobId : res.getRetryJobMap().keySet()) {
+            TaskJob jobEntity = jobs.stream()
+                .filter(job -> Objects.equals(job.getId(), jobId))
+                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+            res.getMaxRetryJobs().add(jobEntity);
+        }
         return res;
     }
 

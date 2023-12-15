@@ -43,6 +43,11 @@ public class TaskInstanceManage {
         return TASK_INSTANCE;
     }
 
+    private static TaskStore getTaskStore() {
+        TaskInstance taskInstance = getTaskInstance();
+        return taskInstance.getTaskStore();
+    }
+
     /**
      * 验证cron表达式
      */
@@ -109,8 +114,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq query) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.querySchedulerLog(query));
     }
 
@@ -119,8 +123,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<JobInfo> queryJobs(TaskJobReq query) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.queryJobs(query));
     }
 
@@ -129,8 +132,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static JobInfo getJob(@RequestParam("id") Long id) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.getJobInfo(id));
     }
 
@@ -282,8 +284,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<TaskJobLog> queryTaskJobLog(TaskJobLogReq query) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobLog(query));
     }
 
@@ -292,8 +293,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<JobLogInfo> queryJobLogInfo(TaskJobLogReq query) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.queryJobLogInfo(query));
     }
 
@@ -302,8 +302,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<JobInfo> queryTaskJobTriggers(TaskJobTriggerReq query) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobTriggers(query));
     }
 
@@ -312,8 +311,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<TaskJobTriggerLog> queryTaskJobTriggerLogs(TaskJobTriggerLogReq query) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobTriggerLogs(query));
     }
 
@@ -322,8 +320,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static TaskJobTriggerLog getTaskJobTriggerLog(@RequestParam("jobTriggerLogId") Long jobTriggerLogId) {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.getTaskJobTriggerLog(jobTriggerLogId));
     }
 
@@ -332,8 +329,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static StatisticsInfoRes getStatistics() {
-        TaskInstance taskInstance = getTaskInstance();
-        TaskStore taskStore = taskInstance.getTaskStore();
+        TaskStore taskStore = getTaskStore();
         return taskStore.beginReadOnlyTX(status -> taskStore.getStatistics());
     }
 
@@ -342,7 +338,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static RunJobsRes getRunJobs(RunJobsReq req) {
-        return null;
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getRunJobs(req));
     }
 
     /**
@@ -350,6 +347,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static JobErrorRankRes getErrorJobs(JobErrorRankReq req) {
-        return null;
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getErrorJobs(req));
     }
 }

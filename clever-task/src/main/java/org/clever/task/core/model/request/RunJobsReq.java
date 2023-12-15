@@ -2,8 +2,6 @@ package org.clever.task.core.model.request;
 
 import lombok.Data;
 
-import java.util.Date;
-
 /**
  * 作者：lizw <br/>
  * 创建时间：2023/12/14 10:15 <br/>
@@ -11,13 +9,9 @@ import java.util.Date;
 @Data
 public class RunJobsReq {
     /**
-     * 开始时间
+     * 命名空间
      */
-    private Date start;
-    /**
-     * 结束时间
-     */
-    private Date end;
+    private String namespace;
     /**
      * 数据量限制
      */

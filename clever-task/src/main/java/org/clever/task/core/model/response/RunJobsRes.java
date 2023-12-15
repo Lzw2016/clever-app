@@ -1,7 +1,7 @@
 package org.clever.task.core.model.response;
 
 import lombok.Data;
-import org.clever.task.core.model.entity.TaskJob;
+import org.clever.task.core.model.JobLogInfo;
 
 import java.util.List;
 
@@ -14,13 +14,13 @@ public class RunJobsRes {
     /**
      * 最近运行的任务
      */
-    private List<TaskJob> lastRunJobs;
+    private List<JobLogInfo> lastRunJobs;
     /**
      * 正在运行的任务
      */
-    private List<TaskJob> lastRunningJobs;
+    private List<JobLogInfo> lastRunningJobs;
     /**
      * 即将运行的任务
      */
-    private List<TaskJob> waitRunJobs;
+    private List<JobLogInfo> waitRunJobs;
 }

@@ -1,11 +1,14 @@
 package org.clever.task.core.model.request;
 
+import lombok.Data;
+
 import java.util.Date;
 
 /**
  * 作者：lizw <br/>
  * 创建时间：2023/12/14 10:45 <br/>
  */
+@Data
 public class JobErrorRankReq {
     /**
      * 命名空间
@@ -23,7 +26,6 @@ public class JobErrorRankReq {
      * 结束时间
      */
     private Date end;
-
     /**
      * 数据量限制
      */
