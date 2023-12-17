@@ -332,6 +332,15 @@ public class TaskInstanceManage {
     }
 
     /**
+     * 任务运行统计数据
+     */
+    @Transactional(disabled = true)
+    public static CartLineDataRes getCartLineDataRes(CartLineDataReq req) {
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getCartLineDataRes(req));
+    }
+
+    /**
      * 最近运行的任务
      */
     @Transactional(disabled = true)

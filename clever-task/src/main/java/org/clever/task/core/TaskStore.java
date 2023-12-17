@@ -1,10 +1,9 @@
 package org.clever.task.core;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Ops;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.DateTimeExpression;
-import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.sql.ColumnMetadata;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.dml.SQLInsertClause;
@@ -1089,6 +1088,97 @@ public class TaskStore {
         res.setJobTypeCount(jobTypeCountSum);
         return res;
     }
+
+    public CartLineDataRes getCartLineDataRes(CartLineDataReq req) {
+        if (req.getEnd() == null) {
+            req.setEnd(new Date());
+        }
+        if (req.getStart() == null) {
+            req.setStart(DateUtils.addMonths(req.getEnd(), -1));
+        }
+        if (req.getLimit() == null || req.getLimit() <= 0) {
+            req.setLimit(30);
+        }
+        if (req.getLimit() > QueryByPage.PAGE_SIZE_MAX) {
+            req.setLimit(QueryByPage.PAGE_SIZE_MAX);
+        }
+        Function<DateTimePath<Date>, StringExpression> getDateFormatField = field -> {
+            // mysql        date_format(now(), '%Y-%m-%d %H:%i:%s')
+            // oracle       to_char(sysdate, 'YYYY-MM-DD HH24:MI:SS')
+            // postgre_sql  to_char(now(), 'YYYY-MM-DD HH24:MI:SS')
+            StringExpression fieldExpr;
+            switch (queryDSL.getJdbc().getDbType()) {
+                case MYSQL:
+                    // noinspection DuplicateBranchesInSwitch
+                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, ConstantImpl.create("%Y-%m-%d"));
+                    break;
+                case ORACLE:
+                case ORACLE_12C:
+                case POSTGRE_SQL:
+                    fieldExpr = Expressions.stringTemplate("to_char({0}, {1})", field, ConstantImpl.create("YYYY-MM-DD"));
+                    break;
+                default:
+                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, ConstantImpl.create("%Y-%m-%d"));
+            }
+            return fieldExpr;
+        };
+        CartLineDataRes res = new CartLineDataRes();
+        // 任务运行统计数据
+        StringExpression jobFireTime = getDateFormatField.apply(taskJobLog.fireTime);
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(jobFireTime, taskJobLog.fireTime.count())
+            .from(taskJobLog)
+            .where(taskJobLog.fireTime.goe(req.getStart()))
+            .where(taskJobLog.fireTime.loe(req.getEnd()))
+            .groupBy(jobFireTime)
+            .orderBy(jobFireTime.desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobLog.namespace.eq(req.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(req.getInstanceName())) {
+            sqlQuery.where(taskJobLog.instanceName.eq(req.getInstanceName()));
+        }
+        List<Tuple> tuples = sqlQuery.fetch();
+        Map<String, Integer> jobMap = new HashMap<>(tuples.size());
+        tuples.forEach(tuple -> jobMap.put(tuple.get(jobFireTime), Conv.asInteger(tuple.get(taskJobLog.fireTime.count()))));
+        StringExpression triggerFireTime = getDateFormatField.apply(taskJobTriggerLog.fireTime);
+        sqlQuery = queryDSL.select(triggerFireTime, taskJobTriggerLog.fireTime.count())
+            .from(taskJobTriggerLog)
+            .where(taskJobTriggerLog.fireTime.goe(req.getStart()))
+            .where(taskJobTriggerLog.fireTime.loe(req.getEnd()))
+            .groupBy(triggerFireTime)
+            .orderBy(triggerFireTime.desc())
+            .limit(req.getLimit());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskJobTriggerLog.namespace.eq(req.getNamespace()));
+        }
+        if (StringUtils.isNotBlank(req.getInstanceName())) {
+            sqlQuery.where(taskJobTriggerLog.instanceName.eq(req.getInstanceName()));
+        }
+        tuples = sqlQuery.fetch();
+        Map<String, Integer> triggerMap = new HashMap<>(tuples.size());
+        tuples.forEach(tuple -> triggerMap.put(tuple.get(triggerFireTime), Conv.asInteger(tuple.get(taskJobTriggerLog.fireTime.count()))));
+        // 设置返回值
+        Date startTime = req.getStart();
+        String currentTimeStr = DateUtils.formatToString(startTime, DateUtils.yyyy_MM_dd);
+        final String endTimeStr = DateUtils.formatToString(req.getEnd(), DateUtils.yyyy_MM_dd);
+        while (currentTimeStr.compareTo(endTimeStr) <= 0) {
+            Integer count = jobMap.get(currentTimeStr);
+            if (count == null) {
+                count = 0;
+            }
+            res.getJob().add(new CartLineDataRes.CartLineItem(currentTimeStr, count));
+            count = triggerMap.get(currentTimeStr);
+            if (count == null) {
+                count = 0;
+            }
+            res.getTrigger().add(new CartLineDataRes.CartLineItem(currentTimeStr, count));
+            startTime = DateUtils.addDays(startTime, 1);
+            currentTimeStr = DateUtils.formatToString(startTime, DateUtils.yyyy_MM_dd);
+        }
+        return res;
+    }
+
 
     @SuppressWarnings("DuplicatedCode")
     public List<JobLogInfo> getLastRunJobs(RunJobsReq req) {
