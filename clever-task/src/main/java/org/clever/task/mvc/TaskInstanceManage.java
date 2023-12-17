@@ -17,9 +17,7 @@ import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
 import org.clever.task.core.model.request.*;
-import org.clever.task.core.model.response.JobErrorRankRes;
-import org.clever.task.core.model.response.RunJobsRes;
-import org.clever.task.core.model.response.StatisticsInfoRes;
+import org.clever.task.core.model.response.*;
 import org.clever.validation.annotation.Validated;
 import org.clever.web.support.mvc.annotation.RequestBody;
 import org.clever.web.support.mvc.annotation.RequestParam;
@@ -334,20 +332,65 @@ public class TaskInstanceManage {
     }
 
     /**
-     * 最近运行的任务、正在运行的任务、即将运行的任务
+     * 最近运行的任务
      */
     @Transactional(disabled = true)
-    public static RunJobsRes getRunJobs(RunJobsReq req) {
+    public static List<JobLogInfo> getLastRunJobs(RunJobsReq req) {
         TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getRunJobs(req));
+        return taskStore.beginReadOnlyTX(status -> taskStore.getLastRunJobs(req));
     }
 
     /**
-     * 错过触发最多的任务、运行失败最多的任务、运行耗时最长的任务、重试最多的任务
+     * 正在运行的任务
      */
     @Transactional(disabled = true)
-    public static JobErrorRankRes getErrorJobs(JobErrorRankReq req) {
+    public static List<JobLogInfo> getLastRunningJobs(RunJobsReq req) {
         TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getErrorJobs(req));
+        return taskStore.beginReadOnlyTX(status -> taskStore.getLastRunningJobs(req));
+    }
+
+    /**
+     * 即将运行的任务
+     */
+    @Transactional(disabled = true)
+    public static List<JobLogInfo> getWaitRunJobs(RunJobsReq req) {
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getWaitRunJobs(req));
+    }
+
+    /**
+     * 错过触发最多的任务
+     */
+    @Transactional(disabled = true)
+    public static JobMisfireRankRes getMisfireJobs(JobErrorRankReq req) {
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getMisfireJobs(req));
+    }
+
+    /**
+     * 运行失败最多的任务
+     */
+    @Transactional(disabled = true)
+    public static JobFailRankRes getFailJobs(JobErrorRankReq req) {
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getFailJobs(req));
+    }
+
+    /**
+     * 运行耗时最长的任务
+     */
+    @Transactional(disabled = true)
+    public static JobRunTimeRankRes getRunTimeJobs(JobErrorRankReq req) {
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getRunTimeJobs(req));
+    }
+
+    /**
+     * 重试最多的任务
+     */
+    @Transactional(disabled = true)
+    public static JobRetryRankRes getRetryJobs(JobErrorRankReq req) {
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.getRetryJobs(req));
     }
 }
