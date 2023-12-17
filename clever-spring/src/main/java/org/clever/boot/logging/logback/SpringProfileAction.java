@@ -49,8 +49,7 @@ class SpringProfileAction extends Action implements InPlayListener {
         if (this.environment == null) {
             return false;
         }
-        String[] profileNames = StringUtils
-                .trimArrayElements(StringUtils.commaDelimitedListToStringArray(attributes.getValue(NAME_ATTRIBUTE)));
+        String[] profileNames = StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(attributes.getValue(NAME_ATTRIBUTE)));
         if (profileNames.length == 0) {
             return false;
         }
