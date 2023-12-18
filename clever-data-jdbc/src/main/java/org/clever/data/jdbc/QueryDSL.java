@@ -4,6 +4,9 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.*;
 import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
@@ -570,6 +573,96 @@ public class QueryDSL extends SQLQueryFactory {
      */
     public JdbcDataSourceStatus getStatus() {
         return jdbc.getStatus();
+    }
+
+    /**
+     * 处理 like 匹配时, 使用转义字符, 转义'%'、'_'通配符, 如:
+     * <pre>
+     * "abcdefg"        ->  "abcdefg"
+     * "abc%de_fg"      ->  "abc\%de\_fg"
+     * "abc\%de\_fg"    ->  "abc\%de\_fg"
+     * "abc\%de_fg"     ->  "abc\%de\_fg"
+     * </pre>
+     * sql语句类似 “ and field like likeEscape(likeVal, escape) escape '\' ”
+     *
+     * @param field   like匹配字段
+     * @param likeVal like匹配值
+     * @param escape  转义字符，如{@code "\"}
+     * @param prefix  是否前缀匹配
+     * @param suffix  是否后缀匹配
+     */
+    public BooleanExpression likeMatch(StringPath field, String likeVal, String escape, boolean prefix, boolean suffix) {
+        String likeEscape = jdbc.likeEscape(likeVal, escape);
+        if (prefix) {
+            likeEscape = "%" + likeEscape;
+        }
+        if (suffix) {
+            likeEscape = likeEscape + "%";
+        }
+        return Expressions.booleanTemplate(
+            " {0} like {1} escape {2} ",
+            field,
+            Expressions.constant(likeEscape),
+            Expressions.constant(escape)
+        );
+    }
+
+    /**
+     * 生成 like 前缀匹配值, 转义'%'、'_'通配符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     *
+     * @param field   like匹配字段
+     * @param likeVal like匹配值
+     * @param prefix  是否前缀匹配
+     * @param suffix  是否后缀匹配
+     */
+    public BooleanExpression likeMatch(StringPath field, String likeVal, boolean prefix, boolean suffix) {
+        String escape = jdbc.getEscape();
+        return likeMatch(field, likeVal, escape, suffix, suffix);
+    }
+
+    /**
+     * 生成 like 前缀匹配值, 转义'%'、'_'通配符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     */
+    public BooleanExpression likePrefix(StringPath field, String likeVal) {
+        return likeMatch(field, likeVal, true, false);
+    }
+
+    /**
+     * 生成 like 后缀匹配值, 转义'%'、'_'通配符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     */
+    public BooleanExpression likeSuffix(StringPath field, String likeVal) {
+        return likeMatch(field, likeVal, false, true);
+    }
+
+    /**
+     * 生成 like 前缀和后缀匹配值, 转义'%'、'_'通配符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     */
+    public BooleanExpression likeBoth(StringPath field, String likeVal) {
+        return likeMatch(field, likeVal, true, true);
     }
 
     // --------------------------------------------------------------------------------------------

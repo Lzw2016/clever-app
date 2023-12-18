@@ -2747,6 +2747,22 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
+     * 获取数据库的转义字符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     */
+    public String getEscape() {
+        // if (Objects.equals(dbType, DbType.MYSQL)) {
+        //     escape = "\\\\";
+        // }
+        return "\\";
+    }
+
+    /**
      * 处理 like 匹配时, 使用转义字符, 转义'%'、'_'通配符, 如:
      * <pre>
      * "abcdefg"        ->  "abcdefg"
@@ -2793,10 +2809,7 @@ public class Jdbc extends AbstractDataSource {
      * @param likeVal like匹配值
      */
     public String likeEscape(String likeVal) {
-        String escape = "\\";
-        // if (Objects.equals(dbType, DbType.MYSQL)) {
-        //     escape = "\\\\";
-        // }
+        String escape = getEscape();
         return likeEscape(likeVal, escape);
     }
 
