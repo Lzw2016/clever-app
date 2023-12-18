@@ -2746,6 +2746,99 @@ public class Jdbc extends AbstractDataSource {
         }
     }
 
+    /**
+     * 处理 like 匹配时, 使用转义字符, 转义'%'、'_'通配符, 如:
+     * <pre>
+     * "abcdefg"        ->  "abcdefg"
+     * "abc%de_fg"      ->  "abc\%de\_fg"
+     * "abc\%de\_fg"    ->  "abc\%de\_fg"
+     * "abc\%de_fg"     ->  "abc\%de\_fg"
+     * </pre>
+     * sql语句类似 “ and field like likeEscape(likeVal, escape) escape '\' ”
+     *
+     * @param likeVal like匹配值
+     * @param escape  转义字符，如{@code "\"}
+     */
+    public String likeEscape(String likeVal, String escape) {
+        if ("".equals(likeVal) || likeVal == null) {
+            return "";
+        }
+        escape = StringUtils.trim(escape);
+        if (StringUtils.isBlank(escape)) {
+            escape = "\\";
+        }
+        likeVal = StringUtils.replace(likeVal, escape + "%", "%");
+        likeVal = StringUtils.replace(likeVal, escape + "_", "_");
+        likeVal = StringUtils.replace(likeVal, "%", escape + "%");
+        likeVal = StringUtils.replace(likeVal, "_", escape + "_");
+        return likeVal;
+    }
+
+    /**
+     * 处理 like 匹配时, 使用转义字符, 转义'%'、'_'通配符, 如:
+     * <pre>
+     * "abcdefg"        ->  "abcdefg"
+     * "abc%de_fg"      ->  "abc\%de\_fg"
+     * "abc\%de\_fg"    ->  "abc\%de\_fg"
+     * "abc\%de_fg"     ->  "abc\%de\_fg"
+     * </pre>
+     * sql语句类似 “ and field like likeEscape(likeVal, escape) escape '\' ”
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     *
+     * @param likeVal like匹配值
+     */
+    public String likeEscape(String likeVal) {
+        String escape = "\\";
+        // if (Objects.equals(dbType, DbType.MYSQL)) {
+        //     escape = "\\\\";
+        // }
+        return likeEscape(likeVal, escape);
+    }
+
+    /**
+     * 生成 like 前缀匹配值, 转义'%'、'_'通配符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     */
+    public String likePrefix(String likeVal) {
+        return likeEscape(likeVal) + "%";
+    }
+
+    /**
+     * 生成 like 后缀匹配值, 转义'%'、'_'通配符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     */
+    public String likeSuffix(String likeVal) {
+        return "%" + likeEscape(likeVal);
+    }
+
+    /**
+     * 生成 like 前缀和后缀匹配值, 转义'%'、'_'通配符
+     * <pre>
+     *  MySQL       -> escape '\\'(或者不写)
+     *  PostgreSQL  -> escape '\' (或者不写)
+     *  Oracle      -> escape '\'
+     *  others      -> escape '\' (不能保证正确)
+     * </pre>
+     */
+    public String likeBoth(String likeVal) {
+        return "%" + likeEscape(likeVal) + "%";
+    }
+
     // --------------------------------------------------------------------------------------------
     //  业务含义操作
     // --------------------------------------------------------------------------------------------

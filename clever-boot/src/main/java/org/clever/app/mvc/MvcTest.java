@@ -336,4 +336,11 @@ public class MvcTest {
         thread.join();
         return R.success(new Object[]{"res"});
     }
+
+    public static R<?> t24() {
+        Jdbc db = DaoFactory.getJdbc("postgresql");
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("param", db.likeBoth("b_"));
+        return R.success(db.queryMany("select * from test where a like :param ", paramMap));
+    }
 }
