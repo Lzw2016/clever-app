@@ -1,7 +1,6 @@
 package org.clever.task.core;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.*;
 import com.querydsl.sql.ColumnMetadata;
@@ -1110,15 +1109,15 @@ public class TaskStore {
             switch (queryDSL.getJdbc().getDbType()) {
                 case MYSQL:
                     // noinspection DuplicateBranchesInSwitch
-                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, ConstantImpl.create("%Y-%m-%d"));
+                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, Expressions.constant("%Y-%m-%d"));
                     break;
                 case ORACLE:
                 case ORACLE_12C:
                 case POSTGRE_SQL:
-                    fieldExpr = Expressions.stringTemplate("to_char({0}, {1})", field, ConstantImpl.create("YYYY-MM-DD"));
+                    fieldExpr = Expressions.stringTemplate("to_char({0}, {1})", field, Expressions.constant("YYYY-MM-DD"));
                     break;
                 default:
-                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, ConstantImpl.create("%Y-%m-%d"));
+                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, Expressions.constant("%Y-%m-%d"));
             }
             return fieldExpr;
         };

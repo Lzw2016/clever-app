@@ -225,7 +225,9 @@ public class MvcTest {
 
     @Transactional(disabled = true)
     public static Object t18() {
-        TaskJobTrigger trigger = queryDSL.selectFrom(taskJobTrigger).where(taskJobTrigger.id.eq(1653059609297231874L)).fetchOne();
+        TaskJobTrigger trigger = queryDSL.selectFrom(taskJobTrigger)
+            .where(taskJobTrigger.id.eq(1653059609297231874L))
+            .fetchOne();
         trigger.setDescription("AAA");
         queryDSL.update(
             taskJobTrigger,
@@ -341,6 +343,11 @@ public class MvcTest {
         Jdbc db = DaoFactory.getJdbc("postgresql");
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("param", db.likeBoth("b_"));
-        return R.success(db.queryMany("select * from test where a like :param ", paramMap));
+        Object res_1 = db.queryMany("select * from test where a like :param ", paramMap);
+        Object res_2 = queryDSL.selectFrom(taskJobTrigger)
+            .where(taskJobTrigger.id.eq(1653059609297231874L))
+            .where(queryDSL.likeBoth(taskJobTrigger.namespace, "a%b_c"))
+            .fetchOne();
+        return R.success(new Object[]{res_1, res_2});
     }
 }
