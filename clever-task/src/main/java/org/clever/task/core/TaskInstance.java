@@ -794,7 +794,17 @@ public class TaskInstance {
             initialDelay, GlobalConstant.RELOAD_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
         );
         // 触发接下来(N+M)秒内需要触发的触发器
-        fireTriggerFuture = scheduledExecutor.submit(this::fireTriggers);
+        fireTriggerFuture = scheduledExecutor.submit(() -> {
+            try {
+                fireTriggers();
+            } catch (Exception e) {
+                log.error("[TaskInstance] 调度核心线程错误 | instanceName={}", getInstanceName(), e);
+                TaskSchedulerLog schedulerLog = newSchedulerLog();
+                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_FIRE_TRIGGERS_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                schedulerErrorListener(schedulerLog, e);
+                paused();
+            }
+        });
     }
 
     private void stopScheduler() {
@@ -986,6 +996,7 @@ public class TaskInstance {
         // 维护接下来(N+M)秒内需要触发的触发器列表
         reloadNextTrigger();
         final long startTime = taskStore.currentTimeMillis();
+        // 使用无限循环触发任务, 每一秒循环一次(每秒触发一次)
         for (long count = 1; ; count++) {
             // 判断调度器是否已暂停/停止
             int state = STATE_UPDATER.get(this);
@@ -1037,7 +1048,7 @@ public class TaskInstance {
                 log.error("[TaskInstance] 加载下一轮触发器失败 | instanceName={}", getInstanceName(), e);
             }
             final long waitReloadTrigger = taskStore.currentTimeMillis() - startMillis;
-            // 计算休眠时间到下一次触发
+            // 计算休眠时间到下一次触发(保证每秒触发一次)
             long sleepTime = startTime + (count * 1000) - taskStore.currentTimeMillis();
             if (sleepTime <= -500) {
                 log.error(

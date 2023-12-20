@@ -32,6 +32,8 @@ public class TaskSchedulerLog implements Serializable {
     public static final String EVENT_TRIGGER_JOB_EXEC_ITEM_ERROR = "trigger_job_exec_item_error";
     /** JobTrigger触发器触发失败 */
     public static final String EVENT_JOB_TRIGGER_FIRE_ERROR = "job_trigger_fire_error";
+    /** 调度核心线程错误(会导致调度器暂停) */
+    public static final String EVENT_FIRE_TRIGGERS_ERROR = "fire_triggers_error";
     /** 调度器启动成功 */
     public static final String EVENT_STARTED = "started";
     /** 调度器启动失败 */
