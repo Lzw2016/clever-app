@@ -1109,15 +1109,15 @@ public class TaskStore {
             switch (queryDSL.getJdbc().getDbType()) {
                 case MYSQL:
                     // noinspection DuplicateBranchesInSwitch
-                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, Expressions.constant("%Y-%m-%d"));
+                    fieldExpr = Expressions.stringTemplate("date_format({0}, '%Y-%m-%d')", field);
                     break;
                 case ORACLE:
                 case ORACLE_12C:
                 case POSTGRE_SQL:
-                    fieldExpr = Expressions.stringTemplate("to_char({0}, {1})", field, Expressions.constant("YYYY-MM-DD"));
+                    fieldExpr = Expressions.stringTemplate("to_char({0}, 'YYYY-MM-DD')", field);
                     break;
                 default:
-                    fieldExpr = Expressions.stringTemplate("date_format({0}, {1})", field, Expressions.constant("%Y-%m-%d"));
+                    fieldExpr = Expressions.stringTemplate("date_format({0}, '%Y-%m-%d')", field);
             }
             return fieldExpr;
         };
