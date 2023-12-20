@@ -15,6 +15,8 @@ import org.clever.core.function.ZeroConsumer;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.querydsl.SQLCoreListener;
+import org.clever.data.jdbc.querydsl.sql.OracleTemplates;
+import org.clever.data.jdbc.querydsl.sql.PostgreSQLTemplates;
 import org.clever.data.jdbc.querydsl.sql.SQLQueryFactory;
 import org.clever.data.jdbc.support.JdbcDataSourceStatus;
 import org.clever.data.jdbc.support.JdbcInfo;
