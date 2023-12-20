@@ -86,9 +86,18 @@ public class DataSyncJobTest {
             "test",
             "WMSYS",
             false,
-            "auto_increment_id",
-            "biz_code",
-            "sys_lock"
+            "",
+            "task_http_job",
+            "task_java_job",
+            "task_job",
+            "task_job_log",
+            "task_job_trigger",
+            "task_job_trigger_log",
+            "task_js_job",
+            "task_scheduler",
+            "task_scheduler_log",
+            "task_shell_job",
+            ""
         );
         log.info("--> \n{}", ddl);
         mysql.close();
