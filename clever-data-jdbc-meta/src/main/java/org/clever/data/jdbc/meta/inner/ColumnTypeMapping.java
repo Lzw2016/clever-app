@@ -155,7 +155,7 @@ public class ColumnTypeMapping {
         final DbType targetDbType = DbType.ORACLE;
         // 数值型
         register(DbType.MYSQL, new String[]{"tinyint", "smallint", "mediumint", "int", "integer"}, targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
-            setColumnType("number", 11, 0, column);
+            setColumnType("number", 10, 0, column);
         });
         register(DbType.MYSQL, "bigint", targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
             setColumnType("number", 19, 0, column);
@@ -341,7 +341,7 @@ public class ColumnTypeMapping {
         final DbType targetDbType = DbType.ORACLE;
         // 数值型
         register(DbType.POSTGRE_SQL, new String[]{"int2", "smallint", "smallserial", "int4", "integer", "serial"}, targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
-            setColumnType("number", 11, 0, column);
+            setColumnType("number", 10, 0, column);
         });
         register(DbType.POSTGRE_SQL, new String[]{"int8", "bigint", "bigserial"}, targetDbType, ALWAYS_TRUE, (dataType, size, width, decimalDigits, column) -> {
             setColumnType("number", 19, 0, column);
