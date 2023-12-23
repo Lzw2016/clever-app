@@ -637,3 +637,6 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 
 ### clever-task-ext
 未开始
+
+### 第三方库
+asyncTool: 多线程编排工具, https://gitee.com/jd-platform-opensource/asyncTool

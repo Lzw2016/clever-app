@@ -6,10 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.File;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +44,7 @@ public class HttpUtils {
     static {
         long readTimeout = 30L;
         long connectTimeout = 5L;
-        long cacheSize = 1024 * 1024 * 100L;
+        // long cacheSize = 1024 * 1024 * 100L;
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
             .addInterceptor(chain -> {
                 Request request = chain.request().newBuilder()
@@ -61,34 +57,8 @@ public class HttpUtils {
                 log.info(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start)));
                 return response;
             })
-
             .readTimeout(readTimeout, TimeUnit.SECONDS)
-            .connectTimeout(connectTimeout, TimeUnit.SECONDS)
-            .cache(new Cache(new File("./.httpCache"), cacheSize));
-        // Https 签名校验
-        final TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                }
-
-                @Override
-                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                }
-
-                @Override
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return new java.security.cert.X509Certificate[]{};
-                }
-            }
-        };
-        try {
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            javax.net.ssl.SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-        } catch (Exception ignored) {
-        }
+            .connectTimeout(connectTimeout, TimeUnit.SECONDS);
         HTTP_UTILS = new HttpUtils(builder.build());
     }
 
