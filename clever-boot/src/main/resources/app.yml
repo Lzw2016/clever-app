@@ -42,7 +42,37 @@ jdbc:
     #dataSourceProperties:
     #  stringtype: unspecified
 
+redis:
+  global:
+    mode: Standalone
+    ssl: false
+    readTimeout: 30s
+    connectTimeout: 10s
+    shutdownTimeout: 100ms
+    clientName: 'clever-app'
+    pool:
+      enabled: true
+      maxIdle: 8
+      minIdle: 0
+      maxActive: 8
+      maxWait: 30s
+      timeBetweenEvictionRuns: 1m
+
 web:
+  host: '0.0.0.0'
+  port: 9090
+  server:
+    enableDevLogging: false
+    ignoreTrailingSlashes: true
+    threads:
+      min: 8
+      max: 250
+  jackson:
+    locale: 'zh_CN'
+    dateFormat: 'yyyy-MM-dd HH:mm:ss'
+  http:
+    autogenerateEtags: true
+    maxRequestSize: 10MB
   echo:
     enable: true
     ignorePaths:
@@ -70,15 +100,46 @@ web:
     exposedHeaders: [ ]
     allowCredentials: true
     maxAge: 3600
-  resources:
-    enable: true
-    mappings:
-      - hostedPath: '/xml/logback.xml'
-        location: './clever-boot/src/main/resources/logback-app.xml'
-        cachePeriod: 30d
-      - hostedPath: '/static/'
-        location: './clever-boot/src/main/resources/static'
-        cachePeriod: 30d
-      - hostedPath: '/static/'
-        location: 'classpath:static/'
-        cachePeriod: 30d
+  mvc:
+    httpMethod: [ 'POST', 'GET' ]
+    defTransactional:
+      propagation: REQUIRED
+      isolation: DEFAULT
+      timeout: -1
+      readOnly: false
+  security:
+    ignorePaths:
+      - '/favicon.ico'
+      - '/dist/**'
+      - '/static/**'
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.png'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/.git'
+    ignoreAuthPaths: [ ]
+    ignoreAuthFailedPaths: [ ]
+    currentUserPath: '/current_user'
+    login:
+      paths: [ '/login' ]
+      postOnly: true
+      allowRepeatLogin: true
+      concurrentLoginCount: 1
+      allowAfterLogin: true
+    logout:
+      path: '/logout'
+    token:
+      secretKey: 'security'
+      tokenValidity: 30d
+      jwtTokenName: 'authorization'
+      refreshTokenName: 'refresh-token'

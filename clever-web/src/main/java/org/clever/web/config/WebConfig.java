@@ -9,6 +9,7 @@ import lombok.Data;
 import org.clever.core.json.jackson.JacksonConfig;
 import org.clever.util.Assert;
 import org.clever.util.unit.DataSize;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
@@ -99,6 +100,7 @@ public class WebConfig {
         /**
          * 应用当前配置到 JavalinConfig
          */
+        @SuppressWarnings("ExtractMethodRecommender")
         public void apply(JavalinConfig config) {
             Assert.notNull(config, "参数 config 不能为空");
             ServerConfig server = this;
@@ -113,9 +115,9 @@ public class WebConfig {
             if (threads != null) {
                 config.server(() -> {
                     BlockingQueue<Runnable> queue = null;
-                    if (threads.getMaxQueueCapacity() == 0) {
+                    if (Objects.equals(threads.getMaxQueueCapacity(), 0)) {
                         queue = new SynchronousQueue<>();
-                    } else if (threads.getMaxQueueCapacity() > 0) {
+                    } else if (threads.getMaxQueueCapacity() != null && threads.getMaxQueueCapacity() > 0) {
                         queue = new BlockingArrayQueue<>(threads.getMaxQueueCapacity());
                     }
                     int maxThreadCount = (threads.getMax() > 0) ? threads.getMax() : 250;
@@ -123,7 +125,7 @@ public class WebConfig {
                     int threadIdleTimeout = (threads.getIdleTimeout() != null) ? (int) threads.getIdleTimeout().toMillis() : 60_000;
                     QueuedThreadPool queuedThreadPool = new QueuedThreadPool(maxThreadCount, minThreadCount, threadIdleTimeout, queue);
                     queuedThreadPool.setName("JettyServerThreadPool");
-                    org.eclipse.jetty.server.Server jettyServer = new org.eclipse.jetty.server.Server(queuedThreadPool);
+                    Server jettyServer = new Server(queuedThreadPool);
                     jettyServer = JettyUtil.getOrDefault(jettyServer);
                     return jettyServer;
                 });

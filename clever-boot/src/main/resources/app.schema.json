@@ -1192,7 +1192,7 @@
                                 },
                                 "maxQueueCapacity": {
                                     "type": "integer",
-                                    "description": "线程池的后备队列的最大容量。根据线程配置计算默认值"
+                                    "description": "线程池的后备队列的最大容量。默认：null。根据线程配置计算默认值"
                                 },
                                 "idleTimeout": {
                                     "type": "string",
@@ -1256,7 +1256,7 @@
                                     "$ref": "#/definitions/dataSize"
                                 },
                                 "fileSizeThreshold": {
-                                    "description": "将文件写入磁盘的阈值，，默认值：“4KB”",
+                                    "description": "将文件写入磁盘的阈值，默认值：“4KB”",
                                     "$ref": "#/definitions/dataSize"
                                 },
                                 "resolveLazily": {

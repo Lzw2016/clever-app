@@ -1,3 +1,5 @@
+rootPath: "./"
+
 startup-task:
   poolSize: 8
   timedTask:
@@ -62,19 +64,6 @@ jdbc:
 redis:
   enable: true
   defaultName: 'default'
-  global:
-    ssl: false
-    readTimeout: 30s
-    connectTimeout: 10s
-    shutdownTimeout: 100ms
-    clientName: 'clever-app'
-    pool:
-      enabled: true
-      maxIdle: 8
-      minIdle: 0
-      maxActive: 8
-      maxWait: 30s
-      timeBetweenEvictionRuns: 1m
   dataSource:
     default:
       mode: Standalone
@@ -85,20 +74,6 @@ redis:
         password: 'admin123456'
 
 web:
-  host: '0.0.0.0'
-  port: 9090
-  http:
-    autogenerateEtags: true
-    maxRequestSize: 10MB
-    #singlePageRoot:
-    #  - hostedPath: '/xml'
-    #    filePath: 'logback-app.xml'
-    #    location: CLASSPATH
-    #staticFile:
-    #  - hostedPath: '/static'
-    #    directory: 'clever-boot/src/main/resources'
-    #    preCompress: true
-    #    location: EXTERNAL
   mvc:
     path: '/api/'
     httpMethod: [ 'POST', 'GET' ]
@@ -111,10 +86,8 @@ web:
       - 'org.clever.app.mvc.'
       - 'org.clever.task.mvc.'
     defTransactional:
-      defDatasource: [ 'mysql' ]
-      datasource: [ 'mysql' ]
-      propagation: REQUIRED
-      isolation: DEFAULT
+      defDatasource: [ ]
+      datasource: [ ]
       timeout: -1
       readOnly: false
     hotReload:
@@ -139,45 +112,10 @@ web:
       enableRedis: true
       redisName: "default"
       redisNamespace: "security"
-    ignorePaths:
-      - '/favicon.ico'
-      - '/dist/**'
-      - '/static/**'
-      - '/**/*.png'
-      - '/**/*.ico'
-      - '/**/*.js'
-      - '/**/*.css'
-      - '/**/*.html'
-      - '/**/*.ts'
-      - '/**/*.tsx'
-      - '/**/*.map'
-      - '/**/*.png'
-      - '/**/*.jpg'
-      - '/**/*.gif'
-      - '/**/*.ttf'
-      - '/**/*.woff'
-      - '/**/*.woff2'
-      - '/**/.git'
-    ignoreAuthPaths: [ ]
-    ignoreAuthFailedPaths: [ ]
-    currentUserPath: '/current_user'
-    login:
-      paths: [ '/login' ]
-      postOnly: true
-      allowRepeatLogin: true
-      concurrentLoginCount: 1
-      allowAfterLogin: true
-    logout:
-      path: '/logout'
-    token:
-      secretKey: 'security'
-      tokenValidity: 30d
-      jwtTokenName: 'authorization'
-      refreshTokenName: 'refresh-token'
 
 timed-task:
   enable: false
-  jdbcName: 'mysql'
+  jdbcName: 'postgresql'
   namespace: 'default'
   instanceName: 'node01'
   # namespace: 'lzw'

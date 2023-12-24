@@ -18,6 +18,9 @@
                     <option name="path" value="clever-boot/src/main/resources/app-example.yml" />
                   </Item>
                   <Item>
+                    <option name="path" value="clever-boot/src/main/resources/app-task.yml" />
+                  </Item>
+                  <Item>
                     <option name="path" value="clever-boot/src/main/resources/app.yml" />
                   </Item>
                 </list>
