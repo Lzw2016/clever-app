@@ -64,7 +64,7 @@ web:
 timed-task:
   enable: true
   jdbcName: 'postgresql'
-  namespace: 'default'
+  namespace: 'test'
   instanceName: 'node01'
   heartbeatInterval: 10000
   description: '测试节点01'
