@@ -1272,6 +1272,8 @@ public class TaskStore {
         // 错过触发最多的任务
         SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobTriggerLog.jobId, taskJobTriggerLog.jobId.count())
             .from(taskJobTriggerLog)
+            .leftJoin(taskJob).on(taskJobTriggerLog.jobId.eq(taskJob.id))
+            .where(taskJob.id.isNotNull())
             .where(taskJobTriggerLog.createAt.goe(req.getStart()))
             .where(taskJobTriggerLog.createAt.loe(req.getEnd()))
             .where(taskJobTriggerLog.misFired.eq(EnumConstant.JOB_TRIGGER_MIS_FIRED_1))
@@ -1311,6 +1313,8 @@ public class TaskStore {
         // 运行失败最多的任务
         SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobLog.jobId, taskJobLog.jobId.count())
             .from(taskJobLog)
+            .leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
+            .where(taskJob.id.isNotNull())
             .where(taskJobLog.fireTime.goe(req.getStart()))
             .where(taskJobLog.fireTime.loe(req.getEnd()))
             .where(taskJobLog.status.eq(EnumConstant.JOB_LOG_STATUS_1))
@@ -1350,6 +1354,8 @@ public class TaskStore {
         // 运行耗时最长的任务
         SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobLog.jobId, taskJobLog.runTime.avg())
             .from(taskJobLog)
+            .leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
+            .where(taskJob.id.isNotNull())
             .where(taskJobLog.fireTime.goe(req.getStart()))
             .where(taskJobLog.fireTime.loe(req.getEnd()))
             .where(taskJobLog.runTime.isNotNull())
@@ -1389,6 +1395,8 @@ public class TaskStore {
         // 重试次数最多的任务
         SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobLog.jobId, taskJobLog.retryCount.sum())
             .from(taskJobLog)
+            .leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
+            .where(taskJob.id.isNotNull())
             .where(taskJobLog.fireTime.goe(req.getStart()))
             .where(taskJobLog.fireTime.loe(req.getEnd()))
             .where(taskJobLog.retryCount.goe(1))
