@@ -1,4 +1,8 @@
-rootPath: "/app"
+logging.file:
+  name: 'clever-app-task'
+  path: '/data/logs/${logging.file.name}'
+
+rootPath: '/app'
 
 startup-task:
   poolSize: 8
