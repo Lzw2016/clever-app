@@ -2,6 +2,8 @@ package org.clever.boot.context.config;
 
 import org.clever.boot.context.properties.source.ConfigurationPropertySources;
 import org.clever.boot.env.RandomValuePropertySource;
+import org.clever.core.env.MutablePropertySources;
+import org.clever.core.env.SimpleCommandLinePropertySource;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.core.io.DefaultResourceLoader;
 import org.clever.core.io.ResourceLoader;
@@ -40,14 +42,25 @@ public class ConfigDataBootstrap {
     /**
      * 读取系统配置到 {@code environment} 中
      */
-    public void init(StandardEnvironment environment) {
+    public void init(StandardEnvironment environment, String[] args) {
         Assert.isTrue(!initialized, "不能多次初始化");
         initialized = true;
+        if (args != null && args.length > 0) {
+            MutablePropertySources sources = environment.getPropertySources();
+            sources.addFirst(new SimpleCommandLinePropertySource(args));
+        }
         ConfigurationPropertySources.attach(environment);
         RandomValuePropertySource.addToEnvironment(environment, logger);
         ConfigDataEnvironment configDataEnvironment = new ConfigDataEnvironment(
-                environment, resourceLoader, additionalProfiles, environmentUpdateListener
+            environment, resourceLoader, additionalProfiles, environmentUpdateListener
         );
         configDataEnvironment.processAndApply();
+    }
+
+    /**
+     * 读取系统配置到 {@code environment} 中
+     */
+    public void init(StandardEnvironment environment) {
+        init(environment, null);
     }
 }

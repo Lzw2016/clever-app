@@ -35,22 +35,22 @@ import java.time.Duration;
  */
 @Slf4j
 public abstract class AppBootstrap {
-    public static void start() {
+    public static void start(String[] args) {
         try {
-            doStart();
+            doStart(args);
         } catch (Throwable e) {
             log.info("启动失败!", e);
             System.exit(-1);
         }
     }
 
-    private static void doStart() {
+    private static void doStart(String[] args) {
         final long startTime = System.currentTimeMillis();
         // 读取系统配置 & 初始化日志模块
         StandardEnvironment environment = new StandardEnvironment();
         LoggingBootstrap loggingBootstrap = new LoggingBootstrap(Thread.currentThread().getContextClassLoader());
         ConfigDataBootstrap configDataBootstrap = new ConfigDataBootstrap();
-        configDataBootstrap.init(environment);
+        configDataBootstrap.init(environment, args);
         loggingBootstrap.init(environment);
         AppContextHolder.registerBean("environment", environment, true);
         AppContextHolder.registerBean("loggingBootstrap", loggingBootstrap, true);
