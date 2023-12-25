@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.Conv;
 import org.clever.core.DateUtils;
-import org.clever.core.exception.BusinessException;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
@@ -1288,7 +1287,7 @@ public class TaskStore {
         for (Long jobId : res.getMisfireJobMap().keySet()) {
             TaskJob jobEntity = jobs.stream()
                 .filter(job -> Objects.equals(job.getId(), jobId))
-                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+                .findFirst().orElse(null);
             res.getMisfireJobs().add(jobEntity);
         }
         return res;
@@ -1327,7 +1326,7 @@ public class TaskStore {
         for (Long jobId : res.getFailJobMap().keySet()) {
             TaskJob jobEntity = jobs.stream()
                 .filter(job -> Objects.equals(job.getId(), jobId))
-                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+                .findFirst().orElse(null);
             res.getFailJobs().add(jobEntity);
         }
         return res;
@@ -1366,7 +1365,7 @@ public class TaskStore {
         for (Long jobId : res.getAvgRunTimeJobMap().keySet()) {
             TaskJob jobEntity = jobs.stream()
                 .filter(job -> Objects.equals(job.getId(), jobId))
-                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+                .findFirst().orElse(null);
             res.getMaxRunTimeJobs().add(jobEntity);
         }
         return res;
@@ -1405,7 +1404,7 @@ public class TaskStore {
         for (Long jobId : res.getRetryJobMap().keySet()) {
             TaskJob jobEntity = jobs.stream()
                 .filter(job -> Objects.equals(job.getId(), jobId))
-                .findFirst().orElseThrow(() -> new BusinessException("未知的错误"));
+                .findFirst().orElse(null);
             res.getMaxRetryJobs().add(jobEntity);
         }
         return res;
