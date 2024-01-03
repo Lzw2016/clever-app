@@ -36,10 +36,6 @@ sourceSets {
         //         setSrcDirs(listOf("src/main/java", "src/main/groovy"))
         //     }
         // }
-        resources {
-            setSrcDirs(listOf("src/main/java", "src/main/kotlin", "src/main/resources"))
-            exclude(listOf("**/*.java", "**/*.kt", "**/*.kts"))
-        }
     }
 }
 
@@ -61,6 +57,17 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+// 在源码目录中引入资源(如: mybatis xml文件)
+tasks.processResources {
+    val includes = listOf("**/*.xml")
+    from("src/main/java") {
+        include(includes)
+    }
+    from("src/main/kotlin") {
+        include(includes)
+    }
+}
+
 // 拷贝lib文件
 tasks.register("copyJar", Copy::class) {
     delete("$buildDir/libs/lib")
@@ -79,18 +86,21 @@ tasks.register("copyResources", Copy::class) {
 tasks.jar {
     enabled = true
     manifest.attributes["Main-Class"] = "org.clever.app.StartApp"
+    // lib/jar 加入 classPath
     val classPaths = project.configurations.runtimeClasspath.get().files.map { file -> "lib/${file.name}" }.toMutableList()
-    val resourcesPath = File(projectDir.absolutePath, "src/main/resources").absolutePath
-    file("src/main/resources").listFiles { file -> file.isFile }?.forEach { file ->
-        var path = file.absolutePath
-        if (path.startsWith(resourcesPath)) {
-            path = path.substring(resourcesPath.length + 1)
-            path = path.replace('\\', '/')
-        }
-        classPaths.add("config/$path")
-    }
+    // // resources 资源加入 classPath (当没有把resources资源编译进jar包时很有用)
+    // val resourcesFile = File(projectDir.absolutePath, "src/main/resources")
+    // val resourcesPath = resourcesFile.absolutePath
+    // resourcesFile.listFiles { file -> file.isFile }?.forEach { file ->
+    //     var path = file.absolutePath
+    //     if (path.startsWith(resourcesPath)) {
+    //         path = path.substring(resourcesPath.length + 1)
+    //         path = path.replace('\\', '/')
+    //     }
+    //     classPaths.add("config/$path")
+    // }
     manifest.attributes["Class-Path"] = classPaths.joinToString(" ")
-    // println("### @# [${classPaths.joinToString(" ")}]")
+    // println("### [${classPaths.joinToString(" ")}]")
 }
 
 // 触发class热部署

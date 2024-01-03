@@ -1,7 +1,6 @@
 dependencies {
     compileOnly("org.slf4j:slf4j-api")
     api("ognl:ognl")
-    // api("org.antlr:antlr4")
     api("org.antlr:antlr4-runtime")
     api("org.apache.commons:commons-lang3")
     testImplementation("commons-io:commons-io")
@@ -10,7 +9,6 @@ dependencies {
 
 tasks.processResources {
     from("src/main/java") {
-        include("**/*.dtd")
-        include("**/*.xsd")
+        include(listOf("**/*.dtd", "**/*.xsd"))
     }
 }
