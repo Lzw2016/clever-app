@@ -1,5 +1,6 @@
 package org.clever.data.jdbc.meta;
 
+import com.zaxxer.hikari.HikariConfig;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
@@ -132,40 +133,52 @@ public class DataSyncJobTest {
         mysql.close();
     }
 
-//    @Test
-//    public void t08() {
-//        HikariConfig hikariConfig = new HikariConfig();
-//        hikariConfig.setDriverClassName("org.postgresql.Driver");
-//        hikariConfig.setJdbcUrl("jdbc:postgresql://10.100.1.13:5432/wms8d100?currentSchema=wms8prod");
-//        hikariConfig.setUsername("wms8prod");
-//        hikariConfig.setPassword("lmis9system");
-//        hikariConfig.setAutoCommit(false);
-//        hikariConfig.setMinimumIdle(1);
-//        hikariConfig.setMaximumPoolSize(512);
-//        Jdbc postgresql = new Jdbc(hikariConfig);
-//
-//        hikariConfig = new HikariConfig();
-//        hikariConfig.setDriverClassName("oracle.jdbc.OracleDriver");
-//        hikariConfig.setJdbcUrl("jdbc:oracle:thin:@10.0.30.221:1521:wms8prod");
-//        hikariConfig.setUsername("wms8prod");
-//        hikariConfig.setPassword("lmis9system");
-//        hikariConfig.setAutoCommit(false);
-//        hikariConfig.setMinimumIdle(1);
-//        hikariConfig.setMaximumPoolSize(512);
-//        Jdbc oracle = new Jdbc(hikariConfig);
-//
+    @SneakyThrows
+    @Test
+    public void t08() {
+        Jdbc postgresql = BaseTest.newPostgresql();
+
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDriverClassName("org.postgresql.Driver");
+        hikariConfig.setJdbcUrl("jdbc:postgresql://192.168.1.211:5432/test");
+        hikariConfig.setUsername("postgres");
+        hikariConfig.setPassword("abc123ABC456");
+        hikariConfig.setAutoCommit(false);
+        hikariConfig.setMinimumIdle(1);
+        hikariConfig.setMaximumPoolSize(512);
+        Jdbc jdbc2 = new Jdbc(hikariConfig);
+
 //        String ddl = DataSyncJob.structSync(
-//            oracle,
 //            postgresql,
-//            "wms8prod",
-//            "wms8prod",
+//            jdbc2,
+//            "public",
+//            "public",
 //            false,
-//            "COLD_REJECT_RECORDS"
+//            "order_wave",
+//            "order_wave_details",
+//            "order_out",
+//            "order_out_details"
 //        );
-//        log.info("--> \n{}", ddl);
-//        postgresql.close();
-//        oracle.close();
-//    }
+//        log.info("###完成 -> \n{}", ddl);
+
+        TablesSyncState state = DataSyncJob.tableSync(
+            postgresql,
+            jdbc2,
+            false,
+            false,
+            "order_wave",
+            "order_wave_details",
+            "order_out",
+            "order_out_details"
+        );
+        while (state.getSuccess() == null) {
+            log.info("State={}", state);
+            Thread.sleep(1000);
+        }
+
+        postgresql.close();
+        jdbc2.close();
+    }
 
 //    @Test
 //    public void t09() {

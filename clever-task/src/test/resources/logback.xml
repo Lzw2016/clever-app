@@ -10,12 +10,9 @@
     <contextName>${APP_NAME}</contextName>
 
     <!--自定义日志级别-->
-    <logger name="org.springframework" level="INFO"/>
     <logger name="com.zaxxer.hikari" level="INFO"/>
     <logger name="com.zaxxer.hikari.pool.ProxyConnection" level="ERROR"/>
-    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG"/>
     <logger name="org.clever.data.jdbc.support.SqlLoggerUtils" level="INFO"/>
-    <!--<logger name="org.springframework.jdbc.datasource.DataSourceTransactionManager" level="DEBUG"/>-->
 
     <!-- 控制台日志：输出全部日志到控制台 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

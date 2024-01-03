@@ -17,6 +17,7 @@
 - [OK] JDK8
 - [  ] JDK11
 - [  ] JDK17
+- [  ] JDK21
 
 ### clever-spring
 需要删除的关键字
