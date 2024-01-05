@@ -3,9 +3,14 @@ package org.clever.data.redis;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.DateUtils;
 import org.clever.core.SystemClock;
+import org.clever.core.function.OneConsumer;
+import org.clever.core.random.RandomUtil;
+import org.clever.dao.DataAccessException;
 import org.clever.data.redis.config.RedisProperties;
 import org.clever.data.redis.connection.DataType;
 import org.clever.data.redis.connection.stream.*;
+import org.clever.data.redis.core.RedisOperations;
+import org.clever.data.redis.core.SessionCallback;
 import org.clever.data.redis.hash.Jackson2HashMapper;
 import org.clever.data.redis.stream.StreamMessageListenerContainer;
 import org.clever.data.redis.stream.Subscription;
@@ -15,7 +20,9 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 作者：lizw <br/>
@@ -103,9 +110,9 @@ public class RedisTest {
                     break;
                 }
                 ObjectRecord<String, String> record = StreamRecords.newRecord()
-                        .in(streamKey)
-                        .ofObject(String.format("abc_%s", i))
-                        .withId(RecordId.autoGenerate());
+                    .in(streamKey)
+                    .ofObject(String.format("abc_%s", i))
+                    .withId(RecordId.autoGenerate());
                 RecordId recordId = redis.getRedisTemplate().opsForStream().add(record);
                 log.info("### -> recordId={}", recordId);
                 try {
@@ -117,14 +124,14 @@ public class RedisTest {
         list.add(thread);
         // 消费者
         StreamReadOptions streamReadOptions = StreamReadOptions.empty()
-                // 自动ACK
-                // .autoAcknowledge()
-                // 如果没有数据，则阻塞1s 阻塞时间需要小于`redis.timeout`配置的时间
-                .block(Duration.ofMillis(100))
-                // 一直阻塞直到获取数据，可能会报超时异常
-                // .block(Duration.ofMillis(0))
-                // 1次获取10个数据
-                .count(10);
+            // 自动ACK
+            // .autoAcknowledge()
+            // 如果没有数据，则阻塞1s 阻塞时间需要小于`redis.timeout`配置的时间
+            .block(Duration.ofMillis(100))
+            // 一直阻塞直到获取数据，可能会报超时异常
+            // .block(Duration.ofMillis(0))
+            // 1次获取10个数据
+            .count(10);
         // Consumer consumer = Consumer.from("test", "test");
         // redis.getRedisTemplate().opsForStream().createGroup(streamKey, consumer.getGroup());
         thread = new Thread(() -> {
@@ -132,8 +139,8 @@ public class RedisTest {
             while (countAtomic.get() < count) {
                 @SuppressWarnings("unchecked")
                 List<ObjectRecord<String, String>> records = redis.getRedisTemplate()
-                        .opsForStream()
-                        .read(String.class, streamReadOptions, StreamOffset.create(streamKey, ReadOffset.from(readOffset)));
+                    .opsForStream()
+                    .read(String.class, streamReadOptions, StreamOffset.create(streamKey, ReadOffset.from(readOffset)));
                 if (records.isEmpty()) {
                     log.warn("没有获取到数据");
                 }
@@ -193,9 +200,9 @@ public class RedisTest {
         Thread.sleep(2000);
         // 消费者
         StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, MapRecord<String, String, String>> options = StreamMessageListenerContainer.StreamMessageListenerContainerOptions.builder()
-                .pollTimeout(Duration.ofSeconds(1))
-                .batchSize(10)
-                .build();
+            .pollTimeout(Duration.ofSeconds(1))
+            .batchSize(10)
+            .build();
         StreamMessageListenerContainer<String, MapRecord<String, String, String>> container = StreamMessageListenerContainer.create(redis.getConnectionFactory(), options);
         Subscription subscription = container.receive(consumer, StreamOffset.create(streamKey, ReadOffset.lastConsumed()), message -> {
             log.info("@@@ -> getId={} | getValue={}", message.getId(), message.getValue());
@@ -244,6 +251,50 @@ public class RedisTest {
         // 断开网络连接
         redis.vSet("001", "456");
         log.info("### 2");
+        redis.close();
+    }
+
+    @Test
+    public void t06() {
+        RedisProperties properties = new RedisProperties();
+        properties.setMode(RedisProperties.Mode.Standalone);
+        properties.setClientName("test");
+        properties.getStandalone().setHost("10.100.10.20");
+        properties.getStandalone().setPort(6379);
+        properties.getStandalone().setPassword("");
+        properties.getStandalone().setDatabase(14);
+        properties.setReadTimeout(Duration.ofSeconds(600));
+        properties.setConnectTimeout(Duration.ofSeconds(600));
+        properties.setShutdownTimeout(Duration.ofSeconds(600));
+        properties.getPool().setMaxActive(10000);
+        Redis redis = new Redis("test", properties);
+
+        OneConsumer<Set<String>> expireKeys = keys -> {
+            AtomicLong count = new AtomicLong(0);
+            // noinspection rawtypes
+            redis.getRedisTemplate().executePipelined(new SessionCallback<Void>() {
+                @Override
+                public Void execute(RedisOperations operations) throws DataAccessException {
+                    keys.forEach(key -> {
+                        // noinspection unchecked
+                        operations.expire(key, 60L * 60 * 24 * RandomUtil.randomInt(1, 7), TimeUnit.SECONDS);
+                        if (count.incrementAndGet() % 1000 == 0) {
+                            log.info("count -> {}", count.get());
+                        }
+                    });
+                    return null;
+                }
+            });
+        };
+
+        Set<String> keys = redis.keys("ALLOC:REPWAVE:*");
+        log.info("ALLOC:REPWAVE:* keys -> {}", keys.size());
+        expireKeys.call(keys);
+
+        // keys = redis.keys("LOC_NOT_FOUND:*");
+        // log.info("LOC_NOT_FOUND:* keys -> {}", keys.size());
+        // expireKeys.call(keys);
+
         redis.close();
     }
 }
