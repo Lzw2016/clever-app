@@ -85,7 +85,8 @@ public interface RedisOperations<K, V> {
      * 允许事务流水线化。
      * 请注意，回调<b>不能<b>返回一个非空值，因为它被管道覆盖。
      *
-     * @param session 会话回调
+     * @param session          会话回调
+     * @param resultSerializer 用于单个值或值集合的序列化程序。如果任何返回值是散列值，则此序列化程序将用于反序列化键和值
      * @return 管道返回的对象列表
      */
     List<Object> executePipelined(final SessionCallback<?> session, final RedisSerializer<?> resultSerializer);
@@ -252,8 +253,8 @@ public interface RedisOperations<K, V> {
     default Boolean expire(K key, Duration timeout) {
         Assert.notNull(timeout, "Timeout must not be null");
         return TimeoutUtils.hasMillis(timeout) ?
-                expire(key, timeout.toMillis(), TimeUnit.MILLISECONDS) :
-                expire(key, timeout.getSeconds(), TimeUnit.SECONDS);
+            expire(key, timeout.toMillis(), TimeUnit.MILLISECONDS) :
+            expire(key, timeout.getSeconds(), TimeUnit.SECONDS);
     }
 
     /**

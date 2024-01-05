@@ -9,14 +9,12 @@ import org.clever.core.DateUtils;
 import org.clever.core.function.ZeroConsumer;
 import org.clever.core.io.ClassPathResource;
 import org.clever.core.mapper.JacksonMapper;
+import org.clever.dao.DataAccessException;
 import org.clever.data.AbstractDataSource;
 import org.clever.data.geo.Distance;
 import org.clever.data.geo.Point;
 import org.clever.data.redis.config.RedisProperties;
-import org.clever.data.redis.connection.DataType;
-import org.clever.data.redis.connection.RedisConnectionFactory;
-import org.clever.data.redis.connection.RedisGeoCommands;
-import org.clever.data.redis.connection.RedisZSetCommands;
+import org.clever.data.redis.connection.*;
 import org.clever.data.redis.core.*;
 import org.clever.data.redis.core.script.DefaultRedisScript;
 import org.clever.data.redis.core.script.RedisScript;
@@ -2378,6 +2376,88 @@ public class Redis extends AbstractDataSource {
      */
     public <T> T execute(RedisScript<T> script, List<String> keys, Object... args) {
         return redisTemplate.execute(script, keys, args);
+    }
+
+    /**
+     * 在管道连接上执行给定的 Redis 会话，使用专用序列化器返回结果。
+     * 允许事务流水线化。
+     * 请注意，回调<b>不能<b>返回一个非空值，因为它被管道覆盖。
+     *
+     * @param session          会话回调
+     * @param resultSerializer 用于单个值或值集合的序列化程序。如果任何返回值是散列值，则此序列化程序将用于反序列化键和值
+     * @return 管道返回的对象列表
+     */
+    public <K, V> List<Object> executePipelinedForSession(Consumer<RedisOperations<K, V>> session, RedisSerializer<?> resultSerializer) {
+        return redisTemplate.executePipelined(new SessionCallback<Void>() {
+            @SuppressWarnings({"rawtypes", "unchecked"})
+            @Override
+            public Void execute(RedisOperations operations) throws DataAccessException {
+                session.accept(operations);
+                return null;
+            }
+        }, resultSerializer);
+    }
+
+    /**
+     * 在管道连接上执行给定的 Redis 会话。允许事务流水线化。
+     * 请注意，回调<b>不能<b>返回一个非空值，因为它被管道覆盖。
+     *
+     * @param session 会话回调
+     * @return 管道返回的对象列表
+     */
+    public <K, V> List<Object> executePipelinedForSession(Consumer<RedisOperations<K, V>> session) {
+        return executePipelinedForSession(session, redisTemplate.getValueSerializer());
+    }
+
+    /**
+     * 在管道连接上执行给定的操作对象，使用专用序列化器返回结果。
+     * 请注意，回调<b>不能<b>返回一个非空值，因为它被管道覆盖。
+     *
+     * @param action           要执行的回调对象
+     * @param resultSerializer 用于单个值或值集合的序列化程序。如果任何返回值是散列值，则此序列化程序将用于反序列化键和值
+     * @return 管道返回的对象列表
+     */
+    public List<Object> executePipelinedForAction(Consumer<RedisConnection> action, RedisSerializer<?> resultSerializer) {
+        return redisTemplate.executePipelined((RedisCallback<Void>) connection -> {
+            action.accept(connection);
+            return null;
+        }, resultSerializer);
+    }
+
+    /**
+     * 在管道连接上执行给定的操作对象，返回结果。
+     * 请注意，回调<b>不能<b>返回一个非空值，因为它被管道覆盖。
+     * 此方法将使用默认序列化程序反序列化结果
+     *
+     * @param action 要执行的回调对象
+     * @return 管道返回的对象列表
+     */
+    public List<Object> executePipelinedForAction(Consumer<RedisConnection> action) {
+        return executePipelinedForAction(action, redisTemplate.getValueSerializer());
+    }
+
+    /**
+     * 在管道连接上执行给定的 Redis 会话，使用专用序列化器返回结果。
+     * 允许事务流水线化。
+     * 请注意，回调<b>不能<b>返回一个非空值，因为它被管道覆盖。
+     *
+     * @param session          会话回调
+     * @param resultSerializer 用于单个值或值集合的序列化程序。如果任何返回值是散列值，则此序列化程序将用于反序列化键和值
+     * @return 管道返回的对象列表
+     */
+    public <K, V> List<Object> executePipelined(Consumer<RedisOperations<K, V>> session, RedisSerializer<?> resultSerializer) {
+        return executePipelinedForSession(session, resultSerializer);
+    }
+
+    /**
+     * 在管道连接上执行给定的 Redis 会话。允许事务流水线化。
+     * 请注意，回调<b>不能<b>返回一个非空值，因为它被管道覆盖。
+     *
+     * @param session 会话回调
+     * @return 管道返回的对象列表
+     */
+    public <K, V> List<Object> executePipelined(Consumer<RedisOperations<K, V>> session) {
+        return executePipelinedForSession(session);
     }
 
     /**

@@ -5,12 +5,9 @@ import org.clever.core.DateUtils;
 import org.clever.core.SystemClock;
 import org.clever.core.function.OneConsumer;
 import org.clever.core.random.RandomUtil;
-import org.clever.dao.DataAccessException;
 import org.clever.data.redis.config.RedisProperties;
 import org.clever.data.redis.connection.DataType;
 import org.clever.data.redis.connection.stream.*;
-import org.clever.data.redis.core.RedisOperations;
-import org.clever.data.redis.core.SessionCallback;
 import org.clever.data.redis.hash.Jackson2HashMapper;
 import org.clever.data.redis.stream.StreamMessageListenerContainer;
 import org.clever.data.redis.stream.Subscription;
@@ -261,7 +258,7 @@ public class RedisTest {
         properties.setClientName("test");
         properties.getStandalone().setHost("10.100.10.20");
         properties.getStandalone().setPort(6379);
-        properties.getStandalone().setPassword("");
+        properties.getStandalone().setPassword("Info@wms2023#");
         properties.getStandalone().setDatabase(14);
         properties.setReadTimeout(Duration.ofSeconds(600));
         properties.setConnectTimeout(Duration.ofSeconds(600));
@@ -271,22 +268,18 @@ public class RedisTest {
 
         OneConsumer<Set<String>> expireKeys = keys -> {
             AtomicLong count = new AtomicLong(0);
-            // noinspection rawtypes
-            redis.getRedisTemplate().executePipelined(new SessionCallback<Void>() {
-                @Override
-                public Void execute(RedisOperations operations) throws DataAccessException {
-                    keys.forEach(key -> {
-                        // noinspection unchecked
-                        operations.expire(key, 60L * 60 * 24 * RandomUtil.randomInt(1, 7), TimeUnit.SECONDS);
-                        if (count.incrementAndGet() % 1000 == 0) {
-                            log.info("count -> {}", count.get());
-                        }
-                    });
-                    return null;
-                }
+            List<Object> list = redis.executePipelined(operations -> {
+                keys.forEach(key -> {
+                    operations.expire(key, 60L * 60 * 24 * RandomUtil.randomInt(1, 7), TimeUnit.SECONDS);
+                    if (count.incrementAndGet() % 1000 == 0) {
+                        log.info("count -> {}", count.get());
+                    }
+                });
             });
+            if (!list.isEmpty()) {
+                log.info("list -> {}", list.get(0));
+            }
         };
-
         Set<String> keys = redis.keys("ALLOC:REPWAVE:*");
         log.info("ALLOC:REPWAVE:* keys -> {}", keys.size());
         expireKeys.call(keys);
