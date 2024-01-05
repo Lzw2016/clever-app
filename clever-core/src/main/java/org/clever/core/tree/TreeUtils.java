@@ -104,8 +104,8 @@ public class TreeUtils {
             // 消除死循环
             if (!noBuildTreeNodeList.isEmpty()) {
                 Assert.isTrue(
-                        nextNoBuildTreeNodeList.size() < noBuildTreeNodeList.size(),
-                        "可能出现死循环，ITreeNode.setBuild函数实现错误"
+                    nextNoBuildTreeNodeList.size() < noBuildTreeNodeList.size(),
+                    "可能出现死循环，ITreeNode.setBuild函数实现错误"
                 );
             }
             noBuildTreeNodeList = nextNoBuildTreeNodeList;
@@ -190,7 +190,7 @@ public class TreeUtils {
      * @return 如未找到返回null
      */
     @SuppressWarnings("unchecked")
-    public static <T extends ITreeNode> T findNode(List<T> treeList, Long id) {
+    public static <T extends ITreeNode> T findNode(List<T> treeList, Object id) {
         List<T> currentLevel = treeList;
         List<T> nextLevel;
         T match = null;
@@ -213,6 +213,42 @@ public class TreeUtils {
             currentLevel = nextLevel;
         }
         return match;
+    }
+
+    /**
+     * 查找指定节点
+     *
+     * @param node 已经构建好的树节点
+     * @param id   查找的节点ID
+     * @param <T>  节点数据类型
+     * @return 如未找到返回null
+     */
+    public static <T extends ITreeNode> T findNode(T node, Object id) {
+        return findNode(Collections.singletonList(node), id);
+    }
+
+    /**
+     * 判断指定的节点是否存在树中
+     *
+     * @param treeList 已经构建好的树
+     * @param id       查找的节点ID
+     * @param <T>      节点数据类型
+     * @return 如未找到返回null
+     */
+    public static <T extends ITreeNode> boolean existsNode(List<T> treeList, Object id) {
+        return findNode(treeList, id) != null;
+    }
+
+    /**
+     * 判断指定的节点是否存在树中
+     *
+     * @param node 已经构建好的树节点
+     * @param id   查找的节点ID
+     * @param <T>  节点数据类型
+     * @return 如未找到返回null
+     */
+    public static <T extends ITreeNode> boolean existsNode(T node, Object id) {
+        return findNode(Collections.singletonList(node), id) != null;
     }
 
     /**
@@ -249,5 +285,53 @@ public class TreeUtils {
      */
     public static <T extends ITreeNode> List<T> flattenNode(T node) {
         return flattenTree(Collections.singletonList(node));
+    }
+
+    /**
+     * 获取指定节点的父节点
+     *
+     * @param treeList 已经构建好的树
+     * @param node     指定的节点
+     * @return 指定节点的父节点，不存在返回null
+     */
+    public static <T extends ITreeNode> T getParent(List<T> treeList, T node) {
+        // TODO 获取当前节点的父节点
+        return null;
+    }
+
+    /**
+     * 获取指定节点的父节点
+     *
+     * @param treeList 已经构建好的树
+     * @param id       查找的节点ID
+     * @return 指定节点的父节点，不存在返回null
+     */
+    public static <T extends ITreeNode> T getParent(List<T> treeList, Object id) {
+        // TODO 获取当前节点的父节点
+        return null;
+    }
+
+    /**
+     * 获取指定节点的所有父节点(按照层级结构排序，直接父节点在集合的第一个位置)
+     *
+     * @param treeList 已经构建好的树
+     * @param node     指定的节点
+     * @return 指定节点的所有父节点，不存在返回空集合
+     */
+    public static <T extends ITreeNode> List<T> getParents(List<T> treeList, T node) {
+        // TODO 获取当前节点的父节点
+        return null;
+    }
+
+    /**
+     * 获取指定节点的所有父节点(按照层级结构排序，直接父节点在集合的第一个位置)
+     *
+     * @param treeList 已经构建好的树
+     * @param id       查找的节点ID
+     * @return 指定节点的所有父节点，不存在返回空集合
+     */
+    public static <T extends ITreeNode> List<T> getParents(List<T> treeList, Object id) {
+        // TODO 获取当前节点的父节点
+        return null;
     }
 }
