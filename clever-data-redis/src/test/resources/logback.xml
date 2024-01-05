@@ -41,25 +41,6 @@
         </filter>
     </appender>
 
-    <appProfile name="test | test2">
-        <!--日志输出到ES-->
-        <appender name="ES_Appender" class="com.galaxis.wms.logger.ElasticSearchAppender">
-            <idxName>wms-log-test</idxName>
-        </appender>
-
-        <logger name="com.galaxis.wms" level="INFO">
-            <appender-ref ref="ES_Appender"/>
-        </logger>
-
-        <logger name="p6spy" level="INFO">
-            <appender-ref ref="ES_Appender"/>
-        </logger>
-
-        <logger name="ECHO" level="INFO">
-            <appender-ref ref="ES_Appender"/>
-        </logger>
-    </appProfile>
-
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
