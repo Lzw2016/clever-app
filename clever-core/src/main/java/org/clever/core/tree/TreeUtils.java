@@ -331,7 +331,6 @@ public class TreeUtils {
         }
         final TupleOne<Object> parentId = TupleOne.creat(node.getParentId());
         final Set<Object> parentIds = new HashSet<>();
-        parentIds.add(parentId.getValue1());
         while (true) {
             T parentNode = nodes.stream().filter(n -> Objects.equals(n.getId(), parentId.getValue1())).findFirst().orElse(null);
             // 父节点必须存在
@@ -339,11 +338,15 @@ public class TreeUtils {
                 break;
             }
             // 防止死循环
-            if (!parentIds.add(parentNode.getParentId())) {
+            if (!parentIds.add(parentNode.getId())) {
                 break;
             }
             parents.add(parentNode);
             parentId.setValue1(parentNode.getParentId());
+            // 父节点是根节点
+            if (Objects.equals(parentNode.isRoot(), true)) {
+                break;
+            }
         }
         return parents;
     }
