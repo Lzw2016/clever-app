@@ -2,6 +2,7 @@ package org.clever.core.tree;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.tuples.TupleOne;
 import org.clever.util.Assert;
 
 import java.util.*;
@@ -228,7 +229,7 @@ public class TreeUtils {
     }
 
     /**
-     * 判断指定的节点是否存在树中
+     * 判断树中是否存在指定的节点
      *
      * @param treeList 已经构建好的树
      * @param id       查找的节点ID
@@ -240,7 +241,7 @@ public class TreeUtils {
     }
 
     /**
-     * 判断指定的节点是否存在树中
+     * 判断树中是否存在指定的节点
      *
      * @param node 已经构建好的树节点
      * @param id   查找的节点ID
@@ -291,36 +292,27 @@ public class TreeUtils {
      * 获取指定节点的父节点
      *
      * @param treeList 已经构建好的树
-     * @param node     指定的节点
+     * @param id       查找的节点ID
      * @return 指定节点的父节点，不存在返回null
      */
-    public static <T extends ITreeNode> T getParent(List<T> treeList, T node) {
-        // TODO 获取当前节点的父节点
-        return null;
+    public static <T extends ITreeNode> T getParent(List<T> treeList, Object id) {
+        List<T> nodes = flattenTree(treeList);
+        T node = nodes.stream().filter(n -> Objects.equals(n.getId(), id)).findFirst().orElse(null);
+        if (node == null || Objects.equals(node.isRoot(), true)) {
+            return null;
+        }
+        return nodes.stream().filter(n -> Objects.equals(n.getId(), node.getParentId())).findFirst().orElse(null);
     }
 
     /**
      * 获取指定节点的父节点
      *
      * @param treeList 已经构建好的树
-     * @param id       查找的节点ID
+     * @param node     指定的节点
      * @return 指定节点的父节点，不存在返回null
      */
-    public static <T extends ITreeNode> T getParent(List<T> treeList, Object id) {
-        // TODO 获取当前节点的父节点
-        return null;
-    }
-
-    /**
-     * 获取指定节点的所有父节点(按照层级结构排序，直接父节点在集合的第一个位置)
-     *
-     * @param treeList 已经构建好的树
-     * @param node     指定的节点
-     * @return 指定节点的所有父节点，不存在返回空集合
-     */
-    public static <T extends ITreeNode> List<T> getParents(List<T> treeList, T node) {
-        // TODO 获取当前节点的父节点
-        return null;
+    public static <T extends ITreeNode> T getParent(List<T> treeList, T node) {
+        return getParent(treeList, node.getId());
     }
 
     /**
@@ -331,7 +323,39 @@ public class TreeUtils {
      * @return 指定节点的所有父节点，不存在返回空集合
      */
     public static <T extends ITreeNode> List<T> getParents(List<T> treeList, Object id) {
-        // TODO 获取当前节点的父节点
-        return null;
+        final List<T> parents = new ArrayList<>();
+        final List<T> nodes = flattenTree(treeList);
+        final T node = nodes.stream().filter(n -> Objects.equals(n.getId(), id)).findFirst().orElse(null);
+        if (node == null || Objects.equals(node.isRoot(), true)) {
+            return parents;
+        }
+        final TupleOne<Object> parentId = TupleOne.creat(node.getParentId());
+        final Set<Object> parentIds = new HashSet<>();
+        parentIds.add(parentId.getValue1());
+        while (true) {
+            T parentNode = nodes.stream().filter(n -> Objects.equals(n.getId(), parentId.getValue1())).findFirst().orElse(null);
+            // 父节点必须存在
+            if (parentNode == null) {
+                break;
+            }
+            // 防止死循环
+            if (!parentIds.add(parentNode.getParentId())) {
+                break;
+            }
+            parents.add(parentNode);
+            parentId.setValue1(parentNode.getParentId());
+        }
+        return parents;
+    }
+
+    /**
+     * 获取指定节点的所有父节点(按照层级结构排序，直接父节点在集合的第一个位置)
+     *
+     * @param treeList 已经构建好的树
+     * @param node     指定的节点
+     * @return 指定节点的所有父节点，不存在返回空集合
+     */
+    public static <T extends ITreeNode> List<T> getParents(List<T> treeList, T node) {
+        return getParents(treeList, node.getId());
     }
 }
