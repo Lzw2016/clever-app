@@ -49,6 +49,12 @@ public class WorkerFlow {
             executorService = DEF_POOL;
         }
         final ExecutorService executor = executorService;
+        // 检查入口任务
+        for (WorkerNode worker : entryWorkers) {
+            if (!worker.isEntryWorker()) {
+                throw new IllegalArgumentException("WorkerNode(id=" + worker.getId() + ", name=" + worker.getName() + ")不是入口任务");
+            }
+        }
         // 构造 WorkerContext
         List<WorkerNode> flattenWorkers = flattenWorkers(entryWorkers);
         Map<String, WorkerNode> flattenWorkerMap = new HashMap<>();
@@ -57,7 +63,7 @@ public class WorkerFlow {
         // 开始并行执行任务
         List<CompletableFuture<Void>> futures = new ArrayList<>(entryWorkers.size());
         for (WorkerNode worker : entryWorkers) {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> worker.start(workerContext, executor), executor);
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> worker.start(workerContext, null, executor), executor);
             futures.add(future);
         }
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply(unused -> workerContext);

@@ -2,13 +2,14 @@ package org.clever.core.flow;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.clever.core.OrderComparator;
+import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * 作者：lizw <br/>
  * 创建时间：2024/01/07 12:23 <br/>
  */
+@Slf4j
 @EqualsAndHashCode
 public class WorkerNode {
     private static final AtomicIntegerFieldUpdater<WorkerNode> STATE_UPDATER = AtomicIntegerFieldUpdater.newUpdater(WorkerNode.class, "state");
@@ -32,6 +34,11 @@ public class WorkerNode {
      */
     @Getter
     private String name;
+    /**
+     * 任务参数
+     */
+    @Getter
+    private final WorkerParam param = new WorkerParam();
     /**
      * 任务
      */
@@ -120,7 +127,7 @@ public class WorkerNode {
      * 节点任务运行状态，参照 {@link WorkerState}
      */
     public int getState() {
-        return state;
+        return STATE_UPDATER.get(this);
     }
 
     /**
@@ -244,37 +251,148 @@ public class WorkerNode {
     }
 
     /**
+     * 判断当前任务节点是否是入口任务(不存在前置任务)
+     */
+    public boolean isEntryWorker() {
+        return prevWorkers.isEmpty();
+    }
+
+    /**
+     * 当前任务节点是否未结束
+     */
+    public boolean notCompleted() {
+        int state = getState();
+        return Objects.equals(state, WorkerState.INIT) || Objects.equals(state, WorkerState.RUNNING);
+    }
+
+    /**
+     * 当前任务节点是否已经结束
+     */
+    public boolean isCompleted() {
+        return !notCompleted();
+    }
+
+    /**
      * 开始执行当前任务节点及其后续的任务节点。<br/>
      * 可重复调用，但只有第一次调用起作用。
      *
      * @param workerContext   任务上下文
+     * @param from            发起执行当前任务的任务节点(执行入口任务时为null)
      * @param executorService 任务执行器(线程池)
      */
-    public void start(WorkerContext workerContext, ExecutorService executorService) {
+    public void start(WorkerContext workerContext, WorkerNode from, ExecutorService executorService) {
         Assert.notNull(workerContext, "参数 workerContext 不能为空");
         Assert.notNull(executorService, "参数 executorService 不能为空");
-        if (!setState(WorkerState.INIT, WorkerState.RUNNING)) {
+        // 当前任务已经执行完成
+        if (isCompleted()) {
             return;
         }
-
+        // 是否必须等待 prev 任务执行完成
+        if (prevWorkers.stream().anyMatch(prev -> prev.isWaitComplete() && prev.getPrev().notCompleted())) {
+            return;
+        }
+        // 如果 next 任务已经执行完成，能否跳过 current 任务执行
+        if (nextWorkers.stream().allMatch(next -> next.isCanSkip() && next.getNext().isCompleted())) {
+            setState(WorkerState.SKIPPED);
+            return;
+        }
+        // 当前任务已经在执行过了
+        if (!setState(WorkerState.RUNNING, WorkerState.INIT)) {
+            return;
+        }
+        // 执行当前任务节点逻辑
+        TupleTwo<Object, Throwable> tuple = executeWorker(workerContext, from);
+        final Object result = tuple.getValue1();
+        final Throwable err = tuple.getValue2();
+        // 更新任务状态
+        setState(err == null ? WorkerState.SUCCESS : WorkerState.ERROR);
+        workerContext.setResult(this, result);
+        if (err != null && !ignoreErr) {
+            throw ExceptionUtils.unchecked(err);
+        }
+        if (err != null) {
+            log.warn("WorkerNode(id={}, name={}) 执行失败", id, name, err);
+        }
+        // 触发后续任务节点执行
+        for (NextWorker nextWorker : nextWorkers) {
+            CompletableFuture.runAsync(() -> nextWorker.getNext().start(workerContext, this, executorService), executorService);
+        }
     }
 
     /**
      * 设置新的 state 值, 如果设置成功返回 true。<br/>
      * 参考 {@link WorkerState}
      *
-     * @param expect 预期当前的 state 值
      * @param state  新的 state 值
+     * @param expect 预期当前的 state 值
      */
-    private boolean setState(int expect, int state) {
+    private boolean setState(int state, int expect) {
         return STATE_UPDATER.compareAndSet(this, expect, state);
     }
 
     /**
-     * 执行当前任务节点
+     * 设置新的 state 值
+     *
+     * @param state 新的 state 值
      */
-    private void executeWorker() {
+    private void setState(int state) {
+        STATE_UPDATER.set(this, state);
+    }
 
+    /**
+     * 执行当前任务节点逻辑
+     *
+     * @param workerContext 任务上下文
+     * @param from          发起执行当前任务的任务节点(执行入口任务时为null)
+     * @return {@code TupleTwo<result, err>}
+     */
+    private TupleTwo<Object, Throwable> executeWorker(WorkerContext workerContext, WorkerNode from) {
+        final List<Callback> follows = new ArrayList<>(callbacks.size());
+        Object result = null;
+        Throwable err = null;
+        // 执行 Callback.before
+        final CallbackContext beforeContext = new CallbackContext(workerContext, this, from);
+        for (Callback callback : callbacks) {
+            try {
+                follows.add(callback);
+                callback.before(beforeContext);
+            } catch (Throwable e) {
+                err = e;
+                break;
+            }
+        }
+        Collections.reverse(follows);
+        if (err == null) {
+            // 执行 Worker.execute
+            try {
+                result = worker.execute(param, this, from, workerContext);
+            } catch (Throwable e) {
+                err = e;
+            }
+            // 执行 Callback.after
+            if (err == null) {
+                CallbackContext.After afterContext = new CallbackContext.After(workerContext, this, from, result);
+                for (Callback callback : follows) {
+                    try {
+                        callback.after(afterContext);
+                        result = afterContext.getResult();
+                    } catch (Throwable e) {
+                        err = e;
+                        break;
+                    }
+                }
+            }
+        }
+        // 执行 Callback.finallyHandle
+        CallbackContext.Finally finallyContext = new CallbackContext.Finally(workerContext, this, from, result, err);
+        for (Callback callback : follows) {
+            try {
+                callback.finallyHandle(finallyContext);
+            } catch (Throwable e) {
+                log.warn("Callback.finallyHandle 执行失败", e);
+            }
+        }
+        return TupleTwo.creat(result, err);
     }
 
     /**
