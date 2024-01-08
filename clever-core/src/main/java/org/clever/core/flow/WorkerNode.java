@@ -416,14 +416,17 @@ public class WorkerNode {
             log.warn("WorkerNode(id={}, name={}) 执行失败", id, name, err);
         }
         // 触发后续任务节点执行
+        TraceWorker currentTrace = workerContext.getTraceWorker(id);
         for (NextWorker nextWorker : nextWorkers) {
             WorkerNode next = nextWorker.getNext();
             CompletableFuture<Void> future = CompletableFuture.runAsync(
                 () -> next.start(workerContext, this, executor), executor
             );
-            TraceWorker traceWorker = new TraceWorker(next, future);
+            currentTrace.addFire(next);
+            TraceWorker traceWorker = new TraceWorker(from, next, future);
             workerContext.addTrace(traceWorker);
         }
+        currentTrace.end();
     }
 
     /**
@@ -433,6 +436,7 @@ public class WorkerNode {
      * @param state  新的 state 值
      * @param expect 预期当前的 state 值
      */
+    @SuppressWarnings("SameParameterValue")
     private boolean setState(int state, int expect) {
         return STATE_UPDATER.compareAndSet(this, expect, state);
     }

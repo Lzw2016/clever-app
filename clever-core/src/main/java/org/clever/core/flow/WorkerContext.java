@@ -40,11 +40,6 @@ public class WorkerContext {
      */
     @Getter
     private final WorkerVariable attributes = new WorkerVariable();
-//    /**
-//     *
-//     */
-//    private final ConcurrentMap<String, CompletableFuture<Void>> allFuture = new ConcurrentHashMap<>();
-
     /**
      * 第一个 TraceWorker(入口)
      */
@@ -53,11 +48,12 @@ public class WorkerContext {
     /**
      * 当前最新的 TraceWorker(最后一个)
      */
+    @Getter
     public volatile TraceWorker currentTrace;
-//    /**
-//     *
-//     */
-//    private final ConcurrentMap<String, TraceWorker> flattenTraceMap = new ConcurrentHashMap<>();
+    /**
+     * 所有的 TraceWorker {@code Map<WorkerNode唯一ID, TraceWorker>}
+     */
+    private final ConcurrentMap<String, TraceWorker> flattenTraces = new ConcurrentHashMap<>();
 
     /**
      * @param flattenWorkers   平铺的所有任务节点
@@ -171,6 +167,15 @@ public class WorkerContext {
     }
 
     /**
+     * 获取 WorkerNode 对应的 TraceWorker
+     *
+     * @param id WorkerNode ID
+     */
+    public TraceWorker getTraceWorker(String id) {
+        return flattenTraces.get(id);
+    }
+
+    /**
      * 设置任务节点执行的返回值
      *
      * @param worker 任务节点
@@ -190,6 +195,7 @@ public class WorkerContext {
      */
     synchronized void addTrace(TraceWorker nextTrace) {
         Assert.notNull(nextTrace, "参数 nextTrace 不能为 null");
+        flattenTraces.put(nextTrace.getCurrent().getId(), nextTrace);
         if (firstTrace == null) {
             firstTrace = nextTrace;
         }

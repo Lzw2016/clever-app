@@ -116,7 +116,7 @@ public class WorkerFlowTest {
                 sleep(300);
                 log.info("05.2 -> PoolSize={}", threadPool.getPoolSize());
             })
-            .addPrev(workerNode_4)
+            .addPrev(workerNode_3)
             .build();
         CompletableFuture<WorkerContext> future = WorkerFlow.start(threadPool, workerNode_1);
         future.join();
