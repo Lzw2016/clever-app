@@ -1,5 +1,6 @@
 package org.clever.core.flow;
 
+import lombok.extern.slf4j.Slf4j;
 import org.clever.core.SharedThreadPoolExecutor;
 
 import java.util.*;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2024/01/07 15:20 <br/>
  */
+@Slf4j
 public class WorkerFlow {
     /**
      * 执行异步任务的线程池
@@ -49,24 +51,29 @@ public class WorkerFlow {
             executorService = DEF_POOL;
         }
         final ExecutorService executor = executorService;
-        // 检查入口任务
-        for (WorkerNode worker : entryWorkers) {
-            if (!worker.isEntryWorker()) {
-                throw new IllegalArgumentException("WorkerNode(id=" + worker.getId() + ", name=" + worker.getName() + ")不是入口任务");
-            }
-        }
         // 构造 WorkerContext
         List<WorkerNode> flattenWorkers = flattenWorkers(entryWorkers);
         Map<String, WorkerNode> flattenWorkerMap = new HashMap<>();
-        flattenWorkers.forEach(workerNode -> flattenWorkerMap.put(workerNode.getId(), workerNode));
+        flattenWorkers.forEach(workerNode -> {
+            if (flattenWorkerMap.containsKey(workerNode.getId())) {
+                throw new IllegalArgumentException("重复的 WorkerNode ID=" + workerNode.getId());
+            }
+            flattenWorkerMap.put(workerNode.getId(), workerNode);
+        });
         final WorkerContext workerContext = new WorkerContext(flattenWorkers, flattenWorkerMap, entryWorkers);
         // 开始并行执行任务
-        List<CompletableFuture<Void>> futures = new ArrayList<>(entryWorkers.size());
+        List<CompletableFuture<CompletableFuture<Void>>> futures = new ArrayList<>(entryWorkers.size());
         for (WorkerNode worker : entryWorkers) {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> worker.start(workerContext, null, executor), executor);
+            CompletableFuture<CompletableFuture<Void>> future = CompletableFuture.supplyAsync(
+                () -> worker.start(workerContext, null, executor), executor
+            );
             futures.add(future);
         }
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply(unused -> workerContext);
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenAccept(unused -> {
+            // 等待所有的 entryWorkers 执行完毕
+            CompletableFuture<Void> innerFuture = CompletableFuture.allOf(futures.stream().map(CompletableFuture::join).toArray(CompletableFuture[]::new));
+            innerFuture.join();
+        }).thenApply(unused -> workerContext);
     }
 
     /**

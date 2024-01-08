@@ -132,7 +132,15 @@ public class SharedThreadPoolExecutor {
     public static ThreadPoolExecutor getCachedPool() {
         synchronized (LOCK_CACHED_POOL) {
             if (CACHED_POOL == null) {
-                CACHED_POOL = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
+                CACHED_POOL = new ThreadPoolExecutor(
+                    0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+                    new SynchronousQueue<>(),
+                    new BasicThreadFactory.Builder()
+                        .namingPattern("cached-shared-%d")
+                        .daemon(true)
+                        .build(),
+                    new ThreadPoolExecutor.CallerRunsPolicy()
+                );
             }
         }
         return CACHED_POOL;

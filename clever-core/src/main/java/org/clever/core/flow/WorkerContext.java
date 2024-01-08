@@ -24,7 +24,7 @@ public class WorkerContext {
      */
     private final List<WorkerNode> flattenWorkers;
     /**
-     * 平铺的所有任务节点 {@code Map<id, WorkerNode>}
+     * 平铺的所有任务节点 {@code Map<WorkerNode唯一ID, WorkerNode>}
      */
     private final Map<String, WorkerNode> flattenWorkerMap;
     /**
@@ -32,14 +32,14 @@ public class WorkerContext {
      */
     private final List<WorkerNode> entryWorkers;
     /**
-     * 任务节点执行的返回值 {@code Map<id, result>}
+     * 任务节点执行的返回值 {@code Map<WorkerNode唯一ID, Worker result>}
      */
     private final ConcurrentMap<String, Object> results = new ConcurrentHashMap<>();
     /**
      * 自定义属性
      */
     @Getter
-    private final WorkerParam attributes = new WorkerParam();
+    private final WorkerVariable attributes = new WorkerVariable();
 
 
 //    TODO 调用链追踪
@@ -47,7 +47,7 @@ public class WorkerContext {
 
     /**
      * @param flattenWorkers   平铺的所有任务节点
-     * @param flattenWorkerMap 平铺的所有任务节点 {@code Map<id, WorkerNode>}
+     * @param flattenWorkerMap 平铺的所有任务节点 {@code Map<WorkerNode唯一ID, WorkerNode>}
      * @param entryWorkers     入口任务集合
      */
     public WorkerContext(List<WorkerNode> flattenWorkers, Map<String, WorkerNode> flattenWorkerMap, List<WorkerNode> entryWorkers) {
@@ -64,7 +64,7 @@ public class WorkerContext {
     }
 
     /**
-     * 平铺的所有任务节点 {@code Map<id, WorkerNode>}
+     * 平铺的所有任务节点 {@code Map<WorkerNode唯一ID, WorkerNode>}
      */
     public Map<String, WorkerNode> getFlattenWorkerMap() {
         return Collections.unmodifiableMap(flattenWorkerMap);
@@ -95,6 +95,9 @@ public class WorkerContext {
      * @param result 执行的返回值
      */
     void setResult(WorkerNode worker, Object result) {
+        if (result == null) {
+            return;
+        }
         results.put(worker.getId(), result);
     }
 }

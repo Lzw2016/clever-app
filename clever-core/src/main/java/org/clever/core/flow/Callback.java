@@ -26,7 +26,8 @@ public interface Callback extends Ordered {
     }
 
     /**
-     * 任务执行成功后的回调 <br/>
+     * 任务执行成功后的回调(可以覆盖 Worker 返回值) <br/>
+     *
      */
     void after(CallbackContext.After context);
 

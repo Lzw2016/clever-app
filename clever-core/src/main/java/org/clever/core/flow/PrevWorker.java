@@ -1,6 +1,6 @@
 package org.clever.core.flow;
 
-import lombok.Data;
+import lombok.Getter;
 import org.clever.util.Assert;
 
 /**
@@ -9,7 +9,7 @@ import org.clever.util.Assert;
  * 作者：lizw <br/>
  * 创建时间：2024/01/07 13:17 <br/>
  */
-@Data
+@Getter
 public class PrevWorker {
     /**
      * 当前任务节点
