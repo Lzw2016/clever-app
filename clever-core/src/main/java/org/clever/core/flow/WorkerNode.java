@@ -402,6 +402,8 @@ public class WorkerNode {
         if (!setState(WorkerState.RUNNING, WorkerState.INIT)) {
             return;
         }
+        TraceWorker currentTrace = workerContext.getTraceWorker(id);
+        currentTrace.setThread(Thread.currentThread().getName());
         // 执行当前任务节点逻辑
         TupleTwo<Object, Throwable> tuple = executeWorker(workerContext, from);
         final Object result = tuple.getValue1();
@@ -416,15 +418,13 @@ public class WorkerNode {
             log.warn("WorkerNode(id={}, name={}) 执行失败", id, name, err);
         }
         // 触发后续任务节点执行
-        TraceWorker currentTrace = workerContext.getTraceWorker(id);
-        currentTrace.setThread(Thread.currentThread().getName());
         for (NextWorker nextWorker : nextWorkers) {
             WorkerNode next = nextWorker.getNext();
+            TraceWorker traceWorker = new TraceWorker(from, next);
             CompletableFuture<Void> future = CompletableFuture.runAsync(
                 () -> next.start(workerContext, this, executor), executor
             );
-            TraceWorker traceWorker = new TraceWorker(from, next, future);
-            // currentTrace.setFuture(future);
+            traceWorker.setFuture(future);
             currentTrace.addFire(next);
             workerContext.addTrace(traceWorker);
         }

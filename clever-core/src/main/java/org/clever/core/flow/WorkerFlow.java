@@ -63,11 +63,11 @@ public class WorkerFlow {
         final WorkerContext workerContext = new WorkerContext(flattenWorkers, flattenWorkerMap, entryWorkers);
         // 开始并行执行任务
         for (WorkerNode worker : entryWorkers) {
+            TraceWorker traceWorker = new TraceWorker(null, worker);
             CompletableFuture<Void> future = CompletableFuture.runAsync(
                 () -> worker.start(workerContext, null, executor), executor
             );
-            TraceWorker traceWorker = new TraceWorker(null, worker, future);
-            // traceWorker.setFuture(future);
+            traceWorker.setFuture(future);
             workerContext.addTrace(traceWorker);
         }
         return CompletableFuture.supplyAsync(() -> {

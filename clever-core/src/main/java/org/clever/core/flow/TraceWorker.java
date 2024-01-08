@@ -30,7 +30,7 @@ public class TraceWorker {
      * 执行当前任务节点返回的 CompletableFuture
      */
     @Getter
-    private final CompletableFuture<Void> future;
+    private volatile CompletableFuture<Void> future;
     /**
      * 下一个任务节点执行记录
      */
@@ -61,12 +61,10 @@ public class TraceWorker {
      * @param current 当前任务节点
      * @param start   任务开始执行时间
      */
-    public TraceWorker(WorkerNode from, WorkerNode current, CompletableFuture<Void> future, long start) {
+    public TraceWorker(WorkerNode from, WorkerNode current, long start) {
         Assert.notNull(current, "参数 current 不能为 null");
-        Assert.notNull(future, "参数 future 不能为 null");
         this.from = from;
         this.current = current;
-        this.future = future;
         this.start = start;
     }
 
@@ -74,8 +72,8 @@ public class TraceWorker {
      * @param from    触发当前任务的任务节点
      * @param current 当前任务节点
      */
-    public TraceWorker(WorkerNode from, WorkerNode current, CompletableFuture<Void> future) {
-        this(from, current, future, SystemClock.now());
+    public TraceWorker(WorkerNode from, WorkerNode current) {
+        this(from, current, SystemClock.now());
     }
 
     /**
@@ -95,12 +93,12 @@ public class TraceWorker {
         return (int) (end - start);
     }
 
-    // /**
-    //  * 执行当前任务节点返回的 CompletableFuture
-    //  */
-    // public void setFuture(CompletableFuture<Void> future) {
-    //     this.future = future;
-    // }
+    /**
+     * 执行当前任务节点返回的 CompletableFuture
+     */
+    public void setFuture(CompletableFuture<Void> future) {
+        this.future = future;
+    }
 
     /**
      * 执行当前任务的线程名

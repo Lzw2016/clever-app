@@ -1,6 +1,7 @@
 package org.clever.core.flow;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.util.Assert;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2024/01/07 12:21 <br/>
  */
+@Slf4j
 public class WorkerContext {
     public static final WorkerContext NULL = new WorkerContext(Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
 
