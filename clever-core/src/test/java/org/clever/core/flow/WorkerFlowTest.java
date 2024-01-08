@@ -77,44 +77,44 @@ public class WorkerFlowTest {
         WorkerNode workerNode_1 = WorkerNode.Builder.create()
             .setName("01")
             .worker(context -> {
-                log.info("01.1-> {}", threadPool.getPoolSize());
+                log.info("01.1 -> PoolSize={}", threadPool.getPoolSize());
                 sleep(300);
-                log.info("01.2-> {}", threadPool.getPoolSize());
+                log.info("01.2 -> PoolSize={}", threadPool.getPoolSize());
             })
             .build();
         WorkerNode workerNode_2 = WorkerNode.Builder.create()
             .setName("02")
             .worker(context -> {
-                log.info("02.1-> {}", threadPool.getPoolSize());
+                log.info("02.1 -> PoolSize={}", threadPool.getPoolSize());
                 sleep(300);
-                log.info("02.2-> {}", threadPool.getPoolSize());
+                log.info("02.2 -> PoolSize={}", threadPool.getPoolSize());
             })
             .addPrev(workerNode_1)
             .build();
         WorkerNode workerNode_3 = WorkerNode.Builder.create()
             .setName("03")
             .worker(context -> {
-                log.info("03.1 -> {}", threadPool.getPoolSize());
+                log.info("03.1 -> PoolSize={}", threadPool.getPoolSize());
                 sleep(300);
-                log.info("03.2 -> {}", threadPool.getPoolSize());
+                log.info("03.2 -> PoolSize={}", threadPool.getPoolSize());
             })
             .addPrev(workerNode_2)
             .build();
         WorkerNode workerNode_4 = WorkerNode.Builder.create()
             .setName("04")
             .worker(context -> {
-                log.info("04.1 -> {}", threadPool.getPoolSize());
+                log.info("04.1 -> PoolSize={}", threadPool.getPoolSize());
                 sleep(300);
-                log.info("04.2 -> {}", threadPool.getPoolSize());
+                log.info("04.2 -> PoolSize={}", threadPool.getPoolSize());
             })
             .addPrev(workerNode_3)
             .build();
         WorkerNode workerNode_5 = WorkerNode.Builder.create()
             .setName("05")
             .worker(context -> {
-                log.info("05.1 -> {}", threadPool.getPoolSize());
+                log.info("05.1 -> PoolSize={}", threadPool.getPoolSize());
                 sleep(300);
-                log.info("05.2 -> {}", threadPool.getPoolSize());
+                log.info("05.2 -> PoolSize={}", threadPool.getPoolSize());
             })
             .addPrev(workerNode_4)
             .build();

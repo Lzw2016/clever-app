@@ -62,18 +62,22 @@ public class WorkerFlow {
         });
         final WorkerContext workerContext = new WorkerContext(flattenWorkers, flattenWorkerMap, entryWorkers);
         // 开始并行执行任务
-        List<CompletableFuture<CompletableFuture<Void>>> futures = new ArrayList<>(entryWorkers.size());
         for (WorkerNode worker : entryWorkers) {
-            CompletableFuture<CompletableFuture<Void>> future = CompletableFuture.supplyAsync(
+            CompletableFuture<Void> future = CompletableFuture.runAsync(
                 () -> worker.start(workerContext, null, executor), executor
             );
-            futures.add(future);
+            TraceWorker traceWorker = new TraceWorker(worker, future);
+            workerContext.addTrace(traceWorker);
         }
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenAccept(unused -> {
-            // 等待所有的 entryWorkers 执行完毕
-            CompletableFuture<Void> innerFuture = CompletableFuture.allOf(futures.stream().map(CompletableFuture::join).toArray(CompletableFuture[]::new));
-            innerFuture.join();
-        }).thenApply(unused -> workerContext);
+        return CompletableFuture.supplyAsync(() -> {
+            // 等待所有的 WorkerNode 执行完毕
+            TraceWorker traceWorker = workerContext.getFirstTrace();
+            while (traceWorker != null) {
+                traceWorker.getFuture().join();
+                traceWorker = traceWorker.getNextTrace();
+            }
+            return workerContext;
+        });
     }
 
     /**

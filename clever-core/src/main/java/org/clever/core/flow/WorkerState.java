@@ -25,8 +25,4 @@ public interface WorkerState {
      * 跳过执行
      */
     int SKIPPED = 4;
-    /**
-     * TODO 执行超时
-     */
-    int TIMEOUT = 5;
 }

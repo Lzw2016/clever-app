@@ -174,6 +174,13 @@ public class WorkerNode {
     }
 
     /**
+     * 当前任务节点是否已经执行成功
+     */
+    public boolean isSuccess() {
+        return Objects.equals(getState(), WorkerState.SUCCESS);
+    }
+
+    /**
      * 新增一个前置的任务节点。<br/>
      * 建议统一使用next(或统一使用prev)构建任务节点链，便于理解，效果是一致的
      *
@@ -375,26 +382,25 @@ public class WorkerNode {
      * @param from          发起执行当前任务的任务节点(执行入口任务时为null)
      * @param executor      任务执行器(线程池)
      */
-    CompletableFuture<Void> start(WorkerContext workerContext, WorkerNode from, ExecutorService executor) {
+    void start(WorkerContext workerContext, WorkerNode from, ExecutorService executor) {
         Assert.notNull(workerContext, "参数 workerContext 不能为空");
         Assert.notNull(executor, "参数 executor 不能为空");
-        final CompletableFuture<Void> nullFuture = CompletableFuture.completedFuture(null);
         // 当前任务已经执行完成
         if (isCompleted()) {
-            return nullFuture;
+            return;
         }
         // 是否必须等待 prev 任务执行完成
         if (from != null && !prevWorkers.isEmpty() && prevWorkers.stream().anyMatch(prev -> prev.isWaitComplete() && prev.getPrev().notCompleted())) {
-            return nullFuture;
+            return;
         }
         // 如果 next 任务已经执行完成，能否跳过 current 任务执行
         if (!nextWorkers.isEmpty() && nextWorkers.stream().allMatch(next -> next.isCanSkip() && next.getNext().isCompleted())) {
             setState(WorkerState.SKIPPED);
-            return nullFuture;
+            return;
         }
         // 当前任务已经在执行过了
         if (!setState(WorkerState.RUNNING, WorkerState.INIT)) {
-            return nullFuture;
+            return;
         }
         // 执行当前任务节点逻辑
         TupleTwo<Object, Throwable> tuple = executeWorker(workerContext, from);
@@ -410,19 +416,14 @@ public class WorkerNode {
             log.warn("WorkerNode(id={}, name={}) 执行失败", id, name, err);
         }
         // 触发后续任务节点执行
-        List<CompletableFuture<CompletableFuture<Void>>> futures = new ArrayList<>(nextWorkers.size());
         for (NextWorker nextWorker : nextWorkers) {
-            CompletableFuture<CompletableFuture<Void>> future = CompletableFuture.supplyAsync(
-                () -> nextWorker.getNext().start(workerContext, this, executor), executor
+            WorkerNode next = nextWorker.getNext();
+            CompletableFuture<Void> future = CompletableFuture.runAsync(
+                () -> next.start(workerContext, this, executor), executor
             );
-            futures.add(future);
+            TraceWorker traceWorker = new TraceWorker(next, future);
+            workerContext.addTrace(traceWorker);
         }
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenAccept(unused -> {
-            // 等待所有的 nextWorkers 执行完毕
-            CompletableFuture<Void> innerFuture = CompletableFuture.allOf(futures.stream().map(CompletableFuture::join).toArray(CompletableFuture[]::new));
-            innerFuture.join();
-            log.info("@@@ 等待所有的 nextWorkers 执行完毕");
-        });
     }
 
     /**
