@@ -60,12 +60,16 @@ public class WorkerFlow {
             }
             flattenWorkerMap.put(workerNode.getId(), workerNode);
         });
-        final WorkerContext workerContext = new WorkerContext(flattenWorkers, flattenWorkerMap, entryWorkers);
+        final WorkerContext workerContext = new WorkerContext(executor, flattenWorkers, flattenWorkerMap, entryWorkers);
         // 开始并行执行任务
         for (WorkerNode worker : entryWorkers) {
             TraceWorker traceWorker = new TraceWorker(null, worker);
             CompletableFuture<Void> future = CompletableFuture.runAsync(
-                () -> worker.start(workerContext, null, executor), executor
+                () -> {
+                    traceWorker.start();
+                    worker.start(workerContext, null, traceWorker, executor);
+                },
+                executor
             );
             traceWorker.setFuture(future);
             workerContext.addTrace(traceWorker);

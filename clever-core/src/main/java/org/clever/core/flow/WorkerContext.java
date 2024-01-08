@@ -2,15 +2,15 @@ package org.clever.core.flow;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.clever.core.SharedThreadPoolExecutor;
 import org.clever.util.Assert;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -21,8 +21,15 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class WorkerContext {
-    public static final WorkerContext NULL = new WorkerContext(Collections.emptyList(), Collections.emptyMap(), Collections.emptyList());
+    public static final WorkerContext NULL = new WorkerContext(
+        SharedThreadPoolExecutor.getCachedPool(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyList()
+    );
 
+    /**
+     * 执行任务使用的线程池
+     */
+    @Getter
+    private final ExecutorService executor;
     /**
      * 平铺的所有任务节点
      */
@@ -59,17 +66,15 @@ public class WorkerContext {
      */
     @Getter
     private volatile TraceWorker currentTrace;
-    /**
-     * 所有的 TraceWorker {@code Map<WorkerNode唯一ID, TraceWorker>}
-     */
-    private final ConcurrentMap<String, TraceWorker> flattenTraces = new ConcurrentHashMap<>();
 
     /**
+     * @param executor         执行任务使用的线程池
      * @param flattenWorkers   平铺的所有任务节点
      * @param flattenWorkerMap 平铺的所有任务节点 {@code Map<WorkerNode唯一ID, WorkerNode>}
      * @param entryWorkers     入口任务集合
      */
-    public WorkerContext(List<WorkerNode> flattenWorkers, Map<String, WorkerNode> flattenWorkerMap, List<WorkerNode> entryWorkers) {
+    public WorkerContext(ExecutorService executor, List<WorkerNode> flattenWorkers, Map<String, WorkerNode> flattenWorkerMap, List<WorkerNode> entryWorkers) {
+        this.executor = executor;
         this.flattenWorkers = flattenWorkers;
         this.flattenWorkerMap = flattenWorkerMap;
         this.entryWorkers = entryWorkers;
@@ -175,39 +180,90 @@ public class WorkerContext {
         return current.getNextWorkers().stream().allMatch(next -> next.getNext().isSuccess());
     }
 
-    /**
-     * 获取 WorkerNode 对应的 TraceWorker
-     *
-     * @param id WorkerNode ID
-     */
-    public TraceWorker getTraceWorker(String id) {
-        return flattenTraces.get(id);
-    }
+    // TODO 等待任意的节点执行完毕
 
-    public String traceLog() {
-        // [id=, name=, cost=] | ↑ | ↓ | ← | →
+    /**
+     * 获取任务真实的执行日志信息
+     *
+     * @param onlyRealRun 是否仅仅包含 “记录了真实执行过程” 的 TraceWorker
+     */
+    public String traceLog(boolean onlyRealRun) {
+        // ↑ | ↓ | ← | →
         final String line = "\n";
         final String down = " ↓";
         final StringBuilder logs = new StringBuilder();
+        final List<Map<String, String>> infos = new ArrayList<>();
+        final Map<String, Integer> maxWidths = new HashMap<>();
         TraceWorker traceWorker = firstTrace;
+        // 收集信息
         while (traceWorker != null) {
+            if (onlyRealRun && Objects.equals(traceWorker.getRealRun(), false)) {
+                break;
+            }
+            WorkerNode from = traceWorker.getFrom();
+            WorkerNode workerNode = traceWorker.getCurrent();
+            int cost = traceWorker.cost();
+            int await = traceWorker.await();
+            // 计算属性
+            String id = workerNode.getId();
+            String name = workerNode.getName();
+            String fromName = String.valueOf(from == null ? "null" : from.getName());
+            String state = workerNode.getStateText();
+            String start = traceWorker.getStart() <= 0 ? "null" : DateFormatUtils.format(new Date(traceWorker.getStart()), "yyyy-MM-dd HH:mm:ss.SSS");
+            String awaitStr = String.valueOf(await < 0 ? "?" : await);
+            String costStr = String.valueOf(cost < 0 ? "?" : cost);
+            String thread = traceWorker.getThread();
+            String err = traceWorker.getErr() == null ? "null" : traceWorker.getErr().getMessage();
+            // 保存属性
+            Map<String, String> info = new HashMap<>();
+            info.put("id", id);
+            info.put("name", name);
+            info.put("from", fromName);
+            info.put("state", state);
+            info.put("start", start);
+            info.put("await", awaitStr);
+            info.put("cost", costStr);
+            info.put("thread", thread);
+            info.put("err", err);
+            infos.add(info);
+            // 下一个
+            traceWorker = traceWorker.getNextTrace();
+        }
+        // 计算最大宽度
+        for (Map<String, String> info : infos) {
+            info.forEach((name, value) -> {
+                int maxWidth = Math.max(StringUtils.length(value), maxWidths.getOrDefault(name, 0));
+                maxWidths.put(name, maxWidth);
+            });
+        }
+        // 输出内容
+        for (Map<String, String> info : infos) {
             if (logs.length() > 0) {
                 logs.append(down).append(line);
             }
-            WorkerNode workerNode = traceWorker.getCurrent();
-            int cost = traceWorker.cost();
-            logs.append("[id=").append(workerNode.getId())
-                .append(", name=").append(workerNode.getName())
-                .append(", start=").append(DateFormatUtils.format(new Date(traceWorker.getStart()), "yyyy-MM-dd HH:mm:ss.SSS"))
-                .append(", cost=").append(cost <= 0 ? "?" : cost)
-                .append(", thread=").append(traceWorker.getThread())
+            // [id=, name=, from=, state=, start=, await=, cost=, thread=]
+            logs.append("[id=").append(StringUtils.rightPad(info.get("id"), maxWidths.get("id")))
+                .append(", name=").append(StringUtils.rightPad(info.get("name"), maxWidths.get("name")))
+                .append(", from=").append(StringUtils.rightPad(info.get("from"), maxWidths.get("from")))
+                .append(", state=").append(StringUtils.rightPad(info.get("state"), maxWidths.get("state")))
+                .append(", start=").append(StringUtils.rightPad(info.get("start"), maxWidths.get("start")))
+                .append(", await=").append(StringUtils.rightPad(info.get("await"), maxWidths.get("await")))
+                .append(", cost=").append(StringUtils.rightPad(info.get("cost"), maxWidths.get("cost")))
+                .append(", thread=").append(StringUtils.rightPad(info.get("thread"), maxWidths.get("thread")))
+                .append(", err=").append(StringUtils.rightPad(info.get("err"), maxWidths.get("err")))
                 .append("]").append(line);
-            traceWorker = traceWorker.getNextTrace();
         }
         if (!flowCompleted) {
             logs.append(line).append(down).append(line).append("...(执行中)").append(line);
         }
         return logs.toString();
+    }
+
+    /**
+     * 获取任务真实的执行日志信息
+     */
+    public String traceLog() {
+        return traceLog(true);
     }
 
     /**
@@ -230,7 +286,6 @@ public class WorkerContext {
      */
     synchronized void addTrace(TraceWorker nextTrace) {
         Assert.notNull(nextTrace, "参数 nextTrace 不能为 null");
-        flattenTraces.put(nextTrace.getCurrent().getId(), nextTrace);
         if (firstTrace == null) {
             firstTrace = nextTrace;
         }

@@ -6,6 +6,7 @@ import org.clever.util.Assert;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -16,6 +17,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 创建时间：2024/01/08 16:50 <br/>
  */
 public class TraceWorker {
+    /**
+     * TraceID
+     */
+    @Getter
+    private final String id;
     /**
      * 触发 current 任务的任务节点(当 current 是入口节点时，这个字段为 null)
      */
@@ -46,26 +52,44 @@ public class TraceWorker {
     @Getter
     private volatile String thread;
     /**
+     * 任务触发时间
+     */
+    @Getter
+    private final long fireTime;
+    /**
      * current 任务开始执行时间
      */
     @Getter
-    private final long start;
+    private volatile long start = 0;
     /**
      * current 任务结束执行时间
      */
     @Getter
-    private long end;
+    private volatile long end = 0;
+    /**
+     * 是否记录了真实执行过程, null: 未知
+     */
+    @Getter
+    private volatile Boolean realRun;
+    /**
+     * 当前任务执行错误信息
+     */
+    @Getter
+    private volatile Throwable err;
 
     /**
-     * @param from    触发当前任务的任务节点
-     * @param current 当前任务节点
-     * @param start   任务开始执行时间
+     * @param id       TraceID
+     * @param from     触发当前任务的任务节点
+     * @param current  当前任务节点
+     * @param fireTime 任务触发时间
      */
-    public TraceWorker(WorkerNode from, WorkerNode current, long start) {
+    public TraceWorker(String id, WorkerNode from, WorkerNode current, long fireTime) {
+        Assert.isNotBlank(id, "参数 id 不能为 null");
         Assert.notNull(current, "参数 current 不能为 null");
+        this.id = id;
         this.from = from;
         this.current = current;
-        this.start = start;
+        this.fireTime = fireTime;
     }
 
     /**
@@ -73,7 +97,7 @@ public class TraceWorker {
      * @param current 当前任务节点
      */
     public TraceWorker(WorkerNode from, WorkerNode current) {
-        this(from, current, SystemClock.now());
+        this(UUID.randomUUID().toString(), from, current, SystemClock.now());
     }
 
     /**
@@ -81,6 +105,16 @@ public class TraceWorker {
      */
     public List<WorkerNode> getFires() {
         return Collections.unmodifiableList(fires);
+    }
+
+    /**
+     * 任务触发到任务开始执行等待的时间，如果还未开始执行返回 -1
+     */
+    public int await() {
+        if (start == 0) {
+            return -1;
+        }
+        return (int) (start - fireTime);
     }
 
     /**
@@ -127,9 +161,31 @@ public class TraceWorker {
     }
 
     /**
+     * 记录 current 任务开始执行时间
+     */
+    void start() {
+        start = SystemClock.now();
+        thread = Thread.currentThread().getName();
+    }
+
+    /**
      * 记录 current 任务结束执行时间
      */
     void end() {
         end = SystemClock.now();
+    }
+
+    /**
+     * 当前任务执行错误信息
+     */
+    void err(Throwable err) {
+        this.err = err;
+    }
+
+    /**
+     * 是否记录了真实执行过程
+     */
+    void realRun(boolean realRun) {
+        this.realRun = realRun;
     }
 }

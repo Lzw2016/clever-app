@@ -136,6 +136,26 @@ public class WorkerNode {
     }
 
     /**
+     * 节点任务运行状态，参照 {@link WorkerState}
+     */
+    public String getStateText() {
+        int state = getState();
+        switch (state) {
+            case WorkerState.INIT:
+                return "init";
+            case WorkerState.RUNNING:
+                return "running";
+            case WorkerState.SUCCESS:
+                return "success";
+            case WorkerState.ERROR:
+                return "error";
+            case WorkerState.SKIPPED:
+                return "skipped";
+        }
+        return String.valueOf(state);
+    }
+
+    /**
      * 判断当前 WorkerNode 是否可修改配置，只有是 WorkerState.INIT 状态才能修改配置
      */
     public boolean isModifiable() {
@@ -380,38 +400,44 @@ public class WorkerNode {
      *
      * @param workerContext 任务上下文
      * @param from          发起执行当前任务的任务节点(执行入口任务时为null)
+     * @param currentTrace  任务节点执行记录
      * @param executor      任务执行器(线程池)
      */
-    void start(WorkerContext workerContext, WorkerNode from, ExecutorService executor) {
+    void start(WorkerContext workerContext, WorkerNode from, TraceWorker currentTrace, ExecutorService executor) {
         Assert.notNull(workerContext, "参数 workerContext 不能为空");
         Assert.notNull(executor, "参数 executor 不能为空");
         // 当前任务已经执行完成
         if (isCompleted()) {
+            currentTrace.realRun(false);
             return;
         }
         // 是否必须等待 prev 任务执行完成
         if (from != null && !prevWorkers.isEmpty() && prevWorkers.stream().anyMatch(prev -> prev.isWaitComplete() && prev.getPrev().notCompleted())) {
+            currentTrace.realRun(false);
             return;
         }
         // 如果 next 任务已经执行完成，能否跳过 current 任务执行
         if (!nextWorkers.isEmpty() && nextWorkers.stream().allMatch(next -> next.isCanSkip() && next.getNext().isCompleted())) {
+            currentTrace.realRun(true);
             setState(WorkerState.SKIPPED);
             return;
         }
         // 当前任务已经在执行过了
         if (!setState(WorkerState.RUNNING, WorkerState.INIT)) {
+            currentTrace.realRun(false);
             return;
         }
-        TraceWorker currentTrace = workerContext.getTraceWorker(id);
-        currentTrace.setThread(Thread.currentThread().getName());
+        currentTrace.realRun(true);
         // 执行当前任务节点逻辑
         TupleTwo<Object, Throwable> tuple = executeWorker(workerContext, from);
         final Object result = tuple.getValue1();
         final Throwable err = tuple.getValue2();
+        currentTrace.err(err);
         // 更新任务状态
         setState(err == null ? WorkerState.SUCCESS : WorkerState.ERROR);
         workerContext.setResult(this, result);
         if (err != null && !ignoreErr) {
+            currentTrace.end();
             throw ExceptionUtils.unchecked(err);
         }
         if (err != null) {
@@ -420,12 +446,16 @@ public class WorkerNode {
         // 触发后续任务节点执行
         for (NextWorker nextWorker : nextWorkers) {
             WorkerNode next = nextWorker.getNext();
+            currentTrace.addFire(next);
             TraceWorker traceWorker = new TraceWorker(from, next);
             CompletableFuture<Void> future = CompletableFuture.runAsync(
-                () -> next.start(workerContext, this, executor), executor
+                () -> {
+                    traceWorker.start();
+                    next.start(workerContext, this, traceWorker, executor);
+                },
+                executor
             );
             traceWorker.setFuture(future);
-            currentTrace.addFire(next);
             workerContext.addTrace(traceWorker);
         }
         currentTrace.end();
