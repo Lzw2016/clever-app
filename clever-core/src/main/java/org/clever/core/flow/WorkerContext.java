@@ -197,8 +197,10 @@ public class WorkerContext {
         TraceWorker traceWorker = firstTrace;
         // 收集信息
         while (traceWorker != null) {
+            // realRun 过滤
             if (onlyRealRun && Objects.equals(traceWorker.getRealRun(), false)) {
-                break;
+                traceWorker = traceWorker.getNextTrace();
+                continue;
             }
             WorkerNode from = traceWorker.getFrom();
             WorkerNode workerNode = traceWorker.getCurrent();
@@ -242,14 +244,14 @@ public class WorkerContext {
                 logs.append(down).append(line);
             }
             // [id=, name=, from=, state=, start=, await=, cost=, thread=]
-            logs.append("[id=").append(StringUtils.rightPad(info.get("id"), maxWidths.get("id")))
+            logs.append("[from=").append(StringUtils.rightPad(info.get("from"), maxWidths.get("from")))
                 .append(", name=").append(StringUtils.rightPad(info.get("name"), maxWidths.get("name")))
-                .append(", from=").append(StringUtils.rightPad(info.get("from"), maxWidths.get("from")))
                 .append(", state=").append(StringUtils.rightPad(info.get("state"), maxWidths.get("state")))
                 .append(", start=").append(StringUtils.rightPad(info.get("start"), maxWidths.get("start")))
                 .append(", await=").append(StringUtils.rightPad(info.get("await"), maxWidths.get("await")))
                 .append(", cost=").append(StringUtils.rightPad(info.get("cost"), maxWidths.get("cost")))
                 .append(", thread=").append(StringUtils.rightPad(info.get("thread"), maxWidths.get("thread")))
+                .append(", id=").append(StringUtils.rightPad(info.get("id"), maxWidths.get("id")))
                 .append(", err=").append(StringUtils.rightPad(info.get("err"), maxWidths.get("err")))
                 .append("]").append(line);
         }

@@ -245,6 +245,17 @@ public class WorkerNode {
      * 新增一个前置的任务节点，对于同一个prev，如果调用多次，以最后一次调用为准。<br/>
      * 建议统一使用next(或统一使用prev)构建任务节点链，便于理解，效果是一致的
      *
+     * @param prev         之前的任务节点
+     * @param waitComplete 是否必须等待 prev 任务执行完成，才能继续执行当前任务
+     */
+    public void addPrev(WorkerNode prev, boolean waitComplete) {
+        addPrev(prev, waitComplete, false, true);
+    }
+
+    /**
+     * 新增一个前置的任务节点，对于同一个prev，如果调用多次，以最后一次调用为准。<br/>
+     * 建议统一使用next(或统一使用prev)构建任务节点链，便于理解，效果是一致的
+     *
      * @param prev 之前的任务节点
      */
     public void addPrev(WorkerNode... prev) {
@@ -317,6 +328,17 @@ public class WorkerNode {
      */
     public void addNext(WorkerNode next, boolean waitComplete, boolean canSkip) {
         addNext(next, waitComplete, canSkip, true);
+    }
+
+    /**
+     * 新增一个后续的任务节点，对于同一个next，如果调用多次，以最后一次调用为准。<br/>
+     * 建议统一使用next(或统一使用prev)构建任务节点链，便于理解，效果是一致的
+     *
+     * @param next         之后的任务节点
+     * @param waitComplete 是否必须等待当前任务执行完成，才能继续执行 next 任务
+     */
+    public void addNext(WorkerNode next, boolean waitComplete) {
+        addNext(next, waitComplete, false, true);
     }
 
     /**
@@ -447,7 +469,7 @@ public class WorkerNode {
         for (NextWorker nextWorker : nextWorkers) {
             WorkerNode next = nextWorker.getNext();
             currentTrace.addFire(next);
-            TraceWorker traceWorker = new TraceWorker(from, next);
+            TraceWorker traceWorker = new TraceWorker(this, next);
             CompletableFuture<Void> future = CompletableFuture.runAsync(
                 () -> {
                     traceWorker.start();
@@ -815,6 +837,17 @@ public class WorkerNode {
          * 新增一个前置的任务节点，对于同一个prev，如果调用多次，以最后一次调用为准。<br/>
          * 建议统一使用next(或统一使用prev)构建任务节点链，便于理解，效果是一致的
          *
+         * @param prev         之前的任务节点
+         * @param waitComplete 是否必须等待 prev 任务执行完成，才能继续执行当前任务
+         */
+        public Builder addPrev(WorkerNode prev, boolean waitComplete) {
+            return addPrev(prev, waitComplete, false, true);
+        }
+
+        /**
+         * 新增一个前置的任务节点，对于同一个prev，如果调用多次，以最后一次调用为准。<br/>
+         * 建议统一使用next(或统一使用prev)构建任务节点链，便于理解，效果是一致的
+         *
          * @param prev 之前的任务节点
          */
         public Builder addPrev(WorkerNode... prev) {
@@ -861,6 +894,17 @@ public class WorkerNode {
          */
         public Builder addNext(WorkerNode next, boolean waitComplete, boolean canSkip) {
             return addNext(next, waitComplete, canSkip, true);
+        }
+
+        /**
+         * 新增一个后续的任务节点，对于同一个next，如果调用多次，以最后一次调用为准。<br/>
+         * 建议统一使用next(或统一使用prev)构建任务节点链，便于理解，效果是一致的
+         *
+         * @param next         之后的任务节点
+         * @param waitComplete 是否必须等待当前任务执行完成，才能继续执行 next 任务
+         */
+        public Builder addNext(WorkerNode next, boolean waitComplete) {
+            return addNext(next, waitComplete, false, true);
         }
 
         /**
