@@ -1,9 +1,11 @@
 package org.clever.core.flow;
 
 import lombok.Getter;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.util.Assert;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,15 +43,20 @@ public class WorkerContext {
     @Getter
     private final WorkerVariable attributes = new WorkerVariable();
     /**
+     * 整个任务流程都执行完毕
+     */
+    @Getter
+    private volatile boolean flowCompleted;
+    /**
      * 第一个 TraceWorker(入口)
      */
     @Getter
-    public volatile TraceWorker firstTrace;
+    private volatile TraceWorker firstTrace;
     /**
      * 当前最新的 TraceWorker(最后一个)
      */
     @Getter
-    public volatile TraceWorker currentTrace;
+    private volatile TraceWorker currentTrace;
     /**
      * 所有的 TraceWorker {@code Map<WorkerNode唯一ID, TraceWorker>}
      */
@@ -175,6 +182,32 @@ public class WorkerContext {
         return flattenTraces.get(id);
     }
 
+    public String traceLog() {
+        // [id=, name=, cost=] | ↑ | ↓ | ← | →
+        final String line = "\n";
+        final String down = " ↓";
+        final StringBuilder logs = new StringBuilder();
+        TraceWorker traceWorker = firstTrace;
+        while (traceWorker != null) {
+            if (logs.length() > 0) {
+                logs.append(down).append(line);
+            }
+            WorkerNode workerNode = traceWorker.getCurrent();
+            int cost = traceWorker.cost();
+            logs.append("[id=").append(workerNode.getId())
+                .append(", name=").append(workerNode.getName())
+                .append(", start=").append(DateFormatUtils.format(new Date(traceWorker.getStart()), "yyyy-MM-dd HH:mm:ss.SSS"))
+                .append(", cost=").append(cost <= 0 ? "?" : cost)
+                .append(", thread=").append(traceWorker.getThread())
+                .append("]").append(line);
+            traceWorker = traceWorker.getNextTrace();
+        }
+        if (!flowCompleted) {
+            logs.append(line).append(down).append(line).append("...(执行中)");
+        }
+        return logs.toString();
+    }
+
     /**
      * 设置任务节点执行的返回值
      *
@@ -203,5 +236,12 @@ public class WorkerContext {
             currentTrace.setNextTrace(nextTrace);
         }
         currentTrace = nextTrace;
+    }
+
+    /**
+     * 设置整个任务流程都执行完毕
+     */
+    void flowCompleted() {
+        flowCompleted = true;
     }
 }

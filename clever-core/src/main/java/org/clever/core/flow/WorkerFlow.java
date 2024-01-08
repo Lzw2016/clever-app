@@ -67,6 +67,7 @@ public class WorkerFlow {
                 () -> worker.start(workerContext, null, executor), executor
             );
             TraceWorker traceWorker = new TraceWorker(null, worker, future);
+            // traceWorker.setFuture(future);
             workerContext.addTrace(traceWorker);
         }
         return CompletableFuture.supplyAsync(() -> {
@@ -76,6 +77,7 @@ public class WorkerFlow {
                 traceWorker.getFuture().join();
                 traceWorker = traceWorker.getNextTrace();
             }
+            workerContext.flowCompleted();
             return workerContext;
         });
     }

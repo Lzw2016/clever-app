@@ -119,7 +119,7 @@ public class WorkerFlowTest {
             .addPrev(workerNode_3)
             .build();
         CompletableFuture<WorkerContext> future = WorkerFlow.start(threadPool, workerNode_1);
-        future.join();
-        log.info("完成");
+        WorkerContext context = future.join();
+        log.info("完成 \n{}", context.traceLog());
     }
 }

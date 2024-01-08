@@ -417,13 +417,15 @@ public class WorkerNode {
         }
         // 触发后续任务节点执行
         TraceWorker currentTrace = workerContext.getTraceWorker(id);
+        currentTrace.setThread(Thread.currentThread().getName());
         for (NextWorker nextWorker : nextWorkers) {
             WorkerNode next = nextWorker.getNext();
             CompletableFuture<Void> future = CompletableFuture.runAsync(
                 () -> next.start(workerContext, this, executor), executor
             );
-            currentTrace.addFire(next);
             TraceWorker traceWorker = new TraceWorker(from, next, future);
+            // currentTrace.setFuture(future);
+            currentTrace.addFire(next);
             workerContext.addTrace(traceWorker);
         }
         currentTrace.end();
@@ -504,22 +506,6 @@ public class WorkerNode {
             }
         }
         return TupleTwo.creat(result, err);
-    }
-
-    private static class PrevOrNextWorker {
-        private final boolean prev;
-        private final WorkerNode prevOrNext;
-        private final boolean waitComplete;
-        private final boolean canSkip;
-        private final boolean updateIfExists;
-
-        private PrevOrNextWorker(boolean prev, WorkerNode prevOrNext, boolean waitComplete, boolean canSkip, boolean updateIfExists) {
-            this.prev = prev;
-            this.prevOrNext = prevOrNext;
-            this.waitComplete = waitComplete;
-            this.canSkip = canSkip;
-            this.updateIfExists = updateIfExists;
-        }
     }
 
     /**
@@ -896,6 +882,22 @@ public class WorkerNode {
         private static Worker toWorker(BiFunction<WorkerVariable, WorkerContext, Object> worker) {
             Assert.notNull(worker, "参数 worker 不能为空");
             return (from, current, context) -> worker.apply(current.param, context);
+        }
+    }
+
+    private static class PrevOrNextWorker {
+        private final boolean prev;
+        private final WorkerNode prevOrNext;
+        private final boolean waitComplete;
+        private final boolean canSkip;
+        private final boolean updateIfExists;
+
+        private PrevOrNextWorker(boolean prev, WorkerNode prevOrNext, boolean waitComplete, boolean canSkip, boolean updateIfExists) {
+            this.prev = prev;
+            this.prevOrNext = prevOrNext;
+            this.waitComplete = waitComplete;
+            this.canSkip = canSkip;
+            this.updateIfExists = updateIfExists;
         }
     }
 }

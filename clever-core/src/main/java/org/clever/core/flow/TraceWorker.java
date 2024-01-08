@@ -41,6 +41,11 @@ public class TraceWorker {
      */
     private final List<WorkerNode> fires = new CopyOnWriteArrayList<>();
     /**
+     * 执行当前任务的线程名
+     */
+    @Getter
+    private volatile String thread;
+    /**
      * current 任务开始执行时间
      */
     @Getter
@@ -54,7 +59,6 @@ public class TraceWorker {
     /**
      * @param from    触发当前任务的任务节点
      * @param current 当前任务节点
-     * @param future  执行当前任务节点返回的 CompletableFuture
      * @param start   任务开始执行时间
      */
     public TraceWorker(WorkerNode from, WorkerNode current, CompletableFuture<Void> future, long start) {
@@ -69,7 +73,6 @@ public class TraceWorker {
     /**
      * @param from    触发当前任务的任务节点
      * @param current 当前任务节点
-     * @param future  执行当前任务节点返回的 CompletableFuture
      */
     public TraceWorker(WorkerNode from, WorkerNode current, CompletableFuture<Void> future) {
         this(from, current, future, SystemClock.now());
@@ -90,6 +93,20 @@ public class TraceWorker {
             return -1;
         }
         return (int) (end - start);
+    }
+
+    // /**
+    //  * 执行当前任务节点返回的 CompletableFuture
+    //  */
+    // public void setFuture(CompletableFuture<Void> future) {
+    //     this.future = future;
+    // }
+
+    /**
+     * 执行当前任务的线程名
+     */
+    void setThread(String thread) {
+        this.thread = thread;
     }
 
     /**
