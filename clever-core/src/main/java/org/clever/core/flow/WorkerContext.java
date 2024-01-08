@@ -203,7 +203,7 @@ public class WorkerContext {
             traceWorker = traceWorker.getNextTrace();
         }
         if (!flowCompleted) {
-            logs.append(line).append(down).append(line).append("...(执行中)");
+            logs.append(line).append(down).append(line).append("...(执行中)").append(line);
         }
         return logs.toString();
     }
