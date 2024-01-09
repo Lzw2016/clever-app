@@ -2,6 +2,7 @@ package org.clever.core.flow;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.clever.core.exception.AssertException;
 import org.clever.util.Assert;
 
 import java.util.Collections;
@@ -49,11 +50,11 @@ public class WorkerVariable {
     }
 
     /**
-     * 检查当前 WorkerVariable 是否可修改，如果不能修改就抛出 IllegalArgumentException 异常
+     * 检查当前 WorkerVariable 是否可修改，如果不能修改就抛出 AssertException 异常
      */
     public void checkModifiable() {
         if (readOnly) {
-            throw new IllegalArgumentException("WorkerVariable是只读,不可修改");
+            throw new AssertException("WorkerVariable是只读,不可修改");
         }
     }
 

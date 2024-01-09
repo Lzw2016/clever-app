@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -72,55 +73,89 @@ public class WorkerFlowTest {
         sleep(1_000);
     }
 
+    private WorkerNode workerNode_1 = WorkerNode.Builder.create()
+        .setName("01")
+        .worker(context -> {
+            log.info("01.1 -> PoolSize={}", threadPool.getPoolSize());
+            sleep(300);
+            log.info("01.2 -> PoolSize={}", threadPool.getPoolSize());
+            return "worker_01";
+        })
+        .build();
+    private WorkerNode workerNode_2 = WorkerNode.Builder.create()
+        .setName("02")
+        .worker(context -> {
+            log.info("02.1 -> PoolSize={}", threadPool.getPoolSize());
+            sleep(300);
+            log.info("02.2 -> PoolSize={}", threadPool.getPoolSize());
+            return "worker_02";
+        })
+        .build();
+    private WorkerNode workerNode_3 = WorkerNode.Builder.create()
+        .setName("03")
+        .worker(context -> {
+            log.info("03.1 -> PoolSize={}", threadPool.getPoolSize());
+            sleep(300);
+            log.info("03.2 -> PoolSize={}", threadPool.getPoolSize());
+            return "worker_03";
+        })
+        .build();
+    private WorkerNode workerNode_4 = WorkerNode.Builder.create()
+        .setName("04")
+        .worker(context -> {
+            log.info("04.1 -> PoolSize={}", threadPool.getPoolSize());
+            sleep(300);
+            log.info("04.2 -> PoolSize={}", threadPool.getPoolSize());
+            return "worker_04";
+        })
+        .build();
+    private WorkerNode workerNode_5 = WorkerNode.Builder.create()
+        .setName("05")
+        .worker(context -> {
+            log.info("05.1 -> PoolSize={}", threadPool.getPoolSize());
+            sleep(300);
+            log.info("05.2 -> PoolSize={}", threadPool.getPoolSize());
+            return "worker_05";
+        })
+        .build();
+
     @Test
     public void t04() {
-        WorkerNode workerNode_1 = WorkerNode.Builder.create()
-            .setName("01")
-            .worker(context -> {
-                log.info("01.1 -> PoolSize={}", threadPool.getPoolSize());
-                sleep(300);
-                log.info("01.2 -> PoolSize={}", threadPool.getPoolSize());
-            })
-            .build();
-        WorkerNode workerNode_2 = WorkerNode.Builder.create()
-            .setName("02")
-            .worker(context -> {
-                log.info("02.1 -> PoolSize={}", threadPool.getPoolSize());
-                sleep(300);
-                log.info("02.2 -> PoolSize={}", threadPool.getPoolSize());
-            })
-            .addPrev(workerNode_1)
-            .build();
-        WorkerNode workerNode_3 = WorkerNode.Builder.create()
-            .setName("03")
-            .worker(context -> {
-                log.info("03.1 -> PoolSize={}", threadPool.getPoolSize());
-                sleep(300);
-                log.info("03.2 -> PoolSize={}", threadPool.getPoolSize());
-            })
-            .addPrev(workerNode_2)
-            .build();
-        WorkerNode workerNode_4 = WorkerNode.Builder.create()
-            .setName("04")
-            .worker(context -> {
-                log.info("04.1 -> PoolSize={}", threadPool.getPoolSize());
-                sleep(300);
-                log.info("04.2 -> PoolSize={}", threadPool.getPoolSize());
-            })
-            .addPrev(workerNode_3)
-            .build();
-        WorkerNode workerNode_5 = WorkerNode.Builder.create()
-            .setName("05")
-            .worker(context -> {
-                log.info("05.1 -> PoolSize={}", threadPool.getPoolSize());
-                sleep(300);
-                log.info("05.2 -> PoolSize={}", threadPool.getPoolSize());
-            })
-            .addPrev(workerNode_3)
-            .addPrev(workerNode_4, true)
-            .build();
+        workerNode_1.addNext(workerNode_2);
+        workerNode_2.addNext(workerNode_3);
+        workerNode_3.addNext(workerNode_4);
+        workerNode_3.addNext(workerNode_5);
+        workerNode_4.addNext(workerNode_5, false);
         CompletableFuture<WorkerContext> future = WorkerFlow.start(threadPool, workerNode_1);
         WorkerContext context = future.join();
+        log.info("完成 \n{}", context.traceLog());
+
+        // 重复执行
+        future = WorkerFlow.start(threadPool, workerNode_1);
+        context = future.join();
+        log.info("完成 \n{}", context.traceLog(false));
+
+        // clone 后重新执行
+        workerNode_1 = workerNode_1.clone();
+        workerNode_2 = workerNode_2.clone();
+        workerNode_3 = workerNode_3.clone();
+        workerNode_4 = workerNode_4.clone();
+        workerNode_5 = workerNode_5.clone();
+        // clone 后需要重新指定执行流程
+        workerNode_1.addNext(workerNode_2);
+        workerNode_2.addNext(workerNode_3);
+        workerNode_3.addNext(workerNode_4);
+        workerNode_3.addNext(workerNode_5);
+        workerNode_4.addNext(workerNode_5, true);
+        // 启动流程
+        future = workerNode_1.start(threadPool);
+        context = workerNode_1.getContext();
+        CompletableFuture<List<Object>> awaitFuture = context.await(workerNode_1, workerNode_3);
+        awaitFuture.thenAccept(res -> {
+            log.info("workerNode_1 workerNode_3 完成");
+            log.info("workerNode_1 workerNode_3 返回值 -> {}", res);
+        });
+        future.join();
         log.info("完成 \n{}", context.traceLog());
     }
 }

@@ -2,6 +2,7 @@ package org.clever.core.flow;
 
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.SharedThreadPoolExecutor;
+import org.clever.core.exception.AssertException;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -35,7 +36,7 @@ public class WorkerFlow {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>
@@ -56,13 +57,14 @@ public class WorkerFlow {
         Map<String, WorkerNode> flattenWorkerMap = new HashMap<>();
         flattenWorkers.forEach(workerNode -> {
             if (flattenWorkerMap.containsKey(workerNode.getId())) {
-                throw new IllegalArgumentException("重复的 WorkerNode ID=" + workerNode.getId());
+                throw new AssertException("重复的 WorkerNode ID=" + workerNode.getId());
             }
             flattenWorkerMap.put(workerNode.getId(), workerNode);
         });
         final WorkerContext workerContext = new WorkerContext(executor, flattenWorkers, flattenWorkerMap, entryWorkers);
         // 开始并行执行任务
         for (WorkerNode worker : entryWorkers) {
+            worker.setContext(workerContext);
             TraceWorker traceWorker = new TraceWorker(null, worker);
             CompletableFuture<Void> future = CompletableFuture.runAsync(
                 () -> {
@@ -99,7 +101,7 @@ public class WorkerFlow {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers);
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>
@@ -123,7 +125,7 @@ public class WorkerFlow {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, worker_1, worker_2, ...);
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>
@@ -152,7 +154,7 @@ public class WorkerFlow {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = WorkerFlow.start(worker_1, worker_2, ...);
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>

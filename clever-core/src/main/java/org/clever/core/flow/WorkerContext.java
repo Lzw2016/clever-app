@@ -8,6 +8,7 @@ import org.clever.core.SharedThreadPoolExecutor;
 import org.clever.util.Assert;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -180,7 +181,67 @@ public class WorkerContext {
         return current.getNextWorkers().stream().allMatch(next -> next.getNext().isSuccess());
     }
 
-    // TODO 等待任意的节点执行完毕
+    /**
+     * 等待指定的任务完成。<br/>
+     * <b>注意: 滥用此函数容易产生死锁！</b><br/>
+     * <pre>{@code
+     * // 1.阻塞当前调用线程，等待指定的任务完成
+     * CompletableFuture<List<Object>> future = context.await(worker_1, worker_2, ...);
+     * future.join();
+     *
+     * // 2.阻塞当前调用线程，等待指定的任务完成，最多等待3秒，超时会触发 TimeoutException 异常
+     * CompletableFuture<List<Object>> future = context.await(worker_1, worker_2, ...);
+     * future.get(3, TimeUnit.SECONDS);
+     *
+     * // 3.不阻塞当前调用线程，指定的任务完成后异步通知
+     * CompletableFuture<List<Object>> future = context.await(worker_1, worker_2, ...);
+     * future.thenAccept((results) -> {
+     *     // 任务执行完成后，异步通知
+     * });
+     * }</pre>
+     *
+     * @param awaitWorkers 指定的任务
+     */
+    public CompletableFuture<List<Object>> await(WorkerNode... awaitWorkers) {
+        if (awaitWorkers == null || awaitWorkers.length == 0) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+        for (WorkerNode worker : awaitWorkers) {
+            Assert.notNull(worker, "参数 awaitWorkers 中不能有 null 元素");
+            Assert.isTrue(flattenWorkerMap.containsKey(worker.getId()), String.format("WorkerNode(id=%s, name=%s)不属于当前任务流程", worker.getId(), worker.getName()));
+        }
+        return CompletableFuture.supplyAsync(() -> {
+            List<WorkerNode> futureWorkers = Arrays.stream(awaitWorkers).filter(WorkerNode::notCompleted).collect(Collectors.toList());
+            while (!futureWorkers.isEmpty()) {
+                Set<String> futureWorkerIds = futureWorkers.stream().map(WorkerNode::getId).collect(Collectors.toSet());
+                boolean notFound = true;
+                TraceWorker traceWorker = firstTrace;
+                while (traceWorker != null) {
+                    Boolean realRun = traceWorker.getRealRun();
+                    WorkerNode current = traceWorker.getCurrent();
+                    CompletableFuture<Void> future = traceWorker.getFuture();
+                    if (!Objects.equals(realRun, false) && future != null && !future.isDone() && futureWorkerIds.contains(current.getId())) {
+                        notFound = false;
+                        try {
+                            future.join();
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                    traceWorker = traceWorker.getNextTrace();
+                }
+                if (notFound) {
+                    try {
+                        // noinspection BusyWait
+                        Thread.sleep(1);
+                    } catch (InterruptedException e) {
+                        log.warn("休眠被中断", e);
+                    }
+                }
+                futureWorkers = futureWorkers.stream().filter(WorkerNode::notCompleted).collect(Collectors.toList());
+            }
+            return Arrays.stream(awaitWorkers).map(worker -> getResult(worker.getId())).collect(Collectors.toList());
+        }, executor);
+    }
 
     /**
      * 获取任务真实的执行日志信息
@@ -193,7 +254,7 @@ public class WorkerContext {
         final String down = " ↓";
         final StringBuilder logs = new StringBuilder();
         final List<Map<String, String>> infos = new ArrayList<>();
-        final Map<String, Integer> maxWidths = new HashMap<>();
+        final Map<String, Integer> maxWidths = new HashMap<>(16);
         TraceWorker traceWorker = firstTrace;
         // 收集信息
         while (traceWorker != null) {
@@ -211,17 +272,19 @@ public class WorkerContext {
             String name = workerNode.getName();
             String fromName = String.valueOf(from == null ? "null" : from.getName());
             String state = workerNode.getStateText();
+            String realRun = String.valueOf(traceWorker.getRealRun());
             String start = traceWorker.getStart() <= 0 ? "null" : DateFormatUtils.format(new Date(traceWorker.getStart()), "yyyy-MM-dd HH:mm:ss.SSS");
             String awaitStr = String.valueOf(await < 0 ? "?" : await);
             String costStr = String.valueOf(cost < 0 ? "?" : cost);
             String thread = traceWorker.getThread();
             String err = traceWorker.getErr() == null ? "null" : traceWorker.getErr().getMessage();
             // 保存属性
-            Map<String, String> info = new HashMap<>();
+            Map<String, String> info = new HashMap<>(16);
             info.put("id", id);
             info.put("name", name);
             info.put("from", fromName);
             info.put("state", state);
+            info.put("realRun", realRun);
             info.put("start", start);
             info.put("await", awaitStr);
             info.put("cost", costStr);
@@ -246,8 +309,11 @@ public class WorkerContext {
             // [id=, name=, from=, state=, start=, await=, cost=, thread=]
             logs.append("[from=").append(StringUtils.rightPad(info.get("from"), maxWidths.get("from")))
                 .append(", name=").append(StringUtils.rightPad(info.get("name"), maxWidths.get("name")))
-                .append(", state=").append(StringUtils.rightPad(info.get("state"), maxWidths.get("state")))
-                .append(", start=").append(StringUtils.rightPad(info.get("start"), maxWidths.get("start")))
+                .append(", state=").append(StringUtils.rightPad(info.get("state"), maxWidths.get("state")));
+            if (!onlyRealRun) {
+                logs.append(", realRun=").append(StringUtils.rightPad(info.get("realRun"), maxWidths.get("realRun")));
+            }
+            logs.append(", start=").append(StringUtils.rightPad(info.get("start"), maxWidths.get("start")))
                 .append(", await=").append(StringUtils.rightPad(info.get("await"), maxWidths.get("await")))
                 .append(", cost=").append(StringUtils.rightPad(info.get("cost"), maxWidths.get("cost")))
                 .append(", thread=").append(StringUtils.rightPad(info.get("thread"), maxWidths.get("thread")))

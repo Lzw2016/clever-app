@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.OrderComparator;
+import org.clever.core.exception.AssertException;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.util.Assert;
@@ -68,6 +69,11 @@ public class WorkerNode {
      * 节点任务运行状态，参照 {@link WorkerState}
      */
     private volatile int state = WorkerState.INIT;
+    /**
+     * 任务上下文
+     */
+    @Getter
+    private volatile WorkerContext context;
 
     /**
      * 应该使用 {@link Builder} 构建 {@link WorkerNode} 实例
@@ -194,11 +200,11 @@ public class WorkerNode {
     }
 
     /**
-     * 检查当前 WorkerNode 是否可修改，如果不能修改就抛出 IllegalArgumentException 异常
+     * 检查当前 WorkerNode 是否可修改，如果不能修改就抛出 AssertException 异常
      */
     public void checkModifiable() {
         if (!isModifiable()) {
-            throw new IllegalArgumentException("WorkerNode已启动过,不可修改");
+            throw new AssertException("WorkerNode已启动过,不可修改");
         }
     }
 
@@ -442,7 +448,7 @@ public class WorkerNode {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = worker_1.startWith(executor, worker_2, worker_3, ...);
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>
@@ -472,7 +478,7 @@ public class WorkerNode {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = worker_1.startWith(worker_2, worker_3, ...);
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>
@@ -497,7 +503,7 @@ public class WorkerNode {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = worker_1.start(executor);
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>
@@ -522,7 +528,7 @@ public class WorkerNode {
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
      * CompletableFuture<Void> future = worker_1.start();
-     * future.thenRun(workerContext -> {
+     * future.thenAccept(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
      * }</pre>
@@ -583,6 +589,7 @@ public class WorkerNode {
         // 触发后续任务节点执行
         for (NextWorker nextWorker : nextWorkers) {
             WorkerNode next = nextWorker.getNext();
+            next.setContext(workerContext);
             currentTrace.addFire(next);
             TraceWorker traceWorker = new TraceWorker(this, next);
             CompletableFuture<Void> future = CompletableFuture.runAsync(
@@ -673,6 +680,13 @@ public class WorkerNode {
             }
         }
         return TupleTwo.creat(result, err);
+    }
+
+    /**
+     * 任务上下文
+     */
+    void setContext(WorkerContext context) {
+        this.context = context;
     }
 
     /**
