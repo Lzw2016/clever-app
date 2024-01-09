@@ -90,15 +90,15 @@ public class WorkerFlow {
      * 开始执行任务链，使用方式如下： <br/>
      * <pre>{@code
      * // 1.阻塞当前调用线程，等待任务链执行完毕，可以从 WorkerContext 对象中获取任务链执行的结果和详情
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers);
      * WorkerContext workerContext = future.join();
      *
      * // 2.阻塞当前调用线程，等待任务链执行完成，最多等待3秒，超时会触发 TimeoutException 异常
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers);
      * WorkerContext workerContext = future.get(3, TimeUnit.SECONDS);
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers);
      * future.thenRun(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
@@ -114,15 +114,15 @@ public class WorkerFlow {
      * 开始执行任务链，使用方式如下： <br/>
      * <pre>{@code
      * // 1.阻塞当前调用线程，等待任务链执行完毕，可以从 WorkerContext 对象中获取任务链执行的结果和详情
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, worker_1, worker_2, ...);
      * WorkerContext workerContext = future.join();
      *
      * // 2.阻塞当前调用线程，等待任务链执行完成，最多等待3秒，超时会触发 TimeoutException 异常
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, worker_1, worker_2, ...);
      * WorkerContext workerContext = future.get(3, TimeUnit.SECONDS);
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, worker_1, worker_2, ...);
      * future.thenRun(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });
@@ -143,15 +143,15 @@ public class WorkerFlow {
      * 开始执行任务链，使用方式如下： <br/>
      * <pre>{@code
      * // 1.阻塞当前调用线程，等待任务链执行完毕，可以从 WorkerContext 对象中获取任务链执行的结果和详情
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(worker_1, worker_2, ...);
      * WorkerContext workerContext = future.join();
      *
      * // 2.阻塞当前调用线程，等待任务链执行完成，最多等待3秒，超时会触发 TimeoutException 异常
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(worker_1, worker_2, ...);
      * WorkerContext workerContext = future.get(3, TimeUnit.SECONDS);
      *
      * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
-     * CompletableFuture<Void> future = WorkerFlow.start(entryWorkers, executorService);
+     * CompletableFuture<Void> future = WorkerFlow.start(worker_1, worker_2, ...);
      * future.thenRun(workerContext -> {
      *     // 任务执行完成后，异步通知
      * });

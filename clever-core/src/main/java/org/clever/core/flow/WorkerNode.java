@@ -108,6 +108,37 @@ public class WorkerNode {
     }
 
     /**
+     * WorkerNode 是一个有状态的对象，重复调用 {@code start} 函数只有第一次有效。 <br/>
+     * 此方法创建一个相同配置的未执行的 WorkerNode 对象，除了id、prevWorkers、nextWorkers属性不一致<br/>
+     * 如果需要重新定制新的 WorkerNode 配置，请使用 {@link #mutate()}
+     *
+     * @param newId 新的 WorkerNode ID
+     */
+    public WorkerNode clone(String newId) {
+        Assert.isNotBlank(newId, "参数 newId 不能为空");
+        return new WorkerNode(newId, name, param, worker, callbacks, ignoreErr, new ArrayList<>(), new ArrayList<>());
+    }
+
+    /**
+     * WorkerNode 是一个有状态的对象，重复调用 {@code start} 函数只有第一次有效。 <br/>
+     * 此方法创建一个相同配置的未执行的 WorkerNode 对象，除了id、prevWorkers、nextWorkers属性不一致<br/>
+     * 如果需要重新定制新的 WorkerNode 配置，请使用 {@link #mutate()}
+     */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public WorkerNode clone() {
+        return clone(UUID.randomUUID().toString());
+    }
+
+    /**
+     * 基于现有的 WorkerNode 创建新的 Builder <br/>
+     * 继承现有的 WorkerNode 配置，除了id、prevWorkers、nextWorkers属性
+     */
+    public Builder mutate() {
+        return Builder.mutate(this);
+    }
+
+    /**
      * 任务回调
      */
     public List<Callback> getCallbacks() {
@@ -399,21 +430,105 @@ public class WorkerNode {
     }
 
     /**
-     * 开始执行当前任务节点及其后续的任务节点。<br/>
-     * 可重复调用，但只有第一次调用起作用。
+     * 以当前任务和其它任务为入口开始执行任务链，使用方式如下： <br/>
+     * <pre>{@code
+     * // 1.阻塞当前调用线程，等待任务链执行完毕，可以从 WorkerContext 对象中获取任务链执行的结果和详情
+     * CompletableFuture<Void> future = worker_1.startWith(executor, worker_2, worker_3, ...);
+     * WorkerContext workerContext = future.join();
      *
-     * @param executor 任务执行器(线程池)
+     * // 2.阻塞当前调用线程，等待任务链执行完成，最多等待3秒，超时会触发 TimeoutException 异常
+     * CompletableFuture<Void> future = worker_1.startWith(executor, worker_2, worker_3, ...);
+     * WorkerContext workerContext = future.get(3, TimeUnit.SECONDS);
+     *
+     * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
+     * CompletableFuture<Void> future = worker_1.startWith(executor, worker_2, worker_3, ...);
+     * future.thenRun(workerContext -> {
+     *     // 任务执行完成后，异步通知
+     * });
+     * }</pre>
+     *
+     * @param executor     任务执行器(线程池)
+     * @param otherWorkers 其它任务集合
      */
-    public CompletableFuture<WorkerContext> start(ExecutorService executor) {
-        return WorkerFlow.start(executor, this);
+    public CompletableFuture<WorkerContext> startWith(ExecutorService executor, WorkerNode... otherWorkers) {
+        List<WorkerNode> entryWorkers = new ArrayList<>();
+        entryWorkers.add(this);
+        if (otherWorkers != null) {
+            entryWorkers.addAll(Arrays.asList(otherWorkers));
+        }
+        return WorkerFlow.start(entryWorkers, executor);
+    }
+
+    /**
+     * 以当前任务和其它任务为入口开始执行任务链，使用方式如下： <br/>
+     * <pre>{@code
+     * // 1.阻塞当前调用线程，等待任务链执行完毕，可以从 WorkerContext 对象中获取任务链执行的结果和详情
+     * CompletableFuture<Void> future = worker_1.startWith(worker_2, worker_3, ...);
+     * WorkerContext workerContext = future.join();
+     *
+     * // 2.阻塞当前调用线程，等待任务链执行完成，最多等待3秒，超时会触发 TimeoutException 异常
+     * CompletableFuture<Void> future = worker_1.startWith(worker_2, worker_3, ...);
+     * WorkerContext workerContext = future.get(3, TimeUnit.SECONDS);
+     *
+     * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
+     * CompletableFuture<Void> future = worker_1.startWith(worker_2, worker_3, ...);
+     * future.thenRun(workerContext -> {
+     *     // 任务执行完成后，异步通知
+     * });
+     * }</pre>
+     *
+     * @param otherWorkers 其它任务集合
+     */
+    public CompletableFuture<WorkerContext> startWith(WorkerNode... otherWorkers) {
+        return startWith(WorkerFlow.DEF_POOL, otherWorkers);
     }
 
     /**
      * 开始执行当前任务节点及其后续的任务节点。<br/>
      * 可重复调用，但只有第一次调用起作用。
+     * <pre>{@code
+     * // 1.阻塞当前调用线程，等待任务链执行完毕，可以从 WorkerContext 对象中获取任务链执行的结果和详情
+     * CompletableFuture<Void> future = worker_1.start(executor);
+     * WorkerContext workerContext = future.join();
+     *
+     * // 2.阻塞当前调用线程，等待任务链执行完成，最多等待3秒，超时会触发 TimeoutException 异常
+     * CompletableFuture<Void> future = worker_1.start(executor);
+     * WorkerContext workerContext = future.get(3, TimeUnit.SECONDS);
+     *
+     * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
+     * CompletableFuture<Void> future = worker_1.start(executor);
+     * future.thenRun(workerContext -> {
+     *     // 任务执行完成后，异步通知
+     * });
+     * }</pre>
+     *
+     * @param executor 任务执行器(线程池)
+     */
+    public CompletableFuture<WorkerContext> start(ExecutorService executor) {
+        return startWith(executor, this);
+    }
+
+    /**
+     * 开始执行当前任务节点及其后续的任务节点。<br/>
+     * 可重复调用，但只有第一次调用起作用。
+     * <pre>{@code
+     * // 1.阻塞当前调用线程，等待任务链执行完毕，可以从 WorkerContext 对象中获取任务链执行的结果和详情
+     * CompletableFuture<Void> future = worker_1.start();
+     * WorkerContext workerContext = future.join();
+     *
+     * // 2.阻塞当前调用线程，等待任务链执行完成，最多等待3秒，超时会触发 TimeoutException 异常
+     * CompletableFuture<Void> future = worker_1.start();
+     * WorkerContext workerContext = future.get(3, TimeUnit.SECONDS);
+     *
+     * // 3.不阻塞当前调用线程，任务链执行完成后异步通知
+     * CompletableFuture<Void> future = worker_1.start();
+     * future.thenRun(workerContext -> {
+     *     // 任务执行完成后，异步通知
+     * });
+     * }</pre>
      */
     public CompletableFuture<WorkerContext> start() {
-        return WorkerFlow.start(this);
+        return startWith(this);
     }
 
     /**
@@ -648,7 +763,8 @@ public class WorkerNode {
         }
 
         /**
-         * 基于现有的 WorkerNode 创建新的 Builder(继承现有的 WorkerNode 配置，除了ID属性)
+         * 基于现有的 WorkerNode 创建新的 Builder。<br/>
+         * 继承现有的 WorkerNode 配置，除了id、prevWorkers、nextWorkers属性
          *
          * @param workerNode 任务节点
          */
@@ -659,22 +775,22 @@ public class WorkerNode {
             builder.worker = workerNode.worker;
             builder.callbacks.addAll(workerNode.callbacks);
             builder.ignoreErr = workerNode.ignoreErr;
-            for (PrevWorker prevWorker : workerNode.prevWorkers) {
-                WorkerNode prev = prevWorker.getPrev();
-                NextWorker prevNext = prev.nextWorkers.stream().filter(next -> Objects.equals(next.getNext(), workerNode)).findFirst().orElse(null);
-                if (prevNext != null) {
-                    log.warn("WorkerNode(id={}, name={}) 与 prev WorkerNode(id={}, name={}) 缺少 next 关系", workerNode.id, workerNode.name, prev.id, prev.name);
-                }
-                builder.addPrev(prev, prevWorker.isWaitComplete(), prevNext != null && prevNext.isCanSkip());
-            }
-            for (NextWorker nextWorker : workerNode.nextWorkers) {
-                WorkerNode next = nextWorker.getNext();
-                PrevWorker nextPrev = next.prevWorkers.stream().filter(prev -> Objects.equals(prev.getPrev(), workerNode)).findFirst().orElse(null);
-                if (nextPrev != null) {
-                    log.warn("WorkerNode(id={}, name={}) 与 next WorkerNode(id={}, name={}) 缺少 prev 关系", workerNode.id, workerNode.name, next.id, next.name);
-                }
-                builder.addNext(next, nextPrev == null || nextPrev.isWaitComplete(), nextWorker.isCanSkip());
-            }
+            // for (PrevWorker prevWorker : workerNode.prevWorkers) {
+            //     WorkerNode prev = prevWorker.getPrev();
+            //     NextWorker prevNext = prev.nextWorkers.stream().filter(next -> Objects.equals(next.getNext(), workerNode)).findFirst().orElse(null);
+            //     if (prevNext != null) {
+            //         log.warn("WorkerNode(id={}, name={}) 与 prev WorkerNode(id={}, name={}) 缺少 next 关系", workerNode.id, workerNode.name, prev.id, prev.name);
+            //     }
+            //     builder.addPrev(prev, prevWorker.isWaitComplete(), prevNext != null && prevNext.isCanSkip());
+            // }
+            // for (NextWorker nextWorker : workerNode.nextWorkers) {
+            //     WorkerNode next = nextWorker.getNext();
+            //     PrevWorker nextPrev = next.prevWorkers.stream().filter(prev -> Objects.equals(prev.getPrev(), workerNode)).findFirst().orElse(null);
+            //     if (nextPrev != null) {
+            //         log.warn("WorkerNode(id={}, name={}) 与 next WorkerNode(id={}, name={}) 缺少 prev 关系", workerNode.id, workerNode.name, next.id, next.name);
+            //     }
+            //     builder.addNext(next, nextPrev == null || nextPrev.isWaitComplete(), nextWorker.isCanSkip());
+            // }
             return builder;
         }
 
