@@ -2,11 +2,13 @@ package org.clever.core.flow;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.clever.core.SharedThreadPoolExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 作者：lizw <br/>
@@ -14,15 +16,7 @@ import java.util.concurrent.*;
  */
 @Slf4j
 public class WorkerFlowTest {
-    private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
-        0, Integer.MAX_VALUE, 0L, TimeUnit.MILLISECONDS,
-        new SynchronousQueue<>(),
-        new BasicThreadFactory.Builder()
-            .namingPattern("cached-shared-%d")
-            .daemon(true)
-            .build(),
-        new ThreadPoolExecutor.CallerRunsPolicy()
-    );
+    private final ThreadPoolExecutor threadPool = SharedThreadPoolExecutor.getCachedPool();
 
     @SneakyThrows
     public void sleep(long time) {
@@ -76,45 +70,45 @@ public class WorkerFlowTest {
     private WorkerNode workerNode_1 = WorkerNode.Builder.create()
         .setName("01")
         .worker(context -> {
-            log.info("01.1 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("01.1 -> ActiveCount={}", threadPool.getActiveCount());
             sleep(300);
-            log.info("01.2 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("01.2 -> ActiveCount={}", threadPool.getActiveCount());
             return "worker_01";
         })
         .build();
     private WorkerNode workerNode_2 = WorkerNode.Builder.create()
         .setName("02")
         .worker(context -> {
-            log.info("02.1 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("02.1 -> ActiveCount={}", threadPool.getActiveCount());
             sleep(300);
-            log.info("02.2 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("02.2 -> ActiveCount={}", threadPool.getActiveCount());
             return "worker_02";
         })
         .build();
     private WorkerNode workerNode_3 = WorkerNode.Builder.create()
         .setName("03")
         .worker(context -> {
-            log.info("03.1 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("03.1 -> ActiveCount={}", threadPool.getActiveCount());
             sleep(300);
-            log.info("03.2 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("03.2 -> ActiveCount={}", threadPool.getActiveCount());
             return "worker_03";
         })
         .build();
     private WorkerNode workerNode_4 = WorkerNode.Builder.create()
         .setName("04")
         .worker(context -> {
-            log.info("04.1 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("04.1 -> ActiveCount={}", threadPool.getActiveCount());
             sleep(300);
-            log.info("04.2 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("04.2 -> ActiveCount={}", threadPool.getActiveCount());
             return "worker_04";
         })
         .build();
     private WorkerNode workerNode_5 = WorkerNode.Builder.create()
         .setName("05")
         .worker(context -> {
-            log.info("05.1 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("05.1 -> ActiveCount={}", threadPool.getActiveCount());
             sleep(300);
-            log.info("05.2 -> PoolSize={}", threadPool.getPoolSize());
+            log.info("05.2 -> ActiveCount={}", threadPool.getActiveCount());
             return "worker_05";
         })
         .build();
