@@ -176,12 +176,12 @@ public class WorkerFlow {
         List<WorkerNode> flattenWorkers = new ArrayList<>();
         Set<WorkerNode> uniques = new HashSet<>();
         while (currentLevel != null && !currentLevel.isEmpty()) {
-            nextLevel = new ArrayList<>();
             currentLevel.forEach(workerNode -> {
                 if (uniques.add(workerNode)) {
                     flattenWorkers.add(workerNode);
                 }
             });
+            nextLevel = new ArrayList<>();
             for (WorkerNode worker : currentLevel) {
                 List<WorkerNode> nextWorkers = worker.getNextWorkers().stream().map(NextWorker::getNext).collect(Collectors.toList());
                 nextLevel.addAll(nextWorkers);

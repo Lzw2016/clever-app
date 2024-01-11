@@ -183,17 +183,17 @@ IO流
 - [OK] AbstractEnvironment
 - [OK] StandardEnvironment
 Boot应用环境
-- [  ] PropertySourceLoader
-- [  ] PropertiesPropertySourceLoader
-- [  ] YamlPropertySourceLoader
-- [  ] OriginTrackedPropertiesLoader
+- [OK] PropertySourceLoader
+- [OK] PropertiesPropertySourceLoader
+- [OK] YamlPropertySourceLoader
+- [OK] OriginTrackedPropertiesLoader
 - [  ]
 Boot配置文件加载
-- [  ] ConfigDataEnvironment?
-- [  ] LocationResourceLoader
-- [  ] StandardConfigDataLocationResolver
-- [  ] ConfigDataLocationResolvers
-- [  ] ConfigDataImporter
+- [OK] ConfigDataEnvironment
+- [OK] LocationResourceLoader
+- [OK] StandardConfigDataLocationResolver
+- [OK] ConfigDataLocationResolvers
+- [OK] ConfigDataImporter
 - [  ]
 
 基础类型转换

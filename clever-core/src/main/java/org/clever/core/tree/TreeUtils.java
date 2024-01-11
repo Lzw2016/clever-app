@@ -253,6 +253,14 @@ public class TreeUtils {
     }
 
     /**
+     * 判断当前节点是否是叶子节点
+     */
+    public static <T extends ITreeNode> boolean isLeaf(T node) {
+        Assert.notNull(node, "参数 node 不能为 null");
+        return node.getChildren() == null || node.getChildren().isEmpty();
+    }
+
+    /**
      * 平铺树
      *
      * @param treeList 已经构建好的树
@@ -265,10 +273,10 @@ public class TreeUtils {
         List<T> nextLevel;
         List<T> flattenNode = new ArrayList<>();
         while (currentLevel != null && !currentLevel.isEmpty()) {
-            nextLevel = new ArrayList<>();
             flattenNode.addAll(currentLevel);
+            nextLevel = new ArrayList<>();
             for (T treeNode : currentLevel) {
-                if (treeNode.getChildren() != null && !treeNode.getChildren().isEmpty()) {
+                if (!isLeaf(treeNode)) {
                     nextLevel.addAll((List<T>) treeNode.getChildren());
                 }
             }
@@ -360,5 +368,38 @@ public class TreeUtils {
      */
     public static <T extends ITreeNode> List<T> getParents(List<T> treeList, T node) {
         return getParents(treeList, node.getId());
+    }
+
+    /**
+     * 把指定的节点当作一棵树的根节点，获取这棵树的所有的叶子节点
+     *
+     * @param nodes 指定的节点集合
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends ITreeNode> List<T> getLeafs(List<T> nodes) {
+        List<T> currentLevel = nodes;
+        List<T> nextLevel;
+        List<T> leafsNode = new ArrayList<>();
+        while (currentLevel != null && !currentLevel.isEmpty()) {
+            nextLevel = new ArrayList<>();
+            for (T treeNode : currentLevel) {
+                if (isLeaf(treeNode)) {
+                    leafsNode.add(treeNode);
+                } else {
+                    nextLevel.addAll((List<T>) treeNode.getChildren());
+                }
+            }
+            currentLevel = nextLevel;
+        }
+        return leafsNode;
+    }
+
+    /**
+     * 把指定的节点当作一棵树的根节点，获取这棵树的所有的叶子节点
+     *
+     * @param node 指定的节点
+     */
+    public static <T extends ITreeNode> List<T> getLeafs(T node) {
+        return getLeafs(Collections.singletonList(node));
     }
 }
