@@ -30,23 +30,23 @@ public class TreeNodeWrapper<T extends ITreeID> implements ITreeNode {
      * 绑定到节点的对象
      */
     @JsonUnwrapped
-    private T attributes;
+    private T node;
 
     public TreeNodeWrapper() {
     }
 
-    public TreeNodeWrapper(T attributes) {
-        this.attributes = attributes;
+    public TreeNodeWrapper(T node) {
+        this.node = node;
     }
 
     @Override
     public Object getId() {
-        return attributes.getId();
+        return node.getId();
     }
 
     @Override
     public Object getParentId() {
-        return attributes.getParentId();
+        return node.getParentId();
     }
 
     @Override
