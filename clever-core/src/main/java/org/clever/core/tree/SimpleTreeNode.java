@@ -45,7 +45,7 @@ public class SimpleTreeNode<T extends Serializable> implements ITreeNode {
      */
     private boolean checked;
     /**
-     * 节点状态，'open' 或 'closed'，默认：'open'。如果为'closed'的时候，将不自动展开该节点
+     * 节点状态，'open' 或 'closed'，默认：'open'。如果为 'closed' 的时候，将不自动展开该节点
      */
     private String state = "open";
     /**

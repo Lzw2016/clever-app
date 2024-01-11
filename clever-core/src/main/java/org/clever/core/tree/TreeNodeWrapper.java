@@ -9,14 +9,14 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * 通用的数节点实现
+ * 树节点包装器
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2021/03/18 19:08 <br/>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
-public class GeneralTreeNode<T extends ITreeID> implements ITreeNode {
+public class TreeNodeWrapper<T extends ITreeID> implements ITreeNode {
     /**
      * 是否被添加到父节点下
      */
@@ -32,10 +32,10 @@ public class GeneralTreeNode<T extends ITreeID> implements ITreeNode {
     @JsonUnwrapped
     private T attributes;
 
-    public GeneralTreeNode() {
+    public TreeNodeWrapper() {
     }
 
-    public GeneralTreeNode(T attributes) {
+    public TreeNodeWrapper(T attributes) {
         this.attributes = attributes;
     }
 
@@ -75,7 +75,7 @@ public class GeneralTreeNode<T extends ITreeID> implements ITreeNode {
     /**
      * 增加子节点<br>
      */
-    public GeneralTreeNode<?> addChildren(GeneralTreeNode<?> node) {
+    public TreeNodeWrapper<?> addChildren(TreeNodeWrapper<?> node) {
         if (this.children == null) {
             this.children = new ArrayList<>();
         }
@@ -86,7 +86,7 @@ public class GeneralTreeNode<T extends ITreeID> implements ITreeNode {
     /**
      * 增加子节点集合<br>
      */
-    public GeneralTreeNode<?> addChildren(Collection<? extends GeneralTreeNode<?>> nodes) {
+    public TreeNodeWrapper<?> addChildren(Collection<? extends TreeNodeWrapper<?>> nodes) {
         if (this.children == null) {
             this.children = new ArrayList<>();
         }
