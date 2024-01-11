@@ -253,7 +253,7 @@ public class TreeUtils {
     }
 
     /**
-     * 判断当前节点是否是叶子节点
+     * 判断指定节点是否是叶子节点
      */
     public static <T extends ITreeNode> boolean isLeaf(T node) {
         Assert.notNull(node, "参数 node 不能为 null");
