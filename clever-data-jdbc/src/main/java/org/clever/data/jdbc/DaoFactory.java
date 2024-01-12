@@ -74,9 +74,9 @@ public class DaoFactory {
      */
     public static MyBatis getMyBatis(String stdXmlPath) {
         return getMyBatis(
-                stdXmlPath,
-                DataSourceAdmin.getDefaultDataSourceName(),
-                DataSourceAdmin.getProjects()
+            stdXmlPath,
+            DataSourceAdmin.getDefaultDataSourceName(),
+            DataSourceAdmin.getProjects()
         );
     }
 
@@ -109,9 +109,22 @@ public class DaoFactory {
      */
     public static MyBatis getMyBatis(Class<?> clazz) {
         return getMyBatis(
-                clazz,
-                DataSourceAdmin.getDefaultDataSourceName(),
-                DataSourceAdmin.getProjects()
+            clazz,
+            DataSourceAdmin.getDefaultDataSourceName(),
+            DataSourceAdmin.getProjects()
         );
+    }
+
+    /**
+     * 获取 MyBatis Mapper 对象实例 <br/>
+     *
+     * @param mapper         Mapper接口
+     * @param dataSourceName 数据源名称
+     * @param projects       项目列表
+     * @param <T>            Mapper接口类型
+     */
+    public static <T> T getMapper(Class<?> mapper, String dataSourceName, List<String> projects) {
+
+        return null;
     }
 }

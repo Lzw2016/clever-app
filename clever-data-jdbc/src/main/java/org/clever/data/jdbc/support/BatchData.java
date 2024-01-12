@@ -63,7 +63,7 @@ public class BatchData implements Serializable {
         return rowDataList.size();
     }
 
-    public int[] originalGetColumnTypes() {
+    public int[] getRawColumnTypes() {
         int[] result = new int[columnTypes.size()];
         for (int i = 0; i < columnTypes.size(); i++) {
             result[i] = columnTypes.get(i);
