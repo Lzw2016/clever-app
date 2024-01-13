@@ -314,6 +314,7 @@ public class MyBatisMapperHandler implements InvocationHandler {
             // 创建新的 MapperMethodInfo
             final Mapper config = method.getAnnotation(Mapper.class);
             MapperMethodInfo.MapperMethodInfoBuilder builder = MapperMethodInfo.builder()
+                .method(method)
                 .mapperPath(getMapperPath(config))
                 .sqlId(getSqlId(config, method))
                 .ops(getOps(config))

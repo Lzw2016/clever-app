@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.jdbc.mapper.LocationClass;
 import org.clever.data.jdbc.mapper.Mapper01;
+import org.clever.data.jdbc.mybatis.ClassPathMyBatisMapperSql;
 import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,16 +48,14 @@ public class MyBatisTest {
     @SneakyThrows
     @Test
     public void t03() {
+        ClassPathMyBatisMapperSql mapperSql = BaseTest.newClassPathMyBatisMapperSql("classpath*:org/clever/data/jdbc/mapper/**/*.xml");
         DataSourceAdmin.setDefaultDataSourceName("def");
         DataSourceAdmin.addDataSource("def", BaseTest.mysqlConfig());
+        DataSourceAdmin.setMyBatisMapperSql(mapperSql);
         try {
-            FileSystemMyBatisMapperSql mapperSql = BaseTest.newFileSystemMyBatisMapperSql("./src/test/resources", "dao/**/*.xml");
-            Mapper01 mapper = (Mapper01) Proxy.newProxyInstance(
-                Thread.currentThread().getContextClassLoader(),
-                new Class[]{Mapper01.class},
-                new MyBatisMapperHandler(Mapper01.class, null, mapperSql, DataSourceAdmin.getDefaultJdbc())
-            );
-            log.info("## -> {}", mapper.test(null, null, null, null));
+            Mapper01 mapper01 = DaoFactory.getMapper(Mapper01.class);
+            log.info("t01 -> {}", mapper01.t01(2L));
+            log.info("t02 -> {}", mapper01.t02(3L));
         } finally {
             DataSourceAdmin.closeAllDataSource();
         }

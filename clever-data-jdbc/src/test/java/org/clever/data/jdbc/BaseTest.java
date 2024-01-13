@@ -3,6 +3,7 @@ package org.clever.data.jdbc;
 import com.zaxxer.hikari.HikariConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.clever.data.jdbc.mybatis.ClassPathMyBatisMapperSql;
 import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -76,6 +77,14 @@ public class BaseTest {
     public static FileSystemMyBatisMapperSql newFileSystemMyBatisMapperSql(String rootPath, String filter) {
         // final String rootPath = new File("./src/test/resources").getAbsolutePath();
         FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(rootPath, filter);
+        myBatisMapperSql.reloadAll();
+        myBatisMapperSql.startWatch(200);
+        log.info("sqlSourceCount->{}", myBatisMapperSql.getSqlSourceCount());
+        return myBatisMapperSql;
+    }
+
+    public static ClassPathMyBatisMapperSql newClassPathMyBatisMapperSql(String locationPattern) {
+        ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
         myBatisMapperSql.reloadAll();
         myBatisMapperSql.startWatch(200);
         log.info("sqlSourceCount->{}", myBatisMapperSql.getSqlSourceCount());

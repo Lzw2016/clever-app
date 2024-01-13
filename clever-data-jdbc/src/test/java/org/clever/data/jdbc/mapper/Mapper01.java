@@ -3,6 +3,7 @@ package org.clever.data.jdbc.mapper;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.data.jdbc.entity.EntityData;
+import org.clever.data.jdbc.mybatis.annotations.Mapper;
 import org.clever.data.jdbc.mybatis.annotations.Param;
 import org.clever.data.jdbc.support.BatchData;
 import org.clever.data.jdbc.support.DbColumnMetaData;
@@ -23,6 +24,14 @@ import java.util.function.Function;
  * 创建时间：2024/01/10 14:22 <br/>
  */
 public interface Mapper01 {
+    List<Map<String, Object>> t01(Long id);
+
+    @Mapper(sqlId = "t01")
+    Map<String, Object> t02(Long id);
+
+
+
+
     List<EntityData> test(@Param("123") EntityData param, QueryBySort sort, Function<BatchData, Boolean> call_1, String a);
 
     EntityData test1(QueryByPage page, Function<BatchData, Boolean> call_1, Consumer<RowData> call_2);
