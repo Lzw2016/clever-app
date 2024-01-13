@@ -2,7 +2,9 @@ package org.clever.data.jdbc;
 
 import org.apache.commons.lang3.StringUtils;
 import org.clever.data.jdbc.mybatis.MyBatisMapperSql;
+import org.clever.util.Assert;
 
+import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.List;
 
@@ -123,8 +125,46 @@ public class DaoFactory {
      * @param projects       项目列表
      * @param <T>            Mapper接口类型
      */
+    @SuppressWarnings("unchecked")
     public static <T> T getMapper(Class<?> mapper, String dataSourceName, List<String> projects) {
+        Assert.notNull(mapper, "参数 mapper 不能为 null");
+        Assert.isNotBlank(dataSourceName, "参数 dataSourceName 不能为空");
+        Jdbc jdbc = DataSourceAdmin.getJdbc(dataSourceName);
+        Collections.reverse(projects);
+        MyBatisMapperSql mapperSql = DataSourceAdmin.getMyBatisMapperSql();
+        return (T) Proxy.newProxyInstance(
+            Thread.currentThread().getContextClassLoader(),
+            new Class[]{mapper},
+            new MyBatisMapperHandler(mapper, projects, mapperSql, jdbc)
+        );
+    }
 
-        return null;
+    /**
+     * 获取 MyBatis Mapper 对象实例 <br/>
+     *
+     * @param mapper         Mapper接口
+     * @param dataSourceName 数据源名称
+     * @param <T>            Mapper接口类型
+     */
+    public static <T> T getMapper(Class<?> mapper, String dataSourceName) {
+        return getMapper(
+            mapper,
+            dataSourceName,
+            DataSourceAdmin.getProjects()
+        );
+    }
+
+    /**
+     * 获取 MyBatis Mapper 对象实例 <br/>
+     *
+     * @param mapper Mapper接口
+     * @param <T>    Mapper接口类型
+     */
+    public static <T> T getMapper(Class<?> mapper) {
+        return getMapper(
+            mapper,
+            DataSourceAdmin.getDefaultDataSourceName(),
+            DataSourceAdmin.getProjects()
+        );
     }
 }

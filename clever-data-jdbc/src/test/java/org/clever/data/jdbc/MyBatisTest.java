@@ -42,7 +42,6 @@ public class MyBatisTest {
         FileSystemMyBatisMapperSql mapperSql = BaseTest.newFileSystemMyBatisMapperSql("./src/test/resources", "dao/**/*.xml");
         DataSourceAdmin.setMyBatisMapperSql(mapperSql);
         MyBatis myBatis = DaoFactory.getMyBatis(LocationClass.class);
-
         DataSourceAdmin.closeAllDataSource();
     }
 
@@ -56,7 +55,7 @@ public class MyBatisTest {
             Mapper01 mapper = (Mapper01) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 new Class[]{Mapper01.class},
-                new MyBatisMapperHandler(Mapper01.class, mapperSql, DataSourceAdmin.getDefaultJdbc())
+                new MyBatisMapperHandler(Mapper01.class, null, mapperSql, DataSourceAdmin.getDefaultJdbc())
             );
             log.info("## -> {}", mapper.test(null, null, null, null));
         } finally {

@@ -27,6 +27,7 @@ public class MapperMethodInfo {
     // --------------------------------------------------------------------------------------------
     // Mapper
     // --------------------------------------------------------------------------------------------
+
     /**
      * Mapper xml文件路径
      */
@@ -60,6 +61,7 @@ public class MapperMethodInfo {
     // --------------------------------------------------------------------------------------------
     // return
     // --------------------------------------------------------------------------------------------
+
     /**
      * 是否无返回值
      */
@@ -71,7 +73,7 @@ public class MapperMethodInfo {
     /**
      * 创建返回 List 对象的函数(可能为null)
      */
-    private final CreateObject<List<?>> newList;
+    private final CreateObject<List<Object>> newList;
     /**
      * 返回类型是 Set 集合
      */
@@ -79,7 +81,7 @@ public class MapperMethodInfo {
     /**
      * 创建返回 Set 对象的函数(可能为null)
      */
-    private final CreateObject<Set<?>> newSet;
+    private final CreateObject<Set<Object>> newSet;
     /**
      * 返回类型是数组(Array)
      */
@@ -91,7 +93,7 @@ public class MapperMethodInfo {
     /**
      * 创建返回 Map 对象的函数(可能为null)
      */
-    private final CreateObject<Map<?, ?>> newMap;
+    private final CreateObject<Map<Object, Object>> newMap;
     /**
      * 返回一个简单类型(基本类型或者实体类)
      */
@@ -107,7 +109,7 @@ public class MapperMethodInfo {
     /**
      * returnItemMap 时，创建 Item Map 对象的函数(可能为null)
      */
-    private final CreateObject<Map<?, ?>> newItemMap;
+    private final CreateObject<Map<Object, Object>> newItemMap;
     /**
      * returnList、returnSet、returnArray时, 元素项类型是DbColumnMetaData(使用queryMetaData)
      */
@@ -116,6 +118,7 @@ public class MapperMethodInfo {
     // --------------------------------------------------------------------------------------------
     // param
     // --------------------------------------------------------------------------------------------
+
     /**
      * SQL参数信息 {@code Map<idx, name>}
      */
@@ -140,6 +143,10 @@ public class MapperMethodInfo {
      * 使用游标读取数据时，是否使用 BatchData
      */
     private final boolean cursorUseBatch;
+    /**
+     * 参数仅仅只有一个 List
+     */
+    private final boolean paramOnlyList;
 
     public MapperMethodInfo(Method method,
                             String mapperPath,
@@ -151,23 +158,24 @@ public class MapperMethodInfo {
                             int batchSize,
                             boolean returnVoid,
                             boolean returnList,
-                            CreateObject<List<?>> newList,
+                            CreateObject<List<Object>> newList,
                             boolean returnSet,
-                            CreateObject<Set<?>> newSet,
+                            CreateObject<Set<Object>> newSet,
                             boolean returnArray,
                             boolean returnMap,
-                            CreateObject<Map<?, ?>> newMap,
+                            CreateObject<Map<Object, Object>> newMap,
                             boolean returnSimple,
                             Class<?> returnItemType,
                             boolean returnItemMap,
-                            CreateObject<Map<?, ?>> newItemMap,
+                            CreateObject<Map<Object, Object>> newItemMap,
                             boolean queryMetaData,
                             Map<Integer, String> params,
                             Integer sortParamIdx,
                             Integer pageParamIdx,
                             Integer cursorParamIdx,
                             boolean cursorParamConsumer,
-                            boolean cursorUseBatch) {
+                            boolean cursorUseBatch,
+                            boolean paramOnlyList) {
         this.method = method;
         this.mapperPath = mapperPath;
         this.sqlId = sqlId;
@@ -195,5 +203,6 @@ public class MapperMethodInfo {
         this.cursorParamIdx = cursorParamIdx;
         this.cursorParamConsumer = cursorParamConsumer;
         this.cursorUseBatch = cursorUseBatch;
+        this.paramOnlyList = paramOnlyList;
     }
 }

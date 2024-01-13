@@ -44,7 +44,7 @@ public class MyBatis extends AbstractDataSource {
     @Getter
     private final String stdXmlPath;
     /**
-     * 项目列表(优选级又高到底)
+     * 项目列表(优选级由高到底)
      */
     @Getter
     private final List<String> projects;
@@ -1895,7 +1895,6 @@ public class MyBatis extends AbstractDataSource {
             parameter = new HashMap<>();
         }
         BoundSql boundSql = getBoundSql(sqlId, parameter);
-        Assert.notNull(boundSql, "SQL不存在，sqlId=" + sqlId);
         return TupleTwo.creat(boundSql.getNamedParameterSql(), boundSql.getParameterMap());
     }
 
@@ -1912,6 +1911,7 @@ public class MyBatis extends AbstractDataSource {
 
     private BoundSql getBoundSql(String sqlId, Object parameter) {
         SqlSource sqlSource = mapperSql.getSqlSource(sqlId, stdXmlPath, jdbc.getDbType(), projects.toArray(new String[0]));
+        Assert.notNull(sqlSource, "SQL不存在, sqlId=" + sqlId + ", file=" + stdXmlPath);
         return sqlSource.getBoundSql(jdbc.getDbType(), parameter);
     }
 }

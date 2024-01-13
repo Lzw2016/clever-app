@@ -12,6 +12,9 @@ import org.clever.data.jdbc.support.RowData;
 import org.clever.util.Assert;
 
 import java.lang.reflect.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -43,6 +46,7 @@ public class MyBatisMapperUtils {
         }
     }
 
+    @SuppressWarnings({"unchecked"})
     public static void fillMethodReturn(final Method method, final MapperMethodInfo.MapperMethodInfoBuilder builder) {
         String mapperClass = method.getDeclaringClass().getName();
         String methodName = method.getName();
@@ -51,15 +55,15 @@ public class MyBatisMapperUtils {
         final Class<?> returnType = method.getReturnType();
         boolean returnVoid;
         boolean returnList = false;
-        CreateObject<List<?>> newList = null;
+        CreateObject<List<Object>> newList = null;
         boolean returnSet = false;
-        CreateObject<Set<?>> newSet = null;
+        CreateObject<Set<Object>> newSet = HashSet::new;
         boolean returnArray = false;
         Class<?> returnItemType = null;
         boolean returnItemMap = false;
-        CreateObject<Map<?, ?>> newItemMap = null;
+        CreateObject<Map<Object, Object>> newItemMap = null;
         boolean returnMap = false;
-        CreateObject<Map<?, ?>> newMap = null;
+        CreateObject<Map<Object, Object>> newMap = null;
         boolean returnSimple = false;
         boolean queryMetaData = false;
         returnVoid = Void.TYPE.equals(returnType);
@@ -77,11 +81,11 @@ public class MyBatisMapperUtils {
                 }
                 if (returnList && !returnType.isAssignableFrom(ArrayList.class)) {
                     Assert.isTrue(isNewInstance(returnType), "返回值类型没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                    newList = () -> (List<?>) returnType.newInstance();
+                    newList = () -> (List<Object>) returnType.newInstance();
                 }
                 if (returnSet && !returnType.isAssignableFrom(HashSet.class)) {
                     Assert.isTrue(isNewInstance(returnType), "返回值没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                    newSet = () -> (Set<?>) returnType.newInstance();
+                    newSet = () -> (Set<Object>) returnType.newInstance();
                 }
             } else if (returnType.isArray()) {
                 // 返回类型是数组(Array)
@@ -92,7 +96,7 @@ public class MyBatisMapperUtils {
                 returnMap = true;
                 if (!Objects.equals(Map.class, returnType)) {
                     Assert.isTrue(isNewInstance(returnType), "返回值没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                    newMap = () -> (Map<?, ?>) returnType.newInstance();
+                    newMap = () -> (Map<Object, Object>) returnType.newInstance();
                 }
             } else {
                 // 返回一个简单类型(基本类型或者实体类)
@@ -104,7 +108,7 @@ public class MyBatisMapperUtils {
                     returnItemMap = true;
                     if (!Objects.equals(Map.class, returnType)) {
                         Assert.isTrue(isNewInstance(returnType), "返回值没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                        newItemMap = () -> (Map<?, ?>) returnType.newInstance();
+                        newItemMap = () -> (Map<Object, Object>) returnType.newInstance();
                     }
                 }
                 // 是否是 queryMetaData
@@ -112,7 +116,6 @@ public class MyBatisMapperUtils {
                     queryMetaData = true;
                 }
             }
-            // 是否是 InsertResult???
         }
         // 设置返回值
         builder.returnVoid(returnVoid);
@@ -141,6 +144,7 @@ public class MyBatisMapperUtils {
         Integer cursorParamIdx = null;
         boolean cursorParamConsumer = false;
         boolean cursorUseBatch = false;
+        boolean paramOnlyList = parameters.length == 1 && List.class.isAssignableFrom(parameters[0].getType());
         for (int idx = 0; idx < parameters.length; idx++) {
             final Parameter parameter = parameters[idx];
             final Class<?> parameterClass = parameter.getType();
@@ -182,6 +186,7 @@ public class MyBatisMapperUtils {
         builder.cursorParamIdx(cursorParamIdx);
         builder.cursorParamConsumer(cursorParamConsumer);
         builder.cursorUseBatch(cursorUseBatch);
+        builder.paramOnlyList(paramOnlyList);
     }
 
     /**
@@ -209,12 +214,52 @@ public class MyBatisMapperUtils {
         return Objects.equals(m1.getDeclaringClass().getClassLoader(), m2.getDeclaringClass().getClassLoader());
     }
 
-//    /**
-//     * 判断
-//     * @param returnType
-//     * @return
-//     */
-//    public static boolean isSimpleType(Class<?> returnType) {
-//        returnType.isPrimitive();
-//    }
+    /**
+     * 判断是否是基础类型(不是实体类)
+     */
+    public static boolean isBaseType(Class<?> clazz) {
+        // Boolean.TYPE, Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Void.TYPE
+        if (clazz.isPrimitive()) {
+            return true;
+        }
+        String[] basePackages = new String[]{
+            "java.lang.",
+            "java.util.",
+            "java.sql.",
+            "java.time.",
+        };
+        if (Arrays.stream(basePackages).anyMatch(pkg -> StringUtils.startsWith(clazz.getName(), pkg))) {
+            return true;
+        }
+        Class<?>[] baseClasses = new Class<?>[]{
+            boolean.class,
+            byte.class,
+            short.class,
+            int.class,
+            long.class,
+            float.class,
+            double.class,
+            boolean.class,
+            char.class,
+            Number.class,
+            CharSequence.class,
+            java.util.Date.class,
+            java.sql.Date.class,
+            java.sql.Timestamp.class,
+            LocalDate.class,
+            LocalTime.class,
+            LocalDateTime.class,
+        };
+        return Arrays.stream(baseClasses).anyMatch(cls -> cls.isAssignableFrom(clazz));
+    }
+
+    /**
+     * 是否是整数类型
+     */
+    public static boolean isIntType(Class<?> clazz) {
+        final Class<?>[] classes = new Class<?>[]{
+            int.class, Integer.class, long.class, Long.class,
+        };
+        return Arrays.asList(classes).contains(clazz);
+    }
 }

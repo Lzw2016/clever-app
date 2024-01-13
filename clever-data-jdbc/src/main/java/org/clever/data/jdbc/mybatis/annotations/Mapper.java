@@ -28,12 +28,13 @@ public @interface Mapper {
     /**
      * 执行的操作类型
      */
-    Ops ops() default Ops.Query;
+    Ops ops() default Ops.Auto;
 
     /**
-     * 返回的表字段重命名策略
+     * 返回的表字段重命名策略。<br/>
+     * 与 {@code Jdbc.DEFAULT_RESULT_RENAME} 保持一致
      */
-    RenameStrategy rename() default RenameStrategy.ToCamel;
+    RenameStrategy rename() default RenameStrategy.None;
 
     /**
      * 当查询一条数据时(Mapper返回值不是集合)，是否使用 queryFirst。 <br/>
@@ -53,6 +54,10 @@ public @interface Mapper {
 
     enum Ops {
         /**
+         * 自动判断 Query、Update、Call
+         */
+        Auto,
+        /**
          * 查询操作(select)
          */
         Query,
@@ -60,9 +65,9 @@ public @interface Mapper {
          * 更新操作(insert、update、delete)
          */
         Update,
-//        /**
-//         * 执行存储过程或函数???
-//         */
-//        Call,
+        /**
+         * 执行存储过程或函数
+         */
+        Call,
     }
 }
