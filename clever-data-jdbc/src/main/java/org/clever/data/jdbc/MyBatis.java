@@ -211,7 +211,8 @@ public class MyBatis extends AbstractDataSource {
      * @param resultRename 返回数据字段名重命名策略
      */
     public Map<String, Object> queryFirst(String sqlId, Object param, RenameStrategy resultRename) {
-        return jdbc.queryFirst(getSql(sqlId), param, resultRename);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirst(sqlInfo.getValue1(), sqlInfo.getValue2(), resultRename);
     }
 
     /**
@@ -221,7 +222,8 @@ public class MyBatis extends AbstractDataSource {
      * @param param 参数
      */
     public Map<String, Object> queryFirst(String sqlId, Object param) {
-        return jdbc.queryFirst(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirst(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**
@@ -242,7 +244,8 @@ public class MyBatis extends AbstractDataSource {
      * @param clazz 查询对象类型
      */
     public <T> T queryFirst(String sqlId, Object param, Class<T> clazz) {
-        return jdbc.queryFirst(getSql(sqlId), param, clazz);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirst(sqlInfo.getValue1(), sqlInfo.getValue2(), clazz);
     }
 
     /**
@@ -307,6 +310,18 @@ public class MyBatis extends AbstractDataSource {
      */
     public <T> List<T> queryMany(String sqlId, Class<T> clazz) {
         return jdbc.queryMany(getSql(sqlId), clazz);
+    }
+
+    /**
+     * 查询返回一个基本数据类型值(单行单列) (sql返回多条数据会抛出异常)
+     *
+     * @param sqlId       SQL ID
+     * @param param       参数
+     * @param returnClass 返回的基本数据类型
+     */
+    public <T> T queryBaseObject(String sqlId, Object param, Class<T> returnClass) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryBaseObject(sqlInfo.getValue1(), sqlInfo.getValue2(), returnClass);
     }
 
     /**
@@ -490,13 +505,26 @@ public class MyBatis extends AbstractDataSource {
     }
 
     /**
+     * 查询sql执行结果的第一条数据，返回一个基本数据类型值(单行单列)
+     *
+     * @param sqlId       SQL ID
+     * @param param       参数
+     * @param returnClass 返回的基本数据类型
+     */
+    public <T> T queryFirstBaseObject(String sqlId, Object param, Class<T> returnClass) {
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstBaseObject(sqlInfo.getValue1(), sqlInfo.getValue2(), returnClass);
+    }
+
+    /**
      * 查询sql执行结果的第一条数据，返回一个 String
      *
      * @param sqlId SQL ID
      * @param param 参数
      */
     public String queryFirstString(String sqlId, Object param) {
-        return jdbc.queryFirstString(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstString(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**
@@ -515,7 +543,8 @@ public class MyBatis extends AbstractDataSource {
      * @param param 参数
      */
     public Long queryFirstLong(String sqlId, Object param) {
-        return jdbc.queryFirstLong(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstLong(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**
@@ -534,7 +563,8 @@ public class MyBatis extends AbstractDataSource {
      * @param param 参数
      */
     public Double queryFirstDouble(String sqlId, Object param) {
-        return jdbc.queryFirstDouble(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstDouble(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**
@@ -553,7 +583,8 @@ public class MyBatis extends AbstractDataSource {
      * @param param 参数
      */
     public BigDecimal queryFirstBigDecimal(String sqlId, Object param) {
-        return jdbc.queryFirstBigDecimal(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstBigDecimal(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**
@@ -572,7 +603,8 @@ public class MyBatis extends AbstractDataSource {
      * @param param 参数
      */
     public Boolean queryFirstBoolean(String sqlId, Object param) {
-        return jdbc.queryFirstBoolean(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstBoolean(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**
@@ -591,7 +623,8 @@ public class MyBatis extends AbstractDataSource {
      * @param param 参数
      */
     public Date queryFirstDate(String sqlId, Object param) {
-        return jdbc.queryFirstDate(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstDate(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**
@@ -610,7 +643,8 @@ public class MyBatis extends AbstractDataSource {
      * @param param 参数
      */
     public Timestamp queryFirstTimestamp(String sqlId, Object param) {
-        return jdbc.queryFirstTimestamp(getSql(sqlId), param);
+        TupleTwo<String, Map<String, Object>> sqlInfo = getSql(sqlId, param);
+        return jdbc.queryFirstTimestamp(sqlInfo.getValue1(), sqlInfo.getValue2());
     }
 
     /**

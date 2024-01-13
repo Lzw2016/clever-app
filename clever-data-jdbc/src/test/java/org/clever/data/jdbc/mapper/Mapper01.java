@@ -11,11 +11,7 @@ import org.clever.data.jdbc.support.InsertResult;
 import org.clever.data.jdbc.support.RowData;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -29,42 +25,39 @@ public interface Mapper01 {
     @Mapper(sqlId = "t01")
     Map<String, Object> t02(Long id);
 
+    @Mapper(sqlId = "t01")
+    List<EntityData> t03(Long id);
+
+    @Mapper(sqlId = "t01")
+    EntityData t04(Long id);
+
+    @Mapper(sqlId = "t01")
+    LinkedList<EntityData> t05(Long id);
+
+    @Mapper(sqlId = "t01")
+    HashMap<String, Object> t06(Long id);
+
+    @Mapper(sqlId = "t01")
+    List<DbColumnMetaData> t07(Long id);
+
+    Long t08(Long id);
+
+    Date t09(Long id);
+
+    String t10(String str);
+
+    @Mapper(sqlId = "t08", first = false)
+    BigDecimal t11(Long id);
+
+    @Mapper(sqlId = "t01")
+    EntityData[] t12(Long id);
+
 
 
 
     List<EntityData> test(@Param("123") EntityData param, QueryBySort sort, Function<BatchData, Boolean> call_1, String a);
 
     EntityData test1(QueryByPage page, Function<BatchData, Boolean> call_1, Consumer<RowData> call_2);
-
-    List<DbColumnMetaData> queryMetaData();
-
-    Map<String, Object> qOne();
-
-    EntityData qOne2();
-
-    String qOne3();
-
-    Long qOne4();
-
-    Integer qOne5();
-
-    Double qOne6();
-
-    Float qOne7();
-
-    BigDecimal qOne8();
-
-    Boolean qOne9();
-
-    Date qOne10();
-
-    Timestamp qOne11();
-
-    Map<String, Object> qFirst();
-
-    EntityData qFirst2();
-
-    Collection<EntityData> qMany();
 
     EntityData[] qMany2();
 

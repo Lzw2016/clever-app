@@ -611,6 +611,17 @@ public class Jdbc extends AbstractDataSource {
     }
 
     /**
+     * 查询返回一个基本数据类型值(单行单列) (sql返回多条数据会抛出异常)
+     *
+     * @param sql         sql脚本，参数格式[:param]
+     * @param param       参数，参数格式[:param]
+     * @param returnClass 返回的基本数据类型
+     */
+    public <T> T queryBaseObject(String sql, Object param, Class<T> returnClass) {
+        return queryData(sql, BeanCopyUtils.toMap(param), new QueryObject<>(this, returnClass));
+    }
+
+    /**
      * 查询返回一个 String (sql返回多条数据会抛出异常)
      *
      * @param sql      sql脚本，参数格式[:param]
@@ -869,6 +880,17 @@ public class Jdbc extends AbstractDataSource {
      */
     public Timestamp queryTimestamp(String sql) {
         return queryTimestamp(sql, Collections.emptyMap());
+    }
+
+    /**
+     * 查询sql执行结果的第一条数据，返回一个基本数据类型值(单行单列)
+     *
+     * @param sql         sql脚本，参数格式[:param]
+     * @param param       参数，参数格式[:param]
+     * @param returnClass 返回的基本数据类型
+     */
+    public <T> T queryFirstBaseObject(String sql, Object param, Class<T> returnClass) {
+        return queryData(sql, BeanCopyUtils.toMap(param), new QueryObject<>(this, returnClass, true));
     }
 
     /**
@@ -3652,7 +3674,7 @@ public class Jdbc extends AbstractDataSource {
      * @return 影响的行数
      */
     private static int executeUpdate(Connection con, String sql, Object[] params) throws SQLException {
-        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatement;
         // 执行SQL预编译
         preparedStatement = con.prepareStatement(sql);
         // 绑定参数设置sql占位符中的值

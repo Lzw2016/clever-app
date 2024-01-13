@@ -4,4 +4,16 @@
     <select id="t01">
         select * from test where id=#{id}
     </select>
+
+    <select id="t08">
+        select lock_count from test where id=#{id}
+    </select>
+
+    <select id="t09">
+        select create_at from test where id=#{id}
+    </select>
+
+    <select id="t10">
+        select a from test where b=#{str}
+    </select>
 </mapper>

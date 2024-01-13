@@ -11,6 +11,7 @@
 
     <!--自定义日志级别-->
     <logger name="com.zaxxer.hikari" level="INFO"/>
+    <logger name="org.clever.data.jdbc.support.SqlLoggerUtils" level="DEBUG"/>
 
     <!-- 控制台日志：输出全部日志到控制台 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

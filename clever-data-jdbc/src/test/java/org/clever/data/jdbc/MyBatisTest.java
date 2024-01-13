@@ -3,6 +3,7 @@ package org.clever.data.jdbc;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.tuples.TupleTwo;
+import org.clever.data.jdbc.entity.EntityData;
 import org.clever.data.jdbc.mapper.LocationClass;
 import org.clever.data.jdbc.mapper.Mapper01;
 import org.clever.data.jdbc.mybatis.ClassPathMyBatisMapperSql;
@@ -54,8 +55,21 @@ public class MyBatisTest {
         DataSourceAdmin.setMyBatisMapperSql(mapperSql);
         try {
             Mapper01 mapper01 = DaoFactory.getMapper(Mapper01.class);
-            log.info("t01 -> {}", mapper01.t01(2L));
-            log.info("t02 -> {}", mapper01.t02(3L));
+//            log.info("t01 -> {}", mapper01.t01(1L));
+//            log.info("t02 -> {}", mapper01.t02(2L));
+//            log.info("t03 -> {}", mapper01.t03(3L));
+//            log.info("t04 -> {}", mapper01.t04(4L));
+//            LinkedList<EntityData> t05 = mapper01.t05(5L);
+//            log.info("t05 -> {} | {}", t05.getClass().getName(), t05);
+//            HashMap<String, Object> t06 = mapper01.t06(6L);
+//            log.info("t06 -> {} | {}", t06.getClass().getName(), t06);
+//            log.info("t07 -> {}", mapper01.t07(1L));
+//            log.info("t08 -> {}", mapper01.t08(1L));
+//            log.info("t09 -> {}", mapper01.t09(1L));
+//            log.info("t10 -> {}", mapper01.t10("a"));
+//            log.info("t11 -> {}", mapper01.t11(1L));
+            EntityData[] t12 = mapper01.t12(1L);
+            log.info("t12 -> {} | {}", t12.getClass().getName(), t12);
         } finally {
             DataSourceAdmin.closeAllDataSource();
         }

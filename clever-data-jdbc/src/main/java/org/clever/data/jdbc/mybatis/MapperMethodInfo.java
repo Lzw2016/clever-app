@@ -50,7 +50,7 @@ public class MapperMethodInfo {
      */
     private final boolean first;
     /**
-     * 当Mapper返回值是数值类型时(int/Integer/long/Long)，是否使用 SQL Count 查询获取查询结果数据量
+     * 当Mapper返回值是整数类型时(int/Integer/long/Long)，是否使用 SQL Count 查询获取查询结果数据量
      */
     private final boolean count;
     /**

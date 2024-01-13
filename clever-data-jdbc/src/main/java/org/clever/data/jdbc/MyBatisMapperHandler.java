@@ -19,7 +19,9 @@ import org.clever.data.jdbc.support.BatchData;
 import org.clever.data.jdbc.support.InsertResult;
 import org.clever.data.jdbc.support.RowData;
 import org.clever.util.Assert;
+import org.clever.util.NumberUtils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -215,7 +217,7 @@ public class MyBatisMapperHandler implements InvocationHandler {
                     set.addAll(list);
                     return set;
                 } else if (methodInfo.isReturnArray()) {
-                    return list.toArray();
+                    return list.toArray((Object[]) Array.newInstance(methodInfo.getReturnItemType(), 0));
                 }
             }
             return list;
@@ -237,16 +239,28 @@ public class MyBatisMapperHandler implements InvocationHandler {
             return map;
         }
         // returnSimple -> queryCount
-        final ConversionService conversionService = DefaultConversionService.getSharedInstance();
-        if (MyBatisMapperUtils.isIntType(returnType)) {
-            Object res = jdbc.queryCount(sql, parameter);
-            return conversionService.convert(res, returnType);
+        if (methodInfo.isCount()) {
+            Assert.isTrue(MyBatisMapperUtils.isIntType(returnType), "count=true时, 返回值必须是整数类型(int/Integer/long/Long), " + errMsgSuffix);
+            long res = jdbc.queryCount(sql, parameter);
+            return NumberUtils.convertNumberToTargetClass(res, (Class<? extends Number>) returnType);
         }
         // returnSimple -> queryOne、queryFirst
-        if (methodInfo.isFirst()) {
-            return jdbc.queryFirst(sql, parameter, returnType);
+        if (MyBatisMapperUtils.isBaseType(returnType)) {
+            Object res;
+            if (methodInfo.isFirst()) {
+                res = jdbc.queryFirstBaseObject(sql, parameter, returnType);
+            } else {
+                res = jdbc.queryBaseObject(sql, parameter, returnType);
+            }
+            return res;
         }
-        return jdbc.queryOne(sql, parameter, returnType);
+        Object res;
+        if (methodInfo.isFirst()) {
+            res = jdbc.queryFirst(sql, parameter, returnType);
+        } else {
+            res = jdbc.queryOne(sql, parameter, returnType);
+        }
+        return res;
     }
 
     private Object update(MapperMethodInfo methodInfo, String sql, Map<String, Object> parameter, Object[] args, String errMsgSuffix) {
