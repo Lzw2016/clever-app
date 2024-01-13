@@ -12,12 +12,12 @@ import java.util.Map;
 public class HSQLDialect extends AbstractDialect {
     @Override
     public String doBuildPaginationSql(String originalSql, long offset, long limit, Map<String, Object> paramMap, String firstMark, String secondMark) {
-        return originalSql + " limit " + (COLON + firstMark) + COMMA + (COLON + secondMark);
+        return originalSql + "\n limit " + (COLON + firstMark) + COMMA + (COLON + secondMark);
     }
 
     @Override
     public String buildPaginationSql(String originalSql, long offset, long limit) {
-        return originalSql + " limit " + offset + COMMA + limit;
+        return originalSql + "\n limit " + offset + COMMA + limit;
     }
 
     @Override

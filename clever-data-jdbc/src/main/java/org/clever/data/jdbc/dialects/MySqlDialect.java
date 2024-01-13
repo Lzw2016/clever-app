@@ -12,12 +12,12 @@ import java.util.Map;
 public class MySqlDialect extends AbstractDialect {
     @Override
     public String doBuildPaginationSql(String originalSql, long offset, long limit, Map<String, Object> paramMap, String firstMark, String secondMark) {
-        return originalSql + " LIMIT " + (COLON + firstMark) + COMMA + (COLON + secondMark);
+        return originalSql + "\n LIMIT " + (COLON + firstMark) + COMMA + (COLON + secondMark);
     }
 
     @Override
     public String buildPaginationSql(String originalSql, long offset, long limit) {
-        return originalSql + " LIMIT " + offset + COMMA + limit;
+        return originalSql + "\n LIMIT " + offset + COMMA + limit;
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.Map;
 public class H2Dialect extends AbstractDialect {
     @Override
     public String doBuildPaginationSql(String originalSql, long offset, long limit, Map<String, Object> paramMap, String firstMark, String secondMark) {
-        String sql = originalSql + " limit " + (COLON + secondMark);
+        String sql = originalSql + "\n limit " + (COLON + secondMark);
         if (offset > 0) {
             sql += (" offset " + (COLON + firstMark));
         }
@@ -21,7 +21,7 @@ public class H2Dialect extends AbstractDialect {
 
     @Override
     public String buildPaginationSql(String originalSql, long offset, long limit) {
-        String sql = originalSql + " limit " + limit;
+        String sql = originalSql + "\n limit " + limit;
         if (offset > 0) {
             sql += (" offset " + offset);
         }

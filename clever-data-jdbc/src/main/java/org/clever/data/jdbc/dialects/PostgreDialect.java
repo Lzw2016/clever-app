@@ -12,12 +12,12 @@ import java.util.Map;
 public class PostgreDialect extends AbstractDialect {
     @Override
     public String doBuildPaginationSql(String originalSql, long offset, long limit, Map<String, Object> paramMap, String firstMark, String secondMark) {
-        return originalSql + " limit " + (COLON + secondMark) + " offset " + (COLON + firstMark);
+        return originalSql + "\n limit " + (COLON + secondMark) + " offset " + (COLON + firstMark);
     }
 
     @Override
     public String buildPaginationSql(String originalSql, long offset, long limit) {
-        return originalSql + " limit " + limit + " offset " + offset;
+        return originalSql + "\n limit " + limit + " offset " + offset;
     }
 
     @Override

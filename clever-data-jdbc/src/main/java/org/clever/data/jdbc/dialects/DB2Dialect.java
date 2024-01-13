@@ -16,14 +16,14 @@ public class DB2Dialect extends AbstractDialect {
         long secondParam = offset + limit;
         paramMap.put(firstMark, firstParam);
         paramMap.put(secondMark, secondParam);
-        return "SELECT * FROM (SELECT TMP_PAGE.*, ROWNUMBER() OVER() AS ROW_ID FROM ( " + originalSql + " ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN " + (COLON + firstMark) + " AND " + (COLON + secondMark);
+        return "SELECT * FROM (SELECT TMP_PAGE.*, ROWNUMBER() OVER() AS ROW_ID FROM ( \n" + originalSql + "\n ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN " + (COLON + firstMark) + " AND " + (COLON + secondMark);
     }
 
     @Override
     public String buildPaginationSql(String originalSql, long offset, long limit) {
         long firstParam = offset + 1;
         long secondParam = offset + limit;
-        return "SELECT * FROM (SELECT TMP_PAGE.*, ROWNUMBER() OVER() AS ROW_ID FROM ( " + originalSql + " ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN " + firstParam + " AND " + secondParam;
+        return "SELECT * FROM (SELECT TMP_PAGE.*, ROWNUMBER() OVER() AS ROW_ID FROM ( \n" + originalSql + "\n ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN " + firstParam + " AND " + secondParam;
     }
 
     @Override
