@@ -19,4 +19,13 @@ public class EntityData {
     private String description;
     private Date createAt;
     private Date updateAt;
+
+    public static EntityData create(String str) {
+        EntityData res = new EntityData();
+        res.a = str;
+        res.b = str;
+        res.c = str;
+        res.d = str;
+        return res;
+    }
 }

@@ -48,9 +48,10 @@ public @interface Mapper {
     boolean count() default false;
 
     /**
-     * 设置游标读取查询数据时的批次大小(小于等于0表示不设置)
+     * 设置游标读取查询数据时的批次大小(小于等于0表示不设置)。 <br/>
+     * 与 {@code BatchDataReaderCallback.DEFAULT_BATCH_SIZE} 保持一致
      */
-    int batchSize() default -1;
+    int batchSize() default 200;
 
     enum Ops {
         /**

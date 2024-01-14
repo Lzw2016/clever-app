@@ -16,4 +16,28 @@
     <select id="t10">
         select a from test where b=#{str}
     </select>
+
+    <sql id="t22">
+        update test set lock_count=#{lockCount} where id=#{id}
+    </sql>
+
+    <sql id="t23">
+        update test set lock_count=#{newValue} where id=#{id}
+    </sql>
+
+    <sql id="t24">
+        insert into test(a, b, c, d) values (#{str}, #{str}, #{str}, #{str})
+    </sql>
+
+    <sql id="t29">
+        insert into test(a, b, c, d) values (#{a}, #{b}, #{c}, #{d})
+    </sql>
+
+    <sql id="t30">
+        call p_test_1()
+    </sql>
+
+    <sql id="t31">
+        call p_test_2(#{name}, #{size})
+    </sql>
 </mapper>

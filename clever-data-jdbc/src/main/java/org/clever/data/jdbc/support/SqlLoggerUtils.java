@@ -17,6 +17,8 @@ public class SqlLoggerUtils {
     private static final String Log_Batch_Param /* */ = "==> BatchParam: {}";
     private static final String Log_Total /*       */ = "<==      Total: {}";
     private static final String Log_Update_Total /**/ = "<==    Updated: {}";
+    private static final String Log_Procedure /*   */ = "==>  Procedure: {}";
+    private static final String Procedure_Result /**/ = "<==     Result: {}";
     /**
      * 忽略的包前缀
      */
@@ -58,7 +60,7 @@ public class SqlLoggerUtils {
      * @param sql      sql语句
      * @param paramMap sql参数
      */
-    public static void printfSql(String sql, Map<String, Object> paramMap) {
+    public static void printfSql(String sql, Map<String, ?> paramMap) {
         // noinspection DuplicatedCode
         if (!log.isDebugEnabled()) {
             return;
@@ -124,6 +126,50 @@ public class SqlLoggerUtils {
     }
 
     /**
+     * 打印Procedure以及其参数
+     *
+     * @param name     Procedure名称
+     * @param paramMap Procedure参数
+     */
+    public static void printfProcedure(String name, Map<String, ?> paramMap) {
+        // noinspection DuplicatedCode
+        if (!log.isDebugEnabled()) {
+            return;
+        }
+        name = deleteWhitespace(name);
+        log.debug(Log_Procedure, name);
+        if (paramMap != null) {
+            String paramMapStr = getParamMapStr(paramMap);
+            log.debug(Log_Parameters, paramMapStr);
+        }
+    }
+
+    /**
+     * 打印Procedure以及其参数
+     *
+     * @param name     Procedure名称
+     * @param params Procedure参数
+     */
+    public static void printfProcedure(String name, Object[] params) {
+        List<Object> paramList = Arrays.stream(params == null ? new Object[0] : params).collect(Collectors.toList());
+        // noinspection DuplicatedCode
+        if (!log.isDebugEnabled()) {
+            return;
+        }
+        name = deleteWhitespace(name);
+        log.debug(Log_Procedure, name);
+        String paramMapStr = getParamMapStr(paramList);
+        log.debug(Log_Parameters, paramMapStr);
+    }
+
+    /**
+     * 打印执行Procedure的返回值
+     */
+    public static void printfProcedureResult(Map<String, Object> res) {
+        log.debug(Procedure_Result, res);
+    }
+
+    /**
      * 打印SQL查询结果数据量
      *
      * @param totals 查询结果数据量
@@ -146,12 +192,12 @@ public class SqlLoggerUtils {
         return sb.toString();
     }
 
-    private static String getParamMapStr(Map<String, Object> paramMap) {
+    private static String getParamMapStr(Map<String, ?> paramMap) {
         if (paramMap == null) {
             return null;
         }
         StringBuilder sb = new StringBuilder(paramMap.size() * 15 + 32);
-        for (Map.Entry<String, Object> paramEntry : paramMap.entrySet()) {
+        for (Map.Entry<String, ?> paramEntry : paramMap.entrySet()) {
             String name = paramEntry.getKey();
             Object value = paramEntry.getValue();
             if (sb.length() > 0) {

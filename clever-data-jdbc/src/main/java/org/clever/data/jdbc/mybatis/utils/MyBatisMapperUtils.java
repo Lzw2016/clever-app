@@ -3,6 +3,7 @@ package org.clever.data.jdbc.mybatis.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
+import org.clever.core.model.request.page.Page;
 import org.clever.data.jdbc.mybatis.CreateObject;
 import org.clever.data.jdbc.mybatis.MapperMethodInfo;
 import org.clever.data.jdbc.mybatis.annotations.Param;
@@ -18,6 +19,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 作者：lizw <br/>
@@ -64,21 +66,22 @@ public class MyBatisMapperUtils {
         CreateObject<Map<Object, Object>> newItemMap = null;
         boolean returnMap = false;
         CreateObject<Map<Object, Object>> newMap = null;
+        boolean returnPage = false;
         boolean returnSimple = false;
         boolean queryMetaData = false;
         returnVoid = Void.TYPE.equals(returnType);
         if (!returnVoid) {
+            Type type = method.getGenericReturnType();
+            if (type instanceof ParameterizedType) {
+                Type[] types = ((ParameterizedType) type).getActualTypeArguments();
+                if (types != null && types.length == 1 && types[0] instanceof Class) {
+                    returnItemType = (Class<?>) types[0];
+                }
+            }
             if (Collection.class.isAssignableFrom(returnType)) {
                 // 返回类型是集合(List、Set)
                 returnSet = Set.class.isAssignableFrom(returnType);
                 returnList = List.class.isAssignableFrom(returnType);
-                Type type = method.getGenericReturnType();
-                if (type instanceof ParameterizedType) {
-                    Type[] types = ((ParameterizedType) type).getActualTypeArguments();
-                    if (types != null && types.length == 1 && types[0] instanceof Class) {
-                        returnItemType = (Class<?>) types[0];
-                    }
-                }
                 if (returnList && !returnType.isAssignableFrom(ArrayList.class)) {
                     Assert.isTrue(isNewInstance(returnType), "返回值类型没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
                     newList = () -> (List<Object>) returnType.newInstance();
@@ -98,6 +101,9 @@ public class MyBatisMapperUtils {
                     Assert.isTrue(isNewInstance(returnType), "返回值没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
                     newMap = () -> (Map<Object, Object>) returnType.newInstance();
                 }
+            } else if (returnType.isAssignableFrom(Page.class)) {
+                // 返回类型是IPage
+                returnPage = true;
             } else {
                 // 返回一个简单类型(基本类型或者实体类)
                 returnSimple = true;
@@ -129,6 +135,7 @@ public class MyBatisMapperUtils {
         builder.newItemMap(newItemMap);
         builder.returnMap(returnMap);
         builder.newMap(newMap);
+        builder.returnPage(returnPage);
         builder.returnSimple(returnSimple);
         builder.queryMetaData(queryMetaData);
     }
@@ -261,5 +268,42 @@ public class MyBatisMapperUtils {
             int.class, Integer.class, long.class, Long.class,
         };
         return Arrays.asList(classes).contains(clazz);
+    }
+
+    /**
+     * 获取存储过程名称 <br/>
+     * <pre>
+     *  call next_id()                      -> next_id
+     *  call next_id(#{name})               -> next_id
+     *  call next_id(#{name}, #{param2})    -> next_id
+     *  next_id                             -> next_id
+     * </pre>
+     *
+     * @param callProcedure 存储过程的调用语句
+     */
+    public static String getProcedureName(String callProcedure) {
+        callProcedure = StringUtils.trim(callProcedure);
+        String sql = Arrays.stream(StringUtils.split(callProcedure, "\n"))
+            .filter(line -> {
+                line = StringUtils.trim(line);
+                return !StringUtils.startsWith(line, "#") && !StringUtils.startsWith(line, "--");
+            })
+            .map(line -> {
+                int start = StringUtils.indexOf(line, "--");
+                if (start >= 0) {
+                    line = line.substring(0, start);
+                }
+                return line;
+            })
+            .collect(Collectors.joining("\n"));
+        int start = StringUtils.indexOf(sql.toLowerCase(), "call ");
+        if (start >= 0) {
+            sql = sql.substring(start + 5);
+        }
+        int end = StringUtils.indexOf(sql, "(");
+        if (end >= 0) {
+            sql = sql.substring(0, end);
+        }
+        return StringUtils.trim(sql);
     }
 }

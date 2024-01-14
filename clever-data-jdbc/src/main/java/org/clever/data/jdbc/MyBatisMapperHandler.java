@@ -28,6 +28,7 @@ import java.lang.reflect.Proxy;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * MyBatis Mapper 动态代理实现
@@ -127,8 +128,8 @@ public class MyBatisMapperHandler implements InvocationHandler {
                 return Mapper.Ops.Call;
             }
         }
-        // returnList returnSet returnArray
-        if (methodInfo.isReturnList() || methodInfo.isReturnSet() || methodInfo.isReturnArray()) {
+        // returnList returnArray
+        if (methodInfo.isReturnList() || methodInfo.isReturnArray()) {
             if (MyBatisMapperUtils.isIntType(methodInfo.getReturnItemType())) {
                 return Mapper.Ops.Update;
             }
@@ -158,7 +159,8 @@ public class MyBatisMapperHandler implements InvocationHandler {
                 }
             } else {
                 // Function<BatchData/RowData, Boolean>
-                if (methodInfo.isCursorUseBatch() && methodInfo.getBatchSize() > 0) {
+                if (methodInfo.isCursorUseBatch()) {
+                    Assert.isTrue(methodInfo.getBatchSize() > 0, "使用游标批量读取数据时, Mapper.batchSize值必须大于0, " + errMsgSuffix);
                     jdbc.queryForCursor(sql, parameter, methodInfo.getBatchSize(), (Function<BatchData, Boolean>) callback, methodInfo.getRename());
                 } else {
                     jdbc.queryForCursor(sql, parameter, (Function<RowData, Boolean>) callback, methodInfo.getRename());
@@ -238,6 +240,16 @@ public class MyBatisMapperHandler implements InvocationHandler {
             }
             return map;
         }
+        // returnPage -> queryByPage
+        if (queryByPage != null) {
+            IPage<?> page;
+            if (methodInfo.getReturnItemType() == null) {
+                page = jdbc.queryByPage(sql, queryByPage, parameter, methodInfo.getRename());
+            } else {
+                page = jdbc.queryByPage(sql, queryByPage, parameter, methodInfo.getReturnItemType());
+            }
+            return page;
+        }
         // returnSimple -> queryCount
         if (methodInfo.isCount()) {
             Assert.isTrue(MyBatisMapperUtils.isIntType(returnType), "count=true时, 返回值必须是整数类型(int/Integer/long/Long), " + errMsgSuffix);
@@ -279,10 +291,19 @@ public class MyBatisMapperHandler implements InvocationHandler {
             return res;
         }
         // returnArray -> batchUpdate
-        if ((methodInfo.isReturnList() || methodInfo.isReturnArray()) && methodInfo.isParamOnlyList()) {
+        if ((methodInfo.isReturnList() || methodInfo.isReturnArray())) {
             Assert.isTrue(MyBatisMapperUtils.isIntType(methodInfo.getReturnItemType()), "Mapper.Ops=Update且return List/Array时, List/Array元素项只能是int/Integer/long/Long类型, " + errMsgSuffix);
+            Assert.isTrue(methodInfo.isParamOnlyList(), "Mapper.Ops=Update且只有一个List参数时, List元素项只能是Map/Entity类型, " + errMsgSuffix);
             int[] res = jdbc.batchUpdate(sql, (List<?>) args[0]);
-            return Arrays.stream(res).mapToObj(num -> conversionService.convert(num, methodInfo.getReturnItemType())).toArray();
+            if (returnType.isAssignableFrom(res.getClass())) {
+                return res;
+            }
+            if (returnType.isAssignableFrom(long[].class)) {
+                return IntStream.of(res).asLongStream().toArray();
+            }
+            return Arrays.stream(res)
+                .mapToObj(num -> conversionService.convert(num, methodInfo.getReturnItemType()))
+                .toArray(size -> (Object[]) Array.newInstance(methodInfo.getReturnItemType(), size));
         }
         throw new IllegalArgumentException("Mapper.Ops=Update时, 返回值只能是Number(int/Integer/long/Long)、List<Number>、Number[]类型, " + errMsgSuffix);
     }
@@ -292,12 +313,12 @@ public class MyBatisMapperHandler implements InvocationHandler {
         final Class<?> returnType = methodInfo.getMethod().getReturnType();
         // returnVoid -> call
         if (methodInfo.isReturnVoid()) {
-            jdbc.call(sql, args);
+            jdbc.call(MyBatisMapperUtils.getProcedureName(sql), args);
             return null;
         }
         // returnMap -> callGet
         if (methodInfo.isReturnMap()) {
-            Map<String, Object> map = jdbc.callGet(sql, parameter);
+            Map<String, Object> map = jdbc.callGet(MyBatisMapperUtils.getProcedureName(sql), args);
             // 应用 Map 类型
             if (methodInfo.getNewMap() != null && !returnType.isAssignableFrom(map.getClass())) {
                 Map<Object, Object> newMap = methodInfo.getNewMap().create();

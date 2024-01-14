@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.support;
 
 import lombok.Getter;
+import lombok.ToString;
 import org.clever.core.mapper.BeanCopyUtils;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.Map;
  * 作者：lizw <br/>
  * 创建时间：2020/07/09 22:38 <br/>
  */
+@ToString
 @Getter
 public class RowData implements Serializable {
     /**

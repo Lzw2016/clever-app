@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.support;
 
 import lombok.Getter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import java.util.Map;
  * 作者：lizw <br/>
  * 创建时间：2020/07/10 08:32 <br/>
  */
+@ToString
 @Getter
 public class InsertResult implements Serializable {
     /**
@@ -36,6 +38,7 @@ public class InsertResult implements Serializable {
     /**
      * Insert时，数据库自动生成的key
      */
+    @ToString
     @Getter
     public static class KeyHolder implements Serializable {
         /**

@@ -2,8 +2,9 @@ package org.clever.data.jdbc;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.model.request.QueryByPage;
+import org.clever.core.model.request.QueryBySort;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.data.jdbc.entity.EntityData;
 import org.clever.data.jdbc.mapper.LocationClass;
 import org.clever.data.jdbc.mapper.Mapper01;
 import org.clever.data.jdbc.mybatis.ClassPathMyBatisMapperSql;
@@ -54,7 +55,16 @@ public class MyBatisTest {
         DataSourceAdmin.addDataSource("def", BaseTest.mysqlConfig());
         DataSourceAdmin.setMyBatisMapperSql(mapperSql);
         try {
-            Mapper01 mapper01 = DaoFactory.getMapper(Mapper01.class);
+            final Mapper01 mapper01 = DaoFactory.getMapper(Mapper01.class);
+            // 排序参数
+            final QueryBySort sort = new QueryBySort();
+            sort.addOrderField("createAt", QueryBySort.DESC);
+            sort.addOrderFieldMapping("createAt", "create_at");
+            // 分页参数
+            final QueryByPage page = new QueryByPage(5, 1);
+            page.addOrderField("createAt", QueryBySort.DESC);
+            page.addOrderFieldMapping("createAt", "create_at");
+
 //            log.info("t01 -> {}", mapper01.t01(1L));
 //            log.info("t02 -> {}", mapper01.t02(2L));
 //            log.info("t03 -> {}", mapper01.t03(3L));
@@ -68,8 +78,42 @@ public class MyBatisTest {
 //            log.info("t09 -> {}", mapper01.t09(1L));
 //            log.info("t10 -> {}", mapper01.t10("a"));
 //            log.info("t11 -> {}", mapper01.t11(1L));
-            EntityData[] t12 = mapper01.t12(1L);
-            log.info("t12 -> {} | {}", t12.getClass().getName(), t12);
+//            EntityData[] t12 = mapper01.t12(1L);
+//            log.info("t12 -> {} | {}", t12.getClass().getName(), t12);
+//            log.info("t14 -> {}", mapper01.t14(1L, sort));
+//            log.info("t15 -> {}", mapper01.t15(1L, page));
+//            log.info("t16 -> {}", mapper01.t16(1L, page));
+//            log.info("t17 -> {}", mapper01.t17(1L, page));
+//            mapper01.t18(1L, batchData -> {
+//                log.info("t18 -> {}", batchData);
+//                return true;
+//            });
+//            mapper01.t19(1L, rowData -> {
+//                log.info("t19 -> {}", rowData);
+//                return true;
+//            });
+//            mapper01.t20(1L, batchData -> log.info("t20 -> {}", batchData));
+//            mapper01.t21(1L, rowData -> log.info("t21 -> {}", rowData));
+//            log.info("t22 -> {}", mapper01.t22(1L, SnowFlake.SNOW_FLAKE.nextId()));
+//            log.info("t23 -> {}", mapper01.t23(1L, SnowFlake.SNOW_FLAKE.nextId()));
+//            log.info("t24 -> {}", mapper01.t24("t24"));
+//            log.info("t25 -> {}", mapper01.t25("t25"));
+//            Map<String, Object> t26_1 = new HashMap<String, Object>() {{
+//                put("str", "t26_1");
+//            }};
+//            Map<String, Object> t26_2 = new HashMap<String, Object>() {{
+//                put("str", "t26_2");
+//            }};
+//            Map<String, Object> t26_3 = new HashMap<String, Object>() {{
+//                put("str", "t26_3");
+//            }};
+//            log.info("t26 -> {}", mapper01.t26(Arrays.asList(t26_1, t26_2, t26_3)));
+//            log.info("t27 -> {}", mapper01.t27(Arrays.asList(t26_1, t26_2, t26_3)));
+//            Long[] t28 = mapper01.t28(Arrays.asList(t26_1, t26_2, t26_3));
+//            log.info("t28 -> {} | {}", t28.getClass(), Arrays.asList(t28));
+//            log.info("t29 -> {}", mapper01.t29(Arrays.asList(EntityData.create("t29_1"), EntityData.create("t29_2"), EntityData.create("t29_3"))));
+            mapper01.t30("mapper");
+            log.info("t31 -> {}", mapper01.t31("mapper", -1L));
         } finally {
             DataSourceAdmin.closeAllDataSource();
         }

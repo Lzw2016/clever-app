@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.support;
 
 import lombok.Getter;
+import lombok.ToString;
 import org.clever.core.mapper.BeanCopyUtils;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2020/07/09 22:08 <br/>
  */
+@ToString
 @Getter
 public class BatchData implements Serializable {
     /**
@@ -73,7 +75,7 @@ public class BatchData implements Serializable {
 
     public <T> List<T> getRowDataList(Class<T> clazz) {
         return Optional.ofNullable(rowDataList).orElse(Collections.emptyList()).stream()
-                .map(row -> BeanCopyUtils.toBean(row, clazz))
-                .collect(Collectors.toList());
+            .map(row -> BeanCopyUtils.toBean(row, clazz))
+            .collect(Collectors.toList());
     }
 }

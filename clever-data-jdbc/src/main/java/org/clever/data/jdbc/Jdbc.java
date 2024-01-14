@@ -2202,9 +2202,12 @@ public class Jdbc extends AbstractDataSource {
      * @param paramMap      参数
      */
     public Map<String, Object> callGet(final String procedureName, Map<String, ?> paramMap) {
+        SqlLoggerUtils.printfProcedure(procedureName, paramMap);
         SimpleJdbcCall jdbcCall = getJdbcCall(procedureName);
         MapSqlParameterSource sqlParameter = new MapSqlParameterSource(paramMap);
-        return jdbcCall.execute(sqlParameter);
+        Map<String, Object> res = jdbcCall.execute(sqlParameter);
+        SqlLoggerUtils.printfProcedureResult(res);
+        return res;
     }
 
     /**
@@ -2214,8 +2217,11 @@ public class Jdbc extends AbstractDataSource {
      * @param params        参数
      */
     public Map<String, Object> callGet(final String procedureName, Object... params) {
+        SqlLoggerUtils.printfProcedure(procedureName, params);
         SimpleJdbcCall jdbcCall = getJdbcCall(procedureName);
-        return jdbcCall.execute(params);
+        Map<String, Object> res = jdbcCall.execute(params);
+        SqlLoggerUtils.printfProcedureResult(res);
+        return res;
     }
 
     /**

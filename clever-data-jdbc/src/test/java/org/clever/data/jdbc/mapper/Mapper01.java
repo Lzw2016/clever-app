@@ -2,6 +2,8 @@ package org.clever.data.jdbc.mapper;
 
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
+import org.clever.core.model.request.page.IPage;
+import org.clever.core.model.request.page.Page;
 import org.clever.data.jdbc.entity.EntityData;
 import org.clever.data.jdbc.mybatis.annotations.Mapper;
 import org.clever.data.jdbc.mybatis.annotations.Param;
@@ -52,38 +54,61 @@ public interface Mapper01 {
     @Mapper(sqlId = "t01")
     EntityData[] t12(Long id);
 
+//    不支持这种
+//    @Mapper(sqlId = "t01")
+//    Map<String, Object>[] t13(Long id);
 
+    @Mapper(sqlId = "t01")
+    List<EntityData> t14(Long id, QueryBySort sort);
 
+    @Mapper(sqlId = "t01")
+    List<EntityData> t15(Long id, QueryByPage page);
 
-    List<EntityData> test(@Param("123") EntityData param, QueryBySort sort, Function<BatchData, Boolean> call_1, String a);
+    @Mapper(sqlId = "t01")
+    IPage<EntityData> t16(Long id, QueryByPage page);
 
-    EntityData test1(QueryByPage page, Function<BatchData, Boolean> call_1, Consumer<RowData> call_2);
+    @Mapper(sqlId = "t01")
+    Page<Map<String, Object>> t17(Long id, QueryByPage page);
 
-    EntityData[] qMany2();
+    @Mapper(sqlId = "t01")
+    void t18(Long id, Function<BatchData, Boolean> callback);
 
-    Collection<Map<String, Object>> qMany3();
+    @Mapper(sqlId = "t01")
+    void t19(Long id, Function<RowData, Boolean> callback);
 
-    Map<String, Object>[] qMany4();
+    @Mapper(sqlId = "t01")
+    void t20(Long id, Consumer<BatchData> callback);
 
-    Collection<EntityData> qSort(QueryBySort sort);
+    @Mapper(sqlId = "t01")
+    void t21(Long id, Consumer<RowData> callback);
 
-    Collection<EntityData> qPage(QueryByPage pagination);
+    @Mapper(ops = Mapper.Ops.Update)
+    int t22(Long id, @Param("lockCount") Long newValue);
 
-    void qCursor(Function<BatchData, Boolean> callback);
+    @Mapper(ops = Mapper.Ops.Update)
+    Long t23(Long id, Long newValue);
 
-    void qCursor2(Consumer<BatchData> consumer);
+    InsertResult t24(String str);
 
-    void qCursor3(Function<RowData, Boolean> callback);
+    @Mapper(sqlId = "t24", ops = Mapper.Ops.Update)
+    long t25(String str);
 
-    void qCursor3(Consumer<RowData> consumer);
+    @Mapper(sqlId = "t24")
+    int[] t26(List<Map<String, Object>> values);
 
-    int update(String sqlId);
+    @Mapper(sqlId = "t24")
+    long[] t27(List<Map<String, Object>> values);
 
-    int[] batchUpdate();
+    @Mapper(sqlId = "t24")
+    Long[] t28(List<Map<String, Object>> values);
 
-    InsertResult insert();
+    int[] t29(List<EntityData> values);
 
-    void call();
+    @Mapper(ops = Mapper.Ops.Call)
+    void t30(String name);
+
+    @Mapper(ops = Mapper.Ops.Call)
+    Map<String, Object> t31(String name, Long size);
 
     Map<String, Object> callGet();
 

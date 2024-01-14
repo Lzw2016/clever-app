@@ -95,11 +95,15 @@ public class MapperMethodInfo {
      */
     private final CreateObject<Map<Object, Object>> newMap;
     /**
+     * 返回类型是IPage
+     */
+    private final boolean returnPage;
+    /**
      * 返回一个简单类型(基本类型或者实体类)
      */
     private final boolean returnSimple;
     /**
-     * returnList、returnSet、returnArray时, 元素项类型
+     * returnList、returnSet、returnArray、returnPage时, 元素项类型
      */
     private final Class<?> returnItemType;
     /**
@@ -164,6 +168,7 @@ public class MapperMethodInfo {
                             boolean returnArray,
                             boolean returnMap,
                             CreateObject<Map<Object, Object>> newMap,
+                            boolean returnPage,
                             boolean returnSimple,
                             Class<?> returnItemType,
                             boolean returnItemMap,
@@ -192,6 +197,7 @@ public class MapperMethodInfo {
         this.returnArray = returnArray;
         this.returnMap = returnMap;
         this.newMap = newMap;
+        this.returnPage = returnPage;
         this.returnSimple = returnSimple;
         this.returnItemType = returnItemType;
         this.returnItemMap = returnItemMap;
