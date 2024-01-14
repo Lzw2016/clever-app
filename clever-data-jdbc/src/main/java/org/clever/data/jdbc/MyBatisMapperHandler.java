@@ -39,7 +39,7 @@ import java.util.stream.IntStream;
 @Slf4j
 public class MyBatisMapperHandler implements InvocationHandler {
     private static final Mapper DEF_CONFIG = (Mapper) Proxy.newProxyInstance(
-        Thread.currentThread().getContextClassLoader(),
+        Mapper.class.getClassLoader(),
         new Class[]{Mapper.class},
         (proxy, method, args) -> method.getDefaultValue()
     );

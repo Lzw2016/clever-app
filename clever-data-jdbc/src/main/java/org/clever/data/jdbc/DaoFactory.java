@@ -133,7 +133,7 @@ public class DaoFactory {
         Collections.reverse(projects);
         MyBatisMapperSql mapperSql = DataSourceAdmin.getMyBatisMapperSql();
         return (T) Proxy.newProxyInstance(
-            Thread.currentThread().getContextClassLoader(),
+            mapper.getClassLoader(),
             new Class[]{mapper},
             new MyBatisMapperHandler(mapper, projects, mapperSql, jdbc)
         );

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.clever.app.mapper.MapperTest;
 import org.clever.core.DateUtils;
 import org.clever.core.http.CookieUtils;
 import org.clever.core.model.request.QueryByPage;
@@ -349,5 +350,13 @@ public class MvcTest {
             .where(queryDSL.likeBoth(taskJobTrigger.namespace, "a%b_c"))
             .fetchOne();
         return R.success(new Object[]{res_1, res_2});
+    }
+
+    private static final MapperTest mapperTest = DaoFactory.getMapper(MapperTest.class);
+
+    public static R<?> t25() {
+        // List<Map<String, Object>> list = mapperTest.q01(1L);
+        List<Map<String, Object>> list = mapperTest.q02("abc");
+        return R.success(list);
     }
 }
