@@ -112,9 +112,9 @@ public class MyBatisMapperUtils {
                 // returnItemType 是否是 Map
                 if (Map.class.isAssignableFrom(returnItemType)) {
                     returnItemMap = true;
-                    if (!Objects.equals(Map.class, returnType)) {
-                        Assert.isTrue(isNewInstance(returnType), "返回值没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                        newItemMap = () -> (Map<Object, Object>) returnType.newInstance();
+                    if (isNewInstance(returnItemType)) {
+                        Class<?> finalCls = returnItemType;
+                        newItemMap = () -> (Map<Object, Object>) finalCls.newInstance();
                     }
                 }
                 // 是否是 queryMetaData

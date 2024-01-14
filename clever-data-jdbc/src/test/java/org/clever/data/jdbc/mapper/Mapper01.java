@@ -54,9 +54,8 @@ public interface Mapper01 {
     @Mapper(sqlId = "t01")
     EntityData[] t12(Long id);
 
-//    不支持这种
-//    @Mapper(sqlId = "t01")
-//    Map<String, Object>[] t13(Long id);
+    @Mapper(sqlId = "t01")
+    Map<String, Object>[] t13(Long id);
 
     @Mapper(sqlId = "t01")
     List<EntityData> t14(Long id, QueryBySort sort);
@@ -109,10 +108,4 @@ public interface Mapper01 {
 
     @Mapper(ops = Mapper.Ops.Call)
     Map<String, Object> t31(String name, Long size);
-
-    Map<String, Object> callGet();
-
-    EntityData callGet2();
-
-    Object callGet3();
 }
