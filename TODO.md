@@ -534,9 +534,14 @@ DAO数据访问层
 
 ### clever-core
 - [OK] jackson配置
+- [OK] 增加了多线程任务编排功能
 - [  ]
 
 ### clever-groovy
+- [  ] 支持动态加载 groovy 代码并执行
+- [  ] 支持直接执行 groovy dsl
+
+已暂停
 
 ### clever-web
 - [OK] ApplyConfigFilter (应用web配置,如: ContentType、CharacterEncoding 等等)
@@ -567,8 +572,13 @@ DAO数据访问层
 - [  ]
 
 ### clever-data-commons
+- [OK] 数据源抽象类型
+- [OK] JDBC事务支持
+- [OK] 统一数据访问层异常处理
 
 ### clever-data-dynamic-sql
+- [OK] 支持类似mybatis的动态SQL模版
+- [OK] 支持自定义函数 `join` 和 `to_date`
 
 ### clever-data-jdbc
 ```
@@ -618,6 +628,9 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 已暂停
 
 ### clever-data-redis
+- [OK] 支持多个 redis 数据源
+- [OK] 支持：单节点、哨兵、群集, 三种模式
+- [OK] 封装了 redis 的常用操作
 
 ### clever-data-rabbitmq
 已暂停
@@ -639,5 +652,19 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 ### clever-task-ext
 未开始
 
+### clever-js-api
+
+
+### clever-js-graaljs
+
+
+### clever-js-nashorn
+
+
+### clever-js-j2v8
+
+
+### clever-js-test
+
+
 ### 第三方库
-asyncTool: 多线程编排工具, https://gitee.com/jd-platform-opensource/asyncTool
