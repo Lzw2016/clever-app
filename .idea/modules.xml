@@ -6,6 +6,8 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-groovy/clever-app.clever-groovy.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-groovy/clever-app.clever-groovy.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.test.iml" />
     </modules>
   </component>
 </project>

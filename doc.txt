@@ -7,8 +7,9 @@ clever-groovy           基于groovy实现web mvc动态调用groovy class(无需
 clever-js-api           JS引擎API层
 clever-js-graaljs       graaljs引擎实现
 clever-js-nashorn       nashorn引擎实现
-clever-js-j2v8          v8引擎实现
+clever-js-javet         v8引擎实现
 clever-js-test          JS引擎测试代码
+clever-js-shim          用于桥接JS与Java的项目
 
 clever-swagger2
 
@@ -24,6 +25,7 @@ clever-data-kafka       实现对kafka操作的轻度封装
 clever-security         实现一套RBAC模型的权限认证功能
 
 clever-boot             应用启动项目,各个组件模块整合示例
+
 
 ### 依赖关系
 

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -30,7 +31,7 @@ public class Pool2Test {
     public void init() {
         // 创建对象池配置
         GenericObjectPoolConfig<TupleOne<Long>> config = new GenericObjectPoolConfig<>();
-        config.setMaxWaitMillis(-1);
+        config.setMaxWait(Duration.ofMillis(-1));
         config.setMaxTotal(32);
         config.setMinIdle(8);
         // 创建对象工厂

@@ -1,8 +1,9 @@
 dependencies {
+    api(project(":clever-js-api"))
     api("org.graalvm.truffle:truffle-api")
     api("org.graalvm.sdk:graal-sdk")
     api("org.graalvm.js:js-scriptengine")
-    api("org.graalvm.js:js")
-    api("org.graalvm.tools:profiler")
-    api("org.graalvm.tools:chromeinspector")
+    runtimeOnly("org.graalvm.js:js")
+    runtimeOnly("org.graalvm.tools:profiler")
+    runtimeOnly("org.graalvm.tools:chromeinspector")
 }

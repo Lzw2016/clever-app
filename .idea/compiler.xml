@@ -8,7 +8,6 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.26/8f8cf0372abf564913e9796623aac4c8ea44025a/lombok-1.18.26.jar" />
         </processorPath>
-        <module name="clever-app.clever-js-j2v8.test" />
         <module name="clever-app.clever-security.test" />
         <module name="clever-app.clever-data-redis.test" />
         <module name="clever-app.clever-js-api.main" />
@@ -17,7 +16,6 @@
         <module name="clever-app.clever-web.main" />
         <module name="clever-app.clever-data-jdbc-meta.main" />
         <module name="clever-app.clever-web.test" />
-        <module name="clever-app.clever-js-j2v8.main" />
         <module name="clever-app.clever-js-nashorn.main" />
         <module name="clever-app.clever-data-commons.test" />
         <module name="clever-app.clever-task-ext.test" />
@@ -26,6 +24,7 @@
         <module name="clever-app.clever-task.test" />
         <module name="clever-app.clever-data-jdbc.test" />
         <module name="clever-app.clever-core.test" />
+        <module name="clever-app.clever-js-javet.test" />
         <module name="clever-app.clever-task.main" />
         <module name="clever-app.clever-core.main" />
         <module name="clever-app.clever-js-graaljs.test" />
@@ -36,6 +35,7 @@
         <module name="clever-app.clever-spring.test" />
         <module name="clever-app.clever-boot.main" />
         <module name="clever-app.clever-js-graaljs.main" />
+        <module name="clever-app.clever-js-javet.main" />
         <module name="clever-app.clever-data-dynamic-sql.main" />
         <module name="clever-app.clever-data-redis.main" />
         <module name="clever-app.clever-security.main" />

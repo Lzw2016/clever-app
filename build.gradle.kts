@@ -20,8 +20,9 @@ object Ver {
     const val kotlinVersion = "1.9.22"
     const val kotlinxCoroutinesVersion = "1.7.3"
     const val groovyVersion = "4.0.17"
-    const val graaljsVersion = "22.3.4"
-    const val j2v8Version = "6.2.1"
+    const val graaljsVersion = "21.3.8"
+    const val nashornVersion = "15.4"
+    const val javetVersion = "3.0.2"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.37"
     const val querydslVersion = "5.0.0"
@@ -68,8 +69,8 @@ allprojects {
 
     repositories {
         mavenLocal()
-        maven(url = "https://maven.aliyun.com/repository/public/")
         mavenCentral()
+        maven(url = "https://maven.aliyun.com/repository/public/")
     }
 
     // 默认是24小时，gradle会检查一次依赖，可以设置每次build都进行检查
@@ -174,14 +175,13 @@ subprojects {
             dependency("org.graalvm.tools:profiler:${Ver.graaljsVersion}")
             dependency("org.graalvm.tools:chromeinspector:${Ver.graaljsVersion}")
             dependency("org.graalvm.compiler:compiler:${Ver.graaljsVersion}")
-            // j2v8
-            dependency("com.eclipsesource.j2v8:j2v8:${Ver.j2v8Version}")
-            dependency("com.eclipsesource.j2v8:j2v8_win32_x86:${Ver.j2v8Version}")
-            dependency("com.eclipsesource.j2v8:j2v8_win32_x86_64:${Ver.j2v8Version}")
-            dependency("com.eclipsesource.j2v8:j2v8_macosx_x86_64:${Ver.j2v8Version}")
-            dependency("com.eclipsesource.j2v8:j2v8_linux_x86_64:${Ver.j2v8Version}")
-            dependency("com.eclipsesource.j2v8:j2v8_android_armv7l:${Ver.j2v8Version}")
-            dependency("com.eclipsesource.j2v8:j2v8_android_x86:${Ver.j2v8Version}")
+            // nashorn
+            dependency("org.openjdk.nashorn:nashorn-core:${Ver.nashornVersion}")
+            // javet
+            dependency("com.caoccao.javet:javet:${Ver.javetVersion}")
+            dependency("com.caoccao.javet:javet-linux-arm64:${Ver.javetVersion}")
+            dependency("com.caoccao.javet:javet-macos:${Ver.javetVersion}")
+            dependency("com.caoccao.javet:javet-android:${Ver.javetVersion}")
             // 验证码
             dependency("com.github.cage:cage:1.0")
             dependency("com.github.axet:kaptcha:0.0.9")
