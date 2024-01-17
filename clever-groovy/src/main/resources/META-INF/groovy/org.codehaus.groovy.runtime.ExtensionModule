@@ -1,0 +1,4 @@
+#moduleName=clever-groovy
+#moduleVersion=1.0.0
+#extensionClasses=org.clever.data.jdbc.ext.QueryDSLExtension,org.clever.data.jdbc.ext.TransactionStatusExtension
+#staticExtensionClasses=

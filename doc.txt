@@ -1,14 +1,14 @@
 ### 模块说明
-clever-spring   参考spring最核心的代码实现：通用类、工具类、注解扩展、类型反射、IO流、应用环境、基础类型转换、Bean类型转换
-clever-core     封装常用的工具类: 序列化反序列化、HTTP、编码解码、ID生成、Bean转换验证、Excel、异常、验证码等等
-clever-web      基于javalin封装servlet web服务器的实现,参考spring mvc部分注解的实现,支持web mvc动态调用java class(包含kotlin或groovy等JVM语言,需要编译器支持)
-clever-groovy   基于groovy实现web mvc动态调用groovy class(无需编译器支持)
+clever-spring           参考spring最核心的代码实现：通用类、工具类、注解扩展、类型反射、IO流、应用环境、基础类型转换、Bean类型转换
+clever-core             封装常用的工具类: 序列化反序列化、HTTP、编码解码、ID生成、Bean转换验证、Excel、异常、验证码等等
+clever-web              基于javalin封装servlet web服务器的实现,参考spring mvc部分注解的实现,支持web mvc动态调用java class(包含kotlin或groovy等JVM语言,需要编译器支持)
+clever-groovy           基于groovy实现web mvc动态调用groovy class(无需编译器支持)
 
-clever-js-api       JS引擎API层
-clever-js-graaljs   graaljs引擎实现
-clever-js-nashorn   nashorn引擎实现
-clever-js-j2v8      v8引擎实现
-clever-js-test      JS引擎测试代码
+clever-js-api           JS引擎API层
+clever-js-graaljs       graaljs引擎实现
+clever-js-nashorn       nashorn引擎实现
+clever-js-j2v8          v8引擎实现
+clever-js-test          JS引擎测试代码
 
 clever-swagger2
 
@@ -21,9 +21,9 @@ clever-data-rabbitmq    实现对rabbitmq操作的轻度封装
 clever-data-rocketmq    实现对rocketmq操作的轻度封装
 clever-data-kafka       实现对kafka操作的轻度封装
 
-clever-security     实现一套RBAC模型的权限认证功能
+clever-security         实现一套RBAC模型的权限认证功能
 
-clever-boot         应用启动项目,各个组件模块整合示例
+clever-boot             应用启动项目,各个组件模块整合示例
 
 ### 依赖关系
 
@@ -115,7 +115,7 @@ Javalin app = Javalin.create().events(event -> {
     event.wsHandlerAdded(wsHandlerMetaInfo -> { ... });
 });
 app.start() // serverStarting -> (serverStarted || serverStartFailed)
-app.stop() // serverStopping -> serverStopped
+app.stop()  // serverStopping -> serverStopped
 ###---
 请求生命周期
 Javalin#before              // runs first, can throw exception (which will skip any endpoint handlers)
