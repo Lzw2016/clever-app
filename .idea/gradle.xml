@@ -21,6 +21,10 @@
             <option value="$PROJECT_DIR$/clever-data-rabbitmq" />
             <option value="$PROJECT_DIR$/clever-data-redis" />
             <option value="$PROJECT_DIR$/clever-groovy" />
+            <option value="$PROJECT_DIR$/clever-js-api" />
+            <option value="$PROJECT_DIR$/clever-js-graaljs" />
+            <option value="$PROJECT_DIR$/clever-js-j2v8" />
+            <option value="$PROJECT_DIR$/clever-js-nashorn" />
             <option value="$PROJECT_DIR$/clever-security" />
             <option value="$PROJECT_DIR$/clever-spring" />
             <option value="$PROJECT_DIR$/clever-task" />

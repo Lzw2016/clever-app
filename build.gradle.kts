@@ -20,6 +20,8 @@ object Ver {
     const val kotlinVersion = "1.9.22"
     const val kotlinxCoroutinesVersion = "1.7.3"
     const val groovyVersion = "4.0.17"
+    const val graaljsVersion = "22.3.4"
+    const val j2v8Version = "6.2.1"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.37"
     const val querydslVersion = "5.0.0"
@@ -164,6 +166,22 @@ subprojects {
             // groovy
             dependency("org.apache.groovy:groovy-all:${Ver.groovyVersion}")
             dependency("org.apache.groovy:groovy:${Ver.groovyVersion}")
+            // graaljs
+            dependency("org.graalvm.truffle:truffle-api:${Ver.graaljsVersion}")
+            dependency("org.graalvm.sdk:graal-sdk:${Ver.graaljsVersion}")
+            dependency("org.graalvm.js:js-scriptengine:${Ver.graaljsVersion}")
+            dependency("org.graalvm.js:js:${Ver.graaljsVersion}")
+            dependency("org.graalvm.tools:profiler:${Ver.graaljsVersion}")
+            dependency("org.graalvm.tools:chromeinspector:${Ver.graaljsVersion}")
+            dependency("org.graalvm.compiler:compiler:${Ver.graaljsVersion}")
+            // j2v8
+            dependency("com.eclipsesource.j2v8:j2v8:${Ver.j2v8Version}")
+            dependency("com.eclipsesource.j2v8:j2v8_win32_x86:${Ver.j2v8Version}")
+            dependency("com.eclipsesource.j2v8:j2v8_win32_x86_64:${Ver.j2v8Version}")
+            dependency("com.eclipsesource.j2v8:j2v8_macosx_x86_64:${Ver.j2v8Version}")
+            dependency("com.eclipsesource.j2v8:j2v8_linux_x86_64:${Ver.j2v8Version}")
+            dependency("com.eclipsesource.j2v8:j2v8_android_armv7l:${Ver.j2v8Version}")
+            dependency("com.eclipsesource.j2v8:j2v8_android_x86:${Ver.j2v8Version}")
             // 验证码
             dependency("com.github.cage:cage:1.0")
             dependency("com.github.axet:kaptcha:0.0.9")
