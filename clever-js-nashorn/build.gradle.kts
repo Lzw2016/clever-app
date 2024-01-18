@@ -1,4 +1,4 @@
 dependencies {
     api(project(":clever-js-api"))
-    api("org.openjdk.nashorn:nashorn-core")
+    // api("org.openjdk.nashorn:nashorn-core")
 }
