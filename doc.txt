@@ -5,7 +5,7 @@ clever-web              基于javalin封装servlet web服务器的实现,参考s
 clever-groovy           基于groovy实现web mvc动态调用groovy class(无需编译器支持)
 
 clever-js-api           JS引擎API层
-clever-js-graaljs       graaljs引擎实现
+clever-js-graaljs       graaljs引擎实现(推荐)
 clever-js-nashorn       nashorn引擎实现
 clever-js-javet         v8引擎实现
 clever-js-test          JS引擎测试代码

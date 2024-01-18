@@ -656,12 +656,23 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 
 
 ### clever-js-graaljs
-
+```
+// graaljs最新使用方式(更推荐使用)
+dependency("org.graalvm.polyglot:polyglot:23.1.2")
+dependency("org.graalvm.polyglot:js:23.1.2")
+dependency("org.graalvm.polyglot:js-community:23.1.2")
+dependency("org.graalvm.polyglot:inspect:23.1.2")
+dependency("org.graalvm.polyglot:inspect-community:23.1.2")
+dependency("org.graalvm.polyglot:profiler:23.1.2")
+dependency("org.graalvm.polyglot:profiler-community:23.1.2")
+dependency("org.graalvm.polyglot:tools:23.1.2")
+dependency("org.graalvm.polyglot:tools-community:23.1.2")
+```
 
 ### clever-js-nashorn
 
 
-### clever-js-j2v8
+### clever-js-javet
 
 
 ### clever-js-test
