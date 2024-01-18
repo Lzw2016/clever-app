@@ -16,7 +16,7 @@ import java.math.BigDecimal;
  * 创建时间：2020/03/28 12:17 <br/>
  */
 @Slf4j
-public class GraalJsTest01 {
+public class GraalJs01Test {
 
     private Context context;
 

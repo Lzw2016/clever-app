@@ -33,12 +33,13 @@ public class JacksonMapperSupport {
         module.addSerializer(Value.class, ValueSerializer.instance);
         module.addSerializer(TruffleObject.class, ToStringSerializer.instance);
         module.addSerializer(Proxy.class, HostWrapperSerializer.instance);
-        try {
-            Class<?> clazz = Class.forName("com.oracle.truffle.polyglot.HostWrapper");
-            module.addSerializer(clazz, HostWrapperSerializer.instance);
-        } catch (ClassNotFoundException e) {
-            log.warn("类型com.oracle.truffle.polyglot.HostWrapper加载失败", e);
-        }
+        // 新版本 graaljs 不需要
+        // try {
+        //     Class<?> clazz = Class.forName("com.oracle.truffle.polyglot.HostWrapper");
+        //     module.addSerializer(clazz, HostWrapperSerializer.instance);
+        // } catch (ClassNotFoundException e) {
+        //     log.warn("类型com.oracle.truffle.polyglot.HostWrapper加载失败", e);
+        // }
         JacksonMapper.getInstance().getMapper().registerModules(module);
     }
 

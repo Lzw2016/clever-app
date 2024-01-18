@@ -10,8 +10,9 @@ import org.junit.jupiter.api.Test;
  * 创建时间：2020/07/21 10:06 <br/>
  */
 @Slf4j
-public class GraalJsTest02 {
+public class GraalJs02Test {
 
+    @SuppressWarnings({"Java8MapForEach", "CodeBlock2Expr"})
     @Test
     public void t01() {
         Context context = Context.newBuilder(GraalConstant.Js_Language_Id)

@@ -25,7 +25,7 @@ public class JavaInteropTest {
 
     @BeforeEach
     public void before1() {
-        // clever-hinny-graaljs
+        // clever-js-graaljs
         log.info("### rootFolder -> {}", rootFolder);
         Engine engine = Engine.newBuilder()
             .useSystemProperties(true)
@@ -40,13 +40,13 @@ public class JavaInteropTest {
 
     @Test
     public void t01() throws Exception {
-        ScriptObject<?> scriptObject = engineInstance.require("/java-interop");
+        ScriptObject<?> scriptObject = engineInstance.require("/java-interop01");
         log.info("# -------> {}", scriptObject);
     }
 
     @Test
     public void t02() throws Exception {
-        ScriptObject<?> scriptObject = engineInstance.require("/java-interop2");
+        ScriptObject<?> scriptObject = engineInstance.require("/java-interop02");
         log.info("# -------> {}", scriptObject);
     }
 }

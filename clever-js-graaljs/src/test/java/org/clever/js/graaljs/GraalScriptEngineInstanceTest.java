@@ -21,7 +21,7 @@ public class GraalScriptEngineInstanceTest {
 
     @Test
     public void t01() throws Exception {
-        String basePath = new File("../clever-hinny-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);
@@ -47,11 +47,12 @@ public class GraalScriptEngineInstanceTest {
         log.info("### getMembers       -> {}", scriptObject.getMembers());
         log.info("### size             -> {}", scriptObject.size());
         log.info("### callMember       -> {}", scriptObject.callMember("fuc", 1, 2));
+        engineInstance.close();
     }
 
     @Test
     public void t02() throws Exception {
-        String basePath = new File("../clever-hinny-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);
@@ -76,11 +77,12 @@ public class GraalScriptEngineInstanceTest {
 
         scriptObject = engineInstance.require("/01基本使用/03.js");
         log.info("### getMemberNames   -> {}", scriptObject.getMemberNames());
+        engineInstance.close();
     }
 
     @Test
     public void t03() throws Exception {
-        String basePath = new File("../clever-hinny-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);
@@ -91,6 +93,7 @@ public class GraalScriptEngineInstanceTest {
         ScriptEngineInstance<?, ?> engineInstance = GraalScriptEngineInstance.Builder.create(engine, rootFolder).build();
         ScriptObject<?> scriptObject = engineInstance.require("/02循环依赖/main");
         log.info("### getMemberNames   -> {}", scriptObject.getMemberNames());
+        engineInstance.close();
 
         // 参考 http://nodejs.cn/api/modules.html#modules_the_module_wrapper
         // main 开始
@@ -105,7 +108,7 @@ public class GraalScriptEngineInstanceTest {
 
     @Test
     public void t04() throws Exception {
-        String basePath = new File("../clever-hinny-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);
@@ -121,5 +124,6 @@ public class GraalScriptEngineInstanceTest {
         scriptObject = engineInstance.require("/03使用npm包/src/01");
         log.info("### getMemberNames   -> {}", scriptObject.getMemberNames());
         log.info("### callMember       -> {}", scriptObject.callMember("trim", "   abc  "));
+        engineInstance.close();
     }
 }

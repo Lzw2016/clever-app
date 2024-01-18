@@ -23,7 +23,7 @@ public class MultiThreadTest {
 
     @BeforeEach
     public void before() {
-        // clever-hinny-graaljs
+        // clever-js-graaljs
         log.info("### rootFolder -> {}", rootFolder);
         Engine engine = Engine.newBuilder()
             .useSystemProperties(true)

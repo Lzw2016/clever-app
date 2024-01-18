@@ -9,7 +9,7 @@ clever-js-graaljs       graaljs引擎实现
 clever-js-nashorn       nashorn引擎实现
 clever-js-javet         v8引擎实现
 clever-js-test          JS引擎测试代码
-clever-js-shim          用于桥接JS与Java的项目
+clever-js-shim          用于桥接Java与JS组件
 
 clever-swagger2
 

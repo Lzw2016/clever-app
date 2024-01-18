@@ -157,31 +157,33 @@ public class JavaInterop {
     public void setMap(Map<String, Object> map) {
         log.info("# map -> {}", map);
         map.forEach((s, o) -> {
-            log.info("# map -> {}={} | {}", s, o, o.getClass());
+            log.info("# map.item -> {}={} | {}", s, o, o.getClass());
         });
-        // map -> str=aaa | class java.lang.String
-        // map -> int=123 | class java.lang.Integer
-        // map -> b=false | class java.lang.Boolean
-        // map -> d=123.456 | class java.lang.Double
+        // map.item -> str=aaa | class java.lang.String
+        // map.item -> int=123 | class java.lang.Integer
+        // map.item -> b=false | class java.lang.Boolean
+        // map.item -> d=123.456 | class java.lang.Double
     }
 
     public void setValue(Value value) {
         log.info("# value -> {}", value);
-        value.getMemberKeys().forEach(s -> {
-            log.info("# value -> {}={} | {}", s, value.getMember(s), value.getMember(s).getClass());
-        });
-        // value -> str=aaa | class org.graalvm.polyglot.Value
-        // value -> int=123 | class org.graalvm.polyglot.Value
-        // value -> b=false | class org.graalvm.polyglot.Value
-        // value -> d=123.456 | class org.graalvm.polyglot.Value
+        if (value.hasArrayElements()) {
+            for (int i = 0; i < value.getArraySize(); i++) {
+                Value item = value.getArrayElement(i);
+                log.info("# value.item -> {} | {}", item, item.getClass());
+            }
+        }
+        // value.item -> {boolean=false, string=aaa, double=1.3, char=A, float=1.1, int=1, long=123} | class org.graalvm.polyglot.Value
+        // value.item -> {boolean=false, string=aaa, double=1.3, char=A, float=1.1, int=1, long=123} | class org.graalvm.polyglot.Value
+        // value.item -> {boolean=false, string=aaa, double=1.3, char=A, float=1.1, int=1, long=123} | class org.graalvm.polyglot.Value
     }
 
     public void setTestBean(TestBean bean) {
         log.info("# bean -> {}", bean);
     }
 
-    public List<ProxyObject> getProxyMap3() {
-        List<ProxyObject> list = new ArrayList<>();
+    public List<Object> getProxyMap3() {
+        List<Object> list = new ArrayList<>();
         list.add(new HashMapProxy(getMap()));
         list.add(new HashMapProxy(getMap()));
         list.add(new HashMapProxy(getMap()));

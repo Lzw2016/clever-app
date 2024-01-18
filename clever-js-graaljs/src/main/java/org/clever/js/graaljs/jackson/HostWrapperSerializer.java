@@ -16,6 +16,7 @@ import java.util.*;
  * 创建时间：2020/08/26 18:37 <br/>
  */
 public class HostWrapperSerializer extends JsonSerializer<Object> {
+    // TODO 这里需要根据 graaljs 版本调整
     public static final String FunctionProxyHandler_Class = "com.oracle.truffle.polyglot.FunctionProxyHandler";
     public static final String ObjectProxyHandler_Class = "com.oracle.truffle.polyglot.ObjectProxyHandler";
     public static final String PolyglotFunction_Class = "com.oracle.truffle.polyglot.PolyglotFunction";

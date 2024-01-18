@@ -1,4 +1,4 @@
-var JavaInterop = Java.type("org.clever.hinny.test.graaljs.JavaInterop").Instance;
+var JavaInterop = Java.type("org.clever.js.graaljs.JavaInterop").Instance;
 
 console.log("----------------------------------------------------------------------------------------")
 console.log("# -> getByte:      | ", JavaInterop.getByte());

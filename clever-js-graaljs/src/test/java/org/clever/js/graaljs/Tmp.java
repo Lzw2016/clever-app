@@ -39,6 +39,7 @@ public class Tmp {
         Value res = function.execute();
         log.info("### res -> {}", res.execute());
         context.getBindings(GraalConstant.Js_Language_Id).putMember("x", 100);
+        context.close();
     }
 
     @Test
@@ -66,6 +67,7 @@ public class Tmp {
             log.info("### -> {}", atomicInteger.get());
         }
         log.info("### end");
+        context.close();
     }
 
     @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
@@ -87,6 +89,7 @@ public class Tmp {
     public void t04() {
         Context context_1 = Context.newBuilder(GraalConstant.Js_Language_Id).build();
         Value value = context_1.eval(GraalConstant.Js_Language_Id, "new Date()");
+        context_1.close();
         Context context_2 = Context.newBuilder(GraalConstant.Js_Language_Id).build();
         Value fuc = context_2.eval(GraalConstant.Js_Language_Id, "(function(obj) { return JSON.stringify(obj); });");
         try {
@@ -98,6 +101,7 @@ public class Tmp {
         value = context_2.eval(GraalConstant.Js_Language_Id, "new Date()");
         Object object = fuc.execute(value);
         log.info("# -> {}", object);
+        context_2.close();
     }
 
     @Test
@@ -142,6 +146,7 @@ public class Tmp {
         log.info("## -> {}", context.asValue(l));
         log.info("## -> {}", context.asValue(m));
         log.info("## -> {}", context.asValue(m).getMemberKeys().size()); // size=0
+        context.close();
     }
 
     @Test
@@ -187,6 +192,7 @@ public class Tmp {
         context.getBindings(GraalConstant.Js_Language_Id).putMember("c", 11 * 10);
         Value value = context.eval(GraalConstant.Js_Language_Id, "a * b >= c");
         log.info("# -> {}", value);
+        context.close();
     }
 
     @SneakyThrows
@@ -194,7 +200,6 @@ public class Tmp {
     public void t09() {
 //        Instrument.getOptions();
 //        Language.getOptions()
-
         Engine engine = Engine.newBuilder().build();
         for (OptionDescriptor option : engine.getOptions()) {
             log.info("{} -> {}", option.getName(), option.getHelp());
