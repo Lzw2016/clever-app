@@ -1,8 +1,8 @@
-package org.clever.js.graaljs.internal.support;
+package org.clever.js.graaljs.support;
 
 import com.oracle.truffle.api.interop.TruffleObject;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.js.api.internal.support.ObjectToString;
+import org.clever.js.api.support.ObjectToString;
 import org.clever.js.graaljs.jackson.HostWrapperSerializer;
 import org.clever.js.graaljs.jackson.JacksonMapperSupport;
 import org.graalvm.polyglot.Value;

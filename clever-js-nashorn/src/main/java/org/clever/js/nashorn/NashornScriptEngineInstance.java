@@ -9,7 +9,7 @@ import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.internal.LoggerConsole;
 import org.clever.js.nashorn.internal.NashornLoggerFactory;
-import org.clever.js.nashorn.internal.support.NashornObjectToString;
+import org.clever.js.nashorn.support.NashornObjectToString;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;

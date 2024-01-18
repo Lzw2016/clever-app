@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 @Slf4j
 public class JavaInteropTest {
-    private final Folder rootFolder = FileSystemFolder.createRootPath(new File("src/test/resources").getAbsolutePath());
+    private final Folder rootFolder = FileSystemFolder.createRootPath(new File("../clever-js-api/src/test/resources/graaljs").getAbsolutePath());
 
     private ScriptEngineInstance<?, ?> engineInstance;
 

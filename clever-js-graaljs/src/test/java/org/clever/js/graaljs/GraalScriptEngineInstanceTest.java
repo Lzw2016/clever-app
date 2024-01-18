@@ -21,7 +21,7 @@ public class GraalScriptEngineInstanceTest {
 
     @Test
     public void t01() throws Exception {
-        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-api/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);
@@ -52,7 +52,7 @@ public class GraalScriptEngineInstanceTest {
 
     @Test
     public void t02() throws Exception {
-        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-api/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);
@@ -82,7 +82,7 @@ public class GraalScriptEngineInstanceTest {
 
     @Test
     public void t03() throws Exception {
-        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-api/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);
@@ -108,7 +108,7 @@ public class GraalScriptEngineInstanceTest {
 
     @Test
     public void t04() throws Exception {
-        String basePath = new File("../clever-js-nashorn/src/test/resources/javascript").getAbsolutePath();
+        String basePath = new File("../clever-js-api/src/test/resources/javascript").getAbsolutePath();
         log.info("### basePath   -> {}", basePath);
         Folder rootFolder = FileSystemFolder.createRootPath(basePath);
         log.info("### rootFolder -> {}", rootFolder);

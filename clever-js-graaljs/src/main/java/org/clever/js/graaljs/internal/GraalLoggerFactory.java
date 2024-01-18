@@ -3,7 +3,7 @@ package org.clever.js.graaljs.internal;
 import lombok.SneakyThrows;
 import org.clever.js.api.internal.Logger;
 import org.clever.js.api.internal.LoggerFactory;
-import org.clever.js.graaljs.internal.support.GraalObjectToString;
+import org.clever.js.graaljs.support.GraalObjectToString;
 
 /**
  * 作者：lizw <br/>

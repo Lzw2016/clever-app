@@ -3,7 +3,7 @@ package org.clever.js.nashorn.internal;
 import lombok.SneakyThrows;
 import org.clever.js.api.internal.Logger;
 import org.clever.js.api.internal.LoggerFactory;
-import org.clever.js.nashorn.internal.support.NashornObjectToString;
+import org.clever.js.nashorn.support.NashornObjectToString;
 
 /**
  * 作者：lizw <br/>

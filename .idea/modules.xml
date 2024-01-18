@@ -8,6 +8,8 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-javet/clever-app.clever-js-javet.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-javet/clever-app.clever-js-javet.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-javet/clever-app.clever-js-javet.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-javet/clever-app.clever-js-javet.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.test.iml" />
     </modules>

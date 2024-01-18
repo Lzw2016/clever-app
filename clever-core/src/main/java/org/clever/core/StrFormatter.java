@@ -78,7 +78,6 @@ public class StrFormatter {
         return sb.toString();
     }
 
-
     /**
      * 是否空白符<br>
      * 空白符包括空格、制表符、全角空格和不间断空格<br>

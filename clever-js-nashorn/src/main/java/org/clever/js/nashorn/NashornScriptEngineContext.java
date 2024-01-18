@@ -10,10 +10,10 @@ import org.clever.js.api.module.MemoryModuleCache;
 import org.clever.js.api.module.ModuleCache;
 import org.clever.js.api.require.Require;
 import org.clever.js.nashorn.internal.NashornLoggerFactory;
-import org.clever.js.nashorn.internal.support.NashornObjectToString;
 import org.clever.js.nashorn.module.NashornCompileModule;
 import org.clever.js.nashorn.module.NashornModule;
 import org.clever.js.nashorn.require.NashornRequire;
+import org.clever.js.nashorn.support.NashornObjectToString;
 import org.clever.js.nashorn.utils.ScriptEngineUtils;
 
 import java.util.Collections;

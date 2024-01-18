@@ -45,7 +45,7 @@ public class EngineInstancePool2Test {
         config.setMaxTotal(8);
         config.setMinIdle(2);
         // 创建对象工厂
-        Folder rootFolder = FileSystemFolder.createRootPath(new File("src/test/resources").getAbsolutePath());
+        Folder rootFolder = FileSystemFolder.createRootPath(new File("../clever-js-api/src/test/resources").getAbsolutePath());
         Engine engine = Engine.newBuilder()
                 .useSystemProperties(true)
                 .build();
