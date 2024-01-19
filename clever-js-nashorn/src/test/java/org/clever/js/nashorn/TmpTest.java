@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 创建时间：2020/07/24 22:07 <br/>
  */
 @Slf4j
-public class Tmp {
+public class TmpTest {
     @Test
     public void t01() throws InterruptedException {
         ExecutorService executorService = Executors.newSingleThreadExecutor();

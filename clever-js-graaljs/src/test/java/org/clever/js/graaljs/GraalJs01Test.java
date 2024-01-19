@@ -1,6 +1,7 @@
 package org.clever.js.graaljs;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
@@ -8,8 +9,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 作者：lizw <br/>
@@ -42,13 +45,17 @@ public class GraalJs01Test {
         log.info("sum = [{}]", sum);
     }
 
+    public static final int WARM_UP = 15;
+    public static final int ITERATIONS = 30;
+
     @Test
     public void t1() throws IOException {
-        Source source = Source.newBuilder("js", "utf-8", "SOURCE_1.js").content(JsSource.SOURCE_1).build();
+        String content = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance01.js"), StandardCharsets.UTF_8);
+        Source source = Source.newBuilder("js", "utf-8", "SOURCE_1.js").content(content).build();
         context.eval(source);
         log.info("warming up ...");
         boolean first = true;
-        for (int i = 0; i < JsSource.WARM_UP; i++) {
+        for (int i = 0; i < WARM_UP; i++) {
             long start = System.currentTimeMillis();
             context.getBindings("js").getMember("primesMain").execute();
             long end = System.currentTimeMillis();
@@ -58,7 +65,7 @@ public class GraalJs01Test {
             }
         }
         long took = 0;
-        for (int i = 0; i < JsSource.ITERATIONS; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
             long start = System.currentTimeMillis();
             context.getBindings("js").getMember("primesMain").execute();
             took += System.currentTimeMillis() - start;
@@ -68,13 +75,14 @@ public class GraalJs01Test {
 
     @Test
     public void t2() throws IOException {
-        Source source = Source.newBuilder("js", "utf-8", "SOURCE_2.js").content(JsSource.SOURCE_2).build();
+        String content = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance02.js"), StandardCharsets.UTF_8);
+        Source source = Source.newBuilder("js", "utf-8", "SOURCE_2.js").content(content).build();
         context.eval(source);
         final int a = 10000;
         final int b = 10000;
         log.info("warming up ...");
         boolean first = true;
-        for (int i = 0; i < JsSource.WARM_UP; i++) {
+        for (int i = 0; i < WARM_UP; i++) {
             long start = System.currentTimeMillis();
             Object sum = context.getBindings("js").getMember("test").execute(a, b);
             long end = System.currentTimeMillis();
@@ -84,7 +92,7 @@ public class GraalJs01Test {
             }
         }
         long took = 0;
-        for (int i = 0; i < JsSource.ITERATIONS; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
             long start = System.currentTimeMillis();
             Object sum = context.getBindings("js").getMember("test").execute(a, b);
             took += System.currentTimeMillis() - start;
@@ -94,11 +102,12 @@ public class GraalJs01Test {
 
     @Test
     public void t3() throws IOException {
-        Source source = Source.newBuilder("js", "utf-8", "SOURCE_3.js").content(JsSource.SOURCE_3).build();
+        String content = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance03.js"), StandardCharsets.UTF_8);
+        Source source = Source.newBuilder("js", "utf-8", "SOURCE_3.js").content(content).build();
         context.eval(source);
         log.info("warming up ...");
         boolean first = true;
-        for (int i = 0; i < JsSource.WARM_UP; i++) {
+        for (int i = 0; i < WARM_UP; i++) {
             long start = System.currentTimeMillis();
             context.getBindings("js").getMember("test").execute();
             long end = System.currentTimeMillis();
@@ -108,7 +117,7 @@ public class GraalJs01Test {
             }
         }
         long took = 0;
-        for (int i = 0; i < JsSource.ITERATIONS; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
             long start = System.currentTimeMillis();
             Object sum = context.getBindings("js").getMember("test").execute();
             took += System.currentTimeMillis() - start;

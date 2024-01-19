@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 创建时间：2020/07/25 14:18 <br/>
  */
 @Slf4j
-public class Tmp {
+public class TmpTest {
     @Test
     public void t01() {
         // Engine engine = Engine.create();
