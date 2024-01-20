@@ -7,7 +7,7 @@ import com.caoccao.javet.values.reference.IV8ValueFunction;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.clever.js.javet.support.JavetLogger;
+import org.clever.js.javet.support.V8Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
  * 创建时间：2024/01/19 14:59 <br/>
  */
 @Slf4j
-public class Javet01Test {
+public class V801Test {
     public static final int WARM_UP = 15;
     public static final int ITERATIONS = 30;
 
@@ -28,7 +28,7 @@ public class Javet01Test {
     public void t01() {
         String source = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance01.js"), StandardCharsets.UTF_8);
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-        v8Runtime.setLogger(JavetLogger.Instance);
+        v8Runtime.setLogger(V8Logger.Instance);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
         IV8ValueFunction function = v8Runtime.getGlobalObject().get("primesMain");
@@ -59,7 +59,7 @@ public class Javet01Test {
     public void t02() {
         String source = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance02.js"), StandardCharsets.UTF_8);
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-        v8Runtime.setLogger(JavetLogger.Instance);
+        v8Runtime.setLogger(V8Logger.Instance);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
         IV8ValueFunction function = v8Runtime.getGlobalObject().get("test");
@@ -93,7 +93,7 @@ public class Javet01Test {
     public void t03() {
         String source = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance03.js"), StandardCharsets.UTF_8);
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-        v8Runtime.setLogger(JavetLogger.Instance);
+        v8Runtime.setLogger(V8Logger.Instance);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
         IV8ValueFunction function = v8Runtime.getGlobalObject().get("test");

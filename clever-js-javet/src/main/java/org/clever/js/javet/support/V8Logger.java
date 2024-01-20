@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
  * 作者：lizw <br/>
  * 创建时间：2024/01/19 11:48 <br/>
  */
-public class JavetLogger implements IJavetLogger {
-    public static final JavetLogger Instance = new JavetLogger(JavetLogger.class.getName());
+public class V8Logger implements IJavetLogger {
+    public static final V8Logger Instance = new V8Logger(V8Logger.class.getName());
     /**
      * 日志记录器
      */
     protected final org.slf4j.Logger logger;
 
-    public JavetLogger(String name) {
+    public V8Logger(String name) {
         logger = LoggerFactory.getLogger(StringUtils.trimToEmpty(name));
     }
 

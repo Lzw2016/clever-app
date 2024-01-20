@@ -18,7 +18,7 @@ public interface CompileModule<T> {
     /**
      * 编译 JavaScript Module
      *
-     * @return 返回script引擎对象
+     * @return 返回script对象
      */
     T compileJavaScriptModule(Folder path) throws Exception;
 }
