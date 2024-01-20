@@ -653,7 +653,7 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 未开始
 
 ### clever-js-api
-
+- [OK] 抽象了 js 引擎的使用
 
 ### clever-js-graaljs
 ```
@@ -668,14 +668,20 @@ dependency("org.graalvm.polyglot:profiler-community:23.1.2")
 dependency("org.graalvm.polyglot:tools:23.1.2")
 dependency("org.graalvm.polyglot:tools-community:23.1.2")
 ```
+- [OK] 基本实现 clever-js-api
+- [  ] 需要解决 js 与 java 相互交互的问题
+- [  ] 需要升级 graaljs 最新版本
 
 ### clever-js-nashorn
-
+- [OK] 基本实现 clever-js-api
+性能最差、与java语言交互能力太弱 不推荐使用，暂停维护
 
 ### clever-js-javet
+- [OK] 基本实现 clever-js-api
+- [  ] 需要解决内存泄漏问题
+- [  ] 需要解决 js 与 java 相互交互的问题
 
-
-### clever-js-test
+### clever-js-shim
 
 
 ### 第三方库
