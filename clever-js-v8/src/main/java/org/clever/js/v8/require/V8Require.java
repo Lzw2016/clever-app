@@ -1,4 +1,4 @@
-package org.clever.js.javet.require;
+package org.clever.js.v8.require;
 
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.interop.callback.JavetCallbackContext;
@@ -11,8 +11,8 @@ import org.clever.js.api.folder.Folder;
 import org.clever.js.api.module.Module;
 import org.clever.js.api.require.AbstractRequire;
 import org.clever.js.api.require.Require;
-import org.clever.js.javet.module.V8Module;
-import org.clever.js.javet.utils.ScriptEngineUtils;
+import org.clever.js.v8.module.V8Module;
+import org.clever.js.v8.utils.ScriptEngineUtils;
 import org.clever.util.Assert;
 
 /**

@@ -1,4 +1,4 @@
-package org.clever.js.javet;
+package org.clever.js.v8;
 
 import com.caoccao.javet.exceptions.JavetException;
 import com.caoccao.javet.interfaces.IJavetBiConsumer;
@@ -14,7 +14,7 @@ import com.caoccao.javet.values.reference.V8ValueFunction;
 import com.caoccao.javet.values.reference.V8ValueObject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.js.javet.support.V8Logger;
+import org.clever.js.v8.support.V8Logger;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

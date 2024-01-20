@@ -1,4 +1,4 @@
-package org.clever.js.javet.support;
+package org.clever.js.v8.support;
 
 import com.caoccao.javet.interfaces.IJavetLogger;
 import org.apache.commons.lang3.StringUtils;

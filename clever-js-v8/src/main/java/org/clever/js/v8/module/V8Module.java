@@ -1,4 +1,4 @@
-package org.clever.js.javet.module;
+package org.clever.js.v8.module;
 
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.values.reference.IV8ValueObject;
@@ -10,8 +10,8 @@ import org.clever.js.api.ScriptObject;
 import org.clever.js.api.module.AbstractModule;
 import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
-import org.clever.js.javet.V8ScriptObject;
-import org.clever.js.javet.utils.ScriptEngineUtils;
+import org.clever.js.v8.V8ScriptObject;
+import org.clever.js.v8.utils.ScriptEngineUtils;
 
 /**
  * 作者：lizw <br/>

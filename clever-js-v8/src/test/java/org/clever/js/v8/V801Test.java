@@ -1,4 +1,4 @@
-package org.clever.js.javet;
+package org.clever.js.v8;
 
 import com.caoccao.javet.interop.V8Host;
 import com.caoccao.javet.interop.V8Runtime;
@@ -7,7 +7,7 @@ import com.caoccao.javet.values.reference.IV8ValueFunction;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.clever.js.javet.support.V8Logger;
+import org.clever.js.v8.support.V8Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

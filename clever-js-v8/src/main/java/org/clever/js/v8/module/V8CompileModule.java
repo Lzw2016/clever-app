@@ -1,4 +1,4 @@
-package org.clever.js.javet.module;
+package org.clever.js.v8.module;
 
 
 import com.caoccao.javet.interop.V8Runtime;
@@ -9,7 +9,7 @@ import org.clever.js.api.ScriptEngineContext;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.folder.ReadFileContentException;
 import org.clever.js.api.module.AbstractCompileModule;
-import org.clever.js.javet.utils.ScriptEngineUtils;
+import org.clever.js.v8.utils.ScriptEngineUtils;
 
 /**
  * 作者：lizw <br/>

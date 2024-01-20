@@ -25,8 +25,9 @@
         <module name="clever-app.clever-task.test" />
         <module name="clever-app.clever-data-jdbc.test" />
         <module name="clever-app.clever-core.test" />
-        <module name="clever-app.clever-js-javet.test" />
+        <module name="clever-app.clever-js-v8.test" />
         <module name="clever-app.clever-task.main" />
+        <module name="clever-app.clever-js-v8.main" />
         <module name="clever-app.clever-core.main" />
         <module name="clever-app.clever-js-graaljs.test" />
         <module name="clever-app.clever-js-api.test" />
@@ -36,7 +37,6 @@
         <module name="clever-app.clever-spring.test" />
         <module name="clever-app.clever-boot.main" />
         <module name="clever-app.clever-js-graaljs.main" />
-        <module name="clever-app.clever-js-javet.main" />
         <module name="clever-app.clever-data-dynamic-sql.main" />
         <module name="clever-app.clever-data-redis.main" />
         <module name="clever-app.clever-security.main" />

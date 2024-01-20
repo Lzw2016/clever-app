@@ -1,4 +1,4 @@
-package org.clever.js.javet;
+package org.clever.js.v8;
 
 import com.caoccao.javet.interop.V8Host;
 import com.caoccao.javet.interop.V8Runtime;
@@ -10,11 +10,11 @@ import org.clever.js.api.module.CompileModule;
 import org.clever.js.api.module.MemoryModuleCache;
 import org.clever.js.api.module.ModuleCache;
 import org.clever.js.api.require.Require;
-import org.clever.js.javet.module.V8CompileModule;
-import org.clever.js.javet.module.V8Module;
-import org.clever.js.javet.require.V8Require;
-import org.clever.js.javet.support.V8Logger;
-import org.clever.js.javet.utils.ScriptEngineUtils;
+import org.clever.js.v8.module.V8CompileModule;
+import org.clever.js.v8.module.V8Module;
+import org.clever.js.v8.require.V8Require;
+import org.clever.js.v8.support.V8Logger;
+import org.clever.js.v8.utils.ScriptEngineUtils;
 
 import java.util.Collections;
 import java.util.Map;

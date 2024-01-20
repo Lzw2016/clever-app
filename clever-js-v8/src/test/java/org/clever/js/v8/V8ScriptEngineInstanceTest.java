@@ -1,4 +1,4 @@
-package org.clever.js.javet;
+package org.clever.js.v8;
 
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.interop.callback.JavetCallbackContext;

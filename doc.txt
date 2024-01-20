@@ -7,7 +7,7 @@ clever-groovy           基于groovy实现web mvc动态调用groovy class(无需
 clever-js-api           JS引擎API层
 clever-js-graaljs       graaljs引擎实现(推荐)
 clever-js-nashorn       nashorn引擎实现
-clever-js-javet         v8引擎实现
+clever-js-v8            v8引擎实现
 clever-js-shim          用于桥接Java与JS组件
 
 clever-swagger2

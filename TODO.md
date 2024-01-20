@@ -676,7 +676,7 @@ dependency("org.graalvm.polyglot:tools-community:23.1.2")
 - [OK] 基本实现 clever-js-api
 性能最差、与java语言交互能力太弱 不推荐使用，暂停维护
 
-### clever-js-javet
+### clever-js-v8
 - [OK] 基本实现 clever-js-api
 - [  ] 需要解决内存泄漏问题
 - [  ] 需要解决 js 与 java 相互交互的问题

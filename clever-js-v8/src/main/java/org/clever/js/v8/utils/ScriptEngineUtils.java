@@ -1,4 +1,4 @@
-package org.clever.js.javet.utils;
+package org.clever.js.v8.utils;
 
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.values.reference.IV8ValueObject;
