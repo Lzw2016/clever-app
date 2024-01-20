@@ -18,14 +18,12 @@ public class ListProxy implements ProxyArray {
 
     @Override
     public Object get(long index) {
-        // TODO 嵌套Map List
         checkIndex(index);
         return list.get((int) index);
     }
 
     @Override
     public void set(long index, Value value) {
-        // TODO 嵌套Map List
         checkIndex(index);
         Object element = value.isHostObject() ? value.asHostObject() : value;
         list.set((int) index, element);

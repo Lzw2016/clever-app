@@ -669,7 +669,7 @@ dependency("org.graalvm.polyglot:tools:23.1.2")
 dependency("org.graalvm.polyglot:tools-community:23.1.2")
 ```
 - [OK] 基本实现 clever-js-api
-- [  ] 需要解决 js 与 java 相互交互的问题
+- [  ] 需要解决 js 与 java 相互交互的问题(需要写大量的 targetTypeMapping 实现)
 - [  ] 需要升级 graaljs 最新版本
 
 ### clever-js-nashorn

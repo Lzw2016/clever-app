@@ -19,7 +19,6 @@ public class MapProxy implements ProxyObject {
 
     @Override
     public Object getMember(String key) {
-        // TODO 嵌套Map List
         return map.get(key);
     }
 
@@ -36,7 +35,6 @@ public class MapProxy implements ProxyObject {
 
     @Override
     public void putMember(String key, Value value) {
-        // TODO 嵌套Map List
         map.put(key, value.isHostObject() ? value.asHostObject() : value);
     }
 

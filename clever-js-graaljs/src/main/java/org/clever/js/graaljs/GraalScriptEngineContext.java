@@ -14,12 +14,12 @@ import org.clever.js.graaljs.utils.ScriptEngineUtils;
 import org.clever.util.Assert;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * 作者：lizw <br/>
@@ -31,18 +31,19 @@ public class GraalScriptEngineContext extends AbstractScriptEngineContext<Contex
     }
 
     public GraalScriptEngineContext(
-            Context engine,
-            Map<String, Object> contextMap,
-            Folder rootPath,
-            ModuleCache<Value> moduleCache,
-            Require<Value> require,
-            CompileModule<Value> compileModule,
-            Value global) {
+        Context engine,
+        Map<String, Object> contextMap,
+        Folder rootPath,
+        ModuleCache<Value> moduleCache,
+        Require<Value> require,
+        CompileModule<Value> compileModule,
+        Value global) {
         super(engine, contextMap, rootPath, moduleCache, require, compileModule, global);
     }
 
     public static class Builder extends AbstractBuilder<Context, Value> {
-        private Set<Class<?>> denyAccessClass = new HashSet<>();
+        private Consumer<Context.Builder> customContext;
+        private Consumer<HostAccess.Builder> customHostAccess;
         private final Engine graalvmEngine;
 
         public Builder(Engine graalvmEngine, Folder rootPath) {
@@ -57,20 +58,18 @@ public class GraalScriptEngineContext extends AbstractScriptEngineContext<Contex
         }
 
         /**
-         * 增加JavaScript不允许访问的Class
+         * 设置自定义 Context 逻辑
          */
-        public Builder addDenyAccessClass(Class<?> clazz) {
-            if (denyAccessClass != null && clazz != null) {
-                denyAccessClass.add(clazz);
-            }
+        public Builder setCustomContext(Consumer<Context.Builder> customContext) {
+            this.customContext = customContext;
             return this;
         }
 
         /**
-         * 设置JavaScript不允许访问的Class
+         * 设置自定义 HostAccess 逻辑
          */
-        public Builder setDenyAccessClass(Set<Class<?>> denyAccessClass) {
-            this.denyAccessClass = denyAccessClass;
+        public Builder setCustomHostAccess(Consumer<HostAccess.Builder> customHostAccess) {
+            this.customHostAccess = customHostAccess;
             return this;
         }
 
@@ -82,7 +81,7 @@ public class GraalScriptEngineContext extends AbstractScriptEngineContext<Contex
             // engine
             if (engine == null) {
                 Assert.notNull(graalvmEngine, "参数graalvmEngine或者engine不能为空");
-                engine = ScriptEngineUtils.creatEngine(graalvmEngine, denyAccessClass);
+                engine = ScriptEngineUtils.creatEngine(graalvmEngine, customContext, customHostAccess);
             }
             context.engine = engine;
             // contextMap

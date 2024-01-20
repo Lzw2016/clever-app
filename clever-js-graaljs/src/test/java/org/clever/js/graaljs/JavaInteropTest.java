@@ -1,17 +1,21 @@
 package org.clever.js.graaljs;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.js.api.ScriptEngineInstance;
 import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.FileSystemFolder;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.graaljs.utils.InteropScriptToJavaUtils;
 import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.Value;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * 作者：lizw <br/>
@@ -30,7 +34,24 @@ public class JavaInteropTest {
         Engine engine = Engine.newBuilder()
             .useSystemProperties(true)
             .build();
-        engineInstance = GraalScriptEngineInstance.Builder.create(engine, rootFolder).build();
+        engineInstance = GraalScriptEngineInstance.Builder.create(engine, rootFolder)
+            .setCustomHostAccess(builder -> {
+                builder.targetTypeMapping(
+                    Value.class,
+                    TestBean.class,
+                    Value::hasMembers,
+                    value -> {
+                        TestBean bean = new TestBean();
+                        // noinspection unchecked
+                        BeanCopyUtils.toBean(
+                            (Map<String, Object>) InteropScriptToJavaUtils.Instance.deepToJavaObject(value),
+                            bean
+                        );
+                        return bean;
+                    }
+                );
+            })
+            .build();
     }
 
     @AfterEach
@@ -47,6 +68,12 @@ public class JavaInteropTest {
     @Test
     public void t02() throws Exception {
         ScriptObject<?> scriptObject = engineInstance.require("/java-interop02");
+        log.info("# -------> {}", scriptObject);
+    }
+
+    @Test
+    public void t03() throws Exception {
+        ScriptObject<?> scriptObject = engineInstance.require("/java-interop03");
         log.info("# -------> {}", scriptObject);
     }
 }

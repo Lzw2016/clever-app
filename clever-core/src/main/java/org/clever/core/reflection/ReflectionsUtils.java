@@ -54,9 +54,9 @@ public class ReflectionsUtils {
      */
     private static void makeAccessible(Field field) {
         if ((!Modifier.isPublic(field.getModifiers())
-                || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
-                || Modifier.isFinal(field.getModifiers()))
-                && !field.isAccessible()) {
+            || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
+            || Modifier.isFinal(field.getModifiers()))
+            && !field.isAccessible()) {
             field.setAccessible(true);
         }
     }
@@ -229,19 +229,55 @@ public class ReflectionsUtils {
      *
      * @param obj       目标对象
      * @param fieldName 属性名，不支持：属性名.属性名.属性名...
+     * @param required  如果不存在就抛出异常
      * @return 属性值
      */
     @SuppressWarnings("unchecked")
     @SneakyThrows
-    public static <T> T getFieldValue(final Object obj, final String fieldName) {
+    public static <T> T getFieldValue(final Object obj, final String fieldName, boolean required) {
         if (obj == null) {
             return null;
         }
         Field field = getAccessibleField(obj, fieldName);
         if (field == null) {
-            throw new IllegalArgumentException("getFieldValue-在对象[" + obj + "]中找不到字段[" + fieldName + "]");
+            if (required) {
+                throw new IllegalArgumentException("getFieldValue-在对象[" + obj + "]中找不到字段[" + fieldName + "]");
+            }
+            return null;
         }
         return (T) field.get(obj);
+    }
+
+    /**
+     * 通过反射直接读取对象属性值, 无视private/protected修饰符, 不经过getter函数
+     *
+     * @param obj       目标对象
+     * @param fieldName 属性名，不支持：属性名.属性名.属性名...
+     * @return 属性值
+     */
+    @SneakyThrows
+    public static <T> T getFieldValue(final Object obj, final String fieldName) {
+        return getFieldValue(obj, fieldName, true);
+    }
+
+    /**
+     * 通过反射直接设置对象属性值, 无视private/protected修饰符, 不经过setter函数
+     *
+     * @param obj       目标对象
+     * @param fieldName 属性名，不支持：属性名.属性名.属性名...
+     * @param value     属性值
+     * @param required  如果不存在就抛出异常
+     */
+    @SneakyThrows
+    public static void setFieldValue(final Object obj, final String fieldName, final Object value, boolean required) {
+        Field field = getAccessibleField(obj, fieldName);
+        if (field == null) {
+            if (required) {
+                throw new IllegalArgumentException("getFieldValue-在对象[" + obj + "]中找不到字段[" + fieldName + "]");
+            }
+            return;
+        }
+        field.set(obj, value);
     }
 
     /**
@@ -253,11 +289,7 @@ public class ReflectionsUtils {
      */
     @SneakyThrows
     public static void setFieldValue(final Object obj, final String fieldName, final Object value) {
-        Field field = getAccessibleField(obj, fieldName);
-        if (field == null) {
-            throw new IllegalArgumentException("getFieldValue-在对象[" + obj + "]中找不到字段[" + fieldName + "]");
-        }
-        field.set(obj, value);
+        setFieldValue(obj, fieldName, value, true);
     }
 
     /**
@@ -346,6 +378,20 @@ public class ReflectionsUtils {
         return fieldList.toArray(result);
     }
 
+    /**
+     * 获取Class的所有Method，以及父类Method
+     */
+    public static Method[] getAllMethod(Class<?> clazz) {
+        List<Method> methodList = new ArrayList<>();
+        Class<?> tempClass = clazz;
+        while (tempClass != null) {
+            methodList.addAll(Arrays.asList(tempClass.getDeclaredMethods()));
+            tempClass = tempClass.getSuperclass();
+        }
+        Method[] result = new Method[methodList.size()];
+        return methodList.toArray(result);
+    }
+
     public static Method getMethod(Class<?> clazz, String methodName) {
         return getMethod(clazz, methodName, false);
     }
@@ -373,8 +419,8 @@ public class ReflectionsUtils {
 
     public static List<Method> getStaticMethods(Class<?> clazz, String methodName) {
         return getMethods(clazz, methodName).stream()
-                .filter(m -> Modifier.isStatic(m.getModifiers()))
-                .collect(Collectors.toList());
+            .filter(m -> Modifier.isStatic(m.getModifiers()))
+            .collect(Collectors.toList());
     }
 
     private static Method getMethod(List<Method> methods, boolean mustOnlyOne, String errMsg) {

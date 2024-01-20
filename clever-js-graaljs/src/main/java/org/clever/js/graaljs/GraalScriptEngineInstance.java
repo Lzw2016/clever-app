@@ -9,11 +9,11 @@ import org.clever.js.api.folder.Folder;
 import org.clever.js.graaljs.utils.EngineGlobalUtils;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * 作者：lizw <br/>
@@ -63,7 +63,8 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
     }
 
     public static class Builder extends AbstractBuilder<Context, Value> {
-        private Set<Class<?>> denyAccessClass = new HashSet<>();
+        private Consumer<Context.Builder> customContext;
+        private Consumer<HostAccess.Builder> customHostAccess;
         private final Engine graalEngine;
 
         /**
@@ -81,20 +82,18 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
         }
 
         /**
-         * 增加JavaScript不允许访问的Class
+         * 设置自定义 Context 逻辑
          */
-        public Builder addDenyAccessClass(Class<?> clazz) {
-            if (denyAccessClass != null && clazz != null) {
-                denyAccessClass.add(clazz);
-            }
+        public Builder setCustomContext(Consumer<Context.Builder> customContext) {
+            this.customContext = customContext;
             return this;
         }
 
         /**
-         * 设置JavaScript不允许访问的Class
+         * 设置自定义 HostAccess 逻辑
          */
-        public Builder setDenyAccessClass(Set<Class<?>> denyAccessClass) {
-            this.denyAccessClass = denyAccessClass;
+        public Builder setCustomHostAccess(Consumer<HostAccess.Builder> customHostAccess) {
+            this.customHostAccess = customHostAccess;
             return this;
         }
 
@@ -103,14 +102,15 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
          */
         public GraalScriptEngineInstance build() {
             ScriptEngineContext<Context, Value> context = GraalScriptEngineContext.Builder.create(graalEngine, rootPath)
-                    .setDenyAccessClass(denyAccessClass)
-                    .setEngine(engine)
-                    .setContextMap(contextMap)
-                    .setModuleCache(moduleCache)
-                    .setRequire(require)
-                    .setCompileModule(compileModule)
-                    .setGlobal(global)
-                    .build();
+                .setCustomContext(customContext)
+                .setCustomHostAccess(customHostAccess)
+                .setEngine(engine)
+                .setContextMap(contextMap)
+                .setModuleCache(moduleCache)
+                .setRequire(require)
+                .setCompileModule(compileModule)
+                .setGlobal(global)
+                .build();
             return new GraalScriptEngineInstance(context);
         }
     }

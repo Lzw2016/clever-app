@@ -1,6 +1,7 @@
 package org.clever.js.graaljs;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.js.graaljs.proxy.BeanProxy;
 import org.clever.js.graaljs.proxy.HashMapProxy;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
@@ -192,5 +193,32 @@ public class JavaInterop {
 
     public void setList2(List<Object> list) {
         log.info("# list -> {}", list);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------ Java原生Map
+
+    public Map<String, Object> getMap2() {
+        Map<String, Object> map = getMap();
+        map.put("nest_01", getMap());
+        return map;
+    }
+
+    public TestBean getBean() {
+        TestBean bean = new TestBean();
+        bean.setA(123);
+        bean.setB("ABCabc");
+        bean.setC(true);
+        bean.setD(0.1D);
+        bean.setE(new Date());
+        return bean;
+    }
+
+    public BeanProxy getBeanProxy() {
+        return new BeanProxy(getBean());
+    }
+
+    public TestBean setBean(TestBean bean) {
+        log.info("TestBean -> {}", bean);
+        return bean;
     }
 }

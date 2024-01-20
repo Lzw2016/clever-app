@@ -5,19 +5,19 @@ import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.clever.js.api.AbstractBuilder;
-import org.clever.js.api.GlobalConstant;
 import org.clever.js.api.ScriptEngineInstance;
 import org.clever.js.api.folder.Folder;
-import org.clever.js.graaljs.GraalConstant;
 import org.clever.js.graaljs.GraalScriptEngineInstance;
 import org.clever.js.graaljs.utils.ScriptEngineUtils;
 import org.clever.util.Assert;
-import org.graalvm.polyglot.*;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 
 import java.io.Closeable;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * 单个Engine对象的 GraalScriptEngineInstance 创建工厂
@@ -33,79 +33,36 @@ public class GraalSingleEngineFactory extends BasePooledObjectFactory<ScriptEngi
     protected final Folder rootFolder;
     protected final Engine engine;
     protected final HostAccess hostAccess;
+    protected final Consumer<Context.Builder> customContext;
 
-    public GraalSingleEngineFactory(Folder rootFolder, Engine engine) {
+    /**
+     * @param rootFolder       根目录对象
+     * @param engine           Engine对象
+     * @param customContext    自定义 Context 逻辑(可选参数)
+     * @param customHostAccess 自定义 HostAccess 逻辑(可选参数)
+     */
+    public GraalSingleEngineFactory(Folder rootFolder, Engine engine, Consumer<Context.Builder> customContext, Consumer<HostAccess.Builder> customHostAccess) {
         Assert.notNull(rootFolder, "参数rootFolder不能为空");
         Assert.notNull(engine, "参数engine不能为空");
         this.rootFolder = rootFolder;
         this.engine = engine;
-        this.hostAccess = getHostAccessBuilder().build();
+        this.customContext = customContext;
+        this.hostAccess = ScriptEngineUtils.createHostAccessBuilder(customHostAccess).build();
     }
 
     /**
-     * 返回 HostAccess.Builder 对象
+     * @param rootFolder 根目录对象
+     * @param engine     Engine对象
      */
-    protected HostAccess.Builder getHostAccessBuilder() {
-        // 沙箱环境控制 - 定义JavaScript可以访问的Class(使用黑名单机制)
-        HostAccess.Builder hostAccessBuilder = HostAccess.newBuilder();
-        hostAccessBuilder.allowArrayAccess(true);
-        hostAccessBuilder.allowListAccess(true);
-        hostAccessBuilder.allowPublicAccess(true);
-        hostAccessBuilder.allowAllImplementations(true);
-        // TODO 计划支持 https://github.com/graalvm/graaljs/issues/143
-        // hostAccessBuilder.allowMapAccess(true);
-        Set<Class<?>> denyAccessClass = new HashSet<>(GlobalConstant.Default_Deny_Access_Class);
-        ScriptEngineUtils.addDenyAccess(hostAccessBuilder, denyAccessClass);
-        return hostAccessBuilder;
-    }
-
-
-    /**
-     * 返回 Context.Builder 对象
-     */
-    protected Context.Builder getContextBuilder() {
-        Assert.notNull(engine, "参数engine不能为空");
-        Context.Builder contextBuilder = Context.newBuilder(GraalConstant.Js_Language_Id)
-                .engine(engine)
-                .options(ScriptEngineUtils.Context_Default_Options)
-                // 不允许使用实验特性
-                .allowExperimentalOptions(false)
-                // 不允许多语言访问
-                .allowPolyglotAccess(PolyglotAccess.NONE)
-                // 默认允许所有行为
-                .allowAllAccess(true)
-                // 不允许JavaScript创建进程
-                .allowCreateProcess(false)
-                // 不允许JavaScript创建线程
-                .allowCreateThread(false)
-                // 不允许JavaScript访问环境变量
-                .allowEnvironmentAccess(EnvironmentAccess.NONE)
-                // 不允许JavaScript对主机的IO操作
-                .allowIO(false)
-                // 不允许JavaScript访问本机接口
-                .allowNativeAccess(false)
-                // 不允许JavaScript加载Class
-                .allowHostClassLoading(false)
-                // 定义JavaScript可以加载的Class
-                // .allowHostClassLookup()
-                // 定义JavaScript可以访问的Class
-                // .allowHostAccess(HostAccess.ALL)
-                // 限制JavaScript的资源使用(CPU)
-                // .resourceLimits()
-                ;
-        // 沙箱环境控制 - 定义JavaScript可以访问的Class(使用黑名单机制)
-        contextBuilder.allowHostAccess(hostAccess);
-        // 沙箱环境控制 - 限制JavaScript的资源使用
-        // ResourceLimits resourceLimits = ResourceLimits.newBuilder().statementLimit()
-        return contextBuilder;
+    public GraalSingleEngineFactory(Folder rootFolder, Engine engine) {
+        this(rootFolder, engine, null, null);
     }
 
     /**
      * 返回ScriptEngineInstance Builder对象
      */
     protected AbstractBuilder<Context, Value, ScriptEngineInstance<Context, Value>> getScriptEngineInstanceBuilder() {
-        return GraalScriptEngineInstance.Builder.create(engine, rootFolder)
-                .setEngine(getContextBuilder().build());
+        return GraalScriptEngineInstance.Builder.create(engine, rootFolder).setEngine(ScriptEngineUtils.creatEngine(engine, customContext, hostAccess));
     }
 
     /**
