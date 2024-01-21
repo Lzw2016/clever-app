@@ -1,8 +1,6 @@
 package org.clever.task.core.model.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +13,25 @@ import java.util.List;
 public class CartLineDataRes {
     private List<CartLineItem> job = new ArrayList<>();
 
-    private List<CartLineItem> trigger = new ArrayList<>();
-
-    @AllArgsConstructor
-    @NoArgsConstructor
     @Data
     public static class CartLineItem {
+        /** 时间 */
         private String time;
-        private Integer count;
+        /** job 运行总次数 */
+        private Integer jobCount;
+        /** job 运行错误次数 */
+        private Integer jobErrCount;
+        /** job 触发总次数 */
+        private Integer triggerCount;
+
+        public CartLineItem() {
+        }
+
+        public CartLineItem(String time, Integer jobCount, Integer jobErrCount, Integer triggerCount) {
+            this.time = time;
+            this.jobCount = jobCount;
+            this.jobErrCount = jobErrCount;
+            this.triggerCount = triggerCount;
+        }
     }
 }

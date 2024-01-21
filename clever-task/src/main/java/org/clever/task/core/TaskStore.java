@@ -839,6 +839,16 @@ public class TaskStore {
             .fetch();
     }
 
+    public List<String> allInstance(AllInstanceReq req) {
+        SQLQuery<String> sqlQuery = queryDSL.select(taskScheduler.instanceName).distinct()
+            .from(taskScheduler)
+            .orderBy(taskScheduler.instanceName.asc());
+        if (StringUtils.isNotBlank(req.getNamespace())) {
+            sqlQuery.where(taskScheduler.namespace.eq(req.getNamespace()));
+        }
+        return sqlQuery.fetch();
+    }
+
     public Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq query) {
         SQLQuery<TaskSchedulerLog> sqlQuery = queryDSL.selectFrom(taskSchedulerLog);
         if (StringUtils.isNotBlank(query.getNamespace())) {
@@ -873,6 +883,9 @@ public class TaskStore {
         }
         if (query.getJobId() != null) {
             sqlQuery.where(taskJobLog.jobId.eq(query.getJobId()));
+        }
+        if (query.getJobStatus() != null) {
+            sqlQuery.where(taskJobLog.status.eq(query.getJobStatus()));
         }
         if (query.getFireTimeStart() != null) {
             sqlQuery.where(taskJobLog.fireTime.goe(query.getFireTimeStart()));
@@ -932,7 +945,7 @@ public class TaskStore {
             sqlQuery.where(taskJob.namespace.eq(query.getNamespace()));
         }
         if (StringUtils.isNotBlank(query.getName())) {
-            sqlQuery.where(taskJob.name.like(query.getName()));
+            sqlQuery.where(taskJob.name.like(jdbc.likePrefix(query.getName())));
         }
         if (query.getType() != null) {
             sqlQuery.where(taskJob.type.eq(query.getType()));
@@ -1123,7 +1136,8 @@ public class TaskStore {
         CartLineDataRes res = new CartLineDataRes();
         // 任务运行统计数据
         StringExpression jobFireTime = getDateFormatField.apply(taskJobLog.fireTime);
-        SQLQuery<Tuple> sqlQuery = queryDSL.select(jobFireTime, taskJobLog.fireTime.count())
+        NumberTemplate<Integer> jobErrCountField = Expressions.numberTemplate(Integer.class, "sum(case when {0}=1 then 1 else 0 end)", taskJobLog.status);
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(jobFireTime, taskJobLog.fireTime.count(), jobErrCountField)
             .from(taskJobLog)
             .where(taskJobLog.fireTime.goe(req.getStart()))
             .where(taskJobLog.fireTime.loe(req.getEnd()))
@@ -1137,8 +1151,10 @@ public class TaskStore {
             sqlQuery.where(taskJobLog.instanceName.eq(req.getInstanceName()));
         }
         List<Tuple> tuples = sqlQuery.fetch();
-        Map<String, Integer> jobMap = new HashMap<>(tuples.size());
-        tuples.forEach(tuple -> jobMap.put(tuple.get(jobFireTime), Conv.asInteger(tuple.get(taskJobLog.fireTime.count()))));
+        Map<String, Integer> jobCountMap = new HashMap<>(tuples.size());
+        tuples.forEach(tuple -> jobCountMap.put(tuple.get(jobFireTime), Conv.asInteger(tuple.get(taskJobLog.fireTime.count()))));
+        Map<String, Integer> jobErrCountMap = new HashMap<>(tuples.size());
+        tuples.forEach(tuple -> jobErrCountMap.put(tuple.get(jobFireTime), Conv.asInteger(tuple.get(jobErrCountField))));
         StringExpression triggerFireTime = getDateFormatField.apply(taskJobTriggerLog.fireTime);
         sqlQuery = queryDSL.select(triggerFireTime, taskJobTriggerLog.fireTime.count())
             .from(taskJobTriggerLog)
@@ -1154,29 +1170,31 @@ public class TaskStore {
             sqlQuery.where(taskJobTriggerLog.instanceName.eq(req.getInstanceName()));
         }
         tuples = sqlQuery.fetch();
-        Map<String, Integer> triggerMap = new HashMap<>(tuples.size());
-        tuples.forEach(tuple -> triggerMap.put(tuple.get(triggerFireTime), Conv.asInteger(tuple.get(taskJobTriggerLog.fireTime.count()))));
+        Map<String, Integer> triggerCountMap = new HashMap<>(tuples.size());
+        tuples.forEach(tuple -> triggerCountMap.put(tuple.get(triggerFireTime), Conv.asInteger(tuple.get(taskJobTriggerLog.fireTime.count()))));
         // 设置返回值
         Date startTime = req.getStart();
         String currentTimeStr = DateUtils.formatToString(startTime, DateUtils.yyyy_MM_dd);
         final String endTimeStr = DateUtils.formatToString(req.getEnd(), DateUtils.yyyy_MM_dd);
         while (currentTimeStr.compareTo(endTimeStr) <= 0) {
-            Integer count = jobMap.get(currentTimeStr);
-            if (count == null) {
-                count = 0;
+            Integer jobCount = jobCountMap.get(currentTimeStr);
+            if (jobCount == null) {
+                jobCount = 0;
             }
-            res.getJob().add(new CartLineDataRes.CartLineItem(currentTimeStr, count));
-            count = triggerMap.get(currentTimeStr);
-            if (count == null) {
-                count = 0;
+            Integer jobErrCount = jobErrCountMap.get(currentTimeStr);
+            if (jobErrCount == null) {
+                jobErrCount = 0;
             }
-            res.getTrigger().add(new CartLineDataRes.CartLineItem(currentTimeStr, count));
+            Integer triggerCount = triggerCountMap.get(currentTimeStr);
+            if (triggerCount == null) {
+                triggerCount = 0;
+            }
+            res.getJob().add(new CartLineDataRes.CartLineItem(currentTimeStr, jobCount, jobErrCount, triggerCount));
             startTime = DateUtils.addDays(startTime, 1);
             currentTimeStr = DateUtils.formatToString(startTime, DateUtils.yyyy_MM_dd);
         }
         return res;
     }
-
 
     @SuppressWarnings("DuplicatedCode")
     public List<JobLogInfo> getLastRunJobs(RunJobsReq req) {

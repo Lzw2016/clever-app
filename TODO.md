@@ -647,7 +647,8 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 - [  ] 支持负载均衡策略：抢占、随机、轮询、一致性HASH
 - [  ] 支持任务类型：java调用任务、Http任务、js脚本任务、shell脚本任务
 - [  ] 定时任务调度平台API接口
-- [  ] 定时任务调度平台Web页面
+- [OK] 定时任务调度平台Web页面
+- [  ] 拆分管理控制台代码(区分定时任务核心代码与管理API代码)
 
 ### clever-task-ext
 未开始

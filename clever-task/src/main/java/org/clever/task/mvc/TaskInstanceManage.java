@@ -74,8 +74,9 @@ public class TaskInstanceManage {
      * 获取所有的 “实例名”
      */
     @Transactional(disabled = true)
-    public List<String> allInstance() {
-        return getTaskInstance().allInstance();
+    public static List<String> allInstance(AllInstanceReq req) {
+        TaskStore taskStore = getTaskStore();
+        return taskStore.beginReadOnlyTX(status -> taskStore.allInstance(req));
     }
 
     /**

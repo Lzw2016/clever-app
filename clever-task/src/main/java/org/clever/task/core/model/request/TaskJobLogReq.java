@@ -26,6 +26,10 @@ public class TaskJobLogReq extends QueryByPage {
      */
     private Long jobId;
     /**
+     * 任务执行结果
+     */
+    private Integer jobStatus;
+    /**
      * 触发时间 - 开始
      */
     private Date fireTimeStart;
