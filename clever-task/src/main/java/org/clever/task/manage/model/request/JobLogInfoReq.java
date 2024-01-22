@@ -8,11 +8,11 @@ import java.util.Date;
 
 /**
  * 作者：lizw <br/>
- * 创建时间：2023/06/11 23:10 <br/>
+ * 创建时间：2024/01/22 20:49 <br/>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class TaskJobLogReq extends QueryByPage {
+public class JobLogInfoReq extends QueryByPage {
     /**
      * 命名空间
      */
@@ -26,9 +26,25 @@ public class TaskJobLogReq extends QueryByPage {
      */
     private Long jobId;
     /**
+     * 任务名称
+     */
+    private String jobName;
+    /**
+     * 任务类型
+     */
+    private Integer jobType;
+    /**
      * 任务执行结果
      */
     private Integer jobStatus;
+    /**
+     * 是否是手动触发
+     */
+    private Integer isManual;
+    // /**
+    //  * 是否错过了触发
+    //  */
+    // private Integer misFired;
     /**
      * 触发时间 - 开始
      */

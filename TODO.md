@@ -648,7 +648,7 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 - [  ] 支持任务类型：java调用任务、Http任务、js脚本任务、shell脚本任务
 - [  ] 定时任务调度平台API接口
 - [OK] 定时任务调度平台Web页面
-- [  ] 拆分管理控制台代码(区分定时任务核心代码与管理API代码)
+- [OK] 拆分管理控制台代码(区分定时任务核心代码与管理API代码)
 - [  ] 内置日志数据清理任务
 - [  ] 新建统计数据表，定时收集统计信息
 - [  ] 保存http、java、js、shell任务的执行日志，方便控制台查询

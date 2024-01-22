@@ -16,6 +16,7 @@ import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
+import org.clever.task.manage.dao.TaskManageStore;
 import org.clever.task.manage.model.JobLogInfo;
 import org.clever.task.manage.model.request.*;
 import org.clever.task.manage.model.response.*;
@@ -34,12 +35,21 @@ import java.util.Map;
 @Slf4j
 public class TaskInstanceManage {
     private static volatile TaskInstance TASK_INSTANCE;
+    private static volatile TaskManageStore TASK_MANAGE_STORE;
 
     private static TaskInstance getTaskInstance() {
         if (TASK_INSTANCE == null) {
             TASK_INSTANCE = AppContextHolder.getBean(TaskInstance.class);
         }
         return TASK_INSTANCE;
+    }
+
+    private static TaskManageStore getTaskManageStore() {
+        if (TASK_MANAGE_STORE == null) {
+            TaskInstance taskInstance = getTaskInstance();
+            TASK_MANAGE_STORE = new TaskManageStore(taskInstance.getTaskStore().getQueryDSL());
+        }
+        return TASK_MANAGE_STORE;
     }
 
     private static TaskStore getTaskStore() {
@@ -76,8 +86,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static List<String> allInstance(AllInstanceReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.allInstance(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.allInstance(req));
     }
 
     /**
@@ -114,8 +124,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<TaskSchedulerLog> querySchedulerLog(SchedulerLogReq query) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.querySchedulerLog(query));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.querySchedulerLog(query));
     }
 
     /**
@@ -123,8 +133,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<JobInfo> queryJobs(TaskJobReq query) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryJobs(query));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.queryJobs(query));
     }
 
     /**
@@ -284,17 +294,17 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<TaskJobLog> queryTaskJobLog(TaskJobLogReq query) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobLog(query));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.queryTaskJobLog(query));
     }
 
     /**
      * 查询所有任务日志信息
      */
     @Transactional(disabled = true)
-    public static Page<JobLogInfo> queryJobLogInfo(TaskJobLogReq query) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryJobLogInfo(query));
+    public static Page<JobLogInfo> queryJobLogInfo(JobLogInfoReq query) {
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.queryJobLogInfo(query));
     }
 
     /**
@@ -302,8 +312,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<JobInfo> queryTaskJobTriggers(TaskJobTriggerReq query) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobTriggers(query));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.queryTaskJobTriggers(query));
     }
 
     /**
@@ -311,8 +321,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static Page<TaskJobTriggerLog> queryTaskJobTriggerLogs(TaskJobTriggerLogReq query) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.queryTaskJobTriggerLogs(query));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.queryTaskJobTriggerLogs(query));
     }
 
     /**
@@ -320,8 +330,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static TaskJobTriggerLog getTaskJobTriggerLog(@RequestParam("jobTriggerLogId") Long jobTriggerLogId) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getTaskJobTriggerLog(jobTriggerLogId));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getTaskJobTriggerLog(jobTriggerLogId));
     }
 
     /**
@@ -329,8 +339,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static StatisticsInfoRes getStatistics() {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getStatistics());
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getStatistics());
     }
 
     /**
@@ -338,8 +348,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static CartLineDataRes getCartLineDataRes(CartLineDataReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getCartLineDataRes(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getCartLineDataRes(req));
     }
 
     /**
@@ -347,8 +357,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static List<JobLogInfo> getLastRunJobs(RunJobsReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getLastRunJobs(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getLastRunJobs(req));
     }
 
     /**
@@ -356,8 +366,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static List<JobLogInfo> getLastRunningJobs(RunJobsReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getLastRunningJobs(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getLastRunningJobs(req));
     }
 
     /**
@@ -365,8 +375,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static List<JobLogInfo> getWaitRunJobs(RunJobsReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getWaitRunJobs(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getWaitRunJobs(req));
     }
 
     /**
@@ -374,8 +384,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static JobMisfireRankRes getMisfireJobs(JobErrorRankReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getMisfireJobs(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getMisfireJobs(req));
     }
 
     /**
@@ -383,8 +393,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static JobFailRankRes getFailJobs(JobErrorRankReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getFailJobs(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getFailJobs(req));
     }
 
     /**
@@ -392,8 +402,8 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static JobRunTimeRankRes getRunTimeJobs(JobErrorRankReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getRunTimeJobs(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getRunTimeJobs(req));
     }
 
     /**
@@ -401,7 +411,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static JobRetryRankRes getRetryJobs(JobErrorRankReq req) {
-        TaskStore taskStore = getTaskStore();
-        return taskStore.beginReadOnlyTX(status -> taskStore.getRetryJobs(req));
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getRetryJobs(req));
     }
 }
