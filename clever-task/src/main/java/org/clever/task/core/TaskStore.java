@@ -23,12 +23,12 @@ import org.clever.task.TaskDataSource;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.JobInfo;
-import org.clever.task.core.model.JobLogInfo;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
-import org.clever.task.core.model.request.*;
-import org.clever.task.core.model.response.*;
 import org.clever.task.core.support.DataBaseClock;
+import org.clever.task.manage.model.JobLogInfo;
+import org.clever.task.manage.model.request.*;
+import org.clever.task.manage.model.response.*;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 

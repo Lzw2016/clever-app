@@ -84,10 +84,10 @@ web:
       - pathPrefix: '/app'
         packagePrefix: 'org.clever.app.mvc'
       - pathPrefix: '/task'
-        packagePrefix: 'org.clever.task.mvc'
+        packagePrefix: 'org.clever.task.manage.mvc'
     allowPackages:
       - 'org.clever.app.mvc.'
-      - 'org.clever.task.mvc.'
+      - 'org.clever.task.manage.mvc.'
     defTransactional:
       defDatasource: [ ]
       datasource: [ ]

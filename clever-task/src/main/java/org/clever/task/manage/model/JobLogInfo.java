@@ -1,4 +1,4 @@
-package org.clever.task.core.model;
+package org.clever.task.manage.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

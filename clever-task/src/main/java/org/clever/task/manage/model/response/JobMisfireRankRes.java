@@ -1,4 +1,4 @@
-package org.clever.task.core.model.response;
+package org.clever.task.manage.model.response;
 
 import lombok.Data;
 import org.clever.task.core.model.entity.TaskJob;

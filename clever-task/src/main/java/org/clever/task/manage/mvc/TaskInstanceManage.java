@@ -1,4 +1,4 @@
-package org.clever.task.mvc;
+package org.clever.task.manage.mvc;
 
 import com.google.common.base.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +16,9 @@ import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
-import org.clever.task.core.model.request.*;
-import org.clever.task.core.model.response.*;
+import org.clever.task.manage.model.JobLogInfo;
+import org.clever.task.manage.model.request.*;
+import org.clever.task.manage.model.response.*;
 import org.clever.validation.annotation.Validated;
 import org.clever.web.support.mvc.annotation.RequestBody;
 import org.clever.web.support.mvc.annotation.RequestParam;
