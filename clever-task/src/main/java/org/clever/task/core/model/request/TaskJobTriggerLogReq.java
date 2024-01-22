@@ -26,6 +26,14 @@ public class TaskJobTriggerLogReq extends QueryByPage {
      */
     private Long jobTriggerId;
     /**
+     * 是否是手动触发
+     */
+    private Integer isManual;
+    /**
+     * 是否错过了触发
+     */
+    private Integer misFired;
+    /**
      * 触发时间 - 开始
      */
     private Date fireTimeStart;

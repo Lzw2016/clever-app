@@ -37,4 +37,21 @@ public class TaskJobLogReq extends QueryByPage {
      * 触发时间 - 结束
      */
     private Date fireTimeEnd;
+    // -------------------------------------------------------------------- 查询明细
+    /**
+     * 任务名称
+     */
+    private String jobName;
+    /**
+     * 任务类型
+     */
+    private Integer jobType;
+    /**
+     * 是否是手动触发
+     */
+    private Integer isManual;
+    // /**
+    //  * 是否错过了触发
+    //  */
+    // private Integer misFired;
 }

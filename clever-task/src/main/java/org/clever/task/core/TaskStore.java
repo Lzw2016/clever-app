@@ -916,6 +916,21 @@ public class TaskStore {
         if (query.getJobId() != null) {
             sqlQuery.where(taskJobLog.jobId.eq(query.getJobId()));
         }
+        if (query.getJobStatus() != null) {
+            sqlQuery.where(taskJobLog.status.eq(query.getJobStatus()));
+        }
+        if (StringUtils.isNotBlank(query.getJobName())) {
+            sqlQuery.where(taskJob.name.like(jdbc.likePrefix(query.getJobName())));
+        }
+        if (query.getJobType() != null) {
+            sqlQuery.where(taskJob.type.eq(query.getJobType()));
+        }
+        if (query.getIsManual() != null) {
+            sqlQuery.where(taskJobTriggerLog.isManual.eq(query.getIsManual()));
+        }
+        // if (query.getMisFired() != null) {
+        //     sqlQuery.where(taskJobTriggerLog.misFired.eq(query.getMisFired()));
+        // }
         if (query.getFireTimeStart() != null) {
             sqlQuery.where(taskJobLog.fireTime.goe(query.getFireTimeStart()));
         }
@@ -999,7 +1014,7 @@ public class TaskStore {
             sqlQuery.where(taskJob.namespace.eq(query.getNamespace()));
         }
         if (StringUtils.isNotBlank(query.getName())) {
-            sqlQuery.where(taskJobTrigger.name.like(query.getName()));
+            sqlQuery.where(taskJobTrigger.name.like(jdbc.likePrefix(query.getName())));
         }
         if (query.getType() != null) {
             sqlQuery.where(taskJobTrigger.type.eq(query.getType()));
@@ -1029,6 +1044,12 @@ public class TaskStore {
         }
         if (query.getJobTriggerId() != null) {
             sqlQuery.where(taskJobTriggerLog.jobTriggerId.eq(query.getJobTriggerId()));
+        }
+        if (query.getIsManual() != null) {
+            sqlQuery.where(taskJobTriggerLog.isManual.eq(query.getIsManual()));
+        }
+        if (query.getMisFired() != null) {
+            sqlQuery.where(taskJobTriggerLog.misFired.eq(query.getMisFired()));
         }
         if (query.getFireTimeStart() != null) {
             sqlQuery.where(taskJobTriggerLog.fireTime.goe(query.getFireTimeStart()));
