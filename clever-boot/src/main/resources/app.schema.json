@@ -1866,6 +1866,11 @@
                 "shellJobWorkingDir": {
                     "type": "string",
                     "description": "shell任务的work目录"
+                },
+                "logRetention": {
+                    "type": "string",
+                    "description": "日志保留时间(默认7天)",
+                    "$ref": "#/definitions/duration"
                 }
             }
         }

@@ -41,4 +41,6 @@ public interface GlobalConstant {
     int INITIAL_CAPACITY = 1024;
     // 分布式锁的等待时间(单位：秒)
     int CONCURRENT_LOCK_WAIT = 3;
+    // 清理日志数据任务时间间隔(单位：毫秒)
+    int CLEAR_LOG_INTERVAL = 1800_000;
 }

@@ -856,6 +856,27 @@ public class TaskStore {
         return new JobInfo(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
     }
 
+    public long clearJobLog(String namespace, Date maxDate) {
+        return queryDSL.delete(taskJobLog)
+            .where(taskJobLog.namespace.eq(namespace))
+            .where(taskJobLog.endTime.loe(maxDate))
+            .execute();
+    }
+
+    public long clearTriggerJobLog(String namespace, Date maxDate) {
+        return queryDSL.delete(taskJobTriggerLog)
+            .where(taskJobTriggerLog.namespace.eq(namespace))
+            .where(taskJobTriggerLog.createAt.loe(maxDate))
+            .execute();
+    }
+
+    public long clearSchedulerLog(String namespace, Date maxDate) {
+        return queryDSL.delete(taskSchedulerLog)
+            .where(taskSchedulerLog.namespace.eq(namespace))
+            .where(taskSchedulerLog.createAt.loe(maxDate))
+            .execute();
+    }
+
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support
 
     /**

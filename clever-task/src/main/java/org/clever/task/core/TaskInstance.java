@@ -105,6 +105,10 @@ public class TaskInstance {
      */
     private Future<?> fireTriggerFuture;
     /**
+     * 清理日志数据
+     */
+    private ScheduledFuture<?> clearLogFuture;
+    /**
      * 调度器状态
      */
     private volatile int state = State.INIT;
@@ -805,6 +809,20 @@ public class TaskInstance {
                 paused();
             }
         });
+        // 清理日志数据任务
+        clearLogFuture = scheduledExecutor.scheduleAtFixedRate(
+            () -> {
+                try {
+                    clearLogs();
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 清理日志数据失败 | instanceName={}", getInstanceName(), e);
+                    TaskSchedulerLog schedulerLog = newSchedulerLog();
+                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_CLEAR_LOG_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                    schedulerErrorListener(schedulerLog, e);
+                }
+            },
+            initialDelay, GlobalConstant.CLEAR_LOG_INTERVAL, TimeUnit.MILLISECONDS
+        );
     }
 
     private void stopScheduler() {
@@ -818,6 +836,7 @@ public class TaskInstance {
         stopScheduler.accept(dataCheckFuture);
         stopScheduler.accept(reloadSchedulerFuture);
         stopScheduler.accept(fireTriggerFuture);
+        stopScheduler.accept(clearLogFuture);
     }
 
     private void doStart() {
@@ -1307,6 +1326,27 @@ public class TaskInstance {
             taskContext.decrementAndGetJobReentryCount(job.getId());
             jobEndRunListener(jobLog);
         }
+    }
+
+    private void clearLogs() {
+        SchedulerConfig config = taskContext.getSchedulerConfig();
+        long logRetention = -1;
+        if (config.getLogRetention() != null) {
+            logRetention = config.getLogRetention().toMillis();
+        }
+        if (logRetention <= 0) {
+            return;
+        }
+        Date maxDate = new Date(taskStore.currentTimeMillis() - logRetention);
+        log.info("清理任务执行日志开始...");
+        long count = taskStore.beginTX(status -> taskStore.clearJobLog(getNamespace(), maxDate));
+        log.info("清理任务执行日志数据量: {}", count);
+        log.info("清理任务触发日志开始...");
+        count = taskStore.beginTX(status -> taskStore.clearTriggerJobLog(getNamespace(), maxDate));
+        log.info("清理任务触发日志数据量: {}", count);
+        log.info("清理调度器日志开始...");
+        count = taskStore.beginTX(status -> taskStore.clearSchedulerLog(getNamespace(), maxDate));
+        log.info("清理调度器日志数据量: {}", count);
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- listeners

@@ -77,3 +77,4 @@ timed-task:
   jobExecutorQueueSize: 64
   loadWeight: 1.0
   shellJobWorkingDir: './'
+  logRetention: 30d

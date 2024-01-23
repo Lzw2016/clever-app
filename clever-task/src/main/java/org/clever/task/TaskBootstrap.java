@@ -30,25 +30,26 @@ public class TaskBootstrap {
     }
 
     public static TaskBootstrap create(Environment environment) {
-        SchedulerConfig schedulerConfig = Binder.get(environment).bind(SchedulerConfig.PREFIX, SchedulerConfig.class).orElseGet(SchedulerConfig::new);
+        SchedulerConfig config = Binder.get(environment).bind(SchedulerConfig.PREFIX, SchedulerConfig.class).orElseGet(SchedulerConfig::new);
         // 打印配置日志
         List<String> logs = new ArrayList<>();
         logs.add("timed-task: ");
-        logs.add("  enable                    : " + schedulerConfig.isEnable());
-        logs.add("  jdbcName                  : " + schedulerConfig.getJdbcName());
-        logs.add("  namespace                 : " + schedulerConfig.getNamespace());
-        logs.add("  instanceName              : " + schedulerConfig.getInstanceName());
-        logs.add("  heartbeatInterval         : " + schedulerConfig.getHeartbeatInterval() + "ms");
-        logs.add("  description               : " + schedulerConfig.getDescription());
-        logs.add("  schedulerExecutorPoolSize : " + schedulerConfig.getSchedulerExecutorPoolSize());
-        logs.add("  jobExecutorPoolSize       : " + schedulerConfig.getJobExecutorPoolSize());
-        logs.add("  jobExecutorQueueSize      : " + schedulerConfig.getJobExecutorQueueSize());
-        logs.add("  loadWeight                : " + schedulerConfig.getLoadWeight());
-        logs.add("  shellJobWorkingDir        : " + schedulerConfig.getShellJobWorkingDir());
-        if (schedulerConfig.isEnable()) {
+        logs.add("  enable                    : " + config.isEnable());
+        logs.add("  jdbcName                  : " + config.getJdbcName());
+        logs.add("  namespace                 : " + config.getNamespace());
+        logs.add("  instanceName              : " + config.getInstanceName());
+        logs.add("  heartbeatInterval         : " + config.getHeartbeatInterval() + "ms");
+        logs.add("  description               : " + config.getDescription());
+        logs.add("  schedulerExecutorPoolSize : " + config.getSchedulerExecutorPoolSize());
+        logs.add("  jobExecutorPoolSize       : " + config.getJobExecutorPoolSize());
+        logs.add("  jobExecutorQueueSize      : " + config.getJobExecutorQueueSize());
+        logs.add("  loadWeight                : " + config.getLoadWeight());
+        logs.add("  shellJobWorkingDir        : " + config.getShellJobWorkingDir());
+        logs.add("  logRetention              : " + (config.getLogRetention() != null ? config.getLogRetention().toMillis() + "ms" : ""));
+        if (config.isEnable()) {
             BannerUtils.printConfig(log, "定时任务配置", logs.toArray(new String[0]));
         }
-        TaskBootstrap taskBootstrap = create(schedulerConfig);
+        TaskBootstrap taskBootstrap = create(config);
         AppContextHolder.registerBean("taskBootstrap", taskBootstrap, true);
         AppContextHolder.registerBean("taskInstance", taskBootstrap.taskInstance, true);
         return taskBootstrap;
@@ -78,12 +79,12 @@ public class TaskBootstrap {
         TaskDataSource.JDBC_DATA_SOURCE_NAME = schedulerConfig.getJdbcName();
         this.schedulerConfig = schedulerConfig;
         this.taskInstance = new TaskInstance(
-                TaskDataSource.getQueryDSL(),
-                schedulerConfig,
-                JOB_EXECUTORS,
-                SCHEDULER_LISTENERS,
-                JOB_TRIGGER_LISTENERS,
-                JOB_LISTENERS
+            TaskDataSource.getQueryDSL(),
+            schedulerConfig,
+            JOB_EXECUTORS,
+            SCHEDULER_LISTENERS,
+            JOB_TRIGGER_LISTENERS,
+            JOB_LISTENERS
         );
     }
 

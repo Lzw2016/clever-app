@@ -3,6 +3,7 @@ package org.clever.task.core.config;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 /**
  * 作者：lizw <br/>
@@ -56,4 +57,8 @@ public class SchedulerConfig implements Serializable {
      * TODO shell任务的work目录
      */
     private String shellJobWorkingDir = "";
+    /**
+     * 日志保留时间(默认7天)
+     */
+    private Duration logRetention = Duration.ofDays(7);
 }
