@@ -1376,13 +1376,13 @@ public class TaskInstance {
         if (StringUtils.isBlank(lastReportTime)) {
             minDate = taskStore.beginReadOnlyTX(status -> taskStore.getMinFireTime(getNamespace()));
         } else {
-            minDate = DateUtils.getDayStartTime(DateUtils.parseDate(lastReportTime, DateUtils.yyyy_MM_dd));
+            minDate = DateUtils.parseDate(lastReportTime, DateUtils.yyyy_MM_dd);
         }
         if (minDate == null) {
             return;
         }
         List<TaskReport> listReport = new ArrayList<>();
-        Date currentDate = minDate;
+        Date currentDate = DateUtils.getDayStartTime(minDate);
         while (currentDate.compareTo(maxDate) <= 0) {
             final Date finalDate = currentDate;
             TaskReport taskReport = taskStore.beginReadOnlyTX(status -> taskStore.createTaskReport(getNamespace(), finalDate));
