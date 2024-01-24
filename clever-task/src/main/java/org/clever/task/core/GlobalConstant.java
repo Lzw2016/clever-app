@@ -43,4 +43,6 @@ public interface GlobalConstant {
     int CONCURRENT_LOCK_WAIT = 3;
     // 清理日志数据任务时间间隔(单位：毫秒)
     int CLEAR_LOG_INTERVAL = 1800_000;
+    // 收集任务执行报表时间间隔(单位：毫秒)
+    int COLLECT_REPORT_INTERVAL = 3600_000;
 }

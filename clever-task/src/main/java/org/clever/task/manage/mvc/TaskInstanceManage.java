@@ -347,7 +347,7 @@ public class TaskInstanceManage {
      * 任务运行统计数据
      */
     @Transactional(disabled = true)
-    public static CartLineDataRes getCartLineDataRes(CartLineDataReq req) {
+    public static List<CartLineDataRes> getCartLineDataRes(CartLineDataReq req) {
         TaskManageStore taskManageStore = getTaskManageStore();
         return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getCartLineDataRes(req));
     }

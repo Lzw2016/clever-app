@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.clever.core.DateUtils;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.function.ThreeConsumer;
 import org.clever.core.id.SnowFlake;
@@ -108,6 +109,10 @@ public class TaskInstance {
      * 清理日志数据
      */
     private ScheduledFuture<?> clearLogFuture;
+    /**
+     * 收集任务执行报表
+     */
+    private ScheduledFuture<?> collectReportFuture;
     /**
      * 调度器状态
      */
@@ -823,6 +828,20 @@ public class TaskInstance {
             },
             initialDelay, GlobalConstant.CLEAR_LOG_INTERVAL, TimeUnit.MILLISECONDS
         );
+        // 收集任务执行报表
+        collectReportFuture = scheduledExecutor.scheduleAtFixedRate(
+            () -> {
+                try {
+                    collectReport();
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 收集任务执行报表失败 | instanceName={}", getInstanceName(), e);
+                    TaskSchedulerLog schedulerLog = newSchedulerLog();
+                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_COLLECT_REPORT_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                    schedulerErrorListener(schedulerLog, e);
+                }
+            },
+            initialDelay, GlobalConstant.COLLECT_REPORT_INTERVAL, TimeUnit.MILLISECONDS
+        );
     }
 
     private void stopScheduler() {
@@ -837,6 +856,7 @@ public class TaskInstance {
         stopScheduler.accept(reloadSchedulerFuture);
         stopScheduler.accept(fireTriggerFuture);
         stopScheduler.accept(clearLogFuture);
+        stopScheduler.accept(collectReportFuture);
     }
 
     private void doStart() {
@@ -1347,6 +1367,32 @@ public class TaskInstance {
         log.info("清理调度器日志开始...");
         count = taskStore.beginTX(status -> taskStore.clearSchedulerLog(getNamespace(), maxDate));
         log.info("清理调度器日志数据量: {}", count);
+    }
+
+    public void collectReport() {
+        final Date maxDate = DateUtils.getDayStartTime(taskStore.currentDate());
+        Date minDate;
+        String lastReportTime = taskStore.beginReadOnlyTX(status -> taskStore.getLastReportTime(getNamespace()));
+        if (StringUtils.isBlank(lastReportTime)) {
+            minDate = taskStore.beginReadOnlyTX(status -> taskStore.getMinFireTime(getNamespace()));
+        } else {
+            minDate = DateUtils.getDayStartTime(DateUtils.parseDate(lastReportTime, DateUtils.yyyy_MM_dd));
+        }
+        if (minDate == null) {
+            return;
+        }
+        List<TaskReport> listReport = new ArrayList<>();
+        Date currentDate = minDate;
+        while (currentDate.compareTo(maxDate) <= 0) {
+            final Date finalDate = currentDate;
+            TaskReport taskReport = taskStore.beginReadOnlyTX(status -> taskStore.createTaskReport(getNamespace(), finalDate));
+            listReport.add(taskReport);
+            currentDate = DateUtils.addDays(finalDate, 1);
+        }
+        if (!listReport.isEmpty()) {
+            long count = taskStore.beginTX(status -> taskStore.addOrUpdateTaskReport(listReport));
+            log.info("收集任务执行报表数据量: {}", count);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- listeners

@@ -5,6 +5,7 @@ import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
@@ -37,6 +38,7 @@ import static org.clever.task.core.model.query.QTaskJobLog.taskJobLog;
 import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 import static org.clever.task.core.model.query.QTaskJobTriggerLog.taskJobTriggerLog;
 import static org.clever.task.core.model.query.QTaskJsJob.taskJsJob;
+import static org.clever.task.core.model.query.QTaskReport.taskReport;
 import static org.clever.task.core.model.query.QTaskScheduler.taskScheduler;
 import static org.clever.task.core.model.query.QTaskSchedulerLog.taskSchedulerLog;
 import static org.clever.task.core.model.query.QTaskShellJob.taskShellJob;
@@ -875,6 +877,106 @@ public class TaskStore {
             .where(taskSchedulerLog.namespace.eq(namespace))
             .where(taskSchedulerLog.createAt.loe(maxDate))
             .execute();
+    }
+
+    public TaskReport createTaskReport(String namespace, Date date) {
+        final TaskReport taskReport = new TaskReport();
+        taskReport.setId(snowFlake.nextId());
+        taskReport.setNamespace(namespace);
+        taskReport.setReportTime(DateUtils.formatToString(date, DateUtils.yyyy_MM_dd));
+        final Date dayStart = DateUtils.getDayStartTime(date);
+        final Date dayEnd = DateUtils.addDays(dayStart, 1);
+        NumberTemplate<Long> jobErrCountField = Expressions.numberTemplate(Long.class, "sum(case when {0}=1 then 1 else 0 end)", taskJobLog.status);
+        Tuple tuple = queryDSL.select(taskJobLog.fireTime.count(), jobErrCountField)
+            .from(taskJobLog)
+            .where(taskJobLog.namespace.eq(namespace))
+            .where(taskJobLog.fireTime.goe(dayStart))
+            .where(taskJobLog.fireTime.lt(dayEnd))
+            .fetchOne();
+        if (tuple != null) {
+            taskReport.setJobCount(tuple.get(taskJobLog.fireTime.count()));
+            taskReport.setJobErrCount(tuple.get(jobErrCountField));
+        }
+        NumberTemplate<Long> misfireCountField = Expressions.numberTemplate(Long.class, "sum(case when {0}=1 then 1 else 0 end)", taskJobTriggerLog.misFired);
+        tuple = queryDSL.select(taskJobTriggerLog.fireTime.count(), misfireCountField)
+            .from(taskJobTriggerLog)
+            .where(taskJobTriggerLog.namespace.eq(namespace))
+            .where(taskJobTriggerLog.fireTime.goe(dayStart))
+            .where(taskJobTriggerLog.fireTime.lt(dayEnd))
+            .fetchOne();
+        if (tuple != null) {
+            taskReport.setTriggerCount(tuple.get(taskJobTriggerLog.fireTime.count()));
+            taskReport.setMisfireCount(tuple.get(misfireCountField));
+        }
+        if (taskReport.getJobCount() == null) {
+            taskReport.setJobCount(0L);
+        }
+        if (taskReport.getJobErrCount() == null) {
+            taskReport.setJobErrCount(0L);
+        }
+        if (taskReport.getTriggerCount() == null) {
+            taskReport.setTriggerCount(0L);
+        }
+        if (taskReport.getMisfireCount() == null) {
+            taskReport.setMisfireCount(0L);
+        }
+        return taskReport;
+    }
+
+    public String getLastReportTime(String namespace) {
+        return queryDSL.select(taskReport.reportTime.max())
+            .from(taskReport)
+            .where(taskReport.namespace.eq(namespace))
+            .fetchOne();
+    }
+
+    public Date getMinFireTime(String namespace) {
+        Date jobLogMin = queryDSL.select(taskJobLog.fireTime.min())
+            .from(taskJobLog)
+            .where(taskJobLog.namespace.eq(namespace))
+            .fetchOne();
+        Date triggerLogMin = queryDSL.select(taskJobTriggerLog.fireTime.min())
+            .from(taskJobTriggerLog)
+            .where(taskJobTriggerLog.namespace.eq(namespace))
+            .fetchOne();
+        if (jobLogMin == null && triggerLogMin == null) {
+            return null;
+        }
+        if (jobLogMin == null || triggerLogMin == null) {
+            return jobLogMin == null ? triggerLogMin : jobLogMin;
+        }
+        return jobLogMin.compareTo(triggerLogMin) > 0 ? triggerLogMin : jobLogMin;
+    }
+
+    public long addOrUpdateTaskReport(List<TaskReport> listReport) {
+        if (listReport == null || listReport.isEmpty()) {
+            return 0L;
+        }
+        List<String> exists = queryDSL.select(taskReport.reportTime).from(taskReport)
+            .where(taskReport.reportTime.in(listReport.stream().map(TaskReport::getReportTime).collect(Collectors.toSet())))
+            .fetch();
+        SQLUpdateClause update = queryDSL.update(taskReport);
+        SQLInsertClause insert = queryDSL.insert(taskReport);
+        for (TaskReport report : listReport) {
+            if (exists.contains(report.getReportTime())) {
+                update.set(taskReport.jobCount, report.getJobCount())
+                    .set(taskReport.jobErrCount, report.getJobErrCount())
+                    .set(taskReport.triggerCount, report.getTriggerCount())
+                    .set(taskReport.misfireCount, report.getMisfireCount())
+                    .where(taskReport.reportTime.eq(report.getReportTime()))
+                    .addBatch();
+            } else {
+                insert.populate(report).addBatch();
+            }
+        }
+        long count = 0;
+        if (update.getBatchCount() > 0) {
+            count = count + update.execute();
+        }
+        if (insert.getBatchCount() > 0) {
+            count = count + insert.execute();
+        }
+        return count;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

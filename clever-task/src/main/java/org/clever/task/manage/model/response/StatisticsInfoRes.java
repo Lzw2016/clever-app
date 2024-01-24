@@ -17,7 +17,7 @@ public class StatisticsInfoRes {
     /**
      * 触发次数
      */
-    private Integer triggerCount;
+    private Long triggerCount;
     /**
      * 命名空间数
      */

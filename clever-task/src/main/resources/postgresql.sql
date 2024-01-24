@@ -403,3 +403,31 @@ create index idx_task_job_log_start_time on task_job_log (start_time);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/
+
+
+/* ====================================================================================================================
+    task_report -- 任务执行报表
+==================================================================================================================== */
+create table task_report
+(
+    id                  int8                            not null,
+    namespace           varchar(63)                     not null,
+    report_time         varchar(31)                     not null,
+    job_count           int8                            not null,
+    job_err_count       int8                            not null,
+    trigger_count       int8                            not null,
+    misfire_count       int8                            not null,
+    primary key (id)
+);
+comment on table task_report is '任务执行报表';
+comment on column task_report.id is '主键id';
+comment on column task_report.namespace is '命名空间';
+comment on column task_report.report_time is '报表时间';
+comment on column task_report.job_count is 'job 运行总次数';
+comment on column task_report.job_err_count is 'job 运行错误次数';
+comment on column task_report.trigger_count is '触发总次数';
+comment on column task_report.misfire_count is '错过触发次数';
+create index idx_task_report_task_report on task_report (report_time);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/

@@ -280,3 +280,22 @@ create index idx_task_job_log_end_time on task_job_log (end_time);
 
 --------------------------------------------------------------------------------------------------------------------------*/
 
+
+/* ====================================================================================================================
+    task_report -- 任务执行报表
+==================================================================================================================== */
+create table task_report
+(
+    id                  bigint          not null        auto_increment                          comment '主键id',
+    namespace           varchar(63)     not null                                                comment '命名空间',
+    report_time         varchar(31)     not null                                                comment '报表时间',
+    job_count           bigint          not null                                                comment 'job 运行总次数',
+    job_err_count       bigint          not null                                                comment 'job 运行错误次数',
+    trigger_count       bigint          not null                                                comment '触发总次数',
+    misfire_count       bigint          not null                                                comment '错过触发次数',
+    primary key (id)
+) comment = '任务执行报表';
+create index idx_task_report_task_report on task_report (report_time);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/

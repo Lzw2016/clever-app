@@ -15,10 +15,6 @@ public class CartLineDataReq {
      */
     private String namespace;
     /**
-     * 调度器实例名称
-     */
-    private String instanceName;
-    /**
      * 开始时间
      */
     private Date start;

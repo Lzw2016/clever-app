@@ -2,7 +2,9 @@ package org.clever.task.manage.dao;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Ops;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.sql.ColumnMetadata;
 import com.querydsl.sql.SQLQuery;
 import lombok.Getter;
@@ -26,13 +28,13 @@ import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.clever.task.core.model.query.QTaskJob.taskJob;
 import static org.clever.task.core.model.query.QTaskJobLog.taskJobLog;
 import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 import static org.clever.task.core.model.query.QTaskJobTriggerLog.taskJobTriggerLog;
+import static org.clever.task.core.model.query.QTaskReport.taskReport;
 import static org.clever.task.core.model.query.QTaskScheduler.taskScheduler;
 import static org.clever.task.core.model.query.QTaskSchedulerLog.taskSchedulerLog;
 
@@ -254,9 +256,18 @@ public class TaskManageStore {
 
     @SuppressWarnings("ExtractMethodRecommender")
     public StatisticsInfoRes getStatistics() {
+        final Date today = DateUtils.getDayStartTime(jdbc.currentDate());
         StatisticsInfoRes res = new StatisticsInfoRes();
         res.setJobCount(Conv.asInteger(queryDSL.selectFrom(taskJob).fetchCount()));
-        res.setTriggerCount(Conv.asInteger(queryDSL.select(taskJobTrigger.fireCount.sum()).from(taskJobTrigger).fetchOne()));
+        Long triggerCount = queryDSL.select(taskReport.triggerCount.sum())
+            .from(taskReport)
+            .where(taskReport.reportTime.ne(DateUtils.formatToString(today, DateUtils.yyyy_MM_dd)))
+            .fetchOne();
+        if (triggerCount == null) {
+            triggerCount = 0L;
+        }
+        triggerCount = triggerCount + createTaskReport(today).getTriggerCount();
+        res.setTriggerCount(triggerCount);
         Tuple tuple = queryDSL.select(taskScheduler.namespace.countDistinct(), taskScheduler.instanceName.count()).from(taskScheduler).fetchOne();
         if (tuple != null) {
             res.setNamespaceCount(Conv.asInteger(tuple.get(taskScheduler.namespace.countDistinct())));
@@ -306,7 +317,7 @@ public class TaskManageStore {
         return res;
     }
 
-    public CartLineDataRes getCartLineDataRes(CartLineDataReq req) {
+    public List<CartLineDataRes> getCartLineDataRes(CartLineDataReq req) {
         if (req.getEnd() == null) {
             req.setEnd(new Date());
         }
@@ -319,87 +330,37 @@ public class TaskManageStore {
         if (req.getLimit() > QueryByPage.PAGE_SIZE_MAX) {
             req.setLimit(QueryByPage.PAGE_SIZE_MAX);
         }
-        Function<DateTimePath<Date>, StringExpression> getDateFormatField = field -> {
-            // mysql        date_format(now(), '%Y-%m-%d %H:%i:%s')
-            // oracle       to_char(sysdate, 'YYYY-MM-DD HH24:MI:SS')
-            // postgre_sql  to_char(now(), 'YYYY-MM-DD HH24:MI:SS')
-            StringExpression fieldExpr;
-            switch (queryDSL.getJdbc().getDbType()) {
-                case MYSQL:
-                    // noinspection DuplicateBranchesInSwitch
-                    fieldExpr = Expressions.stringTemplate("date_format({0}, '%Y-%m-%d')", field);
-                    break;
-                case ORACLE:
-                case ORACLE_12C:
-                case POSTGRE_SQL:
-                    fieldExpr = Expressions.stringTemplate("to_char({0}, 'YYYY-MM-DD')", field);
-                    break;
-                default:
-                    fieldExpr = Expressions.stringTemplate("date_format({0}, '%Y-%m-%d')", field);
-            }
-            return fieldExpr;
-        };
-        CartLineDataRes res = new CartLineDataRes();
-        // 任务运行统计数据
-        StringExpression jobFireTime = getDateFormatField.apply(taskJobLog.fireTime);
-        NumberTemplate<Integer> jobErrCountField = Expressions.numberTemplate(Integer.class, "sum(case when {0}=1 then 1 else 0 end)", taskJobLog.status);
-        SQLQuery<Tuple> sqlQuery = queryDSL.select(jobFireTime, taskJobLog.fireTime.count(), jobErrCountField)
-            .from(taskJobLog)
-            .where(taskJobLog.fireTime.goe(req.getStart()))
-            .where(taskJobLog.fireTime.loe(req.getEnd()))
-            .groupBy(jobFireTime)
-            .orderBy(jobFireTime.desc())
-            .limit(req.getLimit());
-        if (StringUtils.isNotBlank(req.getNamespace())) {
-            sqlQuery.where(taskJobLog.namespace.eq(req.getNamespace()));
-        }
-        if (StringUtils.isNotBlank(req.getInstanceName())) {
-            sqlQuery.where(taskJobLog.instanceName.eq(req.getInstanceName()));
-        }
-        List<Tuple> tuples = sqlQuery.fetch();
-        Map<String, Integer> jobCountMap = new HashMap<>(tuples.size());
-        tuples.forEach(tuple -> jobCountMap.put(tuple.get(jobFireTime), Conv.asInteger(tuple.get(taskJobLog.fireTime.count()))));
-        Map<String, Integer> jobErrCountMap = new HashMap<>(tuples.size());
-        tuples.forEach(tuple -> jobErrCountMap.put(tuple.get(jobFireTime), Conv.asInteger(tuple.get(jobErrCountField))));
-        StringExpression triggerFireTime = getDateFormatField.apply(taskJobTriggerLog.fireTime);
-        sqlQuery = queryDSL.select(triggerFireTime, taskJobTriggerLog.fireTime.count())
-            .from(taskJobTriggerLog)
-            .where(taskJobTriggerLog.fireTime.goe(req.getStart()))
-            .where(taskJobTriggerLog.fireTime.loe(req.getEnd()))
-            .groupBy(triggerFireTime)
-            .orderBy(triggerFireTime.desc())
+        final Date today = DateUtils.getDayStartTime(jdbc.currentDate());
+        SQLQuery<Tuple> sqlQuery = queryDSL.select(
+                taskReport.reportTime,
+                taskReport.jobCount.sum(),
+                taskReport.jobErrCount.sum(),
+                taskReport.triggerCount.sum(),
+                taskReport.misfireCount.sum()
+            )
+            .from(taskReport)
+            .where(taskReport.reportTime.ne(DateUtils.formatToString(today, DateUtils.yyyy_MM_dd)))
+            .where(taskReport.reportTime.goe(DateUtils.formatToString(req.getStart(), DateUtils.yyyy_MM_dd)))
+            .where(taskReport.reportTime.loe(DateUtils.formatToString(req.getEnd(), DateUtils.yyyy_MM_dd)))
+            .groupBy(taskReport.namespace, taskReport.reportTime)
+            .orderBy(taskReport.reportTime.asc())
             .limit(req.getLimit());
         if (StringUtils.isNotBlank(req.getNamespace())) {
             sqlQuery.where(taskJobTriggerLog.namespace.eq(req.getNamespace()));
         }
-        if (StringUtils.isNotBlank(req.getInstanceName())) {
-            sqlQuery.where(taskJobTriggerLog.instanceName.eq(req.getInstanceName()));
-        }
-        tuples = sqlQuery.fetch();
-        Map<String, Integer> triggerCountMap = new HashMap<>(tuples.size());
-        tuples.forEach(tuple -> triggerCountMap.put(tuple.get(triggerFireTime), Conv.asInteger(tuple.get(taskJobTriggerLog.fireTime.count()))));
-        // 设置返回值
-        Date startTime = req.getStart();
-        String currentTimeStr = DateUtils.formatToString(startTime, DateUtils.yyyy_MM_dd);
-        final String endTimeStr = DateUtils.formatToString(req.getEnd(), DateUtils.yyyy_MM_dd);
-        while (currentTimeStr.compareTo(endTimeStr) <= 0) {
-            Integer jobCount = jobCountMap.get(currentTimeStr);
-            if (jobCount == null) {
-                jobCount = 0;
-            }
-            Integer jobErrCount = jobErrCountMap.get(currentTimeStr);
-            if (jobErrCount == null) {
-                jobErrCount = 0;
-            }
-            Integer triggerCount = triggerCountMap.get(currentTimeStr);
-            if (triggerCount == null) {
-                triggerCount = 0;
-            }
-            res.getJob().add(new CartLineDataRes.CartLineItem(currentTimeStr, jobCount, jobErrCount, triggerCount));
-            startTime = DateUtils.addDays(startTime, 1);
-            currentTimeStr = DateUtils.formatToString(startTime, DateUtils.yyyy_MM_dd);
-        }
-        return res;
+        List<Tuple> list = sqlQuery.fetch();
+        List<CartLineDataRes> resList = list.stream().map(tuple -> {
+            CartLineDataRes res = new CartLineDataRes();
+            res.setReportTime(tuple.get(taskReport.reportTime));
+            res.setJobCount(tuple.get(taskReport.jobCount.sum()));
+            res.setJobErrCount(tuple.get(taskReport.jobErrCount.sum()));
+            res.setTriggerCount(tuple.get(taskReport.triggerCount.sum()));
+            res.setMisfireCount(tuple.get(taskReport.misfireCount.sum()));
+            return res;
+        }).collect(Collectors.toList());
+        resList.add(createTaskReport(today));
+        resList.sort(Comparator.comparing(CartLineDataRes::getReportTime));
+        return resList;
     }
 
     public List<JobLogInfo> getLastRunJobs(RunJobsReq req) {
@@ -632,6 +593,34 @@ public class TaskManageStore {
                 .filter(job -> Objects.equals(job.getId(), jobId))
                 .findFirst().orElse(null);
             res.getMaxRetryJobs().add(jobEntity);
+        }
+        return res;
+    }
+
+    public CartLineDataRes createTaskReport(Date date) {
+        final CartLineDataRes res = new CartLineDataRes();
+        res.setReportTime(DateUtils.formatToString(date, DateUtils.yyyy_MM_dd));
+        final Date dayStart = DateUtils.getDayStartTime(date);
+        final Date dayEnd = DateUtils.addDays(dayStart, 1);
+        NumberTemplate<Long> jobErrCountField = Expressions.numberTemplate(Long.class, "sum(case when {0}=1 then 1 else 0 end)", taskJobLog.status);
+        Tuple tuple = queryDSL.select(taskJobLog.fireTime.count(), jobErrCountField)
+            .from(taskJobLog)
+            .where(taskJobLog.fireTime.goe(dayStart))
+            .where(taskJobLog.fireTime.lt(dayEnd))
+            .fetchOne();
+        if (tuple != null) {
+            res.setJobCount(tuple.get(taskJobLog.fireTime.count()));
+            res.setJobErrCount(tuple.get(jobErrCountField));
+        }
+        NumberTemplate<Long> misfireCountField = Expressions.numberTemplate(Long.class, "sum(case when {0}=1 then 1 else 0 end)", taskJobTriggerLog.misFired);
+        tuple = queryDSL.select(taskJobTriggerLog.fireTime.count(), misfireCountField)
+            .from(taskJobTriggerLog)
+            .where(taskJobTriggerLog.fireTime.goe(dayStart))
+            .where(taskJobTriggerLog.fireTime.lt(dayEnd))
+            .fetchOne();
+        if (tuple != null) {
+            res.setTriggerCount(tuple.get(taskJobTriggerLog.fireTime.count()));
+            res.setMisfireCount(tuple.get(misfireCountField));
         }
         return res;
     }
