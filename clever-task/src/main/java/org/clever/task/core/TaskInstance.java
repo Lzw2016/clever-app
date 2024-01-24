@@ -1370,7 +1370,7 @@ public class TaskInstance {
     }
 
     public void collectReport() {
-        final Date maxDate = DateUtils.getDayStartTime(taskStore.currentDate());
+        final Date maxDate = DateUtils.getDayStartTime(DateUtils.addDays(taskStore.currentDate(), -1));
         Date minDate;
         String lastReportTime = taskStore.beginReadOnlyTX(status -> taskStore.getLastReportTime(getNamespace()));
         if (StringUtils.isBlank(lastReportTime)) {
