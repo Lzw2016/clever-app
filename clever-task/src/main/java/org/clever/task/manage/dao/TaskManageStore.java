@@ -148,8 +148,7 @@ public class TaskManageStore {
             .from(taskJobLog)
             .leftJoin(taskJobTriggerLog).on(taskJobLog.jobTriggerLogId.eq(taskJobTriggerLog.id))
             .leftJoin(taskJob).on(taskJobLog.jobId.eq(taskJob.id))
-            .orderBy(taskJob.namespace.asc())
-            .orderBy(taskJob.name.asc());
+            .orderBy(taskJobLog.fireTime.desc());
         if (StringUtils.isNotBlank(query.getNamespace())) {
             sqlQuery.where(taskJobLog.namespace.eq(query.getNamespace()));
         }
