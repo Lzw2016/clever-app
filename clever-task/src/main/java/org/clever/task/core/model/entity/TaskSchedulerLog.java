@@ -36,6 +36,8 @@ public class TaskSchedulerLog implements Serializable {
     public static final String EVENT_CLEAR_LOG_ERROR = "clear_log_error";
     /** 收集任务执行报表错误 */
     public static final String EVENT_COLLECT_REPORT_ERROR = "collect_report_error";
+    /** 调度器优化告警 */
+    public static final String EVENT_OPTIMIZE_ALARMS = "optimize_alarms";
     /** 调度器启动成功 */
     public static final String EVENT_STARTED = "started";
     /** 调度器启动失败 */

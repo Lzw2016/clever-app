@@ -1090,10 +1090,20 @@ public class TaskInstance {
             // 计算休眠时间到下一次触发(保证每秒触发一次)
             long sleepTime = startTime + (count * 1000) - taskStore.currentTimeMillis();
             if (sleepTime <= -500) {
-                log.error(
-                    "[TaskInstance] 调度器超时，建议调整参数配置提高调度器性能 | instanceName={} | waitTrigger={} | waitReloadTrigger={} |sleepTime={}",
+                String message = String.format(
+                    "调度器超时，建议调整参数配置提高调度器性能 | instanceName=%s | waitTrigger=%s(ms) | waitReloadTrigger=%s(ms) | sleepTime=%s(ms)",
                     getInstanceName(), waitTrigger, waitReloadTrigger, sleepTime
                 );
+                log.error("[TaskInstance] {}", message);
+                jobExecutor.execute(() -> {
+                    try {
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_OPTIMIZE_ALARMS, message);
+                        schedulerErrorListener(schedulerLog, new SchedulerException(message));
+                    } catch (Throwable e) {
+                        log.error(e.getMessage(), e);
+                    }
+                });
             }
             if (sleepTime > 0) {
                 try {
