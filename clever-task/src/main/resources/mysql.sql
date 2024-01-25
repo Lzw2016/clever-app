@@ -171,7 +171,7 @@ create table task_job_trigger
     next_fire_time      datetime(3)                                                             comment '下一次触发时间',
     misfire_strategy    tinyint         not null        default 2                               comment '错过触发策略，1：忽略，2：立即补偿触发一次',
     allow_concurrent    tinyint         not null        default 0                               comment '是否允许多节点并行触发，使用分布式锁实现，0：禁止，1：允许',
-    type                tinyint         not null                                                comment '任务类型，1：cron触发，2：固定间隔触发',
+    type                tinyint         not null                                                comment '触发类型，1：cron触发，2：固定间隔触发',
     cron                varchar(511)                                                            comment 'cron表达式',
     fixed_interval      bigint                                                                  comment '固定间隔触发，间隔时间(单位：秒)',
     fire_count          bigint          not null        default 0                               comment '触发次数',

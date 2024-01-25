@@ -20,11 +20,11 @@ import java.util.*;
  */
 public class QLinkedMap extends FactoryExpressionBase<LinkedHashMap<String, ?>> {
     private final ArrayList<Expression<?>> args;
-    private RenameStrategy renameStrategy = RenameStrategy.ToUnderline;
+    private RenameStrategy renameStrategy;
     private final Map<Integer, String> columnNameCache = new HashMap<>();
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public QLinkedMap(Expression<?>... args) {
+    public QLinkedMap(RenameStrategy renameStrategy, Expression<?>... args) {
         super((Class) LinkedHashMap.class);
         ArrayList<Expression<?>> paths = new ArrayList<>(args.length);
         for (Expression<?> arg : args) {
@@ -35,6 +35,11 @@ public class QLinkedMap extends FactoryExpressionBase<LinkedHashMap<String, ?>> 
             }
         }
         this.args = paths;
+        this.renameStrategy = renameStrategy;
+    }
+
+    public QLinkedMap(Expression<?>... args) {
+        this(RenameStrategy.ToUnderline, args);
     }
 
     public QLinkedMap add(Expression<?>... args) {

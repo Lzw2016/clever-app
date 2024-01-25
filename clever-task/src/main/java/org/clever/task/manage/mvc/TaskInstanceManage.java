@@ -1,6 +1,5 @@
 package org.clever.task.manage.mvc;
 
-import com.google.common.base.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppContextHolder;
@@ -27,6 +26,7 @@ import org.clever.web.support.mvc.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 作者：lizw <br/>
@@ -168,7 +168,7 @@ public class TaskInstanceManage {
         final TaskInfoReq.TaskJobTrigger trigger = req.getJobTrigger();
         AbstractJob jobModel;
         AbstractTrigger jobTrigger;
-        if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_1)) {
+        if (Objects.equals(job.getType(), EnumConstant.JOB_TYPE_1)) {
             HttpJobModel httpJob = new HttpJobModel(job.getName(), http.getRequestMethod(), http.getRequestUrl());
             if (StringUtils.isNotBlank(http.getRequestData())) {
                 try {
@@ -179,17 +179,17 @@ public class TaskInstanceManage {
             }
             httpJob.setSuccessCheck(httpJob.getSuccessCheck());
             jobModel = httpJob;
-        } else if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_2)) {
+        } else if (Objects.equals(job.getType(), EnumConstant.JOB_TYPE_2)) {
             jobModel = new JavaJobModel(
-                job.getName(), Objects.equal(java.getIsStatic(), EnumConstant.JAVA_JOB_IS_STATIC_1), java.getClassName(), java.getClassMethod()
+                job.getName(), Objects.equals(java.getIsStatic(), EnumConstant.JAVA_JOB_IS_STATIC_1), java.getClassName(), java.getClassMethod()
             );
-        } else if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_3)) {
+        } else if (Objects.equals(job.getType(), EnumConstant.JOB_TYPE_3)) {
             jobModel = new JsJobModel(
-                job.getName(), js.getContent(), Objects.equal(js.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
+                job.getName(), js.getContent(), Objects.equals(js.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
             );
-        } else if (Objects.equal(job.getType(), EnumConstant.JOB_TYPE_4)) {
+        } else if (Objects.equals(job.getType(), EnumConstant.JOB_TYPE_4)) {
             ShellJobModel shellJob = new ShellJobModel(
-                job.getName(), shell.getShellType(), shell.getContent(), Objects.equal(shell.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
+                job.getName(), shell.getShellType(), shell.getContent(), Objects.equals(shell.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
             );
             shellJob.setShellCharset(shell.getShellCharset());
             shellJob.setShellTimeout(shell.getShellTimeout());
@@ -198,7 +198,7 @@ public class TaskInstanceManage {
             throw new BusinessException("任务类型错误type=" + job.getType());
         }
         BeanCopyUtils.copyTo(job, jobModel);
-        if (Objects.equal(trigger.getType(), EnumConstant.JOB_TRIGGER_TYPE_1)) {
+        if (Objects.equals(trigger.getType(), EnumConstant.JOB_TRIGGER_TYPE_1)) {
             jobTrigger = new CronTrigger(job.getName(), trigger.getCron());
         } else {
             jobTrigger = new FixedIntervalTrigger(job.getName(), trigger.getFixedInterval());
@@ -234,15 +234,15 @@ public class TaskInstanceManage {
             jobModel = httpJob;
         } else if (java != null && java.getId() != null) {
             jobModel = new JavaJobModel(
-                job.getName(), Objects.equal(java.getIsStatic(), EnumConstant.JAVA_JOB_IS_STATIC_1), java.getClassName(), java.getClassMethod()
+                job.getName(), Objects.equals(java.getIsStatic(), EnumConstant.JAVA_JOB_IS_STATIC_1), java.getClassName(), java.getClassMethod()
             );
         } else if (js != null && js.getId() != null) {
             jobModel = new JsJobModel(
-                job.getName(), js.getContent(), Objects.equal(js.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
+                job.getName(), js.getContent(), Objects.equals(js.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
             );
         } else if (shell != null && shell.getId() != null) {
             ShellJobModel shellJob = new ShellJobModel(
-                job.getName(), shell.getShellType(), shell.getContent(), Objects.equal(shell.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
+                job.getName(), shell.getShellType(), shell.getContent(), Objects.equals(shell.getReadOnly(), EnumConstant.FILE_CONTENT_READ_ONLY_1)
             );
             shellJob.setShellCharset(shell.getShellCharset());
             shellJob.setShellTimeout(shell.getShellTimeout());
@@ -251,7 +251,7 @@ public class TaskInstanceManage {
             throw new BusinessException("任务数据不完整");
         }
         BeanCopyUtils.copyTo(job, jobModel);
-        if (Objects.equal(trigger.getType(), EnumConstant.JOB_TRIGGER_TYPE_1)) {
+        if (Objects.equals(trigger.getType(), EnumConstant.JOB_TRIGGER_TYPE_1)) {
             jobTrigger = new CronTrigger(job.getName(), trigger.getCron());
         } else {
             jobTrigger = new FixedIntervalTrigger(job.getName(), trigger.getFixedInterval());
@@ -413,5 +413,11 @@ public class TaskInstanceManage {
     public static JobRetryRankRes getRetryJobs(JobErrorRankReq req) {
         TaskManageStore taskManageStore = getTaskManageStore();
         return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getRetryJobs(req));
+    }
+
+    @Transactional(disabled = true)
+    public static Object t01() {
+        getTaskInstance().dataCheck();
+        return R.success();
     }
 }

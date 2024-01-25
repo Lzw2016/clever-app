@@ -257,7 +257,7 @@ comment on column task_job_trigger.last_fire_time is '上一次触发时间';
 comment on column task_job_trigger.next_fire_time is '下一次触发时间';
 comment on column task_job_trigger.misfire_strategy is '错过触发策略，1：忽略，2：立即补偿触发一次';
 comment on column task_job_trigger.allow_concurrent is '是否允许多节点并行触发，使用悲观锁实现，不建议允许，0：禁止，1：允许';
-comment on column task_job_trigger.type is '任务类型，1：cron触发，2：固定间隔触发';
+comment on column task_job_trigger.type is '触发类型，1：cron触发，2：固定间隔触发';
 comment on column task_job_trigger.cron is 'cron表达式';
 comment on column task_job_trigger.fixed_interval is '固定间隔触发，间隔时间(单位：秒)';
 comment on column task_job_trigger.fire_count is '触发次数';

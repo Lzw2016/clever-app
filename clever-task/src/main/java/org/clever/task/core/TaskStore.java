@@ -12,22 +12,31 @@ import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Conv;
 import org.clever.core.DateUtils;
+import org.clever.core.RenameStrategy;
 import org.clever.core.id.SnowFlake;
+import org.clever.core.mapper.JacksonMapper;
+import org.clever.core.tuples.TupleTwo;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
+import org.clever.data.jdbc.querydsl.utils.QueryDslUtils;
 import org.clever.task.TaskDataSource;
+import org.clever.task.core.cron.CronExpressionUtil;
 import org.clever.task.core.exception.SchedulerException;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.JobInfo;
 import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
+import org.clever.task.core.support.ClassMethodLoader;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
-import java.util.Date;
-import java.util.List;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -977,6 +986,356 @@ public class TaskStore {
             count = count + insert.execute();
         }
         return count;
+    }
+
+    public String dataCheck(String namespace) {
+        final String line = "\n";
+        final String tab = "\t";
+        final StringBuilder errMsg = new StringBuilder();
+        final Consumer<List<?>> appendData = list -> {
+            if (list.isEmpty()) {
+                return;
+            }
+            for (Object row : list) {
+                errMsg.append(tab).append(row).append(line);
+            }
+            errMsg.append(line);
+        };
+        // 1.task_http_job、task_java_job、task_js_job、task_shell_job 与 task_job 是否是一对一的关系
+        // -- task_java_job 一对一的关系
+        // select
+        //     a.job_id
+        // from task_http_job a
+        // group by a.job_id having count(a.id) > 1
+        final Function<String, TupleTwo<String, List<Map<String, Object>>>> query1 = tableName -> {
+            String sql = String.format("select a.job_id from %s a group by a.job_id having count(a.id) > 1", tableName);
+            List<Map<String, Object>> res = beginReadOnlyTX(status -> jdbc.queryMany(sql));
+            return TupleTwo.creat(sql, res);
+        };
+        final String[] tables = new String[]{taskHttpJob.getTableName(), taskJavaJob.getTableName(), taskJsJob.getTableName(), taskShellJob.getTableName()};
+        for (String table : tables) {
+            TupleTwo<String, List<Map<String, Object>>> tuple = query1.apply(table);
+            if (tuple.getValue2().isEmpty()) {
+                continue;
+            }
+            errMsg.append(String.format("-- %s 一对一的关系", table)).append(line);
+            errMsg.append(tab).append(tuple.getValue1()).append(line);
+            appendData.accept(tuple.getValue2());
+        }
+        // -- 无效的 task_job 数据(任务类型错误或者缺少任务子表数据)
+        // select
+        //     a.id, a.namespace, a.name
+        // from task_job a
+        //     left join task_http_job b on (a.id=b.job_id)
+        //     left join task_java_job c on (a.id=c.job_id)
+        //     left join task_js_job d on (a.id=d.job_id)
+        //     left join task_shell_job e on (a.id=e.job_id)
+        // where a.type not in (1, 2, 3, 4)
+        //     or (a.type=1 and b.id is null )
+        //     or (a.type=2 and c.id is null )
+        //     or (a.type=3 and d.id is null )
+        //     or (a.type=4 and e.id is null )
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery1 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskJob.id, taskJob.namespace, taskJob.name
+            ))
+            .from(taskJob)
+            .leftJoin(taskHttpJob).on(taskJob.id.eq(taskHttpJob.jobId))
+            .leftJoin(taskJavaJob).on(taskJob.id.eq(taskJavaJob.jobId))
+            .leftJoin(taskJsJob).on(taskJob.id.eq(taskJsJob.jobId))
+            .leftJoin(taskShellJob).on(taskJob.id.eq(taskShellJob.jobId))
+            .where(
+                taskJob.type.notIn(EnumConstant.JOB_TYPE_1, EnumConstant.JOB_TYPE_2, EnumConstant.JOB_TYPE_3, EnumConstant.JOB_TYPE_4)
+                    .or(taskJob.type.eq(EnumConstant.JOB_TYPE_1).and(taskHttpJob.id.isNull()))
+                    .or(taskJob.type.eq(EnumConstant.JOB_TYPE_2).and(taskJavaJob.id.isNull()))
+                    .or(taskJob.type.eq(EnumConstant.JOB_TYPE_3).and(taskJsJob.id.isNull()))
+                    .or(taskJob.type.eq(EnumConstant.JOB_TYPE_4).and(taskShellJob.id.isNull()))
+            );
+        List<LinkedHashMap<String, ?>> list1 = beginReadOnlyTX(status -> sqlQuery1.fetch());
+        if (!list1.isEmpty()) {
+            errMsg.append("-- 无效的 task_job 数据(任务类型错误或者缺少任务子表数据)").append(line);
+            errMsg.append(sqlQuery1.getSQL().getSQL()).append(line);
+            appendData.accept(list1);
+        }
+        // -- 无效的 task_http_job 数据(namespace不一致或者缺少父表数据)
+        // select
+        //     a.id, a.namespace, a.job_id
+        // from task_http_job a left join task_job b on (a.job_id=b.id)
+        // where a.namespace!=b.namespace or b.id is null
+        final Function<String, TupleTwo<String, List<Map<String, Object>>>> query2 = tableName -> {
+            String sql = String.format(
+                "select a.id, a.namespace, a.job_id from %s a left join %s b on (a.job_id=b.id) where a.namespace!=b.namespace or b.id is null",
+                tableName, taskJob.getTableName()
+            );
+            List<Map<String, Object>> res = beginReadOnlyTX(status -> jdbc.queryMany(sql));
+            return TupleTwo.creat(sql, res);
+        };
+        for (String table : tables) {
+            TupleTwo<String, List<Map<String, Object>>> tuple = query2.apply(table);
+            if (tuple.getValue2().isEmpty()) {
+                continue;
+            }
+            errMsg.append(String.format("-- 无效的 %s 数据(namespace不一致或者缺少父表数据)", table)).append(line);
+            errMsg.append(tuple.getValue1()).append(line);
+            appendData.accept(tuple.getValue2());
+        }
+        // 2.task_job_trigger 与 task_job 是否是一对一的关系
+        // -- task_job_trigger 一对一的关系
+        // select
+        //     a.job_id
+        // from task_job_trigger a
+        // group by a.job_id having count(a.id) > 1
+        TupleTwo<String, List<Map<String, Object>>> tuple = query1.apply(taskJobTrigger.getTableName());
+        if (!tuple.getValue2().isEmpty()) {
+            errMsg.append(String.format("-- %s 一对一的关系", taskJobTrigger.getTableName())).append(line);
+            errMsg.append(tab).append(tuple.getValue1()).append(line);
+            appendData.accept(tuple.getValue2());
+        }
+        // -- 无效的 task_job_trigger 数据(触发类型错误或者与task_job匹配的数据)
+        // select
+        //     a.id, a.namespace, a.name
+        // from task_job a
+        //     left join task_job_trigger b on (a.id=b.job_id)
+        // where b.type not in (1, 2) or b.id is null
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery2 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskJob.id, taskJob.namespace, taskJob.name
+            ))
+            .from(taskJob)
+            .leftJoin(taskJobTrigger).on(taskJob.id.eq(taskJobTrigger.jobId))
+            .where(
+                taskJobTrigger.type.notIn(EnumConstant.JOB_TRIGGER_TYPE_1, EnumConstant.JOB_TRIGGER_TYPE_2)
+                    .or(taskJobTrigger.id.isNull())
+            );
+        List<LinkedHashMap<String, ?>> list2 = beginReadOnlyTX(status -> sqlQuery2.fetch());
+        if (!list2.isEmpty()) {
+            errMsg.append("-- 无效的 task_job_trigger 数据(触发类型错误或者与task_job匹配的数据)").append(line);
+            errMsg.append(sqlQuery2.getSQL().getSQL()).append(line);
+            appendData.accept(list2);
+        }
+        // 3. task_job: type、route_strategy、first_scheduler、whitelist_scheduler、blacklist_scheduler、load_balance 字段值的有效性
+        // -- task_job: type、route_strategy、load_balance 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.name
+        // from task_job a
+        // where a.type not in (1, 2, 3, 4)
+        //     or a.route_strategy not in (0, 1, 2, 3)
+        //     or a.load_balance not in (1, 2, 3, 4)
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery3 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskJob.id, taskJob.namespace, taskJob.name
+            ))
+            .from(taskJob)
+            .where(
+                taskJob.type.notIn(EnumConstant.JOB_TYPE_1, EnumConstant.JOB_TYPE_2, EnumConstant.JOB_TYPE_3, EnumConstant.JOB_TYPE_4)
+                    .or(taskJob.routeStrategy.notIn(EnumConstant.JOB_ROUTE_STRATEGY_0, EnumConstant.JOB_ROUTE_STRATEGY_1, EnumConstant.JOB_ROUTE_STRATEGY_2, EnumConstant.JOB_ROUTE_STRATEGY_3))
+                    .or(taskJob.loadBalance.notIn(EnumConstant.JOB_LOAD_BALANCE_1, EnumConstant.JOB_LOAD_BALANCE_2, EnumConstant.JOB_LOAD_BALANCE_3, EnumConstant.JOB_LOAD_BALANCE_4))
+            );
+        List<LinkedHashMap<String, ?>> list3 = beginReadOnlyTX(status -> sqlQuery3.fetch());
+        if (!list3.isEmpty()) {
+            errMsg.append("-- task_job: type、route_strategy、load_balance 字段值的有效性").append(line);
+            errMsg.append(sqlQuery3.getSQL().getSQL()).append(line);
+            appendData.accept(list3);
+        }
+        // -- task_job: first_scheduler、whitelist_scheduler、blacklist_scheduler 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.name, a.first_scheduler, a.whitelist_scheduler, a.blacklist_scheduler
+        // from task_job a
+        // where a.route_strategy not in (1, 2, 3)
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery4 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskJob.id, taskJob.namespace, taskJob.name,
+                taskJob.firstScheduler, taskJob.whitelistScheduler, taskJob.blacklistScheduler
+            ))
+            .from(taskJob)
+            .where(
+                taskJob.type.notIn(EnumConstant.JOB_TYPE_1, EnumConstant.JOB_TYPE_2, EnumConstant.JOB_TYPE_3, EnumConstant.JOB_TYPE_4)
+                    .or(taskJob.routeStrategy.notIn(EnumConstant.JOB_ROUTE_STRATEGY_0, EnumConstant.JOB_ROUTE_STRATEGY_1, EnumConstant.JOB_ROUTE_STRATEGY_2, EnumConstant.JOB_ROUTE_STRATEGY_3))
+                    .or(taskJob.loadBalance.notIn(EnumConstant.JOB_LOAD_BALANCE_1, EnumConstant.JOB_LOAD_BALANCE_2, EnumConstant.JOB_LOAD_BALANCE_3, EnumConstant.JOB_LOAD_BALANCE_4))
+            );
+        List<LinkedHashMap<String, ?>> list4 = beginReadOnlyTX(status -> sqlQuery4.fetch());
+        Iterator<LinkedHashMap<String, ?>> iterator4 = list4.iterator();
+        while (iterator4.hasNext()) {
+            LinkedHashMap<String, ?> row = iterator4.next();
+            try {
+                String firstScheduler = Conv.asString(row.get(taskJob.firstScheduler.getMetadata().getName()));
+                String whitelistScheduler = Conv.asString(row.get(taskJob.whitelistScheduler.getMetadata().getName()));
+                String blacklistScheduler = Conv.asString(row.get(taskJob.blacklistScheduler.getMetadata().getName()));
+                if (StringUtils.isNotBlank(firstScheduler)) {
+                    if (!Objects.equals(firstScheduler, EnumConstant.JOB_FIRST_SCHEDULER_1)) {
+                        JacksonMapper.getInstance().fromJson(firstScheduler, List.class);
+                    }
+                }
+                if (StringUtils.isNotBlank(whitelistScheduler)) {
+                    JacksonMapper.getInstance().fromJson(whitelistScheduler, List.class);
+                }
+                if (StringUtils.isNotBlank(blacklistScheduler)) {
+                    JacksonMapper.getInstance().fromJson(blacklistScheduler, List.class);
+                }
+                iterator4.remove();
+            } catch (Throwable ignored) {
+            }
+        }
+        if (!list4.isEmpty()) {
+            errMsg.append("-- task_job: first_scheduler、whitelist_scheduler、blacklist_scheduler 字段值的有效性").append(line);
+            errMsg.append(sqlQuery4.getSQL().getSQL()).append(line);
+            appendData.accept(list4);
+        }
+        // 4.task_http_job: request_method 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.job_id
+        // from task_http_job a
+        // where a.request_method not in ('GET','HEAD','POST','PUT','DELETE','CONNECT','OPTIONS','TRACE','PATCH')
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery5 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskHttpJob.id, taskHttpJob.namespace, taskHttpJob.jobId
+            ))
+            .from(taskHttpJob)
+            .where(taskHttpJob.requestMethod.notIn(
+                "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"
+            ));
+        List<LinkedHashMap<String, ?>> list5 = beginReadOnlyTX(status -> sqlQuery5.fetch());
+        if (!list5.isEmpty()) {
+            errMsg.append("-- task_http_job: request_method 字段值的有效性)").append(line);
+            errMsg.append(sqlQuery5.getSQL().getSQL()).append(line);
+            appendData.accept(list5);
+        }
+        // 5.task_java_job: class_name、class_method 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.job_id, a.class_name, a.class_method
+        // from task_java_job a
+        // where a.namespace=''
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery6 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskJavaJob.id, taskJavaJob.namespace, taskJavaJob.jobId,
+                taskJavaJob.className, taskJavaJob.classMethod
+            ))
+            .from(taskJavaJob)
+            .where(taskJavaJob.namespace.eq(namespace));
+        List<LinkedHashMap<String, ?>> list6 = beginReadOnlyTX(status -> sqlQuery6.fetch());
+        Iterator<LinkedHashMap<String, ?>> iterator6 = list6.iterator();
+        while (iterator6.hasNext()) {
+            LinkedHashMap<String, ?> row = iterator6.next();
+            try {
+                String className = Conv.asString(row.get(taskJavaJob.className.getMetadata().getName()));
+                String classMethod = Conv.asString(row.get(taskJavaJob.classMethod.getMetadata().getName()));
+                TupleTwo<Class<?>, Method> exists = ClassMethodLoader.getMethod(className, classMethod);
+                if (exists != null) {
+                    iterator6.remove();
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        if (!list6.isEmpty()) {
+            errMsg.append("-- task_java_job: class_name、class_method 字段值的有效性").append(line);
+            errMsg.append(sqlQuery6.getSQL().getSQL()).append(line);
+            appendData.accept(list6);
+        }
+        // 6.task_shell_job: shell_type 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.job_id
+        // from task_shell_job a
+        // where a.shell_type not in ('bash','sh','ash','powershell','cmd','python','node','deno','php')
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery7 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskShellJob.id, taskShellJob.namespace, taskShellJob.jobId
+            ))
+            .from(taskShellJob)
+            .where(taskShellJob.shellType.notIn(EnumConstant.SHELL_TYPE_FILE_SUFFIX_MAPPING.keySet()));
+        List<LinkedHashMap<String, ?>> list7 = beginReadOnlyTX(status -> sqlQuery7.fetch());
+        if (!list7.isEmpty()) {
+            errMsg.append("-- task_shell_job: shell_type 字段值的有效性").append(line);
+            errMsg.append(sqlQuery7.getSQL().getSQL()).append(line);
+            appendData.accept(list7);
+        }
+        // task_shell_job: shell_charset 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.job_id, a.shell_charset
+        // from task_shell_job a
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery8 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskShellJob.id, taskShellJob.namespace, taskShellJob.jobId, taskShellJob.shellCharset
+            ))
+            .from(taskShellJob)
+            .where(taskShellJob.shellType.notIn(EnumConstant.SHELL_TYPE_FILE_SUFFIX_MAPPING.keySet()));
+        List<LinkedHashMap<String, ?>> list8 = beginReadOnlyTX(status -> sqlQuery8.fetch());
+        Iterator<LinkedHashMap<String, ?>> iterator8 = list8.iterator();
+        while (iterator8.hasNext()) {
+            LinkedHashMap<String, ?> row = iterator8.next();
+            try {
+                String shellCharset = Conv.asString(row.get(taskShellJob.shellCharset.getMetadata().getName()));
+                Charset.forName(shellCharset);
+                iterator8.remove();
+            } catch (Throwable ignored) {
+            }
+        }
+        if (!list8.isEmpty()) {
+            errMsg.append("-- task_shell_job: shell_charset 字段值的有效性").append(line);
+            errMsg.append(sqlQuery8.getSQL().getSQL()).append(line);
+            appendData.accept(list8);
+        }
+        // 7.task_job_trigger: misfire_strategy、allow_concurrent、type、cron、fixed_interval 字段值的有效性
+        // task_job_trigger: misfire_strategy、allow_concurrent、type 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.job_id
+        // from task_job_trigger a
+        // where a.misfire_strategy not in (1, 2)
+        //     or a.allow_concurrent not in (0, 1)
+        //     or a.type not in (1, 2)
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery9 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskJobTrigger.id, taskJobTrigger.namespace, taskJobTrigger.jobId
+            ))
+            .from(taskJobTrigger)
+            .where(
+                taskJobTrigger.misfireStrategy.notIn(EnumConstant.JOB_TRIGGER_MISFIRE_STRATEGY_1, EnumConstant.JOB_TRIGGER_MISFIRE_STRATEGY_2)
+                    .or(taskJobTrigger.allowConcurrent.notIn(EnumConstant.JOB_ALLOW_CONCURRENT_0, EnumConstant.JOB_ALLOW_CONCURRENT_1))
+                    .or(taskJobTrigger.type.notIn(EnumConstant.JOB_TRIGGER_TYPE_1, EnumConstant.JOB_TRIGGER_TYPE_2))
+            );
+        List<LinkedHashMap<String, ?>> list9 = beginReadOnlyTX(status -> sqlQuery9.fetch());
+        if (!list9.isEmpty()) {
+            errMsg.append("-- task_job_trigger: misfire_strategy、allow_concurrent、type 字段值的有效性").append(line);
+            errMsg.append(sqlQuery9.getSQL().getSQL()).append(line);
+            appendData.accept(list9);
+        }
+        // task_job_trigger: cron、fixed_interval 字段值的有效性
+        // select
+        //     a.id, a.namespace, a.job_id, a.type, a.cron, a.fixed_interval
+        // from task_job_trigger a
+        // where a.type in (1, 2)
+        SQLQuery<LinkedHashMap<String, ?>> sqlQuery10 = queryDSL.select(QueryDslUtils.linkedMap(
+                RenameStrategy.None,
+                taskJobTrigger.id, taskJobTrigger.namespace, taskJobTrigger.jobId,
+                taskJobTrigger.type, taskJobTrigger.cron, taskJobTrigger.fixedInterval
+            ))
+            .from(taskJobTrigger)
+            .where(taskJobTrigger.type.in(EnumConstant.JOB_TRIGGER_TYPE_1, EnumConstant.JOB_TRIGGER_TYPE_2));
+        List<LinkedHashMap<String, ?>> list10 = beginReadOnlyTX(status -> sqlQuery10.fetch());
+        Iterator<LinkedHashMap<String, ?>> iterator10 = list10.iterator();
+        while (iterator10.hasNext()) {
+            LinkedHashMap<String, ?> row = iterator10.next();
+            try {
+                Integer type = Conv.asInteger(row.get(taskJobTrigger.type.getMetadata().getName()));
+                String cron = Conv.asString(row.get(taskJobTrigger.cron.getMetadata().getName()));
+                Long fixedInterval = Conv.asLong(row.get(taskJobTrigger.fixedInterval.getMetadata().getName()));
+                boolean success = false;
+                if (Objects.equals(type, EnumConstant.JOB_TRIGGER_TYPE_1)) {
+                    success = CronExpressionUtil.isValidExpression(cron);
+                } else if (Objects.equals(type, EnumConstant.JOB_TRIGGER_TYPE_2)) {
+                    success = (fixedInterval != null && fixedInterval > 0);
+                }
+                if (success) {
+                    iterator10.remove();
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        if (!list10.isEmpty()) {
+            errMsg.append("-- task_job_trigger: cron、fixed_interval 字段值的有效性").append(line);
+            errMsg.append(sqlQuery10.getSQL().getSQL()).append(line);
+            appendData.accept(list10);
+        }
+        return errMsg.toString();
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

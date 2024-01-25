@@ -938,9 +938,9 @@ public class TaskInstance {
     /**
      * 数据完整性校验&一致性校验
      */
-    private void dataCheck() {
+    public void dataCheck() throws SchedulerException {
         calcNextFireTime(false);
-        // TODO 数据完整性校验&一致性校验
+        // 数据完整性校验&一致性校验
         // 1.task_http_job、task_java_job、task_js_job、task_shell_job 与 task_job 是否是一对一的关系
         // 2.task_job_trigger 与 task_job 是否是一对一的关系
         // 3. task_job: type、route_strategy、first_scheduler、whitelist_scheduler、blacklist_scheduler、load_balance 字段值的有效性
@@ -948,6 +948,10 @@ public class TaskInstance {
         // 5.task_java_job: class_name、class_method 字段值的有效性
         // 6.task_shell_job: shell_type、shell_charset 字段值的有效性
         // 7.task_job_trigger: misfire_strategy、type、cron、fixed_interval 字段值的有效性
+        String errMsg = taskStore.dataCheck(getNamespace());
+        if (StringUtils.isNotBlank(errMsg)) {
+            throw new SchedulerException(errMsg);
+        }
     }
 
     /**
@@ -1379,7 +1383,7 @@ public class TaskInstance {
         log.info("清理调度器日志数据量: {}", count);
     }
 
-    public void collectReport() {
+    private void collectReport() {
         final Date maxDate = DateUtils.getDayStartTime(DateUtils.addDays(taskStore.currentDate(), -1));
         Date minDate;
         String lastReportTime = taskStore.beginReadOnlyTX(status -> taskStore.getLastReportTime(getNamespace()));

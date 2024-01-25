@@ -22,7 +22,7 @@ public class TaskJobTriggerReq extends QueryByPage {
      */
     private String name;
     /**
-     * 任务类型，1：cron触发，2：固定间隔触发
+     * 触发类型，1：cron触发，2：固定间隔触发
      */
     private Integer type;
     /**

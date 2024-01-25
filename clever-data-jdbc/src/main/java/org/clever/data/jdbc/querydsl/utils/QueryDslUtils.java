@@ -53,6 +53,22 @@ public class QueryDslUtils {
         return new QLinkedMap(fields.toArray(new Expression<?>[0]));
     }
 
+    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, Expression<?>... fields) {
+        return new QLinkedMap(renameStrategy, fields);
+    }
+
+    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, Collection<? extends Expression<?>> fields) {
+        return new QLinkedMap(renameStrategy, fields.toArray(new Expression<?>[0]));
+    }
+
+    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, RelationalPath<?>... tables) {
+        List<Expression<?>> fields = new LinkedList<>();
+        for (RelationalPath<?> table : tables) {
+            fields.addAll(table.getColumns());
+        }
+        return new QLinkedMap(renameStrategy, fields.toArray(new Expression<?>[0]));
+    }
+
     public static QArray array(Expression<?>... fields) {
         return new QArray(fields);
     }

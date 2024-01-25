@@ -42,7 +42,7 @@ public class QTaskJobTrigger extends RelationalPathBase<TaskJobTrigger> {
     public final NumberPath<Integer> misfireStrategy = createNumber("misfireStrategy", Integer.class);
     /** 是否允许多节点并行触发，使用分布式锁实现，不建议允许，0：禁止，1：允许 */
     public final NumberPath<Integer> allowConcurrent = createNumber("allowConcurrent", Integer.class);
-    /** 任务类型，1：cron触发，2：固定间隔触发 */
+    /** 触发类型，1：cron触发，2：固定间隔触发 */
     public final NumberPath<Integer> type = createNumber("type", Integer.class);
     /** cron表达式 */
     public final StringPath cron = createString("cron");

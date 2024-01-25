@@ -97,6 +97,11 @@ public interface EnumConstant {
     int JOB_ROUTE_STRATEGY_3 = 3;
 
     /**
+     * 路由策略，1-指定节点优先，调度器名称集合
+     */
+    String JOB_FIRST_SCHEDULER_1 = "1";
+
+    /**
      * 负载均衡策略，1：抢占，2：随机，3：轮询，4：一致性HASH
      */
     int JOB_LOAD_BALANCE_1 = 1;
@@ -211,33 +216,33 @@ public interface EnumConstant {
      * shell脚本类型对应的文件后缀
      */
     Map<String, String> SHELL_TYPE_FILE_SUFFIX_MAPPING = Collections.unmodifiableMap(
-            new HashMap<String, String>() {{
-                put(SHELL_JOB_SHELL_TYPE_BASH, ".sh");
-                put(SHELL_JOB_SHELL_TYPE_SH, ".sh");
-                put(SHELL_JOB_SHELL_TYPE_ASH, ".sh");
-                put(SHELL_JOB_SHELL_TYPE_POWERSHELL, ".ps1");
-                put(SHELL_JOB_SHELL_TYPE_CMD, ".bat");
-                put(SHELL_JOB_SHELL_TYPE_PYTHON, ".py");
-                put(SHELL_JOB_SHELL_TYPE_NODE, ".js");
-                put(SHELL_JOB_SHELL_TYPE_DENO, ".ts");
-                put(SHELL_JOB_SHELL_TYPE_PHP, ".php");
-            }}
+        new HashMap<String, String>() {{
+            put(SHELL_JOB_SHELL_TYPE_BASH, ".sh");
+            put(SHELL_JOB_SHELL_TYPE_SH, ".sh");
+            put(SHELL_JOB_SHELL_TYPE_ASH, ".sh");
+            put(SHELL_JOB_SHELL_TYPE_POWERSHELL, ".ps1");
+            put(SHELL_JOB_SHELL_TYPE_CMD, ".bat");
+            put(SHELL_JOB_SHELL_TYPE_PYTHON, ".py");
+            put(SHELL_JOB_SHELL_TYPE_NODE, ".js");
+            put(SHELL_JOB_SHELL_TYPE_DENO, ".ts");
+            put(SHELL_JOB_SHELL_TYPE_PHP, ".php");
+        }}
     );
 
     /**
      * shell脚本类型对应的command命令
      */
     Map<String, List<String>> SHELL_TYPE_COMMAND_MAPPING = Collections.unmodifiableMap(
-            new HashMap<String, List<String>>() {{
-                put(SHELL_JOB_SHELL_TYPE_BASH, Arrays.asList("sh", "-c"));
-                put(SHELL_JOB_SHELL_TYPE_SH, Arrays.asList("sh", "-c"));
-                put(SHELL_JOB_SHELL_TYPE_ASH, Arrays.asList("sh", "-c"));
-                put(SHELL_JOB_SHELL_TYPE_POWERSHELL, Collections.singletonList("powershell"));
-                put(SHELL_JOB_SHELL_TYPE_CMD, Arrays.asList("cmd", "/q", "/c"));
-                put(SHELL_JOB_SHELL_TYPE_PYTHON, Collections.singletonList("python"));
-                put(SHELL_JOB_SHELL_TYPE_NODE, Collections.singletonList("node"));
-                put(SHELL_JOB_SHELL_TYPE_DENO, Arrays.asList("deno", "run"));
-                put(SHELL_JOB_SHELL_TYPE_PHP, Collections.singletonList("php"));
-            }}
+        new HashMap<String, List<String>>() {{
+            put(SHELL_JOB_SHELL_TYPE_BASH, Arrays.asList("sh", "-c"));
+            put(SHELL_JOB_SHELL_TYPE_SH, Arrays.asList("sh", "-c"));
+            put(SHELL_JOB_SHELL_TYPE_ASH, Arrays.asList("sh", "-c"));
+            put(SHELL_JOB_SHELL_TYPE_POWERSHELL, Collections.singletonList("powershell"));
+            put(SHELL_JOB_SHELL_TYPE_CMD, Arrays.asList("cmd", "/q", "/c"));
+            put(SHELL_JOB_SHELL_TYPE_PYTHON, Collections.singletonList("python"));
+            put(SHELL_JOB_SHELL_TYPE_NODE, Collections.singletonList("node"));
+            put(SHELL_JOB_SHELL_TYPE_DENO, Arrays.asList("deno", "run"));
+            put(SHELL_JOB_SHELL_TYPE_PHP, Collections.singletonList("php"));
+        }}
     );
 }
