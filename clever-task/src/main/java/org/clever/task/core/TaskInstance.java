@@ -938,7 +938,7 @@ public class TaskInstance {
     /**
      * 数据完整性校验&一致性校验
      */
-    public void dataCheck() throws SchedulerException {
+    private void dataCheck() throws SchedulerException {
         calcNextFireTime(false);
         // 数据完整性校验&一致性校验
         // 1.task_http_job、task_java_job、task_js_job、task_shell_job 与 task_job 是否是一对一的关系

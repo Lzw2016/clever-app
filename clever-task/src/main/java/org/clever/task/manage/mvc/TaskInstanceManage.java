@@ -414,10 +414,4 @@ public class TaskInstanceManage {
         TaskManageStore taskManageStore = getTaskManageStore();
         return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getRetryJobs(req));
     }
-
-    @Transactional(disabled = true)
-    public static Object t01() {
-        getTaskInstance().dataCheck();
-        return R.success();
-    }
 }
