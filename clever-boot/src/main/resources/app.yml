@@ -28,6 +28,8 @@ jdbc:
       - 'select 1 from dual'
       - 'select now(6) from dual'
     ignoreContainsSql:
+      - 'pg_advisory'
+      - 'pg_try_advisory'
       - 'task_http_job'
       - 'task_java_job'
       - 'task_job'

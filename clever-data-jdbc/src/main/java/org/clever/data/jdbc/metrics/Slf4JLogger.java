@@ -84,12 +84,10 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
         if (LOG_CONFIG != null && StringUtils.isNotBlank(prepared)) {
             // 忽略的SQL语句(完整匹配，大小写敏感)
             if (LOG_CONFIG.getIgnoreSql() != null && LOG_CONFIG.getIgnoreSql().contains(prepared)) {
-                super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);
                 return;
             }
             // 忽略的SQL语句(包含匹配，大小写敏感)
             if (LOG_CONFIG.getIgnoreContainsSql() != null && LOG_CONFIG.getIgnoreContainsSql().stream().anyMatch(prepared::contains)) {
-                super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);
                 return;
             }
         }
