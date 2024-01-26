@@ -1040,6 +1040,30 @@
                     "type": "string",
                     "description": "默认的数据源名称"
                 },
+                "p6spylog": {
+                    "type": "object",
+                    "description": "p6spy 打印SQL日志配置(实现类: org.clever.data.jdbc.metrics.Slf4JLogger)",
+                    "properties": {
+                        "slow": {
+                            "type": "integer",
+                            "description": "标记慢SQL的执行时间(毫秒)"
+                        },
+                        "ignoreSql": {
+                            "type": "array",
+                            "description": "忽略的SQL语句(完整匹配，大小写敏感)",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "ignoreContainsSql": {
+                            "type": "array",
+                            "description": "忽略的SQL语句(包含匹配，大小写敏感)",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
                 "metrics": {
                     "type": "object",
                     "description": "jdbc性能监控",
@@ -1047,13 +1071,6 @@
                         "enable": {
                             "type": "boolean",
                             "description": "是否启用监控jdbc性能"
-                        },
-                        "ignoreSql": {
-                            "type": "array",
-                            "description": "忽略的SQL语句",
-                            "items": {
-                                "type": "string"
-                            }
                         },
                         "maxSqlCount": {
                             "type": "integer",

@@ -13,7 +13,7 @@ public class SqlExecEvent {
      */
     private final String dataSourceName;
     /**
-     * 将所有绑定变量替换为实际值的sql语句
+     * 预编译的sql语句
      */
     private final String prepared;
     /**

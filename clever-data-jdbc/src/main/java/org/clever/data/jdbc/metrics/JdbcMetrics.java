@@ -18,6 +18,8 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * 统计 sql 执行性能
+ * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/03/14 20:01 <br/>
  */

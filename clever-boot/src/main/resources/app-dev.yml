@@ -119,7 +119,7 @@ web:
 timed-task:
   enable: false
   jdbcName: 'postgresql'
-  namespace: 'default'
+  namespace: 'test'
   instanceName: 'node01'
   # namespace: 'lzw'
   # instanceName: 'n01'

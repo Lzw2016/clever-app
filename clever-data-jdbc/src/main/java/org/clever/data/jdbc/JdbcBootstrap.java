@@ -10,7 +10,6 @@ import org.clever.core.*;
 import org.clever.core.env.Environment;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
-import org.clever.data.jdbc.metrics.P6SpyMeter;
 import org.clever.data.jdbc.metrics.Slf4JLogger;
 import org.clever.data.jdbc.mybatis.ClassPathMyBatisMapperSql;
 import org.clever.data.jdbc.mybatis.ComposeMyBatisMapperSql;
@@ -24,7 +23,7 @@ import org.clever.util.Assert;
 import javax.sql.DataSource;
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 /**
  * 作者：lizw <br/>
@@ -66,27 +65,48 @@ public class JdbcBootstrap {
             return;
         }
         initialized = true;
-        initP6Spy();
+        final JdbcConfig.P6SpyLog p6spylog = initP6SpyLog();
+        final JdbcConfig.JdbcMetrics metrics = initMetrics();
+        Slf4JLogger.init(p6spylog, metrics);
         initMybatis();
         initJdbc();
     }
 
-    private void initP6Spy() {
+    private JdbcConfig.P6SpyLog initP6SpyLog() {
+        final JdbcConfig.P6SpyLog p6spylog = Optional.of(jdbcConfig.getP6spylog()).orElse(new JdbcConfig.P6SpyLog());
+        Function<Collection<String>, List<String>> getSql = list -> {
+            List<String> sqlList = new ArrayList<>();
+            if (list != null) {
+                for (String sql : list) {
+                    sqlList.add("    - " + SqlLoggerUtils.deleteWhitespace(sql));
+                }
+            }
+            return sqlList;
+        };
+        BannerUtils.printConfig(log, "p6spy打印SQL日志配置",
+            new String[]{
+                "p6SpyLog: ",
+                "  ignoreSql        : " + "\n" + StringUtils.join(getSql.apply(p6spylog.getIgnoreSql()), "\n"),
+                "  ignoreContainsSql: " + "\n" + StringUtils.join(getSql.apply(p6spylog.getIgnoreContainsSql()), "\n"),
+            }
+        );
+        return p6spylog;
+    }
+
+    private JdbcConfig.JdbcMetrics initMetrics() {
         final JdbcConfig.JdbcMetrics metrics = Optional.of(jdbcConfig.getMetrics()).orElse(new JdbcConfig.JdbcMetrics());
         if (metrics.isEnable()) {
             BannerUtils.printConfig(log, "jdbc性能监控配置",
-                    new String[]{
-                            "metrics: ",
-                            "  enable       : " + metrics.isEnable(),
-                            "  ignoreSql    : " + metrics.getIgnoreSql().stream().map(sql -> String.format("\"%s\"", SqlLoggerUtils.deleteWhitespace(sql))).collect(Collectors.toList()),
-                            "  maxSqlCount  : " + metrics.getMaxSqlCount(),
-                            "  histogram    : " + metrics.getHistogram(),
-                            "  histogramTopN: " + metrics.getHistogramTopN(),
-                    }
+                new String[]{
+                    "metrics: ",
+                    "  enable       : " + true,
+                    "  maxSqlCount  : " + metrics.getMaxSqlCount(),
+                    "  histogram    : " + metrics.getHistogram(),
+                    "  histogramTopN: " + metrics.getHistogramTopN(),
+                }
             );
         }
-        P6SpyMeter.init(metrics);
-        Slf4JLogger.init(metrics);
+        return metrics;
     }
 
     private void initMybatis() {
@@ -122,13 +142,13 @@ public class JdbcBootstrap {
             MyBatisMapperSql mybatisMapperSql;
             if (MybatisConfig.FileType.FileSystem.equals(location.getFileType())) {
                 mybatisMapperSql = new FileSystemMyBatisMapperSql(
-                        ResourcePathUtils.getAbsolutePath(rootPath, location.getLocation()),
-                        location.getFilter()
+                    ResourcePathUtils.getAbsolutePath(rootPath, location.getLocation()),
+                    location.getFilter()
                 );
             } else if (MybatisConfig.FileType.Jar.equals(location.getFileType())) {
                 mybatisMapperSql = new ClassPathMyBatisMapperSql(
-                        location.getLocation(),
-                        location.getFilter()
+                    location.getLocation(),
+                    location.getFilter()
                 );
             } else {
                 throw new RuntimeException("配置 mybatis.locations.fileType 值无效");

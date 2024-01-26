@@ -22,6 +22,11 @@ public class JdbcConfig {
      */
     private String defaultName = "default";
     /**
+     * p6spy 打印SQL日志配置 <br />
+     * 实现类: org.clever.data.jdbc.metrics.Slf4JLogger
+     */
+    private P6SpyLog p6spylog = new P6SpyLog();
+    /**
      * jdbc性能监控配置
      */
     private JdbcMetrics metrics = new JdbcMetrics();
@@ -35,15 +40,27 @@ public class JdbcConfig {
     private Map<String, HikariConfig> dataSource = Collections.emptyMap();
 
     @Data
+    public static class P6SpyLog {
+        /**
+         * 标记慢SQL的执行时间(毫秒)
+         */
+        private int slow = 800;
+        /**
+         * 忽略的SQL语句(完整匹配，大小写敏感)
+         */
+        private Set<String> ignoreSql = new HashSet<>();
+        /**
+         * 忽略的SQL语句(包含匹配，大小写敏感)
+         */
+        private Set<String> ignoreContainsSql = new HashSet<>();
+    }
+
+    @Data
     public static class JdbcMetrics {
         /**
          * 是否启用监控jdbc性能
          */
         private boolean enable = false;
-        /**
-         * 忽略的SQL语句
-         */
-        private Set<String> ignoreSql = new HashSet<>();
         /**
          * 最大监控的SQL数量
          */
