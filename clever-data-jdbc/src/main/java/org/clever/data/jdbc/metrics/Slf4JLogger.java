@@ -25,6 +25,8 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
     static {
         FORCE_LOG_CATEGORY.add(Category.ERROR.getName());
         FORCE_LOG_CATEGORY.add(Category.WARN.getName());
+        FORCE_LOG_CATEGORY.add(Category.COMMIT.getName());
+        FORCE_LOG_CATEGORY.add(Category.ROLLBACK.getName());
         FORCE_LOG_CATEGORY.add(Category.OUTAGE.getName());
     }
 
