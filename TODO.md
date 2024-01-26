@@ -610,7 +610,7 @@ Oracle(锁名称为字符串，支持超时):
 - [OK] join函数支持 `join(java_arr)` 和 `join(java_arr, javaType)` 两种调用形式
 - [OK] 利用数据库原生的锁支持实现 nativeLock 相关功能
 - [  ] 提供 JdbcMetrics 信息查询接口，查询收集的 sql 执行性能信息
-- [  ]
+- [OK] p6spy 支持忽略指定的sql(全匹配和包含匹配)
 
 ### clever-data-jdbc-meta
 ```
