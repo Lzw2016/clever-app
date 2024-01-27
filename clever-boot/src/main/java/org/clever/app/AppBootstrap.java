@@ -17,7 +17,6 @@ import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.redis.RedisBootstrap;
 import org.clever.security.SecurityBootstrap;
 import org.clever.task.TaskBootstrap;
-import org.clever.task.ext.job.ShellJobExecutor;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.MvcBootstrap;
 import org.clever.web.PathConstants;
@@ -158,7 +157,6 @@ public abstract class AppBootstrap {
         }
         startupTaskBootstrap.start();
         // 分布式定时任务
-        TaskBootstrap.JOB_EXECUTORS.add(new ShellJobExecutor());
         TaskBootstrap taskBootstrap = TaskBootstrap.create(environment);
         taskBootstrap.start();
         // 系统启动完成日志
