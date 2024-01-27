@@ -85,11 +85,12 @@ public class JdbcBootstrap {
         };
         List<String> logs = new ArrayList<>();
         logs.add("p6SpyLog: ");
+        logs.add("  slow             : " + p6spylog.getSlow() + "ms");
         logs.add("  ignoreSql        : ");
         logs.addAll(getSql.apply(p6spylog.getIgnoreSql()));
         logs.add("  ignoreContainsSql: ");
         logs.addAll(getSql.apply(p6spylog.getIgnoreContainsSql()));
-        BannerUtils.printConfig(log, "p6spy打印SQL日志配置", logs.toArray(new String[0]));
+        BannerUtils.printConfig(log, "p6spy打印sql日志配置", logs.toArray(new String[0]));
         return p6spylog;
     }
 

@@ -939,6 +939,14 @@ public class TaskInstance {
      * 数据完整性校验&一致性校验
      */
     private void dataCheck() throws SchedulerException {
+        Date now = taskStore.currentDate();
+        // 最后一次校验时间
+        Date lastDataCheckDate = taskStore.lastDataCheckDate(getNamespace());
+        long maxWait = Math.max(GlobalConstant.DATA_CHECK_INTERVAL / 2, 300_000);
+        if (lastDataCheckDate != null && (now.getTime() - lastDataCheckDate.getTime() < maxWait)) {
+            return;
+        }
+        // 计算下一次触发时间，但不更新数据，仅检查有无异常
         calcNextFireTime(false);
         // 数据完整性校验&一致性校验
         // 1.task_http_job、task_java_job、task_js_job、task_shell_job 与 task_job 是否是一对一的关系

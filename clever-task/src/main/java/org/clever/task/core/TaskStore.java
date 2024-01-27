@@ -738,6 +738,7 @@ public class TaskStore {
             jobTrigger,
             update -> update.set(taskJobTrigger.updateAt, queryDSL.currentDate()),
             taskJobTrigger.id,
+            taskJobTrigger.lastFireTime,
             taskJobTrigger.fireCount,
             taskJobTrigger.createAt,
             taskJobTrigger.updateAt
@@ -1336,6 +1337,14 @@ public class TaskStore {
             appendData.accept(list10);
         }
         return errMsg.toString();
+    }
+
+    public Date lastDataCheckDate(String namespace) {
+        return queryDSL.select(taskSchedulerLog.createAt.max())
+            .from(taskSchedulerLog)
+            .where(taskSchedulerLog.namespace.eq(namespace))
+            .where(taskSchedulerLog.eventName.eq(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR))
+            .fetchOne();
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support
