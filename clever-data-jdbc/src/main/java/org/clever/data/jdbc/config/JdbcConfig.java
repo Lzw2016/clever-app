@@ -42,6 +42,10 @@ public class JdbcConfig {
     @Data
     public static class P6SpyLog {
         /**
+         * 是否开启 p6spy sql 日志
+         */
+        private boolean enable = true;
+        /**
          * 标记慢SQL的执行时间(毫秒)
          */
         private int slow = 800;

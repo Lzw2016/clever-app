@@ -62,6 +62,7 @@ import static org.clever.task.core.model.query.QTaskShellJob.taskShellJob;
 public class TaskStore {
     @Getter
     private final SnowFlake snowFlake;
+    @Getter
     private final Jdbc jdbc;
     @Getter
     private final QueryDSL queryDSL;

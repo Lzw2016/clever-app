@@ -653,7 +653,7 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 - [OK] 内置日志数据清理任务
 - [OK] 新建统计数据表，定时收集统计信息
 - [  ] 保存http、java、js、shell任务的执行日志，方便控制台查询
-- [  ] 对于 java、js 任务需要支持 JobContext
+- [OK] 对于 java、js 任务需要支持 JobContext
 - [  ] 任何一个节点都能给其它节点发送指令，用于在web控制台操作调度器和执行定时任务
 - [OK] 数据校验需要检查最后一条数据时间，如果其它节点已经运行了，就不运行了
 - [  ] 

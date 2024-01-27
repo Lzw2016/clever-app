@@ -1,4 +1,4 @@
-package org.clever.task.ext.job;
+package org.clever.task.core.job;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -9,7 +9,6 @@ import org.clever.core.DateUtils;
 import org.clever.core.PlatformOS;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.exception.JobExecutorException;
-import org.clever.task.core.job.JobExecutor;
 import org.clever.task.core.model.EnumConstant;
 import org.clever.task.core.model.entity.TaskJob;
 import org.clever.task.core.model.entity.TaskScheduler;
@@ -17,7 +16,10 @@ import org.clever.task.core.model.entity.TaskShellJob;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -64,25 +66,29 @@ public class ShellJobExecutor implements JobExecutor {
     }
 
     @Override
-    public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
+    public void exec(final JobContext context) throws Exception {
+        final TaskJob job = context.getJob();
+        final TaskStore taskStore = context.getTaskStore();
+        final TaskScheduler scheduler = context.getScheduler();
         final TaskShellJob shellJob = taskStore.beginReadOnlyTX(status -> taskStore.getShellJob(scheduler.getNamespace(), job.getId()));
         if (shellJob == null) {
             throw new JobExecutorException(String.format("ShellJob数据不存在，JobId=%s", job.getId()));
         }
+        context.setInnerData(JobContext.INNER_SHELL_JOB_KEY, shellJob);
         final String dir = FilenameUtils.concat(WORKING_DIR.getAbsolutePath(), String.format("%s_%s", job.getId(), job.getName()));
         final String timeLine = String.format(
-                "\n### %s ###---------------------------------------------------------------------------------------------------------------------------\n",
-                DateUtils.formatToString(dbNow)
+            "\n### %s ###---------------------------------------------------------------------------------------------------------------------------\n",
+            DateUtils.formatToString(context.getDbNow())
         );
         final List<String> command = EnumConstant.SHELL_TYPE_COMMAND_MAPPING.getOrDefault(shellJob.getShellType(), Arrays.asList("sh", "-c"));
         final String scriptFile = FilenameUtils.concat(
-                dir,
-                String.format(
-                        "%s_%s%s",
-                        job.getName(),
-                        job.getId(),
-                        EnumConstant.SHELL_TYPE_FILE_SUFFIX_MAPPING.getOrDefault(shellJob.getShellType(), ".txt")
-                )
+            dir,
+            String.format(
+                "%s_%s%s",
+                job.getName(),
+                job.getId(),
+                EnumConstant.SHELL_TYPE_FILE_SUFFIX_MAPPING.getOrDefault(shellJob.getShellType(), ".txt")
+            )
         );
         final String outLogFile = FilenameUtils.concat(dir, "out.log");
         final String errLogFile = FilenameUtils.concat(dir, "err.log");
@@ -103,7 +109,8 @@ public class ShellJobExecutor implements JobExecutor {
         log.info("ShellJob执行完成，进程退出状态码:{}， shellType={} | jobId={}", exitValue, shellJob.getShellType(), job.getId());
     }
 
-    protected Integer execShell(List<String> command, String scriptFile, String outLogFile, String errLogFile, String charset, long timeout, String... params) throws Exception {
+    // TODO 封装到 org.clever.task.core.support 包中
+    public Integer execShell(List<String> command, String scriptFile, String outLogFile, String errLogFile, String charset, long timeout, String... params) throws Exception {
         FileOutputStream out = null;
         FileOutputStream err = null;
         Process proc = null;

@@ -14,6 +14,7 @@ import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.cron.CronExpressionUtil;
 import org.clever.task.core.exception.SchedulerException;
+import org.clever.task.core.job.JobContext;
 import org.clever.task.core.job.JobExecutor;
 import org.clever.task.core.listeners.JobListener;
 import org.clever.task.core.listeners.JobTriggerListener;
@@ -1340,8 +1341,12 @@ public class TaskInstance {
             while (retryCount < maxRetryCount) {
                 retryCount++;
                 try {
-                    jobExecutor.exec(dbNow, job, scheduler, taskStore);
+                    JobContext jobContext = new JobContext(dbNow, job, scheduler, taskStore);
+                    jobExecutor.exec(jobContext);
                     jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_0);
+                    if (!jobContext.getJobData().isEmpty() && Objects.equals(job.getIsUpdateData(), EnumConstant.JOB_IS_UPDATE_DATA_1)) {
+                        job.setJobData(JacksonMapper.getInstance().toJson(jobContext.getJobData()));
+                    }
                     break;
                 } catch (Exception e) {
                     log.error("[TaskInstance] Job执行失败，重试次数：{} | id={} | name={} | instanceName={}", retryCount, job.getId(), job.getName(), getInstanceName(), e);

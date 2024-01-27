@@ -1,11 +1,5 @@
 package org.clever.task.core.job;
 
-import org.clever.task.core.TaskStore;
-import org.clever.task.core.model.entity.TaskJob;
-import org.clever.task.core.model.entity.TaskScheduler;
-
-import java.util.Date;
-
 /**
  * 定时任务执行器
  * <p>
@@ -28,8 +22,7 @@ public interface JobExecutor {
     /**
      * 执行定时任务实现
      *
-     * @param dbNow 数据库当前时间
-     * @param job   任务信息
+     * @param context context 对象
      */
-    void exec(final Date dbNow, final TaskJob job, final TaskScheduler scheduler, final TaskStore taskStore) throws Exception;
+    void exec(final JobContext context) throws Exception;
 }

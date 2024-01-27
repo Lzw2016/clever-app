@@ -1,8 +1,6 @@
 package org.clever.task.core.job;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.exception.JobExecutorException;
@@ -13,8 +11,6 @@ import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.task.core.support.ClassMethodLoader;
 
 import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Objects;
 
 /**
@@ -29,15 +25,15 @@ public class JavaJobExecutor implements JobExecutor {
     }
 
     @Override
-    public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
+    public void exec(final JobContext context) throws Exception {
+        final TaskJob job = context.getJob();
+        final TaskStore taskStore = context.getTaskStore();
+        final TaskScheduler scheduler = context.getScheduler();
         final TaskJavaJob javaJob = taskStore.beginReadOnlyTX(status -> taskStore.getJavaJob(scheduler.getNamespace(), job.getId()));
         if (javaJob == null) {
             throw new JobExecutorException(String.format("JavaJob数据不存在，JobId=%s", job.getId()));
         }
-        final LinkedHashMap<?, ?> jobData = StringUtils.isBlank(job.getJobData())
-            ? new LinkedHashMap<>()
-            : JacksonMapper.getInstance().fromJson(job.getJobData(), LinkedHashMap.class);
-        final Object[] args = new Object[]{jobData};
+        context.setInnerData(JobContext.INNER_JAVA_JOB_KEY, javaJob);
         TupleTwo<Class<?>, Method> tuple = ClassMethodLoader.getMethod(javaJob.getClassName(), javaJob.getClassMethod());
         if (tuple == null) {
             throw new JobExecutorException(String.format(
@@ -52,13 +48,10 @@ public class JavaJobExecutor implements JobExecutor {
         }
         Object res;
         if (hasParameter) {
-            res = tuple.getValue2().invoke(obj, args);
+            res = tuple.getValue2().invoke(obj, context);
         } else {
             res = tuple.getValue2().invoke(obj);
         }
         log.debug("JavaJob执行完成，class={} | method={} | res={}", javaJob.getClassName(), javaJob.getClassMethod(), res);
-        if (hasParameter && Objects.equals(job.getIsUpdateData(), EnumConstant.JOB_IS_UPDATE_DATA_1)) {
-            job.setJobData(JacksonMapper.getInstance().toJson(jobData));
-        }
     }
 }

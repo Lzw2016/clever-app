@@ -1,6 +1,7 @@
 package org.clever.task.ext.job;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.task.core.job.ShellJobExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

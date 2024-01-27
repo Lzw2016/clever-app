@@ -13,6 +13,7 @@ import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.job.HttpJobExecutor;
 import org.clever.task.core.job.JavaJobExecutor;
 import org.clever.task.core.job.JobExecutor;
+import org.clever.task.core.job.ShellJobExecutor;
 import org.clever.task.core.listeners.*;
 import org.clever.util.Assert;
 
@@ -63,6 +64,7 @@ public class TaskBootstrap {
     static {
         JOB_EXECUTORS.add(new HttpJobExecutor());
         JOB_EXECUTORS.add(new JavaJobExecutor());
+        JOB_EXECUTORS.add(new ShellJobExecutor());
         SCHEDULER_LISTENERS.add(new SchedulerLogListener());
         JOB_TRIGGER_LISTENERS.add(new JobTriggerLogListener());
         JOB_LISTENERS.add(new JobLogListener());

@@ -20,12 +20,14 @@ rootPath: "./"
 
 jdbc:
   p6spylog:
+    enable: true
     slow: 800
     ignoreSql:
       - 'begin dbms_output.enable(); end;'
       - 'declare     num integer := 1000; begin     dbms_output.get_lines(?, num);     dbms_output.disable(); end;'
       - 'select 1'
       - 'select 1 from dual'
+      - 'select now()'
       - 'select now(6) from dual'
     ignoreContainsSql:
       - 'pg_advisory'

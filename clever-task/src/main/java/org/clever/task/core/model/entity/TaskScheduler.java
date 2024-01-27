@@ -1,6 +1,8 @@
 package org.clever.task.core.model.entity;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.clever.core.mapper.JacksonMapper;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -30,6 +32,16 @@ public class TaskScheduler implements Serializable {
     private Date createAt;
     /** 更新时间 */
     private Date updateAt;
+
+    /**
+     * 获取配置信息
+     */
+    public Config getConfigInfo() {
+        if (StringUtils.isBlank(config)) {
+            return null;
+        }
+        return JacksonMapper.getInstance().fromJson(config, Config.class);
+    }
 
     @Data
     public static final class Config implements Serializable {

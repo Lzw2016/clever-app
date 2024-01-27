@@ -13,7 +13,6 @@ import org.clever.task.core.model.entity.TaskHttpJob;
 import org.clever.task.core.model.entity.TaskJob;
 import org.clever.task.core.model.entity.TaskScheduler;
 
-import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -28,11 +27,15 @@ public class HttpJobExecutor implements JobExecutor {
     }
 
     @Override
-    public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
+    public void exec(final JobContext context) throws Exception {
+        final TaskJob job = context.getJob();
+        final TaskStore taskStore = context.getTaskStore();
+        final TaskScheduler scheduler = context.getScheduler();
         TaskHttpJob httpJob = taskStore.beginReadOnlyTX(status -> taskStore.getHttpJob(scheduler.getNamespace(), job.getId()));
         if (httpJob == null) {
             throw new JobExecutorException(String.format("HttpJob数据不存在，JobId=%s", job.getId()));
         }
+        context.setInnerData(JobContext.INNER_HTTP_JOB_KEY, httpJob);
         HttpJobModel.HttpRequestData requestData;
         if (StringUtils.isBlank(httpJob.getRequestData())) {
             requestData = new HttpJobModel.HttpRequestData();

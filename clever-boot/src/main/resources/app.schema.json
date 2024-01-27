@@ -1044,6 +1044,10 @@
                     "type": "object",
                     "description": "p6spy 打印SQL日志配置(实现类: org.clever.data.jdbc.metrics.Slf4JLogger)",
                     "properties": {
+                        "enable": {
+                            "type": "boolean",
+                            "description": "是否开启 p6spy sql 日志"
+                        },
                         "slow": {
                             "type": "integer",
                             "description": "标记慢SQL的执行时间(毫秒)"

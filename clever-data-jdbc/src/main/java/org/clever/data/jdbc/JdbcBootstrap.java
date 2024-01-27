@@ -85,6 +85,7 @@ public class JdbcBootstrap {
         };
         List<String> logs = new ArrayList<>();
         logs.add("p6SpyLog: ");
+        logs.add("  enable           : " + p6spylog.isEnable());
         logs.add("  slow             : " + p6spylog.getSlow() + "ms");
         logs.add("  ignoreSql        : ");
         logs.addAll(getSql.apply(p6spylog.getIgnoreSql()));

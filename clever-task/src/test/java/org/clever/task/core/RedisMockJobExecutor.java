@@ -4,12 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Conv;
 import org.clever.data.redis.Redis;
 import org.clever.data.redis.config.RedisProperties;
+import org.clever.task.core.job.JobContext;
 import org.clever.task.core.job.JobExecutor;
 import org.clever.task.core.model.entity.TaskJob;
-import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.task.core.support.JobTriggerUtils;
 
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -47,14 +46,16 @@ public class RedisMockJobExecutor implements JobExecutor {
     }
 
     @Override
-    public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
+    public void exec(final JobContext context) throws Exception {
+        final TaskJob job = context.getJob();
+        final TaskStore taskStore = context.getTaskStore();
         long newTime = taskStore.currentTimeMillis();
         String key = String.format("task-test:job_%s", job.getId());
         Long oldTime = Conv.asLong(redis.vGet(key, String.class), 0L);
         redis.vSet(key, newTime);
         if (oldTime != null) {
             long interval = newTime - oldTime;
-            if(interval >= 2000) {
+            if (interval >= 2000) {
                 log.error("调度时间错误 | jobId={} | new={} | old={} | interval={}", job.getId(), newTime, oldTime, interval);
             }
         }

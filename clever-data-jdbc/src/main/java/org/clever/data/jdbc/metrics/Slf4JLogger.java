@@ -77,6 +77,10 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
             SqlExecEvent sqlExecEvent = new SqlExecEvent(url, prepared, sql, elapsed);
             JDBC_METRICS.addSqlExecEvent(sqlExecEvent);
         }
+        // 不启用 sql 日志
+        if (!LOG_CONFIG.isEnable()) {
+            return;
+        }
         // 强制打印 sql 日志
         if (FORCE_LOG_CATEGORY.contains(category.getName())) {
             super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);

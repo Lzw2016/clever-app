@@ -3,10 +3,8 @@ package org.clever.task.core.job;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.entity.TaskJob;
-import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.task.core.support.JobTriggerUtils;
 
-import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,7 +24,9 @@ public class MockJobExecutor implements JobExecutor {
     }
 
     @Override
-    public void exec(Date dbNow, TaskJob job, TaskScheduler scheduler, TaskStore taskStore) throws Exception {
+    public void exec(final JobContext context) throws Exception {
+        final TaskJob job = context.getJob();
+        final TaskStore taskStore = context.getTaskStore();
         long newTime = taskStore.currentTimeMillis();
         long oldTime = lastTime.computeIfAbsent(job.getId(), id -> 0L);
         lastTime.put(job.getId(), newTime);

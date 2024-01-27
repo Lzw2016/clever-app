@@ -48,6 +48,7 @@ jdbc:
   enable: true
   defaultName: 'mysql'
   p6spylog:
+    enable: true
     slow: 800
     ignoreSql:
       - 'begin dbms_output.enable(); end;'
