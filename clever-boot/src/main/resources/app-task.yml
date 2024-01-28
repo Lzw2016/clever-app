@@ -19,6 +19,8 @@ mybatis:
 
 jdbc:
   enable: true
+  p6spylog:
+    ignoreContainsSql: []
   defaultName: 'postgresql'
   dataSource:
     postgresql:
