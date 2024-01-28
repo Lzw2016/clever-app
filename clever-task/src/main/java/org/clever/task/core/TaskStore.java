@@ -30,6 +30,7 @@ import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.support.ClassMethodLoader;
 import org.clever.task.core.support.DataBaseClock;
+import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 import static org.clever.task.core.model.query.QTaskHttpJob.taskHttpJob;
 import static org.clever.task.core.model.query.QTaskJavaJob.taskJavaJob;
 import static org.clever.task.core.model.query.QTaskJob.taskJob;
+import static org.clever.task.core.model.query.QTaskJobConsoleLog.taskJobConsoleLog;
 import static org.clever.task.core.model.query.QTaskJobLog.taskJobLog;
 import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 import static org.clever.task.core.model.query.QTaskJobTriggerLog.taskJobTriggerLog;
@@ -520,7 +522,9 @@ public class TaskStore {
         }
         SQLInsertClause insert = queryDSL.insert(taskJobLog);
         for (TaskJobLog jobLog : jobLogs) {
-            jobLog.setId(snowFlake.nextId());
+            if (jobLog.getId() == null) {
+                jobLog.setId(snowFlake.nextId());
+            }
             jobLog.setEndTime(null);
             jobLog.setRunTime(null);
             jobLog.setStatus(null);
@@ -573,7 +577,9 @@ public class TaskStore {
     }
 
     public int addJobLog(TaskJobLog jobLog) {
-        jobLog.setId(snowFlake.nextId());
+        if (jobLog.getId() == null) {
+            jobLog.setId(snowFlake.nextId());
+        }
         jobLog.setStartTime(currentDate());
         jobLog.setEndTime(null);
         jobLog.setRunTime(null);
@@ -1348,6 +1354,16 @@ public class TaskStore {
             .fetchOne();
     }
 
+    public long saveJobConsoleLog(TaskJobConsoleLog jobConsoleLog) {
+        if (jobConsoleLog == null) {
+            return 0;
+        }
+        if (jobConsoleLog.getId() == null) {
+            jobConsoleLog.setId(snowFlake.nextId());
+        }
+        return queryDSL.insert(taskJobConsoleLog).populate(jobConsoleLog).execute();
+    }
+
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support
 
     /**
@@ -1358,6 +1374,16 @@ public class TaskStore {
      */
     public <T> T beginTX(TransactionCallback<T> action) {
         return jdbc.beginTX(action);
+    }
+
+    /**
+     * 开启一个新事务，在事务内支持操作
+     *
+     * @param action 事务内数据库操作
+     * @param <T>    返回值类型
+     */
+    public <T> T newBeginTX(TransactionCallback<T> action) {
+        return jdbc.beginTX(action, TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     /**

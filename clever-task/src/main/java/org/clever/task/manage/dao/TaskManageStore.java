@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.clever.task.core.model.query.QTaskJob.taskJob;
+import static org.clever.task.core.model.query.QTaskJobConsoleLog.taskJobConsoleLog;
 import static org.clever.task.core.model.query.QTaskJobLog.taskJobLog;
 import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 import static org.clever.task.core.model.query.QTaskJobTriggerLog.taskJobTriggerLog;
@@ -621,6 +622,21 @@ public class TaskManageStore {
             res.setTriggerCount(tuple.get(taskJobTriggerLog.fireTime.count()));
             res.setMisfireCount(tuple.get(misfireCountField));
         }
+        return res;
+    }
+
+    public JobConsoleLogRes getJobConsoleLogs(JobConsoleLogReq req) {
+        TaskJobLog jobLog = queryDSL.select(taskJobLog).from(taskJobLog).where(taskJobLog.id.eq(req.getJobLogId())).fetchOne();
+        SQLQuery<TaskJobConsoleLog> sqlQuery = queryDSL.select(taskJobConsoleLog)
+            .from(taskJobConsoleLog)
+            .where(taskJobConsoleLog.jobLogId.eq(req.getJobLogId()))
+            .orderBy(taskJobConsoleLog.lineNum.asc());
+        if (req.getStartLineNum() != null) {
+            sqlQuery.where(taskJobConsoleLog.lineNum.gt(req.getStartLineNum()));
+        }
+        JobConsoleLogRes res = new JobConsoleLogRes();
+        res.setJobLog(jobLog);
+        res.setJobConsoleLogs(sqlQuery.fetch());
         return res;
     }
 

@@ -1341,7 +1341,7 @@ public class TaskInstance {
             while (retryCount < maxRetryCount) {
                 retryCount++;
                 try {
-                    JobContext jobContext = new JobContext(dbNow, job, scheduler, taskStore);
+                    JobContext jobContext = new JobContext(dbNow, job, jobLog, scheduler, taskStore);
                     jobExecutor.exec(jobContext);
                     jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_0);
                     if (!jobContext.getJobData().isEmpty() && Objects.equals(job.getIsUpdateData(), EnumConstant.JOB_IS_UPDATE_DATA_1)) {
@@ -1394,6 +1394,8 @@ public class TaskInstance {
         log.info("清理调度器日志开始...");
         count = taskStore.beginTX(status -> taskStore.clearSchedulerLog(getNamespace(), maxDate));
         log.info("清理调度器日志数据量: {}", count);
+        // TODO 清理任务控制台日志
+        // TODO 清理任务控制台日志
     }
 
     private void collectReport() {
@@ -1662,6 +1664,7 @@ public class TaskInstance {
 
     private TaskJobLog newJobLog(Date dbNow, TaskJob job, TaskJobTrigger jobTrigger, Long jobTriggerLogId) {
         TaskJobLog jobLog = new TaskJobLog();
+        jobLog.setId(taskStore.getSnowFlake().nextId());
         jobLog.setNamespace(getNamespace());
         jobLog.setInstanceName(getInstanceName());
         jobLog.setJobTriggerLogId(jobTriggerLogId);

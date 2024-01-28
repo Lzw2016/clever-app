@@ -15,7 +15,7 @@ import org.clever.task.core.model.entity.TaskScheduler;
 public class JobTriggerLogListener implements JobTriggerListener {
     @Override
     public void onTriggered(TaskScheduler scheduler, TaskStore taskStore, TaskJobTriggerLog jobTriggerLog) {
-        int count = taskStore.beginTX(status -> taskStore.addJobTriggerLog(jobTriggerLog));
+        int count = taskStore.newBeginTX(status -> taskStore.addJobTriggerLog(jobTriggerLog));
         if (count <= 0) {
             log.error("触发器日志保存失败，jobTriggerLog={}", jobTriggerLog);
         }

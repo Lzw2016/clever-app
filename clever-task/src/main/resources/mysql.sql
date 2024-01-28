@@ -193,6 +193,26 @@ create index idx_task_job_trigger_update_at on task_job_trigger (update_at);
 
 
 /* ====================================================================================================================
+    task_scheduler_cmd -- 调度器指令
+==================================================================================================================== */
+create table task_scheduler_cmd
+(
+    id                  bigint          not null        auto_increment                          comment '主键id',
+    namespace           varchar(63)     not null                                                comment '命名空间',
+    instance_name       varchar(127)                                                            comment '指定的调度器实例名称，为空表示不指定',
+    cmd_info            text            not null                                                comment '指令信息',
+    state               tinyint         not null        default 0                               comment '指令执行状态，0：未执行，1：执行中，2：执行完成',
+    create_at           datetime(3)     not null        default current_timestamp(3)            comment '创建时间',
+    update_at           datetime(3)                     on update current_timestamp(3)          comment '更新时间',
+    primary key (id)
+) engine=innodb default charset=utf8mb4 comment = '调度器指令';
+create index idx_task_scheduler_cmd_create_at on task_scheduler_cmd (create_at);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/
+
+
+/* ====================================================================================================================
     task_scheduler_log -- 调度器事件日志
 ==================================================================================================================== */
 create table task_scheduler_log
@@ -276,6 +296,30 @@ create index idx_task_job_log_job_id on task_job_log (job_id);
 create index idx_task_job_log_fire_time on task_job_log (fire_time);
 create index idx_task_job_log_start_time on task_job_log (start_time);
 create index idx_task_job_log_end_time on task_job_log (end_time);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/
+
+
+/* ====================================================================================================================
+    task_job_console_log -- 任务控制台日志
+==================================================================================================================== */
+create table task_job_console_log
+(
+    id                  bigint          not null        auto_increment                          comment '主键id',
+    namespace           varchar(63)     not null                                                comment '命名空间',
+    instance_name       varchar(127)    not null                                                comment '调度器实例名称',
+    job_id              bigint          not null                                                comment '任务ID',
+    job_log_id          bigint          not null                                                comment '任务执行日志ID',
+    line_num            int             not null                                                comment '日志行号',
+    log                 text                                                                    comment '日志内容',
+    create_at           datetime(3)     not null        default current_timestamp(3)            comment '创建时间',
+    primary key (id)
+) comment = '任务控制台日志';
+create index idx_task_job_console_log_instance_name on task_job_console_log (instance_name(31));
+create index idx_task_job_console_log_job_id on task_job_console_log (job_id);
+create index idx_task_job_console_log_job_log_id on task_job_console_log (job_log_id);
+create index idx_task_job_console_log_create_at on task_job_console_log (create_at);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/

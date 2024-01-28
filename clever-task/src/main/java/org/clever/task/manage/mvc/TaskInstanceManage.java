@@ -414,4 +414,13 @@ public class TaskInstanceManage {
         TaskManageStore taskManageStore = getTaskManageStore();
         return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getRetryJobs(req));
     }
+
+    /**
+     * 查询任务控制台日志
+     */
+    @Transactional(disabled = true)
+    public static JobConsoleLogRes getJobConsoleLog(JobConsoleLogReq req) {
+        TaskManageStore taskManageStore = getTaskManageStore();
+        return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getJobConsoleLogs(req));
+    }
 }

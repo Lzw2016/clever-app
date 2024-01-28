@@ -39,7 +39,7 @@ public class SchedulerLogListener implements SchedulerListener {
     }
 
     private void saveSchedulerLog(TaskStore taskStore, TaskSchedulerLog schedulerLog) {
-        int count = taskStore.beginTX(status -> taskStore.addSchedulerLog(schedulerLog));
+        int count = taskStore.newBeginTX(status -> taskStore.addSchedulerLog(schedulerLog));
         if (count <= 0) {
             log.error("调度器日志保存失败，schedulerLog={}", schedulerLog);
         }

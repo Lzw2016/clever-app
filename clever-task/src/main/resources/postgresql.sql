@@ -277,6 +277,34 @@ create index idx_task_job_trigger_update_at on task_job_trigger (update_at);
 
 
 /* ====================================================================================================================
+    task_scheduler_cmd -- 调度器指令
+==================================================================================================================== */
+create table task_scheduler_cmd
+(
+    id                  int8                                not null,
+    namespace           varchar(63)                         not null,
+    instance_name       varchar(127),
+    cmd_info            varchar(2047)                       not null,
+    state               int2            default 0           not null,
+    create_at           timestamp       default now()       not null,
+    update_at           timestamp,
+    primary key (id)
+);
+comment on table task_scheduler_cmd is '调度器指令';
+comment on column task_scheduler_cmd.id is '主键id';
+comment on column task_scheduler_cmd.namespace is '命名空间';
+comment on column task_scheduler_cmd.instance_name is '指定的调度器实例名称，为空表示不指定';
+comment on column task_scheduler_cmd.cmd_info is '指令信息';
+comment on column task_scheduler_cmd.state is '指令执行状态，0：未执行，1：执行中，2：执行完成';
+comment on column task_scheduler_cmd.create_at is '创建时间';
+comment on column task_scheduler_cmd.update_at is '更新时间';
+create index idx_task_scheduler_cmd_create_at on task_scheduler_cmd (create_at);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/
+
+
+/* ====================================================================================================================
     task_scheduler_log -- 调度器事件日志
 ==================================================================================================================== */
 create table task_scheduler_log
@@ -322,7 +350,7 @@ create table task_job_trigger_log
     fire_count          int8                            not null,
     mis_fired           int2                            not null,
     trigger_msg         varchar(511),
-    create_at           timestamp default now()         not null,
+    create_at           timestamp   default now()       not null,
     primary key (id)
 );
 comment on table task_job_trigger_log is '任务触发器日志';
@@ -400,6 +428,39 @@ create index idx_task_job_log_job_id on task_job_log (job_id);
 create index idx_task_job_log_job_trigger_id on task_job_log (job_trigger_id);
 create index idx_task_job_log_job_trigger_log_id on task_job_log (job_trigger_log_id);
 create index idx_task_job_log_start_time on task_job_log (start_time);
+/*------------------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------------------*/
+
+
+/* ====================================================================================================================
+    task_job_console_log -- 任务控制台日志
+==================================================================================================================== */
+create table task_job_console_log
+(
+    id                  int8                            not null,
+    namespace           varchar(63)                     not null,
+    instance_name       varchar(127)                    not null,
+    job_id              int8                            not null,
+    job_log_id          int8                            not null,
+    line_num            int4                            not null,
+    log                 text,
+    create_at           timestamp   default now()       not null,
+    primary key (id)
+);
+comment on table task_job_console_log is '任务控制台日志';
+comment on column task_job_console_log.id is '主键id';
+comment on column task_job_console_log.namespace is '命名空间';
+comment on column task_job_console_log.instance_name is '调度器实例名称';
+comment on column task_job_console_log.job_id is '任务ID';
+comment on column task_job_console_log.job_log_id is '任务执行日志ID';
+comment on column task_job_console_log.line_num is '日志行号';
+comment on column task_job_console_log.log is '日志内容';
+comment on column task_job_console_log.create_at is '创建时间';
+create index idx_task_job_console_log_instance_name on task_job_console_log (instance_name);
+create index idx_task_job_console_log_job_id on task_job_console_log (job_id);
+create index idx_task_job_console_log_job_log_id on task_job_console_log (job_log_id);
+create index idx_task_job_console_log_create_at on task_job_console_log (create_at);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/

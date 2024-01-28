@@ -15,7 +15,7 @@ import org.clever.task.core.model.entity.TaskScheduler;
 public class JobLogListener implements JobListener {
     @Override
     public void onStartRun(TaskScheduler scheduler, TaskStore taskStore, TaskJobLog jobLog) {
-        int count = taskStore.beginTX(status -> taskStore.addJobLog(jobLog));
+        int count = taskStore.newBeginTX(status -> taskStore.addJobLog(jobLog));
         if (count <= 0) {
             log.error("任务执行日志保存失败[onStartRun]，jobLog={}", jobLog);
         }
@@ -23,7 +23,7 @@ public class JobLogListener implements JobListener {
 
     @Override
     public void onEndRun(TaskScheduler scheduler, TaskStore taskStore, TaskJobLog jobLog) {
-        int count = taskStore.beginTX(status -> taskStore.updateJobLogByEnd(jobLog));
+        int count = taskStore.newBeginTX(status -> taskStore.updateJobLogByEnd(jobLog));
         if (count <= 0) {
             log.error("任务执行日志保存失败[onEndRun]，jobLog={}", jobLog);
         }
@@ -31,7 +31,7 @@ public class JobLogListener implements JobListener {
 
     @Override
     public void onRetryRun(TaskScheduler scheduler, TaskStore taskStore, TaskJobLog jobLog, Exception error) {
-        int count = taskStore.beginTX(status -> taskStore.updateJobLogByRetry(jobLog));
+        int count = taskStore.newBeginTX(status -> taskStore.updateJobLogByRetry(jobLog));
         if (count <= 0) {
             log.error("任务执行日志保存失败[onRetryRun]，jobLog={}", jobLog);
         }

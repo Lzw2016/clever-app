@@ -15,6 +15,15 @@ public class TaskTest {
     }
 
     public static void job02(JobContext context) {
-        log.info("定时任务: dbNow={}", context.getDbNow());
+        context.info("开始");
+        context.info("定时任务: dbNow={}", context.getDbNow());
+        for (int i = 0; i < 100; i++) {
+            context.info("测试: {}", i);
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException ignored) {
+            }
+        }
+        context.info("完成");
     }
 }
