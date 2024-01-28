@@ -1,11 +1,13 @@
 package org.clever.task.core.support;
 
+import lombok.extern.slf4j.Slf4j;
+import org.clever.core.AppContextHolder;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.task.core.GlobalConstant;
+import org.clever.task.core.job.JobContext;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -13,49 +15,86 @@ import java.util.concurrent.ConcurrentMap;
  * 作者：lizw <br/>
  * 创建时间：2024/01/25 19:09 <br/>
  */
+@Slf4j
 public class ClassMethodLoader {
-    private static final ConcurrentMap<String, Method> METHOD_CACHE = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
+    private static final ConcurrentMap<String, Method> METHOD_CACHE = new ConcurrentHashMap<>();
 
-    public static TupleTwo<Class<?>, Method> getMethod(String className, String classMethod, ClassLoader classLoader) throws ClassNotFoundException {
-        // TODO 不存在返回null
-        final Class<?> clazz = classLoader.loadClass(className);
-        final String cacheKey = String.format("%s#%s", className, classMethod);
-        // TODO 热重载场景???
-        Method method = METHOD_CACHE.computeIfAbsent(cacheKey, key -> {
-            Method tmp = getAccessibleMethodByName(clazz, classMethod, true);
-            if (tmp == null) {
-                tmp = getAccessibleMethodByName(clazz, classMethod, false);
+    /**
+     * 加载函数对象,不存在返回 null {@code TupleTwo<class, method>}
+     *
+     * @param className  class 全名
+     * @param methodName 函数名
+     */
+    public static TupleTwo<Class<?>, Method> getMethod(String className, String methodName) {
+        boolean useCache = false;
+        // 支持热重载
+        ClassLoader classLoader = AppContextHolder.getBean("hotReloadClassLoader", ClassLoader.class);
+        if (classLoader == null) {
+            useCache = true;
+            classLoader = ClassMethodLoader.class.getClassLoader();
+        }
+        return getMethod(className, methodName, classLoader, useCache);
+    }
+
+    /**
+     * 加载函数对象,不存在返回 null {@code TupleTwo<class, method>}
+     *
+     * @param className   class 全名
+     * @param methodName  函数名
+     * @param classLoader ClassLoader对象
+     * @param useCache    是否使用缓存
+     */
+    public static TupleTwo<Class<?>, Method> getMethod(String className, String methodName, ClassLoader classLoader, boolean useCache) {
+        final Class<?> clazz;
+        try {
+            clazz = classLoader.loadClass(className);
+        } catch (ClassNotFoundException ignored) {
+            return null;
+        }
+        final String methodKey = String.format("%s#%s", className, methodName);
+        Method method;
+        if (useCache) {
+            method = METHOD_CACHE.get(methodKey);
+            if (method == null || !Objects.equals(clazz.getClassLoader(), classLoader)) {
+                synchronized (METHOD_CACHE) {
+                    // 二次确认
+                    method = METHOD_CACHE.get(methodKey);
+                    if (method == null || !Objects.equals(clazz.getClassLoader(), classLoader)) {
+                        method = loadMethod(clazz, methodName);
+                        if (method != null) {
+                            METHOD_CACHE.put(methodKey, method);
+                        }
+                    }
+                }
             }
-            return tmp;
-        });
+        } else {
+            method = loadMethod(clazz, methodName);
+        }
+        if (method == null) {
+            return null;
+        }
         return TupleTwo.creat(clazz, method);
     }
 
-    public static TupleTwo<Class<?>, Method>  getMethod(String className, String classMethod) throws ClassNotFoundException {
-        return getMethod(className, classMethod, Thread.currentThread().getContextClassLoader());
+    private static Method loadMethod(Class<?> clazz, String methodName) {
+        Method method = getAccessibleMethodByName(clazz, methodName, JobContext.class);
+        if (method == null) {
+            method = getAccessibleMethodByName(clazz, methodName);
+        }
+        return method;
     }
 
-    private static Method getAccessibleMethodByName(Class<?> searchType, String methodName, boolean hasParameter) {
+    private static Method getAccessibleMethodByName(Class<?> searchType, String methodName, Class<?>... parameterTypes) {
         while (searchType != Object.class) {
-            Method[] methods = searchType.getDeclaredMethods();
-            for (Method method : methods) {
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                if (hasParameter) {
-                    // 有参数，参数必须是 LinkedHashMap
-                    if (parameterTypes.length != 1 || !Map.class.isAssignableFrom(parameterTypes[0])) {
-                        continue;
-                    }
-                } else {
-                    // 无参数
-                    if (parameterTypes.length > 0) {
-                        continue;
-                    }
-                }
-                if (method.getName().equals(methodName)) {
-                    // 强制设置方法可以访问(public)
-                    makeAccessible(method);
-                    return method;
-                }
+            Method method = null;
+            try {
+                method = searchType.getDeclaredMethod(methodName, parameterTypes);
+            } catch (Throwable ignored) {
+            }
+            if (method != null) {
+                // 强制设置方法可以访问(public)
+                makeAccessible(method);
+                return method;
             }
             // 获取父类类型，继续查找方法
             searchType = searchType.getSuperclass();

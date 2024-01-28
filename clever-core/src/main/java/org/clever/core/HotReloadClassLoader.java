@@ -155,7 +155,7 @@ public class HotReloadClassLoader extends ClassLoader {
         for (String path : paths) {
             path = StringUtils.trimToEmpty(path);
             path = path.replace('\\', '/');
-            if (path.replace('.', ' ').replace('/', ' ').trim().length() > 0 && path.endsWith("/")) {
+            if (!path.replace('.', ' ').replace('/', ' ').trim().isEmpty() && path.endsWith("/")) {
                 path = path.substring(0, path.length() - 1);
             }
             path = path + "/";
