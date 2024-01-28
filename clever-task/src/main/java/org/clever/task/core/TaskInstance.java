@@ -107,6 +107,10 @@ public class TaskInstance {
      */
     private Future<?> fireTriggerFuture;
     /**
+     * 执行调度器指令
+     */
+    private ScheduledFuture<?> execSchedulerCmdFuture;
+    /**
      * 清理日志数据
      */
     private ScheduledFuture<?> clearLogFuture;
@@ -741,6 +745,19 @@ public class TaskInstance {
         return taskStore.beginReadOnlyTX(status -> taskStore.allInstance());
     }
 
+    /**
+     * 使用调度器指令(SchedulerCmd)执行任务
+     *
+     * @param jobId        任务ID
+     * @param instanceName 指定执行任务的节点(可以为空)
+     * @return 成功返回 true
+     */
+    public boolean useCmdExecJob(Long jobId, String instanceName) {
+        TaskJob job = taskStore.beginReadOnlyTX(status -> taskStore.getJob(jobId));
+        Assert.notNull(job, "任务不存在");
+        return createAndWaitSchedulerCmd(job.getNamespace(), instanceName, SchedulerCmdInfo.createExecJobCmd(jobId));
+    }
+
     // ---------------------------------------------------------------------------------------------------------------------------------------- service
 
     private void startScheduler() {
@@ -815,6 +832,20 @@ public class TaskInstance {
                 paused();
             }
         });
+        // 执行调度器指令
+        execSchedulerCmdFuture = scheduledExecutor.scheduleAtFixedRate(
+            () -> {
+                try {
+                    execSchedulerCmd();
+                } catch (Exception e) {
+                    log.error("[TaskInstance] 执行调度器指令失败 | instanceName={}", getInstanceName(), e);
+                    TaskSchedulerLog schedulerLog = newSchedulerLog();
+                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_EXEC_SCHEDULER_CMD_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                    schedulerErrorListener(schedulerLog, e);
+                }
+            },
+            initialDelay, GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL, TimeUnit.MILLISECONDS
+        );
         // 清理日志数据任务
         clearLogFuture = scheduledExecutor.scheduleAtFixedRate(
             () -> {
@@ -856,6 +887,7 @@ public class TaskInstance {
         stopScheduler.accept(dataCheckFuture);
         stopScheduler.accept(reloadSchedulerFuture);
         stopScheduler.accept(fireTriggerFuture);
+        stopScheduler.accept(execSchedulerCmdFuture);
         stopScheduler.accept(clearLogFuture);
         stopScheduler.accept(collectReportFuture);
     }
@@ -942,7 +974,7 @@ public class TaskInstance {
     private void dataCheck() throws SchedulerException {
         Date now = taskStore.currentDate();
         // 最后一次校验时间
-        Date lastDataCheckDate = taskStore.lastDataCheckDate(getNamespace());
+        Date lastDataCheckDate = taskStore.lastEventNameDate(getNamespace(), TaskSchedulerLog.EVENT_DATA_CHECK_ERROR);
         long maxWait = Math.max(GlobalConstant.DATA_CHECK_INTERVAL / 2, 300_000);
         if (lastDataCheckDate != null && (now.getTime() - lastDataCheckDate.getTime() < maxWait)) {
             return;
@@ -1110,6 +1142,11 @@ public class TaskInstance {
                 log.error("[TaskInstance] {}", message);
                 jobExecutor.execute(() -> {
                     try {
+                        Date lastEvent = taskStore.lastEventNameDate(getNamespace(), TaskSchedulerLog.EVENT_OPTIMIZE_ALARMS);
+                        long minInterval = 3_000;
+                        if (lastEvent != null && (taskStore.currentTimeMillis() - lastEvent.getTime() < minInterval)) {
+                            return;
+                        }
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
                         schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_OPTIMIZE_ALARMS, message);
                         schedulerErrorListener(schedulerLog, new SchedulerException(message));
@@ -1375,6 +1412,73 @@ public class TaskInstance {
         }
     }
 
+    /**
+     * 创建并等待调度器指定执行完成
+     */
+    private boolean createAndWaitSchedulerCmd(String namespace, String instanceName, SchedulerCmdInfo schedulerCmdInfo) {
+        TaskSchedulerCmd schedulerCmd = new TaskSchedulerCmd();
+        schedulerCmd.setNamespace(namespace);
+        schedulerCmd.setInstanceName(instanceName);
+        schedulerCmd.setCmdInfo(JacksonMapper.getInstance().toJson(schedulerCmdInfo));
+        taskStore.beginTX(status -> taskStore.saveSchedulerCmd(schedulerCmd));
+        boolean success = false;
+        long awaitEndTime = taskStore.currentTimeMillis() + GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL + 2_000;
+        while (taskStore.currentTimeMillis() <= awaitEndTime) {
+            try {
+                // noinspection BusyWait
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                log.info("休眠失败", e);
+            }
+            TaskSchedulerCmd newCmd = taskStore.beginReadOnlyTX(status -> taskStore.getSchedulerCmd(schedulerCmd.getId()));
+            if (newCmd == null) {
+                break;
+            }
+            success = Objects.equals(newCmd.getState(), EnumConstant.SCHEDULER_CMD_STATE_2);
+            if (success) {
+                break;
+            }
+        }
+        taskStore.beginTX(status -> taskStore.delSchedulerCmd(schedulerCmd.getId()));
+        return success;
+    }
+
+    private void execSchedulerCmd() {
+        List<TaskSchedulerCmd> nextSchedulerCmd = taskStore.beginReadOnlyTX(status -> taskStore.getNextSchedulerCmd(getNamespace(), getInstanceName()));
+        for (TaskSchedulerCmd schedulerCmd : nextSchedulerCmd) {
+            try {
+                // 在 state 字段上使用了乐观锁
+                boolean locked = taskStore.beginTX(status -> taskStore.updateSchedulerCmdState(
+                    schedulerCmd.getId(), EnumConstant.SCHEDULER_CMD_STATE_1, EnumConstant.SCHEDULER_CMD_STATE_0
+                ));
+                if (!locked) {
+                    continue;
+                }
+                if (!Objects.equals(schedulerCmd.getState(), EnumConstant.SCHEDULER_CMD_STATE_0) || StringUtils.isBlank(schedulerCmd.getCmdInfo())) {
+                    continue;
+                }
+                SchedulerCmdInfo cmdInfo = JacksonMapper.getInstance().fromJson(schedulerCmd.getCmdInfo(), SchedulerCmdInfo.class);
+                if (cmdInfo == null) {
+                    continue;
+                }
+                switch (cmdInfo.getOperation()) {
+                    case SchedulerCmdInfo.EXEC_JOB:
+                        execJob(cmdInfo.getJobId());
+                        break;
+                    // TODO 其它操作
+                    default:
+                        throw new SchedulerException("不支持的操作: " + cmdInfo.getOperation());
+                }
+                taskStore.beginTX(status -> taskStore.updateSchedulerCmdState(schedulerCmd.getId(), EnumConstant.SCHEDULER_CMD_STATE_2));
+            } catch (Exception e) {
+                log.error("[TaskInstance] 执行调度器指令失败 | instanceName={}", getInstanceName(), e);
+                TaskSchedulerLog schedulerLog = newSchedulerLog();
+                schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_EXEC_SCHEDULER_CMD_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                schedulerErrorListener(schedulerLog, e);
+            }
+        }
+    }
+
     private void clearLogs() {
         SchedulerConfig config = taskContext.getSchedulerConfig();
         long logRetention = -1;
@@ -1385,8 +1489,11 @@ public class TaskInstance {
             return;
         }
         Date maxDate = new Date(taskStore.currentTimeMillis() - logRetention);
+        log.info("清理超时的调度器指令开始...");
+        long count = taskStore.beginTX(status -> taskStore.clearSchedulerCmd());
+        log.info("清理超时的调度器指令数据量: {}", count);
         log.info("清理任务执行日志开始...");
-        long count = taskStore.beginTX(status -> taskStore.clearJobLog(getNamespace(), maxDate));
+        count = taskStore.beginTX(status -> taskStore.clearJobLog(getNamespace(), maxDate));
         log.info("清理任务执行日志数据量: {}", count);
         log.info("清理任务触发日志开始...");
         count = taskStore.beginTX(status -> taskStore.clearTriggerJobLog(getNamespace(), maxDate));

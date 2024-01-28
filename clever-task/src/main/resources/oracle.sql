@@ -299,6 +299,7 @@ comment on column task_scheduler_cmd.state is '指令执行状态，0：未执�
 comment on column task_scheduler_cmd.create_at is '创建时间';
 comment on column task_scheduler_cmd.update_at is '更新时间';
 create index idx_task_scheduler_cmd_create_at on task_scheduler_cmd (create_at);
+create index idx_task_scheduler_cmd_update_at on task_scheduler_cmd (update_at);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/

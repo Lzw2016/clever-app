@@ -207,6 +207,7 @@ create table task_scheduler_cmd
     primary key (id)
 ) engine=innodb default charset=utf8mb4 comment = '调度器指令';
 create index idx_task_scheduler_cmd_create_at on task_scheduler_cmd (create_at);
+create index idx_task_scheduler_cmd_update_at on task_scheduler_cmd (update_at);
 /*------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------------------------------------------------*/

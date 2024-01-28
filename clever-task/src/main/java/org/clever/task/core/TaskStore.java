@@ -51,6 +51,7 @@ import static org.clever.task.core.model.query.QTaskJobTriggerLog.taskJobTrigger
 import static org.clever.task.core.model.query.QTaskJsJob.taskJsJob;
 import static org.clever.task.core.model.query.QTaskReport.taskReport;
 import static org.clever.task.core.model.query.QTaskScheduler.taskScheduler;
+import static org.clever.task.core.model.query.QTaskSchedulerCmd.taskSchedulerCmd;
 import static org.clever.task.core.model.query.QTaskSchedulerLog.taskSchedulerLog;
 import static org.clever.task.core.model.query.QTaskShellJob.taskShellJob;
 
@@ -694,7 +695,7 @@ public class TaskStore {
         if (jobTrigger.getId() == null) {
             jobTrigger.setId(snowFlake.nextId());
         }
-        jobTrigger.setCreateAt(queryDSL.currentDate());
+        jobTrigger.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskJobTrigger).populate(jobTrigger).execute();
     }
 
@@ -702,7 +703,7 @@ public class TaskStore {
         if (job.getId() == null) {
             job.setId(snowFlake.nextId());
         }
-        job.setCreateAt(queryDSL.currentDate());
+        job.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskJob).populate(job).execute();
     }
 
@@ -710,7 +711,7 @@ public class TaskStore {
         if (httpJob.getId() == null) {
             httpJob.setId(snowFlake.nextId());
         }
-        httpJob.setCreateAt(queryDSL.currentDate());
+        httpJob.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskHttpJob).populate(httpJob).execute();
     }
 
@@ -718,7 +719,7 @@ public class TaskStore {
         if (javaJob.getId() == null) {
             javaJob.setId(snowFlake.nextId());
         }
-        javaJob.setCreateAt(queryDSL.currentDate());
+        javaJob.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskJavaJob).populate(javaJob).execute();
     }
 
@@ -726,7 +727,7 @@ public class TaskStore {
         if (jsJob.getId() == null) {
             jsJob.setId(snowFlake.nextId());
         }
-        jsJob.setCreateAt(queryDSL.currentDate());
+        jsJob.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskJsJob).populate(jsJob).execute();
     }
 
@@ -734,7 +735,7 @@ public class TaskStore {
         if (shellJob.getId() == null) {
             shellJob.setId(snowFlake.nextId());
         }
-        shellJob.setCreateAt(queryDSL.currentDate());
+        shellJob.setCreateAt(currentDate());
         return (int) queryDSL.insert(taskShellJob).populate(shellJob).execute();
     }
 
@@ -743,7 +744,7 @@ public class TaskStore {
             taskJobTrigger,
             jobTrigger.getId() != null ? taskJobTrigger.id.eq(jobTrigger.getId()) : taskJobTrigger.jobId.eq(jobTrigger.getJobId()),
             jobTrigger,
-            update -> update.set(taskJobTrigger.updateAt, queryDSL.currentDate()),
+            update -> update.set(taskJobTrigger.updateAt, currentDate()),
             taskJobTrigger.id,
             taskJobTrigger.lastFireTime,
             taskJobTrigger.fireCount,
@@ -757,7 +758,7 @@ public class TaskStore {
             taskJob,
             taskJob.id.eq(job.getId()),
             job,
-            update -> update.set(taskJob.updateAt, queryDSL.currentDate()),
+            update -> update.set(taskJob.updateAt, currentDate()),
             taskJob.id,
             taskJob.runCount,
             taskJob.createAt,
@@ -770,7 +771,7 @@ public class TaskStore {
             taskHttpJob,
             httpJob.getId() != null ? taskHttpJob.id.eq(httpJob.getId()) : taskHttpJob.jobId.eq(httpJob.getJobId()),
             httpJob,
-            update -> update.set(taskHttpJob.updateAt, queryDSL.currentDate()),
+            update -> update.set(taskHttpJob.updateAt, currentDate()),
             taskHttpJob.id,
             taskHttpJob.createAt,
             taskHttpJob.updateAt
@@ -782,7 +783,7 @@ public class TaskStore {
             taskJavaJob,
             javaJob.getId() != null ? taskJavaJob.id.eq(javaJob.getId()) : taskJavaJob.jobId.eq(javaJob.getJobId()),
             javaJob,
-            update -> update.set(taskJavaJob.updateAt, queryDSL.currentDate()),
+            update -> update.set(taskJavaJob.updateAt, currentDate()),
             taskJavaJob.id,
             taskJavaJob.createAt,
             taskJavaJob.updateAt
@@ -794,7 +795,7 @@ public class TaskStore {
             taskJsJob,
             jsJob.getId() != null ? taskJsJob.id.eq(jsJob.getId()) : taskJsJob.jobId.eq(jsJob.getJobId()),
             jsJob,
-            update -> update.set(taskJsJob.updateAt, queryDSL.currentDate()),
+            update -> update.set(taskJsJob.updateAt, currentDate()),
             taskJsJob.id,
             taskJsJob.createAt,
             taskJsJob.updateAt
@@ -806,7 +807,7 @@ public class TaskStore {
             taskShellJob,
             shellJob.getId() != null ? taskShellJob.id.eq(shellJob.getId()) : taskShellJob.jobId.eq(shellJob.getJobId()),
             shellJob,
-            update -> update.set(taskShellJob.updateAt, queryDSL.currentDate()),
+            update -> update.set(taskShellJob.updateAt, currentDate()),
             taskShellJob.id,
             taskShellJob.createAt,
             taskShellJob.updateAt
@@ -873,6 +874,13 @@ public class TaskStore {
         TaskShellJob shellJob = tuple.get(taskShellJob);
         TaskJobTrigger jobTrigger = tuple.get(taskJobTrigger);
         return new JobInfo(job, httpJob, javaJob, jsJob, shellJob, jobTrigger);
+    }
+
+    public long clearSchedulerCmd() {
+        Date maxDate = new Date(currentTimeMillis() - GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL - 10_000);
+        return queryDSL.delete(taskSchedulerCmd)
+            .where(taskSchedulerCmd.createAt.loe(maxDate))
+            .execute();
     }
 
     public long clearJobLog(String namespace, Date maxDate) {
@@ -1353,11 +1361,11 @@ public class TaskStore {
         return errMsg.toString();
     }
 
-    public Date lastDataCheckDate(String namespace) {
+    public Date lastEventNameDate(String namespace, String eventName) {
         return queryDSL.select(taskSchedulerLog.createAt.max())
             .from(taskSchedulerLog)
             .where(taskSchedulerLog.namespace.eq(namespace))
-            .where(taskSchedulerLog.eventName.eq(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR))
+            .where(taskSchedulerLog.eventName.eq(eventName))
             .fetchOne();
     }
 
@@ -1369,6 +1377,61 @@ public class TaskStore {
             jobConsoleLog.setId(snowFlake.nextId());
         }
         return queryDSL.insert(taskJobConsoleLog).populate(jobConsoleLog).execute();
+    }
+
+    public List<TaskSchedulerCmd> getNextSchedulerCmd(String namespace, String instanceName) {
+        Date minDate = new Date(currentTimeMillis() - (GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL + 5_000));
+        return queryDSL.select(taskSchedulerCmd)
+            .from(taskSchedulerCmd)
+            .where(taskSchedulerCmd.namespace.eq(namespace))
+            .where(
+                taskSchedulerCmd.instanceName.eq(instanceName)
+                    .or(taskSchedulerCmd.instanceName.isNull())
+                    .or(taskSchedulerCmd.instanceName.trim().length().loe(0))
+            )
+            .where(taskSchedulerCmd.createAt.goe(minDate))
+            .where(taskSchedulerCmd.state.eq(EnumConstant.SCHEDULER_CMD_STATE_0))
+            .where(taskSchedulerCmd.cmdInfo.isNotNull())
+            .orderBy(taskSchedulerCmd.createAt.asc())
+            .fetch();
+    }
+
+    public boolean updateSchedulerCmdState(long id, int state, Integer oldState) {
+        SQLUpdateClause update = queryDSL.update(taskSchedulerCmd)
+            .set(taskSchedulerCmd.state, state)
+            .set(taskSchedulerCmd.updateAt, currentDate())
+            .where(taskSchedulerCmd.id.eq(id));
+        if (oldState != null) {
+            update.where(taskSchedulerCmd.state.eq(oldState));
+        }
+        return update.execute() > 0;
+    }
+
+    public boolean updateSchedulerCmdState(long id, int state) {
+        return updateSchedulerCmdState(id, state, null);
+    }
+
+    public boolean saveSchedulerCmd(TaskSchedulerCmd schedulerCmd) {
+        if (schedulerCmd == null) {
+            return false;
+        }
+        if (schedulerCmd.getId() == null) {
+            schedulerCmd.setId(snowFlake.nextId());
+        }
+        if (StringUtils.isBlank(schedulerCmd.getInstanceName())) {
+            schedulerCmd.setInstanceName(null);
+        }
+        schedulerCmd.setState(EnumConstant.SCHEDULER_CMD_STATE_0);
+        schedulerCmd.setCreateAt(currentDate());
+        return queryDSL.insert(taskSchedulerCmd).populate(schedulerCmd).execute() > 0;
+    }
+
+    public TaskSchedulerCmd getSchedulerCmd(long id) {
+        return queryDSL.selectFrom(taskSchedulerCmd).where(taskSchedulerCmd.id.eq(id)).fetchOne();
+    }
+
+    public boolean delSchedulerCmd(long id) {
+        return queryDSL.delete(taskSchedulerCmd).where(taskSchedulerCmd.id.eq(id)).execute() > 0;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

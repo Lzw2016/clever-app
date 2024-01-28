@@ -176,6 +176,19 @@ public interface EnumConstant {
     int JAVA_JOB_IS_STATIC_1 = 1;
 
     /**
+     * 指令执行状态，0：未执行，1：执行中，2：执行完成
+     */
+    int SCHEDULER_CMD_STATE_0 = 0;
+    /**
+     * 指令执行状态，0：未执行，1：执行中，2：执行完成
+     */
+    int SCHEDULER_CMD_STATE_1 = 1;
+    /**
+     * 指令执行状态，0：未执行，1：执行中，2：执行完成
+     */
+    int SCHEDULER_CMD_STATE_2 = 2;
+
+    /**
      * shell脚本类型：bash|sh|ash|powershell|cmd|python|node|deno|php
      */
     String SHELL_JOB_SHELL_TYPE_BASH = "bash";

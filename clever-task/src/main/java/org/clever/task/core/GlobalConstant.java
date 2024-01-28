@@ -41,6 +41,8 @@ public interface GlobalConstant {
     int INITIAL_CAPACITY = 1024;
     // 分布式锁的等待时间(单位：秒)
     int CONCURRENT_LOCK_WAIT = 3;
+    // 执行调度器指令时间间隔(单位：毫秒)
+    int EXEC_SCHEDULER_CMD_INTERVAL = 2_000;
     // 清理日志数据任务时间间隔(单位：毫秒)
     int CLEAR_LOG_INTERVAL = 1800_000;
     // 收集任务执行报表时间间隔(单位：毫秒)

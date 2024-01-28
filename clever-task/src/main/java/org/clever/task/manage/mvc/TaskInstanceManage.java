@@ -284,9 +284,9 @@ public class TaskInstanceManage {
      * 立即执行任务
      */
     @Transactional(disabled = true)
-    public static R<?> execJob(@RequestParam("jobId") Long jobId) {
-        getTaskInstance().execJob(jobId);
-        return R.success();
+    public static R<?> execJob(ExecJobReq req) {
+        boolean success = getTaskInstance().useCmdExecJob(req.getJobId(), req.getInstanceName());
+        return R.create(success, "操作成功", "操作失败请重试");
     }
 
     /**
