@@ -65,5 +65,7 @@ public class HttpJobExecutor implements JobExecutor {
                 // httpJob.getSuccessCheck() TODO 执行js校验逻辑
             }
         }
+        // TODO 保存请求响应日志
+        // context.info("");
     }
 }

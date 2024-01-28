@@ -1394,8 +1394,9 @@ public class TaskInstance {
         log.info("清理调度器日志开始...");
         count = taskStore.beginTX(status -> taskStore.clearSchedulerLog(getNamespace(), maxDate));
         log.info("清理调度器日志数据量: {}", count);
-        // TODO 清理任务控制台日志
-        // TODO 清理任务控制台日志
+        log.info("清理任务控制台日志开始...");
+        count = taskStore.beginTX(status -> taskStore.clearJobConsoleLog(getNamespace(), maxDate));
+        log.info("清理任务控制台日志数据量: {}", count);
     }
 
     private void collectReport() {

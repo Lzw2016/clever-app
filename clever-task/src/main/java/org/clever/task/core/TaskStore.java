@@ -896,6 +896,13 @@ public class TaskStore {
             .execute();
     }
 
+    public long clearJobConsoleLog(String namespace, Date maxDate) {
+        return queryDSL.delete(taskJobConsoleLog)
+            .where(taskJobConsoleLog.namespace.eq(namespace))
+            .where(taskJobConsoleLog.createAt.loe(maxDate))
+            .execute();
+    }
+
     public TaskReport createTaskReport(String namespace, Date date) {
         final TaskReport taskReport = new TaskReport();
         taskReport.setId(snowFlake.nextId());
