@@ -1422,11 +1422,11 @@ public class TaskInstance {
         schedulerCmd.setCmdInfo(JacksonMapper.getInstance().toJson(schedulerCmdInfo));
         taskStore.beginTX(status -> taskStore.saveSchedulerCmd(schedulerCmd));
         boolean success = false;
-        long awaitEndTime = taskStore.currentTimeMillis() + GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL + 2_000;
+        long awaitEndTime = taskStore.currentTimeMillis() + GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL + 30_000;
         while (taskStore.currentTimeMillis() <= awaitEndTime) {
             try {
                 // noinspection BusyWait
-                Thread.sleep(200);
+                Thread.sleep(800);
             } catch (InterruptedException e) {
                 log.info("休眠失败", e);
             }
