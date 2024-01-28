@@ -170,7 +170,7 @@ public class HotReloadClassLoader extends ClassLoader {
      * @param name class名
      */
     private boolean basePackageFilter(String name) {
-        if (excludeClassPrefixes == null || excludeClassPrefixes.length == 0) {
+        if (excludeClassPrefixes == null) {
             return true;
         }
         for (String prefix : excludeClassPrefixes) {
