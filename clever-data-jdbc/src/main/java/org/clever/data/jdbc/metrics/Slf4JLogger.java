@@ -4,6 +4,7 @@ import com.p6spy.engine.logging.Category;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.p6spy.P6SpyFormatter;
+import org.clever.data.jdbc.support.SqlLoggerUtils;
 import org.clever.util.Assert;
 
 import java.util.HashSet;
@@ -88,12 +89,13 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
         }
         // 判断是否需要忽略打印SQL
         if (LOG_CONFIG != null && StringUtils.isNotBlank(prepared)) {
+            String preparedSql = SqlLoggerUtils.deleteWhitespace(prepared);
             // 忽略的SQL语句(完整匹配，大小写敏感)
-            if (LOG_CONFIG.getIgnoreSql() != null && LOG_CONFIG.getIgnoreSql().contains(prepared)) {
+            if (LOG_CONFIG.getIgnoreSql() != null && LOG_CONFIG.getIgnoreSql().contains(preparedSql)) {
                 return;
             }
             // 忽略的SQL语句(包含匹配，大小写敏感)
-            if (LOG_CONFIG.getIgnoreContainsSql() != null && LOG_CONFIG.getIgnoreContainsSql().stream().anyMatch(prepared::contains)) {
+            if (LOG_CONFIG.getIgnoreContainsSql() != null && LOG_CONFIG.getIgnoreContainsSql().stream().anyMatch(preparedSql::contains)) {
                 return;
             }
         }
