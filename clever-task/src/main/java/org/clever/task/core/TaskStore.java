@@ -31,6 +31,7 @@ import org.clever.task.core.model.entity.*;
 import org.clever.task.core.support.ClassMethodLoader;
 import org.clever.task.core.support.DataBaseClock;
 import org.clever.transaction.TransactionDefinition;
+import org.clever.transaction.annotation.Propagation;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.util.Assert;
 
@@ -320,7 +321,9 @@ public class TaskStore {
      * @param syncBlock 同步回调函数(可保证分布式串行执行): () -> { ... }
      */
     public void getLockJob(String namespace, Long jobId, Runnable syncBlock) {
-        lock(namespace, String.format("job_%s", jobId), syncBlock);
+        jdbc.beginTX(status -> {
+            lock(namespace, String.format("job_%s", jobId), syncBlock);
+        }, Propagation.REQUIRES_NEW, 60 * 60 * 24);
     }
 
     /**
