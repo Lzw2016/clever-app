@@ -14,6 +14,7 @@ import org.clever.task.core.cron.CronExpressionUtil;
 import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
+import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
 import org.clever.task.manage.dao.TaskManageStore;
 import org.clever.task.manage.model.JobLogInfo;
@@ -25,7 +26,6 @@ import org.clever.web.support.mvc.annotation.RequestParam;
 import org.clever.web.support.mvc.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -94,29 +94,26 @@ public class TaskInstanceManage {
      * 获取当前调度器
      */
     @Transactional(disabled = true)
-    public static R<?> getCurrentScheduler() {
-        Map<String, Object> data = BeanCopyUtils.toMap(getTaskInstance().getContext().getCurrentScheduler());
-        data.put("state", getTaskInstance().getState());
-        data.put("stateText", getTaskInstance().getStateText());
-        return R.success(data);
+    public static TaskScheduler getCurrentScheduler() {
+        return getTaskInstance().getContext().getCurrentScheduler();
     }
 
     /**
      * 暂停调度器
      */
     @Transactional(disabled = true)
-    public static R<?> paused() {
-        getTaskInstance().paused();
-        return R.success();
+    public static R<?> paused(@RequestParam("schedulerId") Long schedulerId) {
+        boolean success = getTaskInstance().useCmdPausedScheduler(schedulerId);
+        return R.create(success, "操作成功", "操作失败请重试");
     }
 
     /**
      * 继续运行调度器
      */
     @Transactional(disabled = true)
-    public static R<?> resume() {
-        getTaskInstance().resume();
-        return R.success();
+    public static R<?> resume(@RequestParam("schedulerId") Long schedulerId) {
+        boolean success = getTaskInstance().useCmdResumeScheduler(schedulerId);
+        return R.create(success, "操作成功", "操作失败请重试");
     }
 
     /**

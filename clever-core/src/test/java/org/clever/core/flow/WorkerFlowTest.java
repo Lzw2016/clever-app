@@ -2,7 +2,7 @@ package org.clever.core.flow;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.SharedThreadPoolExecutor;
+import org.clever.core.thread.SharedThreadPoolExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

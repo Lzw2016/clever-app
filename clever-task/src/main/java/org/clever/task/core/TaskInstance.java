@@ -9,6 +9,7 @@ import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.function.ThreeConsumer;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
+import org.clever.core.thread.ThreadUtils;
 import org.clever.core.tuples.TupleOne;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.task.core.config.SchedulerConfig;
@@ -727,7 +728,6 @@ public class TaskInstance {
      * 获取所有调度器
      */
     public List<SchedulerInfo> allSchedulers() {
-        // getNamespace()
         return taskStore.beginReadOnlyTX(status -> taskStore.queryAllSchedulerList(null));
     }
 
@@ -746,7 +746,7 @@ public class TaskInstance {
     }
 
     /**
-     * 使用调度器指令(SchedulerCmd)执行任务
+     * 使用调度器指令(SchedulerCmd) 执行任务
      *
      * @param jobId        任务ID
      * @param instanceName 指定执行任务的节点(可以为空)
@@ -758,54 +758,30 @@ public class TaskInstance {
         return createAndWaitSchedulerCmd(job.getNamespace(), instanceName, SchedulerCmdInfo.createExecJobCmd(jobId));
     }
 
+    /**
+     * 使用调度器指令(SchedulerCmd) 暂停调度器
+     */
+    public boolean useCmdPausedScheduler(Long schedulerId) {
+        TaskScheduler scheduler = taskStore.beginReadOnlyTX(status -> taskStore.getScheduler(schedulerId));
+        Assert.notNull(scheduler, "调度器不存在");
+        return createAndWaitSchedulerCmd(scheduler.getNamespace(), scheduler.getInstanceName(), SchedulerCmdInfo.createPausedSchedulerCmd());
+    }
+
+    /**
+     * 使用调度器指令(SchedulerCmd) 继续运行调度器
+     */
+    public boolean useCmdResumeScheduler(Long schedulerId) {
+        TaskScheduler scheduler = taskStore.beginReadOnlyTX(status -> taskStore.getScheduler(schedulerId));
+        Assert.notNull(scheduler, "调度器不存在");
+        return createAndWaitSchedulerCmd(scheduler.getNamespace(), scheduler.getInstanceName(), SchedulerCmdInfo.createResumeSchedulerCmd());
+    }
+
     // ---------------------------------------------------------------------------------------------------------------------------------------- service
 
-    private void startScheduler() {
+    private void startScheduler(boolean startScheduler) {
         long initialDelay = 0;
-        TaskScheduler taskScheduler = registerScheduler(toScheduler(taskContext.getSchedulerConfig()));
+        TaskScheduler taskScheduler = registerScheduler();
         taskContext.setCurrentScheduler(taskScheduler);
-        // 调度器节点注册&更新调度器运行信息
-        registerSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
-            () -> {
-                try {
-                    registerScheduler(taskContext.getCurrentScheduler());
-                } catch (Exception e) {
-                    log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", getInstanceName(), e);
-                    TaskSchedulerLog schedulerLog = newSchedulerLog();
-                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_REGISTER_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                    schedulerErrorListener(schedulerLog, e);
-                }
-            },
-            GlobalConstant.REGISTER_SCHEDULER_INTERVAL, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
-        );
-        // 集群节点心跳保持
-        heartbeatFuture = scheduledExecutor.scheduleAtFixedRate(
-            () -> {
-                try {
-                    heartbeat();
-                } catch (Exception e) {
-                    log.error("[TaskInstance] 心跳保持失败 | instanceName={}", getInstanceName(), e);
-                    TaskSchedulerLog schedulerLog = newSchedulerLog();
-                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_HEART_BEAT_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                    schedulerErrorListener(schedulerLog, e);
-                }
-            },
-            initialDelay, taskScheduler.getHeartbeatInterval(), TimeUnit.MILLISECONDS
-        );
-        // 数据完整性校验&一致性校验
-        dataCheckFuture = scheduledExecutor.scheduleAtFixedRate(
-            () -> {
-                try {
-                    dataCheck();
-                } catch (Exception e) {
-                    log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", getInstanceName(), e);
-                    TaskSchedulerLog schedulerLog = newSchedulerLog();
-                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                    schedulerErrorListener(schedulerLog, e);
-                }
-            },
-            initialDelay, GlobalConstant.DATA_CHECK_INTERVAL, TimeUnit.MILLISECONDS
-        );
         // 维护当前集群可用的调度器列表
         reloadSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
             () -> {
@@ -832,69 +808,116 @@ public class TaskInstance {
                 paused();
             }
         });
-        // 执行调度器指令
-        execSchedulerCmdFuture = scheduledExecutor.scheduleAtFixedRate(
-            () -> {
-                try {
-                    execSchedulerCmd();
-                } catch (Exception e) {
-                    log.error("[TaskInstance] 执行调度器指令失败 | instanceName={}", getInstanceName(), e);
-                    TaskSchedulerLog schedulerLog = newSchedulerLog();
-                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_EXEC_SCHEDULER_CMD_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                    schedulerErrorListener(schedulerLog, e);
-                }
-            },
-            initialDelay, GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL, TimeUnit.MILLISECONDS
-        );
-        // 清理日志数据任务
-        clearLogFuture = scheduledExecutor.scheduleAtFixedRate(
-            () -> {
-                try {
-                    clearLogs();
-                } catch (Exception e) {
-                    log.error("[TaskInstance] 清理日志数据失败 | instanceName={}", getInstanceName(), e);
-                    TaskSchedulerLog schedulerLog = newSchedulerLog();
-                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_CLEAR_LOG_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                    schedulerErrorListener(schedulerLog, e);
-                }
-            },
-            initialDelay, GlobalConstant.CLEAR_LOG_INTERVAL, TimeUnit.MILLISECONDS
-        );
-        // 收集任务执行报表
-        collectReportFuture = scheduledExecutor.scheduleAtFixedRate(
-            () -> {
-                try {
-                    collectReport();
-                } catch (Exception e) {
-                    log.error("[TaskInstance] 收集任务执行报表失败 | instanceName={}", getInstanceName(), e);
-                    TaskSchedulerLog schedulerLog = newSchedulerLog();
-                    schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_COLLECT_REPORT_ERROR, ExceptionUtils.getStackTraceAsString(e));
-                    schedulerErrorListener(schedulerLog, e);
-                }
-            },
-            initialDelay, GlobalConstant.COLLECT_REPORT_INTERVAL, TimeUnit.MILLISECONDS
-        );
+        if (startScheduler) {
+            // 调度器节点注册&更新调度器运行信息
+            registerSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        registerScheduler();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 调度器节点注册失败 | instanceName={}", getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_REGISTER_SCHEDULER_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                10_000, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
+            );
+            // 集群节点心跳保持
+            heartbeatFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        heartbeat();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 心跳保持失败 | instanceName={}", getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_HEART_BEAT_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, taskScheduler.getHeartbeatInterval(), TimeUnit.MILLISECONDS
+            );
+            // 数据完整性校验&一致性校验
+            dataCheckFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        dataCheck();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 数据完整性校验失败 | instanceName={}", getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_DATA_CHECK_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.DATA_CHECK_INTERVAL, TimeUnit.MILLISECONDS
+            );
+            // 执行调度器指令
+            execSchedulerCmdFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        execSchedulerCmd();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 执行调度器指令失败 | instanceName={}", getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_EXEC_SCHEDULER_CMD_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL, TimeUnit.MILLISECONDS
+            );
+            // 清理日志数据任务
+            clearLogFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        clearLogs();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 清理日志数据失败 | instanceName={}", getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_CLEAR_LOG_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.CLEAR_LOG_INTERVAL, TimeUnit.MILLISECONDS
+            );
+            // 收集任务执行报表
+            collectReportFuture = scheduledExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        collectReport();
+                    } catch (Exception e) {
+                        log.error("[TaskInstance] 收集任务执行报表失败 | instanceName={}", getInstanceName(), e);
+                        TaskSchedulerLog schedulerLog = newSchedulerLog();
+                        schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_COLLECT_REPORT_ERROR, ExceptionUtils.getStackTraceAsString(e));
+                        schedulerErrorListener(schedulerLog, e);
+                    }
+                },
+                initialDelay, GlobalConstant.COLLECT_REPORT_INTERVAL, TimeUnit.MILLISECONDS
+            );
+        }
     }
 
-    private void stopScheduler() {
-        Consumer<Future<?>> stopScheduler = future -> {
+    private void stopScheduler(boolean stopScheduler) {
+        Consumer<Future<?>> stopFuture = future -> {
             if (future != null && !future.isDone() && !future.isCancelled()) {
                 future.cancel(true);
             }
         };
-        stopScheduler.accept(registerSchedulerFuture);
-        stopScheduler.accept(heartbeatFuture);
-        stopScheduler.accept(dataCheckFuture);
-        stopScheduler.accept(reloadSchedulerFuture);
-        stopScheduler.accept(fireTriggerFuture);
-        stopScheduler.accept(execSchedulerCmdFuture);
-        stopScheduler.accept(clearLogFuture);
-        stopScheduler.accept(collectReportFuture);
+        if (stopScheduler) {
+            // 停止调度器时
+            stopFuture.accept(registerSchedulerFuture);
+            stopFuture.accept(heartbeatFuture);
+            stopFuture.accept(dataCheckFuture);
+            stopFuture.accept(execSchedulerCmdFuture);
+            stopFuture.accept(clearLogFuture);
+            stopFuture.accept(collectReportFuture);
+        }
+        stopFuture.accept(reloadSchedulerFuture);
+        stopFuture.accept(fireTriggerFuture);
     }
 
     private void doStart() {
         try {
-            startScheduler();
+            startScheduler(true);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_STARTED);
             scheduledExecutor.execute(() -> schedulerStartedListener(schedulerLog));
@@ -909,7 +932,7 @@ public class TaskInstance {
 
     private void doPause() {
         try {
-            stopScheduler();
+            stopScheduler(false);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_PAUSED);
             scheduledExecutor.execute(() -> schedulerPausedListener(schedulerLog));
@@ -924,7 +947,7 @@ public class TaskInstance {
 
     private void doResume() {
         try {
-            startScheduler();
+            startScheduler(false);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_RESUME);
             scheduledExecutor.execute(() -> schedulerResumeListener(schedulerLog));
@@ -939,7 +962,7 @@ public class TaskInstance {
 
     private void doStop() {
         try {
-            stopScheduler();
+            stopScheduler(true);
             scheduledExecutor.shutdownNow();
             jobExecutor.shutdownNow();
             TaskSchedulerLog schedulerLog = newSchedulerLog();
@@ -956,7 +979,8 @@ public class TaskInstance {
     /**
      * 调度器节点注册，返回注册后的调度器对象
      */
-    private TaskScheduler registerScheduler(TaskScheduler scheduler) {
+    private TaskScheduler registerScheduler() {
+        TaskScheduler scheduler = toScheduler(taskContext.getSchedulerConfig());
         return taskStore.beginTX(status -> taskStore.addOrUpdateScheduler(scheduler));
     }
 
@@ -1465,7 +1489,18 @@ public class TaskInstance {
                     case SchedulerCmdInfo.EXEC_JOB:
                         execJob(cmdInfo.getJobId());
                         break;
-                    // TODO 其它操作
+                    case SchedulerCmdInfo.PAUSED_SCHEDULER:
+                        if (Objects.equals(schedulerCmd.getInstanceName(), getInstanceName())) {
+                            paused();
+                            registerScheduler();
+                        }
+                        break;
+                    case SchedulerCmdInfo.RESUME_SCHEDULER:
+                        if (Objects.equals(schedulerCmd.getInstanceName(), getInstanceName())) {
+                            resume();
+                            registerScheduler();
+                        }
+                        break;
                     default:
                         throw new SchedulerException("不支持的操作: " + cmdInfo.getOperation());
                 }
@@ -1718,18 +1753,34 @@ public class TaskInstance {
 
     // SchedulerConfig 转换成 Scheduler
     private TaskScheduler toScheduler(SchedulerConfig schedulerConfig) {
-        TaskScheduler.Config config = new TaskScheduler.Config();
-        config.setSchedulerExecutorPoolSize(schedulerConfig.getSchedulerExecutorPoolSize());
-        config.setJobExecutorPoolSize(schedulerConfig.getJobExecutorPoolSize());
-        config.setJobExecutorQueueSize(schedulerConfig.getJobExecutorQueueSize());
-        config.setLoadWeight(schedulerConfig.getLoadWeight());
+        SchedulerRuntimeConfig config = toSchedulerConfig(schedulerConfig);
+        SchedulerRuntimeInfo runtimeInfo = getSchedulerRuntimeInfo();
         TaskScheduler scheduler = new TaskScheduler();
         scheduler.setNamespace(schedulerConfig.getNamespace());
         scheduler.setInstanceName(schedulerConfig.getInstanceName());
         scheduler.setHeartbeatInterval(schedulerConfig.getHeartbeatInterval());
         scheduler.setConfig(JacksonMapper.getInstance().toJson(config));
+        scheduler.setRuntimeInfo(JacksonMapper.getInstance().toJson(runtimeInfo));
         scheduler.setDescription(schedulerConfig.getDescription());
         return scheduler;
+    }
+
+    private SchedulerRuntimeConfig toSchedulerConfig(SchedulerConfig schedulerConfig) {
+        SchedulerRuntimeConfig config = new SchedulerRuntimeConfig();
+        config.setSchedulerExecutorPoolSize(schedulerConfig.getSchedulerExecutorPoolSize());
+        config.setJobExecutorPoolSize(schedulerConfig.getJobExecutorPoolSize());
+        config.setJobExecutorQueueSize(schedulerConfig.getJobExecutorQueueSize());
+        config.setLoadWeight(schedulerConfig.getLoadWeight());
+        return config;
+    }
+
+    private SchedulerRuntimeInfo getSchedulerRuntimeInfo() {
+        SchedulerRuntimeInfo runtimeInfo = new SchedulerRuntimeInfo();
+        runtimeInfo.setState(getState());
+        runtimeInfo.setStateText(getStateText());
+        runtimeInfo.setScheduledExecutorState(ThreadUtils.getPoolInfo(scheduledExecutor));
+        runtimeInfo.setJobExecutorState(ThreadUtils.getPoolInfo(jobExecutor));
+        return runtimeInfo;
     }
 
     private TaskSchedulerLog newSchedulerLog() {

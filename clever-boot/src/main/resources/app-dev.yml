@@ -118,9 +118,9 @@ web:
       redisNamespace: "security"
 
 timed-task:
-  enable: false
+  enable: true
   jdbcName: 'postgresql'
-  namespace: 'test'
+  namespace: 'default'
   instanceName: 'node01'
   # namespace: 'lzw'
   # instanceName: 'n01'

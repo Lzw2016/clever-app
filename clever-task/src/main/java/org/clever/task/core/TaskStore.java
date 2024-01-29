@@ -134,6 +134,7 @@ public class TaskStore {
                 // .set(taskScheduler.lastHeartbeatTime, now)
                 .set(taskScheduler.heartbeatInterval, scheduler.getHeartbeatInterval())
                 .set(taskScheduler.config, scheduler.getConfig())
+                .set(taskScheduler.runtimeInfo, scheduler.getRuntimeInfo())
                 .set(taskScheduler.description, scheduler.getDescription())
                 .set(taskScheduler.updateAt, now)
                 .where(taskScheduler.namespace.eq(scheduler.getNamespace()))
@@ -648,6 +649,13 @@ public class TaskStore {
             }
             return null;
         });
+    }
+
+    public TaskScheduler getScheduler(long schedulerId) {
+        return queryDSL.select(taskScheduler)
+            .from(taskScheduler)
+            .where(taskScheduler.id.eq(schedulerId))
+            .fetchOne();
     }
 
     /**

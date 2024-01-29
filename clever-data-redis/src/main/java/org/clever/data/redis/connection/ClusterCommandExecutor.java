@@ -1,7 +1,7 @@
 package org.clever.data.redis.connection;
 
 import org.clever.beans.factory.DisposableBean;
-import org.clever.core.SharedThreadPoolExecutor;
+import org.clever.core.thread.SharedThreadPoolExecutor;
 import org.clever.dao.DataAccessException;
 import org.clever.data.redis.ClusterRedirectException;
 import org.clever.data.redis.ClusterStateFailureException;

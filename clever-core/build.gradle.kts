@@ -9,6 +9,7 @@ dependencies {
     api("commons-codec:commons-codec")
     api("org.json:json")
     api("com.fasterxml.jackson.datatype:jackson-datatype-joda")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     api("com.google.guava:guava")
     api("com.squareup.okhttp3:okhttp")
     // 可选依赖

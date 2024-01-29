@@ -3,6 +3,8 @@ package org.clever.task.core.model.entity;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.mapper.JacksonMapper;
+import org.clever.task.core.model.SchedulerRuntimeConfig;
+import org.clever.task.core.model.SchedulerRuntimeInfo;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -36,22 +38,20 @@ public class TaskScheduler implements Serializable {
     /**
      * 获取配置信息
      */
-    public Config getConfigInfo() {
+    public SchedulerRuntimeConfig getSchedulerConfig() {
         if (StringUtils.isBlank(config)) {
             return null;
         }
-        return JacksonMapper.getInstance().fromJson(config, Config.class);
+        return JacksonMapper.getInstance().fromJson(config, SchedulerRuntimeConfig.class);
     }
 
-    @Data
-    public static final class Config implements Serializable {
-        /** 调度线程池大小 */
-        private Integer schedulerExecutorPoolSize;
-        /** 定时任务执行线程池大小 */
-        private Integer jobExecutorPoolSize;
-        /** 定时任务执行线程池队列大小 */
-        private Integer jobExecutorQueueSize;
-        /** 负载权重 */
-        private Double loadWeight;
+    /**
+     * 获取运行信息
+     */
+    public SchedulerRuntimeInfo getSchedulerRuntimeInfo() {
+        if (StringUtils.isBlank(runtimeInfo)) {
+            return null;
+        }
+        return JacksonMapper.getInstance().fromJson(runtimeInfo, SchedulerRuntimeInfo.class);
     }
 }

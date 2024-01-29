@@ -1,7 +1,8 @@
-package org.clever.core;
+package org.clever.core.thread;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.clever.util.Assert;
+import org.clever.core.AppShutdownHook;
+import org.clever.core.OrderIncrement;
 
 import java.util.concurrent.*;
 
@@ -144,42 +145,5 @@ public class SharedThreadPoolExecutor {
             }
         }
         return CACHED_POOL;
-    }
-
-    /**
-     * 获取线程池状态信息
-     */
-    public static String getPoolInfo(ThreadPoolExecutor pool) {
-        Assert.notNull(pool, "参数 pool 不能为 null");
-        // 当前活跃执行任务的线程数
-        int activeCount = pool.getActiveCount();
-        // 工作队列中等待执行的任务数
-        int queueSize = pool.getQueue().size();
-        // 当前线程池中的线程数（包括核心线程和非核心线程）
-        int poolSize = pool.getPoolSize();
-        // 是否已调用 shutdown() 方法，不再接受新任务，但会继续处理队列中的任务
-        boolean isShutdown = pool.isShutdown();
-        // 线程池是否已经完全终止，即所有提交的任务都已经执行完毕或被取消
-        boolean isTerminated = pool.isTerminated();
-        // 已完成的任务总数
-        long completedTaskCount = pool.getCompletedTaskCount();
-        // 返回计划执行的任务的大致总数。由于任务和线程的状态在计算过程中可能会动态变化，因此返回的值只是一个近似值。
-        long taskCount = pool.getTaskCount();
-        // 核心线程数
-        int corePoolSize = pool.getCorePoolSize();
-        // 最大线程数
-        int maximumPoolSize = pool.getMaximumPoolSize();
-        // 获取拒绝策略等其他详细配置信息
-        String abortPolicy = pool.getRejectedExecutionHandler().getClass().getSimpleName();
-        return "activeCount=" + activeCount +
-            ", queueSize=" + queueSize
-            + ", poolSize=" + poolSize
-            + ", isShutdown=" + isShutdown
-            + ", isTerminated=" + isTerminated
-            + ", completedTaskCount=" + completedTaskCount
-            + ", taskCount=" + taskCount
-            + ", corePoolSize=" + corePoolSize
-            + ", maximumPoolSize=" + maximumPoolSize
-            + ", abortPolicy=" + abortPolicy;
     }
 }

@@ -1,7 +1,7 @@
 package org.clever.data.redis.stream;
 
 import org.clever.context.SmartLifecycle;
-import org.clever.core.SharedThreadPoolExecutor;
+import org.clever.core.thread.SharedThreadPoolExecutor;
 import org.clever.data.redis.connection.RedisConnectionFactory;
 import org.clever.data.redis.connection.stream.*;
 import org.clever.data.redis.hash.HashMapper;

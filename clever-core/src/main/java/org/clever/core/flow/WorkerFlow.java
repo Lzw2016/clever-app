@@ -1,8 +1,8 @@
 package org.clever.core.flow;
 
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.SharedThreadPoolExecutor;
 import org.clever.core.exception.AssertException;
+import org.clever.core.thread.SharedThreadPoolExecutor;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
