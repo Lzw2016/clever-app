@@ -440,15 +440,12 @@ public class TaskStore {
      * 更新触发器下一次触发时间
      */
     public int updateNextFireTime(TaskJobTrigger jobTrigger) {
-        int count = (int) queryDSL.update(taskJobTrigger)
+        return (int) queryDSL.update(taskJobTrigger)
             .set(taskJobTrigger.nextFireTime, jobTrigger.getNextFireTime())
             .where(taskJobTrigger.id.eq(jobTrigger.getId()))
             .where(taskJobTrigger.namespace.eq(jobTrigger.getNamespace()))
+            .where(taskJobTrigger.endTime.isNull().or(taskJobTrigger.endTime.goe(currentDate())))
             .execute();
-        if (count != 1) {
-            throw new SchedulerException(String.format("更新触发器下一次触发时间失败，JobTrigger(id=%s)", jobTrigger.getId()));
-        }
-        return count;
     }
 
     /**
@@ -476,6 +473,7 @@ public class TaskStore {
             .where(taskJobTrigger.fixedInterval.gt(0))
             .where(taskJobTrigger.nextFireTime.isNotNull().or(taskJobTrigger.nextFireTime.ne(nextFireTime)))
             .where(taskJobTrigger.namespace.eq(namespace))
+            .where(taskJobTrigger.endTime.isNull().or(taskJobTrigger.endTime.goe(currentDate())))
             .execute();
     }
 
@@ -489,6 +487,7 @@ public class TaskStore {
             .set(taskJobTrigger.fireCount, taskJobTrigger.fireCount.add(1))
             .where(taskJobTrigger.id.eq(jobTrigger.getId()))
             .where(taskJobTrigger.namespace.eq(jobTrigger.getNamespace()))
+            .where(taskJobTrigger.endTime.isNull().or(taskJobTrigger.endTime.goe(currentDate())))
             .execute();
     }
 
