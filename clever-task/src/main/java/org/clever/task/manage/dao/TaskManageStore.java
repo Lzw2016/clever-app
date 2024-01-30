@@ -423,6 +423,7 @@ public class TaskManageStore {
         // 即将运行的任务
         SQLQuery<Tuple> sqlQuery = queryDSL.select(taskJobTrigger, taskJob)
             .from(taskJobTrigger).leftJoin(taskJob).on(taskJobTrigger.jobId.eq(taskJob.id))
+            .where(taskJobTrigger.nextFireTime.isNotNull())
             .orderBy(taskJobTrigger.nextFireTime.asc())
             .limit(req.getLimit());
         if (StringUtils.isNotBlank(req.getNamespace())) {

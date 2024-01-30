@@ -18,6 +18,10 @@ public class SchedulerConfig implements Serializable {
      */
     private boolean enable = false;
     /**
+     * 是否只进入 standby 模式
+     */
+    private boolean standby = true;
+    /**
      * jdbc数据源
      */
     private String jdbcName = "default";

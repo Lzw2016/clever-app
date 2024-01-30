@@ -36,6 +36,7 @@ public class TaskBootstrap {
         List<String> logs = new ArrayList<>();
         logs.add("timed-task: ");
         logs.add("  enable                    : " + config.isEnable());
+        logs.add("  standby                   : " + config.isStandby());
         logs.add("  jdbcName                  : " + config.getJdbcName());
         logs.add("  namespace                 : " + config.getNamespace());
         logs.add("  instanceName              : " + config.getInstanceName());
@@ -98,7 +99,11 @@ public class TaskBootstrap {
             return;
         }
         isStarted = true;
-        taskInstance.start();
+        if(schedulerConfig.isStandby()) {
+            taskInstance.standby();
+        } else {
+            taskInstance.start();
+        }
         AppShutdownHook.addShutdownHook(taskInstance::stop, OrderIncrement.NORMAL, "停止定时任务");
     }
 }

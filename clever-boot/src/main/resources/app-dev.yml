@@ -119,6 +119,7 @@ web:
 
 timed-task:
   enable: true
+  standby: true
   jdbcName: 'postgresql'
   namespace: 'default'
   instanceName: 'node01'

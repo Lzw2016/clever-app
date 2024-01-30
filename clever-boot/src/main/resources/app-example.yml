@@ -323,6 +323,7 @@ web:
 
 timed-task:
   enable: false
+  standby: true
   jdbcName: ''
   namespace: 'default'
   instanceName: 'node01'

@@ -187,6 +187,27 @@ public class TaskInstance {
     // ---------------------------------------------------------------------------------------------------------------------------------------- api
 
     /**
+     * 直接进入 paused 状态(无须先 start 再 paused)
+     */
+    public void standby() {
+        STATE_UPDATER.getAndUpdate(this, state -> {
+            switch (state) {
+                case State.INIT:
+                    doStandby();
+                    break;
+                case State.RUNNING:
+                    doPause();
+                    break;
+                case State.PAUSED:
+                    break;
+                default:
+                    throw new SchedulerException(String.format("无效的操作，当前调度器状态：%s，", getStateText()));
+            }
+            return State.PAUSED;
+        });
+    }
+
+    /**
      * 启动调度器，只有当前为 {@link State#INIT} 状态才能调用
      */
     public void start() {
@@ -809,7 +830,13 @@ public class TaskInstance {
             }
         });
         if (startScheduler) {
-            // 调度器节点注册&更新调度器运行信息
+            startStandbyScheduler(initialDelay, taskScheduler);
+        }
+    }
+
+    private void startStandbyScheduler(long initialDelay, TaskScheduler taskScheduler) {
+        // 调度器节点注册&更新调度器运行信息
+        if (registerSchedulerFuture == null || registerSchedulerFuture.isCancelled()) {
             registerSchedulerFuture = scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
@@ -823,7 +850,9 @@ public class TaskInstance {
                 },
                 10_000, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
             );
-            // 集群节点心跳保持
+        }
+        // 集群节点心跳保持
+        if (heartbeatFuture == null || heartbeatFuture.isCancelled()) {
             heartbeatFuture = scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
@@ -837,7 +866,9 @@ public class TaskInstance {
                 },
                 initialDelay, taskScheduler.getHeartbeatInterval(), TimeUnit.MILLISECONDS
             );
-            // 数据完整性校验&一致性校验
+        }
+        // 数据完整性校验&一致性校验
+        if (dataCheckFuture == null || dataCheckFuture.isCancelled()) {
             dataCheckFuture = scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
@@ -851,7 +882,9 @@ public class TaskInstance {
                 },
                 initialDelay, GlobalConstant.DATA_CHECK_INTERVAL, TimeUnit.MILLISECONDS
             );
-            // 执行调度器指令
+        }
+        // 执行调度器指令
+        if (execSchedulerCmdFuture == null || execSchedulerCmdFuture.isCancelled()) {
             execSchedulerCmdFuture = scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
@@ -865,7 +898,9 @@ public class TaskInstance {
                 },
                 initialDelay, GlobalConstant.EXEC_SCHEDULER_CMD_INTERVAL, TimeUnit.MILLISECONDS
             );
-            // 清理日志数据任务
+        }
+        // 清理日志数据任务
+        if (clearLogFuture == null || clearLogFuture.isCancelled()) {
             clearLogFuture = scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
@@ -879,7 +914,9 @@ public class TaskInstance {
                 },
                 initialDelay, GlobalConstant.CLEAR_LOG_INTERVAL, TimeUnit.MILLISECONDS
             );
-            // 收集任务执行报表
+        }
+        // 收集任务执行报表
+        if (collectReportFuture == null || collectReportFuture.isCancelled()) {
             collectReportFuture = scheduledExecutor.scheduleAtFixedRate(
                 () -> {
                     try {
@@ -896,7 +933,7 @@ public class TaskInstance {
         }
     }
 
-    private void stopScheduler(boolean stopScheduler) {
+    private void stopFuture(boolean stopScheduler) {
         Consumer<Future<?>> stopFuture = future -> {
             if (future != null && !future.isDone() && !future.isCancelled()) {
                 future.cancel(true);
@@ -913,6 +950,24 @@ public class TaskInstance {
         }
         stopFuture.accept(reloadSchedulerFuture);
         stopFuture.accept(fireTriggerFuture);
+    }
+
+    private void doStandby() {
+        try {
+            long initialDelay = 0;
+            TaskScheduler taskScheduler = registerScheduler();
+            taskContext.setCurrentScheduler(taskScheduler);
+            startStandbyScheduler(initialDelay, taskScheduler);
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventName(TaskSchedulerLog.EVENT_STANDBY);
+            scheduledExecutor.execute(() -> schedulerStartedListener(schedulerLog));
+        } catch (Exception e) {
+            log.error("[TaskInstance] 调度器准备失败 | instanceName={}", getInstanceName(), e);
+            TaskSchedulerLog schedulerLog = newSchedulerLog();
+            schedulerLog.setEventInfo(TaskSchedulerLog.EVENT_STANDBY_ERROR, ExceptionUtils.getStackTraceAsString(e));
+            scheduledExecutor.execute(() -> schedulerErrorListener(schedulerLog, e));
+            throw ExceptionUtils.unchecked(e);
+        }
     }
 
     private void doStart() {
@@ -932,7 +987,7 @@ public class TaskInstance {
 
     private void doPause() {
         try {
-            stopScheduler(false);
+            stopFuture(false);
             TaskSchedulerLog schedulerLog = newSchedulerLog();
             schedulerLog.setEventName(TaskSchedulerLog.EVENT_PAUSED);
             scheduledExecutor.execute(() -> schedulerPausedListener(schedulerLog));
@@ -962,7 +1017,7 @@ public class TaskInstance {
 
     private void doStop() {
         try {
-            stopScheduler(true);
+            stopFuture(true);
             scheduledExecutor.shutdownNow();
             jobExecutor.shutdownNow();
             TaskSchedulerLog schedulerLog = newSchedulerLog();
