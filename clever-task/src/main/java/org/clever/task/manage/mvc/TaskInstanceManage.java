@@ -262,7 +262,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static R<?> disableJob(@RequestParam("jobId") Long jobId, @RequestParam("triggerId") Long triggerId) {
-        int count = getTaskInstance().disableJob(jobId);
+        long count = getTaskInstance().disableJob(jobId);
         count += getTaskInstance().disableTrigger(triggerId);
         return R.success(count);
     }
@@ -272,7 +272,7 @@ public class TaskInstanceManage {
      */
     @Transactional(disabled = true)
     public static R<?> enableJob(@RequestParam("jobId") Long jobId, @RequestParam("triggerId") Long triggerId) {
-        int count = getTaskInstance().enableJob(jobId);
+        long count = getTaskInstance().enableJob(jobId);
         count += getTaskInstance().enableTrigger(triggerId);
         return R.success(count);
     }

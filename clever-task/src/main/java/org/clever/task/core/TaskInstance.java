@@ -351,7 +351,7 @@ public class TaskInstance {
         return taskStore.beginTX(status -> {
             final TaskJobTrigger existsTrigger = triggerId != null ? taskStore.getTrigger(triggerId) : null;
             final boolean exists = existsTrigger != null;
-            int count;
+            long count;
             final Date dbNow = taskStore.currentDate();
             if (jobTrigger.getStartTime() == null || jobTrigger.getStartTime().compareTo(dbNow) < 0) {
                 jobTrigger.setStartTime(JobTriggerUtils.removeMillisecond(dbNow));
@@ -359,7 +359,7 @@ public class TaskInstance {
             final Date nextFireTime = JobTriggerUtils.getNextFireTime(jobTrigger);
             jobTrigger.setNextFireTime(nextFireTime);
             if (exists) {
-                count = taskStore.updateTrigger(jobTrigger);
+                count = taskStore.updateTrigger(jobTrigger) ? 1 : 0;
             } else {
                 count = taskStore.addTrigger(jobTrigger);
             }
@@ -382,13 +382,13 @@ public class TaskInstance {
             final JobInfo info = new JobInfo();
             final TaskJob existsJob = jobId != null ? taskStore.getJob(jobId) : null;
             final boolean exists = existsJob != null;
-            int count;
+            long count;
             // 更新job
             final TaskJob job = jobModel.toJob();
             job.setId(jobId);
             job.setNamespace(namespace);
             if (exists) {
-                count = taskStore.updateJob(job);
+                count = taskStore.updateJob(job) ? 1 : 0;
             } else {
                 count = taskStore.addJob(job);
             }
@@ -421,9 +421,9 @@ public class TaskInstance {
             final TaskHttpJob http = httpJob.toJobEntity();
             http.setNamespace(namespace);
             http.setJobId(job.getId());
-            int count;
+            long count;
             if (exists) {
-                count = taskStore.updateHttpJob(http);
+                count = taskStore.updateHttpJob(http) ? 1 : 0;
             } else {
                 count = taskStore.addHttpJob(http);
             }
@@ -447,9 +447,9 @@ public class TaskInstance {
             final TaskJavaJob java = javaJob.toJobEntity();
             java.setNamespace(namespace);
             java.setJobId(job.getId());
-            int count;
+            long count;
             if (exists) {
-                count = taskStore.updateJavaJob(java);
+                count = taskStore.updateJavaJob(java) ? 1 : 0;
             } else {
                 count = taskStore.addJavaJob(java);
             }
@@ -473,9 +473,9 @@ public class TaskInstance {
             final TaskJsJob js = jsJob.toJobEntity();
             js.setNamespace(namespace);
             js.setJobId(job.getId());
-            int count;
+            long count;
             if (exists) {
-                count = taskStore.updateJsJob(js);
+                count = taskStore.updateJsJob(js) ? 1 : 0;
             } else {
                 count = taskStore.addJsJob(js);
             }
@@ -494,9 +494,9 @@ public class TaskInstance {
             final TaskShellJob shell = shellJob.toJobEntity();
             shell.setNamespace(namespace);
             shell.setJobId(job.getId());
-            int count;
+            long count;
             if (exists) {
-                count = taskStore.updateShellJob(shell);
+                count = taskStore.updateShellJob(shell) ? 1 : 0;
             } else {
                 count = taskStore.addShellJob(shell);
             }
@@ -563,7 +563,7 @@ public class TaskInstance {
     /**
      * 禁用定时任务
      */
-    public int disableJob(Long jobId) {
+    public long disableJob(Long jobId) {
         Assert.notNull(jobId, "参数jobId不能为空");
         return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_1, jobId));
     }
@@ -571,7 +571,7 @@ public class TaskInstance {
     /**
      * 批量禁用定时任务
      */
-    public int disableJobs(Collection<Long> jobIds) {
+    public long disableJobs(Collection<Long> jobIds) {
         Assert.notEmpty(jobIds, "参数jobIds不能为空");
         Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
         return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_1, jobIds.toArray(new Long[0])));
@@ -580,7 +580,7 @@ public class TaskInstance {
     /**
      * 启用定时任务
      */
-    public int enableJob(Long jobId) {
+    public long enableJob(Long jobId) {
         Assert.notNull(jobId, "参数jobId不能为空");
         return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_0, jobId));
     }
@@ -588,7 +588,7 @@ public class TaskInstance {
     /**
      * 批量启用定时任务
      */
-    public int enableJobs(Collection<Long> jobIds) {
+    public long enableJobs(Collection<Long> jobIds) {
         Assert.notEmpty(jobIds, "参数jobIds不能为空");
         Assert.noNullElements(jobIds, "参数jobIds含有空jobId");
         return taskStore.beginTX(status -> taskStore.updateDisableJob(EnumConstant.JOB_DISABLE_0, jobIds.toArray(new Long[0])));
@@ -597,8 +597,8 @@ public class TaskInstance {
     /**
      * 禁用触发器
      */
-    public int disableTrigger(Long triggerId) {
-        int count = taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_1, triggerId));
+    public long disableTrigger(Long triggerId) {
+        long count = taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_1, triggerId));
         if (count > 0) {
             taskContext.removeNextTrigger(triggerId);
         }
@@ -608,10 +608,10 @@ public class TaskInstance {
     /**
      * 批量禁用触发器
      */
-    public int disableTriggers(Collection<Long> triggerIds) {
+    public long disableTriggers(Collection<Long> triggerIds) {
         Assert.notEmpty(triggerIds, "参数triggerIds不能为空");
         Assert.noNullElements(triggerIds, "参数triggerIds含有空triggerId");
-        int count = taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_1, triggerIds.toArray(new Long[0])));
+        long count = taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_1, triggerIds.toArray(new Long[0])));
         if (count > 0) {
             triggerIds.forEach(taskContext::removeNextTrigger);
         }
@@ -621,14 +621,14 @@ public class TaskInstance {
     /**
      * 启用触发器
      */
-    public int enableTrigger(Long triggerId) {
+    public long enableTrigger(Long triggerId) {
         return taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_0, triggerId));
     }
 
     /**
      * 批量启用触发器
      */
-    public int enableTriggers(Collection<Long> triggerIds) {
+    public long enableTriggers(Collection<Long> triggerIds) {
         Assert.notEmpty(triggerIds, "参数jobIds不能为空");
         Assert.noNullElements(triggerIds, "参数triggerIds含有空triggerId");
         return taskStore.beginTX(status -> taskStore.updateDisableTrigger(EnumConstant.JOB_TRIGGER_DISABLE_0, triggerIds.toArray(new Long[0])));
@@ -1079,8 +1079,8 @@ public class TaskInstance {
      */
     private void calcNextFireTime(boolean updateNextFireTime) {
         // 1.更新无效的Trigger配置
-        int invalidCount = taskStore.beginReadOnlyTX(status -> taskStore.countInvalidTrigger(getNamespace()));
-        int updateCount = taskStore.beginTX(status -> taskStore.updateInvalidTrigger(getNamespace()));
+        long invalidCount = taskStore.beginReadOnlyTX(status -> taskStore.countInvalidTrigger(getNamespace()));
+        long updateCount = taskStore.beginTX(status -> taskStore.updateInvalidTrigger(getNamespace()));
         if (updateCount > 0) {
             log.info("[TaskInstance] 更新异常触发器nextFireTime=null | 更新数量：{} | instanceName={}", updateCount, getInstanceName());
         }
@@ -1097,7 +1097,7 @@ public class TaskInstance {
                 invalidCount++;
                 if (cronTrigger.getNextFireTime() != null) {
                     cronTrigger.setNextFireTime(null);
-                    taskStore.beginTX(status -> taskStore.updateNextFireTime(cronTrigger));
+                    taskStore.beginTX(status -> taskStore.updateNextFireTime(cronTrigger.getId(), cronTrigger.getNextFireTime()));
                 }
             }
         }
@@ -1112,7 +1112,7 @@ public class TaskInstance {
                     if (cronTrigger.getNextFireTime() == null || cronTrigger.getNextFireTime().compareTo(nextFireTime) != 0) {
                         updateCount++;
                         cronTrigger.setNextFireTime(nextFireTime);
-                        taskStore.beginTX(status -> taskStore.updateNextFireTime(cronTrigger));
+                        taskStore.beginTX(status -> taskStore.updateNextFireTime(cronTrigger.getId(), cronTrigger.getNextFireTime()));
                     }
                 } catch (Exception e) {
                     log.error("[TaskInstance] 计算触发器下一次触发时间失败 | JobTrigger(id={}) | instanceName={}", cronTrigger.getId(), getInstanceName(), e);
@@ -1410,7 +1410,7 @@ public class TaskInstance {
                 }
                 tmpTrigger.setLastFireTime(lastFireTime.getValue1());
                 tmpTrigger.setNextFireTime(newNextFireTime);
-                if (taskStore.updateFireTime(tmpTrigger) <= 0) {
+                if (taskStore.updateFireTime(tmpTrigger.getId(), tmpTrigger.getLastFireTime(), tmpTrigger.getNextFireTime()) <= 0) {
                     tmpTrigger = null;
                 }
             }
