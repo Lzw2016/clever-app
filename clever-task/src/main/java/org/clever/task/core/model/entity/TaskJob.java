@@ -1,9 +1,13 @@
 package org.clever.task.core.model.entity;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.clever.core.mapper.JacksonMapper;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 定时任务(task_job)
@@ -48,4 +52,39 @@ public class TaskJob implements Serializable {
     private Date createAt;
     /** 更新时间 */
     private Date updateAt;
+
+    /**
+     * 路由策略，1-指定节点优先，调度器名称集合
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getFirstInstanceNames() {
+        if (StringUtils.isBlank(firstScheduler)) {
+            return Collections.emptyList();
+        }
+        return JacksonMapper.getInstance().fromJson(firstScheduler, List.class);
+    }
+
+    /**
+     * 路由策略，2-固定节点白名单，调度器名称集合
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getWhitelistInstanceNames() {
+        if (StringUtils.isBlank(whitelistScheduler)) {
+            return Collections.emptyList();
+        }
+        return JacksonMapper.getInstance().fromJson(whitelistScheduler, List.class);
+    }
+
+    /**
+     * 路由策略，3-固定节点黑名单，调度器名称集合
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getBlacklistInstanceNames() {
+        if (StringUtils.isBlank(blacklistScheduler)) {
+            return Collections.emptyList();
+        }
+        return JacksonMapper.getInstance().fromJson(blacklistScheduler, List.class);
+    }
+
+
 }

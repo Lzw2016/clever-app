@@ -1312,16 +1312,42 @@ public class TaskInstance {
             jobTriggerLog.setTriggerMsg(String.format("当前节点超过最大重入执行次数，JobId=%s | jobReentryCount=%s | maxReentry=%s", job.getId(), jobReentryCount, job.getMaxReentry()));
             return;
         }
-        // 3.控制任务执行节点 // TODO 暂不支持控制任务执行节点
+        // 3.控制任务执行节点
+        final String currentInstanceName = getInstanceName();
+        List<String> instanceNames;
         switch (job.getRouteStrategy()) {
             case EnumConstant.JOB_ROUTE_STRATEGY_1:
                 // 指定节点优先
+                instanceNames = job.getFirstInstanceNames();
+                if (!instanceNames.isEmpty()) {
+                    // 获取在线且正在运行的节点
+                    List<TaskScheduler> runningScheduler = taskContext.getAvailableSchedulerList().stream()
+                        .filter(scheduler -> {
+                            SchedulerRuntimeInfo runtimeInfo = scheduler.getSchedulerRuntimeInfo();
+                            return runtimeInfo != null && Objects.equals(runtimeInfo.getState(), State.RUNNING);
+                        }).collect(Collectors.toList());
+                    // 存在正在运行的节点 & 当前节点不在集合里
+                    if (!runningScheduler.isEmpty()
+                        && runningScheduler.stream().noneMatch(scheduler -> Objects.equals(scheduler.getInstanceName(), currentInstanceName))) {
+                        return;
+                    }
+                }
                 break;
             case EnumConstant.JOB_ROUTE_STRATEGY_2:
                 // 固定节点白名单
+                instanceNames = job.getWhitelistInstanceNames();
+                // 当前节点不在白名单列表里面
+                if (instanceNames.stream().noneMatch(name -> Objects.equals(name, currentInstanceName))) {
+                    return;
+                }
                 break;
             case EnumConstant.JOB_ROUTE_STRATEGY_3:
                 // 固定节点黑名单
+                instanceNames = job.getBlacklistInstanceNames();
+                // 当前节点在黑名单列表里面
+                if (instanceNames.stream().anyMatch(name -> Objects.equals(name, currentInstanceName))) {
+                    return;
+                }
                 break;
         }
         // 4.负载均衡策略 // TODO 暂不支持负载均衡策略
