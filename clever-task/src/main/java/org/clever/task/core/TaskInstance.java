@@ -1372,7 +1372,7 @@ public class TaskInstance {
                 // 一致性HASH
                 List<TaskScheduler> runningScheduler = taskContext.getRunningSchedulerList();
                 runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
-                int idx = job.getName().hashCode() % runningScheduler.size();
+                int idx = Math.abs(job.getName().hashCode()) % runningScheduler.size();
                 TaskScheduler scheduler = runningScheduler.get(idx);
                 if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
                     return;
