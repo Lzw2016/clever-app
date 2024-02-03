@@ -1266,9 +1266,8 @@ public class TaskInstance {
                 // 获取触发器分布式锁 - 判断是否被其他节点触发了
                 taskStore.getLockTrigger(trigger.getNamespace(), trigger.getId(), () -> {
                     // 二次校验数据
-                    Long fireCount = taskStore.beginReadOnlyTX(status -> taskStore.getTriggerFireCount(trigger.getNamespace(), trigger.getId()));
-                    log.info("@@@ 二次校验数据 InstanceName={} | fireCount({}={})", getInstanceName(), fireCount, trigger.getFireCount());
-                    if (Objects.equals(fireCount, trigger.getFireCount())) {
+                    Date nextFireTime = taskStore.beginReadOnlyTX(status -> taskStore.getNextFireTime(trigger.getNamespace(), trigger.getId()));
+                    if (nextFireTime != null && dbNow.compareTo(nextFireTime) >= 0) {
                         doTriggerJobExec(dbNow, trigger, jobTriggerLog);
                     }
                 });

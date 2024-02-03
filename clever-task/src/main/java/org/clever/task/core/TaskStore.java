@@ -304,9 +304,9 @@ public class TaskStore {
             .where(taskJobTrigger.id.eq(jobTriggerId))
             .fetchOne();
     }
-
-    public Long getTriggerFireCount(String namespace, Long jobTriggerId) {
-        return queryDSL.select(taskJobTrigger.fireCount)
+    
+    public Date getNextFireTime(String namespace, Long jobTriggerId) {
+        return queryDSL.select(taskJobTrigger.nextFireTime)
             .from(taskJobTrigger)
             .where(taskJobTrigger.namespace.eq(namespace))
             .where(taskJobTrigger.id.eq(jobTriggerId))
