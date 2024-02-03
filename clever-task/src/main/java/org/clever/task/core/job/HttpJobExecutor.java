@@ -18,6 +18,7 @@ import org.clever.task.core.model.entity.TaskScheduler;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 作者：lizw <br/>
@@ -25,6 +26,69 @@ import java.util.Objects;
  */
 @Slf4j
 public class HttpJobExecutor implements JobExecutor {
+    private static final String LINE = "\n";
+    private static final String SEPARATE = ":";
+    private static final ThreadLocal<JobContext> JOB_CONTEXT_THREAD_LOCAL = new ThreadLocal<>();
+    private static final OkHttpClient OKHTTP_CLIENT;
+
+    static {
+        long readTimeout = 30L;
+        long connectTimeout = 5L;
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+            .addInterceptor(chain -> {
+                final JobContext context = JOB_CONTEXT_THREAD_LOCAL.get();
+                // 构造请求对象
+                Request request = chain.request().newBuilder()
+                    .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
+                    .build();
+                // 请求数据日志
+                final long start = SystemClock.now();
+                StringBuilder logs = new StringBuilder();
+                logs.append("请求数据 ").append(LINE);
+                logs.append(String.format("---> 请求 [%1$s] %2$s", request.method(), request.url())).append(LINE);
+                int maxWidth = logHeaders(request.headers(), logs);
+                if (request.body() != null) {
+                    logs.append(StringUtils.rightPad("body", maxWidth)).append(SEPARATE).append(Conv.asString(request.body())).append(LINE);
+                }
+                logs.append(LINE);
+                context.info(logs.toString());
+                logs.setLength(0);
+                // 执行http请求
+                Response response = chain.proceed(request);
+                final long end = SystemClock.now();
+                // 响应数据日志
+                logs = new StringBuilder();
+                logs.append("响应数据 ").append(LINE);
+                logs.append(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start))).append(LINE);
+                maxWidth = logHeaders(response.headers(), logs);
+                if (response.body() != null) {
+                    logs.append(StringUtils.rightPad("body", maxWidth)).append(SEPARATE).append(response.body().string()).append(LINE);
+                }
+                context.info(logs.toString());
+                logs.setLength(0);
+                return response;
+            })
+            .readTimeout(readTimeout, TimeUnit.SECONDS)
+            .connectTimeout(connectTimeout, TimeUnit.SECONDS);
+        OKHTTP_CLIENT = builder.build();
+    }
+
+    private static int logHeaders(okhttp3.Headers headers, StringBuilder logs) {
+        Iterator<Pair<String, String>> iterator = headers.iterator();
+        int maxWidth = 0;
+        while (iterator.hasNext()) {
+            Pair<String, String> pair = iterator.next();
+            maxWidth = Math.max(maxWidth, pair.getFirst().length());
+        }
+        maxWidth = maxWidth + 1;
+        iterator = headers.iterator();
+        while (iterator.hasNext()) {
+            Pair<String, String> pair = iterator.next();
+            logs.append(StringUtils.rightPad(pair.getFirst(), maxWidth)).append(SEPARATE).append(pair.getSecond()).append(LINE);
+        }
+        return maxWidth;
+    }
+
     @Override
     public boolean support(int jobType) {
         return Objects.equals(jobType, EnumConstant.JOB_TYPE_1);
@@ -48,34 +112,19 @@ public class HttpJobExecutor implements JobExecutor {
         }
         Request.Builder builder = HttpUtils.createRequestBuilder(httpJob.getRequestUrl(), requestData.getHeaders(), requestData.getParams());
         RequestBody requestBody = null;
-        String jsonBody = null;
         if (requestData.getBody() != null && !requestData.getBody().isEmpty()) {
-            jsonBody = JacksonMapper.getInstance().toJson(requestData.getBody());
+            String jsonBody = JacksonMapper.getInstance().toJson(requestData.getBody());
             requestBody = RequestBody.create(jsonBody, MediaType.parse(HttpUtils.MediaType_Json));
         }
         builder.method(httpJob.getRequestMethod(), requestBody);
-        Request request = builder.build();
-        StringBuilder logs = new StringBuilder("请求数据: \n");
-        logs.append(String.format("---> 请求 [%1$s] %2$s", request.method(), request.url())).append("\n");
-        int maxWidth = logHeaders(request.headers(), logs);
-        logs.append(StringUtils.rightPad("body:", maxWidth)).append(Conv.asString(jsonBody)).append("\n");
-        context.info(logs.toString());
-        logs.setLength(0);
-        final long start = SystemClock.now();
-        try (Response response = HttpUtils.execute(HttpUtils.getInner().getOkHttpClient(), request)) {
+        JOB_CONTEXT_THREAD_LOCAL.set(context);
+        try (Response response = HttpUtils.execute(OKHTTP_CLIENT, builder.build())) {
             String body = null;
             try (ResponseBody responseBody = response.body()) {
                 if (responseBody != null) {
                     body = responseBody.string();
                 }
             }
-            final long end = SystemClock.now();
-            logs = new StringBuilder("响应数据: \n");
-            logs.append(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start))).append("\n");
-            maxWidth = logHeaders(response.headers(), logs);
-            logs.append(StringUtils.rightPad("body:", maxWidth)).append(Conv.asString(body)).append("\n");
-            context.info(logs.toString());
-            logs.setLength(0);
             if (StringUtils.isBlank(httpJob.getSuccessCheck())) {
                 int status = response.code();
                 if (status < 200 || status >= 300) {
@@ -85,22 +134,8 @@ public class HttpJobExecutor implements JobExecutor {
                 // TODO 执行js校验逻辑
                 // httpJob.getSuccessCheck()
             }
+        } finally {
+            JOB_CONTEXT_THREAD_LOCAL.remove();
         }
-    }
-
-    private static int logHeaders(okhttp3.Headers headers, StringBuilder logs) {
-        Iterator<Pair<String, String>> iterator = headers.iterator();
-        int maxWidth = 8;
-        while (iterator.hasNext()) {
-            Pair<String, String> pair = iterator.next();
-            maxWidth = Math.max(maxWidth, pair.getFirst().length());
-        }
-        iterator = headers.iterator();
-        while (iterator.hasNext()) {
-            Pair<String, String> pair = iterator.next();
-            String name = pair.getFirst() + ":";
-            logs.append(StringUtils.rightPad(name, maxWidth)).append(pair.getSecond()).append("\n");
-        }
-        return maxWidth;
     }
 }
