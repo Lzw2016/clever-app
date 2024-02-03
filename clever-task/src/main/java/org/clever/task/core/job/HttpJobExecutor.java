@@ -44,7 +44,6 @@ public class HttpJobExecutor implements JobExecutor {
                 // 请求数据日志
                 final long start = SystemClock.now();
                 StringBuilder logs = new StringBuilder();
-                logs.append("请求数据 ").append(LINE);
                 logs.append(String.format("---> 请求 [%1$s] %2$s", request.method(), request.url())).append(LINE);
                 int maxWidth = logHeaders(request.headers(), logs);
                 if (request.body() != null) {
@@ -58,7 +57,6 @@ public class HttpJobExecutor implements JobExecutor {
                 final long end = SystemClock.now();
                 // 响应数据日志
                 logs = new StringBuilder();
-                logs.append("响应数据 ").append(LINE);
                 logs.append(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start))).append(LINE);
                 maxWidth = logHeaders(response.headers(), logs);
                 if (response.body() != null) {
