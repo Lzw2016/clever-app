@@ -1359,7 +1359,7 @@ public class TaskInstance {
                 // 随机
                 runningScheduler = taskContext.getRunningSchedulerList();
                 runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
-                Object randomSeed = job.getRunCount() == null ? -1L : job.getRunCount();
+                Object randomSeed = taskStore.currentTimeMillis();
                 idx = Math.abs(randomSeed.hashCode()) % runningScheduler.size();
                 scheduler = runningScheduler.get(idx);
                 if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
