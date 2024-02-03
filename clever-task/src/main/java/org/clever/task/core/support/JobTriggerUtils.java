@@ -142,7 +142,14 @@ public class JobTriggerUtils {
     }
 
     /**
-     * 清除时间的毫秒信息精确到秒
+     * 清除时间的毫秒信息到整秒
+     */
+    public static long removeMillisecond(long time) {
+        return time - time % 1000;
+    }
+
+    /**
+     * 清除时间的毫秒信息到整秒
      */
     public static Date removeMillisecond(Date date) {
         if (date != null) {

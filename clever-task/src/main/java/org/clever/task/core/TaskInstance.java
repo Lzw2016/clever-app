@@ -1158,7 +1158,7 @@ public class TaskInstance {
         calcNextFireTime(true);
         // 维护接下来(N+M)秒内需要触发的触发器列表
         reloadNextTrigger();
-        final long startTime = taskStore.currentTimeMillis();
+        final long startTime = JobTriggerUtils.removeMillisecond(taskStore.currentTimeMillis());
         // 使用无限循环触发任务, 每一秒循环一次(每秒触发一次)
         for (long count = 1; ; count++) {
             // 判断调度器是否已暂停/停止
