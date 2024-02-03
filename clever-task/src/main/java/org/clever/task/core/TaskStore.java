@@ -304,7 +304,7 @@ public class TaskStore {
             .where(taskJobTrigger.id.eq(jobTriggerId))
             .fetchOne();
     }
-    
+
     public Date getNextFireTime(String namespace, Long jobTriggerId) {
         return queryDSL.select(taskJobTrigger.nextFireTime)
             .from(taskJobTrigger)
@@ -1447,6 +1447,17 @@ public class TaskStore {
 
     public boolean delSchedulerCmd(long id) {
         return queryDSL.delete(taskSchedulerCmd).where(taskSchedulerCmd.id.eq(id)).execute() > 0;
+    }
+
+    /**
+     * 更新由于调度器节点关闭导致的任务日志状态为空的数据
+     */
+    public long updateZombieJobLog(String namespace, String instanceName) {
+        return queryDSL.update(taskJobLog)
+            .where(taskJobLog.namespace.eq(namespace))
+            .where(taskJobLog.instanceName.eq(instanceName))
+            .where(taskJobLog.status.isNull())
+            .execute();
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- transaction support

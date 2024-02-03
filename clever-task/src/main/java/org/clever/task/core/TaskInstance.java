@@ -833,6 +833,8 @@ public class TaskInstance {
         if (startScheduler) {
             startStandbyScheduler(initialDelay, taskScheduler);
         }
+        // 更新由于调度器节点关闭导致的任务日志状态为空的数据
+        taskStore.beginTX(status -> taskStore.updateZombieJobLog(getNamespace(), getInstanceName()));
     }
 
     private void startStandbyScheduler(long initialDelay, TaskScheduler taskScheduler) {
@@ -906,6 +908,7 @@ public class TaskInstance {
                 () -> {
                     try {
                         clearLogs();
+                        updateZombieJobLog();
                     } catch (Exception e) {
                         log.error("[TaskInstance] 清理日志数据失败 | instanceName={}", getInstanceName(), e);
                         TaskSchedulerLog schedulerLog = newSchedulerLog();
@@ -1648,6 +1651,18 @@ public class TaskInstance {
         log.info("清理任务控制台日志开始...");
         count = taskStore.beginTX(status -> taskStore.clearJobConsoleLog(getNamespace(), maxDate));
         log.info("清理任务控制台日志数据量: {}", count);
+    }
+
+    /**
+     * 更新由于调度器节点关闭导致的任务日志状态为空的数据
+     */
+    private void updateZombieJobLog() {
+        List<SchedulerInfo> allScheduler = taskStore.beginReadOnlyTX(status -> taskStore.queryAllSchedulerList(null));
+        for (SchedulerInfo schedulerInfo : allScheduler) {
+            if (!schedulerInfo.getAvailable()) {
+                taskStore.beginTX(status -> taskStore.updateZombieJobLog(schedulerInfo.getNamespace(), schedulerInfo.getInstanceName()));
+            }
+        }
     }
 
     private void collectReport() {
