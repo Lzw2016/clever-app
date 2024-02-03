@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.SystemClock;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,10 +51,10 @@ public class HttpUtils {
                 Request request = chain.request().newBuilder()
                     .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
                     .build();
-                long start = System.currentTimeMillis();
+                long start = SystemClock.now();
                 log.info(String.format("---> 请求 [%1$s] %2$s ", request.method(), request.url()));
                 Response response = chain.proceed(request);
-                long end = System.currentTimeMillis();
+                long end = SystemClock.now();
                 log.info(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start)));
                 return response;
             })
