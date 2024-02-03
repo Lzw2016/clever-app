@@ -1266,7 +1266,6 @@ public class TaskInstance {
                 taskStore.getLockTrigger(trigger.getNamespace(), trigger.getId(), () -> {
                     // 二次校验数据
                     Long fireCount = taskStore.beginReadOnlyTX(status -> taskStore.getTriggerFireCount(trigger.getNamespace(), trigger.getId()));
-                    log.info("@@@ 二次校验数据 InstanceName={} | fireCount({}={})", getInstanceName(), fireCount, trigger.getFireCount());
                     if (Objects.equals(fireCount, trigger.getFireCount())) {
                         doTriggerJobExec(dbNow, trigger, jobTriggerLog);
                     }
