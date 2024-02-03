@@ -1324,7 +1324,7 @@ public class TaskInstance {
                     // 获取在线且正在运行的节点
                     List<TaskScheduler> runningScheduler = taskContext.getRunningSchedulerList();
                     // 存在正在运行的节点 & 当前节点不在集合里
-                    if (!runningScheduler.isEmpty() && runningScheduler.stream().noneMatch(scheduler -> Objects.equals(scheduler.getInstanceName(), currentInstanceName))) {
+                    if (!runningScheduler.isEmpty() && instanceNames.stream().noneMatch(name -> Objects.equals(name, currentInstanceName))) {
                         return;
                     }
                 }
