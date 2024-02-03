@@ -119,16 +119,10 @@ public class HttpJobExecutor implements JobExecutor {
         builder.method(httpJob.getRequestMethod(), requestBody);
         JOB_CONTEXT_THREAD_LOCAL.set(context);
         try (Response response = HttpUtils.execute(OKHTTP_CLIENT, builder.build())) {
-            String body = null;
-            try (ResponseBody responseBody = response.body()) {
-                if (responseBody != null) {
-                    body = responseBody.string();
-                }
-            }
             if (StringUtils.isBlank(httpJob.getSuccessCheck())) {
                 int status = response.code();
                 if (status < 200 || status >= 300) {
-                    throw new JobExecutorException(String.format("Http任务执行失败，response_body=%s", body));
+                    throw new JobExecutorException(String.format("Http任务执行失败，status=%s", status));
                 }
             } else {
                 // TODO 执行js校验逻辑
