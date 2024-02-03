@@ -1454,6 +1454,7 @@ public class TaskStore {
      */
     public long updateZombieJobLog(String namespace, String instanceName) {
         return queryDSL.update(taskJobLog)
+            .set(taskJobLog.status, EnumConstant.JOB_LOG_STATUS_2)
             .where(taskJobLog.namespace.eq(namespace))
             .where(taskJobLog.instanceName.eq(instanceName))
             .where(taskJobLog.status.isNull())
