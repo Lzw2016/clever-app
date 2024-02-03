@@ -1266,6 +1266,7 @@ public class TaskInstance {
                 taskStore.getLockTrigger(trigger.getNamespace(), trigger.getId(), () -> {
                     // 二次校验数据
                     Long fireCount = taskStore.beginReadOnlyTX(status -> taskStore.getTriggerFireCount(trigger.getNamespace(), trigger.getId()));
+                    log.info("@@@ 二次校验数据 InstanceName={} | fireCount({}={})", getInstanceName(), fireCount, trigger.getFireCount());
                     if (Objects.equals(fireCount, trigger.getFireCount())) {
                         doTriggerJobExec(dbNow, trigger, jobTriggerLog);
                     }
@@ -1358,13 +1359,11 @@ public class TaskInstance {
             case EnumConstant.JOB_LOAD_BALANCE_2:
                 // 随机
                 runningScheduler = taskContext.getRunningSchedulerList();
-                log.info("@@@ 随机-1 InstanceName={}", currentInstanceName);
                 if (runningScheduler.size() >= 2) {
                     runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
                     Object randomSeed = job.getRunCount() == null ? 0L : job.getRunCount();
                     idx = Math.abs(randomSeed.hashCode()) % runningScheduler.size();
                     scheduler = runningScheduler.get(idx);
-                    log.info("@@@ 随机-2 InstanceName={} | randomSeed={} | idx={}", currentInstanceName, randomSeed, idx);
                     if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
                         return;
                     }
