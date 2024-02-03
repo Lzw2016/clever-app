@@ -48,7 +48,7 @@ public class HttpJobExecutor implements JobExecutor {
                 logs.append(String.format("---> 请求 [%1$s] %2$s", request.method(), request.url())).append(LINE);
                 int maxWidth = logHeaders(request.headers(), logs);
                 if (request.body() != null) {
-                    logs.append(StringUtils.rightPad("body", maxWidth)).append(SEPARATE).append(Conv.asString(request.body())).append(LINE);
+                    logs.append(StringUtils.rightPad("body" + SEPARATE, maxWidth)).append(Conv.asString(request.body())).append(LINE);
                 }
                 logs.append(LINE);
                 context.info(logs.toString());
@@ -62,7 +62,7 @@ public class HttpJobExecutor implements JobExecutor {
                 logs.append(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start))).append(LINE);
                 maxWidth = logHeaders(response.headers(), logs);
                 if (response.body() != null) {
-                    logs.append(StringUtils.rightPad("body", maxWidth)).append(SEPARATE).append(response.body().string()).append(LINE);
+                    logs.append(StringUtils.rightPad("body" + SEPARATE, maxWidth)).append(response.body().string()).append(LINE);
                 }
                 context.info(logs.toString());
                 logs.setLength(0);
@@ -80,11 +80,11 @@ public class HttpJobExecutor implements JobExecutor {
             Pair<String, String> pair = iterator.next();
             maxWidth = Math.max(maxWidth, pair.getFirst().length());
         }
-        maxWidth = maxWidth + 1;
+        maxWidth = maxWidth + 2;
         iterator = headers.iterator();
         while (iterator.hasNext()) {
             Pair<String, String> pair = iterator.next();
-            logs.append(StringUtils.rightPad(pair.getFirst(), maxWidth)).append(SEPARATE).append(pair.getSecond()).append(LINE);
+            logs.append(StringUtils.rightPad(pair.getFirst() + SEPARATE, maxWidth)).append(pair.getSecond()).append(LINE);
         }
         return maxWidth;
     }
