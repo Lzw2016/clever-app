@@ -16,6 +16,7 @@ import org.clever.task.core.model.entity.TaskJobLog;
 import org.clever.task.core.model.entity.TaskJobTriggerLog;
 import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.task.core.model.entity.TaskSchedulerLog;
+import org.clever.task.core.support.TaskContext;
 import org.clever.task.manage.dao.TaskManageStore;
 import org.clever.task.manage.model.JobLogInfo;
 import org.clever.task.manage.model.request.*;
@@ -419,5 +420,13 @@ public class TaskInstanceManage {
     public static JobConsoleLogRes getJobConsoleLog(JobConsoleLogReq req) {
         TaskManageStore taskManageStore = getTaskManageStore();
         return taskManageStore.beginReadOnlyTX(status -> taskManageStore.getJobConsoleLogs(req));
+    }
+
+    /**
+     * 获取调度器当前 Context
+     */
+    @Transactional(disabled = true)
+    public static TaskContext getTaskContext() {
+        return getTaskInstance().getContext();
     }
 }

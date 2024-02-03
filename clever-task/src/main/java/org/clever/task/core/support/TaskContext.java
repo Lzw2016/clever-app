@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.task.core.GlobalConstant;
+import org.clever.task.core.TaskInstance;
 import org.clever.task.core.config.SchedulerConfig;
+import org.clever.task.core.model.SchedulerRuntimeInfo;
 import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.task.core.model.entity.TaskScheduler;
 import org.clever.util.Assert;
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * 定时任务调度器上下文
@@ -140,5 +143,16 @@ public class TaskContext {
 
     public void removeJobRunCount(Long jobId) {
         jobRunCount.remove(jobId);
+    }
+
+    public List<TaskScheduler> getRunningSchedulerList() {
+        if (availableSchedulerList == null) {
+            return null;
+        }
+        return availableSchedulerList.stream()
+            .filter(scheduler -> {
+                SchedulerRuntimeInfo runtimeInfo = scheduler.getSchedulerRuntimeInfo();
+                return runtimeInfo != null && Objects.equals(runtimeInfo.getState(), TaskInstance.State.RUNNING);
+            }).collect(Collectors.toList());
     }
 }

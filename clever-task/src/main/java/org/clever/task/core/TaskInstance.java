@@ -9,6 +9,7 @@ import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.function.ThreeConsumer;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
+import org.clever.core.random.RandomUtil;
 import org.clever.core.thread.ThreadUtils;
 import org.clever.core.tuples.TupleOne;
 import org.clever.data.jdbc.QueryDSL;
@@ -1321,14 +1322,9 @@ public class TaskInstance {
                 instanceNames = job.getFirstInstanceNames();
                 if (!instanceNames.isEmpty()) {
                     // 获取在线且正在运行的节点
-                    List<TaskScheduler> runningScheduler = taskContext.getAvailableSchedulerList().stream()
-                        .filter(scheduler -> {
-                            SchedulerRuntimeInfo runtimeInfo = scheduler.getSchedulerRuntimeInfo();
-                            return runtimeInfo != null && Objects.equals(runtimeInfo.getState(), State.RUNNING);
-                        }).collect(Collectors.toList());
+                    List<TaskScheduler> runningScheduler = taskContext.getRunningSchedulerList();
                     // 存在正在运行的节点 & 当前节点不在集合里
-                    if (!runningScheduler.isEmpty()
-                        && runningScheduler.stream().noneMatch(scheduler -> Objects.equals(scheduler.getInstanceName(), currentInstanceName))) {
+                    if (!runningScheduler.isEmpty() && runningScheduler.stream().noneMatch(scheduler -> Objects.equals(scheduler.getInstanceName(), currentInstanceName))) {
                         return;
                     }
                 }
@@ -1357,12 +1353,28 @@ public class TaskInstance {
                 break;
             case EnumConstant.JOB_LOAD_BALANCE_2:
                 // 随机
+                boolean needSleep = RandomUtil.randomInt(0, 10) >= 5;
+                if (needSleep) {
+                    try {
+                        int sleepTime = RandomUtil.randomInt(0, 100);
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
                 break;
             case EnumConstant.JOB_LOAD_BALANCE_3:
                 // 轮询
+
                 break;
             case EnumConstant.JOB_LOAD_BALANCE_4:
                 // 一致性HASH
+                List<TaskScheduler> runningScheduler = taskContext.getRunningSchedulerList();
+                runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
+                int idx = job.getName().hashCode() % runningScheduler.size();
+                TaskScheduler scheduler = runningScheduler.get(idx);
+                if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
+                    return;
+                }
                 break;
         }
         // 触发定时任务
