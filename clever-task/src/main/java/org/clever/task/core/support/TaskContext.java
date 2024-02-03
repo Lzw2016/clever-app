@@ -147,7 +147,7 @@ public class TaskContext {
 
     public List<TaskScheduler> getRunningSchedulerList() {
         if (availableSchedulerList == null) {
-            return null;
+            return Collections.emptyList();
         }
         return availableSchedulerList.stream()
             .filter(scheduler -> {
