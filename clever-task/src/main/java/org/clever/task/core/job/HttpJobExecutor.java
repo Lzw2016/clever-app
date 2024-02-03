@@ -55,11 +55,11 @@ public class HttpJobExecutor implements JobExecutor {
         }
         builder.method(httpJob.getRequestMethod(), requestBody);
         Request request = builder.build();
-        StringBuilder logs = new StringBuilder();
+        StringBuilder logs = new StringBuilder("请求数据: \n");
         logs.append(String.format("---> 请求 [%1$s] %2$s", request.method(), request.url())).append("\n");
         int maxWidth = logHeaders(request.headers(), logs);
         logs.append(StringUtils.rightPad("body:", maxWidth)).append(Conv.asString(jsonBody)).append("\n");
-        context.info("请求数据: \n {}", logs);
+        context.info(logs.toString());
         logs.setLength(0);
         final long start = SystemClock.now();
         try (Response response = HttpUtils.execute(HttpUtils.getInner().getOkHttpClient(), request)) {
@@ -70,11 +70,11 @@ public class HttpJobExecutor implements JobExecutor {
                 }
             }
             final long end = SystemClock.now();
-            logs = new StringBuilder();
+            logs = new StringBuilder("响应数据: \n");
             logs.append(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start))).append("\n");
             maxWidth = logHeaders(response.headers(), logs);
             logs.append(StringUtils.rightPad("body:", maxWidth)).append(Conv.asString(body)).append("\n");
-            context.info("响应数据: \n {}", logs);
+            context.info(logs.toString());
             logs.setLength(0);
             if (StringUtils.isBlank(httpJob.getSuccessCheck())) {
                 int status = response.code();
