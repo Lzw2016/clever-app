@@ -1358,7 +1358,7 @@ public class TaskInstance {
             case EnumConstant.JOB_LOAD_BALANCE_2:
                 // 随机
                 runningScheduler = taskContext.getRunningSchedulerList();
-                if (!runningScheduler.isEmpty()) {
+                if (runningScheduler.size() >= 2) {
                     runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
                     Object randomSeed = taskStore.currentTimeMillis();
                     idx = Math.abs(randomSeed.hashCode()) % runningScheduler.size();
@@ -1371,7 +1371,7 @@ public class TaskInstance {
             case EnumConstant.JOB_LOAD_BALANCE_3:
                 // 轮询
                 runningScheduler = taskContext.getRunningSchedulerList();
-                if (!runningScheduler.isEmpty()) {
+                if (runningScheduler.size() >= 2) {
                     runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
                     idx = (int) (Math.abs(job.getRunCount() == null ? 0L : job.getRunCount()) % runningScheduler.size());
                     scheduler = runningScheduler.get(idx);
@@ -1383,7 +1383,7 @@ public class TaskInstance {
             case EnumConstant.JOB_LOAD_BALANCE_4:
                 // 一致性HASH
                 runningScheduler = taskContext.getRunningSchedulerList();
-                if (!runningScheduler.isEmpty()) {
+                if (runningScheduler.size() >= 2) {
                     runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
                     idx = Math.abs(job.getName().hashCode()) % runningScheduler.size();
                     scheduler = runningScheduler.get(idx);
