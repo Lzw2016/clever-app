@@ -9,7 +9,6 @@ import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.function.ThreeConsumer;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
-import org.clever.core.random.RandomUtil;
 import org.clever.core.thread.ThreadUtils;
 import org.clever.core.tuples.TupleOne;
 import org.clever.data.jdbc.QueryDSL;
@@ -1316,13 +1315,14 @@ public class TaskInstance {
         // 3.控制任务执行节点
         final String currentInstanceName = getInstanceName();
         final List<String> instanceNames;
+        List<TaskScheduler> runningScheduler;
         switch (job.getRouteStrategy()) {
             case EnumConstant.JOB_ROUTE_STRATEGY_1:
                 // 指定节点优先
                 instanceNames = job.getFirstInstanceNames();
                 if (!instanceNames.isEmpty()) {
                     // 获取在线且正在运行的节点
-                    List<TaskScheduler> runningScheduler = taskContext.getRunningSchedulerList();
+                    runningScheduler = taskContext.getRunningSchedulerList();
                     // 存在正在运行的节点 & 当前节点不在集合里
                     if (!runningScheduler.isEmpty()
                         && runningScheduler.stream().anyMatch(scheduler -> instanceNames.contains(scheduler.getInstanceName()))
@@ -1348,32 +1348,40 @@ public class TaskInstance {
                 }
                 break;
         }
-        // 4.负载均衡策略 // TODO 暂不支持负载均衡策略
+        // 4.负载均衡策略
+        int idx;
+        TaskScheduler scheduler;
         switch (job.getLoadBalance()) {
             case EnumConstant.JOB_LOAD_BALANCE_1:
                 // 抢占
                 break;
             case EnumConstant.JOB_LOAD_BALANCE_2:
                 // 随机
-                boolean needSleep = RandomUtil.randomInt(0, 10) >= 5;
-                if (needSleep) {
-                    try {
-                        int sleepTime = RandomUtil.randomInt(0, 100);
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException ignored) {
-                    }
+                runningScheduler = taskContext.getRunningSchedulerList();
+                runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
+                Object randomSeed = job.getRunCount() == null ? -1L : job.getRunCount();
+                idx = Math.abs(randomSeed.hashCode()) % runningScheduler.size();
+                scheduler = runningScheduler.get(idx);
+                if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
+                    return;
                 }
                 break;
             case EnumConstant.JOB_LOAD_BALANCE_3:
                 // 轮询
-
+                runningScheduler = taskContext.getRunningSchedulerList();
+                runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
+                idx = (int) (Math.abs(job.getRunCount() == null ? 0L : job.getRunCount()) % runningScheduler.size());
+                scheduler = runningScheduler.get(idx);
+                if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
+                    return;
+                }
                 break;
             case EnumConstant.JOB_LOAD_BALANCE_4:
                 // 一致性HASH
-                List<TaskScheduler> runningScheduler = taskContext.getRunningSchedulerList();
+                runningScheduler = taskContext.getRunningSchedulerList();
                 runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
-                int idx = Math.abs(job.getName().hashCode()) % runningScheduler.size();
-                TaskScheduler scheduler = runningScheduler.get(idx);
+                idx = Math.abs(job.getName().hashCode()) % runningScheduler.size();
+                scheduler = runningScheduler.get(idx);
                 if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
                     return;
                 }
