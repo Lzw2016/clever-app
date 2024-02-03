@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.clever.core.Conv;
 import org.clever.core.DateUtils;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.function.ThreeConsumer;
@@ -1156,8 +1157,6 @@ public class TaskInstance {
     private void fireTriggers() {
         // 初始化触发器下一次触发时间(校准触发器触发时间)
         calcNextFireTime(true);
-        // 维护接下来(N+M)秒内需要触发的触发器列表
-        reloadNextTrigger();
         final long startTime = JobTriggerUtils.removeMillisecond(taskStore.currentTimeMillis()) + 1000;
         // 使用无限循环触发任务, 每一秒循环一次(每秒触发一次)
         for (long count = 1; ; count++) {
@@ -1167,6 +1166,14 @@ public class TaskInstance {
             if (state == State.PAUSED || state == State.STOPPED) {
                 break;
             }
+            // 加载下一轮触发器-接下来(N+M)秒内需要触发的
+            long startMillis = taskStore.currentTimeMillis();
+            try {
+                reloadNextTrigger();
+            } catch (Exception e) {
+                log.error("[TaskInstance] 加载下一轮触发器失败 | instanceName={}", getInstanceName(), e);
+            }
+            final long waitReloadTrigger = taskStore.currentTimeMillis() - startMillis;
             // 触发需要触发的触发器
             final long nowSecond = JobTriggerUtils.getSecond(taskStore.currentTimeMillis());
             final Map<Long, ConcurrentLinkedQueue<TaskJobTrigger>> triggerMap = taskContext.getNextTriggers(nowSecond);
@@ -1194,7 +1201,7 @@ public class TaskInstance {
             }
             triggerIds.clear();
             // 等待所有触发器触发完成
-            long startMillis = taskStore.currentTimeMillis();
+            startMillis = taskStore.currentTimeMillis();
             for (Future<?> future : futures) {
                 try {
                     future.get();
@@ -1204,20 +1211,12 @@ public class TaskInstance {
             }
             futures.clear();
             final long waitTrigger = taskStore.currentTimeMillis() - startMillis;
-            // 加载下一轮触发器-接下来(N+M)秒内需要触发的
-            startMillis = taskStore.currentTimeMillis();
-            try {
-                reloadNextTrigger();
-            } catch (Exception e) {
-                log.error("[TaskInstance] 加载下一轮触发器失败 | instanceName={}", getInstanceName(), e);
-            }
-            final long waitReloadTrigger = taskStore.currentTimeMillis() - startMillis;
             // 计算休眠时间到下一次触发(保证每秒触发一次)
             long sleepTime = startTime + (count * 1000) - taskStore.currentTimeMillis();
             if (sleepTime <= -500) {
                 String message = String.format(
-                    "调度器超时，建议调整参数配置提高调度器性能 | instanceName=%s | waitTrigger=%s(ms) | waitReloadTrigger=%s(ms) | sleepTime=%s(ms)",
-                    getInstanceName(), waitTrigger, waitReloadTrigger, sleepTime
+                    "调度器超时，建议调整参数配置提高调度器性能 | instanceName=%s | waitReloadTrigger=%s(ms) | waitTrigger=%s(ms) | sleepTime=%s(ms)",
+                    getInstanceName(), waitReloadTrigger, waitTrigger, sleepTime
                 );
                 log.error("[TaskInstance] {}", message);
                 jobExecutor.execute(() -> {
@@ -1265,7 +1264,7 @@ public class TaskInstance {
             } else {
                 // 获取触发器分布式锁 - 判断是否被其他节点触发了
                 taskStore.getLockTrigger(trigger.getNamespace(), trigger.getId(), () -> {
-                    // 二次校验数据
+                    // 分布式锁的二次确认，防止触发器的并发触发
                     Date nextFireTime = taskStore.beginReadOnlyTX(status -> taskStore.getNextFireTime(trigger.getNamespace(), trigger.getId()));
                     if (nextFireTime != null && dbNow.compareTo(nextFireTime) >= 0) {
                         doTriggerJobExec(dbNow, trigger, jobTriggerLog);
@@ -1359,13 +1358,11 @@ public class TaskInstance {
             case EnumConstant.JOB_LOAD_BALANCE_2:
                 // 随机
                 runningScheduler = taskContext.getRunningSchedulerList();
-                log.info("@@@ 随机-1 InstanceName={} | size={}", currentInstanceName, runningScheduler.size());
                 if (runningScheduler.size() >= 2) {
                     runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
-                    Object randomSeed = job.getRunCount() == null ? 0L : job.getRunCount();
+                    Object randomSeed = Conv.asString(job.getRunCount());
                     idx = Math.abs(randomSeed.hashCode()) % runningScheduler.size();
                     scheduler = runningScheduler.get(idx);
-                    log.info("@@@ 随机-2 InstanceName={} | randomSeed={} | idx={}", currentInstanceName, randomSeed, idx);
                     if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
                         return;
                     }
@@ -1376,7 +1373,7 @@ public class TaskInstance {
                 runningScheduler = taskContext.getRunningSchedulerList();
                 if (runningScheduler.size() >= 2) {
                     runningScheduler.sort(Comparator.comparing(TaskScheduler::getInstanceName));
-                    idx = (int) (Math.abs(job.getRunCount() == null ? 0L : job.getRunCount()) % runningScheduler.size());
+                    idx = (int) (Math.abs(Conv.asLong(job.getRunCount())) % runningScheduler.size());
                     scheduler = runningScheduler.get(idx);
                     if (!Objects.equals(scheduler.getInstanceName(), currentInstanceName)) {
                         return;
