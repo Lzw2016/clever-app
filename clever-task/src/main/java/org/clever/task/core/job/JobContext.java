@@ -30,6 +30,7 @@ public class JobContext {
     public static final String INNER_JAVA_JOB_KEY = "inner_java_job_key";
     public static final String INNER_HTTP_JOB_KEY = "inner_http_job_key";
     public static final String INNER_SHELL_JOB_KEY = "inner_shell_job_key";
+    public static final String INNER_JS_JOB_KEY = "inner_js_job_key";
 
     /**
      * 数据库的当前时间

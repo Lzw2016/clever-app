@@ -74,6 +74,6 @@ public class ShellJobExecutor implements JobExecutor {
             Conv.asLong(shellJob.getShellTimeout()),
             context::debug
         );
-        log.info("ShellJob执行完成，进程退出状态码:{}， shellType={} | jobId={}", exitValue, shellJob.getShellType(), job.getId());
+        log.debug("ShellJob执行完成，进程退出状态码:{}， shellType={} | jobId={}", exitValue, shellJob.getShellType(), job.getId());
     }
 }

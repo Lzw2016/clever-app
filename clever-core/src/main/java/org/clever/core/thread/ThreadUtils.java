@@ -15,6 +15,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 public class ThreadUtils {
     /**
+     * 休眠当前线程，忽略中断异常
+     */
+    public static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    /**
      * 线程栈信息
      *
      * @return 线程栈信息字符串
@@ -29,7 +39,7 @@ public class ThreadUtils {
             stringBuilder.append(
                 String.format(
                     "%s\tat %s.%s(%s:%s)",
-                    System.getProperty("line.separator"),
+                    System.lineSeparator(),
                     stackTraceElement.getClassName(),
                     stackTraceElement.getMethodName(),
                     stackTraceElement.getFileName(),

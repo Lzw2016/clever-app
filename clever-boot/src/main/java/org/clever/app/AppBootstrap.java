@@ -16,6 +16,7 @@ import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.redis.RedisBootstrap;
 import org.clever.security.SecurityBootstrap;
+import org.clever.task.JsExecutorBootstrap;
 import org.clever.task.TaskBootstrap;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.MvcBootstrap;
@@ -157,6 +158,8 @@ public abstract class AppBootstrap {
         }
         startupTaskBootstrap.start();
         // 分布式定时任务
+        JsExecutorBootstrap jsExecutorBootstrap = JsExecutorBootstrap.create(environment);
+        jsExecutorBootstrap.init();
         TaskBootstrap taskBootstrap = TaskBootstrap.create(rootPath, environment);
         taskBootstrap.start();
         // 系统启动完成日志
