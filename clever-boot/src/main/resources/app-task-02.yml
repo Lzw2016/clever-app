@@ -20,7 +20,11 @@ mybatis:
 jdbc:
   enable: true
   p6spylog:
-    ignoreContainsSql: []
+    ignoreContainsSql:
+      - ' task_job_log '
+      - ' task_job_trigger_log '
+      - ' task_scheduler_log '
+      - ' task_job_console_log '
   defaultName: 'postgresql'
   dataSource:
     postgresql:
