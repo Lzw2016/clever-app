@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.PlatformOS;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.util.Assert;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -98,6 +99,7 @@ public class ExecShellUtils {
                                     Long timeout,
                                     Consumer<String> callback,
                                     String... params) throws Exception {
+        Assert.isTrue(new File(scriptFile).setExecutable(true), "文件 " + scriptFile + " 没有可执行权限");
         if (StringUtils.isBlank(charset)) {
             charset = getDefCharset();
         }
