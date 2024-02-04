@@ -174,11 +174,11 @@ public class JobContext {
      * debug打印输出 (同时将日志写入数据库)
      */
     public void debug(String format, Object... args) {
+        if (args == null) {
+            args = new Object[]{null};
+        }
+        TupleTwo<String, Throwable> tuple = logString(format, args);
         if (logger.isDebugEnabled()) {
-            if (args == null) {
-                args = new Object[]{null};
-            }
-            TupleTwo<String, Throwable> tuple = logString(format, args);
             if (tuple.getValue2() == null) {
                 logger.debug(tuple.getValue1());
             } else {
@@ -199,11 +199,11 @@ public class JobContext {
      * info打印输出 (同时将日志写入数据库)
      */
     public void info(String format, Object... args) {
+        if (args == null) {
+            args = new Object[]{null};
+        }
+        TupleTwo<String, Throwable> tuple = logString(format, args);
         if (logger.isInfoEnabled()) {
-            if (args == null) {
-                args = new Object[]{null};
-            }
-            TupleTwo<String, Throwable> tuple = logString(format, args);
             if (tuple.getValue2() == null) {
                 logger.info(tuple.getValue1());
             } else {
@@ -224,11 +224,11 @@ public class JobContext {
      * warn打印输出 (同时将日志写入数据库)
      */
     public void warn(String format, Object... args) {
+        if (args == null) {
+            args = new Object[]{null};
+        }
+        TupleTwo<String, Throwable> tuple = logString(format, args);
         if (logger.isWarnEnabled()) {
-            if (args == null) {
-                args = new Object[]{null};
-            }
-            TupleTwo<String, Throwable> tuple = logString(format, args);
             if (tuple.getValue2() == null) {
                 logger.warn(tuple.getValue1());
             } else {
@@ -249,11 +249,11 @@ public class JobContext {
      * error打印输出 (同时将日志写入数据库)
      */
     public void error(String format, Object... args) {
+        if (args == null) {
+            args = new Object[]{null};
+        }
+        TupleTwo<String, Throwable> tuple = logString(format, args);
         if (logger.isErrorEnabled()) {
-            if (args == null) {
-                args = new Object[]{null};
-            }
-            TupleTwo<String, Throwable> tuple = logString(format, args);
             if (tuple.getValue2() == null) {
                 logger.error(tuple.getValue1());
             } else {
