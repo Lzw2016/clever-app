@@ -128,6 +128,7 @@ public class TaskInstance {
     /**
      * 创建定时任务调度器实例
      *
+     * @param rootPath            全局基础路径
      * @param queryDSL            QueryDSL数据源
      * @param schedulerConfig     调度器配置
      * @param jobExecutors        定时任务执行器实现列表
@@ -136,12 +137,14 @@ public class TaskInstance {
      * @param jobListeners        定时任务执行事件监听器列表
      */
     public TaskInstance(
+        String rootPath,
         QueryDSL queryDSL,
         SchedulerConfig schedulerConfig,
         List<JobExecutor> jobExecutors,
         List<SchedulerListener> schedulerListeners,
         List<JobTriggerListener> jobTriggerListeners,
         List<JobListener> jobListeners) {
+        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(queryDSL, "参数 queryDSL 不能为空");
         Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为空");
         Assert.notEmpty(jobExecutors, "参数 jobExecutors 不能为空");
@@ -166,7 +169,7 @@ public class TaskInstance {
             Math.abs(schedulerConfig.getNamespace().hashCode() % SnowFlake.MAX_DATACENTER_ID)
         );
         this.taskStore = new TaskStore(snowFlake, queryDSL);
-        this.taskContext = new TaskContext(schedulerConfig);
+        this.taskContext = new TaskContext(rootPath, schedulerConfig);
         this.scheduledExecutor = new ScheduledThreadPoolExecutor(
             schedulerConfig.getSchedulerExecutorPoolSize(),
             new BasicThreadFactory.Builder().namingPattern("task-scheduler-pool-%d").daemon(true).build(),
@@ -1514,7 +1517,7 @@ public class TaskInstance {
             while (retryCount < maxRetryCount) {
                 retryCount++;
                 try {
-                    JobContext jobContext = new JobContext(dbNow, job, jobLog, scheduler, taskStore);
+                    JobContext jobContext = new JobContext(dbNow, job, jobLog, scheduler, taskStore, taskContext);
                     jobExecutor.exec(jobContext);
                     jobLog.setStatus(EnumConstant.JOB_LOG_STATUS_0);
                     if (!jobContext.getJobData().isEmpty() && Objects.equals(job.getIsUpdateData(), EnumConstant.JOB_IS_UPDATE_DATA_1)) {

@@ -72,4 +72,4 @@ build/
 node_modules
 logs
 .httpCache
-shell_job
+shell_job_log

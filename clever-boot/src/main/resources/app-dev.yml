@@ -131,5 +131,5 @@ timed-task:
   jobExecutorPoolSize: 64
   jobExecutorQueueSize: 64
   loadWeight: 1.0
-  shellJobWorkingDir: './'
+  shellJobWorkingDir: './shell_job_log'
   logRetention: 3d

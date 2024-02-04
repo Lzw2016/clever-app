@@ -39,6 +39,7 @@ public class TaskInstanceTest {
         Jdbc jdbc = BaseTest.newMysql();
         QueryDSL queryDSL = QueryDSL.create(jdbc);
         TaskInstance taskInstance = new TaskInstance(
+            "./",
             queryDSL,
             newSchedulerConfig(instanceName),
             // Arrays.asList(new MockJobExecutor(), new HttpJobExecutor()),

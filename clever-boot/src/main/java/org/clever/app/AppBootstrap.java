@@ -157,7 +157,7 @@ public abstract class AppBootstrap {
         }
         startupTaskBootstrap.start();
         // 分布式定时任务
-        TaskBootstrap taskBootstrap = TaskBootstrap.create(environment);
+        TaskBootstrap taskBootstrap = TaskBootstrap.create(rootPath, environment);
         taskBootstrap.start();
         // 系统启动完成日志
         startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));

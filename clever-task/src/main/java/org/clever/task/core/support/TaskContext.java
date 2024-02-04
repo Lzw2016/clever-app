@@ -3,6 +3,7 @@ package org.clever.task.core.support;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.ResourcePathUtils;
 import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.TaskInstance;
 import org.clever.task.core.config.SchedulerConfig;
@@ -27,6 +28,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class TaskContext {
+    /**
+     * 全局基础路径
+     */
+    @Getter
+    private final String rootPath;
     /**
      * 当前调度器配置
      */
@@ -63,8 +69,10 @@ public class TaskContext {
      */
     private final ConcurrentMap<Long, AtomicLong> jobRunCount = new ConcurrentHashMap<>(GlobalConstant.INITIAL_CAPACITY);
 
-    public TaskContext(SchedulerConfig schedulerConfig) {
+    public TaskContext(String rootPath, SchedulerConfig schedulerConfig) {
+        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为null");
+        this.rootPath = rootPath;
         this.schedulerConfig = schedulerConfig;
     }
 
@@ -154,5 +162,12 @@ public class TaskContext {
                 SchedulerRuntimeInfo runtimeInfo = scheduler.getSchedulerRuntimeInfo();
                 return runtimeInfo != null && Objects.equals(runtimeInfo.getState(), TaskInstance.State.RUNNING);
             }).collect(Collectors.toList());
+    }
+
+    /**
+     * shell任务的work目录
+     */
+    public String getShellJobWorkingDir() {
+        return ResourcePathUtils.getAbsolutePath(rootPath, schedulerConfig.getShellJobWorkingDir());
     }
 }

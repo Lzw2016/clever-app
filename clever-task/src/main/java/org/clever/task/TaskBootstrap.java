@@ -3,10 +3,7 @@ package org.clever.task;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.boot.context.properties.bind.Binder;
-import org.clever.core.AppContextHolder;
-import org.clever.core.AppShutdownHook;
-import org.clever.core.BannerUtils;
-import org.clever.core.OrderIncrement;
+import org.clever.core.*;
 import org.clever.core.env.Environment;
 import org.clever.task.core.TaskInstance;
 import org.clever.task.core.config.SchedulerConfig;
@@ -26,11 +23,11 @@ import java.util.List;
  */
 @Slf4j
 public class TaskBootstrap {
-    public static TaskBootstrap create(SchedulerConfig schedulerConfig) {
-        return new TaskBootstrap(schedulerConfig);
+    public static TaskBootstrap create(String rootPath, SchedulerConfig schedulerConfig) {
+        return new TaskBootstrap(rootPath, schedulerConfig);
     }
 
-    public static TaskBootstrap create(Environment environment) {
+    public static TaskBootstrap create(String rootPath, Environment environment) {
         SchedulerConfig config = Binder.get(environment).bind(SchedulerConfig.PREFIX, SchedulerConfig.class).orElseGet(SchedulerConfig::new);
         // 打印配置日志
         List<String> logs = new ArrayList<>();
@@ -46,12 +43,12 @@ public class TaskBootstrap {
         logs.add("  jobExecutorPoolSize       : " + config.getJobExecutorPoolSize());
         logs.add("  jobExecutorQueueSize      : " + config.getJobExecutorQueueSize());
         logs.add("  loadWeight                : " + config.getLoadWeight());
-        logs.add("  shellJobWorkingDir        : " + config.getShellJobWorkingDir());
+        logs.add("  shellJobWorkingDir        : " + ResourcePathUtils.getAbsolutePath(rootPath, config.getShellJobWorkingDir()));
         logs.add("  logRetention              : " + (config.getLogRetention() != null ? config.getLogRetention().toMillis() + "ms" : ""));
         if (config.isEnable()) {
             BannerUtils.printConfig(log, "定时任务配置", logs.toArray(new String[0]));
         }
-        TaskBootstrap taskBootstrap = create(config);
+        TaskBootstrap taskBootstrap = create(rootPath, config);
         AppContextHolder.registerBean("taskBootstrap", taskBootstrap, true);
         AppContextHolder.registerBean("taskInstance", taskBootstrap.taskInstance, true);
         return taskBootstrap;
@@ -72,16 +69,21 @@ public class TaskBootstrap {
     }
 
     @Getter
+    private final String rootPath;
+    @Getter
     private final SchedulerConfig schedulerConfig;
     @Getter
     private final TaskInstance taskInstance;
     private volatile boolean isStarted = false;
 
-    public TaskBootstrap(SchedulerConfig schedulerConfig) {
+    public TaskBootstrap(String rootPath, SchedulerConfig schedulerConfig) {
+        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(schedulerConfig, "参数 schedulerConfig 不能为空");
         TaskDataSource.JDBC_DATA_SOURCE_NAME = schedulerConfig.getJdbcName();
+        this.rootPath = rootPath;
         this.schedulerConfig = schedulerConfig;
         this.taskInstance = new TaskInstance(
+            rootPath,
             TaskDataSource.getQueryDSL(),
             schedulerConfig,
             JOB_EXECUTORS,
@@ -99,7 +101,7 @@ public class TaskBootstrap {
             return;
         }
         isStarted = true;
-        if(schedulerConfig.isStandby()) {
+        if (schedulerConfig.isStandby()) {
             taskInstance.standby();
         } else {
             taskInstance.start();

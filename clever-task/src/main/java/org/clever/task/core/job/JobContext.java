@@ -10,6 +10,7 @@ import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.entity.*;
+import org.clever.task.core.support.TaskContext;
 import org.clever.util.Assert;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,11 @@ public class JobContext {
     @Getter
     private final TaskStore taskStore;
     /**
+     * 定时任务调度器上下文
+     */
+    @Getter
+    private final TaskContext taskContext;
+    /**
      * 当前任务数据
      */
     @Getter
@@ -73,17 +79,24 @@ public class JobContext {
      */
     private final AtomicInteger logLineNum = new AtomicInteger(0);
 
-    public JobContext(Date dbNow, TaskJob job, TaskJobLog jobLog, TaskScheduler scheduler, TaskStore taskStore) {
+    public JobContext(Date dbNow,
+                      TaskJob job,
+                      TaskJobLog jobLog,
+                      TaskScheduler scheduler,
+                      TaskStore taskStore,
+                      TaskContext taskContext) {
         Assert.notNull(dbNow, "参数 dbNow 不能为 null");
         Assert.notNull(job, "参数 job 不能为 null");
         Assert.notNull(jobLog, "参数 jobLog 不能为 null");
         Assert.notNull(scheduler, "参数 scheduler 不能为 null");
         Assert.notNull(taskStore, "参数 taskStore 不能为 null");
+        Assert.notNull(taskContext, "参数 taskContext 不能为 null");
         this.dbNow = dbNow;
         this.job = job;
         this.jobLog = jobLog;
         this.scheduler = scheduler;
         this.taskStore = taskStore;
+        this.taskContext = taskContext;
         this.jobData = loadJobData(job.getJobData());
         this.logger = LoggerFactory.getLogger(String.format("task.job.%s_%s_%s", job.getNamespace(), job.getName(), job.getId()));
     }

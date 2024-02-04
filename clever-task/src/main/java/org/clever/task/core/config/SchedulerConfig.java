@@ -58,9 +58,9 @@ public class SchedulerConfig implements Serializable {
      */
     private double loadWeight = 1.0;
     /**
-     * TODO shell任务的work目录
+     * shell任务的work目录
      */
-    private String shellJobWorkingDir = "";
+    private String shellJobWorkingDir = "./shell_job_log";
     /**
      * 日志保留时间(默认7天)
      */
