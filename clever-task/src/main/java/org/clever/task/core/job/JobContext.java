@@ -163,6 +163,31 @@ public class JobContext {
     }
 
     /**
+     * debug打印输出 (同时将日志写入数据库)
+     */
+    public void debug(String msg) {
+        Object[] args = new Object[]{};
+        debug(msg, args);
+    }
+
+    /**
+     * debug打印输出 (同时将日志写入数据库)
+     */
+    public void debug(String format, Object... args) {
+        if (logger.isDebugEnabled()) {
+            if (args == null) {
+                args = new Object[]{null};
+            }
+            TupleTwo<String, Throwable> tuple = logString(format, args);
+            if (tuple.getValue2() == null) {
+                logger.debug(tuple.getValue1());
+            } else {
+                logger.debug(tuple.getValue1(), tuple.getValue2());
+            }
+        }
+    }
+
+    /**
      * info打印输出 (同时将日志写入数据库)
      */
     public void info(String msg) {
@@ -187,6 +212,9 @@ public class JobContext {
         }
     }
 
+    /**
+     * warn打印输出 (同时将日志写入数据库)
+     */
     public void warn(String msg) {
         Object[] args = new Object[]{};
         warn(msg, args);

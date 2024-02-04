@@ -50,7 +50,7 @@ public class HttpJobExecutor implements JobExecutor {
                     logs.append(StringUtils.rightPad("body" + SEPARATE, maxWidth)).append(Conv.asString(request.body())).append(LINE);
                 }
                 logs.append(LINE);
-                context.info(logs.toString());
+                context.debug(logs.toString());
                 logs.setLength(0);
                 // 执行http请求
                 Response response = chain.proceed(request);
@@ -62,7 +62,7 @@ public class HttpJobExecutor implements JobExecutor {
                 if (response.body() != null) {
                     logs.append(StringUtils.rightPad("body" + SEPARATE, maxWidth)).append(response.body().string()).append(LINE);
                 }
-                context.info(logs.toString());
+                context.debug(logs.toString());
                 logs.setLength(0);
                 return response;
             })
