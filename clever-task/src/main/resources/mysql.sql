@@ -70,7 +70,6 @@ create table task_http_job
     request_method      varchar(15)     not null                                                comment 'http请求method，ALL GET HEAD POST PUT DELETE CONNECT OPTIONS TRACE PATCH',
     request_url         varchar(511)    not null                                                comment 'Http请求地址',
     request_data        mediumtext                                                              comment 'Http请求数据json格式，包含：params、headers、body',
-    success_check       text                                                                    comment 'Http请求是否成功校验(js脚本)',
     create_at           datetime(3)     not null        default current_timestamp(3)            comment '创建时间',
     update_at           datetime(3)                     on update current_timestamp(3)          comment '更新时间',
     primary key (id)

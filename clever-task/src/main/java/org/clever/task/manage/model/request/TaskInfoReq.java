@@ -70,8 +70,6 @@ public class TaskInfoReq {
         private String requestUrl;
         /** Http请求数据json格式，包含：params、headers、body */
         private String requestData;
-        /** Http请求是否成功校验(js脚本) */
-        private String successCheck;
     }
 
     @Data

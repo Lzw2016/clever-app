@@ -28,10 +28,6 @@ public class HttpJobModel extends AbstractJob {
      * Http请求数据json格式，包含：params、headers、body
      */
     private HttpRequestData requestData;
-    /**
-     * Http请求是否成功校验(js脚本)
-     */
-    private String successCheck;
 
     public HttpJobModel(String name, String requestMethod, String requestUrl) {
         Assert.hasText(name, "参数name不能为空");
@@ -54,7 +50,6 @@ public class HttpJobModel extends AbstractJob {
         if (getRequestData() != null) {
             httpJob.setRequestData(getRequestData().toString());
         }
-        httpJob.setSuccessCheck(getSuccessCheck());
         return httpJob;
     }
 

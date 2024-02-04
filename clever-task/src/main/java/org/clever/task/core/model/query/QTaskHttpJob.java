@@ -34,8 +34,6 @@ public class QTaskHttpJob extends RelationalPathBase<TaskHttpJob> {
     public final StringPath requestUrl = createString("requestUrl");
     /** Http请求数据json格式，包含：params、headers、body */
     public final StringPath requestData = createString("requestData");
-    /** Http请求是否成功校验(js脚本) */
-    public final StringPath successCheck = createString("successCheck");
     /** 创建时间 */
     public final DateTimePath<Date> createAt = createDateTime("createAt", Date.class);
     /** 更新时间 */
@@ -73,8 +71,7 @@ public class QTaskHttpJob extends RelationalPathBase<TaskHttpJob> {
         addMetadata(requestMethod, ColumnMetadata.named("request_method").withIndex(4).ofType(Types.VARCHAR).withSize(15));
         addMetadata(requestUrl, ColumnMetadata.named("request_url").withIndex(5).ofType(Types.VARCHAR).withSize(511));
         addMetadata(requestData, ColumnMetadata.named("request_data").withIndex(6).ofType(Types.LONGVARCHAR).withSize(16777215));
-        addMetadata(successCheck, ColumnMetadata.named("success_check").withIndex(7).ofType(Types.LONGVARCHAR).withSize(65535));
-        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
-        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(9).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(createAt, ColumnMetadata.named("create_at").withIndex(7).ofType(Types.TIMESTAMP).withSize(3));
+        addMetadata(updateAt, ColumnMetadata.named("update_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(3));
     }
 }

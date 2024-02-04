@@ -97,7 +97,6 @@ create table task_http_job
     request_method      varchar2(15)                                    not null,
     request_url         varchar2(511)                                   not null,
     request_data        clob,
-    success_check       clob,
     create_at           timestamp(6)    default CURRENT_TIMESTAMP(3)    not null,
     update_at           timestamp(6),
     primary key (id)
@@ -109,7 +108,6 @@ comment on column task_http_job.job_id is '任务ID';
 comment on column task_http_job.request_method is 'http请求method，ALL GET HEAD POST PUT DELETE CONNECT OPTIONS TRACE PATCH';
 comment on column task_http_job.request_url is 'Http请求地址';
 comment on column task_http_job.request_data is 'Http请求数据json格式，包含：params、headers、body';
-comment on column task_http_job.success_check is 'Http请求是否成功校验(js脚本)';
 comment on column task_http_job.create_at is '创建时间';
 comment on column task_http_job.update_at is '更新时间';
 create index idx_task_http_job_create_at on task_http_job (create_at);

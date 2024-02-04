@@ -175,7 +175,6 @@ public class TaskInstanceManage {
                     throw new BusinessException("Http请求数据格式错误", e);
                 }
             }
-            httpJob.setSuccessCheck(httpJob.getSuccessCheck());
             jobModel = httpJob;
         } else if (Objects.equals(job.getType(), EnumConstant.JOB_TYPE_2)) {
             jobModel = new JavaJobModel(
@@ -228,7 +227,6 @@ public class TaskInstanceManage {
                     throw new BusinessException("Http请求数据格式错误", e);
                 }
             }
-            httpJob.setSuccessCheck(httpJob.getSuccessCheck());
             jobModel = httpJob;
         } else if (java != null && java.getId() != null) {
             jobModel = new JavaJobModel(

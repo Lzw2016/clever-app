@@ -22,8 +22,6 @@ public class TaskHttpJob implements Serializable {
     private String requestUrl;
     /** Http请求数据json格式，包含：params、headers、body */
     private String requestData;
-    /** Http请求是否成功校验(js脚本) */
-    private String successCheck;
     /** 创建时间 */
     private Date createAt;
     /** 更新时间 */
