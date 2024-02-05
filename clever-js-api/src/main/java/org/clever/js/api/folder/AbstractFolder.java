@@ -133,6 +133,7 @@ public abstract class AbstractFolder implements Folder {
         return null;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public List<Folder> getChildren() {
         List<String> children = getChildren(this.absolutePath);

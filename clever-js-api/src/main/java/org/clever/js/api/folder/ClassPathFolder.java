@@ -81,7 +81,7 @@ public class ClassPathFolder implements Folder {
      * @param basePath        基础路径
      */
     private ClassPathFolder(String locationPattern, String basePath) {
-        basePath = concatPath(Folder.Root_Path, basePath);
+        basePath = AbstractFolder.concatPath(Folder.Root_Path, basePath);
         this.locationPattern = locationPattern;
         this.basePath = StringUtils.isBlank(basePath) ? Folder.Root_Path : basePath;
         this.fullPath = Folder.Root_Path;
@@ -95,8 +95,8 @@ public class ClassPathFolder implements Folder {
      * @param path            当前路径(相当路径或者绝对路径)
      */
     private ClassPathFolder(String locationPattern, String basePath, String path) {
-        basePath = concatPath(Folder.Root_Path, basePath);
-        path = concatPath(Folder.Root_Path, path);
+        basePath = AbstractFolder.concatPath(Folder.Root_Path, basePath);
+        path = AbstractFolder.concatPath(Folder.Root_Path, path);
         this.locationPattern = locationPattern;
         this.basePath = StringUtils.isBlank(basePath) ? Folder.Root_Path : basePath;
         this.fullPath = StringUtils.isBlank(path) ? Folder.Root_Path : path;
@@ -173,7 +173,7 @@ public class ClassPathFolder implements Folder {
     @SneakyThrows
     @Override
     public String getFileContent(String name) {
-        String filePath = concatPath(this.absolutePath, name);
+        String filePath = AbstractFolder.concatPath(this.absolutePath, name);
         if (StringUtils.isNotBlank(filePath)) {
             return null;
         }
@@ -200,6 +200,7 @@ public class ClassPathFolder implements Folder {
         return null;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public List<Folder> getChildren() {
         List<String> children = getChildren(this);
@@ -216,7 +217,7 @@ public class ClassPathFolder implements Folder {
 
     @Override
     public Folder concat(String... paths) {
-        String fullPath = concatPath(this.fullPath, paths);
+        String fullPath = AbstractFolder.concatPath(this.fullPath, paths);
         if (fullPath == null) {
             return null;
         }
@@ -288,7 +289,7 @@ public class ClassPathFolder implements Folder {
         List<String> pathMatchResourceList = new ArrayList<>(1);
         if (!Current_ClassPath_Is_Jar_File) {
             // 不是jar包
-            String classPathFullPath = concatPath(Current_ClassPath, Folder.Current + basePath, Folder.Current + path);
+            String classPathFullPath = AbstractFolder.concatPath(Current_ClassPath, Folder.Current + basePath, Folder.Current + path);
             for (String resource : resourceSet) {
                 if (resource.startsWith(classPathFullPath)) {
                     pathMatchResourceList.add(classPathFullPath);
@@ -297,7 +298,7 @@ public class ClassPathFolder implements Folder {
             }
         }
         // jar包
-        String fullPath = concatPath(basePath, Folder.Current + path);
+        String fullPath = AbstractFolder.concatPath(basePath, Folder.Current + path);
         if (fullPath == null) {
             return null;
         }
@@ -325,31 +326,6 @@ public class ClassPathFolder implements Folder {
             log.warn("匹配到{}个资源文件 | locationPattern={} | basePath={} | path={} \n{}", pathMatchResourceList.size(), locationPattern, basePath, path, sb.toString());
         }
         return pathMatchResourceList.get(0);
-    }
-
-    /**
-     * 连接路径，超出路径范围返回null(结束字符不是路径分隔符，除了根路径)
-     */
-    protected static String concatPath(String basePath, String... paths) {
-        if (StringUtils.isBlank(basePath)) {
-            basePath = Folder.Root_Path;
-        }
-        if (paths != null) {
-            for (String path : paths) {
-                path = StringUtils.trim(path);
-                if (StringUtils.isBlank(path)) {
-                    continue;
-                }
-                basePath = FilenameUtils.concat(basePath, path);
-            }
-        }
-        if (basePath != null) {
-            basePath = replaceSeparate(basePath);
-            if (basePath.length() > 1 && basePath.endsWith(Folder.Path_Separate)) {
-                basePath = basePath.substring(0, basePath.length() - 1);
-            }
-        }
-        return basePath;
     }
 
     /**

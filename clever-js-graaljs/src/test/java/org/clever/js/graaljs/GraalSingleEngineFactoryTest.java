@@ -9,7 +9,6 @@ import org.clever.js.api.folder.Folder;
 import org.clever.js.api.pool.GenericEngineInstancePool;
 import org.clever.js.graaljs.pool.GraalSingleEngineFactory;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.Value;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +40,7 @@ public class GraalSingleEngineFactoryTest {
         config.setMinIdle(2);
         // 创建对象工厂
         Folder rootFolder = FileSystemFolder.createRootPath(new File("../clever-js-api/src/test/resources").getAbsolutePath());
-        Engine engine = Engine.newBuilder()
-            .useSystemProperties(true)
-            .build();
-        factory = new GraalSingleEngineFactory(rootFolder, engine);
+        factory = GraalSingleEngineFactory.create(rootFolder);
         // 创建对象池
         pool = new GenericEngineInstancePool<>(factory, config);
     }

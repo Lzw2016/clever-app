@@ -665,6 +665,13 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 
 ### clever-js-api
 - [OK] 抽象了 js 引擎的使用
+```
+clever-graaljs
+[OK] GraalSingleEngineFactory    单个Engine对象的PooledObjectFactory<ScriptEngineInstance>
+[  ] ScriptEngineInstance        包装引擎池
+[  ] ScriptContextInstance       包装引擎实例
+[  ] ScriptObjectCache           缓存ScriptObject
+```
 
 ### clever-js-graaljs
 ```

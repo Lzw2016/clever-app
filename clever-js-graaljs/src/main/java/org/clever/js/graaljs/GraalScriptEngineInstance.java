@@ -1,5 +1,6 @@
 package org.clever.js.graaljs;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.js.api.AbstractScriptEngineInstance;
 import org.clever.js.api.GlobalConstant;
@@ -62,6 +63,7 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
         context.getEngine().close(true);
     }
 
+    @Getter
     public static class Builder extends AbstractBuilder<Context, Value> {
         private Consumer<Context.Builder> customContext;
         private Consumer<HostAccess.Builder> customHostAccess;

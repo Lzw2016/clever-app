@@ -3,15 +3,13 @@ package org.clever.js.graaljs;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.ObjectPool;
-import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.clever.js.api.ScriptEngineInstance;
 import org.clever.js.api.folder.FileSystemFolder;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.pool.EnginePoolConfig;
 import org.clever.js.graaljs.pool.GraalSingleEngineFactory;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.Value;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,18 +33,15 @@ public class EngineInstancePool2Test {
     @BeforeEach
     public void init() {
         // 创建对象池配置
-        GenericObjectPoolConfig<ScriptEngineInstance<Context, Value>> config = new GenericObjectPoolConfig<>();
+        EnginePoolConfig config = new EnginePoolConfig();
         config.setMaxWait(Duration.ofMillis(-1));
         config.setMaxTotal(8);
         config.setMinIdle(2);
         // 创建对象工厂
         Folder rootFolder = FileSystemFolder.createRootPath(new File("../clever-js-api/src/test/resources").getAbsolutePath());
-        Engine engine = Engine.newBuilder()
-            .useSystemProperties(true)
-            .build();
-        PooledObjectFactory<ScriptEngineInstance<Context, Value>> factory = new GraalSingleEngineFactory(rootFolder, engine);
+        GraalSingleEngineFactory factory = GraalSingleEngineFactory.create(rootFolder);
         // 创建对象池
-        pool = new GenericObjectPool<>(factory, config);
+        pool = new GenericObjectPool<>(factory, config.toGenericObjectPoolConfig());
     }
 
     @AfterEach

@@ -1,5 +1,6 @@
 package org.clever.js.api;
 
+import lombok.Getter;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.module.CompileModule;
 import org.clever.js.api.module.ModuleCache;
@@ -13,12 +14,14 @@ import java.util.Map;
  * 作者：lizw <br/>
  * 创建时间：2020/07/26 09:30 <br/>
  *
- * @param <E> script引擎类型
- * @param <T> script引擎对象类型
+ * @param <E>  script引擎类型
+ * @param <T>  script引擎对象类型
+ * @param <EI> build返回的对象类型
  */
+@Getter
 public abstract class AbstractBuilder<E, T, EI> {
     protected E engine;
-    protected Map<String, Object> contextMap = new HashMap<String, Object>(){{
+    protected Map<String, Object> contextMap = new HashMap<String, Object>() {{
         putAll(GlobalConstant.Default_Context_Map);
         putAll(GlobalConstant.Custom_Context_Map);
     }};
@@ -37,25 +40,11 @@ public abstract class AbstractBuilder<E, T, EI> {
     }
 
     /**
-     * @return NashornScriptEngine
-     */
-    public E getEngine() {
-        return engine;
-    }
-
-    /**
-     * 设置 NashornScriptEngine
+     * 设置 ScriptEngine
      */
     public AbstractBuilder<E, T, EI> setEngine(E engine) {
         this.engine = engine;
         return this;
-    }
-
-    /**
-     * @return 自定义引擎全局对象
-     */
-    public Map<String, Object> getContextMap() {
-        return contextMap;
     }
 
     /**
@@ -75,32 +64,11 @@ public abstract class AbstractBuilder<E, T, EI> {
     }
 
     /**
-     * @return 根路径文件夹
-     */
-    public Folder getRootPath() {
-        return rootPath;
-    }
-
-    /**
-     * @return 模块缓存
-     */
-    public ModuleCache<T> getModuleCache() {
-        return moduleCache;
-    }
-
-    /**
      * 设置模块缓存
      */
     public AbstractBuilder<E, T, EI> setModuleCache(ModuleCache<T> moduleCache) {
         this.moduleCache = moduleCache;
         return this;
-    }
-
-    /**
-     * @return 全局require实例(根目录require)
-     */
-    public Require<T> getRequire() {
-        return require;
     }
 
     /**
@@ -112,25 +80,11 @@ public abstract class AbstractBuilder<E, T, EI> {
     }
 
     /**
-     * @return 编译模块实现
-     */
-    public CompileModule<T> getCompileModule() {
-        return compileModule;
-    }
-
-    /**
      * 设置编译模块实现
      */
     public AbstractBuilder<E, T, EI> setCompileModule(CompileModule<T> compileModule) {
         this.compileModule = compileModule;
         return this;
-    }
-
-    /**
-     * @return 引擎全局变量
-     */
-    public T getGlobal() {
-        return global;
     }
 
     /**
