@@ -15,7 +15,7 @@ public class GraalJs02Test {
     @SuppressWarnings({"Java8MapForEach", "CodeBlock2Expr"})
     @Test
     public void t01() {
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id)
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID)
             .option("js.ecmascript-version", "11")
             .build();
 
@@ -42,19 +42,19 @@ public class GraalJs02Test {
 
     @Test
     public void t02() {
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id)
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID)
             .option("js.ecmascript-version", "11")
             .build();
-        Value value = context.eval(GraalConstant.Js_Language_Id, "JSON");
+        Value value = context.eval(GraalConstant.JS_LANGUAGE_ID, "JSON");
         Value res1 = value.invokeMember("parse", "{\"str\": \"abc\", \"int\": 123}");
 
-        value = context.eval(GraalConstant.Js_Language_Id, "Object");
+        value = context.eval(GraalConstant.JS_LANGUAGE_ID, "Object");
         Value res2 = value.newInstance();
 
-        value = context.eval(GraalConstant.Js_Language_Id, "function fuc(a, b) { return a+b; } fuc;");
+        value = context.eval(GraalConstant.JS_LANGUAGE_ID, "function fuc(a, b) { return a+b; } fuc;");
         Value res3 = value.execute(3, 6);
 
-        value = context.eval(GraalConstant.Js_Language_Id, "function fuc(a) { return a+6; } fuc;");
+        value = context.eval(GraalConstant.JS_LANGUAGE_ID, "function fuc(a) { return a+6; } fuc;");
         Value res4 = value.execute(res3);
 
         context.close();
@@ -67,11 +67,11 @@ public class GraalJs02Test {
             return 123456;
         };
 
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id)
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID)
             .option("js.ecmascript-version", "11")
             .allowAllAccess(true)
             .build();
-        Value value = context.eval(GraalConstant.Js_Language_Id, "(function(exports, require, module, __filename, __dirname) {\n" +
+        Value value = context.eval(GraalConstant.JS_LANGUAGE_ID, "(function(exports, require, module, __filename, __dirname) {\n" +
             "console.log('exports -> ', exports); \n" +
             "console.log('require -> ', require('/001/002/003')); \n" +
             "console.log('module -> ', module); \n" +

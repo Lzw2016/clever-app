@@ -31,7 +31,7 @@ public class ObjectToString {
         mapper.registerModules(module);
     }
 
-    public static final ObjectToString Instance = new ObjectToString();
+    public static final ObjectToString INSTANCE = new ObjectToString();
 
     /**
      * 格式化字符串,类似log4j日志实现<br>

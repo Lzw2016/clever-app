@@ -27,35 +27,35 @@ public class ClassPathFolder implements Folder {
     /**
      * 加载Resource实现对象
      */
-    private static final PathMatchingResourcePatternResolver Path_Matching_Resolver = new PathMatchingResourcePatternResolver();
+    private static final PathMatchingResourcePatternResolver PATH_MATCHING_RESOLVER = new PathMatchingResourcePatternResolver();
     /**
      * 文件资源集合{@code Map<locationPattern, Set<资源路径>>}
      */
-    private static final ConcurrentHashMap<String, CopyOnWriteArraySet<String>> Multiple_Resource_Map = new ConcurrentHashMap<>(8);
+    private static final ConcurrentHashMap<String, CopyOnWriteArraySet<String>> MULTIPLE_RESOURCE_MAP = new ConcurrentHashMap<>(8);
 
     /**
      * 当前应用的Class Path路径
      */
-    public static final String Current_ClassPath;
+    public static final String CURRENT_CLASS_PATH;
     /**
      * 当前应用的classpath是否是jar包里的文件路径
      */
-    public static final boolean Current_ClassPath_Is_Jar_File;
+    public static final boolean CURRENT_CLASS_PATH_IS_JAR_FILE;
 
     static {
         String classPath;
         try {
-            // jar:file:/D:/SourceCode/clever/hinny-spring-example/hinny-spring-example-1.0.0-SNAPSHOT.jar!/BOOT-INF/classes!/
-            // file:/D:/SourceCode/clever/clever-hinny/clever-hinny-api/target/test-classes/
+            // jar:file:/D:/.../xxx-example-1.0.0-SNAPSHOT.jar!/BOOT-INF/classes!/
+            // file:/D:/.../xxx-example/target/test-classes/
             classPath = ResourceUtils.getURL("classpath:").toExternalForm();
         } catch (FileNotFoundException e) {
             throw ExceptionUtils.unchecked(e);
         }
-        if (classPath.endsWith(Folder.Path_Separate)) {
+        if (classPath.endsWith(Folder.PATH_SEPARATE)) {
             classPath = classPath.substring(0, classPath.length() - 1);
         }
-        Current_ClassPath = classPath;
-        Current_ClassPath_Is_Jar_File = Current_ClassPath.startsWith(ResourceUtils.JAR_URL_PREFIX);
+        CURRENT_CLASS_PATH = classPath;
+        CURRENT_CLASS_PATH_IS_JAR_FILE = CURRENT_CLASS_PATH.startsWith(ResourceUtils.JAR_URL_PREFIX);
     }
 
     /**
@@ -81,12 +81,12 @@ public class ClassPathFolder implements Folder {
      * @param basePath        基础路径
      */
     private ClassPathFolder(String locationPattern, String basePath) {
-        basePath = AbstractFolder.concatPath(Folder.Root_Path, basePath);
+        basePath = AbstractFolder.concatPath(Folder.ROOT_PATH, basePath);
         this.locationPattern = locationPattern;
-        this.basePath = StringUtils.isBlank(basePath) ? Folder.Root_Path : basePath;
-        this.fullPath = Folder.Root_Path;
+        this.basePath = StringUtils.isBlank(basePath) ? Folder.ROOT_PATH : basePath;
+        this.fullPath = Folder.ROOT_PATH;
         init();
-        this.absolutePath = Current_ClassPath;
+        this.absolutePath = CURRENT_CLASS_PATH;
     }
 
     /**
@@ -95,11 +95,11 @@ public class ClassPathFolder implements Folder {
      * @param path            当前路径(相当路径或者绝对路径)
      */
     private ClassPathFolder(String locationPattern, String basePath, String path) {
-        basePath = AbstractFolder.concatPath(Folder.Root_Path, basePath);
-        path = AbstractFolder.concatPath(Folder.Root_Path, path);
+        basePath = AbstractFolder.concatPath(Folder.ROOT_PATH, basePath);
+        path = AbstractFolder.concatPath(Folder.ROOT_PATH, path);
         this.locationPattern = locationPattern;
-        this.basePath = StringUtils.isBlank(basePath) ? Folder.Root_Path : basePath;
-        this.fullPath = StringUtils.isBlank(path) ? Folder.Root_Path : path;
+        this.basePath = StringUtils.isBlank(basePath) ? Folder.ROOT_PATH : basePath;
+        this.fullPath = StringUtils.isBlank(path) ? Folder.ROOT_PATH : path;
         init();
         this.absolutePath = getAbsolutePath(locationPattern, this.basePath, this.fullPath);
     }
@@ -111,7 +111,7 @@ public class ClassPathFolder implements Folder {
 
     @Override
     public Folder getParent() {
-        return this.concat(Folder.Parent_Path);
+        return this.concat(Folder.PARENT_PATH);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class ClassPathFolder implements Folder {
         if (StringUtils.isBlank(absolutePath)) {
             return false;
         }
-        Resource resource = Path_Matching_Resolver.getResource(absolutePath);
+        Resource resource = PATH_MATCHING_RESOLVER.getResource(absolutePath);
         if (resource.isFile()) {
             try {
                 if (!resource.getFile().isFile()) {
@@ -157,7 +157,7 @@ public class ClassPathFolder implements Folder {
         if (StringUtils.isBlank(absolutePath)) {
             return false;
         }
-        Resource resource = Path_Matching_Resolver.getResource(absolutePath);
+        Resource resource = PATH_MATCHING_RESOLVER.getResource(absolutePath);
         if (resource.isFile()) {
             try {
                 if (!resource.getFile().isDirectory()) {
@@ -177,7 +177,7 @@ public class ClassPathFolder implements Folder {
         if (StringUtils.isNotBlank(filePath)) {
             return null;
         }
-        Resource resource = Path_Matching_Resolver.getResource(filePath);
+        Resource resource = PATH_MATCHING_RESOLVER.getResource(filePath);
         if (resourceExists(resource)) {
             try (InputStream inputStream = resource.getInputStream()) {
                 return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
@@ -190,7 +190,7 @@ public class ClassPathFolder implements Folder {
     @Override
     public String getFileContent() {
         if (StringUtils.isNotBlank(absolutePath)) {
-            Resource resource = Path_Matching_Resolver.getResource(absolutePath);
+            Resource resource = PATH_MATCHING_RESOLVER.getResource(absolutePath);
             if (resourceExists(resource)) {
                 try (InputStream inputStream = resource.getInputStream()) {
                     return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
@@ -241,19 +241,19 @@ public class ClassPathFolder implements Folder {
 
     @SneakyThrows
     protected void init() {
-        synchronized (Multiple_Resource_Map) {
-            if (Multiple_Resource_Map.containsKey(locationPattern)) {
+        synchronized (MULTIPLE_RESOURCE_MAP) {
+            if (MULTIPLE_RESOURCE_MAP.containsKey(locationPattern)) {
                 return;
             }
             // 加载资源
-            Resource[] resources = Path_Matching_Resolver.getResources(locationPattern);
+            Resource[] resources = PATH_MATCHING_RESOLVER.getResources(locationPattern);
             CopyOnWriteArraySet<String> resourceSet = new CopyOnWriteArraySet<>();
             for (Resource resource : resources) {
                 if (resource.exists()) {
                     resourceSet.add(resource.getURL().toExternalForm());
                 }
             }
-            Multiple_Resource_Map.put(locationPattern, resourceSet);
+            MULTIPLE_RESOURCE_MAP.put(locationPattern, resourceSet);
             log.info("Resource加载完成! locationPattern={} | size={}", locationPattern, resourceSet.size());
         }
     }
@@ -264,14 +264,14 @@ public class ClassPathFolder implements Folder {
         }
         Set<String> children = new HashSet<>();
         if (StringUtils.isNotBlank(parent.absolutePath)) {
-            Set<String> resourceSet = Multiple_Resource_Map.get(parent.locationPattern);
+            Set<String> resourceSet = MULTIPLE_RESOURCE_MAP.get(parent.locationPattern);
             if (resourceSet == null || resourceSet.isEmpty()) {
                 return Collections.emptyList();
             }
             for (String resource : resourceSet) {
                 if (resource.startsWith(parent.absolutePath)) {
                     String childPath = resource.substring(parent.absolutePath.length());
-                    String[] childArr = StringUtils.split(childPath, Folder.Path_Separate);
+                    String[] childArr = StringUtils.split(childPath, Folder.PATH_SEPARATE);
                     if (childArr.length > 0) {
                         children.add(childArr[0]);
                     }
@@ -282,14 +282,14 @@ public class ClassPathFolder implements Folder {
     }
 
     protected static String getAbsolutePath(String locationPattern, String basePath, String path) {
-        Set<String> resourceSet = Multiple_Resource_Map.get(locationPattern);
+        Set<String> resourceSet = MULTIPLE_RESOURCE_MAP.get(locationPattern);
         if (resourceSet == null || resourceSet.isEmpty()) {
             return null;
         }
         List<String> pathMatchResourceList = new ArrayList<>(1);
-        if (!Current_ClassPath_Is_Jar_File) {
+        if (!CURRENT_CLASS_PATH_IS_JAR_FILE) {
             // 不是jar包
-            String classPathFullPath = AbstractFolder.concatPath(Current_ClassPath, Folder.Current + basePath, Folder.Current + path);
+            String classPathFullPath = AbstractFolder.concatPath(CURRENT_CLASS_PATH, Folder.CURRENT + basePath, Folder.CURRENT + path);
             for (String resource : resourceSet) {
                 if (resource.startsWith(classPathFullPath)) {
                     pathMatchResourceList.add(classPathFullPath);
@@ -298,7 +298,7 @@ public class ClassPathFolder implements Folder {
             }
         }
         // jar包
-        String fullPath = AbstractFolder.concatPath(basePath, Folder.Current + path);
+        String fullPath = AbstractFolder.concatPath(basePath, Folder.CURRENT + path);
         if (fullPath == null) {
             return null;
         }
@@ -307,7 +307,7 @@ public class ClassPathFolder implements Folder {
             if (resource.contains(jarFullPath)) {
                 final int endIndex = resource.lastIndexOf(jarFullPath) + jarFullPath.length();
                 String pathMatchResource = resource.substring(0, endIndex);
-                if (pathMatchResource.length() > 1 && pathMatchResource.endsWith(Folder.Path_Separate)) {
+                if (pathMatchResource.length() > 1 && pathMatchResource.endsWith(Folder.PATH_SEPARATE)) {
                     pathMatchResource = pathMatchResource.substring(0, basePath.length() - 1);
                 }
                 if (!pathMatchResourceList.contains(pathMatchResource)) {
@@ -335,7 +335,7 @@ public class ClassPathFolder implements Folder {
         if (StringUtils.isBlank(path)) {
             return path;
         }
-        return path.replaceAll("\\\\", Folder.Path_Separate);
+        return path.replaceAll("\\\\", Folder.PATH_SEPARATE);
     }
 
     protected static boolean resourceExists(Resource resource) {

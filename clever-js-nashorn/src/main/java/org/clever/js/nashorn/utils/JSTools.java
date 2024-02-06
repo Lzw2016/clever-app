@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
  * 创建时间：2019/08/26 12:01 <br/>
  */
 public class JSTools {
-    public static final ScriptObjectMirror BaseUtils;
+    public static final ScriptObjectMirror BASE_UTILS;
 
     static {
         NashornScriptEngine engine = ScriptEngineUtils.creatEngine();
@@ -33,9 +33,9 @@ public class JSTools {
             throw ExceptionUtils.unchecked(e);
         }
         Assert.isNotBlank(jsCode, "JSTools初始化失败，javascript/BaseUtils.js 文件读取失败");
-        BaseUtils = ScriptEngineUtils.newObject();
-        engine.getBindings(ScriptContext.ENGINE_SCOPE).put("exports", BaseUtils);
-        engine.getBindings(ScriptContext.ENGINE_SCOPE).put("InternalUtils", InternalUtils.Instance);
+        BASE_UTILS = ScriptEngineUtils.newObject();
+        engine.getBindings(ScriptContext.ENGINE_SCOPE).put("exports", BASE_UTILS);
+        engine.getBindings(ScriptContext.ENGINE_SCOPE).put("InternalUtils", InternalUtils.INSTANCE);
         try {
             engine.eval(jsCode);
         } catch (ScriptException e) {
@@ -49,7 +49,7 @@ public class JSTools {
      * @param object JS 对象
      */
     public static String inspect(JSObject object) {
-        Object res = BaseUtils.callMember("inspect", object);
+        Object res = BASE_UTILS.callMember("inspect", object);
         return String.valueOf(res);
     }
 
@@ -59,7 +59,7 @@ public class JSTools {
      * @param object JS 对象
      */
     public static String inspect(Bindings object) {
-        Object res = BaseUtils.callMember("inspect", object);
+        Object res = BASE_UTILS.callMember("inspect", object);
         return String.valueOf(res);
     }
 
@@ -79,7 +79,7 @@ public class JSTools {
      * @param object JS 对象
      */
     public static String stringify(JSObject object) {
-        Object res = BaseUtils.callMember("stringify", object);
+        Object res = BASE_UTILS.callMember("stringify", object);
         return String.valueOf(res);
     }
 
@@ -89,7 +89,7 @@ public class JSTools {
      * @param object JS 对象
      */
     public static String stringify(Bindings object) {
-        Object res = BaseUtils.callMember("stringify", object);
+        Object res = BASE_UTILS.callMember("stringify", object);
         return String.valueOf(res);
     }
 

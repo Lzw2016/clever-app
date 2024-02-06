@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  * 创建时间：2024/01/19 11:48 <br/>
  */
 public class V8Logger implements IJavetLogger {
-    public static final V8Logger Instance = new V8Logger(V8Logger.class.getName());
+    public static final V8Logger INSTANCE = new V8Logger(V8Logger.class.getName());
     /**
      * 日志记录器
      */

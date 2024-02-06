@@ -27,7 +27,7 @@ public class EmptyFolder implements Folder {
 
     @Override
     public Folder getParent() {
-        return this.concat(Folder.Parent_Path);
+        return this.concat(Folder.PARENT_PATH);
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.graalvm.polyglot.Value;
  */
 @Slf4j
 public class GraalObjectToString extends ObjectToString {
-    public static final GraalObjectToString Instance = new GraalObjectToString();
+    public static final GraalObjectToString INSTANCE = new GraalObjectToString();
 
     protected GraalObjectToString() {
         JacksonMapperSupport.initGraalModule();

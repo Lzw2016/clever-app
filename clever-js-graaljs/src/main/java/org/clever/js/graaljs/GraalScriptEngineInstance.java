@@ -25,19 +25,19 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
 
     public GraalScriptEngineInstance(ScriptEngineContext<Context, Value> context) {
         super(context);
-        Value engineBindings = this.engineContext.getEngine().getBindings(GraalConstant.Js_Language_Id);
+        Value engineBindings = this.engineContext.getEngine().getBindings(GraalConstant.JS_LANGUAGE_ID);
         Map<String, Object> registerGlobalVars = this.engineContext.getRegisterGlobalVars();
         if (registerGlobalVars != null) {
             registerGlobalVars.forEach(engineBindings::putMember);
         }
-        engineBindings.putMember(GlobalConstant.Engine_Require, this.engineContext.getRequire());
-        engineBindings.putMember(GlobalConstant.Engine_Global, this.engineContext.getGlobal());
+        engineBindings.putMember(GlobalConstant.ENGINE_REQUIRE, this.engineContext.getRequire());
+        engineBindings.putMember(GlobalConstant.ENGINE_GLOBAL, this.engineContext.getGlobal());
     }
 
     @Override
     public String getEngineName() {
         final String engineName = engineContext.getEngine().getEngine().getImplementationName();
-        if (GraalConstant.Error_Engine_Name.equalsIgnoreCase(engineName)) {
+        if (GraalConstant.ERROR_ENGINE_NAME.equalsIgnoreCase(engineName)) {
             log.error("当前GraalJs未使用GraalVM compiler功能，请使用GraalVM compiler功能以提升性能(2 ~ 10倍性能提升)!");
         }
         return engineName;
@@ -50,7 +50,7 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
 
     @Override
     public String getLanguageVersion() {
-        return "ECMAScript Version: " + GraalConstant.ECMAScript_Version;
+        return "ECMAScript Version: " + GraalConstant.ECMASCRIPT_VERSION;
     }
 
     @Override

@@ -15,7 +15,7 @@ import java.io.IOException;
  * 创建时间：2020/08/29 08:05 <br/>
  */
 public class ValueSerializer extends JsonSerializer<Value> {
-    public final static ValueSerializer instance = new ValueSerializer();
+    public final static ValueSerializer INSTANCE = new ValueSerializer();
 
     @Override
     public void serialize(Value value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -23,7 +23,7 @@ public class ValueSerializer extends JsonSerializer<Value> {
             gen.writeNull();
             return;
         }
-        Object obj = InteropScriptToJavaUtils.Instance.toJavaObject(value);
+        Object obj = InteropScriptToJavaUtils.INSTANCE.toJavaObject(value);
         final String className = obj == null ? null : obj.getClass().getName();
         if (StringUtils.isNotBlank(className)
                 && !HostWrapperSerializer.isSupport(className)

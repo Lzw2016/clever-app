@@ -96,7 +96,7 @@ public class Pool2Test {
         semaphore.acquire(threadCount);
         final long endTime = System.currentTimeMillis();
         long sum = 0;
-        for (TupleOne<Long> tupleOne : TupleOneFactory.allObj) {
+        for (TupleOne<Long> tupleOne : TupleOneFactory.ALL_OBJ) {
             sum += tupleOne.getValue();
         }
         log.info("# --> 耗时: {}ms | sum -> {}", endTime - startTime, sum); // 耗时: 19988ms | sum -> 10000000
@@ -115,14 +115,14 @@ class TupleOne<T> {
 
 @Slf4j
 class TupleOneFactory extends BasePooledObjectFactory<TupleOne<Long>> {
-    public final static List<TupleOne<Long>> allObj = new CopyOnWriteArrayList<>();
+    public final static List<TupleOne<Long>> ALL_OBJ = new CopyOnWriteArrayList<>();
 
     // 创建一个新的对象
     @Override
     public TupleOne<Long> create() {
         // log.info("# create");
         TupleOne<Long> tupleOne = new TupleOne<>(0L);
-        allObj.add(tupleOne);
+        ALL_OBJ.add(tupleOne);
         return tupleOne;
     }
 

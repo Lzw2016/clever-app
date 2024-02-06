@@ -14,7 +14,7 @@ import java.util.*;
  */
 @Slf4j
 public class JavaInterop {
-    public static final JavaInterop Instance = new JavaInterop();
+    public static final JavaInterop INSTANCE = new JavaInterop();
 
     private JavaInterop() {
     }

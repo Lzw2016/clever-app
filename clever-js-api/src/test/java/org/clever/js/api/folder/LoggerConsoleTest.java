@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class LoggerConsoleTest {
     @Test
     public void t01() {
-        LoggerConsole console = LoggerConsole.Instance;
+        LoggerConsole console = LoggerConsole.INSTANCE;
         String label = "aa";
 
         console.count();
@@ -30,7 +30,7 @@ public class LoggerConsoleTest {
 
     @Test
     public void t02() {
-        LoggerConsole console = LoggerConsole.Instance;
+        LoggerConsole console = LoggerConsole.INSTANCE;
         console.log("111");
         console.trace("222");
         console.debug("333");

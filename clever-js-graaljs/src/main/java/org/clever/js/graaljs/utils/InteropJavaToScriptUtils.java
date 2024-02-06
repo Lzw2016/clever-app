@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class InteropJavaToScriptUtils {
 
-    public static final InteropJavaToScriptUtils Instance = new InteropJavaToScriptUtils();
+    public static final InteropJavaToScriptUtils INSTANCE = new InteropJavaToScriptUtils();
 
     private InteropJavaToScriptUtils() {
     }

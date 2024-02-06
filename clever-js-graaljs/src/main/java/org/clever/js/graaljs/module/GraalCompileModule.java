@@ -37,7 +37,7 @@ public class GraalCompileModule extends AbstractCompileModule<Context, Value> {
             throw new ReadFileContentException("读取文件内容失败: path=" + path.getFullPath());
         }
         final String moduleScriptCode = getModuleScriptCode(code);
-        Source source = Source.newBuilder(GraalConstant.Js_Language_Id, moduleScriptCode, path.getFullPath()).cached(true).buildLiteral();
+        Source source = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, moduleScriptCode, path.getFullPath()).cached(true).buildLiteral();
         Context engine = engineContext.getEngine();
         Value modelFunction;
         try {

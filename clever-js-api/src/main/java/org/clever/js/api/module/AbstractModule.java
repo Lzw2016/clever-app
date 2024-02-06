@@ -86,8 +86,8 @@ public abstract class AbstractModule<E, T> implements Module<T> {
     protected AbstractModule(ScriptEngineContext<E, T> engineContext) {
         Assert.notNull(engineContext, "参数 engineContext 不能为 null");
         this.engineContext = engineContext;
-        this.id = GlobalConstant.Module_Main;
-        this.filename = Folder.Root_Path + GlobalConstant.Module_Main;
+        this.id = GlobalConstant.MODULE_MAIN;
+        this.filename = Folder.ROOT_PATH + GlobalConstant.MODULE_MAIN;
         this.parent = null;
         this.paths = Collections.singletonList(this.filename);
         this.require = engineContext.getRequire();

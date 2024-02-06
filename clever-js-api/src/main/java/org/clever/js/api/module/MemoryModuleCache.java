@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class MemoryModuleCache<T> implements ModuleCache<T> {
-    public static final int Default_MAX_Capacity = 10240;
+    public static final int DEFAULT_MAX_CAPACITY = 10240;
     /**
      * 缓存
      */
@@ -25,7 +25,7 @@ public class MemoryModuleCache<T> implements ModuleCache<T> {
      */
     public MemoryModuleCache(long expireTime, int maxCapacity) {
         if (maxCapacity < 0) {
-            maxCapacity = Default_MAX_Capacity;
+            maxCapacity = DEFAULT_MAX_CAPACITY;
         }
         CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
             .initialCapacity(32)
@@ -45,7 +45,7 @@ public class MemoryModuleCache<T> implements ModuleCache<T> {
     }
 
     public MemoryModuleCache() {
-        this(-1, Default_MAX_Capacity);
+        this(-1, DEFAULT_MAX_CAPACITY);
     }
 
     @Override

@@ -21,16 +21,16 @@ import java.util.Map;
  */
 @Slf4j
 public abstract class AbstractRequire<E, T> implements Require<T> {
-    public static final String JS_File = ".js";
-    public static final String JSON_File = ".json";
+    public static final String JS_FILE = ".js";
+    public static final String JSON_FILE = ".json";
     /**
      * 文件可省略的后缀名
      */
-    private static final String[] File_Suffix = new String[]{"", JS_File, JSON_File};
+    private static final String[] FILE_SUFFIX = new String[]{"", JS_FILE, JSON_FILE};
     /**
      * 当前线程缓存(fullPath -> script引擎对象)
      */
-    private static final ThreadLocal<Map<String, Object>> Ref_Cache = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, Object>> REF_CACHE = new ThreadLocal<>();
 
     /**
      * 引擎上下文
@@ -113,18 +113,18 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
         }
         // 确保每个线程都有自己的refCache
         boolean needRemove = false;
-        if (Ref_Cache.get() == null) {
+        if (REF_CACHE.get() == null) {
             needRemove = true;
-            Ref_Cache.set(new HashMap<>());
+            REF_CACHE.set(new HashMap<>());
         }
-        T cached = (T) Ref_Cache.get().get(fullPath);
+        T cached = (T) REF_CACHE.get().get(fullPath);
         if (cached != null) {
             log.debug("# RefCache 命中缓存 -> {}", fullPath);
             return cached;
         } else {
             // 存储对当前加载模块的引用，以避免循环require
             log.debug("# RefCache 加入缓存 -> {}", fullPath);
-            Ref_Cache.get().put(fullPath, newScriptObject());
+            REF_CACHE.get().put(fullPath, newScriptObject());
         }
         // 加载 Module
         try {
@@ -135,8 +135,8 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
             throw new LoadModuleException("加载ScriptModule失败，id=" + id, e);
         } finally {
             // 需要删除refCache防止内存泄漏
-            if (needRemove && Ref_Cache.get() != null) {
-                Ref_Cache.remove();
+            if (needRemove && REF_CACHE.get() != null) {
+                REF_CACHE.remove();
             }
         }
     }
@@ -170,14 +170,14 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
         // 编译加载模块
         String name = moduleFile.getName();
         AbstractRequire<E, T> require = newRequire(engineContext, moduleFile.getParent());
-        if (name.endsWith(JSON_File)) {
+        if (name.endsWith(JSON_FILE)) {
             // json模块
             T exports = compileModule.compileJsonModule(moduleFile);
             module = newModule(engineContext, fullPath, fullPath, exports, currentModule, require);
             require.currentModule = module;
-        } else if (name.endsWith(JS_File)) {
+        } else if (name.endsWith(JS_FILE)) {
             // js模块
-            T exports = Ref_Cache.get() != null ? (T) Ref_Cache.get().get(fullPath) : null;
+            T exports = REF_CACHE.get() != null ? (T) REF_CACHE.get().get(fullPath) : null;
             if (exports == null) {
                 exports = newScriptObject();
             }
@@ -206,9 +206,9 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
      */
     protected Folder loadModuleFolder(final String path) {
         // 判断path是相对路径还是绝对路径
-        if (path.startsWith(Folder.Root_Path)
-            || path.startsWith(Folder.Current_Path)
-            || path.startsWith(Folder.Parent_Path)
+        if (path.startsWith(Folder.ROOT_PATH)
+            || path.startsWith(Folder.CURRENT_PATH)
+            || path.startsWith(Folder.PARENT_PATH)
             || path.startsWith("\\")
             || path.startsWith(".\\")
             || path.startsWith("..\\")) {
@@ -216,7 +216,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
             return resolvedModuleFolder(currentModuleFolder, path);
         }
         // 绝对路径
-        Folder nodeModules = currentModuleFolder.concat(GlobalConstant.CommonJS_Node_Modules);
+        Folder nodeModules = currentModuleFolder.concat(GlobalConstant.COMMON_JS_NODE_MODULES);
         while (nodeModules != null) {
             if (nodeModules.isDir()) {
                 Folder modulePath = resolvedModuleFolder(nodeModules, path);
@@ -225,7 +225,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
                 }
             }
             // 向上级目录查找
-            nodeModules = nodeModules.concat(Folder.Parent_Path, Folder.Parent_Path, GlobalConstant.CommonJS_Node_Modules);
+            nodeModules = nodeModules.concat(Folder.PARENT_PATH, Folder.PARENT_PATH, GlobalConstant.COMMON_JS_NODE_MODULES);
         }
         return null;
     }
@@ -248,7 +248,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
      */
     protected Folder resolvedModuleFolder(final Folder dir, final String modulePath) {
         // 直接从文件加载
-        for (String suffix : File_Suffix) {
+        for (String suffix : FILE_SUFFIX) {
             Folder moduleFile = dir.concat(modulePath + suffix);
             if (moduleFile != null && moduleFile.isFile()) {
                 return moduleFile;
@@ -258,15 +258,15 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
         Folder moduleDir = dir.concat(modulePath);
         if (moduleDir != null && moduleDir.isDir()) {
             // 加载package.json中的main模块
-            Folder packageJson = moduleDir.concat(GlobalConstant.CommonJS_Package);
+            Folder packageJson = moduleDir.concat(GlobalConstant.COMMON_JS_PACKAGE);
             if (packageJson != null && packageJson.isFile()) {
                 String packageJsonStr = packageJson.getFileContent();
                 if (StringUtils.isNotBlank(packageJsonStr)) {
                     String main = null;
                     try {
                         JSONObject jsonObject = new JSONObject(packageJsonStr);
-                        if (jsonObject.has(GlobalConstant.CommonJS_Package_Main)) {
-                            main = jsonObject.getString(GlobalConstant.CommonJS_Package_Main);
+                        if (jsonObject.has(GlobalConstant.COMMON_JS_PACKAGE_MAIN)) {
+                            main = jsonObject.getString(GlobalConstant.COMMON_JS_PACKAGE_MAIN);
                         }
                     } catch (Exception ignored) {
                     }
@@ -279,7 +279,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
                 }
             }
             // 加载默认的index.js模块
-            Folder indexFolder = moduleDir.concat(GlobalConstant.CommonJS_Index);
+            Folder indexFolder = moduleDir.concat(GlobalConstant.COMMON_JS_INDEX);
             if (indexFolder != null && indexFolder.isFile()) {
                 return indexFolder;
             }

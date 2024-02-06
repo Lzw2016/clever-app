@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
  * 创建时间：2020/07/25 21:50 <br/>
  */
 public class OutputStreamConsole extends AbstractConsole implements Closeable {
-    public static final OutputStreamConsole Instance = new OutputStreamConsole(System.out, System.err);
+    public static final OutputStreamConsole INSTANCE = new OutputStreamConsole(System.out, System.err);
 
     /**
      * 读写文件使用的编码格式
@@ -25,7 +25,7 @@ public class OutputStreamConsole extends AbstractConsole implements Closeable {
     /**
      * 换行符
      */
-    public static final String Line_Break = "\r\n";
+    public static final String LINE_BREAK = "\r\n";
     /**
      * 输出流
      */
@@ -119,7 +119,7 @@ public class OutputStreamConsole extends AbstractConsole implements Closeable {
             printStream.println(logsText);
         } else {
             IOUtils.write(logsText, stream, CHARSET);
-            IOUtils.write(Line_Break, stream, CHARSET);
+            IOUtils.write(LINE_BREAK, stream, CHARSET);
             stream.flush();
         }
     }

@@ -19,15 +19,15 @@ public class ScriptEngineUtils {
     /**
      * Context 默认选项
      */
-    public static final Map<String, String> Context_Default_Options = new HashMap<String, String>() {{
-        put("js.ecmascript-version", GraalConstant.ECMAScript_Version);
+    public static final Map<String, String> CONTEXT_DEFAULT_OPTIONS = new HashMap<String, String>() {{
+        put("js.ecmascript-version", GraalConstant.ECMASCRIPT_VERSION);
         // "js.nashorn-compat", "true", // EXPERIMENTAL | js.nashorn-compat -> 实验性特性需要删除
         // "js.experimental-foreign-object-prototype", "true" // 实验性特性需要删除
     }};
 
-    private static final Source Object_Constructor_Source = Source.newBuilder(GraalConstant.Js_Language_Id, "Object", "Unnamed").cached(true).buildLiteral();
-    private static final Source Array_Constructor_Source = Source.newBuilder(GraalConstant.Js_Language_Id, "Array", "Unnamed").cached(true).buildLiteral();
-    private static final Source Json_Constructor_Source = Source.newBuilder(GraalConstant.Js_Language_Id, "JSON", "Unnamed").cached(true).buildLiteral();
+    private static final Source OBJECT_CONSTRUCTOR_SOURCE = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, "Object", "Unnamed").cached(true).buildLiteral();
+    private static final Source ARRAY_CONSTRUCTOR_SOURCE = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, "Array", "Unnamed").cached(true).buildLiteral();
+    private static final Source JSON_CONSTRUCTOR_SOURCE = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, "JSON", "Unnamed").cached(true).buildLiteral();
 
     /**
      * 创建 Context.Builder
@@ -37,9 +37,9 @@ public class ScriptEngineUtils {
      */
     public static Context.Builder createContextBuilder(Engine engine, Consumer<Context.Builder> custom) {
         Assert.notNull(engine, "参数 engine 不能为 null");
-        Context.Builder builder = Context.newBuilder(GraalConstant.Js_Language_Id)
+        Context.Builder builder = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID)
             .engine(engine)
-            .options(Context_Default_Options)
+            .options(CONTEXT_DEFAULT_OPTIONS)
             // 设置时间时区
             .timeZone(ZoneId.of("Asia/Shanghai"))
             // 不允许使用实验特性
@@ -90,7 +90,7 @@ public class ScriptEngineUtils {
         builder.allowAllImplementations(true);
         builder.allowAllClassImplementations(true);
         builder.allowBufferAccess(true);
-        addDenyAccess(builder, GlobalConstant.Default_Deny_Access_Class);
+        addDenyAccess(builder, GlobalConstant.DEFAULT_DENY_ACCESS_CLASS);
         // for (Field field : aClass.getFields()) {
         //     builder.allowAccess(field);
         // }
@@ -150,7 +150,7 @@ public class ScriptEngineUtils {
         Value constructor;
         try {
             context.enter();
-            constructor = context.eval(Object_Constructor_Source);
+            constructor = context.eval(OBJECT_CONSTRUCTOR_SOURCE);
         } finally {
             context.leave();
         }
@@ -163,7 +163,7 @@ public class ScriptEngineUtils {
     public static Value newObject(Object... args) {
         Context context = Context.getCurrent();
         Assert.notNull(context, "参数 context 不能为 null");
-        Value constructor = context.eval(Object_Constructor_Source);
+        Value constructor = context.eval(OBJECT_CONSTRUCTOR_SOURCE);
         return constructor.newInstance(args);
     }
 
@@ -175,7 +175,7 @@ public class ScriptEngineUtils {
         Value constructor;
         try {
             context.enter();
-            constructor = context.eval(Array_Constructor_Source);
+            constructor = context.eval(ARRAY_CONSTRUCTOR_SOURCE);
         } finally {
             context.leave();
         }
@@ -188,7 +188,7 @@ public class ScriptEngineUtils {
     public static Value newArray(Object... args) {
         Context context = Context.getCurrent();
         Assert.notNull(context, "参数 context 不能为 null");
-        Value constructor = context.eval(Array_Constructor_Source);
+        Value constructor = context.eval(ARRAY_CONSTRUCTOR_SOURCE);
         return constructor.newInstance(args);
     }
 
@@ -200,7 +200,7 @@ public class ScriptEngineUtils {
         Value constructor;
         try {
             context.enter();
-            constructor = context.eval(Json_Constructor_Source);
+            constructor = context.eval(JSON_CONSTRUCTOR_SOURCE);
         } finally {
             context.leave();
         }

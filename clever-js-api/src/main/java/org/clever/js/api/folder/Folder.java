@@ -12,23 +12,23 @@ public interface Folder {
     /**
      * 统一使用的路径分隔符
      */
-    String Path_Separate = "/";
+    String PATH_SEPARATE = "/";
     /**
      * 根路径字符串
      */
-    String Root_Path = "/";
+    String ROOT_PATH = "/";
     /**
      * 上级目录
      */
-    String Parent_Path = "../";
+    String PARENT_PATH = "../";
     /**
      * 当前目录
      */
-    String Current_Path = "./";
+    String CURRENT_PATH = "./";
     /**
      * 当前位置
      */
-    String Current = ".";
+    String CURRENT = ".";
 
     /**
      * 获取根路径

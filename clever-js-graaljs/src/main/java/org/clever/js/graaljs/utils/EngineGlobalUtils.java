@@ -10,10 +10,10 @@ import java.util.Map;
 public class EngineGlobalUtils {
 
     public static void putGlobalObjects(Map<String, Object> registerGlobalVars) {
-        LoggerConsole.Instance.setObjectToString(GraalObjectToString.Instance);
-        registerGlobalVars.put("console", LoggerConsole.Instance);
-        registerGlobalVars.put("print", LoggerConsole.Instance);
-        registerGlobalVars.put("LoggerFactory", GraalLoggerFactory.Instance);
-        registerGlobalVars.put("Interop", GraalInterop.Instance);
+        LoggerConsole.INSTANCE.setObjectToString(GraalObjectToString.INSTANCE);
+        registerGlobalVars.put("console", LoggerConsole.INSTANCE);
+        registerGlobalVars.put("print", LoggerConsole.INSTANCE);
+        registerGlobalVars.put("LoggerFactory", GraalLoggerFactory.INSTANCE);
+        registerGlobalVars.put("Interop", GraalInterop.INSTANCE);
     }
 }

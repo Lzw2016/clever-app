@@ -42,16 +42,16 @@ public class GraalModule extends AbstractModule<Context, Value> {
 
     @Override
     protected void initModule(Value exports) {
-        this.module.putMember(GlobalConstant.Module_Id, this.id);
-        this.module.putMember(GlobalConstant.Module_Filename, this.filename);
-        this.module.putMember(GlobalConstant.Module_Loaded, this.loaded);
+        this.module.putMember(GlobalConstant.MODULE_ID, this.id);
+        this.module.putMember(GlobalConstant.MODULE_FILENAME, this.filename);
+        this.module.putMember(GlobalConstant.MODULE_LOADED, this.loaded);
         if (this.parent != null) {
-            this.module.putMember(GlobalConstant.Module_Parent, this.parent.getModule());
+            this.module.putMember(GlobalConstant.MODULE_PARENT, this.parent.getModule());
         }
-        this.module.putMember(GlobalConstant.Module_Paths, this.paths);
-        this.module.putMember(GlobalConstant.Module_Children, this.childrenIds);
-        this.module.putMember(GlobalConstant.Module_Exports, exports);
-        this.module.putMember(GlobalConstant.Module_Require, this.require);
+        this.module.putMember(GlobalConstant.MODULE_PATHS, this.paths);
+        this.module.putMember(GlobalConstant.MODULE_CHILDREN, this.childrenIds);
+        this.module.putMember(GlobalConstant.MODULE_EXPORTS, exports);
+        this.module.putMember(GlobalConstant.MODULE_REQUIRE, this.require);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class GraalModule extends AbstractModule<Context, Value> {
 
     @Override
     public Value getExports() {
-        return this.module.getMember(GlobalConstant.Module_Exports);
+        return this.module.getMember(GlobalConstant.MODULE_EXPORTS);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class GraalModule extends AbstractModule<Context, Value> {
 
     @Override
     protected void doTriggerOnLoaded() {
-        this.module.putMember(GlobalConstant.Module_Loaded, true);
+        this.module.putMember(GlobalConstant.MODULE_LOADED, true);
     }
 
     @Override

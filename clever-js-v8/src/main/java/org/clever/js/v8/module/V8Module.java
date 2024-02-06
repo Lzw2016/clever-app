@@ -44,17 +44,17 @@ public class V8Module extends AbstractModule<V8Runtime, IV8ValueObject> {
     @SneakyThrows
     @Override
     protected void initModule(IV8ValueObject exports) {
-        this.module.set(GlobalConstant.Module_Id, this.id);
-        this.module.set(GlobalConstant.Module_Filename, this.filename);
-        this.module.set(GlobalConstant.Module_Loaded, this.loaded);
+        this.module.set(GlobalConstant.MODULE_ID, this.id);
+        this.module.set(GlobalConstant.MODULE_FILENAME, this.filename);
+        this.module.set(GlobalConstant.MODULE_LOADED, this.loaded);
         if (this.parent != null) {
-            this.module.set(GlobalConstant.Module_Parent, this.parent.getModule());
+            this.module.set(GlobalConstant.MODULE_PARENT, this.parent.getModule());
         }
         // TODO  Module_Paths
-        this.module.set(GlobalConstant.Module_Paths, ScriptEngineUtils.newArray(engineContext.getEngine()));
+        this.module.set(GlobalConstant.MODULE_PATHS, ScriptEngineUtils.newArray(engineContext.getEngine()));
         // TODO  Module_Children
-        this.module.set(GlobalConstant.Module_Children, ScriptEngineUtils.newArray(engineContext.getEngine()));
-        this.module.set(GlobalConstant.Module_Exports, exports);
+        this.module.set(GlobalConstant.MODULE_CHILDREN, ScriptEngineUtils.newArray(engineContext.getEngine()));
+        this.module.set(GlobalConstant.MODULE_EXPORTS, exports);
         // Assert.isTrue(this.require instanceof JavaCallback, "参数require必须实现JavaCallback接口");
         // this.module.registerJavaMethod((JavaCallback) this.require, GlobalConstant.Module_Require);
     }
@@ -67,7 +67,7 @@ public class V8Module extends AbstractModule<V8Runtime, IV8ValueObject> {
     @SneakyThrows
     @Override
     public IV8ValueObject getExports() {
-        return this.module.get(GlobalConstant.Module_Exports);
+        return this.module.get(GlobalConstant.MODULE_EXPORTS);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class V8Module extends AbstractModule<V8Runtime, IV8ValueObject> {
     @SneakyThrows
     @Override
     protected void doTriggerOnLoaded() {
-        this.module.set(GlobalConstant.Module_Loaded, true);
+        this.module.set(GlobalConstant.MODULE_LOADED, true);
         // TODO triggerOnLoaded
     }
 

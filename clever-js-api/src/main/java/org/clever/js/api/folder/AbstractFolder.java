@@ -33,7 +33,7 @@ public abstract class AbstractFolder implements Folder {
         basePath = FilenameUtils.normalize(basePath);
         this.baseAbsolutePath = getAbsolutePath(basePath);
         this.absolutePath = this.baseAbsolutePath;
-        this.fullPath = Folder.Root_Path;
+        this.fullPath = Folder.ROOT_PATH;
         checkPath();
     }
 
@@ -46,11 +46,11 @@ public abstract class AbstractFolder implements Folder {
         this.baseAbsolutePath = getAbsolutePath(basePath);
         path = StringUtils.trim(path);
         if (StringUtils.isBlank(path)) {
-            path = Folder.Root_Path;
+            path = Folder.ROOT_PATH;
         }
         // 都处理成为相当路径
-        if (path.startsWith(Folder.Root_Path)) {
-            path = Folder.Current_Path + path.substring(1);
+        if (path.startsWith(Folder.ROOT_PATH)) {
+            path = Folder.CURRENT_PATH + path.substring(1);
         }
         String absolutePath = FilenameUtils.concat(this.baseAbsolutePath, path);
         if (absolutePath == null) {
@@ -58,7 +58,7 @@ public abstract class AbstractFolder implements Folder {
         }
         path = absolutePath.substring(baseAbsolutePath.length());
         path = replaceSeparate(path);
-        if (path.length() > 1 && path.endsWith(Folder.Path_Separate)) {
+        if (path.length() > 1 && path.endsWith(Folder.PATH_SEPARATE)) {
             path = path.substring(0, path.length() - 1);
         }
         this.absolutePath = absolutePath;
@@ -68,12 +68,12 @@ public abstract class AbstractFolder implements Folder {
 
     @Override
     public Folder getRoot() {
-        return this.concat(Folder.Root_Path);
+        return this.concat(Folder.ROOT_PATH);
     }
 
     @Override
     public Folder getParent() {
-        return this.concat(Folder.Parent_Path);
+        return this.concat(Folder.PARENT_PATH);
     }
 
     @Override
@@ -224,7 +224,7 @@ public abstract class AbstractFolder implements Folder {
      */
     public static String concatPath(String basePath, String... paths) {
         if (StringUtils.isBlank(basePath)) {
-            basePath = Folder.Root_Path;
+            basePath = Folder.ROOT_PATH;
         }
         if (paths != null) {
             for (String path : paths) {
@@ -237,7 +237,7 @@ public abstract class AbstractFolder implements Folder {
         }
         if (basePath != null) {
             basePath = replaceSeparate(basePath);
-            if (basePath.length() > 1 && basePath.endsWith(Folder.Path_Separate)) {
+            if (basePath.length() > 1 && basePath.endsWith(Folder.PATH_SEPARATE)) {
                 basePath = basePath.substring(0, basePath.length() - 1);
             }
         }
@@ -251,6 +251,6 @@ public abstract class AbstractFolder implements Folder {
         if (StringUtils.isBlank(path)) {
             return path;
         }
-        return path.replaceAll("\\\\", Folder.Path_Separate);
+        return path.replaceAll("\\\\", Folder.PATH_SEPARATE);
     }
 }

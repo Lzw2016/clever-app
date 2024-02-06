@@ -32,23 +32,23 @@ public class TmpTest {
     public void t01() {
         // Engine engine = Engine.create();
         // Context.getCurrent()
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id).build();
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID).build();
         String jsCode = "(function() { var b = x; return function() { return 1 + b; };});";
-        Value function = context.eval(GraalConstant.Js_Language_Id, jsCode);
-        context.getBindings(GraalConstant.Js_Language_Id).putMember("x", 10);
+        Value function = context.eval(GraalConstant.JS_LANGUAGE_ID, jsCode);
+        context.getBindings(GraalConstant.JS_LANGUAGE_ID).putMember("x", 10);
         Value res = function.execute();
         log.info("### res -> {}", res.execute());
-        context.getBindings(GraalConstant.Js_Language_Id).putMember("x", 100);
+        context.getBindings(GraalConstant.JS_LANGUAGE_ID).putMember("x", 100);
         context.close();
     }
 
     @Test
     public void t02() {
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id).allowAllAccess(true).build();
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID).allowAllAccess(true).build();
         AtomicInteger atomicInteger = new AtomicInteger(0);
-        context.getBindings(GraalConstant.Js_Language_Id).putMember("x", atomicInteger);
+        context.getBindings(GraalConstant.JS_LANGUAGE_ID).putMember("x", atomicInteger);
         String jsCode = "(function() { while (true) { x.incrementAndGet(); } });";
-        Value function = context.eval(GraalConstant.Js_Language_Id, jsCode);
+        Value function = context.eval(GraalConstant.JS_LANGUAGE_ID, jsCode);
         new Thread(() -> {
             try {
                 Thread.sleep(1_000);
@@ -87,18 +87,18 @@ public class TmpTest {
 
     @Test
     public void t04() {
-        Context context_1 = Context.newBuilder(GraalConstant.Js_Language_Id).build();
-        Value value = context_1.eval(GraalConstant.Js_Language_Id, "new Date()");
+        Context context_1 = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID).build();
+        Value value = context_1.eval(GraalConstant.JS_LANGUAGE_ID, "new Date()");
         context_1.close();
-        Context context_2 = Context.newBuilder(GraalConstant.Js_Language_Id).build();
-        Value fuc = context_2.eval(GraalConstant.Js_Language_Id, "(function(obj) { return JSON.stringify(obj); });");
+        Context context_2 = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID).build();
+        Value fuc = context_2.eval(GraalConstant.JS_LANGUAGE_ID, "(function(obj) { return JSON.stringify(obj); });");
         try {
             Object object = fuc.execute(value);
             log.info("# -> {}", object);
         } catch (Exception e) {
             log.info("# 不能把一个Context中的对象传给另一个Context-> ", e);
         }
-        value = context_2.eval(GraalConstant.Js_Language_Id, "new Date()");
+        value = context_2.eval(GraalConstant.JS_LANGUAGE_ID, "new Date()");
         Object object = fuc.execute(value);
         log.info("# -> {}", object);
         context_2.close();
@@ -106,7 +106,7 @@ public class TmpTest {
 
     @Test
     public void t05() {
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id).build();
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID).build();
         byte a = 1;
         short b = 2;
         int c = 3;
@@ -151,7 +151,7 @@ public class TmpTest {
 
     @Test
     public void t06() {
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id).build();
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID).build();
         Value value = ScriptEngineUtils.newArray(context, "aaa", 111, false);
         log.info("## -> {}", value);
 
@@ -186,11 +186,11 @@ public class TmpTest {
 
     @Test
     public void t08() {
-        Context context = Context.newBuilder(GraalConstant.Js_Language_Id).build();
-        context.getBindings(GraalConstant.Js_Language_Id).putMember("a", 10);
-        context.getBindings(GraalConstant.Js_Language_Id).putMember("b", 11);
-        context.getBindings(GraalConstant.Js_Language_Id).putMember("c", 11 * 10);
-        Value value = context.eval(GraalConstant.Js_Language_Id, "a * b >= c");
+        Context context = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID).build();
+        context.getBindings(GraalConstant.JS_LANGUAGE_ID).putMember("a", 10);
+        context.getBindings(GraalConstant.JS_LANGUAGE_ID).putMember("b", 11);
+        context.getBindings(GraalConstant.JS_LANGUAGE_ID).putMember("c", 11 * 10);
+        Value value = context.eval(GraalConstant.JS_LANGUAGE_ID, "a * b >= c");
         log.info("# -> {}", value);
         context.close();
     }

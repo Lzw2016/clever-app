@@ -44,7 +44,7 @@ public class JavaInteropTest {
                         TestBean bean = new TestBean();
                         // noinspection unchecked
                         BeanCopyUtils.toBean(
-                            (Map<String, Object>) InteropScriptToJavaUtils.Instance.deepToJavaObject(value),
+                            (Map<String, Object>) InteropScriptToJavaUtils.INSTANCE.deepToJavaObject(value),
                             bean
                         );
                         return bean;

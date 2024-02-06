@@ -17,16 +17,16 @@ public abstract class AbstractConsole implements PrintOutput, Console {
     /**
      * 输出最大长度
      */
-    public static final int Max_Len = 1024 * 8;
+    public static final int MAX_LEN = 1024 * 8;
     /**
      * 日志溢出时的后缀
      */
-    public static final String Overflow_Suffix = "...";
+    public static final String OVERFLOW_SUFFIX = "...";
 
-    public static final String Default_Label = "default";
+    public static final String DEFAULT_LABEL = "default";
 
-    public static final Map<String, AtomicLong> Label_Count_Map = new ConcurrentHashMap<>(8);
-    public static final Map<String, Long> Label_Time_Map = new ConcurrentHashMap<>(8);
+    public static final Map<String, AtomicLong> LABEL_COUNT_MAP = new ConcurrentHashMap<>(8);
+    public static final Map<String, Long> LABEL_TIME_MAP = new ConcurrentHashMap<>(8);
 
     /**
      * 是否启用溢出处理(默认启用)
@@ -39,7 +39,7 @@ public abstract class AbstractConsole implements PrintOutput, Console {
      * toString实现
      */
     @Getter
-    protected ObjectToString objectToString = ObjectToString.Instance;
+    protected ObjectToString objectToString = ObjectToString.INSTANCE;
 
     public void setObjectToString(ObjectToString objectToString) {
         Assert.notNull(objectToString, "参数 objectToString 不能为 null");
@@ -54,9 +54,9 @@ public abstract class AbstractConsole implements PrintOutput, Console {
     @Override
     public void count(String label) {
         if (label == null) {
-            label = Default_Label;
+            label = DEFAULT_LABEL;
         }
-        AtomicLong count = Label_Count_Map.computeIfAbsent(label, s -> new AtomicLong(0));
+        AtomicLong count = LABEL_COUNT_MAP.computeIfAbsent(label, s -> new AtomicLong(0));
         long sum = count.incrementAndGet();
         String log = label + ": " + sum;
         info(log);
@@ -70,9 +70,9 @@ public abstract class AbstractConsole implements PrintOutput, Console {
     @Override
     public void countReset(String label) {
         if (label == null) {
-            label = Default_Label;
+            label = DEFAULT_LABEL;
         }
-        Label_Count_Map.remove(label);
+        LABEL_COUNT_MAP.remove(label);
     }
 
     @Override
@@ -83,17 +83,17 @@ public abstract class AbstractConsole implements PrintOutput, Console {
     @Override
     public void time(String label) {
         if (label == null) {
-            label = Default_Label;
+            label = DEFAULT_LABEL;
         }
-        Label_Time_Map.computeIfAbsent(label, s -> System.currentTimeMillis());
+        LABEL_TIME_MAP.computeIfAbsent(label, s -> System.currentTimeMillis());
     }
 
     @Override
     public void timeLog(String label, Object... args) {
         if (label == null) {
-            label = Default_Label;
+            label = DEFAULT_LABEL;
         }
-        Long startTime = Label_Time_Map.get(label);
+        Long startTime = LABEL_TIME_MAP.get(label);
         if (startTime == null) {
             warn("No such label '" + label + "' for console.timeEnd()");
             return;
@@ -117,10 +117,10 @@ public abstract class AbstractConsole implements PrintOutput, Console {
     @Override
     public void timeEnd(String label) {
         if (label == null) {
-            label = Default_Label;
+            label = DEFAULT_LABEL;
         }
         timeLog(label);
-        Label_Time_Map.remove(label);
+        LABEL_TIME_MAP.remove(label);
     }
 
     @Override
@@ -216,9 +216,9 @@ public abstract class AbstractConsole implements PrintOutput, Console {
     protected boolean overflow(StringBuilder sb) {
         final int length = sb.length();
         boolean overflow = false;
-        if (Max_Len < length) {
-            int end = Max_Len - Overflow_Suffix.length();
-            sb.delete(end, length - end).append(Overflow_Suffix);
+        if (MAX_LEN < length) {
+            int end = MAX_LEN - OVERFLOW_SUFFIX.length();
+            sb.delete(end, length - end).append(OVERFLOW_SUFFIX);
             overflow = true;
         }
         return overflow;

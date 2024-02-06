@@ -31,8 +31,8 @@ public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runti
             }
         }
         // TODO registerJavaMethod
-        globalObject.set(GlobalConstant.Engine_Require, this.engineContext.getRequire());
-        globalObject.set(GlobalConstant.Engine_Global, this.engineContext.getGlobal());
+        globalObject.set(GlobalConstant.ENGINE_REQUIRE, this.engineContext.getRequire());
+        globalObject.set(GlobalConstant.ENGINE_GLOBAL, this.engineContext.getGlobal());
     }
 
     @Override

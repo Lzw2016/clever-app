@@ -20,7 +20,7 @@ public class Logger {
      * toString实现
      */
     @Getter
-    protected ObjectToString objectToString = ObjectToString.Instance;
+    protected ObjectToString objectToString = ObjectToString.INSTANCE;
 
     public Logger(String name) {
         logger = LoggerFactory.getLogger(name);

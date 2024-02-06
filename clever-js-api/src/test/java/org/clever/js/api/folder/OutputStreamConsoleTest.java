@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class OutputStreamConsoleTest {
     @Test
     public void t01() {
-        OutputStreamConsole console = OutputStreamConsole.Instance;
+        OutputStreamConsole console = OutputStreamConsole.INSTANCE;
         String label = "aa";
 
         console.count();
@@ -30,7 +30,7 @@ public class OutputStreamConsoleTest {
 
     @Test
     public void t02() {
-        OutputStreamConsole console = OutputStreamConsole.Instance;
+        OutputStreamConsole console = OutputStreamConsole.INSTANCE;
         console.log("111");
         console.trace("222");
         console.debug("333");

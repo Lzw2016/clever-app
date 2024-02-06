@@ -30,8 +30,8 @@ public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<Na
         if (registerGlobalVars != null) {
             engineBindings.putAll(registerGlobalVars);
         }
-        engineBindings.put(GlobalConstant.Engine_Require, this.engineContext.getRequire());
-        engineBindings.put(GlobalConstant.Engine_Global, this.engineContext.getGlobal());
+        engineBindings.put(GlobalConstant.ENGINE_REQUIRE, this.engineContext.getRequire());
+        engineBindings.put(GlobalConstant.ENGINE_GLOBAL, this.engineContext.getGlobal());
     }
 
     @Override
@@ -67,10 +67,10 @@ public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<Na
         public Builder(Folder rootPath) {
             super(rootPath);
             // 自定义 registerGlobalVars
-            LoggerConsole.Instance.setObjectToString(NashornObjectToString.Instance);
-            registerGlobalVars.put("console", LoggerConsole.Instance);
-            registerGlobalVars.put("print", LoggerConsole.Instance);
-            registerGlobalVars.put("LoggerFactory", NashornLoggerFactory.Instance);
+            LoggerConsole.INSTANCE.setObjectToString(NashornObjectToString.INSTANCE);
+            registerGlobalVars.put("console", LoggerConsole.INSTANCE);
+            registerGlobalVars.put("print", LoggerConsole.INSTANCE);
+            registerGlobalVars.put("LoggerFactory", NashornLoggerFactory.INSTANCE);
         }
 
         public static Builder create(Folder rootPath) {

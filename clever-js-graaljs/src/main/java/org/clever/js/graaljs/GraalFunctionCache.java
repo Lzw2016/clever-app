@@ -33,7 +33,7 @@ public class GraalFunctionCache extends ScriptFunctionCache<Context, Value> {
 
     @Override
     protected ScriptObject<Value> createFunction(String funCode) {
-        Source source = Source.newBuilder(GraalConstant.Js_Language_Id, funCode, String.format("/__fun_autogenerate_%s.js", FUC_COUNTER.get()))
+        Source source = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, funCode, String.format("/__fun_autogenerate_%s.js", FUC_COUNTER.get()))
             .cached(true)
             .buildLiteral();
         Context engine = engineInstance.getEngine();

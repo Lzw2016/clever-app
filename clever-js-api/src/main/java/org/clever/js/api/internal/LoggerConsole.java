@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  * 创建时间：2020/07/25 21:49 <br/>
  */
 public class LoggerConsole extends AbstractConsole {
-    public static final LoggerConsole Instance = new LoggerConsole(StringUtils.EMPTY);
+    public static final LoggerConsole INSTANCE = new LoggerConsole(StringUtils.EMPTY);
 
     /**
      * 日志记录对象

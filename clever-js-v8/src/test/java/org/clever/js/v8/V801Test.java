@@ -28,7 +28,7 @@ public class V801Test {
     public void t01() {
         String source = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance01.js"), StandardCharsets.UTF_8);
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-        v8Runtime.setLogger(V8Logger.Instance);
+        v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
         IV8ValueFunction function = v8Runtime.getGlobalObject().get("primesMain");
@@ -59,7 +59,7 @@ public class V801Test {
     public void t02() {
         String source = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance02.js"), StandardCharsets.UTF_8);
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-        v8Runtime.setLogger(V8Logger.Instance);
+        v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
         IV8ValueFunction function = v8Runtime.getGlobalObject().get("test");
@@ -93,7 +93,7 @@ public class V801Test {
     public void t03() {
         String source = FileUtils.readFileToString(new File("../clever-js-api/src/test/resources/performance03.js"), StandardCharsets.UTF_8);
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-        v8Runtime.setLogger(V8Logger.Instance);
+        v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
         IV8ValueFunction function = v8Runtime.getGlobalObject().get("test");

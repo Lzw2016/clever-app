@@ -9,9 +9,9 @@ import lombok.SneakyThrows;
  * 创建时间：2020/07/26 08:45 <br/>
  */
 public class LoggerFactory {
-    protected static final Cache<String, Logger> Logger_Cache = CacheBuilder.newBuilder().initialCapacity(32).maximumSize(256).build();
+    protected static final Cache<String, Logger> LOGGER_CACHE = CacheBuilder.newBuilder().initialCapacity(32).maximumSize(256).build();
 
-    public static final LoggerFactory Instance = new LoggerFactory();
+    public static final LoggerFactory INSTANCE = new LoggerFactory();
 
     protected LoggerFactory() {
     }
@@ -23,6 +23,6 @@ public class LoggerFactory {
      */
     @SneakyThrows
     public Logger getLogger(String name) {
-        return Logger_Cache.get(name, () -> new Logger(name));
+        return LOGGER_CACHE.get(name, () -> new Logger(name));
     }
 }

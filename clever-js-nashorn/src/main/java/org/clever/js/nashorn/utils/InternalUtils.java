@@ -18,9 +18,9 @@ public class InternalUtils {
     /**
      * 时间格式
      */
-    private static final Pattern Date_Pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z");
+    private static final Pattern DATE_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z");
 
-    public static final InternalUtils Instance = new InternalUtils();
+    public static final InternalUtils INSTANCE = new InternalUtils();
 
     private InternalUtils() {
     }
@@ -42,16 +42,16 @@ public class InternalUtils {
         if (str.length() != 24) {
             return str;
         }
-        Matcher matcher = Date_Pattern.matcher(str);
+        Matcher matcher = DATE_PATTERN.matcher(str);
         if (!matcher.matches()) {
             return str;
         }
         //return str.replace('T', ' ').substring(0, str.length() - 5);
         try {
-            Date date = DateUtils.parseDate(str, GlobalConstant.JS_Default_Format);
+            Date date = DateUtils.parseDate(str, GlobalConstant.JS_DEFAULT_FORMAT);
             // 8个小时的时差
             date = DateUtils.addHours(date, 8);
-            return DateFormatUtils.format(date, GlobalConstant.JS_Default_Format);
+            return DateFormatUtils.format(date, GlobalConstant.JS_DEFAULT_FORMAT);
         } catch (ParseException e) {
             return str;
         }

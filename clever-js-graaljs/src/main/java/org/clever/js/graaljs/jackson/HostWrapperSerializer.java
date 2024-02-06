@@ -39,7 +39,7 @@ public class HostWrapperSerializer extends JsonSerializer<Object> {
             )
     ));
 
-    public final static HostWrapperSerializer instance = new HostWrapperSerializer();
+    public final static HostWrapperSerializer INSTANCE = new HostWrapperSerializer();
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override

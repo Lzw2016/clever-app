@@ -12,7 +12,7 @@ import javax.script.Bindings;
  * 创建时间：2020/07/26 13:04 <br/>
  */
 public class NashornObjectToString extends ObjectToString {
-    public static final NashornObjectToString Instance = new NashornObjectToString();
+    public static final NashornObjectToString INSTANCE = new NashornObjectToString();
 
     protected NashornObjectToString() {
     }

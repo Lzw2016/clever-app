@@ -32,7 +32,7 @@ public class TmpTest {
         String jsCode = "(function() { var b = x; return 1 + b;});";
         try {
             V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-            v8Runtime.setLogger(V8Logger.Instance);
+            v8Runtime.setLogger(V8Logger.INSTANCE);
             IV8Executor executor = v8Runtime.getExecutor(jsCode);
             V8Value v8Value = executor.execute();
             log.info("v8Value -> {}", v8Value);
@@ -59,7 +59,7 @@ public class TmpTest {
         String jsCode = "(function() { var b = x; return 1 + b;});";
         try {
             NodeRuntime nodeRuntime = V8Host.getNodeInstance().createV8Runtime();
-            nodeRuntime.setLogger(V8Logger.Instance);
+            nodeRuntime.setLogger(V8Logger.INSTANCE);
             IV8Executor executor = nodeRuntime.getExecutor(jsCode);
             IV8ValueFunction function = executor.execute();
             log.info("v8Value -> {}", function);
@@ -80,7 +80,7 @@ public class TmpTest {
         String jsCode = "({a: 'aa', b: 100, c: false, d: {e: new Date, f: 1.1}});";
         V8Host v8Host = V8Host.getV8Instance();
         V8Runtime v8Runtime = v8Host.createV8Runtime();
-        v8Runtime.setLogger(V8Logger.Instance);
+        v8Runtime.setLogger(V8Logger.INSTANCE);
 
         log.info("Version -> {}", v8Runtime.getVersion());
 
@@ -114,7 +114,7 @@ public class TmpTest {
     public void t04() {
         String jsCode = "(function(_java_m) { return _java_m();});";
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
-        v8Runtime.setLogger(V8Logger.Instance);
+        v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(jsCode);
         IV8ValueFunction function = executor.execute();
 

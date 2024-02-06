@@ -50,10 +50,10 @@ public class NashornScriptEngineContext extends AbstractScriptEngineContext<Nash
         public Builder(Folder rootPath) {
             super(rootPath);
             // 自定义 registerGlobalVars
-            LoggerConsole.Instance.setObjectToString(NashornObjectToString.Instance);
-            registerGlobalVars.put("console", LoggerConsole.Instance);
-            registerGlobalVars.put("print", LoggerConsole.Instance);
-            registerGlobalVars.put("LoggerFactory", NashornLoggerFactory.Instance);
+            LoggerConsole.INSTANCE.setObjectToString(NashornObjectToString.INSTANCE);
+            registerGlobalVars.put("console", LoggerConsole.INSTANCE);
+            registerGlobalVars.put("print", LoggerConsole.INSTANCE);
+            registerGlobalVars.put("LoggerFactory", NashornLoggerFactory.INSTANCE);
         }
 
         public static Builder create(Folder rootPath) {

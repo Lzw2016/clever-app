@@ -17,22 +17,22 @@ import java.math.BigInteger;
  */
 @Slf4j
 public class JacksonMapperSupport {
-    private static volatile boolean initialized = false;
-    private static JacksonMapper Http_Api_Jackson_Mapper;
-    private static JacksonMapper Redis_Jackson_Mapper;
+    private static volatile boolean INITIALIZED = false;
+    private static JacksonMapper HTTP_API_JACKSON_MAPPER;
+    private static JacksonMapper REDIS_JACKSON_MAPPER;
 
     /**
      * 初始化内部使用的 JacksonMapper
      */
     public static synchronized void initGraalModule() {
-        if (initialized) {
+        if (INITIALIZED) {
             return;
         }
-        initialized = true;
+        INITIALIZED = true;
         SimpleModule module = new SimpleModule();
-        module.addSerializer(Value.class, ValueSerializer.instance);
+        module.addSerializer(Value.class, ValueSerializer.INSTANCE);
         module.addSerializer(TruffleObject.class, ToStringSerializer.instance);
-        module.addSerializer(Proxy.class, HostWrapperSerializer.instance);
+        module.addSerializer(Proxy.class, HostWrapperSerializer.INSTANCE);
         // 新版本 graaljs 不需要
         // try {
         //     Class<?> clazz = Class.forName("com.oracle.truffle.polyglot.HostWrapper");
@@ -47,8 +47,8 @@ public class JacksonMapperSupport {
      * HTTP API 数据序列化使用的JacksonMapper
      */
     public static synchronized JacksonMapper getHttpApiJacksonMapper() {
-        if (Http_Api_Jackson_Mapper != null) {
-            return Http_Api_Jackson_Mapper;
+        if (HTTP_API_JACKSON_MAPPER != null) {
+            return HTTP_API_JACKSON_MAPPER;
         }
         initGraalModule();
         ObjectMapper objectMapper = JacksonMapper.getInstance().getMapper().copy();
@@ -57,16 +57,16 @@ public class JacksonMapperSupport {
         module.addSerializer(Long.class, ToStringSerializer.instance);
         module.addSerializer(Long.TYPE, ToStringSerializer.instance);
         objectMapper.registerModules(module);
-        Http_Api_Jackson_Mapper = new JacksonMapper(objectMapper);
-        return Http_Api_Jackson_Mapper;
+        HTTP_API_JACKSON_MAPPER = new JacksonMapper(objectMapper);
+        return HTTP_API_JACKSON_MAPPER;
     }
 
     /**
      * Redis客户端数据序列化使用的JacksonMapper
      */
     public static synchronized JacksonMapper getRedisJacksonMapper() {
-        if (Redis_Jackson_Mapper != null) {
-            return Redis_Jackson_Mapper;
+        if (REDIS_JACKSON_MAPPER != null) {
+            return REDIS_JACKSON_MAPPER;
         }
         initGraalModule();
         ObjectMapper objectMapper = JacksonMapper.getInstance().getMapper().copy();
@@ -75,13 +75,13 @@ public class JacksonMapperSupport {
         // module.addSerializer(Long.class, ToStringSerializer.instance);
         // module.addSerializer(Long.TYPE, ToStringSerializer.instance);
         // objectMapper.registerModules(module);
-        Redis_Jackson_Mapper = new JacksonMapper(objectMapper);
-        return Redis_Jackson_Mapper;
+        REDIS_JACKSON_MAPPER = new JacksonMapper(objectMapper);
+        return REDIS_JACKSON_MAPPER;
     }
 }
 
 //    public static class GraalToStringSerializer extends JsonSerializer<Object> {
-//        public static final GraalToStringSerializer instance = new GraalToStringSerializer();
+//        public static final GraalToStringSerializer INSTANCE = new GraalToStringSerializer();
 //
 //        private GraalToStringSerializer() {
 //        }

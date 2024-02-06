@@ -10,7 +10,7 @@ import org.clever.js.graaljs.support.GraalObjectToString;
  * 创建时间：2020/07/26 15:20 <br/>
  */
 public class GraalLoggerFactory extends LoggerFactory {
-    public static final GraalLoggerFactory Instance = new GraalLoggerFactory();
+    public static final GraalLoggerFactory INSTANCE = new GraalLoggerFactory();
 
     protected GraalLoggerFactory() {
     }
@@ -22,9 +22,9 @@ public class GraalLoggerFactory extends LoggerFactory {
      */
     @SneakyThrows
     public Logger getLogger(String name) {
-        return Logger_Cache.get(name, () -> {
+        return LOGGER_CACHE.get(name, () -> {
             Logger logger = new Logger(name);
-            logger.setObjectToString(GraalObjectToString.Instance);
+            logger.setObjectToString(GraalObjectToString.INSTANCE);
             return logger;
         });
     }

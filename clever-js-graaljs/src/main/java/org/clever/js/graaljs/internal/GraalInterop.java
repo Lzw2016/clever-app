@@ -11,7 +11,7 @@ import java.time.*;
 import java.util.*;
 
 public class GraalInterop extends Interop<Value> {
-    public static final GraalInterop Instance = new GraalInterop();
+    public static final GraalInterop INSTANCE = new GraalInterop();
 
     private GraalInterop() {
     }
@@ -51,13 +51,13 @@ public class GraalInterop extends Interop<Value> {
             }
             map = new HashMap<>((int) size);
             for (int i = 0; i < size; i++) {
-                map.put(i, InteropScriptToJavaUtils.Instance.deepToJavaObject(arg.getArrayElement(i)));
+                map.put(i, InteropScriptToJavaUtils.INSTANCE.deepToJavaObject(arg.getArrayElement(i)));
             }
         } else {
             Set<String> keys = arg.getMemberKeys();
             map = new HashMap<>(keys.size());
             for (String key : keys) {
-                map.put(key, InteropScriptToJavaUtils.Instance.deepToJavaObject(arg.getMember(key)));
+                map.put(key, InteropScriptToJavaUtils.INSTANCE.deepToJavaObject(arg.getMember(key)));
             }
         }
         return map;

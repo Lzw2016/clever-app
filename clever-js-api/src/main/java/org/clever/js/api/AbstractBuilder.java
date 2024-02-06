@@ -22,8 +22,8 @@ import java.util.Map;
 public abstract class AbstractBuilder<E, T, EI> {
     protected E engine;
     protected Map<String, Object> registerGlobalVars = new HashMap<String, Object>() {{
-        putAll(GlobalConstant.Default_Context_Map);
-        putAll(GlobalConstant.Custom_Context_Map);
+        putAll(GlobalConstant.DEFAULT_REGISTER_GLOBAL_VARS);
+        putAll(GlobalConstant.CUSTOM_REGISTER_GLOBAL_VARS);
     }};
     protected final Folder rootPath;
     protected ModuleCache<T> moduleCache;

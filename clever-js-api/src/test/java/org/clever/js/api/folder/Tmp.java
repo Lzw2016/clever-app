@@ -141,7 +141,7 @@ public class Tmp {
         pathMatchResource = "jar:file:/D:/hinny-spring-example-1.0.0-SNAPSHOT.jar!/BOOT-INF/classes!/file";
         String childPath = path.substring(pathMatchResource.length());
         log.info("--> {}", childPath);
-        String[] childArr = StringUtils.split(childPath, Folder.Path_Separate);
+        String[] childArr = StringUtils.split(childPath, Folder.PATH_SEPARATE);
         log.info("--> {}", Arrays.toString(childArr));
     }
 }

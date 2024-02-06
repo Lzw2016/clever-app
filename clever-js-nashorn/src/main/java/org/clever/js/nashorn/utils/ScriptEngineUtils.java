@@ -91,9 +91,9 @@ public class ScriptEngineUtils {
      */
     public static NashornScriptEngine creatEngine(Set<Class<?>> denyAccessClass) {
         if (denyAccessClass == null) {
-            denyAccessClass = GlobalConstant.Default_Deny_Access_Class;
+            denyAccessClass = GlobalConstant.DEFAULT_DENY_ACCESS_CLASS;
         } else {
-            denyAccessClass.addAll(GlobalConstant.Default_Deny_Access_Class);
+            denyAccessClass.addAll(GlobalConstant.DEFAULT_DENY_ACCESS_CLASS);
         }
         // options 参考 https://wiki.openjdk.java.net/display/Nashorn/Nashorn+jsr223+engine+notes
         String[] options = new String[]{"-doe"};

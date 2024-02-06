@@ -18,9 +18,9 @@ import java.util.*;
  */
 @Slf4j
 public class InteropScriptToJavaUtils {
-    public static final int Default_Deep = 16;
+    public static final int DEFAULT_DEEP = 16;
 
-    public static final InteropScriptToJavaUtils Instance = new InteropScriptToJavaUtils();
+    public static final InteropScriptToJavaUtils INSTANCE = new InteropScriptToJavaUtils();
 
     private InteropScriptToJavaUtils() {
     }
@@ -83,7 +83,7 @@ public class InteropScriptToJavaUtils {
      * @param object JavaScript对象
      */
     public Object deepToJavaObject(Object object) {
-        return deepToJavaObject(object, Default_Deep);
+        return deepToJavaObject(object, DEFAULT_DEEP);
     }
 
     /**
@@ -124,7 +124,7 @@ public class InteropScriptToJavaUtils {
      * @param map map对象
      */
     public Map<String, Object> deepConvertMap(Map<String, Object> map) {
-        return deepConvertMap(map, Default_Deep);
+        return deepConvertMap(map, DEFAULT_DEEP);
     }
 
     /**
@@ -162,7 +162,7 @@ public class InteropScriptToJavaUtils {
      * 深度装换List(深度转换，深度值为16)
      */
     public List<?> deepConvertList(List<?> list) {
-        return deepConvertList(list, Default_Deep);
+        return deepConvertList(list, DEFAULT_DEEP);
     }
 
     /**
@@ -197,7 +197,7 @@ public class InteropScriptToJavaUtils {
      * @param mapList mapList对象
      */
     public List<Map<String, Object>> deepConvertMapList(List<Map<String, Object>> mapList) {
-        return deepConvertMapList(mapList, Default_Deep);
+        return deepConvertMapList(mapList, DEFAULT_DEEP);
     }
 
     /**
@@ -265,7 +265,7 @@ public class InteropScriptToJavaUtils {
         } else if (value.isString()) {                                          // String
             return value.asString();
         } else if (value.isDate() || value.isTime() || value.isInstant()) {     // Date 日期+时间
-            return GraalInterop.Instance.asJDate(value);
+            return GraalInterop.INSTANCE.asJDate(value);
         } else if (value.isDuration()) {                                        // Duration 时间段
             return value.asDuration();
         } else if (value.isTimeZone()) {                                        // Duration 时间段

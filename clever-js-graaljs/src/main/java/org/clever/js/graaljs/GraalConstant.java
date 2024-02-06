@@ -8,15 +8,15 @@ public interface GraalConstant {
     /**
      * 错误的引擎名字(没有使用GraalVM compiler功能)
      */
-    String Error_Engine_Name = "Interpreted";
+    String ERROR_ENGINE_NAME = "Interpreted";
 
     /**
      * ECMAScript Version: 11 (ES2020)
      */
-    String ECMAScript_Version = "11";
+    String ECMASCRIPT_VERSION = "11";
 
     /**
      * JS 语言ID
      */
-    String Js_Language_Id = "js";
+    String JS_LANGUAGE_ID = "js";
 }

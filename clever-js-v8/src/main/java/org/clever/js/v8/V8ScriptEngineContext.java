@@ -60,7 +60,7 @@ public class V8ScriptEngineContext extends AbstractScriptEngineContext<V8Runtime
             // engine
             if (engine == null) {
                 engine = V8Host.getNodeInstance().createV8Runtime();
-                engine.setLogger(V8Logger.Instance);
+                engine.setLogger(V8Logger.INSTANCE);
                 engine.allowEval(true);
             }
             // registerGlobalVars
