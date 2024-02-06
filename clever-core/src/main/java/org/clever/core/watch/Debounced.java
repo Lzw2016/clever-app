@@ -1,4 +1,4 @@
-package org.clever.js.api.watch;
+package org.clever.core.watch;
 
 import org.clever.util.Assert;
 

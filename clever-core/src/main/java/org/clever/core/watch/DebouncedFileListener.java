@@ -1,4 +1,4 @@
-package org.clever.js.api.watch;
+package org.clever.core.watch;
 
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -14,9 +14,9 @@ import java.util.function.Consumer;
  */
 public class DebouncedFileListener implements FileAlterationListener {
     private final FileFilter fileFilter;
-    private final Debounced<FileSystemWatcher.MonitorEvent> debounced;
+    private final Debounced<MonitorEvent> debounced;
 
-    public DebouncedFileListener(BlackWhiteFileFilter fileFilter, Consumer<FileSystemWatcher.MonitorEvent> listener, long delayMillis) {
+    public DebouncedFileListener(BlackWhiteFileFilter fileFilter, Consumer<MonitorEvent> listener, long delayMillis) {
         Assert.notNull(listener, "参数 listener 不能为 null");
         this.fileFilter = fileFilter;
         this.debounced = new Debounced<>(listener, delayMillis);
@@ -35,7 +35,7 @@ public class DebouncedFileListener implements FileAlterationListener {
         if (fileFilter != null && !fileFilter.accept(directory)) {
             return;
         }
-        debounced.execute(new FileSystemWatcher.MonitorEvent(MonitorEventType.DirectoryCreate, directory));
+        debounced.execute(new MonitorEvent(MonitorEventType.DirectoryCreate, directory));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class DebouncedFileListener implements FileAlterationListener {
         if (fileFilter != null && !fileFilter.accept(directory)) {
             return;
         }
-        debounced.execute(new FileSystemWatcher.MonitorEvent(MonitorEventType.DirectoryChange, directory));
+        debounced.execute(new MonitorEvent(MonitorEventType.DirectoryChange, directory));
     }
 
     @Override
@@ -51,7 +51,7 @@ public class DebouncedFileListener implements FileAlterationListener {
         if (fileFilter != null && !fileFilter.accept(directory)) {
             return;
         }
-        debounced.execute(new FileSystemWatcher.MonitorEvent(MonitorEventType.DirectoryDelete, directory));
+        debounced.execute(new MonitorEvent(MonitorEventType.DirectoryDelete, directory));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class DebouncedFileListener implements FileAlterationListener {
         if (fileFilter != null && !fileFilter.accept(file)) {
             return;
         }
-        debounced.execute(new FileSystemWatcher.MonitorEvent(MonitorEventType.FileCreate, file));
+        debounced.execute(new MonitorEvent(MonitorEventType.FileCreate, file));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class DebouncedFileListener implements FileAlterationListener {
         if (fileFilter != null && !fileFilter.accept(file)) {
             return;
         }
-        debounced.execute(new FileSystemWatcher.MonitorEvent(MonitorEventType.FileChange, file));
+        debounced.execute(new MonitorEvent(MonitorEventType.FileChange, file));
     }
 
     @Override
@@ -75,6 +75,6 @@ public class DebouncedFileListener implements FileAlterationListener {
         if (fileFilter != null && !fileFilter.accept(file)) {
             return;
         }
-        debounced.execute(new FileSystemWatcher.MonitorEvent(MonitorEventType.FileDelete, file));
+        debounced.execute(new MonitorEvent(MonitorEventType.FileDelete, file));
     }
 }
