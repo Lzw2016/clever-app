@@ -4,6 +4,7 @@ import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.clever.js.api.AbstractScriptObject;
 import org.clever.js.api.ScriptEngineContext;
+import org.clever.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,8 +25,8 @@ public class NashornScriptObject extends AbstractScriptObject<NashornScriptEngin
     }
 
     @Override
-    public Object getMember(String name) {
-        return original.getMember(name);
+    public Collection<Object> getMembers() {
+        return original.values();
     }
 
     @Override
@@ -34,13 +35,13 @@ public class NashornScriptObject extends AbstractScriptObject<NashornScriptEngin
     }
 
     @Override
-    public Collection<Object> getMembers() {
-        return original.values();
+    public Object getMember(String name) {
+        return original.getMember(name);
     }
 
     @Override
-    public Object callMember(String functionName, Object... args) {
-        return original.callMember(functionName, args);
+    public void setMember(String name, Object value) {
+        original.setMember(name, value);
     }
 
     @Override
@@ -49,8 +50,20 @@ public class NashornScriptObject extends AbstractScriptObject<NashornScriptEngin
     }
 
     @Override
-    public void setMember(String name, Object value) {
-        original.setMember(name, value);
+    public Object callMember(String functionName, Object... args) {
+        return original.callMember(functionName, args);
+    }
+
+    @Override
+    public boolean canExecute() {
+        return original.isFunction();
+    }
+
+    @Override
+    public Object execute(Object... args) {
+        Assert.isTrue(original.isFunction(), "当前脚本对象不能执行");
+        // ReflectionsUtils.getFieldValue(original, "sobj");
+        return original.call(null, args);
     }
 
     @Override

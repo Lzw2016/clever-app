@@ -2,10 +2,12 @@ package org.clever.js.v8;
 
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.values.reference.IV8ValueArray;
+import com.caoccao.javet.values.reference.IV8ValueFunction;
 import com.caoccao.javet.values.reference.IV8ValueObject;
 import lombok.SneakyThrows;
 import org.clever.js.api.AbstractScriptObject;
 import org.clever.js.api.ScriptEngineContext;
+import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,18 +32,6 @@ public class V8ScriptObject extends AbstractScriptObject<V8Runtime, IV8ValueObje
 
     @SneakyThrows
     @Override
-    public Object getMember(String name) {
-        return original.get(name);
-    }
-
-    @SneakyThrows
-    @Override
-    public boolean hasMember(String name) {
-        return original.has(name);
-    }
-
-    @SneakyThrows
-    @Override
     public Collection<Object> getMembers() {
         List<String> keys = original.getOwnPropertyNameStrings();
         if (keys == null) {
@@ -56,8 +46,20 @@ public class V8ScriptObject extends AbstractScriptObject<V8Runtime, IV8ValueObje
 
     @SneakyThrows
     @Override
-    public Object callMember(String functionName, Object... args) {
-        return original.invoke(functionName, args);
+    public boolean hasMember(String name) {
+        return original.has(name);
+    }
+
+    @SneakyThrows
+    @Override
+    public Object getMember(String name) {
+        return original.get(name);
+    }
+
+    @SneakyThrows
+    @Override
+    public void setMember(String name, Object value) {
+        original.set(name, value);
     }
 
     @SneakyThrows
@@ -68,8 +70,35 @@ public class V8ScriptObject extends AbstractScriptObject<V8Runtime, IV8ValueObje
 
     @SneakyThrows
     @Override
-    public void setMember(String name, Object value) {
-        original.set(name, value);
+    public Object callMember(String functionName, Object... args) {
+        return original.invoke(functionName, args);
+    }
+
+    @SneakyThrows
+    @Override
+    public void callMemberVoid(String functionName, Object... args) {
+        original.invokeVoid(functionName, args);
+    }
+
+    @Override
+    public boolean canExecute() {
+        return original instanceof IV8ValueFunction;
+    }
+
+    @SneakyThrows
+    @Override
+    public Object execute(Object... args) {
+        Assert.isTrue(original instanceof IV8ValueFunction, "当前脚本对象不能执行");
+        IV8ValueFunction function = (IV8ValueFunction) original;
+        return function.call(null, args);
+    }
+
+    @SneakyThrows
+    @Override
+    public void executeVoid(Object... args) {
+        Assert.isTrue(original instanceof IV8ValueFunction, "当前脚本对象不能执行");
+        IV8ValueFunction function = (IV8ValueFunction) original;
+        function.callVoid(null, args);
     }
 
     @SneakyThrows

@@ -20,11 +20,9 @@ public interface ScriptObject<T> {
     Collection<String> getMemberNames();
 
     /**
-     * 获取script对象成员值
-     *
-     * @param name 成员名称
+     * 获取script对象所有成员值
      */
-    Object getMember(String name);
+    Collection<Object> getMembers();
 
     /**
      * 是否存在成员
@@ -34,9 +32,26 @@ public interface ScriptObject<T> {
     boolean hasMember(String name);
 
     /**
-     * 获取script对象所有成员值
+     * 获取script对象成员值
+     *
+     * @param name 成员名称
      */
-    Collection<Object> getMembers();
+    Object getMember(String name);
+
+    /**
+     * 设置script对象成员值
+     *
+     * @param name  成员名称
+     * @param value 成员属值
+     */
+    void setMember(String name, Object value);
+
+    /**
+     * 删除script对象成员属性
+     *
+     * @param name 成员名称
+     */
+    void delMember(String name);
 
     /**
      * 调用成员函数
@@ -47,19 +62,35 @@ public interface ScriptObject<T> {
     Object callMember(String functionName, Object... args);
 
     /**
-     * 删除script对象成员属性
+     * 调用成员函数
      *
-     * @param name 成员名称
+     * @param functionName 成员函数名称
+     * @param args         参数
      */
-    void delMember(String name);
+    default void callMemberVoid(String functionName, Object... args) {
+        callMember(functionName, args);
+    }
 
     /**
-     * 设置script对象成员值
-     *
-     * @param name  成员名称
-     * @param value 成员属值
+     * 判断当前脚本对象能否执行
      */
-    void setMember(String name, Object value);
+    boolean canExecute();
+
+    /**
+     * 执行当前脚本对象
+     *
+     * @param args 参数
+     */
+    Object execute(Object... args);
+
+    /**
+     * 执行当前脚本对象
+     *
+     * @param args 参数
+     */
+    default void executeVoid(Object... args) {
+        execute(args);
+    }
 
     /**
      * script对象集合大小或者属性成员数量

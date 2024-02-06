@@ -2,6 +2,7 @@ package org.clever.js.graaljs;
 
 import org.clever.js.api.AbstractScriptObject;
 import org.clever.js.api.ScriptEngineContext;
+import org.clever.util.Assert;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 
@@ -25,16 +26,6 @@ public class GraalScriptObject extends AbstractScriptObject<Context, Value> {
     }
 
     @Override
-    public Object getMember(String name) {
-        return original.getMember(name);
-    }
-
-    @Override
-    public boolean hasMember(String name) {
-        return original.hasMember(name);
-    }
-
-    @Override
     public Collection<Object> getMembers() {
         List<Object> list = new ArrayList<>(size());
         if (original.hasArrayElements()) {
@@ -50,9 +41,30 @@ public class GraalScriptObject extends AbstractScriptObject<Context, Value> {
     }
 
     @Override
-    public Object callMember(String functionName, Object... args) {
+    public boolean hasMember(String name) {
+        return original.hasMember(name);
+    }
+
+    @Override
+    public Object getMember(String name) {
+        return original.getMember(name);
+    }
+
+    @Override
+    public void setMember(String name, Object value) {
+        original.putMember(name, value);
+    }
+
+    @Override
+    public void delMember(String name) {
+        original.removeMember(name);
+    }
+
+    @Override
+    public Value callMember(String functionName, Object... args) {
+        Assert.isTrue(original.canInvokeMember(functionName), "对象属性不能执行,functionName=" + functionName);
         Context engine = engineContext.getEngine();
-        Object res;
+        Value res;
         try {
             engine.enter();
             res = original.invokeMember(functionName, args);
@@ -65,13 +77,38 @@ public class GraalScriptObject extends AbstractScriptObject<Context, Value> {
     }
 
     @Override
-    public void delMember(String name) {
-        original.removeMember(name);
+    public boolean canExecute() {
+        return original.canExecute();
     }
 
     @Override
-    public void setMember(String name, Object value) {
-        original.putMember(name, value);
+    public Value execute(Object... args) {
+        Assert.isTrue(original.canExecute(), "当前脚本对象不能执行");
+        Context engine = engineContext.getEngine();
+        Value res;
+        try {
+            engine.enter();
+            res = original.execute(args);
+        } finally {
+            if (engine != null) {
+                engine.leave();
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public void executeVoid(Object... args) {
+        Assert.isTrue(original.canExecute(), "当前脚本对象不能执行");
+        Context engine = engineContext.getEngine();
+        try {
+            engine.enter();
+            original.executeVoid(args);
+        } finally {
+            if (engine != null) {
+                engine.leave();
+            }
+        }
     }
 
     @Override
