@@ -8,10 +8,8 @@ import org.clever.js.api.ScriptEngineContext;
 import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.graaljs.utils.EngineGlobalUtils;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
-import org.graalvm.polyglot.HostAccess;
-import org.graalvm.polyglot.Value;
+import org.clever.util.Assert;
+import org.graalvm.polyglot.*;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -23,8 +21,17 @@ import java.util.function.Consumer;
 @Slf4j
 public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Context, Value> {
 
+    public GraalScriptEngineInstance(ScriptEngineContext<Context, Value> engineContext, long expireTime, int maxCapacity) {
+        super(engineContext, expireTime, maxCapacity);
+        init();
+    }
+
     public GraalScriptEngineInstance(ScriptEngineContext<Context, Value> context) {
         super(context);
+        init();
+    }
+
+    protected void init() {
         Value engineBindings = this.engineContext.getEngine().getBindings(GraalConstant.JS_LANGUAGE_ID);
         Map<String, Object> registerGlobalVars = this.engineContext.getRegisterGlobalVars();
         if (registerGlobalVars != null) {
@@ -54,12 +61,30 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
     }
 
     @Override
-    protected ScriptObject<Value> newScriptObject(Value scriptObject) {
-        return new GraalScriptObject(engineContext, scriptObject);
+    protected ScriptObject<Value> wrapScriptObject(Value original) {
+        return new GraalScriptObject(engineContext, original);
+    }
+
+    @Override
+    protected ScriptObject<Value> createFunction(String funCode) {
+        Source source = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, funCode, String.format("/__fun_autogenerate_%s.js", FUC_COUNTER.get()))
+            .cached(true)
+            .buildLiteral();
+        Context engine = getEngine();
+        Value value;
+        try {
+            engine.enter();
+            value = engine.eval(source);
+        } finally {
+            engine.leave();
+        }
+        Assert.isTrue(value != null && value.canExecute(), String.format("脚本代码不可以执行:\n%s\n", funCode));
+        return new GraalScriptObject(engineContext, value);
     }
 
     @Override
     public void close() {
+        super.close();
         engineContext.getEngine().close(true);
     }
 

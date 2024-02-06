@@ -61,6 +61,36 @@ public interface ScriptEngineInstance<E, T> extends Closeable {
      * @param id 模块ID(模块路径)
      */
     ScriptObject<T> require(String id) throws Exception;
+
+    /**
+     * 清除所有 {@link #require(String)} 缓存
+     */
+    void clearModuleCache();
+
+    /**
+     * 清除指定的 {@link #require(String)} 缓存
+     */
+    void removeModuleCache(String id);
+
+    /**
+     * 把脚本代码包装成函数对象
+     *
+     * @param code 脚本代码片段(并非完整的函数定义，仅仅是一段脚本代码)
+     * @return 脚本函数对象
+     */
+    ScriptObject<T> wrapFunction(String code);
+
+    /**
+     * 清除所有 {@link #wrapFunction(String)} 缓存
+     */
+    void clearFunctionCache();
+
+    /**
+     * 移除指定的 {@link #wrapFunction(String)} 缓存
+     *
+     * @param code 脚本代码片段
+     */
+    void removeFunctionCache(String code);
 }
 
 //(x)module                               module变量代表当前模块

@@ -1,7 +1,9 @@
 package org.clever.js.v8;
 
 import com.caoccao.javet.interop.V8Runtime;
+import com.caoccao.javet.interop.executors.IV8Executor;
 import com.caoccao.javet.utils.JavetResourceUtils;
+import com.caoccao.javet.values.reference.IV8ValueFunction;
 import com.caoccao.javet.values.reference.IV8ValueObject;
 import com.caoccao.javet.values.reference.V8ValueGlobalObject;
 import lombok.SneakyThrows;
@@ -19,9 +21,18 @@ import java.util.Map;
  */
 public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runtime, IV8ValueObject> {
 
+    public V8ScriptEngineInstance(ScriptEngineContext<V8Runtime, IV8ValueObject> engineContext, long expireTime, int maxCapacity) {
+        super(engineContext, expireTime, maxCapacity);
+        init();
+    }
+
+    public V8ScriptEngineInstance(ScriptEngineContext<V8Runtime, IV8ValueObject> engineContext) {
+        super(engineContext);
+        init();
+    }
+
     @SneakyThrows
-    public V8ScriptEngineInstance(ScriptEngineContext<V8Runtime, IV8ValueObject> context) {
-        super(context);
+    protected void init() {
         V8ValueGlobalObject globalObject = this.engineContext.getEngine().getGlobalObject();
         Map<String, Object> registerGlobalVars = this.engineContext.getRegisterGlobalVars();
         if (registerGlobalVars != null) {
@@ -51,12 +62,21 @@ public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runti
     }
 
     @Override
-    protected ScriptObject<IV8ValueObject> newScriptObject(IV8ValueObject scriptObject) {
-        return new V8ScriptObject(engineContext, scriptObject);
+    protected ScriptObject<IV8ValueObject> wrapScriptObject(IV8ValueObject original) {
+        return new V8ScriptObject(engineContext, original);
+    }
+
+    @SneakyThrows
+    @Override
+    protected ScriptObject<IV8ValueObject> createFunction(String funCode) {
+        IV8Executor executor = engineContext.getEngine().getExecutor(funCode);
+        IV8ValueFunction function = executor.execute();
+        return new V8ScriptObject(engineContext, function);
     }
 
     @Override
     public void close() {
+        super.close();
         V8Runtime v8runtime = engineContext.getEngine();
         JavetResourceUtils.safeClose(v8runtime);
     }

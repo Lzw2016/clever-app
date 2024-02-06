@@ -22,7 +22,7 @@ import java.util.*;
  * @param <T> script引擎对象类型
  */
 public abstract class Interop<T> {
-    private static final String[] Date_Patterns = {
+    private static final String[] DATE_PATTERNS = {
             "yyyy-MM-dd HH:mm:ss",
             "yyyy-MM-dd HH:mm:ss.SSS",
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
@@ -161,7 +161,7 @@ public abstract class Interop<T> {
         if (StringUtils.isBlank(arg)) {
             return null;
         }
-        return DateUtils.parseDate(arg, Date_Patterns);
+        return DateUtils.parseDate(arg, DATE_PATTERNS);
     }
 
     public Date asJDate(long arg) {

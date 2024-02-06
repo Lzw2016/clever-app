@@ -2,6 +2,7 @@ package org.clever.js.nashorn;
 
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import lombok.SneakyThrows;
 import org.clever.js.api.AbstractScriptEngineInstance;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.api.ScriptEngineContext;
@@ -23,8 +24,17 @@ import java.util.Set;
  */
 public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<NashornScriptEngine, ScriptObjectMirror> {
 
-    public NashornScriptEngineInstance(ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> context) {
-        super(context);
+    public NashornScriptEngineInstance(ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext, long expireTime, int maxCapacity) {
+        super(engineContext, expireTime, maxCapacity);
+        init();
+    }
+
+    public NashornScriptEngineInstance(ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext) {
+        super(engineContext);
+        init();
+    }
+
+    protected void init() {
         Bindings engineBindings = this.engineContext.getEngine().getBindings(ScriptContext.ENGINE_SCOPE);
         Map<String, Object> registerGlobalVars = this.engineContext.getRegisterGlobalVars();
         if (registerGlobalVars != null) {
@@ -50,12 +60,15 @@ public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<Na
     }
 
     @Override
-    protected ScriptObject<ScriptObjectMirror> newScriptObject(ScriptObjectMirror scriptObject) {
-        return new NashornScriptObject(engineContext, scriptObject);
+    protected ScriptObject<ScriptObjectMirror> wrapScriptObject(ScriptObjectMirror original) {
+        return new NashornScriptObject(engineContext, original);
     }
 
+    @SneakyThrows
     @Override
-    public void close() {
+    protected ScriptObject<ScriptObjectMirror> createFunction(String funCode) {
+        ScriptObjectMirror function = (ScriptObjectMirror) engineContext.getEngine().eval(funCode);
+        return new NashornScriptObject(engineContext, function);
     }
 
     public static class Builder extends AbstractBuilder<NashornScriptEngine, ScriptObjectMirror> {
@@ -100,14 +113,14 @@ public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<Na
          */
         public NashornScriptEngineInstance build() {
             ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> context = NashornScriptEngineContext.Builder.create(rootPath)
-                    .setDenyAccessClass(denyAccessClass)
-                    .setEngine(engine)
-                    .setRegisterGlobalVars(registerGlobalVars)
-                    .setModuleCache(moduleCache)
-                    .setRequire(require)
-                    .setCompileModule(compileModule)
-                    .setGlobal(global)
-                    .build();
+                .setDenyAccessClass(denyAccessClass)
+                .setEngine(engine)
+                .setRegisterGlobalVars(registerGlobalVars)
+                .setModuleCache(moduleCache)
+                .setRequire(require)
+                .setCompileModule(compileModule)
+                .setGlobal(global)
+                .build();
             return new NashornScriptEngineInstance(context);
         }
     }
