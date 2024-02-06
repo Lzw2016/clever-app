@@ -40,8 +40,8 @@ public class OutputStreamConsole extends AbstractConsole implements Closeable {
      * @param err 错误输出流
      */
     public OutputStreamConsole(OutputStream out, OutputStream err) {
-        Assert.notNull(out, "参数out不能为空");
-        Assert.notNull(err, "参数err不能为空");
+        Assert.notNull(out, "参数 out 不能为 null");
+        Assert.notNull(err, "参数 err 不能为 null");
         this.out = out;
         this.err = err;
     }

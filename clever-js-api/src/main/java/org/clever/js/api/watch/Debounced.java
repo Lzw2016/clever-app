@@ -42,8 +42,8 @@ public class Debounced<T> {
      * @param delayMillis 延时时间(单位毫秒)
      */
     public Debounced(Consumer<T> callback, long delayMillis) {
-        Assert.notNull(callback, "参数operation不能为空");
-        Assert.isTrue(delayMillis >= 10, "参数delayMillis必须大于等于10");
+        Assert.notNull(callback, "参数 operation 不能为  null");
+        Assert.isTrue(delayMillis >= 10, "参数 delayMillis 必须大于等于10");
         this.callback = callback;
         this.delayMillis = delayMillis;
     }

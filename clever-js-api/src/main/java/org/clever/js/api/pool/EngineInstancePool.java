@@ -15,6 +15,11 @@ import java.io.Closeable;
  */
 public interface EngineInstancePool<E, T> extends Closeable {
     /**
+     * 获取引擎池状态
+     */
+    EnginePoolStatus getPoolStatus();
+
+    /**
      * 从池中获取引擎对象。使用完后必须使用 returnObject 方法返还获取的对象
      */
     ScriptEngineInstance<E, T> borrowObject() throws Exception;

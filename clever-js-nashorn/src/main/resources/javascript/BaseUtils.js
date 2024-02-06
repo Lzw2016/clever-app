@@ -109,7 +109,7 @@ Date.prototype.toJSON = function () {
     return dateToJSON(this);
 };
 
-// 解除了循环依赖问题
+// 解决了循环依赖问题
 function inspect(object) {
     if (isUndefined(object)) {
         return 'undefined';

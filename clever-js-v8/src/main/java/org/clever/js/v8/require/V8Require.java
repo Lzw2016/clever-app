@@ -33,22 +33,22 @@ public class V8Require extends AbstractRequire<V8Runtime, IV8ValueObject> {
 
     @Override
     protected IV8ValueObject newScriptObject() {
-        return ScriptEngineUtils.newObject(context.getEngine());
+        return ScriptEngineUtils.newObject(engineContext.getEngine());
     }
 
     @Override
-    protected AbstractRequire<V8Runtime, IV8ValueObject> newRequire(ScriptEngineContext<V8Runtime, IV8ValueObject> context, Folder currentModuleFolder) {
-        return new V8Require(context, currentModuleFolder);
+    protected AbstractRequire<V8Runtime, IV8ValueObject> newRequire(ScriptEngineContext<V8Runtime, IV8ValueObject> engineContext, Folder currentModuleFolder) {
+        return new V8Require(engineContext, currentModuleFolder);
     }
 
     @Override
-    protected Module<IV8ValueObject> newModule(ScriptEngineContext<V8Runtime, IV8ValueObject> context,
+    protected Module<IV8ValueObject> newModule(ScriptEngineContext<V8Runtime, IV8ValueObject> engineContext,
                                                String id,
                                                String filename,
                                                IV8ValueObject exports,
                                                Module<IV8ValueObject> parent,
                                                Require<IV8ValueObject> require) {
-        return new V8Module(context, id, filename, exports, parent, require);
+        return new V8Module(engineContext, id, filename, exports, parent, require);
     }
 
     @SneakyThrows
@@ -66,7 +66,7 @@ public class V8Require extends AbstractRequire<V8Runtime, IV8ValueObject> {
             require,
             require.getClass().getMethod("require", String.class)
         );
-        V8ValueFunction requireFun = context.getEngine().createV8ValueFunction(callback);
+        V8ValueFunction requireFun = engineContext.getEngine().createV8ValueFunction(callback);
         ((IV8ValueFunction) function).callVoid(function, exports, requireFun, module, filename, dirname);
     }
 }

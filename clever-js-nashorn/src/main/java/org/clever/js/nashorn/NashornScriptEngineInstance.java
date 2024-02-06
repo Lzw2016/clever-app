@@ -25,33 +25,33 @@ public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<Na
 
     public NashornScriptEngineInstance(ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> context) {
         super(context);
-        Bindings engineBindings = this.context.getEngine().getBindings(ScriptContext.ENGINE_SCOPE);
-        Map<String, Object> contextMap = this.context.getContextMap();
-        if (contextMap != null) {
-            engineBindings.putAll(contextMap);
+        Bindings engineBindings = this.engineContext.getEngine().getBindings(ScriptContext.ENGINE_SCOPE);
+        Map<String, Object> registerGlobalVars = this.engineContext.getRegisterGlobalVars();
+        if (registerGlobalVars != null) {
+            engineBindings.putAll(registerGlobalVars);
         }
-        engineBindings.put(GlobalConstant.Engine_Require, this.context.getRequire());
-        engineBindings.put(GlobalConstant.Engine_Global, this.context.getGlobal());
+        engineBindings.put(GlobalConstant.Engine_Require, this.engineContext.getRequire());
+        engineBindings.put(GlobalConstant.Engine_Global, this.engineContext.getGlobal());
     }
 
     @Override
     public String getEngineName() {
-        return context.getEngine().getFactory().getEngineName();
+        return engineContext.getEngine().getFactory().getEngineName();
     }
 
     @Override
     public String getEngineVersion() {
-        return context.getEngine().getFactory().getEngineVersion();
+        return engineContext.getEngine().getFactory().getEngineVersion();
     }
 
     @Override
     public String getLanguageVersion() {
-        return context.getEngine().getFactory().getLanguageVersion();
+        return engineContext.getEngine().getFactory().getLanguageVersion();
     }
 
     @Override
     protected ScriptObject<ScriptObjectMirror> newScriptObject(ScriptObjectMirror scriptObject) {
-        return new NashornScriptObject(context, scriptObject);
+        return new NashornScriptObject(engineContext, scriptObject);
     }
 
     @Override
@@ -66,11 +66,11 @@ public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<Na
          */
         public Builder(Folder rootPath) {
             super(rootPath);
-            // 自定义 contextMap
+            // 自定义 registerGlobalVars
             LoggerConsole.Instance.setObjectToString(NashornObjectToString.Instance);
-            contextMap.put("console", LoggerConsole.Instance);
-            contextMap.put("print", LoggerConsole.Instance);
-            contextMap.put("LoggerFactory", NashornLoggerFactory.Instance);
+            registerGlobalVars.put("console", LoggerConsole.Instance);
+            registerGlobalVars.put("print", LoggerConsole.Instance);
+            registerGlobalVars.put("LoggerFactory", NashornLoggerFactory.Instance);
         }
 
         public static Builder create(Folder rootPath) {
@@ -102,7 +102,7 @@ public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<Na
             ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> context = NashornScriptEngineContext.Builder.create(rootPath)
                     .setDenyAccessClass(denyAccessClass)
                     .setEngine(engine)
-                    .setContextMap(contextMap)
+                    .setRegisterGlobalVars(registerGlobalVars)
                     .setModuleCache(moduleCache)
                     .setRequire(require)
                     .setCompileModule(compileModule)

@@ -10,6 +10,7 @@ import org.clever.js.api.utils.ScriptCodeUtils;
 import org.clever.util.Assert;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,28 +25,28 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 @Getter
 public abstract class ScriptFunctionCache<E, T> implements Closeable {
-    private static final AtomicLong FUC_COUNTER = new AtomicLong(0);
-    private static final int Default_Max_Capacity = 4096;
+    protected static final AtomicLong FUC_COUNTER = new AtomicLong(0);
+    protected static final int Default_Max_Capacity = 4096;
 
     /**
      * script引擎对象
      */
-    private final E context;
+    protected final ScriptEngineInstance<E, T> engineInstance;
     /**
      * 缓存 {@code Cache<script code, ScriptObject>}
      */
-    private final Cache<String, ScriptObject<T>> cache;
+    protected final Cache<String, ScriptObject<T>> cache;
 
     /**
      * 创建 ScriptObjectCache
      *
-     * @param context     script引擎对象
-     * @param expireTime  缓存的过期时间，单位：秒(小于等于0表示不清除)
-     * @param maxCapacity 最大缓存容量
+     * @param engineInstance script引擎对象
+     * @param expireTime     缓存的过期时间，单位：秒(小于等于0表示不清除)
+     * @param maxCapacity    最大缓存容量
      */
-    public ScriptFunctionCache(E context, long expireTime, int maxCapacity) {
-        Assert.notNull(context, "参数 context 不能为空");
-        this.context = context;
+    public ScriptFunctionCache(ScriptEngineInstance<E, T> engineInstance, long expireTime, int maxCapacity) {
+        Assert.notNull(engineInstance, "参数 engineInstance 不能为 null");
+        this.engineInstance = engineInstance;
         if (maxCapacity < 0) {
             maxCapacity = Default_Max_Capacity;
         }
@@ -62,12 +63,12 @@ public abstract class ScriptFunctionCache<E, T> implements Closeable {
     }
 
     /**
-     * 创建 ScriptObjectCache(不定时清除缓存，使用默认的缓存容量)
+     * 创建 ScriptObjectCache
      *
-     * @param context script引擎对象
+     * @param engineInstance script引擎对象
      */
-    public ScriptFunctionCache(E context) {
-        this(context, -1, Default_Max_Capacity);
+    public ScriptFunctionCache(ScriptEngineInstance<E, T> engineInstance) {
+        this(engineInstance, -1, Default_Max_Capacity);
     }
 
     /**
@@ -84,7 +85,7 @@ public abstract class ScriptFunctionCache<E, T> implements Closeable {
      * @return 脚本函数对象
      */
     public ScriptObject<T> wrapFunction(String code) {
-        Assert.isNotBlank(code, "脚本代码不能为空");
+        Assert.isNotBlank(code, "参数 code 不能为空");
         ScriptObject<T> function = cache.getIfPresent(code);
         if (function != null) {
             return function;
@@ -165,7 +166,8 @@ public abstract class ScriptFunctionCache<E, T> implements Closeable {
      * 释放资源
      */
     @Override
-    public void close() {
+    public void close() throws IOException {
         clearCache();
+        engineInstance.close();
     }
 }

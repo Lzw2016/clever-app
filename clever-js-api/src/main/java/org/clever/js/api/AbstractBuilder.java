@@ -21,7 +21,7 @@ import java.util.Map;
 @Getter
 public abstract class AbstractBuilder<E, T, EI> {
     protected E engine;
-    protected Map<String, Object> contextMap = new HashMap<String, Object>() {{
+    protected Map<String, Object> registerGlobalVars = new HashMap<String, Object>() {{
         putAll(GlobalConstant.Default_Context_Map);
         putAll(GlobalConstant.Custom_Context_Map);
     }};
@@ -35,7 +35,7 @@ public abstract class AbstractBuilder<E, T, EI> {
      * @param rootPath 根路径文件夹
      */
     public AbstractBuilder(Folder rootPath) {
-        Assert.notNull(rootPath, "参数rootPath不能为空");
+        Assert.notNull(rootPath, "参数 rootPath 不能为 null");
         this.rootPath = rootPath;
     }
 
@@ -50,16 +50,16 @@ public abstract class AbstractBuilder<E, T, EI> {
     /**
      * 自定义引擎全局对象
      */
-    public AbstractBuilder<E, T, EI> setContextMap(Map<String, Object> contextMap) {
-        this.contextMap = contextMap;
+    public AbstractBuilder<E, T, EI> setRegisterGlobalVars(Map<String, Object> registerGlobalVars) {
+        this.registerGlobalVars = registerGlobalVars;
         return this;
     }
 
     /**
      * 添加引擎全局对象
      */
-    public AbstractBuilder<E, T, EI> putContextMap(String name, Object object) {
-        this.contextMap.put(name, object);
+    public AbstractBuilder<E, T, EI> registerGlobalVar(String name, Object object) {
+        this.registerGlobalVars.put(name, object);
         return this;
     }
 

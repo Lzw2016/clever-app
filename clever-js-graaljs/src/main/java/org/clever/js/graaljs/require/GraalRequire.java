@@ -31,25 +31,25 @@ public class GraalRequire extends AbstractRequire<Context, Value> {
 
     @Override
     protected Value newScriptObject() {
-        return ScriptEngineUtils.newObject(context.getEngine());
+        return ScriptEngineUtils.newObject(engineContext.getEngine());
     }
 
     @Override
     protected AbstractRequire<Context, Value> newRequire(
-            ScriptEngineContext<Context, Value> context,
+            ScriptEngineContext<Context, Value> engineContext,
             Folder currentModuleFolder) {
-        return new GraalRequire(context, currentModuleFolder);
+        return new GraalRequire(engineContext, currentModuleFolder);
     }
 
     @Override
     protected Module<Value> newModule(
-            ScriptEngineContext<Context, Value> context,
+            ScriptEngineContext<Context, Value> engineContext,
             String id,
             String filename,
             Value exports,
             Module<Value> parent,
             Require<Value> require) {
-        return new GraalModule(context, id, filename, exports, parent, require);
+        return new GraalModule(engineContext, id, filename, exports, parent, require);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class GraalRequire extends AbstractRequire<Context, Value> {
             String filename,
             String dirname) {
         Assert.isTrue(function.canExecute(), "参数function必须是一个可执行函数ScriptObject");
-        Context engine = context.getEngine();
+        Context engine = engineContext.getEngine();
         try {
             engine.enter();
             function.executeVoid(exports, require, module, filename, dirname);

@@ -36,7 +36,7 @@ public class ScriptEngineUtils {
      * @param custom 自定义 Context 逻辑(可选参数)
      */
     public static Context.Builder createContextBuilder(Engine engine, Consumer<Context.Builder> custom) {
-        Assert.notNull(engine, "参数engine不能为空");
+        Assert.notNull(engine, "参数 engine 不能为 null");
         Context.Builder builder = Context.newBuilder(GraalConstant.Js_Language_Id)
             .engine(engine)
             .options(Context_Default_Options)
@@ -146,7 +146,7 @@ public class ScriptEngineUtils {
      * 新建一个js 普通对象
      */
     public static Value newObject(Context context, Object... args) {
-        Assert.notNull(context, "参数context不能为空");
+        Assert.notNull(context, "参数 context 不能为 null");
         Value constructor;
         try {
             context.enter();
@@ -162,7 +162,7 @@ public class ScriptEngineUtils {
      */
     public static Value newObject(Object... args) {
         Context context = Context.getCurrent();
-        Assert.notNull(context, "参数context不能为空");
+        Assert.notNull(context, "参数 context 不能为 null");
         Value constructor = context.eval(Object_Constructor_Source);
         return constructor.newInstance(args);
     }
@@ -171,7 +171,7 @@ public class ScriptEngineUtils {
      * 新建一个js 数组对象
      */
     public static Value newArray(Context context, Object... args) {
-        Assert.notNull(context, "参数context不能为空");
+        Assert.notNull(context, "参数 context 不能为 null");
         Value constructor;
         try {
             context.enter();
@@ -187,7 +187,7 @@ public class ScriptEngineUtils {
      */
     public static Value newArray(Object... args) {
         Context context = Context.getCurrent();
-        Assert.notNull(context, "参数context不能为空");
+        Assert.notNull(context, "参数 context 不能为 null");
         Value constructor = context.eval(Array_Constructor_Source);
         return constructor.newInstance(args);
     }
@@ -196,7 +196,7 @@ public class ScriptEngineUtils {
      * 解析Json成为 Value 对象
      */
     public static Value parseJson(Context context, String json) {
-        Assert.notNull(context, "参数context不能为空");
+        Assert.notNull(context, "参数 context 不能为 null");
         Value constructor;
         try {
             context.enter();

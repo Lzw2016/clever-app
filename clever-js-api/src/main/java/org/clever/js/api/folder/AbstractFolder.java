@@ -54,7 +54,7 @@ public abstract class AbstractFolder implements Folder {
         }
         String absolutePath = FilenameUtils.concat(this.baseAbsolutePath, path);
         if (absolutePath == null) {
-            throw new IllegalArgumentException("属性absolutePath不能为空");
+            throw new IllegalArgumentException("属性 absolutePath 不能为 null");
         }
         path = absolutePath.substring(baseAbsolutePath.length());
         path = replaceSeparate(path);
@@ -203,13 +203,13 @@ public abstract class AbstractFolder implements Folder {
      */
     protected void checkPath() {
         if (StringUtils.isBlank(this.baseAbsolutePath)) {
-            throw new IllegalArgumentException("属性baseAbsolutePath不能为空");
+            throw new IllegalArgumentException("属性 baseAbsolutePath 不能为 null");
         }
         if (StringUtils.isBlank(this.fullPath)) {
-            throw new IllegalArgumentException("属性path不能为空");
+            throw new IllegalArgumentException("属性 path 不能为 null");
         }
         if (StringUtils.isBlank(this.absolutePath)) {
-            throw new IllegalArgumentException("属性absolutePath不能为空");
+            throw new IllegalArgumentException("属性 absolutePath 不能为 null");
         }
         if (!exists(this.baseAbsolutePath)) {
             throw new PathNotFoundException(String.format("路径:%s不存在", this.baseAbsolutePath));

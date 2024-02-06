@@ -33,7 +33,12 @@ public interface ScriptEngineInstance<E, T> extends Closeable {
     /**
      * 获取脚本引擎上下文
      */
-    ScriptEngineContext<E, T> getContext();
+    ScriptEngineContext<E, T> getEngineContext();
+
+    /**
+     * script引擎对象
+     */
+    E getEngine();
 
     /**
      * 根路径Folder

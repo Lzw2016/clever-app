@@ -17,8 +17,8 @@ import org.graalvm.polyglot.Value;
  */
 public class GraalCompileModule extends AbstractCompileModule<Context, Value> {
 
-    public GraalCompileModule(ScriptEngineContext<Context, Value> context) {
-        super(context);
+    public GraalCompileModule(ScriptEngineContext<Context, Value> engineContext) {
+        super(engineContext);
     }
 
     @Override
@@ -27,22 +27,22 @@ public class GraalCompileModule extends AbstractCompileModule<Context, Value> {
         if (StringUtils.isBlank(json)) {
             throw new ReadFileContentException("读取文件Json内容失败: path=" + path.getFullPath());
         }
-        return ScriptEngineUtils.parseJson(context.getEngine(), json);
+        return ScriptEngineUtils.parseJson(engineContext.getEngine(), json);
     }
 
     @Override
-    public Value compileJavaScriptModule(Folder path) {
+    public Value compileScriptModule(Folder path) {
         final String code = path.getFileContent();
         if (code == null) {
             throw new ReadFileContentException("读取文件内容失败: path=" + path.getFullPath());
         }
         final String moduleScriptCode = getModuleScriptCode(code);
         Source source = Source.newBuilder(GraalConstant.Js_Language_Id, moduleScriptCode, path.getFullPath()).cached(true).buildLiteral();
-        Context engine = context.getEngine();
+        Context engine = engineContext.getEngine();
         Value modelFunction;
         try {
             engine.enter();
-            modelFunction = context.getEngine().eval(source);
+            modelFunction = engineContext.getEngine().eval(source);
         } finally {
             if (engine != null) {
                 engine.leave();

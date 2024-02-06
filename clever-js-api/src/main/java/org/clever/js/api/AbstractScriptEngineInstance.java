@@ -15,36 +15,41 @@ public abstract class AbstractScriptEngineInstance<E, T> implements ScriptEngine
     /**
      * 引擎上下文
      */
-    protected final ScriptEngineContext<E, T> context;
+    protected final ScriptEngineContext<E, T> engineContext;
 
-    public AbstractScriptEngineInstance(ScriptEngineContext<E, T> context) {
-        Assert.notNull(context, "参数context不能为空");
-        this.context = context;
+    public AbstractScriptEngineInstance(ScriptEngineContext<E, T> engineContext) {
+        Assert.notNull(engineContext, "参数 engineContext 不能为 null");
+        this.engineContext = engineContext;
     }
 
     @Override
-    public ScriptEngineContext<E, T> getContext() {
-        return context;
+    public ScriptEngineContext<E, T> getEngineContext() {
+        return engineContext;
+    }
+
+    @Override
+    public E getEngine() {
+        return engineContext.getEngine();
     }
 
     @Override
     public Folder getRootPath() {
-        return context.getRootPath();
+        return engineContext.getRootPath();
     }
 
     @Override
     public T getGlobal() {
-        return context.getGlobal();
+        return engineContext.getGlobal();
     }
 
     @Override
     public Require<T> getRequire() {
-        return context.getRequire();
+        return engineContext.getRequire();
     }
 
     @Override
     public ScriptObject<T> require(String id) throws Exception {
-        T scriptObject = context.getRequire().require(id);
+        T scriptObject = engineContext.getRequire().require(id);
         return newScriptObject(scriptObject);
     }
 

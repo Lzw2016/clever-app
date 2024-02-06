@@ -42,7 +42,7 @@ public abstract class AbstractConsole implements PrintOutput, Console {
     protected ObjectToString objectToString = ObjectToString.Instance;
 
     public void setObjectToString(ObjectToString objectToString) {
-        Assert.notNull(objectToString, "参数objectToString不能为空");
+        Assert.notNull(objectToString, "参数 objectToString 不能为 null");
         this.objectToString = objectToString;
     }
 

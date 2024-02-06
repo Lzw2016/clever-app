@@ -22,17 +22,17 @@ public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runti
     @SneakyThrows
     public V8ScriptEngineInstance(ScriptEngineContext<V8Runtime, IV8ValueObject> context) {
         super(context);
-        V8ValueGlobalObject globalObject = this.context.getEngine().getGlobalObject();
-        Map<String, Object> contextMap = this.context.getContextMap();
-        if (contextMap != null) {
-            for (Map.Entry<String, Object> entry : contextMap.entrySet()) {
+        V8ValueGlobalObject globalObject = this.engineContext.getEngine().getGlobalObject();
+        Map<String, Object> registerGlobalVars = this.engineContext.getRegisterGlobalVars();
+        if (registerGlobalVars != null) {
+            for (Map.Entry<String, Object> entry : registerGlobalVars.entrySet()) {
                 // TODO registerJavaMethod
                 globalObject.set(entry.getKey(), entry.getValue());
             }
         }
         // TODO registerJavaMethod
-        globalObject.set(GlobalConstant.Engine_Require, this.context.getRequire());
-        globalObject.set(GlobalConstant.Engine_Global, this.context.getGlobal());
+        globalObject.set(GlobalConstant.Engine_Require, this.engineContext.getRequire());
+        globalObject.set(GlobalConstant.Engine_Global, this.engineContext.getGlobal());
     }
 
     @Override
@@ -42,7 +42,7 @@ public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runti
 
     @Override
     public String getEngineVersion() {
-        return "V8 Version: " + context.getEngine().getVersion();
+        return "V8 Version: " + engineContext.getEngine().getVersion();
     }
 
     @Override
@@ -52,12 +52,12 @@ public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runti
 
     @Override
     protected ScriptObject<IV8ValueObject> newScriptObject(IV8ValueObject scriptObject) {
-        return new V8ScriptObject(context, scriptObject);
+        return new V8ScriptObject(engineContext, scriptObject);
     }
 
     @Override
     public void close() {
-        V8Runtime v8runtime = context.getEngine();
+        V8Runtime v8runtime = engineContext.getEngine();
         JavetResourceUtils.safeClose(v8runtime);
     }
 
@@ -79,7 +79,7 @@ public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runti
         public V8ScriptEngineInstance build() {
             ScriptEngineContext<V8Runtime, IV8ValueObject> context = V8ScriptEngineContext.Builder.create(rootPath)
                 .setEngine(engine)
-                .setContextMap(contextMap)
+                .setRegisterGlobalVars(registerGlobalVars)
                 .setModuleCache(moduleCache)
                 .setRequire(require)
                 .setCompileModule(compileModule)

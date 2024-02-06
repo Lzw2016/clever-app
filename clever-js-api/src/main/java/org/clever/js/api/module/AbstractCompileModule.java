@@ -13,14 +13,14 @@ public abstract class AbstractCompileModule<E, T> implements CompileModule<T> {
     /**
      * 引擎上下文
      */
-    protected final ScriptEngineContext<E, T> context;
+    protected final ScriptEngineContext<E, T> engineContext;
 
-    public AbstractCompileModule(ScriptEngineContext<E, T> context) {
-        this.context = context;
+    public AbstractCompileModule(ScriptEngineContext<E, T> engineContext) {
+        this.engineContext = engineContext;
     }
 
     public ModuleCache<T> getCache() {
-        return context.getModuleCache();
+        return engineContext.getModuleCache();
     }
 
     /**

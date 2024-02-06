@@ -20,5 +20,5 @@ public interface CompileModule<T> {
      *
      * @return 返回script对象
      */
-    T compileJavaScriptModule(Folder path) throws Exception;
+    T compileScriptModule(Folder path) throws Exception;
 }

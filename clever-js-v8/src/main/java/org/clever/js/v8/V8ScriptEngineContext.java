@@ -25,18 +25,21 @@ import java.util.Map;
  */
 public class V8ScriptEngineContext extends AbstractScriptEngineContext<V8Runtime, IV8ValueObject> {
 
-    public V8ScriptEngineContext() {
-        super();
-    }
-
     public V8ScriptEngineContext(V8Runtime engine,
-                                 Map<String, Object> contextMap,
+                                 Map<String, Object> registerGlobalVars,
                                  Folder rootPath,
                                  ModuleCache<IV8ValueObject> moduleCache,
                                  Require<IV8ValueObject> require,
                                  CompileModule<IV8ValueObject> compileModule,
                                  IV8ValueObject global) {
-        super(engine, contextMap, rootPath, moduleCache, require, compileModule, global);
+        super(engine, registerGlobalVars, rootPath, moduleCache, require, compileModule, global);
+    }
+
+    protected V8ScriptEngineContext(V8Runtime engine,
+                                    Map<String, Object> registerGlobalVars,
+                                    Folder rootPath,
+                                    ModuleCache<IV8ValueObject> moduleCache) {
+        super(engine, registerGlobalVars, rootPath, moduleCache);
     }
 
     public static class Builder extends AbstractBuilder<V8Runtime, IV8ValueObject> {
@@ -54,43 +57,38 @@ public class V8ScriptEngineContext extends AbstractScriptEngineContext<V8Runtime
          */
         @SneakyThrows
         public V8ScriptEngineContext build() {
-            V8ScriptEngineContext context = new V8ScriptEngineContext();
             // engine
             if (engine == null) {
                 engine = V8Host.getNodeInstance().createV8Runtime();
                 engine.setLogger(V8Logger.Instance);
                 engine.allowEval(true);
             }
-            context.engine = engine;
-            // contextMap
-            if (contextMap == null) {
-                contextMap = Collections.emptyMap();
+            // registerGlobalVars
+            if (registerGlobalVars == null) {
+                registerGlobalVars = Collections.emptyMap();
             }
-            context.contextMap = contextMap;
-            // rootPath
-            context.rootPath = rootPath;
             // moduleCache
             if (moduleCache == null) {
                 moduleCache = new MemoryModuleCache<>();
             }
-            context.moduleCache = moduleCache;
+            V8ScriptEngineContext engineContext = new V8ScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache);
             // require
             if (require == null) {
-                V8Module mainModule = V8Module.createMainModule(context);
-                require = new V8Require(context, mainModule, rootPath);
+                V8Module mainModule = V8Module.createMainModule(engineContext);
+                require = new V8Require(engineContext, mainModule, rootPath);
             }
-            context.require = require;
+            engineContext.require = require;
             // compileModule
             if (compileModule == null) {
-                compileModule = new V8CompileModule(context);
+                compileModule = new V8CompileModule(engineContext);
             }
-            context.compileModule = compileModule;
+            engineContext.compileModule = compileModule;
             // global
             if (global == null) {
                 global = ScriptEngineUtils.newObject(engine);
             }
-            context.global = global;
-            return context;
+            engineContext.global = global;
+            return engineContext;
         }
     }
 }

@@ -27,17 +27,17 @@ public class V8CompileModule extends AbstractCompileModule<V8Runtime, IV8ValueOb
         if (StringUtils.isBlank(json)) {
             throw new ReadFileContentException("读取文件Json内容失败: path=" + path.getFullPath());
         }
-        return ScriptEngineUtils.parseJson(context.getEngine(), json);
+        return ScriptEngineUtils.parseJson(engineContext.getEngine(), json);
     }
 
     @SneakyThrows
     @Override
-    public IV8ValueObject compileJavaScriptModule(Folder path) {
+    public IV8ValueObject compileScriptModule(Folder path) {
         final String code = path.getFileContent();
         if (code == null) {
             throw new ReadFileContentException("读取文件内容失败: path=" + path.getFullPath());
         }
         final String moduleScriptCode = getModuleScriptCode(code);
-        return context.getEngine().getExecutor(moduleScriptCode).execute();
+        return engineContext.getEngine().getExecutor(moduleScriptCode).execute();
     }
 }

@@ -26,19 +26,22 @@ import java.util.function.Consumer;
  * 创建时间：2020/07/20 21:58 <br/>
  */
 public class GraalScriptEngineContext extends AbstractScriptEngineContext<Context, Value> {
-    public GraalScriptEngineContext() {
-        super();
+
+    public GraalScriptEngineContext(Context engine,
+                                    Map<String, Object> registerGlobalVars,
+                                    Folder rootPath,
+                                    ModuleCache<Value> moduleCache,
+                                    Require<Value> require,
+                                    CompileModule<Value> compileModule,
+                                    Value global) {
+        super(engine, registerGlobalVars, rootPath, moduleCache, require, compileModule, global);
     }
 
-    public GraalScriptEngineContext(
-        Context engine,
-        Map<String, Object> contextMap,
-        Folder rootPath,
-        ModuleCache<Value> moduleCache,
-        Require<Value> require,
-        CompileModule<Value> compileModule,
-        Value global) {
-        super(engine, contextMap, rootPath, moduleCache, require, compileModule, global);
+    protected GraalScriptEngineContext(Context engine,
+                                       Map<String, Object> registerGlobalVars,
+                                       Folder rootPath,
+                                       ModuleCache<Value> moduleCache) {
+        super(engine, registerGlobalVars, rootPath, moduleCache);
     }
 
     public static class Builder extends AbstractBuilder<Context, Value> {
@@ -49,8 +52,8 @@ public class GraalScriptEngineContext extends AbstractScriptEngineContext<Contex
         public Builder(Engine graalvmEngine, Folder rootPath) {
             super(rootPath);
             this.graalvmEngine = graalvmEngine;
-            // 自定义 contextMap
-            EngineGlobalUtils.putGlobalObjects(contextMap);
+            // 自定义 registerGlobalVars
+            EngineGlobalUtils.putGlobalObjects(registerGlobalVars);
         }
 
         public static Builder create(Engine graalvmEngine, Folder rootPath) {
@@ -77,42 +80,37 @@ public class GraalScriptEngineContext extends AbstractScriptEngineContext<Contex
          * 创建 ScriptEngineContext
          */
         public GraalScriptEngineContext build() {
-            GraalScriptEngineContext context = new GraalScriptEngineContext();
             // engine
             if (engine == null) {
                 Assert.notNull(graalvmEngine, "参数graalvmEngine或者engine不能为空");
                 engine = ScriptEngineUtils.creatEngine(graalvmEngine, customContext, customHostAccess);
             }
-            context.engine = engine;
-            // contextMap
-            if (contextMap == null) {
-                contextMap = Collections.emptyMap();
+            // registerGlobalVars
+            if (registerGlobalVars == null) {
+                registerGlobalVars = Collections.emptyMap();
             }
-            context.contextMap = contextMap;
-            // rootPath
-            context.rootPath = rootPath;
             // moduleCache
             if (moduleCache == null) {
                 moduleCache = new MemoryModuleCache<>();
             }
-            context.moduleCache = moduleCache;
+            GraalScriptEngineContext engineContext = new GraalScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache);
             // require
             if (require == null) {
-                GraalModule mainModule = GraalModule.createMainModule(context);
-                require = new GraalRequire(context, mainModule, rootPath);
+                GraalModule mainModule = GraalModule.createMainModule(engineContext);
+                require = new GraalRequire(engineContext, mainModule, rootPath);
             }
-            context.require = require;
+            engineContext.require = require;
             // compileModule
             if (compileModule == null) {
-                compileModule = new GraalCompileModule(context);
+                compileModule = new GraalCompileModule(engineContext);
             }
-            context.compileModule = compileModule;
+            engineContext.compileModule = compileModule;
             // global
             if (global == null) {
                 global = ScriptEngineUtils.newObject(engine);
             }
-            context.global = global;
-            return context;
+            engineContext.global = global;
+            return engineContext;
         }
     }
 }

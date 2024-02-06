@@ -22,7 +22,7 @@ public abstract class AbstractModule<E, T> implements Module<T> {
     /**
      * 引擎上下文
      */
-    protected final ScriptEngineContext<E, T> context;
+    protected final ScriptEngineContext<E, T> engineContext;
     /**
      * 当前模块对象对应的 module 对象
      */
@@ -60,23 +60,21 @@ public abstract class AbstractModule<E, T> implements Module<T> {
      */
     protected boolean removed = false;
 
-    public AbstractModule(
-            ScriptEngineContext<E, T> context,
-            String id,
-            String filename,
-            T exports,
-            Module<T> parent,
-            Require<T> require) {
-        Assert.notNull(context, "参数context不能为空");
-        Assert.isNotBlank(id, "参数id不能为空");
-        Assert.isNotBlank(filename, "参数filename不能为空");
-        Assert.notNull(exports, "参数exports不能为空");
-        Assert.notNull(parent, "参数parent不能为空");
-        Assert.notNull(require, "参数require不能为空");
-        this.context = context;
+    public AbstractModule(ScriptEngineContext<E, T> engineContext,
+                          String id,
+                          String filename,
+                          T exports,
+                          Module<T> parent,
+                          Require<T> require) {
+        Assert.notNull(engineContext, "参数 engineContext 不能为 null");
+        Assert.isNotBlank(id, "参数 id 不能为空");
+        Assert.isNotBlank(filename, "参数 filename 不能为空");
+        Assert.notNull(exports, "参数 exports 不能为 null");
+        Assert.notNull(parent, "参数 parent 不能为 null");
+        Assert.notNull(require, "参数 require 不能为 null");
+        this.engineContext = engineContext;
         this.id = id;
         this.filename = filename;
-        // this.exports = exports;
         this.parent = parent;
         this.parent.addChildModule(this);
         this.paths = Collections.singletonList(filename);
@@ -85,15 +83,14 @@ public abstract class AbstractModule<E, T> implements Module<T> {
         initModule(exports);
     }
 
-    protected AbstractModule(ScriptEngineContext<E, T> context) {
-        Assert.notNull(context, "参数context不能为空");
-        this.context = context;
+    protected AbstractModule(ScriptEngineContext<E, T> engineContext) {
+        Assert.notNull(engineContext, "参数 engineContext 不能为 null");
+        this.engineContext = engineContext;
         this.id = GlobalConstant.Module_Main;
         this.filename = Folder.Root_Path + GlobalConstant.Module_Main;
-        // this.exports = newScriptObject();
         this.parent = null;
         this.paths = Collections.singletonList(this.filename);
-        this.require = context.getRequire();
+        this.require = engineContext.getRequire();
         this.module = newScriptObject();
         initModule(newScriptObject());
     }
@@ -196,6 +193,6 @@ public abstract class AbstractModule<E, T> implements Module<T> {
      * 获取模块缓存
      */
     public ModuleCache<T> getCache() {
-        return context.getModuleCache();
+        return engineContext.getModuleCache();
     }
 }

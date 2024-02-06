@@ -27,7 +27,7 @@ public abstract class AbstractEngineFactory<E, T> extends BasePooledObjectFactor
     public ScriptEngineInstance<E, T> create() {
         ScriptEngineInstance<E, T> instance = doCreate();
         long counter = COUNTER.incrementAndGet();
-        instance.getContext().getContextMap().put(COUNTER_NAME, counter);
+        instance.getEngineContext().getRegisterGlobalVars().put(COUNTER_NAME, counter);
         log.info("创建 ScriptEngineInstance | counter={}", counter);
         return instance;
     }
@@ -72,7 +72,7 @@ public abstract class AbstractEngineFactory<E, T> extends BasePooledObjectFactor
     public void destroyObject(PooledObject<ScriptEngineInstance<E, T>> p) throws Exception {
         if (p.getObject() != null) {
             p.getObject().close();
-            Object counter = p.getObject().getContext().getContextMap().get(COUNTER_NAME);
+            Object counter = p.getObject().getEngineContext().getRegisterGlobalVars().get(COUNTER_NAME);
             log.info("释放 ScriptEngineInstance | counter={}", counter);
         }
     }

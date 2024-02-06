@@ -17,7 +17,7 @@ public class DebouncedFileListener implements FileAlterationListener {
     private final Debounced<FileSystemWatcher.MonitorEvent> debounced;
 
     public DebouncedFileListener(BlackWhiteFileFilter fileFilter, Consumer<FileSystemWatcher.MonitorEvent> listener, long delayMillis) {
-        Assert.notNull(listener, "参数listener不能为空");
+        Assert.notNull(listener, "参数 listener 不能为 null");
         this.fileFilter = fileFilter;
         this.debounced = new Debounced<>(listener, delayMillis);
     }

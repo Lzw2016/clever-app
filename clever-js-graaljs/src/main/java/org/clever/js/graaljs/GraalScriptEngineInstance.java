@@ -25,18 +25,18 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
 
     public GraalScriptEngineInstance(ScriptEngineContext<Context, Value> context) {
         super(context);
-        Value engineBindings = this.context.getEngine().getBindings(GraalConstant.Js_Language_Id);
-        Map<String, Object> contextMap = this.context.getContextMap();
-        if (contextMap != null) {
-            contextMap.forEach(engineBindings::putMember);
+        Value engineBindings = this.engineContext.getEngine().getBindings(GraalConstant.Js_Language_Id);
+        Map<String, Object> registerGlobalVars = this.engineContext.getRegisterGlobalVars();
+        if (registerGlobalVars != null) {
+            registerGlobalVars.forEach(engineBindings::putMember);
         }
-        engineBindings.putMember(GlobalConstant.Engine_Require, this.context.getRequire());
-        engineBindings.putMember(GlobalConstant.Engine_Global, this.context.getGlobal());
+        engineBindings.putMember(GlobalConstant.Engine_Require, this.engineContext.getRequire());
+        engineBindings.putMember(GlobalConstant.Engine_Global, this.engineContext.getGlobal());
     }
 
     @Override
     public String getEngineName() {
-        final String engineName = context.getEngine().getEngine().getImplementationName();
+        final String engineName = engineContext.getEngine().getEngine().getImplementationName();
         if (GraalConstant.Error_Engine_Name.equalsIgnoreCase(engineName)) {
             log.error("当前GraalJs未使用GraalVM compiler功能，请使用GraalVM compiler功能以提升性能(2 ~ 10倍性能提升)!");
         }
@@ -45,7 +45,7 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
 
     @Override
     public String getEngineVersion() {
-        return context.getEngine().getEngine().getVersion();
+        return engineContext.getEngine().getEngine().getVersion();
     }
 
     @Override
@@ -55,12 +55,12 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
 
     @Override
     protected ScriptObject<Value> newScriptObject(Value scriptObject) {
-        return new GraalScriptObject(context, scriptObject);
+        return new GraalScriptObject(engineContext, scriptObject);
     }
 
     @Override
     public void close() {
-        context.getEngine().close(true);
+        engineContext.getEngine().close(true);
     }
 
     @Getter
@@ -75,8 +75,8 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
         public Builder(Engine graalEngine, Folder rootPath) {
             super(rootPath);
             this.graalEngine = graalEngine;
-            // 自定义 contextMap
-            EngineGlobalUtils.putGlobalObjects(contextMap);
+            // 自定义 registerGlobalVars
+            EngineGlobalUtils.putGlobalObjects(registerGlobalVars);
         }
 
         public static Builder create(Engine graalvmEngine, Folder rootPath) {
@@ -107,7 +107,7 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
                 .setCustomContext(customContext)
                 .setCustomHostAccess(customHostAccess)
                 .setEngine(engine)
-                .setContextMap(contextMap)
+                .setRegisterGlobalVars(registerGlobalVars)
                 .setModuleCache(moduleCache)
                 .setRequire(require)
                 .setCompileModule(compileModule)

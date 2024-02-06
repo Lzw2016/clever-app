@@ -14,16 +14,16 @@ public abstract class AbstractScriptObject<E, T> implements ScriptObject<T> {
     /**
      * 引擎上下文
      */
-    protected final ScriptEngineContext<E, T> context;
+    protected final ScriptEngineContext<E, T> engineContext;
     /**
      * Script引擎对应的对象值
      */
     protected final T original;
 
-    public AbstractScriptObject(ScriptEngineContext<E, T> context, T original) {
-        Assert.notNull(context, "参数context不能为空");
-        Assert.notNull(original, "参数original不能为空");
-        this.context = context;
+    public AbstractScriptObject(ScriptEngineContext<E, T> engineContext, T original) {
+        Assert.notNull(engineContext, "参数 engineContext 不能为 null");
+        Assert.notNull(original, "参数 original 不能为空");
+        this.engineContext = engineContext;
         this.original = original;
     }
 

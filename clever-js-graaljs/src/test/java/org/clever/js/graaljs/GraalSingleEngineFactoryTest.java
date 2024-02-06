@@ -57,7 +57,7 @@ public class GraalSingleEngineFactoryTest {
             // 从池中获取对象
             instance = pool.borrowObject();
             // 使用对象
-            Context engine = instance.getContext().getEngine();
+            Context engine = instance.getEngineContext().getEngine();
             try {
                 engine.enter();
                 instance.require("/pool2-test").callMember("t01");

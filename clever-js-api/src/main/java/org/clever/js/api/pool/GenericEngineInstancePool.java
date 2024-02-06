@@ -20,9 +20,14 @@ public class GenericEngineInstancePool<E, T> implements EngineInstancePool<E, T>
     private final GenericObjectPool<ScriptEngineInstance<E, T>> pool;
 
     public GenericEngineInstancePool(
-            final PooledObjectFactory<ScriptEngineInstance<E, T>> factory,
-            final GenericObjectPoolConfig<ScriptEngineInstance<E, T>> config) {
+        final PooledObjectFactory<ScriptEngineInstance<E, T>> factory,
+        final GenericObjectPoolConfig<ScriptEngineInstance<E, T>> config) {
         this.pool = new GenericObjectPool<>(factory, config);
+    }
+
+    @Override
+    public EnginePoolStatus getPoolStatus() {
+        return EnginePoolStatus.create(pool);
     }
 
     @Override

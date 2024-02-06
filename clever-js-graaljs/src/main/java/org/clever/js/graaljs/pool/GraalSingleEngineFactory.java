@@ -26,7 +26,7 @@ public class GraalSingleEngineFactory extends AbstractEngineFactory<Context, Val
     protected final GraalScriptEngineInstance.Builder builder;
 
     public GraalSingleEngineFactory(GraalScriptEngineInstance.Builder builder) {
-        Assert.notNull(builder, "参数 builder 不能为空");
+        Assert.notNull(builder, "参数 builder 不能为 null");
         this.builder = builder;
     }
 

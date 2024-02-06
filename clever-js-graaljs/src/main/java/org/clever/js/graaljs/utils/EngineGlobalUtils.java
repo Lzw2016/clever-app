@@ -9,11 +9,11 @@ import java.util.Map;
 
 public class EngineGlobalUtils {
 
-    public static void putGlobalObjects(Map<String, Object> contextMap) {
+    public static void putGlobalObjects(Map<String, Object> registerGlobalVars) {
         LoggerConsole.Instance.setObjectToString(GraalObjectToString.Instance);
-        contextMap.put("console", LoggerConsole.Instance);
-        contextMap.put("print", LoggerConsole.Instance);
-        contextMap.put("LoggerFactory", GraalLoggerFactory.Instance);
-        contextMap.put("Interop", GraalInterop.Instance);
+        registerGlobalVars.put("console", LoggerConsole.Instance);
+        registerGlobalVars.put("print", LoggerConsole.Instance);
+        registerGlobalVars.put("LoggerFactory", GraalLoggerFactory.Instance);
+        registerGlobalVars.put("Interop", GraalInterop.Instance);
     }
 }

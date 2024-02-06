@@ -35,34 +35,34 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
     /**
      * 引擎上下文
      */
-    protected final ScriptEngineContext<E, T> context;
+    protected final ScriptEngineContext<E, T> engineContext;
     /**
      * 当前模块实例
      */
-    private Module<T> currentModule;
+    private volatile Module<T> currentModule;
     /**
      * 当前模块所属文件夹
      */
     private final Folder currentModuleFolder;
 
-    public AbstractRequire(ScriptEngineContext<E, T> context, Module<T> currentModule, Folder currentModuleFolder) {
-        Assert.notNull(context, "参数context不能为空");
-        Assert.notNull(currentModule, "参数currentModule不能为空");
-        Assert.notNull(currentModuleFolder, "参数currentModuleFolder不能为空");
-        this.context = context;
+    public AbstractRequire(ScriptEngineContext<E, T> engineContext, Module<T> currentModule, Folder currentModuleFolder) {
+        Assert.notNull(engineContext, "参数 engineContext 不能为 null");
+        Assert.notNull(currentModule, "参数 currentModule 不能为 null");
+        Assert.notNull(currentModuleFolder, "参数 currentModuleFolder 不能为 null");
+        this.engineContext = engineContext;
         this.currentModule = currentModule;
         this.currentModuleFolder = currentModuleFolder;
     }
 
-    protected AbstractRequire(ScriptEngineContext<E, T> context, Folder currentModuleFolder) {
-        Assert.notNull(context, "参数context不能为空");
-        Assert.notNull(currentModuleFolder, "参数currentModuleFolder不能为空");
-        this.context = context;
+    protected AbstractRequire(ScriptEngineContext<E, T> engineContext, Folder currentModuleFolder) {
+        Assert.notNull(engineContext, "参数 context 不能为 null");
+        Assert.notNull(currentModuleFolder, "参数 currentModuleFolder 不能为 null");
+        this.engineContext = engineContext;
         this.currentModuleFolder = currentModuleFolder;
     }
 
     public ModuleCache<T> getCache() {
-        return context.getModuleCache();
+        return engineContext.getModuleCache();
     }
 
     /**
@@ -71,20 +71,20 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
     protected abstract T newScriptObject();
 
     /**
-     * @param context             引擎上下文
+     * @param engineContext       引擎上下文
      * @param currentModuleFolder 当前模块所属文件夹
      */
-    protected abstract AbstractRequire<E, T> newRequire(ScriptEngineContext<E, T> context, Folder currentModuleFolder);
+    protected abstract AbstractRequire<E, T> newRequire(ScriptEngineContext<E, T> engineContext, Folder currentModuleFolder);
 
     /**
-     * @param context  引擎上下文
-     * @param id       模块的识别符，通常是带有绝对路径的模块文件名
-     * @param filename 模块的完全解析后的文件名，带有绝对路径
-     * @param exports  表示模块对外输出的值
-     * @param parent   返回一个对象，最先引用该模块的模块
-     * @param require  module.require() 方法提供了一种加载模块的方法，就像从原始模块调用 require() 一样
+     * @param engineContext 引擎上下文
+     * @param id            模块的识别符，通常是带有绝对路径的模块文件名
+     * @param filename      模块的完全解析后的文件名，带有绝对路径
+     * @param exports       表示模块对外输出的值
+     * @param parent        返回一个对象，最先引用该模块的模块
+     * @param require       module.require() 方法提供了一种加载模块的方法，就像从原始模块调用 require() 一样
      */
-    protected abstract Module<T> newModule(ScriptEngineContext<E, T> context, String id, String filename, T exports, Module<T> parent, Require<T> require);
+    protected abstract Module<T> newModule(ScriptEngineContext<E, T> engineContext, String id, String filename, T exports, Module<T> parent, Require<T> require);
 
     /**
      * @param function 脚本模块函数
@@ -100,7 +100,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
     @SuppressWarnings("unchecked")
     @Override
     public T require(final String id) {
-        Assert.isNotBlank(id, "参数id不能为空");
+        Assert.isNotBlank(id, "参数 id 不能为空");
         Folder moduleFile = loadModuleFolder(id);
         if (moduleFile == null || !moduleFile.isFile()) {
             throw new ModuleNotFoundException("找不到模块id=" + id);
@@ -147,7 +147,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
      * @param fullPath 全路径
      */
     protected Module<T> loadModuleForCache(String fullPath) {
-        ModuleCache<T> moduleCache = context.getModuleCache();
+        ModuleCache<T> moduleCache = engineContext.getModuleCache();
         Module<T> module = moduleCache.get(fullPath);
         if (module != null) {
             log.debug("# ModuleCache 命中缓存 -> {}", fullPath);
@@ -161,7 +161,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
     @SuppressWarnings("unchecked")
     protected Module<T> compileModule(Folder moduleFile) throws Exception {
         final String fullPath = moduleFile.getFullPath();
-        CompileModule<T> compileModule = context.getCompileModule();
+        CompileModule<T> compileModule = engineContext.getCompileModule();
         // 从缓存中加载模块
         Module<T> module = loadModuleForCache(fullPath);
         if (module != null) {
@@ -169,11 +169,11 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
         }
         // 编译加载模块
         String name = moduleFile.getName();
-        AbstractRequire<E, T> require = newRequire(context, moduleFile.getParent());
+        AbstractRequire<E, T> require = newRequire(engineContext, moduleFile.getParent());
         if (name.endsWith(JSON_File)) {
             // json模块
             T exports = compileModule.compileJsonModule(moduleFile);
-            module = newModule(context, fullPath, fullPath, exports, currentModule, require);
+            module = newModule(engineContext, fullPath, fullPath, exports, currentModule, require);
             require.currentModule = module;
         } else if (name.endsWith(JS_File)) {
             // js模块
@@ -181,8 +181,8 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
             if (exports == null) {
                 exports = newScriptObject();
             }
-            T function = compileModule.compileJavaScriptModule(moduleFile);
-            module = newModule(context, fullPath, fullPath, exports, currentModule, require);
+            T function = compileModule.compileScriptModule(moduleFile);
+            module = newModule(engineContext, fullPath, fullPath, exports, currentModule, require);
             require.currentModule = module;
             // (function(exports, require, module, __filename, __dirname) {})
             // this         -->
@@ -197,7 +197,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
         }
         // 缓存当前加载的 Module
         log.debug("# ModuleCache 加入缓存 -> {}", fullPath);
-        context.getModuleCache().put(fullPath, module);
+        engineContext.getModuleCache().put(fullPath, module);
         return module;
     }
 
@@ -207,11 +207,11 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
     protected Folder loadModuleFolder(final String path) {
         // 判断path是相对路径还是绝对路径
         if (path.startsWith(Folder.Root_Path)
-                || path.startsWith(Folder.Current_Path)
-                || path.startsWith(Folder.Parent_Path)
-                || path.startsWith("\\")
-                || path.startsWith(".\\")
-                || path.startsWith("..\\")) {
+            || path.startsWith(Folder.Current_Path)
+            || path.startsWith(Folder.Parent_Path)
+            || path.startsWith("\\")
+            || path.startsWith(".\\")
+            || path.startsWith("..\\")) {
             // 相对路径
             return resolvedModuleFolder(currentModuleFolder, path);
         }

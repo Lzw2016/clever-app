@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class GraalScriptObject extends AbstractScriptObject<Context, Value> {
 
-    public GraalScriptObject(ScriptEngineContext<Context, Value> context, Value original) {
-        super(context, original);
+    public GraalScriptObject(ScriptEngineContext<Context, Value> engineContext, Value original) {
+        super(engineContext, original);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class GraalScriptObject extends AbstractScriptObject<Context, Value> {
 
     @Override
     public Object callMember(String functionName, Object... args) {
-        Context engine = context.getEngine();
+        Context engine = engineContext.getEngine();
         Object res;
         try {
             engine.enter();

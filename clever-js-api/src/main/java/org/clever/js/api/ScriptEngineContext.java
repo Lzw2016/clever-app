@@ -23,9 +23,9 @@ public interface ScriptEngineContext<E, T> {
     E getEngine();
 
     /**
-     * 获取Script引擎全局对象
+     * 获取向Script引擎注册的全局对象集合
      */
-    Map<String, Object> getContextMap();
+    Map<String, Object> getRegisterGlobalVars();
 
     /**
      * 根路径文件夹

@@ -29,12 +29,12 @@ public class NashornCompileModule extends AbstractCompileModule<NashornScriptEng
     }
 
     @Override
-    public ScriptObjectMirror compileJavaScriptModule(Folder path) throws Exception {
+    public ScriptObjectMirror compileScriptModule(Folder path) throws Exception {
         final String code = path.getFileContent();
         if (code == null) {
             throw new ReadFileContentException("读取文件内容失败: path=" + path.getFullPath());
         }
         final String moduleScriptCode = getModuleScriptCode(code);
-        return (ScriptObjectMirror) context.getEngine().eval(moduleScriptCode);
+        return (ScriptObjectMirror) engineContext.getEngine().eval(moduleScriptCode);
     }
 }

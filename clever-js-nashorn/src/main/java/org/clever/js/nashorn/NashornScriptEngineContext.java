@@ -27,19 +27,21 @@ import java.util.Set;
  */
 public class NashornScriptEngineContext extends AbstractScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> {
 
-    public NashornScriptEngineContext() {
-        super();
+    public NashornScriptEngineContext(NashornScriptEngine engine,
+                                      Map<String, Object> registerGlobalVars,
+                                      Folder rootPath,
+                                      ModuleCache<ScriptObjectMirror> moduleCache,
+                                      Require<ScriptObjectMirror> require,
+                                      CompileModule<ScriptObjectMirror> compileModule,
+                                      ScriptObjectMirror global) {
+        super(engine, registerGlobalVars, rootPath, moduleCache, require, compileModule, global);
     }
 
-    public NashornScriptEngineContext(
-            NashornScriptEngine engine,
-            Map<String, Object> contextMap,
-            Folder rootPath,
-            ModuleCache<ScriptObjectMirror> moduleCache,
-            Require<ScriptObjectMirror> require,
-            CompileModule<ScriptObjectMirror> compileModule,
-            ScriptObjectMirror global) {
-        super(engine, contextMap, rootPath, moduleCache, require, compileModule, global);
+    public NashornScriptEngineContext(NashornScriptEngine engine,
+                                      Map<String, Object> registerGlobalVars,
+                                      Folder rootPath,
+                                      ModuleCache<ScriptObjectMirror> moduleCache) {
+        super(engine, registerGlobalVars, rootPath, moduleCache);
     }
 
     public static class Builder extends AbstractBuilder<NashornScriptEngine, ScriptObjectMirror> {
@@ -47,11 +49,11 @@ public class NashornScriptEngineContext extends AbstractScriptEngineContext<Nash
 
         public Builder(Folder rootPath) {
             super(rootPath);
-            // 自定义 contextMap
+            // 自定义 registerGlobalVars
             LoggerConsole.Instance.setObjectToString(NashornObjectToString.Instance);
-            contextMap.put("console", LoggerConsole.Instance);
-            contextMap.put("print", LoggerConsole.Instance);
-            contextMap.put("LoggerFactory", NashornLoggerFactory.Instance);
+            registerGlobalVars.put("console", LoggerConsole.Instance);
+            registerGlobalVars.put("print", LoggerConsole.Instance);
+            registerGlobalVars.put("LoggerFactory", NashornLoggerFactory.Instance);
         }
 
         public static Builder create(Folder rootPath) {
@@ -80,41 +82,36 @@ public class NashornScriptEngineContext extends AbstractScriptEngineContext<Nash
          * 创建 ScriptEngineContext
          */
         public NashornScriptEngineContext build() {
-            NashornScriptEngineContext context = new NashornScriptEngineContext();
             // engine
             if (engine == null) {
                 engine = ScriptEngineUtils.creatEngine(denyAccessClass);
             }
-            context.engine = engine;
-            // contextMap
-            if (contextMap == null) {
-                contextMap = Collections.emptyMap();
+            // registerGlobalVars
+            if (registerGlobalVars == null) {
+                registerGlobalVars = Collections.emptyMap();
             }
-            context.contextMap = contextMap;
-            // rootPath
-            context.rootPath = rootPath;
             // moduleCache
             if (moduleCache == null) {
                 moduleCache = new MemoryModuleCache<>();
             }
-            context.moduleCache = moduleCache;
+            NashornScriptEngineContext engineContext = new NashornScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache);
             // require
             if (require == null) {
-                NashornModule mainModule = NashornModule.createMainModule(context);
-                require = new NashornRequire(context, mainModule, rootPath);
+                NashornModule mainModule = NashornModule.createMainModule(engineContext);
+                require = new NashornRequire(engineContext, mainModule, rootPath);
             }
-            context.require = require;
+            engineContext.require = require;
             // compileModule
             if (compileModule == null) {
-                compileModule = new NashornCompileModule(context);
+                compileModule = new NashornCompileModule(engineContext);
             }
-            context.compileModule = compileModule;
+            engineContext.compileModule = compileModule;
             // global
             if (global == null) {
                 global = ScriptEngineUtils.newObject();
             }
-            context.global = global;
-            return context;
+            engineContext.global = global;
+            return engineContext;
         }
     }
 }

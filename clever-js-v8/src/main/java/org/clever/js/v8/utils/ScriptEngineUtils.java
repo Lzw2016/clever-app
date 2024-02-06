@@ -16,7 +16,7 @@ public class ScriptEngineUtils {
      */
     @SneakyThrows
     public static IV8ValueObject newObject(V8Runtime v8) {
-        Assert.notNull(v8, "参数v8不能为空");
+        Assert.notNull(v8, "参数 v8 不能为 null");
         return v8.createV8ValueObject();
     }
 
@@ -25,7 +25,7 @@ public class ScriptEngineUtils {
      */
     @SneakyThrows
     public static IV8ValueObject newArray(V8Runtime v8, Object... args) {
-        Assert.notNull(v8, "参数v8不能为空");
+        Assert.notNull(v8, "参数 v8 不能为 null");
         V8ValueArray array = v8.createV8ValueArray();
         if (args != null) {
             array.push(args);
@@ -38,7 +38,7 @@ public class ScriptEngineUtils {
      */
     @SneakyThrows
     public static IV8ValueObject parseJson(V8Runtime v8, String json) {
-        Assert.notNull(v8, "参数v8不能为空");
+        Assert.notNull(v8, "参数 v8 不能为 null");
         return v8.getExecutor(String.format("( %s );", json)).execute();
     }
 }

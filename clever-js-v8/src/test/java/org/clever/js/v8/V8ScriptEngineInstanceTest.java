@@ -50,7 +50,7 @@ public class V8ScriptEngineInstanceTest {
         log.info("### rootFolder -> {}", rootFolder);
 
         ScriptEngineInstance<V8Runtime, IV8ValueObject> engineInstance = V8ScriptEngineInstance.Builder.create(rootFolder).build();
-        V8Runtime v8 = engineInstance.getContext().getEngine();
+        V8Runtime v8 = engineInstance.getEngineContext().getEngine();
         registerPrint(v8);
 
         log.info("### getEngineName      -> {}", engineInstance.getEngineName());
@@ -82,7 +82,7 @@ public class V8ScriptEngineInstanceTest {
         log.info("### rootFolder -> {}", rootFolder);
 
         ScriptEngineInstance<V8Runtime, IV8ValueObject> engineInstance = V8ScriptEngineInstance.Builder.create(rootFolder).build();
-        V8Runtime v8 = engineInstance.getContext().getEngine();
+        V8Runtime v8 = engineInstance.getEngineContext().getEngine();
         registerPrint(v8);
 
         ScriptObject<?> scriptObject = engineInstance.require("/01基本使用/02.js");
@@ -113,7 +113,7 @@ public class V8ScriptEngineInstanceTest {
         log.info("### rootFolder -> {}", rootFolder);
 
         ScriptEngineInstance<V8Runtime, IV8ValueObject> engineInstance = V8ScriptEngineInstance.Builder.create(rootFolder).build();
-        V8Runtime v8 = engineInstance.getContext().getEngine();
+        V8Runtime v8 = engineInstance.getEngineContext().getEngine();
         registerPrint(v8);
 
         ScriptObject<?> scriptObject = engineInstance.require("/02循环依赖/main");
@@ -140,7 +140,7 @@ public class V8ScriptEngineInstanceTest {
         log.info("### rootFolder -> {}", rootFolder);
 
         ScriptEngineInstance<V8Runtime, IV8ValueObject> engineInstance = V8ScriptEngineInstance.Builder.create(rootFolder).build();
-        V8Runtime v8 = engineInstance.getContext().getEngine();
+        V8Runtime v8 = engineInstance.getEngineContext().getEngine();
         registerPrint(v8);
 
         ScriptObject<?> scriptObject = engineInstance.require("/03使用npm包/src/01");

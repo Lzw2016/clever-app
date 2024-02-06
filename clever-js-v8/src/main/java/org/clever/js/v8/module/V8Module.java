@@ -51,9 +51,9 @@ public class V8Module extends AbstractModule<V8Runtime, IV8ValueObject> {
             this.module.set(GlobalConstant.Module_Parent, this.parent.getModule());
         }
         // TODO  Module_Paths
-        this.module.set(GlobalConstant.Module_Paths, ScriptEngineUtils.newArray(context.getEngine()));
+        this.module.set(GlobalConstant.Module_Paths, ScriptEngineUtils.newArray(engineContext.getEngine()));
         // TODO  Module_Children
-        this.module.set(GlobalConstant.Module_Children, ScriptEngineUtils.newArray(context.getEngine()));
+        this.module.set(GlobalConstant.Module_Children, ScriptEngineUtils.newArray(engineContext.getEngine()));
         this.module.set(GlobalConstant.Module_Exports, exports);
         // Assert.isTrue(this.require instanceof JavaCallback, "参数require必须实现JavaCallback接口");
         // this.module.registerJavaMethod((JavaCallback) this.require, GlobalConstant.Module_Require);
@@ -61,7 +61,7 @@ public class V8Module extends AbstractModule<V8Runtime, IV8ValueObject> {
 
     @Override
     protected IV8ValueObject newScriptObject() {
-        return ScriptEngineUtils.newObject(context.getEngine());
+        return ScriptEngineUtils.newObject(engineContext.getEngine());
     }
 
     @SneakyThrows
@@ -72,7 +72,7 @@ public class V8Module extends AbstractModule<V8Runtime, IV8ValueObject> {
 
     @Override
     public ScriptObject<IV8ValueObject> getExportsWrapper() {
-        return new V8ScriptObject(context, getExports());
+        return new V8ScriptObject(engineContext, getExports());
     }
 
     @SneakyThrows

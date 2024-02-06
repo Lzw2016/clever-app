@@ -14,6 +14,7 @@ import java.io.Serializable;
 @Data
 public class EnginePoolStatus implements Serializable {
     // ---------------------------------------------------------------------------------------------------- 配置
+
     /**
      * 配置-最大数量
      */
@@ -38,6 +39,7 @@ public class EnginePoolStatus implements Serializable {
      * 配置-退出程序运行之间的休眠毫秒数
      */
     private long timeBetweenEvictionRunsMillis;
+
     // ---------------------------------------------------------------------------------------------------- 状态
     /**
      * 状态-当前最活动数量

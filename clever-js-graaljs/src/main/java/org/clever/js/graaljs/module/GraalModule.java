@@ -20,24 +20,24 @@ import org.graalvm.polyglot.Value;
 public class GraalModule extends AbstractModule<Context, Value> {
 
     public GraalModule(
-            ScriptEngineContext<Context, Value> context,
-            String id,
-            String filename,
-            Value exports,
-            Module<Value> parent,
-            Require<Value> require) {
-        super(context, id, filename, exports, parent, require);
+        ScriptEngineContext<Context, Value> engineContext,
+        String id,
+        String filename,
+        Value exports,
+        Module<Value> parent,
+        Require<Value> require) {
+        super(engineContext, id, filename, exports, parent, require);
     }
 
-    private GraalModule(ScriptEngineContext<Context, Value> context) {
-        super(context);
+    private GraalModule(ScriptEngineContext<Context, Value> engineContext) {
+        super(engineContext);
     }
 
     /**
      * 创建主模块(根模块)
      */
-    public static GraalModule createMainModule(ScriptEngineContext<Context, Value> context) {
-        return new GraalModule(context);
+    public static GraalModule createMainModule(ScriptEngineContext<Context, Value> engineContext) {
+        return new GraalModule(engineContext);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class GraalModule extends AbstractModule<Context, Value> {
 
     @Override
     protected Value newScriptObject() {
-        return ScriptEngineUtils.newObject(context.getEngine());
+        return ScriptEngineUtils.newObject(engineContext.getEngine());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class GraalModule extends AbstractModule<Context, Value> {
 
     @Override
     public ScriptObject<Value> getExportsWrapper() {
-        return new GraalScriptObject(context, getExports());
+        return new GraalScriptObject(engineContext, getExports());
     }
 
     @Override
