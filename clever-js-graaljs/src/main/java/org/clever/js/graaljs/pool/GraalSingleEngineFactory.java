@@ -40,7 +40,7 @@ public class GraalSingleEngineFactory extends AbstractEngineFactory<Context, Val
      */
     @Override
     public void close() {
-        Engine engine = builder.getGraalEngine();
+        Engine engine = builder.getGraalvmEngine();
         if (engine != null) {
             engine.close();
         }

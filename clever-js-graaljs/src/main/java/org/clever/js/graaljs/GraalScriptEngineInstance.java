@@ -67,14 +67,14 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
     public static class Builder extends AbstractBuilder<Context, Value> {
         private Consumer<Context.Builder> customContext;
         private Consumer<HostAccess.Builder> customHostAccess;
-        private final Engine graalEngine;
+        private final Engine graalvmEngine;
 
         /**
          * @param rootPath 根路径文件夹
          */
-        public Builder(Engine graalEngine, Folder rootPath) {
+        public Builder(Engine graalvmEngine, Folder rootPath) {
             super(rootPath);
-            this.graalEngine = graalEngine;
+            this.graalvmEngine = graalvmEngine;
             // 自定义 registerGlobalVars
             EngineGlobalUtils.putGlobalObjects(registerGlobalVars);
         }
@@ -103,7 +103,7 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
          * 创建 ScriptEngineContext
          */
         public GraalScriptEngineInstance build() {
-            ScriptEngineContext<Context, Value> context = GraalScriptEngineContext.Builder.create(graalEngine, rootPath)
+            ScriptEngineContext<Context, Value> context = GraalScriptEngineContext.Builder.create(graalvmEngine, rootPath)
                 .setCustomContext(customContext)
                 .setCustomHostAccess(customHostAccess)
                 .setEngine(engine)

@@ -79,7 +79,7 @@ public abstract class ScriptFunctionCache<E, T> implements Closeable {
     protected abstract ScriptObject<T> createFunction(String funCode);
 
     /**
-     * 把脚本代码包装成函数对象
+     * 把脚本代码包装成函数对象(会使用缓存)
      *
      * @param code 脚本代码片段(并非完整的函数定义，仅仅是一段脚本代码)
      * @return 脚本函数对象
@@ -108,43 +108,6 @@ public abstract class ScriptFunctionCache<E, T> implements Closeable {
         }
         return function;
     }
-
-//    /**
-//     * 获取ScriptObject
-//     *
-//     * @param code   脚本代码
-//     * @param loader 根据脚本代码创建ScriptObject
-//     * @return 返回ScriptObject，不会返回null
-//     */
-//    @SuppressWarnings("unchecked")
-//    public ScriptObject<T> get(String code, Callable<ScriptObject<T>> loader) {
-//        try {
-//            return (ScriptObject<T>) cache.get(code, loader);
-//        } catch (ExecutionException e) {
-//            throw ExceptionUtils.unchecked(e);
-//        }
-//    }
-//
-//    /**
-//     * 获取ScriptObject
-//     *
-//     * @param code 脚本代码
-//     * @return 返回ScriptObject，不存在就返回null
-//     */
-//    @SuppressWarnings("unchecked")
-//    public  ScriptObject<T> get(String code) {
-//        return (ScriptObject<T>) cache.getIfPresent(code);
-//    }
-//
-//    /**
-//     * 缓存ScriptObject
-//     *
-//     * @param code         脚本代码
-//     * @param scriptObject ScriptObject对象
-//     */
-//    public  void put(String code, ScriptObject<T> scriptObject) {
-//        cache.put(code, scriptObject);
-//    }
 
     /**
      * 清除所有缓存
