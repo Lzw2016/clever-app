@@ -664,14 +664,21 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 未开始
 
 ### clever-js-api
+```
+Folder                  加载CommonJS模块的代码资源加载器(一般对应文件系统)
+Module                  CommonJS模块
+ModuleCache             CommonJS模块缓存
+CompileModule           把js代码编译成js对象
+Require                 内置的 require 对象,实现了CommonJS模块的 require 功能
+Console                 内置的 console 对象
+Console                 内置的 print 对象
+LoggerFactory           内置的 LoggerFactory 对象
+ScriptEngineContext     脚本引擎上下文
+ScriptEngineInstance    脚本引擎实例
+ScriptObject            js对象的java包装类
+EngineInstancePool      js引擎池,在多线程环境中使用
+```
 - [OK] 抽象了 js 引擎的使用
-```
-clever-graaljs
-[OK] GraalSingleEngineFactory    单个Engine对象的PooledObjectFactory<ScriptEngineInstance>
-[  ] ScriptEngineInstance        包装引擎池
-[  ] ScriptContextInstance       包装引擎实例
-[  ] ScriptObjectCache           缓存ScriptObject
-```
 
 ### clever-js-graaljs
 ```
