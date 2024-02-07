@@ -1,14 +1,11 @@
 package org.clever.js.api;
 
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.Conv;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.module.Cache;
 import org.clever.js.api.require.Require;
 import org.clever.js.api.utils.ScriptCodeUtils;
 import org.clever.util.Assert;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 作者：lizw <br/>
@@ -19,7 +16,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Slf4j
 public abstract class AbstractScriptEngineInstance<E, T> implements ScriptEngineInstance<E, T> {
-    protected static final AtomicLong FUC_COUNTER = new AtomicLong(0);
     /**
      * 引擎上下文
      */
@@ -89,7 +85,7 @@ public abstract class AbstractScriptEngineInstance<E, T> implements ScriptEngine
                 return function;
             }
             String compressCode = ScriptCodeUtils.compressCode(code, true);
-            String funCode = ScriptCodeUtils.wrapFunction(compressCode, Conv.asString(FUC_COUNTER.incrementAndGet()));
+            String funCode = ScriptCodeUtils.wrapFunction(compressCode);
             function = createFunction(funCode);
             functionCache.put(code, function);
         }

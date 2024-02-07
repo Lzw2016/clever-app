@@ -58,11 +58,10 @@ public class ScriptCodeUtils {
     /**
      * 把js代码片段包装成一个js函数代码(保留原始的代码行号)
      *
-     * @param code   js代码片段
-     * @param unique 函数名的唯一标识
+     * @param code js代码片段
      * @return js函数代码
      */
-    public static String wrapFunction(String code, String unique) {
-        return String.format("function __wrap_fun_%1$s(args) {;%2$s\n}\n__wrap_fun_%1$s;", Conv.asString(unique), Conv.asString(code));
+    public static String wrapFunction(String code) {
+        return String.format("(function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16) {;%s\n});", Conv.asString(code));
     }
 }

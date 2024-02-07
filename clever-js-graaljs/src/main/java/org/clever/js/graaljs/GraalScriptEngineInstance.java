@@ -9,8 +9,10 @@ import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.graaljs.utils.EngineGlobalUtils;
 import org.clever.util.Assert;
+import org.clever.util.DigestUtils;
 import org.graalvm.polyglot.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -62,7 +64,8 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
 
     @Override
     protected ScriptObject<Value> createFunction(String funCode) {
-        Source source = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, funCode, String.format("/__fun_autogenerate_%s.js", FUC_COUNTER.get()))
+        final String md5 = DigestUtils.md5DigestAsHex(funCode.getBytes(StandardCharsets.UTF_8));
+        Source source = Source.newBuilder(GraalConstant.JS_LANGUAGE_ID, funCode, String.format("__fun_wrap_%s.js", md5))
             .cached(true)
             .buildLiteral();
         Context engine = getEngine();

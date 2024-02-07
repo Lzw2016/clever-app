@@ -29,6 +29,6 @@ public abstract class AbstractCompileModule<E, T> implements CompileModule<T> {
      * @param code Script代码
      */
     protected String getModuleScriptCode(String code) {
-        return "(function(exports, require, module, __filename, __dirname) {\n" + code + "\n});";
+        return "(function(exports, require, module, __filename, __dirname) {;" + code + "\n});";
     }
 }
