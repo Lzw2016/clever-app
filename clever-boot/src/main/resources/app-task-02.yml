@@ -85,3 +85,9 @@ timed-task:
   loadWeight: 1.0
   shellJobWorkingDir: './shell_job_log'
   logRetention: 3d
+  js-executor:
+    enginePool:
+      maxIdle: 8
+      minIdle: 0
+      maxTotal: 8
+      maxWait: 30s

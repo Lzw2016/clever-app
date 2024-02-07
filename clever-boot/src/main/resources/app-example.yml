@@ -336,3 +336,25 @@ timed-task:
   loadWeight: 1.0
   shellJobWorkingDir: './shell_job_log'
   logRetention: 7d
+  js-executor:
+    enginePool:
+      lifo: true
+      fairness: false
+      maxIdle: 8
+      minIdle: 0
+      maxTotal: 8
+      maxWait: 30s
+      blockWhenExhausted: true
+      testOnCreate: false
+      testOnBorrow: false
+      testOnReturn: false
+      testWhileIdle: false
+      timeBetweenEvictionRuns: -1s
+      numTestsPerEvictionRun: 3
+      minEvictableIdleTime: 30m
+      softMinEvictableIdleTime: -1s
+      evictionPolicyClassName: 'org.apache.commons.pool2.impl.DefaultEvictionPolicy'
+      evictorShutdownTimeout: 10s
+      jmxEnabled: true
+      jmxNamePrefix: 'pool'
+      jmxNameBase: 'js-executor-engine-'

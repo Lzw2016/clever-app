@@ -51,7 +51,7 @@
         },
         "duration": {
             "type": "string",
-            "pattern": "^\\d+(ns|us|ms|s|m|h|d)$"
+            "pattern": "^-?\\d+(ns|us|ms|s|m|h|d)$"
         },
         "httpMethod": {
             "enum": [
@@ -806,6 +806,97 @@
                             }
                         }
                     }
+                }
+            }
+        },
+        "pool": {
+            "type": "object",
+            "description": "对象池配置",
+            "properties": {
+                "lifo": {
+                    "type": "boolean",
+                    "description": "是否使用后进先出(LIFO)模式，否则为先进先出(FIFO)"
+                },
+                "fairness": {
+                    "type": "boolean",
+                    "description": "当从池中获取资源或者将资源还回池中时是否使用ReentrantLock的公平锁机制"
+                },
+                "maxIdle": {
+                    "type": "integer",
+                    "description": "链接池中最大空闲的对象数,默认也为8"
+                },
+                "minIdle": {
+                    "type": "integer",
+                    "description": "对象池中最少空闲的对象数,默认为0"
+                },
+                "maxTotal": {
+                    "type": "integer",
+                    "description": "链接池中最大对象数,默认为8"
+                },
+                "maxWait": {
+                    "type": "string",
+                    "description": "当对象池资源耗尽时，等待时间，超出则抛异常，默认为-1即永不超时",
+                    "$ref": "#/definitions/duration"
+                },
+                "blockWhenExhausted": {
+                    "type": "boolean",
+                    "description": "当这个值为true的时候，maxWaitMillis参数才能生效。为false的时候，当对象池没资源，则立马抛异常。默认为true"
+                },
+                "testOnCreate": {
+                    "type": "boolean",
+                    "description": "默认false，create的时候检测是有有效，如果无效则从对象池中移除，并尝试获取继续获取"
+                },
+                "testOnBorrow": {
+                    "type": "boolean",
+                    "description": "默认false，borrow的时候检测是有有效，如果无效则从对象池中移除，并尝试获取继续获取"
+                },
+                "testOnReturn": {
+                    "type": "boolean",
+                    "description": "默认false，return的时候检测是有有效，如果无效则从对象池中移除，并尝试获取继续获取"
+                },
+                "testWhileIdle": {
+                    "type": "boolean",
+                    "description": "默认false，在evictor线程里头，当evictionPolicy.evict方法返回false时，而且testWhileIdle为true的时候则检测是否有效，如果无效则移除"
+                },
+                "timeBetweenEvictionRuns": {
+                    "type": "string",
+                    "description": "空闲对象检测线程检测的周期，毫秒数。如果为负值，表示不运行检测线程。默认为-1",
+                    "$ref": "#/definitions/duration"
+                },
+                "numTestsPerEvictionRun": {
+                    "type": "number",
+                    "description": "在每次空闲对象回收器线程(如果有)运行时检查的对象数量，默认为3"
+                },
+                "minEvictableIdleTime": {
+                    "type": "string",
+                    "description": "对象空闲的最小时间，达到此值后空闲对象将可能会被移除。默认为1000L * 60L * 30L",
+                    "$ref": "#/definitions/duration"
+                },
+                "softMinEvictableIdleTime": {
+                    "type": "string",
+                    "description": "对象空闲的最小时间，达到此值后空闲链接将会被移除，且保留minIdle个空闲对象数。默认为-1",
+                    "$ref": "#/definitions/duration"
+                },
+                "evictionPolicyClassName": {
+                    "type": "string",
+                    "description": "evict策略的类名，默认为org.apache.commons.pool2.impl.DefaultEvictionPolicy"
+                },
+                "evictorShutdownTimeout": {
+                    "type": "string",
+                    "description": "shutdown驱逐线程的超时时间",
+                    "$ref": "#/definitions/duration"
+                },
+                "jmxEnabled": {
+                    "type": "boolean",
+                    "description": "是否注册JMX"
+                },
+                "jmxNamePrefix": {
+                    "type": "string",
+                    "description": "JMX前缀"
+                },
+                "jmxNameBase": {
+                    "type": "string",
+                    "description": "使用base + jmxNamePrefix + idx 来生成ObjectName"
                 }
             }
         },
@@ -1896,6 +1987,17 @@
                     "type": "string",
                     "description": "日志保留时间(默认7天)",
                     "$ref": "#/definitions/duration"
+                },
+                "js-executor": {
+                    "type": "object",
+                    "description": "JS任务执行器配置",
+                    "properties": {
+                        "enginePool": {
+                            "type": "object",
+                            "description": "JS引擎池配置",
+                            "$ref": "#/definitions/pool"
+                        }
+                    }
                 }
             }
         }

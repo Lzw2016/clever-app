@@ -36,9 +36,9 @@ public class MockJobExecutor implements JobExecutor {
         }
         long second = JobTriggerUtils.getSecond(newTime);
         log.info("#### ---> 模拟执行定时任务 | name={} | second={}", job.getName(), second);
-//        Thread.sleep(5_000);
-//        if (count.incrementAndGet() % 100 == 0) {
-//            log.info("#### ---> 模拟执行定时任务 | name={} | second={}", job.getName(), second);
-//        }
+        // Thread.sleep(5_000);
+        // if (count.incrementAndGet() % 100 == 0) {
+        //     log.info("#### ---> 模拟执行定时任务 | name={} | second={}", job.getName(), second);
+        // }
     }
 }
