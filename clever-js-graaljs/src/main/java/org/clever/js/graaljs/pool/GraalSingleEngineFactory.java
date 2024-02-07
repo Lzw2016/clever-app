@@ -40,43 +40,43 @@ public class GraalSingleEngineFactory extends AbstractEngineFactory<Context, Val
      */
     @Override
     public void close() {
-        Engine engine = builder.getGraalvmEngine();
-        if (engine != null) {
-            engine.close();
+        Engine graalvmEngine = builder.getGraalvmEngine();
+        if (graalvmEngine != null) {
+            graalvmEngine.close();
         }
     }
 
     /**
      * @param rootFolder       根目录对象
-     * @param engine           Engine对象
+     * @param graalvmEngine    Engine对象
      * @param customContext    自定义 Context 逻辑
      * @param customHostAccess 自定义 HostAccess 逻辑
      */
     public static GraalSingleEngineFactory create(Folder rootFolder,
-                                                  Engine engine,
+                                                  Engine graalvmEngine,
                                                   Consumer<Context.Builder> customContext,
                                                   Consumer<HostAccess.Builder> customHostAccess) {
-        GraalScriptEngineInstance.Builder builder = new GraalScriptEngineInstance.Builder(engine, rootFolder)
+        GraalScriptEngineInstance.Builder builder = new GraalScriptEngineInstance.Builder(graalvmEngine, rootFolder)
             .setCustomContext(customContext)
             .setCustomHostAccess(customHostAccess);
         return new GraalSingleEngineFactory(builder);
     }
 
     /**
-     * @param rootFolder 根目录对象
-     * @param engine     Engine对象
+     * @param rootFolder    根目录对象
+     * @param graalvmEngine Engine对象
      */
-    public static GraalSingleEngineFactory create(Folder rootFolder, Engine engine) {
-        return create(rootFolder, engine, null, null);
+    public static GraalSingleEngineFactory create(Folder rootFolder, Engine graalvmEngine) {
+        return create(rootFolder, graalvmEngine, null, null);
     }
 
     /**
      * @param rootFolder 根目录对象
      */
     public static GraalSingleEngineFactory create(Folder rootFolder) {
-        Engine engine = Engine.newBuilder()
+        Engine graalvmEngine = Engine.newBuilder()
             .useSystemProperties(true)
             .build();
-        return create(rootFolder, engine, null, null);
+        return create(rootFolder, graalvmEngine, null, null);
     }
 }

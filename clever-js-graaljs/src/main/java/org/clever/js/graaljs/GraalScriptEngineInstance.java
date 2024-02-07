@@ -103,6 +103,12 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
             return new Builder(graalvmEngine, rootPath);
         }
 
+        @Override
+        public Builder setEngine(Context engine) {
+
+            return this;
+        }
+
         /**
          * 设置自定义 Context 逻辑
          */
@@ -126,7 +132,6 @@ public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Cont
             ScriptEngineContext<Context, Value> context = GraalScriptEngineContext.Builder.create(graalvmEngine, rootPath)
                 .setCustomContext(customContext)
                 .setCustomHostAccess(customHostAccess)
-                .setEngine(engine)
                 .setRegisterGlobalVars(registerGlobalVars)
                 .setModuleCache(moduleCache)
                 .setRequire(require)

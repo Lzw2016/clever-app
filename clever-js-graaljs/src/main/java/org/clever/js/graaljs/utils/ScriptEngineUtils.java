@@ -32,13 +32,13 @@ public class ScriptEngineUtils {
     /**
      * 创建 Context.Builder
      *
-     * @param engine Engine对象
-     * @param custom 自定义 Context 逻辑(可选参数)
+     * @param graalvmEngine Engine对象
+     * @param custom        自定义 Context 逻辑(可选参数)
      */
-    public static Context.Builder createContextBuilder(Engine engine, Consumer<Context.Builder> custom) {
-        Assert.notNull(engine, "参数 engine 不能为 null");
+    public static Context.Builder createContextBuilder(Engine graalvmEngine, Consumer<Context.Builder> custom) {
+        Assert.notNull(graalvmEngine, "参数 graalvmEngine 不能为 null");
         Context.Builder builder = Context.newBuilder(GraalConstant.JS_LANGUAGE_ID)
-            .engine(engine)
+            .engine(graalvmEngine)
             .options(CONTEXT_DEFAULT_OPTIONS)
             // 设置时间时区
             .timeZone(ZoneId.of("Asia/Shanghai"))
@@ -118,12 +118,12 @@ public class ScriptEngineUtils {
     /**
      * 创建一个新的 Context
      *
-     * @param engine        Engine对象
+     * @param graalvmEngine Engine对象
      * @param customContext 自定义 Context 逻辑(可选参数)
      * @param hostAccess    HostAccess对象
      */
-    public static Context creatEngine(Engine engine, Consumer<Context.Builder> customContext, HostAccess hostAccess) {
-        Context.Builder contextBuilder = createContextBuilder(engine, customContext);
+    public static Context creatEngine(Engine graalvmEngine, Consumer<Context.Builder> customContext, HostAccess hostAccess) {
+        Context.Builder contextBuilder = createContextBuilder(graalvmEngine, customContext);
         // 沙箱环境控制 - 定义JavaScript可以访问的Class(使用黑名单机制)
         contextBuilder.allowHostAccess(hostAccess);
         // 沙箱环境控制 - 限制JavaScript的资源使用
@@ -134,12 +134,12 @@ public class ScriptEngineUtils {
     /**
      * 创建一个新的 Context
      *
-     * @param engine           Engine对象
+     * @param graalvmEngine    Engine对象
      * @param customContext    自定义 Context 逻辑(可选参数)
      * @param customHostAccess 自定义 HostAccess 逻辑(可选参数)
      */
-    public static Context creatEngine(Engine engine, Consumer<Context.Builder> customContext, Consumer<HostAccess.Builder> customHostAccess) {
-        return creatEngine(engine, customContext, createHostAccessBuilder(customHostAccess).build());
+    public static Context creatEngine(Engine graalvmEngine, Consumer<Context.Builder> customContext, Consumer<HostAccess.Builder> customHostAccess) {
+        return creatEngine(graalvmEngine, customContext, createHostAccessBuilder(customHostAccess).build());
     }
 
     /**

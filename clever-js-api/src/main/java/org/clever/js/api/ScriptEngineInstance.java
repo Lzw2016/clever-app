@@ -46,12 +46,12 @@ public interface ScriptEngineInstance<E, T> extends Closeable {
     Folder getRootPath();
 
     /**
-     * 共享的全局变量
+     * 共享的全局变量(在js代码中使用“global”变量名引用，与ES2020规范的“globalThis”类似但是不是同一个对象)
      */
     T getGlobal();
 
     /**
-     * require用于加载其他模块
+     * require用于加载其他模块(在js代码中使用“require”变量名引用)
      */
     Require<T> getRequire();
 
