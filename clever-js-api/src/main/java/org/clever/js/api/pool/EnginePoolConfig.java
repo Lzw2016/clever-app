@@ -33,41 +33,41 @@ public class EnginePoolConfig implements Serializable {
     // --------------------------------------------------------------------------------------------------------------------------------------- 数量控制参数
 
     /**
-     * 链接池中最大空闲的连接数,默认也为8
+     * 链接池中最大空闲的对象数,默认也为8
      */
     private int maxIdle = GenericObjectPoolConfig.DEFAULT_MAX_IDLE;
     /**
-     * 连接池中最少空闲的连接数,默认为0
+     * 对象池中最少空闲的对象数,默认为0
      */
     private int minIdle = GenericObjectPoolConfig.DEFAULT_MIN_IDLE;
     /**
-     * 链接池中最大连接数,默认为8
+     * 链接池中最大对象数,默认为8
      */
     private int maxTotal = GenericObjectPoolConfig.DEFAULT_MAX_TOTAL;
 
     // --------------------------------------------------------------------------------------------------------------------------------------- 超时参数
 
     /**
-     * 当连接池资源耗尽时，等待时间，超出则抛异常，默认为-1即永不超时
+     * 当对象池资源耗尽时，等待时间，超出则抛异常，默认为-1即永不超时
      */
     private Duration maxWait = BaseObjectPoolConfig.DEFAULT_MAX_WAIT;
     /**
-     * 当这个值为true的时候，maxWaitMillis参数才能生效。为false的时候，当连接池没资源，则立马抛异常。默认为true
+     * 当这个值为true的时候，maxWaitMillis参数才能生效。为false的时候，当对象池没资源，则立马抛异常。默认为true
      */
     private boolean blockWhenExhausted = BaseObjectPoolConfig.DEFAULT_BLOCK_WHEN_EXHAUSTED;
 
     // --------------------------------------------------------------------------------------------------------------------------------------- Test参数
 
     /**
-     * 默认false，create的时候检测是有有效，如果无效则从连接池中移除，并尝试获取继续获取
+     * 默认false，create的时候检测是有有效，如果无效则从对象池中移除，并尝试获取继续获取
      */
     private boolean testOnCreate = BaseObjectPoolConfig.DEFAULT_TEST_ON_CREATE;
     /**
-     * 默认false，borrow的时候检测是有有效，如果无效则从连接池中移除，并尝试获取继续获取
+     * 默认false，borrow的时候检测是有有效，如果无效则从对象池中移除，并尝试获取继续获取
      */
     private boolean testOnBorrow = BaseObjectPoolConfig.DEFAULT_TEST_ON_BORROW;
     /**
-     * 默认false，return的时候检测是有有效，如果无效则从连接池中移除，并尝试获取继续获取
+     * 默认false，return的时候检测是有有效，如果无效则从对象池中移除，并尝试获取继续获取
      */
     private boolean testOnReturn = BaseObjectPoolConfig.DEFAULT_TEST_ON_RETURN;
     /**
@@ -78,19 +78,19 @@ public class EnginePoolConfig implements Serializable {
     // --------------------------------------------------------------------------------------------------------------------------------------- 检测参数
 
     /**
-     * 空闲链接检测线程检测的周期，毫秒数。如果为负值，表示不运行检测线程。默认为-1
+     * 空闲对象检测线程检测的周期，毫秒数。如果为负值，表示不运行检测线程。默认为-1
      */
     private Duration timeBetweenEvictionRuns = BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS;
     /**
-     * 在每次空闲连接回收器线程(如果有)运行时检查的连接数量，默认为3
+     * 在每次空闲对象回收器线程(如果有)运行时检查的对象数量，默认为3
      */
     private int numTestsPerEvictionRun = BaseObjectPoolConfig.DEFAULT_NUM_TESTS_PER_EVICTION_RUN;
     /**
-     * 连接空闲的最小时间，达到此值后空闲连接将可能会被移除。默认为1000L * 60L * 30L
+     * 对象空闲的最小时间，达到此值后空闲对象将可能会被移除。默认为1000L * 60L * 30L
      */
     private Duration minEvictableIdleTime = BaseObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_DURATION;
     /**
-     * 连接空闲的最小时间，达到此值后空闲链接将会被移除，且保留minIdle个空闲连接数。默认为-1
+     * 对象空闲的最小时间，达到此值后空闲链接将会被移除，且保留minIdle个空闲对象数。默认为-1
      */
     private Duration softMinEvictableIdleTime = BaseObjectPoolConfig.DEFAULT_SOFT_MIN_EVICTABLE_IDLE_DURATION;
     /**
