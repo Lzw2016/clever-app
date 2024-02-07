@@ -646,7 +646,7 @@ https://www.dbvisitor.net/docs/guides/types/java-jdbc
 - [OK] 数据完整性校验、一致性校验
 - [OK] 支持控制任务执行节点：指定节点优先、固定节点白名单、固定节点黑名单
 - [OK] 支持负载均衡策略：抢占、随机、轮询、一致性HASH
-- [90] 支持任务类型：java调用任务、Http任务、js脚本任务、shell脚本任务
+- [OK] 支持任务类型：java调用任务、Http任务、js脚本任务、shell脚本任务
 - [OK] 定时任务调度平台API接口
 - [OK] 定时任务调度平台Web页面
 - [OK] 拆分管理控制台代码(区分定时任务核心代码与管理API代码)
@@ -677,6 +677,9 @@ ScriptEngineContext     脚本引擎上下文
 ScriptEngineInstance    脚本引擎实例
 ScriptObject            js对象的java包装类
 EngineInstancePool      js引擎池,在多线程环境中使用
+
+自定义注入的全局对象
+GlobalConstant.CUSTOM_REGISTER_GLOBAL_VARS
 ```
 - [OK] 抽象了 js 引擎的使用
 
