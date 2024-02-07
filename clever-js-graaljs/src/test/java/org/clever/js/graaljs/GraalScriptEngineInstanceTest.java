@@ -3,6 +3,7 @@ package org.clever.js.graaljs;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.js.api.ScriptEngineInstance;
 import org.clever.js.api.ScriptObject;
+import org.clever.js.api.folder.EmptyFolder;
 import org.clever.js.api.folder.FileSystemFolder;
 import org.clever.js.api.folder.Folder;
 import org.graalvm.polyglot.Context;
@@ -124,6 +125,17 @@ public class GraalScriptEngineInstanceTest {
         scriptObject = engineInstance.require("/03使用npm包/src/01");
         log.info("### getMemberNames   -> {}", scriptObject.getMemberNames());
         log.info("### callMember       -> {}", scriptObject.callMember("trim", "   abc  "));
+        engineInstance.close();
+    }
+
+    @Test
+    public void t05() throws Exception {
+        Engine engine = Engine.newBuilder().useSystemProperties(true).build();
+        ScriptEngineInstance<Context, Value> engineInstance = GraalScriptEngineInstance.Builder.create(engine, EmptyFolder.ROOT).build();
+        ScriptObject<Value> function = engineInstance.wrapFunction("return 1 + global.x;");
+        engineInstance.getGlobal().putMember("x", 7);
+        Object res = function.execute();
+        log.info("### res -> {}", res);
         engineInstance.close();
     }
 }

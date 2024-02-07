@@ -63,6 +63,6 @@ public class ScriptCodeUtils {
      * @return js函数代码
      */
     public static String wrapFunction(String code, String unique) {
-        return String.format("function __wrap_fun_%1$s(args) {;%2$s\n}\n__fuc_autogenerate_%1$s;", Conv.asString(unique), Conv.asString(code));
+        return String.format("function __wrap_fun_%1$s(args) {;%2$s\n}\n__wrap_fun_%1$s;", Conv.asString(unique), Conv.asString(code));
     }
 }
