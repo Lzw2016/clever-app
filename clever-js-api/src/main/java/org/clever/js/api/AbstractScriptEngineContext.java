@@ -1,8 +1,9 @@
 package org.clever.js.api;
 
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
-import org.clever.js.api.module.ModuleCache;
+import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
 import org.clever.util.Assert;
 
@@ -32,7 +33,11 @@ public abstract class AbstractScriptEngineContext<E, T> implements ScriptEngineC
     /**
      * 模块缓存
      */
-    protected final ModuleCache<T> moduleCache;
+    protected final Cache<Module<T>> moduleCache;
+    /**
+     * 函数对象缓存
+     */
+    protected final Cache<ScriptObject<T>> functionCache;
     /**
      * 全局require实例(根目录require)
      */
@@ -49,13 +54,15 @@ public abstract class AbstractScriptEngineContext<E, T> implements ScriptEngineC
     public AbstractScriptEngineContext(E engine,
                                        Map<String, Object> registerGlobalVars,
                                        Folder rootPath,
-                                       ModuleCache<T> moduleCache,
+                                       Cache<Module<T>> moduleCache,
+                                       Cache<ScriptObject<T>> functionCache,
                                        Require<T> require,
                                        CompileModule<T> compileModule,
                                        T global) {
         Assert.notNull(engine, "参数 engine 不能为  null");
         Assert.notNull(rootPath, "参数 rootPath 不能为  null");
         Assert.notNull(moduleCache, "参数 moduleCache 不能为  null");
+        Assert.notNull(functionCache, "参数 functionCache 不能为  null");
         Assert.notNull(require, "参数 require 不能为 null");
         Assert.notNull(compileModule, "参数 compileModule 不能为 null");
         Assert.notNull(global, "参数 global 不能为 null");
@@ -65,6 +72,7 @@ public abstract class AbstractScriptEngineContext<E, T> implements ScriptEngineC
         }
         this.rootPath = rootPath;
         this.moduleCache = moduleCache;
+        this.functionCache = functionCache;
         this.require = require;
         this.compileModule = compileModule;
         this.global = global;
@@ -73,16 +81,19 @@ public abstract class AbstractScriptEngineContext<E, T> implements ScriptEngineC
     protected AbstractScriptEngineContext(E engine,
                                           Map<String, Object> registerGlobalVars,
                                           Folder rootPath,
-                                          ModuleCache<T> moduleCache) {
+                                          Cache<Module<T>> moduleCache,
+                                          Cache<ScriptObject<T>> functionCache) {
         Assert.notNull(engine, "参数 engine 不能为  null");
         Assert.notNull(rootPath, "参数 rootPath 不能为  null");
         Assert.notNull(moduleCache, "参数 moduleCache 不能为  null");
+        Assert.notNull(functionCache, "参数 functionCache 不能为  null");
         this.engine = engine;
         if (registerGlobalVars != null) {
             this.registerGlobalVars.putAll(registerGlobalVars);
         }
         this.rootPath = rootPath;
         this.moduleCache = moduleCache;
+        this.functionCache = functionCache;
     }
 
     @Override
@@ -101,8 +112,13 @@ public abstract class AbstractScriptEngineContext<E, T> implements ScriptEngineC
     }
 
     @Override
-    public ModuleCache<T> getModuleCache() {
+    public Cache<Module<T>> getModuleCache() {
         return moduleCache;
+    }
+
+    @Override
+    public Cache<ScriptObject<T>> getFunctionCache() {
+        return functionCache;
     }
 
     @Override

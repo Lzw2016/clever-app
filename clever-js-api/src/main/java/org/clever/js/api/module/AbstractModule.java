@@ -192,7 +192,7 @@ public abstract class AbstractModule<E, T> implements Module<T> {
     /**
      * 获取模块缓存
      */
-    public ModuleCache<T> getCache() {
+    public Cache<Module<T>> getCache() {
         return engineContext.getModuleCache();
     }
 }

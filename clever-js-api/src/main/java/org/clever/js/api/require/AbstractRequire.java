@@ -61,7 +61,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
         this.currentModuleFolder = currentModuleFolder;
     }
 
-    public ModuleCache<T> getCache() {
+    public Cache<Module<T>> getCache() {
         return engineContext.getModuleCache();
     }
 
@@ -147,7 +147,7 @@ public abstract class AbstractRequire<E, T> implements Require<T> {
      * @param fullPath 全路径
      */
     protected Module<T> loadModuleForCache(String fullPath) {
-        ModuleCache<T> moduleCache = engineContext.getModuleCache();
+        Cache<Module<T>> moduleCache = engineContext.getModuleCache();
         Module<T> module = moduleCache.get(fullPath);
         if (module != null) {
             log.debug("# ModuleCache 命中缓存 -> {}", fullPath);

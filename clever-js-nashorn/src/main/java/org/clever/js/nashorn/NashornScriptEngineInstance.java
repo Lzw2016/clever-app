@@ -24,11 +24,6 @@ import java.util.Set;
  */
 public class NashornScriptEngineInstance extends AbstractScriptEngineInstance<NashornScriptEngine, ScriptObjectMirror> {
 
-    public NashornScriptEngineInstance(ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext, long expireTime, int maxCapacity) {
-        super(engineContext, expireTime, maxCapacity);
-        init();
-    }
-
     public NashornScriptEngineInstance(ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext) {
         super(engineContext);
         init();

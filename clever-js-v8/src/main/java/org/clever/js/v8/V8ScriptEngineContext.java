@@ -5,10 +5,12 @@ import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.values.reference.IV8ValueObject;
 import lombok.SneakyThrows;
 import org.clever.js.api.AbstractScriptEngineContext;
+import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
-import org.clever.js.api.module.MemoryModuleCache;
-import org.clever.js.api.module.ModuleCache;
+import org.clever.js.api.module.MemoryCache;
+import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
 import org.clever.js.v8.module.V8CompileModule;
 import org.clever.js.v8.module.V8Module;
@@ -28,18 +30,20 @@ public class V8ScriptEngineContext extends AbstractScriptEngineContext<V8Runtime
     public V8ScriptEngineContext(V8Runtime engine,
                                  Map<String, Object> registerGlobalVars,
                                  Folder rootPath,
-                                 ModuleCache<IV8ValueObject> moduleCache,
+                                 Cache<Module<IV8ValueObject>> moduleCache,
+                                 Cache<ScriptObject<IV8ValueObject>> functionCache,
                                  Require<IV8ValueObject> require,
                                  CompileModule<IV8ValueObject> compileModule,
                                  IV8ValueObject global) {
-        super(engine, registerGlobalVars, rootPath, moduleCache, require, compileModule, global);
+        super(engine, registerGlobalVars, rootPath, moduleCache, functionCache, require, compileModule, global);
     }
 
     protected V8ScriptEngineContext(V8Runtime engine,
                                     Map<String, Object> registerGlobalVars,
                                     Folder rootPath,
-                                    ModuleCache<IV8ValueObject> moduleCache) {
-        super(engine, registerGlobalVars, rootPath, moduleCache);
+                                    Cache<Module<IV8ValueObject>> moduleCache,
+                                    Cache<ScriptObject<IV8ValueObject>> functionCache) {
+        super(engine, registerGlobalVars, rootPath, moduleCache, functionCache);
     }
 
     public static class Builder extends AbstractBuilder<V8Runtime, IV8ValueObject> {
@@ -69,9 +73,13 @@ public class V8ScriptEngineContext extends AbstractScriptEngineContext<V8Runtime
             }
             // moduleCache
             if (moduleCache == null) {
-                moduleCache = new MemoryModuleCache<>();
+                moduleCache = new MemoryCache<>();
             }
-            V8ScriptEngineContext engineContext = new V8ScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache);
+            // functionCache
+            if (functionCache == null) {
+                functionCache = new MemoryCache<>();
+            }
+            V8ScriptEngineContext engineContext = new V8ScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache, functionCache);
             // require
             if (require == null) {
                 V8Module mainModule = V8Module.createMainModule(engineContext);

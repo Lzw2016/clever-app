@@ -1,17 +1,13 @@
 package org.clever.js.api;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Conv;
-import org.clever.core.exception.ExceptionUtils;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.require.Require;
 import org.clever.js.api.utils.ScriptCodeUtils;
 import org.clever.util.Assert;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -24,45 +20,17 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 public abstract class AbstractScriptEngineInstance<E, T> implements ScriptEngineInstance<E, T> {
     protected static final AtomicLong FUC_COUNTER = new AtomicLong(0);
-    protected static final int DEFAULT_MAX_CAPACITY = 4096;
-
     /**
      * 引擎上下文
      */
     protected final ScriptEngineContext<E, T> engineContext;
-    /**
-     * Function对象缓存 {@code Cache<script code, ScriptObject>}
-     */
-    protected final Cache<String, ScriptObject<T>> functionCache;
-
-    /**
-     * @param engineContext 引擎上下文
-     * @param expireTime    缓存的过期时间，单位：秒(小于等于0表示不清除)
-     * @param maxCapacity   最大缓存容量
-     */
-    public AbstractScriptEngineInstance(ScriptEngineContext<E, T> engineContext, long expireTime, int maxCapacity) {
-        Assert.notNull(engineContext, "参数 engineContext 不能为 null");
-        if (maxCapacity < 0) {
-            maxCapacity = DEFAULT_MAX_CAPACITY;
-        }
-        this.engineContext = engineContext;
-        CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
-            .initialCapacity(32)
-            .maximumSize(maxCapacity);
-        if (expireTime > 0) {
-            cacheBuilder.removalListener(notification -> {
-                Object code = notification.getKey();
-                log.debug("ModuleCache 移除缓存,原因: {} | 内容 -> {}", notification.getCause(), ScriptCodeUtils.compressCode(String.valueOf(code), false));
-            }).expireAfterWrite(expireTime, TimeUnit.SECONDS);
-        }
-        this.functionCache = cacheBuilder.build();
-    }
 
     /**
      * @param engineContext 引擎上下文
      */
     public AbstractScriptEngineInstance(ScriptEngineContext<E, T> engineContext) {
-        this(engineContext, -1, DEFAULT_MAX_CAPACITY);
+        Assert.notNull(engineContext, "参数 engineContext 不能为 null");
+        this.engineContext = engineContext;
     }
 
     @Override
@@ -109,37 +77,33 @@ public abstract class AbstractScriptEngineInstance<E, T> implements ScriptEngine
     @Override
     public ScriptObject<T> wrapFunction(String code) {
         Assert.isNotBlank(code, "参数 code 不能为空");
-        ScriptObject<T> function = functionCache.getIfPresent(code);
+        final Cache<ScriptObject<T>> functionCache = engineContext.getFunctionCache();
+        ScriptObject<T> function = functionCache.get(code);
         if (function != null) {
             return function;
         }
         synchronized (functionCache) {
             // 二次确认
-            function = functionCache.getIfPresent(code);
+            function = functionCache.get(code);
             if (function != null) {
                 return function;
             }
-            try {
-                function = functionCache.get(code, () -> {
-                    String compressCode = ScriptCodeUtils.compressCode(code, true);
-                    String funCode = ScriptCodeUtils.wrapFunction(compressCode, Conv.asString(FUC_COUNTER.incrementAndGet()));
-                    return createFunction(funCode);
-                });
-            } catch (ExecutionException e) {
-                throw ExceptionUtils.unchecked(e);
-            }
+            String compressCode = ScriptCodeUtils.compressCode(code, true);
+            String funCode = ScriptCodeUtils.wrapFunction(compressCode, Conv.asString(FUC_COUNTER.incrementAndGet()));
+            function = createFunction(funCode);
+            functionCache.put(code, function);
         }
         return function;
     }
 
     @Override
     public void clearFunctionCache() {
-        functionCache.invalidateAll();
+        engineContext.getFunctionCache().clear();
     }
 
     @Override
     public void removeFunctionCache(String code) {
-        functionCache.invalidate(code);
+        engineContext.getFunctionCache().remove(code);
     }
 
     @Override

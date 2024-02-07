@@ -1,10 +1,12 @@
 package org.clever.js.graaljs;
 
 import org.clever.js.api.AbstractScriptEngineContext;
+import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
-import org.clever.js.api.module.MemoryModuleCache;
-import org.clever.js.api.module.ModuleCache;
+import org.clever.js.api.module.MemoryCache;
+import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
 import org.clever.js.graaljs.module.GraalCompileModule;
 import org.clever.js.graaljs.module.GraalModule;
@@ -30,18 +32,20 @@ public class GraalScriptEngineContext extends AbstractScriptEngineContext<Contex
     public GraalScriptEngineContext(Context engine,
                                     Map<String, Object> registerGlobalVars,
                                     Folder rootPath,
-                                    ModuleCache<Value> moduleCache,
+                                    Cache<Module<Value>> moduleCache,
+                                    Cache<ScriptObject<Value>> functionCache,
                                     Require<Value> require,
                                     CompileModule<Value> compileModule,
                                     Value global) {
-        super(engine, registerGlobalVars, rootPath, moduleCache, require, compileModule, global);
+        super(engine, registerGlobalVars, rootPath, moduleCache, functionCache, require, compileModule, global);
     }
 
     protected GraalScriptEngineContext(Context engine,
                                        Map<String, Object> registerGlobalVars,
                                        Folder rootPath,
-                                       ModuleCache<Value> moduleCache) {
-        super(engine, registerGlobalVars, rootPath, moduleCache);
+                                       Cache<Module<Value>> moduleCache,
+                                       Cache<ScriptObject<Value>> functionCache) {
+        super(engine, registerGlobalVars, rootPath, moduleCache, functionCache);
     }
 
     public static class Builder extends AbstractBuilder<Context, Value> {
@@ -91,9 +95,13 @@ public class GraalScriptEngineContext extends AbstractScriptEngineContext<Contex
             }
             // moduleCache
             if (moduleCache == null) {
-                moduleCache = new MemoryModuleCache<>();
+                moduleCache = new MemoryCache<>();
             }
-            GraalScriptEngineContext engineContext = new GraalScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache);
+            // functionCache
+            if (functionCache == null) {
+                functionCache = new MemoryCache<>();
+            }
+            GraalScriptEngineContext engineContext = new GraalScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache, functionCache);
             // require
             if (require == null) {
                 GraalModule mainModule = GraalModule.createMainModule(engineContext);

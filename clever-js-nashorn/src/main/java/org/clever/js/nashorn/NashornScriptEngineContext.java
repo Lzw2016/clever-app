@@ -3,11 +3,13 @@ package org.clever.js.nashorn;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.clever.js.api.AbstractScriptEngineContext;
+import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.internal.LoggerConsole;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
-import org.clever.js.api.module.MemoryModuleCache;
-import org.clever.js.api.module.ModuleCache;
+import org.clever.js.api.module.MemoryCache;
+import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
 import org.clever.js.nashorn.internal.NashornLoggerFactory;
 import org.clever.js.nashorn.module.NashornCompileModule;
@@ -30,18 +32,20 @@ public class NashornScriptEngineContext extends AbstractScriptEngineContext<Nash
     public NashornScriptEngineContext(NashornScriptEngine engine,
                                       Map<String, Object> registerGlobalVars,
                                       Folder rootPath,
-                                      ModuleCache<ScriptObjectMirror> moduleCache,
+                                      Cache<Module<ScriptObjectMirror>> moduleCache,
+                                      Cache<ScriptObject<ScriptObjectMirror>> functionCache,
                                       Require<ScriptObjectMirror> require,
                                       CompileModule<ScriptObjectMirror> compileModule,
                                       ScriptObjectMirror global) {
-        super(engine, registerGlobalVars, rootPath, moduleCache, require, compileModule, global);
+        super(engine, registerGlobalVars, rootPath, moduleCache, functionCache, require, compileModule, global);
     }
 
     public NashornScriptEngineContext(NashornScriptEngine engine,
                                       Map<String, Object> registerGlobalVars,
                                       Folder rootPath,
-                                      ModuleCache<ScriptObjectMirror> moduleCache) {
-        super(engine, registerGlobalVars, rootPath, moduleCache);
+                                      Cache<Module<ScriptObjectMirror>> moduleCache,
+                                      Cache<ScriptObject<ScriptObjectMirror>> functionCache) {
+        super(engine, registerGlobalVars, rootPath, moduleCache, functionCache);
     }
 
     public static class Builder extends AbstractBuilder<NashornScriptEngine, ScriptObjectMirror> {
@@ -92,9 +96,13 @@ public class NashornScriptEngineContext extends AbstractScriptEngineContext<Nash
             }
             // moduleCache
             if (moduleCache == null) {
-                moduleCache = new MemoryModuleCache<>();
+                moduleCache = new MemoryCache<>();
             }
-            NashornScriptEngineContext engineContext = new NashornScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache);
+            // functionCache
+            if (functionCache == null) {
+                functionCache = new MemoryCache<>();
+            }
+            NashornScriptEngineContext engineContext = new NashornScriptEngineContext(engine, registerGlobalVars, rootPath, moduleCache, functionCache);
             // require
             if (require == null) {
                 NashornModule mainModule = NashornModule.createMainModule(engineContext);

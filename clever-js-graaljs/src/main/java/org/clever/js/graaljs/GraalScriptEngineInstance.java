@@ -21,13 +21,8 @@ import java.util.function.Consumer;
 @Slf4j
 public class GraalScriptEngineInstance extends AbstractScriptEngineInstance<Context, Value> {
 
-    public GraalScriptEngineInstance(ScriptEngineContext<Context, Value> engineContext, long expireTime, int maxCapacity) {
-        super(engineContext, expireTime, maxCapacity);
-        init();
-    }
-
-    public GraalScriptEngineInstance(ScriptEngineContext<Context, Value> context) {
-        super(context);
+    public GraalScriptEngineInstance(ScriptEngineContext<Context, Value> engineContext) {
+        super(engineContext);
         init();
     }
 

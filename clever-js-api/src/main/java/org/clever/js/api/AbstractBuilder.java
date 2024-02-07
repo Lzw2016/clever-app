@@ -2,8 +2,9 @@ package org.clever.js.api;
 
 import lombok.Getter;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
-import org.clever.js.api.module.ModuleCache;
+import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
 import org.clever.util.Assert;
 
@@ -26,7 +27,8 @@ public abstract class AbstractBuilder<E, T, EI> {
         putAll(GlobalConstant.CUSTOM_REGISTER_GLOBAL_VARS);
     }};
     protected final Folder rootPath;
-    protected ModuleCache<T> moduleCache;
+    protected Cache<Module<T>> moduleCache;
+    protected Cache<ScriptObject<T>> functionCache;
     protected Require<T> require;
     protected CompileModule<T> compileModule;
     protected T global;
@@ -66,8 +68,16 @@ public abstract class AbstractBuilder<E, T, EI> {
     /**
      * 设置模块缓存
      */
-    public AbstractBuilder<E, T, EI> setModuleCache(ModuleCache<T> moduleCache) {
+    public AbstractBuilder<E, T, EI> setModuleCache(Cache<Module<T>> moduleCache) {
         this.moduleCache = moduleCache;
+        return this;
+    }
+
+    /**
+     * 设置函数缓存
+     */
+    public AbstractBuilder<E, T, EI> setFunctionCache(Cache<ScriptObject<T>> functionCache) {
+        this.functionCache = functionCache;
         return this;
     }
 

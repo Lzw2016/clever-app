@@ -21,11 +21,6 @@ import java.util.Map;
  */
 public class V8ScriptEngineInstance extends AbstractScriptEngineInstance<V8Runtime, IV8ValueObject> {
 
-    public V8ScriptEngineInstance(ScriptEngineContext<V8Runtime, IV8ValueObject> engineContext, long expireTime, int maxCapacity) {
-        super(engineContext, expireTime, maxCapacity);
-        init();
-    }
-
     public V8ScriptEngineInstance(ScriptEngineContext<V8Runtime, IV8ValueObject> engineContext) {
         super(engineContext);
         init();

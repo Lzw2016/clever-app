@@ -1,8 +1,9 @@
 package org.clever.js.api;
 
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
-import org.clever.js.api.module.ModuleCache;
+import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
 
 import java.util.Map;
@@ -35,7 +36,12 @@ public interface ScriptEngineContext<E, T> {
     /**
      * 模块缓存
      */
-    ModuleCache<T> getModuleCache();
+    Cache<Module<T>> getModuleCache();
+
+    /**
+     * 函数对象缓存
+     */
+    Cache<ScriptObject<T>> getFunctionCache();
 
     /**
      * 全局require实例(根目录require)

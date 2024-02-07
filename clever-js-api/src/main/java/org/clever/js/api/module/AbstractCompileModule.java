@@ -19,7 +19,7 @@ public abstract class AbstractCompileModule<E, T> implements CompileModule<T> {
         this.engineContext = engineContext;
     }
 
-    public ModuleCache<T> getCache() {
+    public Cache<Module<T>> getCache() {
         return engineContext.getModuleCache();
     }
 

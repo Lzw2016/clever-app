@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.clever.core.StrFormatter;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
 import org.clever.js.api.module.Module;
-import org.clever.js.api.module.ModuleCache;
 import org.clever.js.api.require.Require;
 
 /**
@@ -20,7 +20,7 @@ public class ObjectToString {
         // 注册 Module
         final ObjectMapper mapper = JacksonMapper.getInstance().getMapper();
         SimpleModule module = new SimpleModule();
-        module.addSerializer(ModuleCache.class, ToStringSerializer.instance);
+        module.addSerializer(Cache.class, ToStringSerializer.instance);
         module.addSerializer(Module.class, ToStringSerializer.instance);
         module.addSerializer(CompileModule.class, ToStringSerializer.instance);
         module.addSerializer(Require.class, ToStringSerializer.instance);

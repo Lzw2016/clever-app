@@ -5,15 +5,14 @@ package org.clever.js.api.module;
  *
  * @param <T> script引擎对象类型
  */
-public class EmptyModuleCache<T> implements ModuleCache<T> {
-
+public class EmptyCache<T> implements Cache<T> {
     @Override
-    public Module<T> get(String fullPath) {
+    public T get(String key) {
         return null;
     }
 
     @Override
-    public void put(String fullPath, Module<T> module) {
+    public void put(String key, T obj) {
     }
 
     @Override
@@ -21,6 +20,6 @@ public class EmptyModuleCache<T> implements ModuleCache<T> {
     }
 
     @Override
-    public void remove(String fullPath) {
+    public void remove(String key) {
     }
 }
