@@ -3,8 +3,8 @@
     <property name="FILE_NAME" value="logs"/>
     <property name="LOG_PATH" value="./logs/${FILE_NAME}"/>
     <!-- 日志输出格式 -->
-    <property name="ENCODER_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-25([%thread]) %-5level %logger{80} - %msg%n"/>
-    <property name="ENCODER_PATTERN_CONSOLE" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-25([%thread]) %highlight(%-5level) %cyan(%logger{80}) - %msg%n"/>
+    <property name="ENCODER_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-27([%thread]) %-5level %logger{80} - %msg%n"/>
+    <property name="ENCODER_PATTERN_CONSOLE" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-27([%thread]) %highlight(%-5level) %cyan(%logger{80}) - %msg%n"/>
     <contextName>${FILE_NAME}</contextName>
 
     <!-- 控制台日志：输出全部日志到控制台 -->
