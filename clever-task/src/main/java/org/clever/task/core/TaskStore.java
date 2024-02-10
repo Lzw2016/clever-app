@@ -320,7 +320,7 @@ public class TaskStore {
      * @param jobId     任务ID
      * @param syncBlock 同步回调函数(可保证分布式串行执行): () -> { ... }
      */
-    public void getLockJob(String namespace, Long jobId, Runnable syncBlock) {
+    public void getJobLock(String namespace, Long jobId, Runnable syncBlock) {
         jdbc.beginTX(status -> {
             lock(namespace, String.format("job_%s", jobId), syncBlock);
         }, Propagation.REQUIRES_NEW, 60 * 60 * 24);
@@ -503,7 +503,7 @@ public class TaskStore {
      * @param jobTriggerId 任务触发器ID
      * @param syncBlock    同步回调函数(可保证分布式串行执行): () -> { ... }
      */
-    public void getLockTrigger(String namespace, Long jobTriggerId, Runnable syncBlock) {
+    public void getTriggerLock(String namespace, Long jobTriggerId, Runnable syncBlock) {
         lock(namespace, String.format("job_trigger_%s", jobTriggerId), syncBlock);
     }
 
@@ -901,14 +901,14 @@ public class TaskStore {
     public long clearJobLog(String namespace, Date maxDate) {
         return queryDSL.delete(taskJobLog)
             .where(taskJobLog.namespace.eq(namespace))
-            .where(taskJobLog.endTime.loe(maxDate))
+            .where(taskJobLog.fireTime.loe(maxDate))
             .execute();
     }
 
     public long clearTriggerJobLog(String namespace, Date maxDate) {
         return queryDSL.delete(taskJobTriggerLog)
             .where(taskJobTriggerLog.namespace.eq(namespace))
-            .where(taskJobTriggerLog.createAt.loe(maxDate))
+            .where(taskJobTriggerLog.fireTime.loe(maxDate))
             .execute();
     }
 
@@ -924,6 +924,22 @@ public class TaskStore {
             .where(taskJobConsoleLog.namespace.eq(namespace))
             .where(taskJobConsoleLog.createAt.loe(maxDate))
             .execute();
+    }
+
+    /**
+     * 获取收集任务执行报表数据锁
+     *
+     * @param namespace   命名空间
+     * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
+     * @param syncBlock   同步回调函数(可保证分布式串行执行): () -> { ... }
+     */
+    public void getCollectReportLock(String namespace, int waitSeconds, Runnable syncBlock) {
+        lock(namespace, "collect_report", waitSeconds, locked -> {
+            if (locked) {
+                syncBlock.run();
+            }
+            return null;
+        });
     }
 
     public TaskReport createTaskReport(String namespace, Date date) {
@@ -995,11 +1011,12 @@ public class TaskStore {
         return jobLogMin.compareTo(triggerLogMin) > 0 ? triggerLogMin : jobLogMin;
     }
 
-    public long addOrUpdateTaskReport(List<TaskReport> listReport) {
+    public long addOrUpdateTaskReport(String namespace, List<TaskReport> listReport) {
         if (listReport == null || listReport.isEmpty()) {
             return 0L;
         }
         List<String> exists = queryDSL.select(taskReport.reportTime).from(taskReport)
+            .where(taskReport.namespace.eq(namespace))
             .where(taskReport.reportTime.in(listReport.stream().map(TaskReport::getReportTime).collect(Collectors.toSet())))
             .fetch();
         SQLUpdateClause update = queryDSL.update(taskReport);

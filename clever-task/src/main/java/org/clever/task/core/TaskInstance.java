@@ -715,7 +715,7 @@ public class TaskInstance {
             } else {
                 try {
                     // 获取定时任务分布式锁 - 判断是否被其他节点执行了
-                    taskStore.getLockJob(job.getNamespace(), job.getId(), () -> {
+                    taskStore.getJobLock(job.getNamespace(), job.getId(), () -> {
                         // 二次校验数据
                         Long runCount = taskStore.beginReadOnlyTX(status -> taskStore.getJobRunCount(getNamespace(), jobId));
                         if (Objects.equals(runCount, job.getRunCount())) {
@@ -1270,7 +1270,7 @@ public class TaskInstance {
                 doTriggerJobExec(dbNow, trigger, jobTriggerLog);
             } else {
                 // 获取触发器分布式锁 - 判断是否被其他节点触发了
-                taskStore.getLockTrigger(trigger.getNamespace(), trigger.getId(), () -> {
+                taskStore.getTriggerLock(trigger.getNamespace(), trigger.getId(), () -> {
                     // 分布式锁的二次确认，防止触发器的并发触发
                     Date nextFireTime = taskStore.beginReadOnlyTX(status -> taskStore.getNextFireTime(trigger.getNamespace(), trigger.getId()));
                     if (nextFireTime != null && dbNow.compareTo(nextFireTime) >= 0) {
@@ -1438,7 +1438,7 @@ public class TaskInstance {
                 } else {
                     try {
                         // 获取定时任务分布式锁 - 判断是否被其他节点执行了
-                        taskStore.getLockJob(job.getNamespace(), job.getId(), () -> {
+                        taskStore.getJobLock(job.getNamespace(), job.getId(), () -> {
                             // 二次校验数据
                             Long runCount = taskStore.beginReadOnlyTX(status -> taskStore.getJobRunCount(job.getNamespace(), job.getId()));
                             if (Objects.equals(runCount, job.getRunCount())) {
@@ -1670,29 +1670,32 @@ public class TaskInstance {
     }
 
     private void collectReport() {
-        final Date maxDate = DateUtils.getDayStartTime(DateUtils.addDays(taskStore.currentDate(), -1));
-        Date minDate;
-        String lastReportTime = taskStore.beginReadOnlyTX(status -> taskStore.getLastReportTime(getNamespace()));
-        if (StringUtils.isBlank(lastReportTime)) {
-            minDate = taskStore.beginReadOnlyTX(status -> taskStore.getMinFireTime(getNamespace()));
-        } else {
-            minDate = DateUtils.parseDate(lastReportTime, DateUtils.yyyy_MM_dd);
-        }
-        if (minDate == null) {
-            return;
-        }
-        List<TaskReport> listReport = new ArrayList<>();
-        Date currentDate = DateUtils.getDayStartTime(minDate);
-        while (currentDate.compareTo(maxDate) <= 0) {
-            final Date finalDate = currentDate;
-            TaskReport taskReport = taskStore.beginReadOnlyTX(status -> taskStore.createTaskReport(getNamespace(), finalDate));
-            listReport.add(taskReport);
-            currentDate = DateUtils.addDays(finalDate, 1);
-        }
-        if (!listReport.isEmpty()) {
-            long count = taskStore.beginTX(status -> taskStore.addOrUpdateTaskReport(listReport));
-            log.info("收集任务执行报表数据量: {}", count);
-        }
+        taskStore.getCollectReportLock(getNamespace(), 1, () -> {
+                final Date maxDate = DateUtils.getDayStartTime(DateUtils.addDays(taskStore.currentDate(), -1));
+                Date minDate;
+                String lastReportTime = taskStore.beginReadOnlyTX(status -> taskStore.getLastReportTime(getNamespace()));
+                if (StringUtils.isNotBlank(lastReportTime)) {
+                    minDate = DateUtils.parseDate(lastReportTime, DateUtils.yyyy_MM_dd);
+                } else {
+                    minDate = taskStore.beginReadOnlyTX(status -> taskStore.getMinFireTime(getNamespace()));
+                }
+                if (minDate == null) {
+                    return;
+                }
+                List<TaskReport> listReport = new ArrayList<>();
+                Date currentDate = DateUtils.getDayStartTime(minDate);
+                while (currentDate.compareTo(maxDate) <= 0) {
+                    final Date finalDate = currentDate;
+                    TaskReport taskReport = taskStore.beginReadOnlyTX(status -> taskStore.createTaskReport(getNamespace(), finalDate));
+                    listReport.add(taskReport);
+                    currentDate = DateUtils.addDays(finalDate, 1);
+                }
+                if (!listReport.isEmpty()) {
+                    long count = taskStore.beginTX(status -> taskStore.addOrUpdateTaskReport(getNamespace(), listReport));
+                    log.info("收集任务执行报表数据量: {}", count);
+                }
+            }
+        );
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------------- listeners
