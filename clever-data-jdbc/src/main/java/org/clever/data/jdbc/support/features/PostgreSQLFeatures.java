@@ -19,7 +19,7 @@ public class PostgreSQLFeatures extends DataBaseFeatures {
     /**
      * 模拟 waitSeconds 时的休眠时间间隔(单位毫秒)
      */
-    public static int WAIT_PRECISION = 300;
+    public static int WAIT_PRECISION = 50;
 
     public PostgreSQLFeatures(Jdbc jdbc) {
         super(jdbc);
