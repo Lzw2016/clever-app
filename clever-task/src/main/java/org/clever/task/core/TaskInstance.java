@@ -1670,14 +1670,15 @@ public class TaskInstance {
     }
 
     private void collectReport() {
-        taskStore.getCollectReportLock(getNamespace(), 1, () -> {
+        final String namespace = getNamespace();
+        taskStore.getCollectReportLock(namespace, 1, () -> {
                 final Date maxDate = DateUtils.getDayStartTime(DateUtils.addDays(taskStore.currentDate(), -1));
                 Date minDate;
-                String lastReportTime = taskStore.beginReadOnlyTX(status -> taskStore.getLastReportTime(getNamespace()));
+                String lastReportTime = taskStore.beginReadOnlyTX(status -> taskStore.getLastReportTime(namespace));
                 if (StringUtils.isNotBlank(lastReportTime)) {
                     minDate = DateUtils.parseDate(lastReportTime, DateUtils.yyyy_MM_dd);
                 } else {
-                    minDate = taskStore.beginReadOnlyTX(status -> taskStore.getMinFireTime(getNamespace()));
+                    minDate = taskStore.beginReadOnlyTX(status -> taskStore.getMinFireTime(namespace));
                 }
                 if (minDate == null) {
                     return;
@@ -1686,12 +1687,12 @@ public class TaskInstance {
                 Date currentDate = DateUtils.getDayStartTime(minDate);
                 while (currentDate.compareTo(maxDate) <= 0) {
                     final Date finalDate = currentDate;
-                    TaskReport taskReport = taskStore.beginReadOnlyTX(status -> taskStore.createTaskReport(getNamespace(), finalDate));
+                    TaskReport taskReport = taskStore.beginReadOnlyTX(status -> taskStore.createTaskReport(namespace, finalDate));
                     listReport.add(taskReport);
                     currentDate = DateUtils.addDays(finalDate, 1);
                 }
                 if (!listReport.isEmpty()) {
-                    long count = taskStore.beginTX(status -> taskStore.addOrUpdateTaskReport(getNamespace(), listReport));
+                    long count = taskStore.beginTX(status -> taskStore.addOrUpdateTaskReport(namespace, listReport));
                     log.info("收集任务执行报表数据量: {}", count);
                 }
             }
