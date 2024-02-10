@@ -804,7 +804,7 @@ public class TaskInstance {
     // ---------------------------------------------------------------------------------------------------------------------------------------- service
 
     private void startScheduler(boolean startScheduler) {
-        long initialDelay = 0;
+        long initialDelay = 3_000;
         TaskScheduler taskScheduler = registerScheduler();
         taskContext.setCurrentScheduler(taskScheduler);
         // 维护当前集群可用的调度器列表
@@ -824,6 +824,8 @@ public class TaskInstance {
         // 触发接下来(N+M)秒内需要触发的触发器
         fireTriggerFuture = scheduledExecutor.submit(() -> {
             try {
+                // 休眠一下，等待 state 属性更新成 State.RUNNING，防止 fireTriggers 中的循环自动退出
+                Thread.sleep(300);
                 fireTriggers();
             } catch (Exception e) {
                 log.error("[TaskInstance] 调度核心线程错误 | instanceName={}", getInstanceName(), e);
@@ -854,7 +856,7 @@ public class TaskInstance {
                         schedulerErrorListener(schedulerLog, e);
                     }
                 },
-                10_000, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
+                initialDelay, GlobalConstant.REGISTER_SCHEDULER_INTERVAL, TimeUnit.MILLISECONDS
             );
         }
         // 集群节点心跳保持
@@ -1166,7 +1168,6 @@ public class TaskInstance {
         final long startTime = JobTriggerUtils.removeMillisecond(taskStore.currentTimeMillis()) + 1000;
         // 使用无限循环触发任务, 每一秒循环一次(每秒触发一次)
         for (long count = 1; ; count++) {
-            log.info("fireTriggers | currentTimeMillis={}", taskStore.currentTimeMillis());
             // 判断调度器是否已暂停/停止
             int state = STATE_UPDATER.get(this);
             if (state == State.PAUSED || state == State.STOPPED) {
