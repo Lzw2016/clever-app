@@ -362,6 +362,9 @@ public class TaskInstance {
             }
             final Date nextFireTime = JobTriggerUtils.getNextFireTime(jobTrigger);
             jobTrigger.setNextFireTime(nextFireTime);
+            if (jobTrigger.getEndTime() != null && jobTrigger.getNextFireTime() != null && jobTrigger.getNextFireTime().compareTo(jobTrigger.getEndTime()) > 0) {
+                jobTrigger.setNextFireTime(null);
+            }
             if (exists) {
                 count = taskStore.updateTrigger(jobTrigger) ? 1 : 0;
             } else {
