@@ -30,6 +30,7 @@ import org.clever.task.core.model.SchedulerInfo;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.support.ClassMethodLoader;
 import org.clever.task.core.support.DataBaseClock;
+import org.clever.task.core.support.JobTriggerUtils;
 import org.clever.transaction.TransactionDefinition;
 import org.clever.transaction.annotation.Propagation;
 import org.clever.transaction.support.TransactionCallback;
@@ -278,7 +279,7 @@ public class TaskStore {
      * @param nextTime (N+M)秒对应的毫秒时间
      */
     public List<TaskJobTrigger> queryNextTrigger(String namespace, int nextTime) {
-        final Date now = currentDate();
+        final Date now = JobTriggerUtils.removeMillisecond(currentDate());
         return queryDSL.select(taskJobTrigger)
             .from(taskJobTrigger)
             .where(taskJobTrigger.disable.eq(EnumConstant.JOB_TRIGGER_DISABLE_0))
