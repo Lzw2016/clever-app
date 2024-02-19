@@ -77,8 +77,8 @@ timed-task:
   jdbcName: 'postgresql'
   namespace: 'test'
   instanceName: 'node01'
-  heartbeatInterval: 10000
   description: '测试节点01'
+  heartbeatInterval: 10000
   schedulerExecutorPoolSize: 16
   jobExecutorPoolSize: 64
   jobExecutorQueueSize: 64

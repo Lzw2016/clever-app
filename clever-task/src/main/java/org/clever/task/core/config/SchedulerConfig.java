@@ -34,13 +34,13 @@ public class SchedulerConfig implements Serializable {
      */
     private String instanceName = "node01";
     /**
-     * 心跳频率，建议：800 ~ 15000(单位：毫秒)
-     */
-    private long heartbeatInterval = 10_000;
-    /**
      * 调度器节点描述
      */
     private String description;
+    /**
+     * 心跳频率，建议：800 ~ 15000(单位：毫秒)
+     */
+    private long heartbeatInterval = 10_000;
     /**
      * 调度线程池大小
      */

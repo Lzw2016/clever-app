@@ -125,8 +125,8 @@ timed-task:
   instanceName: 'node01'
   # namespace: 'lzw'
   # instanceName: 'n01'
-  heartbeatInterval: 10000
   description: 'dev节点01'
+  heartbeatInterval: 10000
   schedulerExecutorPoolSize: 16
   jobExecutorPoolSize: 64
   jobExecutorQueueSize: 64

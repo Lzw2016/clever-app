@@ -1955,13 +1955,13 @@
                     "type": "string",
                     "description": "调度器实例名称"
                 },
-                "heartbeatInterval": {
-                    "type": "number",
-                    "description": "心跳频率，建议：800 ~ 15000(单位：毫秒)"
-                },
                 "description": {
                     "type": "string",
                     "description": "调度器节点描述"
+                },
+                "heartbeatInterval": {
+                    "type": "number",
+                    "description": "心跳频率，建议：800 ~ 15000(单位：毫秒)"
                 },
                 "schedulerExecutorPoolSize": {
                     "type": "number",
