@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.core.Conv;
 import org.clever.core.DateUtils;
 import org.clever.core.RenameStrategy;
+import org.clever.core.function.ZeroConsumer;
 import org.clever.core.id.SnowFlake;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
@@ -628,7 +629,7 @@ public class TaskStore {
      * @param lockName    锁名称
      * @param waitSeconds 等待锁的最大时间(小于等于0表示一直等待)
      * @param syncBlock   同步回调函数(可保证分布式串行执行): locked -> { ... }
-     * @see Jdbc#tryLock(String, int, Function)
+     * @see Jdbc#nativeLock(String, ZeroConsumer)
      */
     @SuppressWarnings({"SameParameterValue", "UnusedReturnValue"})
     private <T> T lock(String namespace, String lockName, int waitSeconds, Function<Boolean, T> syncBlock) {
