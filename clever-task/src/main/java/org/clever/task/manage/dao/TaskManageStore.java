@@ -342,7 +342,7 @@ public class TaskManageStore {
             .where(taskReport.reportTime.ne(DateUtils.formatToString(today, DateUtils.yyyy_MM_dd)))
             .where(taskReport.reportTime.goe(DateUtils.formatToString(req.getStart(), DateUtils.yyyy_MM_dd)))
             .where(taskReport.reportTime.loe(DateUtils.formatToString(req.getEnd(), DateUtils.yyyy_MM_dd)))
-            .groupBy(taskReport.namespace, taskReport.reportTime)
+            .groupBy(taskReport.reportTime)
             .orderBy(taskReport.reportTime.desc())
             .limit(req.getLimit());
         if (StringUtils.isNotBlank(req.getNamespace())) {
