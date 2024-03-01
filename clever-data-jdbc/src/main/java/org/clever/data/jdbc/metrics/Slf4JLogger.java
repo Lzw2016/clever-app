@@ -19,7 +19,7 @@ import java.util.Set;
  * 创建时间：2022/03/17 16:39 <br/>
  */
 public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
-    private final Logger log = LoggerFactory.getLogger("p6spy.ignore");
+    private static final Logger log = LoggerFactory.getLogger("p6spy.ignore");
     private static final Set<String> FORCE_LOG_CATEGORY = new HashSet<>();
     private static volatile JdbcConfig.P6SpyLog LOG_CONFIG;
     private static volatile JdbcConfig.JdbcMetrics METRICS_CONFIG;
