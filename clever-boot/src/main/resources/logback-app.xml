@@ -55,6 +55,11 @@
         </filter>
     </appender>
 
+    <!-- p6spy忽略的日志输出到文件 -->
+    <logger name="p6spy.ignore" level="DEBUG" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>

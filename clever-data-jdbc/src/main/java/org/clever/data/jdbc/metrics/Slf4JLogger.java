@@ -6,6 +6,8 @@ import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.p6spy.P6SpyFormatter;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
 import org.clever.util.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +19,7 @@ import java.util.Set;
  * 创建时间：2022/03/17 16:39 <br/>
  */
 public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
+    private final Logger log = LoggerFactory.getLogger("p6spy.ignore");
     private static final Set<String> FORCE_LOG_CATEGORY = new HashSet<>();
     private static volatile JdbcConfig.P6SpyLog LOG_CONFIG;
     private static volatile JdbcConfig.JdbcMetrics METRICS_CONFIG;
@@ -88,16 +91,24 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
             return;
         }
         // 判断是否需要忽略打印SQL
+        boolean ignore = false;
         if (LOG_CONFIG != null && StringUtils.isNotBlank(prepared)) {
             String preparedSql = SqlLoggerUtils.deleteWhitespace(prepared);
-            // 忽略的SQL语句(完整匹配，大小写敏感)
             if (LOG_CONFIG.getIgnoreSql() != null && LOG_CONFIG.getIgnoreSql().contains(preparedSql)) {
-                return;
+                // 忽略的SQL语句(完整匹配，大小写敏感)
+                ignore = true;
+            } else if (LOG_CONFIG.getIgnoreContainsSql() != null && LOG_CONFIG.getIgnoreContainsSql().stream().anyMatch(preparedSql::contains)) {
+                // 忽略的SQL语句(包含匹配，大小写敏感)
+                ignore = true;
             }
-            // 忽略的SQL语句(包含匹配，大小写敏感)
-            if (LOG_CONFIG.getIgnoreContainsSql() != null && LOG_CONFIG.getIgnoreContainsSql().stream().anyMatch(preparedSql::contains)) {
-                return;
+        }
+        // 忽略打印SQL，输出DEBUG级别日志
+        if (ignore) {
+            if (log.isDebugEnabled()) {
+                String msg = this.strategy.formatMessage(connectionId, now, elapsed, category.toString(), prepared, sql, url);
+                log.debug(msg);
             }
+            return;
         }
         // 打印 sql 日志
         super.logSQL(connectionId, now, elapsed, category, prepared, sql, url);
