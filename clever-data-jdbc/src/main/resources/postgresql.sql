@@ -270,7 +270,7 @@ DECLARE
     _res                varchar[];
 BEGIN
     if (size is null or size <= 0) then
-        raise exception using message = -20000, hint = ('参数 size=[' || codename || '] 错误');
+        raise exception using message = -20000, hint = ('参数 size=[' || size || '] 错误');
     end if;
     select
         id, pattern, sequence, reset_pattern, reset_flag, now() at time zone 'Asia/Shanghai' as now into _row
