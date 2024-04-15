@@ -10,7 +10,7 @@ import com.querydsl.core.types.Ops;
  * 创建时间：2023/12/20 18:30 <br/>
  */
 public class OracleTemplates extends com.querydsl.sql.OracleTemplates {
-    public static final PostgreSQLTemplates DEFAULT = new PostgreSQLTemplates();
+    public static final OracleTemplates DEFAULT = new OracleTemplates();
 
     public OracleTemplates() {
         super('\\', false);
