@@ -259,7 +259,7 @@ public class RedisTest {
         properties.getStandalone().setHost("10.100.10.20");
         properties.getStandalone().setPort(6379);
         properties.getStandalone().setPassword("Info@wms2023#");
-        properties.getStandalone().setDatabase(14);
+        properties.getStandalone().setDatabase(11);
         properties.setReadTimeout(Duration.ofSeconds(600));
         properties.setConnectTimeout(Duration.ofSeconds(600));
         properties.setShutdownTimeout(Duration.ofSeconds(600));
@@ -284,10 +284,9 @@ public class RedisTest {
         log.info("ALLOC:REPWAVE:* keys -> {}", keys.size());
         expireKeys.call(keys);
 
-        // keys = redis.keys("LOC_NOT_FOUND:*");
-        // log.info("LOC_NOT_FOUND:* keys -> {}", keys.size());
-        // expireKeys.call(keys);
-
+         keys = redis.keys("LOC_NOT_FOUND:*");
+         log.info("LOC_NOT_FOUND:* keys -> {}", keys.size());
+         expireKeys.call(keys);
         redis.close();
     }
 }
