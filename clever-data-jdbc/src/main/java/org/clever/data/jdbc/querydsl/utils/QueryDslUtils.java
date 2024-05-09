@@ -19,6 +19,7 @@ import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.data.jdbc.querydsl.QArray;
+import org.clever.data.jdbc.querydsl.QEntity;
 import org.clever.data.jdbc.querydsl.QLinkedMap;
 import org.clever.data.jdbc.querydsl.QList;
 import org.clever.data.jdbc.support.SqlUtils;
@@ -37,68 +38,96 @@ import java.util.function.Supplier;
  * 创建时间：2021/12/09 14:53 <br/>
  */
 public class QueryDslUtils {
-    public static QLinkedMap linkedMap(Expression<?>... fields) {
-        return new QLinkedMap(fields);
+    /**
+     * @param exprs 需要查询的“表字段、表”
+     */
+    public static QLinkedMap linkedMap(Expression<?>... exprs) {
+        return new QLinkedMap(exprs);
     }
 
-    public static QLinkedMap linkedMap(Collection<? extends Expression<?>> fields) {
-        return new QLinkedMap(fields.toArray(new Expression<?>[0]));
+    /**
+     * @param exprs 需要查询的“表字段、表”
+     */
+    public static QLinkedMap linkedMap(Collection<? extends Expression<?>> exprs) {
+        return new QLinkedMap(exprs.toArray(new Expression<?>[0]));
     }
 
-    public static QLinkedMap linkedMap(RelationalPath<?>... tables) {
-        List<Expression<?>> fields = new LinkedList<>();
-        for (RelationalPath<?> table : tables) {
-            fields.addAll(table.getColumns());
-        }
-        return new QLinkedMap(fields.toArray(new Expression<?>[0]));
+    /**
+     * @param renameStrategy 字段名重命名规则
+     * @param exprs          exprs 需要查询的“表字段、表”
+     */
+    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, Expression<?>... exprs) {
+        return new QLinkedMap(renameStrategy, exprs);
     }
 
-    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, Expression<?>... fields) {
-        return new QLinkedMap(renameStrategy, fields);
+    /**
+     * @param renameStrategy 字段名重命名规则
+     * @param exprs          exprs 需要查询的“表字段、表”
+     */
+    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, Collection<? extends Expression<?>> exprs) {
+        return new QLinkedMap(renameStrategy, exprs.toArray(new Expression<?>[0]));
     }
 
-    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, Collection<? extends Expression<?>> fields) {
-        return new QLinkedMap(renameStrategy, fields.toArray(new Expression<?>[0]));
+    /**
+     * @param exprs exprs 需要查询的“表字段、表”
+     */
+    public static QArray array(Expression<?>... exprs) {
+        return new QArray(exprs);
     }
 
-    public static QLinkedMap linkedMap(RenameStrategy renameStrategy, RelationalPath<?>... tables) {
-        List<Expression<?>> fields = new LinkedList<>();
-        for (RelationalPath<?> table : tables) {
-            fields.addAll(table.getColumns());
-        }
-        return new QLinkedMap(renameStrategy, fields.toArray(new Expression<?>[0]));
+    /**
+     * @param exprs exprs 需要查询的“表字段、表”
+     */
+    public static QArray array(Collection<? extends Expression<?>> exprs) {
+        return new QArray(exprs.toArray(new Expression<?>[0]));
     }
 
-    public static QArray array(Expression<?>... fields) {
-        return new QArray(fields);
+    /**
+     * @param exprs exprs 需要查询的“表字段、表”
+     */
+    public static QList list(Expression<?>... exprs) {
+        return new QList(exprs);
     }
 
-    public static QArray array(Collection<? extends Expression<?>> fields) {
-        return new QArray(fields.toArray(new Expression<?>[0]));
+    /**
+     * @param exprs exprs 需要查询的“表字段、表”
+     */
+    public static QList list(Collection<? extends Expression<?>> exprs) {
+        return new QList(exprs.toArray(new Expression<?>[0]));
     }
 
-    public static QArray array(RelationalPath<?>... tables) {
-        List<Expression<?>> fields = new LinkedList<>();
-        for (RelationalPath<?> table : tables) {
-            fields.addAll(table.getColumns());
-        }
-        return new QArray(fields.toArray(new Expression<?>[0]));
+    /**
+     * @param type           数据行类型
+     * @param renameStrategy 字段名重命名规则
+     * @param exprs          需要查询的“表字段、表”
+     */
+    public static <T> QEntity<T> entity(Class<? extends T> type, RenameStrategy renameStrategy, Expression<?>... exprs) {
+        return new QEntity<>(type, renameStrategy, exprs);
     }
 
-    public static QList list(Expression<?>... fields) {
-        return new QList(fields);
+    /**
+     * @param type           数据行类型
+     * @param renameStrategy 字段名重命名规则
+     * @param exprs          需要查询的“表字段、表”
+     */
+    public static <T> QEntity<T> entity(Class<? extends T> type, RenameStrategy renameStrategy, Collection<? extends Expression<?>> exprs) {
+        return new QEntity<>(type, renameStrategy, exprs.toArray(new Expression<?>[0]));
     }
 
-    public static QList list(Collection<? extends Expression<?>> fields) {
-        return new QList(fields.toArray(new Expression<?>[0]));
+    /**
+     * @param type  数据行类型
+     * @param exprs 需要查询的“表字段、表”
+     */
+    public static <T> QEntity<T> entity(Class<? extends T> type, Expression<?>... exprs) {
+        return new QEntity<>(type, exprs);
     }
 
-    public static QList list(RelationalPath<?>... tables) {
-        List<Expression<?>> fields = new LinkedList<>();
-        for (RelationalPath<?> table : tables) {
-            fields.addAll(table.getColumns());
-        }
-        return new QList(fields.toArray(new Expression<?>[0]));
+    /**
+     * @param type  数据行类型
+     * @param exprs 需要查询的“表字段、表”
+     */
+    public static <T> QEntity<T> entity(Class<? extends T> type, Collection<? extends Expression<?>> exprs) {
+        return new QEntity<>(type, exprs.toArray(new Expression<?>[0]));
     }
 
     /**

@@ -1092,7 +1092,7 @@ public class TaskStore {
         //     or (a.type=2 and c.id is null )
         //     or (a.type=3 and d.id is null )
         //     or (a.type=4 and e.id is null )
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery1 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery1 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskJob.id, taskJob.namespace, taskJob.name
             ))
@@ -1108,7 +1108,7 @@ public class TaskStore {
                     .or(taskJob.type.eq(EnumConstant.JOB_TYPE_3).and(taskJsJob.id.isNull()))
                     .or(taskJob.type.eq(EnumConstant.JOB_TYPE_4).and(taskShellJob.id.isNull()))
             );
-        List<LinkedHashMap<String, ?>> list1 = beginReadOnlyTX(status -> sqlQuery1.fetch());
+        List<LinkedHashMap<String, Object>> list1 = beginReadOnlyTX(status -> sqlQuery1.fetch());
         if (!list1.isEmpty()) {
             errMsg.append("-- 无效的 task_job 数据(任务类型错误或者缺少任务子表数据)").append(line);
             errMsg.append(sqlQuery1.getSQL().getSQL()).append(line);
@@ -1154,7 +1154,7 @@ public class TaskStore {
         // from task_job a
         //     left join task_job_trigger b on (a.id=b.job_id)
         // where b.type not in (1, 2) or b.id is null
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery2 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery2 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskJob.id, taskJob.namespace, taskJob.name
             ))
@@ -1164,7 +1164,7 @@ public class TaskStore {
                 taskJobTrigger.type.notIn(EnumConstant.JOB_TRIGGER_TYPE_1, EnumConstant.JOB_TRIGGER_TYPE_2)
                     .or(taskJobTrigger.id.isNull())
             );
-        List<LinkedHashMap<String, ?>> list2 = beginReadOnlyTX(status -> sqlQuery2.fetch());
+        List<LinkedHashMap<String, Object>> list2 = beginReadOnlyTX(status -> sqlQuery2.fetch());
         if (!list2.isEmpty()) {
             errMsg.append("-- 无效的 task_job_trigger 数据(触发类型错误或者与task_job匹配的数据)").append(line);
             errMsg.append(sqlQuery2.getSQL().getSQL()).append(line);
@@ -1178,7 +1178,7 @@ public class TaskStore {
         // where a.type not in (1, 2, 3, 4)
         //     or a.route_strategy not in (0, 1, 2, 3)
         //     or a.load_balance not in (1, 2, 3, 4)
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery3 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery3 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskJob.id, taskJob.namespace, taskJob.name
             ))
@@ -1188,7 +1188,7 @@ public class TaskStore {
                     .or(taskJob.routeStrategy.notIn(EnumConstant.JOB_ROUTE_STRATEGY_0, EnumConstant.JOB_ROUTE_STRATEGY_1, EnumConstant.JOB_ROUTE_STRATEGY_2, EnumConstant.JOB_ROUTE_STRATEGY_3))
                     .or(taskJob.loadBalance.notIn(EnumConstant.JOB_LOAD_BALANCE_1, EnumConstant.JOB_LOAD_BALANCE_2, EnumConstant.JOB_LOAD_BALANCE_3, EnumConstant.JOB_LOAD_BALANCE_4))
             );
-        List<LinkedHashMap<String, ?>> list3 = beginReadOnlyTX(status -> sqlQuery3.fetch());
+        List<LinkedHashMap<String, Object>> list3 = beginReadOnlyTX(status -> sqlQuery3.fetch());
         if (!list3.isEmpty()) {
             errMsg.append("-- task_job: type、route_strategy、load_balance 字段值的有效性").append(line);
             errMsg.append(sqlQuery3.getSQL().getSQL()).append(line);
@@ -1199,7 +1199,7 @@ public class TaskStore {
         //     a.id, a.namespace, a.name, a.first_scheduler, a.whitelist_scheduler, a.blacklist_scheduler
         // from task_job a
         // where a.route_strategy not in (1, 2, 3)
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery4 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery4 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskJob.id, taskJob.namespace, taskJob.name,
                 taskJob.firstScheduler, taskJob.whitelistScheduler, taskJob.blacklistScheduler
@@ -1210,8 +1210,8 @@ public class TaskStore {
                     .or(taskJob.routeStrategy.notIn(EnumConstant.JOB_ROUTE_STRATEGY_0, EnumConstant.JOB_ROUTE_STRATEGY_1, EnumConstant.JOB_ROUTE_STRATEGY_2, EnumConstant.JOB_ROUTE_STRATEGY_3))
                     .or(taskJob.loadBalance.notIn(EnumConstant.JOB_LOAD_BALANCE_1, EnumConstant.JOB_LOAD_BALANCE_2, EnumConstant.JOB_LOAD_BALANCE_3, EnumConstant.JOB_LOAD_BALANCE_4))
             );
-        List<LinkedHashMap<String, ?>> list4 = beginReadOnlyTX(status -> sqlQuery4.fetch());
-        Iterator<LinkedHashMap<String, ?>> iterator4 = list4.iterator();
+        List<LinkedHashMap<String, Object>> list4 = beginReadOnlyTX(status -> sqlQuery4.fetch());
+        Iterator<LinkedHashMap<String, Object>> iterator4 = list4.iterator();
         while (iterator4.hasNext()) {
             LinkedHashMap<String, ?> row = iterator4.next();
             try {
@@ -1243,7 +1243,7 @@ public class TaskStore {
         //     a.id, a.namespace, a.job_id
         // from task_http_job a
         // where a.request_method not in ('GET','HEAD','POST','PUT','DELETE','CONNECT','OPTIONS','TRACE','PATCH')
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery5 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery5 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskHttpJob.id, taskHttpJob.namespace, taskHttpJob.jobId
             ))
@@ -1251,7 +1251,7 @@ public class TaskStore {
             .where(taskHttpJob.requestMethod.notIn(
                 "GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE", "PATCH"
             ));
-        List<LinkedHashMap<String, ?>> list5 = beginReadOnlyTX(status -> sqlQuery5.fetch());
+        List<LinkedHashMap<String, Object>> list5 = beginReadOnlyTX(status -> sqlQuery5.fetch());
         if (!list5.isEmpty()) {
             errMsg.append("-- task_http_job: request_method 字段值的有效性)").append(line);
             errMsg.append(sqlQuery5.getSQL().getSQL()).append(line);
@@ -1262,15 +1262,15 @@ public class TaskStore {
         //     a.id, a.namespace, a.job_id, a.class_name, a.class_method
         // from task_java_job a
         // where a.namespace=''
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery6 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery6 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskJavaJob.id, taskJavaJob.namespace, taskJavaJob.jobId,
                 taskJavaJob.className, taskJavaJob.classMethod
             ))
             .from(taskJavaJob)
             .where(taskJavaJob.namespace.eq(namespace));
-        List<LinkedHashMap<String, ?>> list6 = beginReadOnlyTX(status -> sqlQuery6.fetch());
-        Iterator<LinkedHashMap<String, ?>> iterator6 = list6.iterator();
+        List<LinkedHashMap<String, Object>> list6 = beginReadOnlyTX(status -> sqlQuery6.fetch());
+        Iterator<LinkedHashMap<String, Object>> iterator6 = list6.iterator();
         while (iterator6.hasNext()) {
             LinkedHashMap<String, ?> row = iterator6.next();
             try {
@@ -1293,13 +1293,13 @@ public class TaskStore {
         //     a.id, a.namespace, a.job_id
         // from task_shell_job a
         // where a.shell_type not in ('bash','sh','ash','powershell','cmd','python','node','deno','php')
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery7 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery7 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskShellJob.id, taskShellJob.namespace, taskShellJob.jobId
             ))
             .from(taskShellJob)
             .where(taskShellJob.shellType.notIn(EnumConstant.SHELL_TYPE_FILE_SUFFIX_MAPPING.keySet()));
-        List<LinkedHashMap<String, ?>> list7 = beginReadOnlyTX(status -> sqlQuery7.fetch());
+        List<LinkedHashMap<String, Object>> list7 = beginReadOnlyTX(status -> sqlQuery7.fetch());
         if (!list7.isEmpty()) {
             errMsg.append("-- task_shell_job: shell_type 字段值的有效性").append(line);
             errMsg.append(sqlQuery7.getSQL().getSQL()).append(line);
@@ -1309,14 +1309,14 @@ public class TaskStore {
         // select
         //     a.id, a.namespace, a.job_id, a.shell_charset
         // from task_shell_job a
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery8 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery8 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskShellJob.id, taskShellJob.namespace, taskShellJob.jobId, taskShellJob.shellCharset
             ))
             .from(taskShellJob)
             .where(taskShellJob.shellType.notIn(EnumConstant.SHELL_TYPE_FILE_SUFFIX_MAPPING.keySet()));
-        List<LinkedHashMap<String, ?>> list8 = beginReadOnlyTX(status -> sqlQuery8.fetch());
-        Iterator<LinkedHashMap<String, ?>> iterator8 = list8.iterator();
+        List<LinkedHashMap<String, Object>> list8 = beginReadOnlyTX(status -> sqlQuery8.fetch());
+        Iterator<LinkedHashMap<String, Object>> iterator8 = list8.iterator();
         while (iterator8.hasNext()) {
             LinkedHashMap<String, ?> row = iterator8.next();
             try {
@@ -1339,7 +1339,7 @@ public class TaskStore {
         // where a.misfire_strategy not in (1, 2)
         //     or a.allow_concurrent not in (0, 1)
         //     or a.type not in (1, 2)
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery9 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery9 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskJobTrigger.id, taskJobTrigger.namespace, taskJobTrigger.jobId
             ))
@@ -1349,7 +1349,7 @@ public class TaskStore {
                     .or(taskJobTrigger.allowConcurrent.notIn(EnumConstant.JOB_ALLOW_CONCURRENT_0, EnumConstant.JOB_ALLOW_CONCURRENT_1))
                     .or(taskJobTrigger.type.notIn(EnumConstant.JOB_TRIGGER_TYPE_1, EnumConstant.JOB_TRIGGER_TYPE_2))
             );
-        List<LinkedHashMap<String, ?>> list9 = beginReadOnlyTX(status -> sqlQuery9.fetch());
+        List<LinkedHashMap<String, Object>> list9 = beginReadOnlyTX(status -> sqlQuery9.fetch());
         if (!list9.isEmpty()) {
             errMsg.append("-- task_job_trigger: misfire_strategy、allow_concurrent、type 字段值的有效性").append(line);
             errMsg.append(sqlQuery9.getSQL().getSQL()).append(line);
@@ -1360,15 +1360,15 @@ public class TaskStore {
         //     a.id, a.namespace, a.job_id, a.type, a.cron, a.fixed_interval
         // from task_job_trigger a
         // where a.type in (1, 2)
-        SQLQuery<LinkedHashMap<String, ?>> sqlQuery10 = queryDSL.select(QueryDslUtils.linkedMap(
+        SQLQuery<LinkedHashMap<String, Object>> sqlQuery10 = queryDSL.select(QueryDslUtils.linkedMap(
                 RenameStrategy.None,
                 taskJobTrigger.id, taskJobTrigger.namespace, taskJobTrigger.jobId,
                 taskJobTrigger.type, taskJobTrigger.cron, taskJobTrigger.fixedInterval
             ))
             .from(taskJobTrigger)
             .where(taskJobTrigger.type.in(EnumConstant.JOB_TRIGGER_TYPE_1, EnumConstant.JOB_TRIGGER_TYPE_2));
-        List<LinkedHashMap<String, ?>> list10 = beginReadOnlyTX(status -> sqlQuery10.fetch());
-        Iterator<LinkedHashMap<String, ?>> iterator10 = list10.iterator();
+        List<LinkedHashMap<String, Object>> list10 = beginReadOnlyTX(status -> sqlQuery10.fetch());
+        Iterator<LinkedHashMap<String, Object>> iterator10 = list10.iterator();
         while (iterator10.hasNext()) {
             LinkedHashMap<String, ?> row = iterator10.next();
             try {
