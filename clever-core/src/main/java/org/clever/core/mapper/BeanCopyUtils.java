@@ -139,7 +139,7 @@ public class BeanCopyUtils {
         if (targetClass == null || sourceArr == null) {
             return null;
         }
-        T target = targetClass.newInstance();
+        T target = BeanUtils.instantiateClass(targetClass);
         for (Object source : sourceArr) {
             copyTo(source, target, true, true);
         }
@@ -160,8 +160,8 @@ public class BeanCopyUtils {
             return (Map) source;
         }
         final String[] ignoreClass = new String[]{
-                "java.lang.Class",
-                "groovy.lang.MetaClass",
+            "java.lang.Class",
+            "groovy.lang.MetaClass",
         };
         Map<String, Object> map = new HashMap<>();
         getBeanPropertyNames(source, (name, value) -> {
@@ -253,7 +253,7 @@ public class BeanCopyUtils {
         if (targetClass == null || map == null) {
             return null;
         }
-        T target = targetClass.newInstance();
+        T target = BeanUtils.instantiateClass(targetClass);
         toBean(map, target);
         return target;
     }

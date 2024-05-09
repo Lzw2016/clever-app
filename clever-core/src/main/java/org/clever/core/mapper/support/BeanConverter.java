@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
 import net.sf.cglib.core.Converter;
 import org.apache.commons.lang3.ClassUtils;
+import org.clever.beans.BeanUtils;
 import org.clever.core.converter.TypeConverter;
 import org.clever.core.mapper.SharedConversionService;
 
@@ -70,8 +71,8 @@ public class BeanConverter {
     public <T> T mapper(Object source, Class<T> targetClass) {
         T result;
         try {
-            result = targetClass.newInstance();
-        } catch (ReflectiveOperationException e) {
+            result = BeanUtils.instantiateClass(targetClass);
+        } catch (Throwable e) {
             throw new RuntimeException(String.format("创建对象实例[%s]失败，缺少默认的构造函数", targetClass.getName()), e);
         }
         copyTo(source, result);
