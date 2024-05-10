@@ -385,3 +385,51 @@ BEGIN
 END;
 $function$
 ;
+
+-- [存储过程]批量获取全局锁
+create or replace function locks_it(
+    names varchar[] -- 锁名称
+)
+returns varchar[]
+language plpgsql
+as
+$function$
+DECLARE
+    _idx          int4;
+    _lock_name    varchar;
+    _lock_names   varchar[];
+    _names        record;
+BEGIN
+    -- 参数校验
+    if (names is null) then
+        raise exception using message = -20000, hint = '参数names不能为空或者空数组';
+    end if;
+    if(array_length(names, 1) <= 0) then
+        return names;
+    end if;
+    _idx := 1;
+    foreach _lock_name in array names loop
+        if (_lock_name is null or length(trim(_lock_name)) <= 0) then
+            raise exception using message = -20000, hint = '参数names中不能有空值';
+        else
+            names[_idx] := trim(_lock_name);
+        end if;
+        _idx := _idx+1;
+    end loop;
+    -- 查询lock数据
+    select array_agg(lock_name) into _lock_names from sys_lock where lock_name = any(names);
+    for _names in select unnest(names) as name except select unnest(_lock_names) loop
+        insert into sys_lock
+        (lock_name, description)
+        values
+            (_names.name, '系统自动生成')
+        on conflict (lock_name) do update set update_at = now();
+    end loop;
+    -- 利用数据库行级锁实现全局锁
+    foreach _lock_name in array names loop
+        update sys_lock set lock_count=lock_count+1, update_at=now() where lock_name = _lock_name;
+    end loop;
+    return names;
+END;
+$function$
+;
