@@ -99,13 +99,13 @@ returns bigint[]
 language plpgsql
 as
 $function$
-DECLARE
+declare
     _row_id         bigint;     -- auto_increment_id 行数据id
     _add_value      bigint;     -- auto_increment_id 增长值
     _old_val        bigint;     -- 序列自动增长之前的值
     _current_val    bigint;     -- 序列自动增长后的值
     _res            bigint[];   -- 返回序列集合
-BEGIN
+begin
     -- seq_name 不能为空
     if (seq_name is null or length(trim(seq_name)) <= 0) then
         raise exception using message = -20000, hint = ('参数seq_name不能为空');
@@ -149,7 +149,7 @@ BEGIN
         _res[i] := _old_val + i * step;
     end loop;
     return _res;
-END;
+end;
 $function$
 ;
 
@@ -161,9 +161,9 @@ returns bigint
 language plpgsql
 as
 $function$
-BEGIN
+begin
     return (next_ids(seq_name, 1, 1)::bigint[])[1];
-END;
+end;
 $function$
 ;
 
@@ -175,13 +175,13 @@ returns bigint
 language plpgsql
 as
 $function$
-DECLARE
+declare
     _current_val    bigint;
-BEGIN
+begin
     seq_name := trim(seq_name);
     select current_value into _current_val from auto_increment_id where sequence_name = seq_name;
     return _current_val;
-END;
+end;
 $function$
 ;
 
@@ -194,13 +194,13 @@ returns varchar
 language plpgsql
 as
 $function$
-DECLARE
+declare
     _java_patterns  varchar[];
     _pattern_map    json;
     _key            varchar;
     _value          varchar;
     _pg_pattern     varchar;
-BEGIN
+begin
     if(pattern is null or length(trim(pattern))<=0) then
         return '';
     end if;
@@ -241,7 +241,7 @@ BEGIN
     end loop;
     -- call p_log('java_date_format', '_pg_pattern=' || _pg_pattern);
     return to_char(date_time, _pg_pattern);
-END;
+end;
 $function$
 ;
 
@@ -254,7 +254,7 @@ returns varchar[]
 language plpgsql
 as
 $function$
-DECLARE
+declare
     _row                record;
     _new_reset_flag     varchar;
     _new_sequence       bigint;
@@ -268,7 +268,7 @@ DECLARE
     _seq_placeholder    varchar = '@@@_seq_@@@';
     _res_seq            varchar;
     _res                varchar[];
-BEGIN
+begin
     if (size is null or size <= 0) then
         raise exception using message = -20000, hint = ('参数 size=[' || size || '] 错误');
     end if;
@@ -336,7 +336,7 @@ BEGIN
         end if;
     end loop;
     return _res;
-END;
+end;
 $function$
 ;
 
@@ -362,9 +362,9 @@ returns varchar
 language plpgsql
 as
 $function$
-DECLARE
+declare
     _lock_name      varchar;
-BEGIN
+begin
     -- 参数校验
     if (name is null or length(trim(name)) <= 0) then
         raise exception using message = -20000, hint = '参数name不能为空';
@@ -382,7 +382,7 @@ BEGIN
     -- 利用数据库行级锁实现全局锁
     update sys_lock set lock_count=lock_count+1, update_at=now() where lock_name = name;
     return name;
-END;
+end;
 $function$
 ;
 
@@ -394,12 +394,12 @@ returns varchar[]
 language plpgsql
 as
 $function$
-DECLARE
+declare
     _idx          int4;
     _lock_name    varchar;
     _lock_names   varchar[];
     _names        record;
-BEGIN
+begin
     -- 参数校验
     if (names is null) then
         raise exception using message = -20000, hint = '参数names不能为空或者空数组';
@@ -418,18 +418,19 @@ BEGIN
     end loop;
     -- 查询lock数据
     select array_agg(lock_name) into _lock_names from sys_lock where lock_name = any(names);
-    for _names in select unnest(names) as name except select unnest(_lock_names) loop
+    -- 新增数据(需要排序)
+    for _names in select name from unnest(names) as locks(name) except select unnest(_lock_names) order by name loop
         insert into sys_lock
         (lock_name, description)
         values
             (_names.name, '系统自动生成')
         on conflict (lock_name) do update set update_at = now();
     end loop;
-    -- 利用数据库行级锁实现全局锁
-    foreach _lock_name in array names loop
-        update sys_lock set lock_count=lock_count+1, update_at=now() where lock_name = _lock_name;
+    -- 利用数据库行级锁实现全局锁(需要排序)
+    for _names in select name from unnest(names) as locks(name) order by name  loop
+        update sys_lock set lock_count=lock_count+1, update_at=now() where lock_name = _names.name;
     end loop;
     return names;
-END;
+end;
 $function$
 ;

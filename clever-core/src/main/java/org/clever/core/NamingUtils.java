@@ -78,6 +78,9 @@ public class NamingUtils {
         if (StringUtils.isBlank(param)) {
             return StringUtils.EMPTY;
         }
+        if (!param.contains(String.valueOf(UNDERLINE))) {
+            return param;
+        }
         int len = param.length();
         param = param.toLowerCase();
         StringBuilder sb = new StringBuilder(len);
