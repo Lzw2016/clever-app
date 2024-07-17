@@ -16,8 +16,8 @@ import java.util.concurrent.Future;
 @Slf4j
 public class JdbcTest {
     private Jdbc newJdbc() {
-        return BaseTest.newMysql();
-        // return BaseTest.newPostgresql();
+        // return BaseTest.newMysql();
+        return BaseTest.newPostgresql();
     }
 
     @Test
@@ -145,6 +145,23 @@ public class JdbcTest {
                 return null;
             });
         });
+        jdbc.close();
+    }
+
+    @Test
+    public void t10() {
+        Jdbc jdbc = newJdbc();
+        final long startTime = System.currentTimeMillis();
+        final int count = 10000;
+        for (int i = 0; i < count; i++) {
+            Long id = jdbc.queryLong("select 100");
+            if (i % 500 == 0) {
+                log.info("-> {}", id);
+            }
+        }
+        final long endTime = System.currentTimeMillis();
+        // 1ms/次 | 总时间:11443ms
+        log.info("{}ms/次 | 总时间:{}ms", (endTime - startTime) / count, (endTime - startTime));
         jdbc.close();
     }
 }

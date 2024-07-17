@@ -251,15 +251,14 @@ public class RedisTest {
         redis.close();
     }
 
-    @Test
-    public void t06() {
+    public void t06(int dbIdx) {
         RedisProperties properties = new RedisProperties();
         properties.setMode(RedisProperties.Mode.Standalone);
         properties.setClientName("test");
         properties.getStandalone().setHost("10.100.10.20");
         properties.getStandalone().setPort(6379);
         properties.getStandalone().setPassword("Info@wms2023#");
-        properties.getStandalone().setDatabase(11);
+        properties.getStandalone().setDatabase(dbIdx);
         properties.setReadTimeout(Duration.ofSeconds(600));
         properties.setConnectTimeout(Duration.ofSeconds(600));
         properties.setShutdownTimeout(Duration.ofSeconds(600));
@@ -284,9 +283,16 @@ public class RedisTest {
         log.info("ALLOC:REPWAVE:* keys -> {}", keys.size());
         expireKeys.call(keys);
 
-         keys = redis.keys("LOC_NOT_FOUND:*");
-         log.info("LOC_NOT_FOUND:* keys -> {}", keys.size());
-         expireKeys.call(keys);
+        keys = redis.keys("LOC_NOT_FOUND:*");
+        log.info("LOC_NOT_FOUND:* keys -> {}", keys.size());
+        expireKeys.call(keys);
         redis.close();
+    }
+
+    @Test
+    public void t07() {
+        for (int i = 0; i < 12; i++) {
+            t06(i);
+        }
     }
 }
