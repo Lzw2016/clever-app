@@ -70,16 +70,18 @@ tasks.processResources {
 
 // 拷贝lib文件
 tasks.register("copyJar", Copy::class) {
-    delete("$buildDir/libs/lib")
+    val libDir = layout.buildDirectory.dir("libs/lib").get()
+    delete(libDir)
     from(configurations.runtimeClasspath)
-    into("$buildDir/libs/lib")
+    into(libDir)
 }
 
 // 拷贝配置文件
 tasks.register("copyResources", Copy::class) {
-    delete("$buildDir/libs/config")
+    val configDir = layout.buildDirectory.dir("libs/config").get()
+    delete(configDir)
     from("src/main/resources")
-    into("$buildDir/libs/config")
+    into(configDir)
 }
 
 // 配置启动jar
