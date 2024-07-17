@@ -1,4 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,17 +44,12 @@ sourceSets {
 //    enabled = false
 //}
 
-tasks.compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+kotlin {
+    compilerOptions {
+        apiVersion = KotlinVersion.KOTLIN_2_0
+        jvmTarget = JvmTarget.JVM_1_8
         javaParameters = true
-    }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs.plus("-Xjsr305=strict")
-        jvmTarget = "1.8"
+        freeCompilerArgs.add("-Xjsr305=strict")
     }
 }
 
