@@ -52,7 +52,7 @@ tasks.compileKotlin {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
+        freeCompilerArgs.plus("-Xjsr305=strict")
         jvmTarget = "1.8"
     }
 }
