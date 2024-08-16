@@ -3661,6 +3661,19 @@ public class Jdbc extends AbstractDataSource {
                         // mysql 调用存储过程不支持 withNamedBinding 语法
                         procedure.setNamedBinding(false);
                         break;
+                    case ORACLE:
+                    case ORACLE_12C:
+                        // oracle 存储过程调用
+                        String[] pkgAndName = StringUtils.split(procedureName, ".");
+                        if (pkgAndName.length == 3) {
+                            procedure.withSchemaName(pkgAndName[0]);
+                            procedure.withCatalogName(pkgAndName[1]);
+                            procedure.withProcedureName(pkgAndName[2]);
+                        } else if (pkgAndName.length == 2) {
+                            procedure.withSchemaName(pkgAndName[0]);
+                            procedure.withProcedureName(pkgAndName[1]);
+                        }
+                        break;
                 }
                 if (StringUtils.isNotBlank(schemaName)) {
                     procedure.setSchemaName(schemaName);
