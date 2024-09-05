@@ -1,5 +1,6 @@
 package org.clever.data.jdbc;
 
+import com.querydsl.core.QueryFlag;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
@@ -8,6 +9,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.*;
+import com.querydsl.sql.dml.Mapper;
+import com.querydsl.sql.dml.SQLInsertClause;
+import com.querydsl.sql.dml.SQLMergeClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -18,6 +22,7 @@ import org.clever.data.jdbc.querydsl.SQLCoreListener;
 import org.clever.data.jdbc.querydsl.sql.OracleTemplates;
 import org.clever.data.jdbc.querydsl.sql.PostgreSQLTemplates;
 import org.clever.data.jdbc.querydsl.sql.SQLQueryFactory;
+import org.clever.data.jdbc.querydsl.sql.dml.MapMapper;
 import org.clever.data.jdbc.support.JdbcDataSourceStatus;
 import org.clever.data.jdbc.support.JdbcInfo;
 import org.clever.transaction.TransactionDefinition;
@@ -121,6 +126,134 @@ public class QueryDSL extends SQLQueryFactory {
      */
     public boolean update(RelationalPath<?> qTable, Predicate where, Object data, Path<?>... ignoreFields) {
         return update(qTable, where, data, null, ignoreFields);
+    }
+
+    /**
+     * 新增或更新数据，数据不存在就 insert，数据存在就 update
+     *
+     * @param qTable     表对应的Q类
+     * @param data       表数据实体对象
+     * @param ignoreNull 是否忽略空值，不更新空值字段
+     * @param keys       判断数据是否存在的字段
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public long merge(RelationalPath<?> qTable, Object data, boolean ignoreNull, Path<?>... keys) {
+        SQLMergeClause merge = merge(qTable);
+        Mapper<Map<String, ?>> mapper = ignoreNull ? MapMapper.WITH_NULL_BINDINGS : MapMapper.DEFAULT;
+        Map<String, Object> dataMap = BeanCopyUtils.toMap(data);
+        Map<Path<?>, Object> mapperMap = mapper.createMap(qTable, dataMap);
+        for (Map.Entry<Path<?>, Object> entry : mapperMap.entrySet()) {
+            merge.set((Path) entry.getKey(), entry.getValue());
+        }
+        merge.keys(keys);
+        return merge.execute();
+    }
+
+    /**
+     * 新增或更新数据，数据不存在就 insert，数据存在就 update，忽略空值字段
+     *
+     * @param qTable 表对应的Q类
+     * @param data   表数据实体对象(忽略空值字段)
+     * @param keys   判断数据是否存在的字段
+     */
+    public long merge(RelationalPath<?> qTable, Object data, Path<?>... keys) {
+        return merge(qTable, data, true, keys);
+    }
+
+    /**
+     * 新增或更新数据，利用目标数据库的方言语法实现
+     *
+     * @param qTable     表对应的Q类
+     * @param data       表数据实体对象
+     * @param ignoreNull 是否忽略空值，不更新空值字段
+     * @param keys       判断数据是否存在的字段
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public long upsert(RelationalPath<?> qTable, Object data, boolean ignoreNull, Path<?>... keys) {
+        // 生成正常的 insert 语句
+        SQLInsertClause insert = insert(qTable);
+        Map<String, Object> dataMap = BeanCopyUtils.toMap(data);
+        Mapper<Map<String, ?>> mapper = ignoreNull ? MapMapper.WITH_NULL_BINDINGS : MapMapper.DEFAULT;
+        Map<Path<?>, Object> mapperMap = mapper.createMap(qTable, dataMap);
+        for (Map.Entry<Path<?>, Object> entry : mapperMap.entrySet()) {
+            insert.set((Path) entry.getKey(), entry.getValue());
+        }
+        // 生成 “on duplicate key update” 或者 “on conflict” 部分
+        List<Expression<?>> expressions = new ArrayList<>(mapperMap.size());
+        switch (jdbc.getDbType()) {
+            case MYSQL: {
+                // insert into users (id, name, email) values (1, 'alice updated', 'alice.updated@example.com')
+                // on duplicate key update name = values(name), email = values(email)
+                expressions.add(Expressions.stringTemplate(" on duplicate key update"));
+                int idx = 0;
+                for (Map.Entry<Path<?>, Object> entry : mapperMap.entrySet()) {
+                    idx++;
+                    Path<?> column = entry.getKey();
+                    Expression<?> expression;
+                    if (idx < mapperMap.size()) {
+                        expression = Expressions.stringTemplate(" {0} = values({0}),", column);
+                    } else {
+                        expression = Expressions.stringTemplate(" {0} = values({0})", column);
+                    }
+                    expressions.add(expression);
+                }
+            }
+            break;
+            case POSTGRE_SQL: {
+                // insert into users (id, name, email) values (1, 'alice updated', 'alice.updated@example.com')
+                // on conflict (id) do update set name = excluded.name, email = excluded.email
+                Assert.notEmpty(keys, "参数 keys 不能为空");
+                expressions.add(Expressions.stringTemplate(" on conflict ("));
+                int idx = 0;
+                for (Path<?> key : keys) {
+                    idx++;
+                    Expression<?> expression;
+                    Expression<?> field = Expressions.simplePath(Void.class, key.getMetadata().getName());
+                    if (idx < keys.length) {
+                        if (idx == 1) {
+                            expression = Expressions.stringTemplate("{0},", field);
+                        } else {
+                            expression = Expressions.stringTemplate(" {0},", field);
+                        }
+                    } else {
+                        expression = Expressions.stringTemplate(" {0})", field);
+                    }
+                    expressions.add(expression);
+                }
+                expressions.add(Expressions.stringTemplate(" do update set"));
+                idx = 0;
+                for (Map.Entry<Path<?>, Object> entry : mapperMap.entrySet()) {
+                    idx++;
+                    Path<?> column = entry.getKey();
+                    Expression<?> expression;
+                    Expression<?> field = Expressions.simplePath(Void.class, column.getMetadata().getName());
+                    if (idx < mapperMap.size()) {
+                        expression = Expressions.stringTemplate(" {0} = excluded.{0},", field);
+                    } else {
+                        expression = Expressions.stringTemplate(" {0} = excluded.{0}", field);
+                    }
+                    expressions.add(expression);
+                }
+            }
+            break;
+            default:
+                throw new RuntimeException("saveOrUpdate不支持数据库");
+        }
+        for (Expression<?> expression : expressions) {
+            insert.addFlag(QueryFlag.Position.END, expression);
+        }
+        return insert.execute();
+    }
+
+    /**
+     * 新增或更新数据，利用目标数据库的方言语法实现，忽略空值字段
+     *
+     * @param qTable 表对应的Q类
+     * @param data   表数据实体对象(忽略空值字段)
+     * @param keys   判断数据是否存在的字段
+     */
+    public long upsert(RelationalPath<?> qTable, Object data, Path<?>... keys) {
+        return upsert(qTable, data, true, keys);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -625,7 +758,7 @@ public class QueryDSL extends SQLQueryFactory {
      */
     public BooleanExpression likeMatch(StringPath field, String likeVal, boolean prefix, boolean suffix) {
         String escape = jdbc.getEscape();
-        return likeMatch(field, likeVal, escape, suffix, suffix);
+        return likeMatch(field, likeVal, escape, prefix, suffix);
     }
 
     /**
