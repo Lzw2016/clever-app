@@ -28,7 +28,7 @@ jdbc:
   defaultName: 'postgresql'
   dataSource:
     postgresql:
-      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.201:30010/test
+      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.211:30010/test
       username: admin
       password: admin123456
       minimumIdle: 2
@@ -44,7 +44,7 @@ redis:
     default:
       mode: Standalone
       standalone:
-        host: '192.168.1.201'
+        host: '192.168.1.211'
         port: 30007
         database: 0
         password: 'admin123456'
