@@ -9,6 +9,7 @@ import java.beans.PropertyDescriptor;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * JavaBean工具<br/>
@@ -20,6 +21,11 @@ import java.util.function.BiFunction;
  * @see BeanMapper
  */
 public class BeanCopyUtils {
+    public static final String[] IGNORE_CLASS = new String[]{
+        "java.lang.Class",
+        "groovy.lang.MetaClass",
+    };
+
     /**
      * 获取JavaBean的字段名
      *
@@ -55,6 +61,13 @@ public class BeanCopyUtils {
      */
     public static void copyTo(Object source, Object target, boolean ignoreSourceNull, boolean ignoreTargetNotNull) {
         Set<String> propertyNames = new HashSet<>();
+        propertyNames.addAll(getBeanPropertyNames(target, (name, value) -> {
+            if (value != null) {
+                String clazz = value.getClass().getName();
+                return Arrays.stream(IGNORE_CLASS).anyMatch(clazz::startsWith);
+            }
+            return false;
+        }));
         if (ignoreSourceNull) {
             propertyNames.addAll(getBeanPropertyNames(source, (name, value) -> value == null));
         }
@@ -93,7 +106,7 @@ public class BeanCopyUtils {
      * @param ignoreProperties 忽略的字段名
      */
     public static void copyTo(Object source, Object target, String... ignoreProperties) {
-        BeanUtils.copyProperties(source, target, ignoreProperties);
+        copyTo(source, target, Arrays.stream(ignoreProperties).collect(Collectors.toSet()));
     }
 
     /**
@@ -104,11 +117,17 @@ public class BeanCopyUtils {
      * @param ignoreProperties 忽略的字段名
      */
     public static void copyTo(Object source, Object target, Set<String> ignoreProperties) {
-        if (ignoreProperties != null) {
-            BeanUtils.copyProperties(source, target, ignoreProperties.toArray(new String[0]));
-        } else {
-            BeanUtils.copyProperties(source, target);
+        if (ignoreProperties == null) {
+            ignoreProperties = new HashSet<>();
         }
+        ignoreProperties.addAll(getBeanPropertyNames(target, (name, value) -> {
+            if (value != null) {
+                String clazz = value.getClass().getName();
+                return Arrays.stream(IGNORE_CLASS).anyMatch(clazz::startsWith);
+            }
+            return false;
+        }));
+        BeanUtils.copyProperties(source, target, ignoreProperties.toArray(new String[0]));
     }
 
     /**
@@ -159,15 +178,11 @@ public class BeanCopyUtils {
         if (source instanceof Map) {
             return (Map) source;
         }
-        final String[] ignoreClass = new String[]{
-            "java.lang.Class",
-            "groovy.lang.MetaClass",
-        };
         Map<String, Object> map = new HashMap<>();
         getBeanPropertyNames(source, (name, value) -> {
             if (value != null) {
                 String clazz = value.getClass().getName();
-                if (Arrays.stream(ignoreClass).anyMatch(clazz::startsWith)) {
+                if (Arrays.stream(IGNORE_CLASS).anyMatch(clazz::startsWith)) {
                     return false;
                 }
             }
