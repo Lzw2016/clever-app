@@ -42,10 +42,7 @@ import org.clever.data.jdbc.support.features.DataBaseFeatures;
 import org.clever.data.jdbc.support.features.DataBaseFeaturesFactory;
 import org.clever.jdbc.UncategorizedSQLException;
 import org.clever.jdbc.core.*;
-import org.clever.jdbc.core.namedparam.EmptySqlParameterSource;
-import org.clever.jdbc.core.namedparam.MapSqlParameterSource;
-import org.clever.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.clever.jdbc.core.namedparam.SqlParameterSource;
+import org.clever.jdbc.core.namedparam.*;
 import org.clever.jdbc.core.simple.SimpleJdbcCall;
 import org.clever.jdbc.datasource.DataSourceTransactionManager;
 import org.clever.jdbc.support.GeneratedKeyHolder;
@@ -60,6 +57,7 @@ import org.clever.transaction.support.DefaultTransactionDefinition;
 import org.clever.transaction.support.TransactionCallback;
 import org.clever.transaction.support.TransactionTemplate;
 import org.clever.util.Assert;
+import org.clever.util.ConcurrentLruCache;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -72,6 +70,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.clever.data.jdbc.support.query.QAutoIncrementId.autoIncrementId;
 import static org.clever.data.jdbc.support.query.QBizCode.bizCode;
@@ -2880,6 +2879,13 @@ public class Jdbc extends AbstractDataSource {
         return "%" + likeEscape(likeVal) + "%";
     }
 
+    /**
+     * 创建一个批量更新操作对象，注意：批量执行的SQL不要有顺序依赖关系
+     */
+    public JdbcBatchUpdate startBatch() {
+        return new JdbcBatchUpdate(this);
+    }
+
     // --------------------------------------------------------------------------------------------
     //  业务含义操作
     // --------------------------------------------------------------------------------------------
@@ -3985,6 +3991,300 @@ public class Jdbc extends AbstractDataSource {
             } finally {
                 jdbc.listeners.afterExec(jdbc.dbType, jdbc.jdbcTemplate, exception);
             }
+        }
+    }
+
+    @Data
+    public static class JdbcBatchUpdate {
+        private final Jdbc jdbc;
+        private final ConcurrentLruCache<String, ParsedSql> parsedSqlCache = new ConcurrentLruCache<>(512, NamedParameterUtils::parseSqlStatement);
+        private final List<TupleTwo<String, Map<String, Object>>> batchSql = new ArrayList<>();
+
+        public JdbcBatchUpdate(Jdbc jdbc) {
+            this.jdbc = jdbc;
+        }
+
+        /**
+         * 增加一个批量更新的SQL
+         *
+         * @param sql      sql脚本，参数格式[:param]
+         * @param paramMap 参数，参数格式[:param]
+         */
+        public JdbcBatchUpdate update(String sql, Map<String, Object> paramMap) {
+            batchSql.add(TupleTwo.creat(sql, paramMap));
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL
+         *
+         * @param sql   sql脚本，参数格式[:param]
+         * @param param 参数，参数格式[:param]
+         */
+        public JdbcBatchUpdate update(String sql, Object param) {
+            batchSql.add(TupleTwo.creat(sql, BeanCopyUtils.toMap(param)));
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL
+         *
+         * @param sql sql脚本，参数格式[:param]
+         */
+        public JdbcBatchUpdate update(String sql) {
+            batchSql.add(TupleTwo.creat(sql, Collections.emptyMap()));
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，根据表名更新表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param whereMap     更新条件字段(只支持=，and条件)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, Map<String, Object> whereMap, RenameStrategy paramsRename) {
+            Assert.hasText(tableName, "更新表名称不能为空");
+            Assert.notEmpty(fields, "更新字段不能为空");
+            Assert.notEmpty(whereMap, "更新条件不能为空");
+            tableName = StringUtils.trim(tableName);
+            TupleTwo<String, Map<String, Object>> tupleTow = SqlUtils.updateSql(tableName, fields, whereMap, paramsRename);
+            String sql = StringUtils.trim(tupleTow.getValue1());
+            return update(sql, tupleTow.getValue2());
+        }
+
+        /**
+         * 增加一个批量更新的SQL，根据表名更新表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param whereMap  更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, Map<String, Object> whereMap) {
+            return updateTable(tableName, fields, whereMap, DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 根据表名更新表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param where        更新条件字段(只支持=，and条件)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, Object where, RenameStrategy paramsRename) {
+            return updateTable(tableName, BeanCopyUtils.toMap(fields), BeanCopyUtils.toMap(where), paramsRename);
+        }
+
+        /**
+         * 根据表名更新表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param where     更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, Object where) {
+            return updateTable(tableName, BeanCopyUtils.toMap(fields), BeanCopyUtils.toMap(where), DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 更新数据库表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param whereStr     自定义where条件(不用写where关键字)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, String whereStr, RenameStrategy paramsRename) {
+            Assert.hasText(tableName, "更新表名称不能为空");
+            Assert.notEmpty(fields, "更新字段不能为空");
+            Assert.hasText(whereStr, "更新条件不能为空");
+            tableName = StringUtils.trim(tableName);
+            TupleTwo<String, Map<String, Object>> tupleTow = SqlUtils.updateSql(tableName, fields, null, paramsRename);
+            String sql = String.format("%s where %s", tupleTow.getValue1(), StringUtils.trim(whereStr));
+            return update(sql, tupleTow.getValue2());
+        }
+
+        /**
+         * 更新数据库表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param whereStr  自定义where条件(不用写where关键字)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, String whereStr) {
+            return updateTable(tableName, fields, whereStr, DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 更新数据库表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param whereStr     自定义where条件(不用写where关键字)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, String whereStr, RenameStrategy paramsRename) {
+            return updateTable(tableName, BeanCopyUtils.toMap(fields), whereStr, paramsRename);
+        }
+
+        /**
+         * 更新数据库表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param whereStr  自定义where条件(不用写where关键字)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, String whereStr) {
+            return updateTable(tableName, BeanCopyUtils.toMap(fields), whereStr, DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 删除数据库表数据
+         *
+         * @param tableName    表名称
+         * @param whereMap     更新条件字段(只支持=，and条件)
+         * @param paramsRename whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Map<String, Object> whereMap, RenameStrategy paramsRename) {
+            Assert.hasText(tableName, "删除表名称不能为空");
+            Assert.notEmpty(whereMap, "删除条件不能为空");
+            tableName = StringUtils.trim(tableName);
+            TupleTwo<String, Map<String, Object>> tupleTow = SqlUtils.deleteSql(tableName, whereMap, paramsRename);
+            String sql = StringUtils.trim(tupleTow.getValue1());
+            return update(sql, tupleTow.getValue2());
+        }
+
+        /**
+         * 删除数据库表数据
+         *
+         * @param tableName 表名称
+         * @param whereMap  更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Map<String, Object> whereMap) {
+            return deleteTable(tableName, whereMap, DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 删除数据库表数据
+         *
+         * @param tableName    表名称
+         * @param where        更新条件字段(只支持=，and条件)
+         * @param paramsRename whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Object where, RenameStrategy paramsRename) {
+            return deleteTable(tableName, BeanCopyUtils.toMap(where), paramsRename);
+        }
+
+        /**
+         * 删除数据库表数据
+         *
+         * @param tableName 表名称
+         * @param where     更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Object where) {
+            return deleteTable(tableName, BeanCopyUtils.toMap(where), DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 数据插入到表
+         *
+         * @param tableName    表名称
+         * @param fields       字段名
+         * @param paramsRename fields字段名重命名策略
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Map<String, Object> fields, RenameStrategy paramsRename) {
+            Assert.hasText(tableName, "插入表名称不能为空");
+            Assert.notEmpty(fields, "插入字段不能为空");
+            tableName = StringUtils.trim(tableName);
+            TupleTwo<String, Map<String, Object>> tupleTow = SqlUtils.insertSql(tableName, fields, paramsRename);
+            return update(tupleTow.getValue1(), tupleTow.getValue2());
+        }
+
+        /**
+         * 数据插入到表
+         *
+         * @param tableName 表名称
+         * @param fields    字段名
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Map<String, Object> fields) {
+            return insertTable(tableName, fields, DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 数据插入到表
+         *
+         * @param tableName    表名称
+         * @param fields       字段名
+         * @param paramsRename fields字段名重命名策略
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Object fields, RenameStrategy paramsRename) {
+            return insertTable(tableName, BeanCopyUtils.toMap(fields), paramsRename);
+        }
+
+        /**
+         * 数据插入到表
+         *
+         * @param tableName 表名称
+         * @param fields    字段名
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Object fields) {
+            return insertTable(tableName, BeanCopyUtils.toMap(fields), DEFAULT_PARAMS_RENAME);
+        }
+
+        /**
+         * 批量执行所有SQL
+         *
+         * @return 影响数据总行数
+         */
+        public int execute() {
+            if (batchSql.isEmpty()) return 0;
+            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
+            Exception exception = null;
+            try {
+                final Map<String, PreparedStatement> stmts = new LinkedHashMap<>(batchSql.size());
+                final List<TupleTwo<String, PreparedStatementSetter>> pssList = batchSql.stream().map(this::newCreatorFactory).collect(Collectors.toList());
+                return jdbc.jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) connection -> {
+                    // 创建 PreparedStatement 且设置参数
+                    for (TupleTwo<String, PreparedStatementSetter> tupleTwo : pssList) {
+                        String useSql = tupleTwo.getValue1();
+                        PreparedStatementSetter pss = tupleTwo.getValue2();
+                        PreparedStatement ps = stmts.get(useSql);
+                        if (ps == null) {
+                            ps = connection.prepareStatement(useSql);
+                            stmts.put(useSql, ps);
+                        }
+                        pss.setValues(ps);
+                        ps.addBatch();
+                    }
+                    int sumChange = 0;
+                    // 批量执行
+                    for (PreparedStatement ps : stmts.values()) {
+                        int[] changes = ps.executeBatch();
+                        sumChange += Arrays.stream(changes).sum();
+                    }
+                    SqlLoggerUtils.printfUpdateTotal(sumChange);
+                    return sumChange;
+                });
+            } catch (Exception e) {
+                exception = e;
+                throw e;
+            } finally {
+                jdbc.listeners.afterExec(jdbc.dbType, jdbc.jdbcTemplate, exception);
+            }
+        }
+
+        private TupleTwo<String, PreparedStatementSetter> newCreatorFactory(TupleTwo<String, Map<String, Object>> tupleTwo) {
+            String sql = tupleTwo.getValue1();
+            Map<String, Object> params = tupleTwo.getValue2();
+            MapSqlParameterSource paramSource = new MapSqlParameterSource(params);
+            ParsedSql parsedSql = parsedSqlCache.get(sql);
+            String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+            List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
+            PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
+            Object[] values = NamedParameterUtils.buildValueArray(parsedSql, paramSource, declaredParameters);
+            return TupleTwo.creat(sqlToUse, pscf.newPreparedStatementSetter(values));
         }
     }
 }
