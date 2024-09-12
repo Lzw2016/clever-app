@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <excludedPredefinedLibrary name="clever-app/clever-js-api/build/resources/test/javascript/03使用npm包/node_modules" />
+  </component>
+</project>

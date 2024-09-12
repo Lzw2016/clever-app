@@ -6,7 +6,7 @@ pluginManagement {
     plugins {
         id("io.spring.dependency-management").version("1.1.6")
         id("org.springframework.boot").version("2.6.15")
-        id("org.jetbrains.kotlin.jvm").version("2.0.0")
+        id("org.jetbrains.kotlin.jvm").version("2.0.20")
     }
 }
 
