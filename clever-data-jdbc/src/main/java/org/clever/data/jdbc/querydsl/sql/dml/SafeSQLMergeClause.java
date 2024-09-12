@@ -59,14 +59,20 @@ public class SafeSQLMergeClause extends SQLMergeClause {
 
     @Override
     public long execute() {
-        // 参考: 父类的 execute
-        long rc;
-        if (configuration.getTemplates().isNativeMerge()) {
-            rc = executeNativeMerge();
-        } else {
-            rc = executeCompositeMerge();
+        context = startContext(connection(), metadata, entity);
+        try {
+            // 参考: 父类的 execute
+            long rc;
+            if (configuration.getTemplates().isNativeMerge()) {
+                rc = executeNativeMerge();
+            } else {
+                rc = executeCompositeMerge();
+            }
+            context.setData(SqlLoggerUtils.QUERYDSL_UPDATE_TOTAL, rc);
+            return rc;
+        } finally {
+            reset();
+            endContext(context);
         }
-        context.setData(SqlLoggerUtils.QUERYDSL_UPDATE_TOTAL, rc);
-        return rc;
     }
 }
