@@ -10,21 +10,22 @@ import java.util.stream.Collectors;
  * 作者：lizw <br/>
  * 创建时间：2020/07/11 07:28 <br/>
  */
+@SuppressWarnings({"LoggingSimilarMessage", "DuplicatedCode"})
 @Slf4j
 public class SqlLoggerUtils {
     public static final String QUERYDSL_UPDATE_TOTAL = "UpdateTotal";
 
-    private static final String Log_Sql /*         */ = "==> ExecuteSQL: {}";
-    private static final String Log_Parameters /*  */ = "==> Parameters: {}";
-    private static final String Log_Batch_Param /* */ = "==> BatchParam: {}";
-    private static final String Log_Total /*       */ = "<==      Total: {}";
-    private static final String Log_Update_Total /**/ = "<==    Updated: {}";
-    private static final String Log_Procedure /*   */ = "==>  Procedure: {}";
-    private static final String Procedure_Result /**/ = "<==     Result: {}";
+    private static final String LOG_SQL /*         */ = "==> ExecuteSQL: {}";
+    private static final String LOG_PARAMETERS /*  */ = "==> Parameters: {}";
+    private static final String LOG_BATCH_PARAM /* */ = "==> BatchParam: {}";
+    private static final String LOG_TOTAL /*       */ = "<==      Total: {}";
+    private static final String LOG_UPDATE_TOTAL /**/ = "<==    Updated: {}";
+    private static final String LOG_PROCEDURE /*   */ = "==>  Procedure: {}";
+    private static final String PROCEDURE_RESULT /**/ = "<==     Result: {}";
     /**
      * 忽略的包前缀
      */
-    private static final List<String> Ignore_Package_Prefix = Arrays.asList("java.lang.", "java.util.", "java.sql.");
+    private static final List<String> IGNORE_PACKAGE_PREFIX = Arrays.asList("java.lang.", "java.util.", "java.sql.");
 
     /**
      * 打印SQL以及其参数
@@ -37,10 +38,10 @@ public class SqlLoggerUtils {
             return;
         }
         sql = deleteWhitespace(sql);
-        log.debug(Log_Sql, sql);
+        log.debug(LOG_SQL, sql);
         if (params != null) {
-            String paramMapStr = getParamMapStr(params);
-            log.debug(Log_Parameters, paramMapStr);
+            String paramMapStr = getParamListStr(params);
+            log.debug(LOG_PARAMETERS, paramMapStr);
         }
     }
 
@@ -66,10 +67,10 @@ public class SqlLoggerUtils {
             return;
         }
         sql = deleteWhitespace(sql);
-        log.debug(Log_Sql, sql);
+        log.debug(LOG_SQL, sql);
         if (paramMap != null) {
             String paramMapStr = getParamMapStr(paramMap);
-            log.debug(Log_Parameters, paramMapStr);
+            log.debug(LOG_PARAMETERS, paramMapStr);
         }
     }
 
@@ -84,11 +85,11 @@ public class SqlLoggerUtils {
             return;
         }
         sql = deleteWhitespace(sql);
-        log.debug(Log_Sql, sql);
+        log.debug(LOG_SQL, sql);
         if (paramMapList != null) {
             for (Map<String, Object> paramMap : paramMapList) {
                 String paramMapStr = getParamMapStr(paramMap);
-                log.debug(Log_Batch_Param, paramMapStr);
+                log.debug(LOG_BATCH_PARAM, paramMapStr);
             }
         }
     }
@@ -99,7 +100,7 @@ public class SqlLoggerUtils {
      * @param total 查询结果数据量
      */
     public static void printfTotal(int total) {
-        log.debug(Log_Total, total);
+        log.debug(LOG_TOTAL, total);
     }
 
     /**
@@ -110,9 +111,9 @@ public class SqlLoggerUtils {
     public static void printfTotal(Object res) {
         if (res instanceof Collection) {
             Collection<?> resCollection = (Collection<?>) res;
-            log.debug(Log_Total, resCollection.size());
+            log.debug(LOG_TOTAL, resCollection.size());
         } else {
-            log.debug(Log_Total, res == null ? 0 : 1);
+            log.debug(LOG_TOTAL, res == null ? 0 : 1);
         }
     }
 
@@ -122,7 +123,7 @@ public class SqlLoggerUtils {
      * @param updateTotal 更新数据量
      */
     public static void printfUpdateTotal(int updateTotal) {
-        log.debug(Log_Update_Total, updateTotal);
+        log.debug(LOG_UPDATE_TOTAL, updateTotal);
     }
 
     /**
@@ -136,10 +137,10 @@ public class SqlLoggerUtils {
             return;
         }
         name = deleteWhitespace(name);
-        log.debug(Log_Procedure, name);
+        log.debug(LOG_PROCEDURE, name);
         if (paramMap != null) {
             String paramMapStr = getParamMapStr(paramMap);
-            log.debug(Log_Parameters, paramMapStr);
+            log.debug(LOG_PARAMETERS, paramMapStr);
         }
     }
 
@@ -155,16 +156,16 @@ public class SqlLoggerUtils {
             return;
         }
         name = deleteWhitespace(name);
-        log.debug(Log_Procedure, name);
-        String paramMapStr = getParamMapStr(paramList);
-        log.debug(Log_Parameters, paramMapStr);
+        log.debug(LOG_PROCEDURE, name);
+        String paramMapStr = getParamListStr(paramList);
+        log.debug(LOG_PARAMETERS, paramMapStr);
     }
 
     /**
      * 打印执行Procedure的返回值
      */
     public static void printfProcedureResult(Map<String, Object> res) {
-        log.debug(Procedure_Result, res);
+        log.debug(PROCEDURE_RESULT, res);
     }
 
     /**
@@ -173,10 +174,10 @@ public class SqlLoggerUtils {
      * @param totals 查询结果数据量
      */
     public static void printfUpdateTotal(int[] totals) {
-        log.debug(Log_Update_Total, Arrays.toString(totals));
+        log.debug(LOG_UPDATE_TOTAL, Arrays.toString(totals));
     }
 
-    private static String getParamMapStr(List<Object> params) {
+    private static String getParamListStr(List<Object> params) {
         if (params == null) {
             return null;
         }
@@ -217,7 +218,7 @@ public class SqlLoggerUtils {
         }
         if (param != null) {
             String valueType = param.getClass().getName();
-            for (String packagePrefix : Ignore_Package_Prefix) {
+            for (String packagePrefix : IGNORE_PACKAGE_PREFIX) {
                 if (valueType.startsWith(packagePrefix)) {
                     valueType = param.getClass().getSimpleName();
                     break;
