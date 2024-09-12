@@ -4,6 +4,7 @@ import com.querydsl.sql.SQLBaseListener;
 import com.querydsl.sql.SQLBindings;
 import com.querydsl.sql.SQLListenerContext;
 import lombok.Getter;
+import org.clever.core.Conv;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.listener.JdbcListeners;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
@@ -58,6 +59,14 @@ public class SQLCoreListener extends SQLBaseListener {
             for (SQLBindings sqlBindings : allSqlBindings) {
                 SqlLoggerUtils.printfSql(sqlBindings.getSQL(), sqlBindings.getNullFriendlyBindings());
             }
+        }
+    }
+
+    @Override
+    public void executed(SQLListenerContext context) {
+        Integer updateTotal = Conv.asInteger(context.getData(SqlLoggerUtils.QUERYDSL_UPDATE_TOTAL), null);
+        if (updateTotal != null) {
+            SqlLoggerUtils.printfUpdateTotal(updateTotal);
         }
     }
 

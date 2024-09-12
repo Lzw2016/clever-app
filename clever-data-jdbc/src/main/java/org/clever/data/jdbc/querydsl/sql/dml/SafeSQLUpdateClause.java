@@ -8,13 +8,13 @@ import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.querydsl.sql.SQLUpdateFill;
 import org.clever.data.jdbc.querydsl.utils.SQLClause;
+import org.clever.data.jdbc.support.SqlLoggerUtils;
 import org.clever.util.Assert;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -63,33 +63,23 @@ public class SafeSQLUpdateClause extends SQLUpdateClause {
 
     @Override
     public <T> SQLUpdateClause set(Path<T> path, T value) {
-        if (path != null
-                && value != null
-                && path.getType() != null
-                && !path.getType().isAssignableFrom(value.getClass())) {
-            return setx(path, value);
-        }
-        return super.set(path, value);
+        SQLClause.set(this, path, value);
+        return this;
     }
 
     @Override
     public <T> SQLUpdateClause set(Path<T> path, Expression<? extends T> expression) {
-        if (expression != null && Objects.equals(Object.class, expression.getType())) {
-            return super.set(path, expression);
-        }
-        if (path != null
-                && expression != null
-                && path.getType() != null
-                && expression.getType() != null
-                && !path.getType().isAssignableFrom(expression.getType())) {
-            return setx(path, expression);
-        }
-        return super.set(path, expression);
+        SQLClause.set(this, path, expression);
+        return this;
     }
 
     public SQLUpdateClause setx(Path<?> path, Object value) {
         SQLClause.setx(this, path, value);
         return this;
+    }
+
+    public SQLUpdateClause populate(Map<String, ?> valueMap) {
+        return populate(valueMap, MapMapper.DEFAULT);
     }
 
     @Override
@@ -99,6 +89,40 @@ public class SafeSQLUpdateClause extends SQLUpdateClause {
                 sqlUpdateFill.fill(entity, metadata, updates, batches, !batches.isEmpty());
             }
         }
-        return super.execute();
+        // 参考: 父类的 execute
+        context = startContext(connection(), metadata, entity);
+        PreparedStatement stmt = null;
+        Collection<PreparedStatement> stmts = null;
+        try {
+            if (batches.isEmpty()) {
+                stmt = createStatement();
+                listeners.notifyUpdate(entity, metadata, updates);
+                listeners.preExecute(context);
+                int rc = stmt.executeUpdate();
+                context.setData(SqlLoggerUtils.QUERYDSL_UPDATE_TOTAL, rc);
+                listeners.executed(context);
+                return rc;
+            } else {
+                stmts = createStatements();
+                listeners.notifyUpdates(entity, batches);
+                listeners.preExecute(context);
+                long rc = executeBatch(stmts);
+                context.setData(SqlLoggerUtils.QUERYDSL_UPDATE_TOTAL, rc);
+                listeners.executed(context);
+                return rc;
+            }
+        } catch (SQLException e) {
+            onException(context, e);
+            throw configuration.translate(queryString, constants, e);
+        } finally {
+            if (stmt != null) {
+                close(stmt);
+            }
+            if (stmts != null) {
+                close(stmts);
+            }
+            reset();
+            endContext(context);
+        }
     }
 }

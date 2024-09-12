@@ -1,15 +1,17 @@
 package org.clever.data.jdbc.querydsl.utils;
 
+import com.querydsl.core.dml.StoreClause;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.NullExpression;
 import com.querydsl.core.types.Path;
-import com.querydsl.sql.dml.SQLInsertClause;
-import com.querydsl.sql.dml.SQLUpdateClause;
+import com.querydsl.sql.RelationalPath;
+import com.querydsl.sql.dml.Mapper;
 import org.clever.core.Conv;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * SQLClause 工具类
@@ -17,29 +19,53 @@ import java.util.Date;
  * 作者：lizw <br/>
  * 创建时间：2022/02/18 19:24 <br/>
  */
-@SuppressWarnings("ALL")
 public class SQLClause {
-    public static void setx(SQLInsertClause insertClause, Path<?> path, Object value) {
-        if (value == null) {
-            insertClause.setNull(path);
-        } else if (value instanceof Expression) {
-            insertClause.set(path, (Expression) value);
-        } else {
-            value = getFieldValue(path, value);
-            insertClause.set((Path<Object>) path, value);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T> void populate(StoreClause<?> storeClause, RelationalPath<?> entity, T obj, Mapper<T> mapper) {
+        Map<Path<?>, Object> values = mapper.createMap(entity, obj);
+        for (Map.Entry<Path<?>, Object> entry : values.entrySet()) {
+            storeClause.set((Path) entry.getKey(), entry.getValue());
         }
     }
 
-    public static void setx(SQLUpdateClause updateClause, Path<?> path, Object value) {
+    public static <T> void set(StoreClause<?> storeClause, Path<T> path, T value) {
+        if (path != null
+            && value != null
+            && path.getType() != null
+            && !path.getType().isAssignableFrom(value.getClass())) {
+            setx(storeClause, path, value);
+        } else {
+            storeClause.set(path, value);
+        }
+    }
+
+    public static <T> void set(StoreClause<?> storeClause, Path<T> path, Expression<? extends T> expression) {
+        if (path != null
+            && expression != null
+            && path.getType() != null
+            && expression.getType() != null
+            && !path.getType().isAssignableFrom(expression.getType())) {
+            setx(storeClause, path, expression);
+        } else {
+            if (expression == null) {
+                storeClause.setNull(path);
+            } else {
+                storeClause.set(path, expression);
+            }
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void setx(StoreClause<?> storeClause, Path<?> path, Object value) {
         if (value == null) {
-            updateClause.setNull(path);
+            storeClause.setNull(path);
         } else if (value instanceof NullExpression) {
-            updateClause.setNull(path);
+            storeClause.setNull(path);
         } else if (value instanceof Expression) {
-            updateClause.set(path, (Expression) value);
+            storeClause.set(path, (Expression) value);
         } else {
             value = getFieldValue(path, value);
-            updateClause.set((Path<Object>) path, value);
+            storeClause.set((Path<Object>) path, value);
         }
     }
 

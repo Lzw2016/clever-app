@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class SqlLoggerUtils {
+    public static final String QUERYDSL_UPDATE_TOTAL = "UpdateTotal";
+
     private static final String Log_Sql /*         */ = "==> ExecuteSQL: {}";
     private static final String Log_Parameters /*  */ = "==> Parameters: {}";
     private static final String Log_Batch_Param /* */ = "==> BatchParam: {}";
@@ -31,7 +33,6 @@ public class SqlLoggerUtils {
      * @param params sql参数
      */
     public static void printfSql(String sql, List<Object> params) {
-        // noinspection DuplicatedCode
         if (!log.isDebugEnabled()) {
             return;
         }
@@ -61,7 +62,6 @@ public class SqlLoggerUtils {
      * @param paramMap sql参数
      */
     public static void printfSql(String sql, Map<String, ?> paramMap) {
-        // noinspection DuplicatedCode
         if (!log.isDebugEnabled()) {
             return;
         }
@@ -132,7 +132,6 @@ public class SqlLoggerUtils {
      * @param paramMap Procedure参数
      */
     public static void printfProcedure(String name, Map<String, ?> paramMap) {
-        // noinspection DuplicatedCode
         if (!log.isDebugEnabled()) {
             return;
         }
@@ -147,12 +146,11 @@ public class SqlLoggerUtils {
     /**
      * 打印Procedure以及其参数
      *
-     * @param name     Procedure名称
+     * @param name   Procedure名称
      * @param params Procedure参数
      */
     public static void printfProcedure(String name, Object[] params) {
         List<Object> paramList = Arrays.stream(params == null ? new Object[0] : params).collect(Collectors.toList());
-        // noinspection DuplicatedCode
         if (!log.isDebugEnabled()) {
             return;
         }

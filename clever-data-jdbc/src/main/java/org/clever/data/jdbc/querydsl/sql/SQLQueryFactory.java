@@ -24,7 +24,7 @@ public class SQLQueryFactory extends AbstractSQLQueryFactory<SQLQuery<?>> {
 
     @Override
     public SQLQuery<?> query() {
-        return new SQLQuery<Void>(connection, configuration);
+        return new org.clever.data.jdbc.querydsl.sql.SQLQuery<Void>(connection, configuration);
     }
 
     @Override
