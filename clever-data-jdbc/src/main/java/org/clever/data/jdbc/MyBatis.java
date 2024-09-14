@@ -1660,6 +1660,13 @@ public class MyBatis extends AbstractDataSource {
         return jdbc.likeBoth(likeVal);
     }
 
+    /**
+     * 创建一个批量更新操作对象，注意：批量执行的SQL不要有顺序依赖关系
+     */
+    public JdbcBatchUpdate startBatch() {
+        return new JdbcBatchUpdate(this);
+    }
+
     // --------------------------------------------------------------------------------------------
     //  业务含义操作
     // --------------------------------------------------------------------------------------------
@@ -1947,5 +1954,240 @@ public class MyBatis extends AbstractDataSource {
         SqlSource sqlSource = mapperSql.getSqlSource(sqlId, stdXmlPath, jdbc.getDbType(), projects.toArray(new String[0]));
         Assert.notNull(sqlSource, "SQL不存在, sqlId=" + sqlId + ", file=" + stdXmlPath);
         return sqlSource.getBoundSql(jdbc.getDbType(), parameter);
+    }
+
+    public static class JdbcBatchUpdate {
+        @Getter
+        private final MyBatis mybatis;
+        @Getter
+        private final Jdbc.JdbcBatchUpdate batchUpdate;
+
+        public JdbcBatchUpdate(MyBatis mybatis) {
+            this.mybatis = mybatis;
+            this.batchUpdate = new Jdbc.JdbcBatchUpdate(mybatis.jdbc);
+        }
+
+        /**
+         * 增加一个批量更新的SQL，返回更新影响数据量
+         *
+         * @param sqlId    SqlID
+         * @param paramMap 查询参数
+         */
+        public JdbcBatchUpdate update(String sqlId, Object paramMap) {
+            TupleTwo<String, Map<String, Object>> sqlInfo = mybatis.getSql(sqlId, paramMap);
+            batchUpdate.update(sqlInfo.getValue1(), sqlInfo.getValue2());
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，返回更新影响数据量
+         *
+         * @param sqlId SqlID
+         */
+        public JdbcBatchUpdate update(String sqlId) {
+            batchUpdate.update(mybatis.getSql(sqlId));
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，根据表名更新表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param whereMap     更新条件字段(只支持=，and条件)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, Map<String, Object> whereMap, RenameStrategy paramsRename) {
+            batchUpdate.updateTable(tableName, fields, whereMap, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，根据表名更新表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param whereMap  更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, Map<String, Object> whereMap) {
+            batchUpdate.updateTable(tableName, fields, whereMap);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，根据表名更新表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param where        更新条件字段(只支持=，and条件)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, Object where, RenameStrategy paramsRename) {
+            batchUpdate.updateTable(tableName, fields, where, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，根据表名更新表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param where     更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, Object where) {
+            batchUpdate.updateTable(tableName, fields, where);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，更新数据库表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param whereStr     自定义where条件(不用写where关键字)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, String whereStr, RenameStrategy paramsRename) {
+            batchUpdate.updateTable(tableName, fields, whereStr, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，更新数据库表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param whereStr  自定义where条件(不用写where关键字)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Map<String, Object> fields, String whereStr) {
+            batchUpdate.updateTable(tableName, fields, whereStr);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，更新数据库表数据
+         *
+         * @param tableName    表名称
+         * @param fields       更新字段值
+         * @param whereStr     自定义where条件(不用写where关键字)
+         * @param paramsRename fields与whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, String whereStr, RenameStrategy paramsRename) {
+            batchUpdate.updateTable(tableName, fields, whereStr, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，更新数据库表数据
+         *
+         * @param tableName 表名称
+         * @param fields    更新字段值
+         * @param whereStr  自定义where条件(不用写where关键字)
+         */
+        public JdbcBatchUpdate updateTable(String tableName, Object fields, String whereStr) {
+            batchUpdate.updateTable(tableName, fields, whereStr);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，删除数据库表数据
+         *
+         * @param tableName    表名称
+         * @param whereMap     更新条件字段(只支持=，and条件)
+         * @param paramsRename whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Map<String, Object> whereMap, RenameStrategy paramsRename) {
+            batchUpdate.deleteTable(tableName, whereMap, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，删除数据库表数据
+         *
+         * @param tableName 表名称
+         * @param whereMap  更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Map<String, Object> whereMap) {
+            batchUpdate.deleteTable(tableName, whereMap);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，删除数据库表数据
+         *
+         * @param tableName    表名称
+         * @param where        更新条件字段(只支持=，and条件)
+         * @param paramsRename whereMap字段名重命名策略
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Object where, RenameStrategy paramsRename) {
+            batchUpdate.deleteTable(tableName, where, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，删除数据库表数据
+         *
+         * @param tableName 表名称
+         * @param where     更新条件字段(只支持=，and条件)
+         */
+        public JdbcBatchUpdate deleteTable(String tableName, Object where) {
+            batchUpdate.deleteTable(tableName, where);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，数据插入到表
+         *
+         * @param tableName    表名称
+         * @param fields       字段名
+         * @param paramsRename fields字段名重命名策略
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Map<String, Object> fields, RenameStrategy paramsRename) {
+            batchUpdate.insertTable(tableName, fields, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，数据插入到表
+         *
+         * @param tableName 表名称
+         * @param fields    字段名
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Map<String, Object> fields) {
+            batchUpdate.insertTable(tableName, fields);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，数据插入到表
+         *
+         * @param tableName    表名称
+         * @param fields       字段名
+         * @param paramsRename fields字段名重命名策略
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Object fields, RenameStrategy paramsRename) {
+            batchUpdate.insertTable(tableName, fields, paramsRename);
+            return this;
+        }
+
+        /**
+         * 增加一个批量更新的SQL，数据插入到表
+         *
+         * @param tableName 表名称
+         * @param fields    字段名
+         */
+        public JdbcBatchUpdate insertTable(String tableName, Object fields) {
+            batchUpdate.insertTable(tableName, fields);
+            return this;
+        }
+
+        /**
+         * 批量执行所有SQL
+         *
+         * @return 影响数据总行数
+         */
+        public int execute() {
+            return batchUpdate.execute();
+        }
     }
 }

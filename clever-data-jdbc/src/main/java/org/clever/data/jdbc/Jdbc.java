@@ -3995,8 +3995,8 @@ public class Jdbc extends AbstractDataSource {
         }
     }
 
-    @Data
     public static class JdbcBatchUpdate {
+        @Getter
         private final Jdbc jdbc;
         private final ConcurrentLruCache<String, ParsedSql> parsedSqlCache = new ConcurrentLruCache<>(512, NamedParameterUtils::parseSqlStatement);
         private final List<TupleTwo<String, Map<String, Object>>> batchSql = new ArrayList<>();
@@ -4067,7 +4067,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 根据表名更新表数据
+         * 增加一个批量更新的SQL，根据表名更新表数据
          *
          * @param tableName    表名称
          * @param fields       更新字段值
@@ -4079,7 +4079,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 根据表名更新表数据
+         * 增加一个批量更新的SQL，根据表名更新表数据
          *
          * @param tableName 表名称
          * @param fields    更新字段值
@@ -4090,7 +4090,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 更新数据库表数据
+         * 增加一个批量更新的SQL，更新数据库表数据
          *
          * @param tableName    表名称
          * @param fields       更新字段值
@@ -4108,7 +4108,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 更新数据库表数据
+         * 增加一个批量更新的SQL，更新数据库表数据
          *
          * @param tableName 表名称
          * @param fields    更新字段值
@@ -4119,7 +4119,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 更新数据库表数据
+         * 增加一个批量更新的SQL，更新数据库表数据
          *
          * @param tableName    表名称
          * @param fields       更新字段值
@@ -4131,7 +4131,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 更新数据库表数据
+         * 增加一个批量更新的SQL，更新数据库表数据
          *
          * @param tableName 表名称
          * @param fields    更新字段值
@@ -4142,7 +4142,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 删除数据库表数据
+         * 增加一个批量更新的SQL，删除数据库表数据
          *
          * @param tableName    表名称
          * @param whereMap     更新条件字段(只支持=，and条件)
@@ -4158,7 +4158,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 删除数据库表数据
+         * 增加一个批量更新的SQL，删除数据库表数据
          *
          * @param tableName 表名称
          * @param whereMap  更新条件字段(只支持=，and条件)
@@ -4168,7 +4168,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 删除数据库表数据
+         * 增加一个批量更新的SQL，删除数据库表数据
          *
          * @param tableName    表名称
          * @param where        更新条件字段(只支持=，and条件)
@@ -4179,7 +4179,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 删除数据库表数据
+         * 增加一个批量更新的SQL，删除数据库表数据
          *
          * @param tableName 表名称
          * @param where     更新条件字段(只支持=，and条件)
@@ -4189,7 +4189,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 数据插入到表
+         * 增加一个批量更新的SQL，数据插入到表
          *
          * @param tableName    表名称
          * @param fields       字段名
@@ -4204,7 +4204,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 数据插入到表
+         * 增加一个批量更新的SQL，数据插入到表
          *
          * @param tableName 表名称
          * @param fields    字段名
@@ -4214,7 +4214,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 数据插入到表
+         * 增加一个批量更新的SQL，数据插入到表
          *
          * @param tableName    表名称
          * @param fields       字段名
@@ -4225,7 +4225,7 @@ public class Jdbc extends AbstractDataSource {
         }
 
         /**
-         * 数据插入到表
+         * 增加一个批量更新的SQL，数据插入到表
          *
          * @param tableName 表名称
          * @param fields    字段名
