@@ -6,7 +6,9 @@ import org.clever.jdbc.core.ConnectionCallback;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -162,6 +164,42 @@ public class JdbcTest {
         final long endTime = System.currentTimeMillis();
         // 1ms/次 | 总时间:11443ms
         log.info("{}ms/次 | 总时间:{}ms", (endTime - startTime) / count, (endTime - startTime));
+        jdbc.close();
+    }
+
+    @Test
+    public void t11() {
+        Jdbc jdbc = newJdbc();
+        int c = jdbc.startBatch()
+            .update("update test set a=:p1 where id=1", new HashMap<String, Object>() {{
+                put("p1", "1");
+            }})
+            .update("update test set a=:p1 where id=1", new HashMap<String, Object>() {{
+                put("p1", "2");
+            }})
+            .update("update test set a=:p1 where id=2", new HashMap<String, Object>() {{
+                put("p1", "3");
+            }})
+            .update("update test set a=:p1 where id=1", new HashMap<String, Object>() {{
+                put("p1", "4");
+            }})
+            .execute();
+        log.info("-> {}", c);
+        int[] cs = jdbc.batchUpdate("update test set a=:p1 where id=1", new ArrayList<Map<String, Object>>() {{
+            add(new HashMap<String, Object>() {{
+                put("p1", "1");
+            }});
+            add(new HashMap<String, Object>() {{
+                put("p1", "2");
+            }});
+            add(new HashMap<String, Object>() {{
+                put("p1", "3");
+            }});
+            add(new HashMap<String, Object>() {{
+                put("p1", "4");
+            }});
+        }});
+        log.info("-> {}", cs);
         jdbc.close();
     }
 }

@@ -45,7 +45,7 @@ public class BaseTest {
     public static HikariConfig postgresqlConfig() {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName("org.postgresql.Driver");
-        hikariConfig.setJdbcUrl("jdbc:postgresql://192.168.1.201:30010/test");
+        hikariConfig.setJdbcUrl("jdbc:postgresql://192.168.1.211:30010/test");
         hikariConfig.setUsername("admin");
         hikariConfig.setPassword("admin123456");
         hikariConfig.setAutoCommit(false);

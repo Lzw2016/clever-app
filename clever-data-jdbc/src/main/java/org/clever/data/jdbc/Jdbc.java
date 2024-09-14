@@ -27,6 +27,7 @@ import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.IPage;
 import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
+import org.clever.core.tuples.TupleFour;
 import org.clever.core.tuples.TupleThree;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.dao.DataAccessException;
@@ -3591,9 +3592,7 @@ public class Jdbc extends AbstractDataSource {
             Map<String, Object> map = BeanCopyUtils.toMap(param);
             paramList.add(map);
         }
-        int[] res = batchUpdateData.execute(new JdbcContext(sql, paramList));
-        SqlLoggerUtils.printfUpdateTotal(res);
-        return res;
+        return batchUpdateData.execute(new JdbcContext(sql, paramList));
     }
 
     /**
@@ -3953,7 +3952,9 @@ public class Jdbc extends AbstractDataSource {
             Exception exception = null;
             try {
                 SqlLoggerUtils.printfSql(context.getSql(), paramList);
-                return jdbc.jdbcTemplate.batchUpdate(context.getSql(), paramArray);
+                int[] updated = jdbc.jdbcTemplate.batchUpdate(context.getSql(), paramArray);
+                SqlLoggerUtils.printfUpdateTotal(updated);
+                return updated;
             } catch (Exception e) {
                 exception = e;
                 throw e;
@@ -4243,25 +4244,40 @@ public class Jdbc extends AbstractDataSource {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
-                final Map<String, PreparedStatement> stmts = new LinkedHashMap<>(batchSql.size());
-                final List<TupleTwo<String, PreparedStatementSetter>> pssList = batchSql.stream().map(this::newCreatorFactory).collect(Collectors.toList());
+                // TupleFour<jdbc直接使用的sql, jdbc的sql参数设置器, 原始sql, 原始sql参数>
+                final List<TupleFour<String, PreparedStatementSetter, String, Map<String, Object>>> pssList = batchSql.stream().map(this::newCreatorFactory).collect(Collectors.toList());
                 return jdbc.jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) connection -> {
+                    // Map<jdbc直接使用的sql, TupleThree<PreparedStatement, 原始sql, 原始sql参数>>
+                    final Map<String, TupleThree<PreparedStatement, String, List<Map<String, Object>>>> stmts = new LinkedHashMap<>(batchSql.size());
                     // 创建 PreparedStatement 且设置参数
-                    for (TupleTwo<String, PreparedStatementSetter> tupleTwo : pssList) {
-                        String useSql = tupleTwo.getValue1();
-                        PreparedStatementSetter pss = tupleTwo.getValue2();
-                        PreparedStatement ps = stmts.get(useSql);
-                        if (ps == null) {
-                            ps = connection.prepareStatement(useSql);
-                            stmts.put(useSql, ps);
+                    for (TupleFour<String, PreparedStatementSetter, String, Map<String, Object>> tupleFour : pssList) {
+                        final String useSql = tupleFour.getValue1();
+                        final PreparedStatementSetter pss = tupleFour.getValue2();
+                        final String rawSql = tupleFour.getValue3();
+                        final Map<String, Object> param = tupleFour.getValue4();
+                        TupleThree<PreparedStatement, String, List<Map<String, Object>>> tupleThree = stmts.get(useSql);
+                        if (tupleThree == null) {
+                            final PreparedStatement ps = connection.prepareStatement(useSql);
+                            final List<Map<String, Object>> params = new ArrayList<>();
+                            params.add(param);
+                            tupleThree = TupleThree.creat(ps, rawSql, params);
+                            stmts.put(useSql, tupleThree);
+                        } else {
+                            tupleThree.getValue3().add(param);
                         }
+                        PreparedStatement ps = tupleThree.getValue1();
                         pss.setValues(ps);
                         ps.addBatch();
                     }
-                    int sumChange = 0;
                     // 批量执行
-                    for (PreparedStatement ps : stmts.values()) {
+                    int sumChange = 0;
+                    for (TupleThree<PreparedStatement, String, List<Map<String, Object>>> tupleThree : stmts.values()) {
+                        final PreparedStatement ps = tupleThree.getValue1();
+                        final String rawSql = tupleThree.getValue2();
+                        final List<Map<String, Object>> params = tupleThree.getValue3();
+                        SqlLoggerUtils.printfSql(rawSql, params);
                         int[] changes = ps.executeBatch();
+                        SqlLoggerUtils.printfUpdateTotal(changes);
                         sumChange += Arrays.stream(changes).sum();
                     }
                     SqlLoggerUtils.printfUpdateTotal(sumChange);
@@ -4275,7 +4291,12 @@ public class Jdbc extends AbstractDataSource {
             }
         }
 
-        private TupleTwo<String, PreparedStatementSetter> newCreatorFactory(TupleTwo<String, Map<String, Object>> tupleTwo) {
+        /**
+         * 处理SQL与对应的参数
+         *
+         * @return {@code TupleFour<jdbc直接使用的sql, jdbc的sql参数设置器, 原始sql, 原始sql参数>}
+         */
+        private TupleFour<String, PreparedStatementSetter, String, Map<String, Object>> newCreatorFactory(TupleTwo<String, Map<String, Object>> tupleTwo) {
             String sql = tupleTwo.getValue1();
             Map<String, Object> params = tupleTwo.getValue2();
             MapSqlParameterSource paramSource = new MapSqlParameterSource(params);
@@ -4284,7 +4305,7 @@ public class Jdbc extends AbstractDataSource {
             List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
             PreparedStatementCreatorFactory pscf = new PreparedStatementCreatorFactory(sqlToUse, declaredParameters);
             Object[] values = NamedParameterUtils.buildValueArray(parsedSql, paramSource, declaredParameters);
-            return TupleTwo.creat(sqlToUse, pscf.newPreparedStatementSetter(values));
+            return TupleFour.creat(sqlToUse, pscf.newPreparedStatementSetter(values), sql, params);
         }
     }
 }
