@@ -7,6 +7,7 @@ import com.querydsl.core.types.Path;
 import com.querydsl.sql.RelationalPath;
 import com.querydsl.sql.dml.Mapper;
 import org.clever.core.Conv;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -20,6 +21,17 @@ import java.util.Map;
  * 创建时间：2022/02/18 19:24 <br/>
  */
 public class SQLClause {
+    /**
+     * StoreClause 原始的 set 实现
+     */
+    public interface StoreClauseRawSet {
+        <T> void set(Path<T> path, @Nullable T value);
+
+        <T> void set(Path<T> path, Expression<? extends T> expression);
+
+        <T> void setNull(Path<T> path);
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> void populate(StoreClause<?> storeClause, RelationalPath<?> entity, T obj, Mapper<T> mapper) {
         Map<Path<?>, Object> values = mapper.createMap(entity, obj);
@@ -28,7 +40,7 @@ public class SQLClause {
         }
     }
 
-    public static <T> void set(StoreClause<?> storeClause, Path<T> path, T value) {
+    public static <T> void set(StoreClauseRawSet storeClause, Path<T> path, T value) {
         if (path != null
             && value != null
             && path.getType() != null
@@ -39,7 +51,7 @@ public class SQLClause {
         }
     }
 
-    public static <T> void set(StoreClause<?> storeClause, Path<T> path, Expression<? extends T> expression) {
+    public static <T> void set(StoreClauseRawSet storeClause, Path<T> path, Expression<? extends T> expression) {
         if (path != null
             && expression != null
             && path.getType() != null
@@ -56,7 +68,7 @@ public class SQLClause {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void setx(StoreClause<?> storeClause, Path<?> path, Object value) {
+    public static void setx(StoreClauseRawSet storeClause, Path<?> path, Object value) {
         if (value == null) {
             storeClause.setNull(path);
         } else if (value instanceof NullExpression) {

@@ -23,24 +23,44 @@ import java.util.function.Supplier;
  * 创建时间：2022/01/28 22:34 <br/>
  */
 public class SafeSQLMergeClause extends SQLMergeClause {
+    /**
+     * 原始的 set 函数
+     */
+    private final SQLClause.StoreClauseRawSet rawSet = new SQLClause.StoreClauseRawSet() {
+        @Override
+        public <T> void set(Path<T> path, @Nullable T value) {
+            SafeSQLMergeClause.super.set(path, value);
+        }
+
+        @Override
+        public <T> void set(Path<T> path, Expression<? extends T> expression) {
+            SafeSQLMergeClause.super.set(path, expression);
+        }
+
+        @Override
+        public <T> void setNull(Path<T> path) {
+            SafeSQLMergeClause.super.setNull(path);
+        }
+    };
+
     public SafeSQLMergeClause(Supplier<Connection> connection, Configuration configuration, RelationalPath<?> entity) {
         super(connection, configuration, entity);
     }
 
     @Override
     public <T> SQLMergeClause set(Path<T> path, @Nullable T value) {
-        SQLClause.set(this, path, value);
+        SQLClause.set(rawSet, path, value);
         return this;
     }
 
     @Override
     public <T> SQLMergeClause set(Path<T> path, Expression<? extends T> expression) {
-        SQLClause.set(this, path, expression);
+        SQLClause.set(rawSet, path, expression);
         return this;
     }
 
     public SQLMergeClause setx(Path<?> path, Object value) {
-        SQLClause.setx(this, path, value);
+        SQLClause.setx(rawSet, path, value);
         return this;
     }
 

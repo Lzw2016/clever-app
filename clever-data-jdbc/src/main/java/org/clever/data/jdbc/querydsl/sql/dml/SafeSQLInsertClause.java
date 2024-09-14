@@ -9,6 +9,7 @@ import org.clever.data.jdbc.querydsl.sql.SQLInsertFill;
 import org.clever.data.jdbc.querydsl.utils.SQLClause;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
 import org.clever.util.Assert;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -44,6 +45,25 @@ public class SafeSQLInsertClause extends SQLInsertClause {
      * 是否自动填充字段
      */
     private boolean autoFill = true;
+    /**
+     * 原始的 set 函数
+     */
+    private final SQLClause.StoreClauseRawSet rawSet = new SQLClause.StoreClauseRawSet() {
+        @Override
+        public <T> void set(Path<T> path, @Nullable T value) {
+            SafeSQLInsertClause.super.set(path, value);
+        }
+
+        @Override
+        public <T> void set(Path<T> path, Expression<? extends T> expression) {
+            SafeSQLInsertClause.super.set(path, expression);
+        }
+
+        @Override
+        public <T> void setNull(Path<T> path) {
+            SafeSQLInsertClause.super.setNull(path);
+        }
+    };
 
     public SafeSQLInsertClause(Supplier<Connection> connection, Configuration configuration, RelationalPath<?> entity) {
         super(connection, configuration, entity);
@@ -61,18 +81,18 @@ public class SafeSQLInsertClause extends SQLInsertClause {
 
     @Override
     public <T> SQLInsertClause set(Path<T> path, T value) {
-        SQLClause.set(this, path, value);
+        SQLClause.set(rawSet, path, value);
         return this;
     }
 
     @Override
     public <T> SQLInsertClause set(Path<T> path, Expression<? extends T> expression) {
-        SQLClause.set(this, path, expression);
+        SQLClause.set(rawSet, path, expression);
         return this;
     }
 
     public SQLInsertClause setx(Path<?> path, Object value) {
-        SQLClause.setx(this, path, value);
+        SQLClause.setx(rawSet, path, value);
         return this;
     }
 
