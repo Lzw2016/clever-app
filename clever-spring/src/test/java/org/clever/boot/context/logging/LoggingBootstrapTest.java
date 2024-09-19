@@ -1,5 +1,6 @@
 package org.clever.boot.context.logging;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.boot.ansi.AnsiOutput;
 import org.clever.boot.context.config.ConfigDataBootstrap;
@@ -8,6 +9,8 @@ import org.clever.boot.logging.LogLevel;
 import org.clever.core.env.StandardEnvironment;
 import org.clever.util.StringUtils;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
 
 /**
  * 作者：lizw <br/>
@@ -41,6 +44,7 @@ public class LoggingBootstrapTest {
         log.info("### 9. -> {}", System.currentTimeMillis());
     }
 
+    @SneakyThrows
     @Test
     public void t02() {
         StandardEnvironment environment = new StandardEnvironment();
@@ -58,6 +62,9 @@ public class LoggingBootstrapTest {
         ConfigDataBootstrap configDataBootstrap = new ConfigDataBootstrap();
         configDataBootstrap.init(environment);
         Binder.get(environment).bind("clever.output.ansi.enabled", AnsiOutput.Enabled.class).ifBound(AnsiOutput::setEnabled);
+        Field field = LoggingBootstrap.class.getDeclaredField("initialized");
+        field.setAccessible(true);
+        field.set(loggingBootstrap, false);
         loggingBootstrap.init(environment);
         log.debug("### 5. -> {}", System.currentTimeMillis());
         log.info("### 6. -> {}", System.currentTimeMillis());
