@@ -12,6 +12,7 @@ logging:
 clever:
   application.name: clever
   profiles.active: dev
+  output.ansi.enabled: always
 
 server:
   address: '111'
