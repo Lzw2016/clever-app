@@ -2,7 +2,7 @@ package org.clever.core.job;
 
 import lombok.Getter;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

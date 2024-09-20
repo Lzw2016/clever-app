@@ -2,7 +2,7 @@ package org.clever.core.http;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -166,7 +166,7 @@ public class CookieUtils {
         } catch (UnsupportedEncodingException ex) {
             if (log.isDebugEnabled()) {
                 log.debug("Could not decode request string [" + source + "] with encoding '" + enc
-                        + "': falling back to platform default encoding; exception message: " + ex.getMessage());
+                    + "': falling back to platform default encoding; exception message: " + ex.getMessage());
             }
             return URLDecoder.decode(source);
         }
@@ -193,7 +193,7 @@ public class CookieUtils {
         } catch (UnsupportedEncodingException ex) {
             if (log.isDebugEnabled()) {
                 log.debug("Could not encode request string [" + source + "] with encoding '" + enc
-                        + "': falling back to platform default encoding; exception message: " + ex.getMessage());
+                    + "': falling back to platform default encoding; exception message: " + ex.getMessage());
             }
             return URLEncoder.encode(source);
         }

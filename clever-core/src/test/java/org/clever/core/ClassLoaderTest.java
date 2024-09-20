@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Test;
-import sun.misc.Launcher;
 
 import java.io.File;
 import java.util.Collection;
@@ -17,17 +16,19 @@ import java.util.Set;
  */
 @Slf4j
 public class ClassLoaderTest {
+    static class MyClassLoaders extends ClassLoader {
+    }
+
     @Test
     public void t01() throws Exception {
-        Launcher launcherA = new Launcher();
-        log.info("--> {}", launcherA.getClassLoader());
-        Launcher launcherB = new Launcher();
-        log.info("--> {}", launcherB.getClassLoader());
-
-        Class<?> classA = launcherA.getClassLoader().loadClass("org.clever.core.ClassLoaderTestA");
+        ClassLoader loaderA = new MyClassLoaders();
+        log.info("--> {}", loaderA);
+        ClassLoader loaderB = new MyClassLoaders();
+        log.info("--> {}", loaderB);
+        Class<?> classA = loaderA.loadClass("org.clever.core.ClassLoaderTestA");
         // 修改 ClassLoaderTestA 代码
         Thread.yield();
-        Class<?> classB = launcherB.getClassLoader().loadClass("org.clever.core.ClassLoaderTestA");
+        Class<?> classB = loaderB.loadClass("org.clever.core.ClassLoaderTestA");
         log.info("# classA -------------------------------------");
         classA.getMethod("t01").invoke(null);
         log.info("# classB -------------------------------------");
@@ -35,15 +36,15 @@ public class ClassLoaderTest {
         log.info("");
         log.info("");
         log.info("# classA -------------------------------------");
-        classA.getMethod("t02").invoke(classA.newInstance());
+        classA.getMethod("t02").invoke(classA.getDeclaredConstructor().newInstance());
         log.info("# classB -------------------------------------");
-        classB.getMethod("t02").invoke(classB.newInstance());
+        classB.getMethod("t02").invoke(classB.getDeclaredConstructor().newInstance());
     }
 
     @Test
     public void t02() throws Exception {
-        Launcher launcher = new Launcher();
-        log.info("--> {}", launcher.getClassLoader());
+        ClassLoader loaderA = new MyClassLoaders();
+        log.info("--> {}", loaderA);
         File root = new File("out/production/classes");
         Collection<File> files = FileUtils.listFiles(root, new String[]{"class"}, true);
         Set<String> classNames = new HashSet<>();
@@ -65,7 +66,7 @@ public class ClassLoaderTest {
         for (int i = 0; i < count; i++) {
             long startTime = System.currentTimeMillis();
             for (String className : classNames) {
-                launcher.getClassLoader().loadClass(className);
+                loaderA.loadClass(className);
             }
             long endTime = System.currentTimeMillis();
             log.info("#{} | size:{} | 耗时：{}", (i + 1), classNames.size(), (endTime - startTime));
@@ -111,8 +112,8 @@ public class ClassLoaderTest {
     @Test
     public void t05() throws ClassNotFoundException {
         HotReloadClassLoader classLoader = new HotReloadClassLoader(
-                Thread.currentThread().getContextClassLoader(),
-                "out/production/classes"
+            Thread.currentThread().getContextClassLoader(),
+            "out/production/classes"
         );
         File root = new File("out/production/classes");
         Collection<File> files = FileUtils.listFiles(root, new String[]{"class"}, true);
@@ -148,8 +149,8 @@ public class ClassLoaderTest {
     @Test
     public void t06() throws Exception {
         HotReloadClassLoader classLoader = new HotReloadClassLoader(
-                Thread.currentThread().getContextClassLoader(),
-                "out/test/classes"
+            Thread.currentThread().getContextClassLoader(),
+            "out/test/classes"
         );
         Class<?> classA = classLoader.loadClass("org.clever.core.ClassLoaderTestA");
         // 修改 ClassLoaderTestA 代码
@@ -165,8 +166,8 @@ public class ClassLoaderTest {
     @Test
     public void t07() throws Exception {
         HotReloadClassLoader classLoader = new HotReloadClassLoader(
-                Thread.currentThread().getContextClassLoader(),
-                "out/test/classes"
+            Thread.currentThread().getContextClassLoader(),
+            "out/test/classes"
         );
         Thread.currentThread().setContextClassLoader(classLoader);
         Class<?> classA = Class.forName("org.clever.core.ClassLoaderTestA");

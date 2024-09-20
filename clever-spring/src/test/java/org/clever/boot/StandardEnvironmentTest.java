@@ -1,13 +1,17 @@
-package org.clever.core.env;
+package org.clever.boot;
 
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.boot.context.properties.bind.BindResult;
-import org.clever.boot.context.properties.bind.Binder;
-import org.clever.boot.env.YamlPropertySourceLoader;
-import org.clever.core.io.DefaultResourceLoader;
+import org.clever.spring.shim.StandardEnvironmentShim;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.bind.BindResult;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.DefaultResourceLoader;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -28,10 +32,10 @@ public class StandardEnvironmentTest {
         log.info("### HOMEPATH(Properties)   --> {}", standardEnvironment.getSystemProperties().get("HOMEPATH"));
         log.info("### HOMEPATH(Environment)  --> {}", standardEnvironment.getSystemEnvironment().get("HOMEPATH"));
 
-//        log.info("### SystemProperties      -->");
-//        standardEnvironment.getSystemProperties().forEach((k, v) -> log.info("\t {}={}", k, v));
-//        log.info("### SystemEnvironment     -->");
-//        standardEnvironment.getSystemEnvironment().forEach((k, v) -> log.info("\t {}={}", k, v));
+        log.info("### SystemProperties      -->");
+        standardEnvironment.getSystemProperties().forEach((k, v) -> log.info("\t {}={}", k, v));
+        log.info("### SystemEnvironment     -->");
+        standardEnvironment.getSystemEnvironment().forEach((k, v) -> log.info("\t {}={}", k, v));
 
         System.setProperty("HOMEPATH", "C:\\Users\\lizw\\AppData\\Local\\override!!!");
         log.info("### HOMEPATH               --> {}", standardEnvironment.getProperty("HOMEPATH"));
@@ -45,27 +49,27 @@ public class StandardEnvironmentTest {
         YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
         DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
         List<PropertySource<?>> list = yamlPropertySourceLoader.load(
-                "application.yml",
-                resourceLoader.getResource("classpath:application.yml")
+            "application.yml",
+            resourceLoader.getResource("classpath:application.yml")
         );
         MutablePropertySources mutablePropertySources = new MutablePropertySources();
         for (PropertySource<?> source : list) {
             log.info("source --> {}", source);
             mutablePropertySources.addFirst(source);
         }
-        StandardEnvironment environment = new StandardEnvironment(mutablePropertySources);
-        BindResult<Server> result = Binder.get(environment).bind("server", Server.class);
+        StandardEnvironment environment = new StandardEnvironmentShim(mutablePropertySources).getRawObj();
+        BindResult<Server> result = Binder.get(environment).bind("clever.server", Server.class);
         log.info("server --> {}", result.get());
         // 加载dev
         list = yamlPropertySourceLoader.load(
-                "application-dev.yml",
-                resourceLoader.getResource("classpath:application-dev.yml")
+            "application-dev.yml",
+            resourceLoader.getResource("classpath:application-dev.yml")
         );
         for (PropertySource<?> source : list) {
             log.info("source --> {}", source);
             mutablePropertySources.addFirst(source);
         }
-        result = Binder.get(environment).bind("server", Server.class);
+        result = Binder.get(environment).bind("clever.server", Server.class);
         log.info("server --> {}", result.get());
     }
 

@@ -1,11 +1,11 @@
-package org.clever.context;
+package org.clever.core;
 
-import org.clever.beans.factory.NoSuchBeanException;
-import org.clever.beans.factory.NoUniqueBeanException;
-import org.clever.beans.factory.config.BeanHolder;
-import org.clever.beans.factory.support.BeanOverrideException;
-import org.clever.core.ResolvableType;
-import org.clever.util.Assert;
+import org.springframework.beans.factory.*;
+import org.springframework.beans.factory.config.NamedBeanHolder;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.ResolvableType;
+import org.clever.core.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * 兼容IOC容器API，参考 {@code BeanFactory}、{@code ListableBeanFactory}、{@code BeanDefinitionRegistry}
+ * 兼容IOC容器API，参考 {@link BeanFactory}、{@link ListableBeanFactory}、{@link BeanDefinitionRegistry}
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/07/15 22:33 <br/>
@@ -27,11 +27,11 @@ public class AppContext {
     /**
      * {@code Map<bean名称, bean对象>}
      */
-    private final ConcurrentMap<String, BeanHolder<?>> allBeanByNames = new ConcurrentHashMap<>(64);
+    private final ConcurrentMap<String, BeanHolder<?>> allBeanByNames = new ConcurrentHashMap<>(256);
     /**
      * {@code Map<bean类型, Set<bean名称>>}
      */
-    private final ConcurrentMap<Class<?>, CopyOnWriteArraySet<String>> allBeanNamesByType = new ConcurrentHashMap<>(64);
+    private final ConcurrentMap<Class<?>, CopyOnWriteArraySet<String>> allBeanNamesByType = new ConcurrentHashMap<>(128);
 
     // --------------------------------------------------------------------------------------------
     //  对外接口
@@ -59,7 +59,7 @@ public class AppContext {
         BeanHolder<?> beanHolder = allBeanByNames.get(beanName);
         if (beanHolder == null) {
             if (required) {
-                throw new NoSuchBeanException(beanName);
+                throw new NoSuchBeanDefinitionException(beanName);
             }
             return null;
         }
@@ -96,7 +96,7 @@ public class AppContext {
         }
         if (beanHolder == null) {
             if (required) {
-                throw new NoSuchBeanException(beanName);
+                throw new NoSuchBeanDefinitionException(beanName);
             }
             return null;
         }
@@ -129,7 +129,7 @@ public class AppContext {
         });
         if (beanNames.isEmpty()) {
             if (required) {
-                throw new NoSuchBeanException(ResolvableType.forType(requiredType));
+                throw new NoSuchBeanDefinitionException(ResolvableType.forType(requiredType));
             }
             return null;
         }
@@ -143,7 +143,7 @@ public class AppContext {
         if (beans.isEmpty()) {
             // 未找到bean
             if (required) {
-                throw new NoSuchBeanException(ResolvableType.forType(requiredType));
+                throw new NoSuchBeanDefinitionException(ResolvableType.forType(requiredType));
             }
             return null;
         } else if (beans.size() > 1) {
@@ -158,11 +158,11 @@ public class AppContext {
             }
             if (beanNamesFound.isEmpty()) {
                 if (required) {
-                    throw new NoSuchBeanException(ResolvableType.forType(requiredType));
+                    throw new NoSuchBeanDefinitionException(ResolvableType.forType(requiredType));
                 }
                 return null;
             } else if (beanNamesFound.size() > 1) {
-                throw new NoUniqueBeanException(ResolvableType.forType(requiredType), beanNamesFound.toArray(new String[0]));
+                throw new NoUniqueBeanDefinitionException(ResolvableType.forType(requiredType), beanNamesFound.toArray(new String[0]));
             } else {
                 return (T) beanFound.getBeanInstance();
             }
@@ -260,7 +260,7 @@ public class AppContext {
         Assert.hasText(beanName, "Bean name must not be null");
         Assert.notNull(bean, "Bean must not be null");
         synchronized (lock) {
-            BeanHolder<?> beanHolder = new BeanHolder<>(beanName, primary, bean);
+            BeanHolder<?> beanHolder = new BeanHolder<>(beanName, bean, primary);
             BeanHolder<?> existingBean = allBeanByNames.get(beanName);
             if (existingBean != null) {
                 throw new BeanOverrideException(beanName, beanHolder, existingBean);
@@ -280,13 +280,13 @@ public class AppContext {
                     }
                 }
                 if (beanNamesFound.size() > 1) {
-                    throw new NoUniqueBeanException(ResolvableType.forType(bean.getClass()), beanNamesFound.toArray(new String[0]));
+                    throw new NoUniqueBeanDefinitionException(ResolvableType.forType(bean.getClass()), beanNamesFound.toArray(new String[0]));
                 }
             }
             allBeanByNames.put(beanName, beanHolder);
             CopyOnWriteArraySet<String> beanNames = allBeanNamesByType.computeIfAbsent(
-                    bean.getClass(),
-                    aClass -> new CopyOnWriteArraySet<>()
+                bean.getClass(),
+                aClass -> new CopyOnWriteArraySet<>()
             );
             beanNames.add(beanName);
         }
@@ -325,5 +325,89 @@ public class AppContext {
      */
     private boolean isTypeMatch(Class<?> beanType, Class<?> typeToMatch) {
         return ResolvableType.forClass(typeToMatch).isAssignableFrom(ResolvableType.forClass(beanType));
+    }
+
+    /**
+     * 一个简单的 bean 容器
+     */
+    protected static class BeanHolder<T> extends NamedBeanHolder<T> {
+        private final boolean primary;
+
+        public BeanHolder(String beanName, T beanInstance, boolean primary) {
+            super(beanName, beanInstance);
+            Assert.hasText(beanName, "Bean name must not be null");
+            Assert.notNull(beanInstance, "Bean instance must not be null");
+            this.primary = primary;
+        }
+
+        public boolean isPrimary() {
+            return primary;
+        }
+
+        public Class<?> getBeanType() {
+            T beanInstance = getBeanInstance();
+            return beanInstance.getClass();
+        }
+
+        @Override
+        public String toString() {
+            return "BeanHolder{" +
+                "primary=" + primary + ", " +
+                "beanName='" + getBeanName() + "', " +
+                "beanInstance=" + getBeanType().getName() +
+                "}";
+        }
+    }
+
+    /**
+     * 参考 {@link BeanDefinitionOverrideException}
+     */
+    protected static class BeanOverrideException extends BeanDefinitionStoreException {
+        private final BeanHolder<?> bean;
+        private final BeanHolder<?> existingBean;
+
+        public BeanOverrideException(String beanName, BeanHolder<?> bean, BeanHolder<?> existingBean) {
+            super(
+                bean.toString(),
+                beanName,
+                "Cannot register bean [" + bean + "] for bean '" + beanName + "': There is already [" + existingBean + "] bound."
+            );
+            this.bean = bean;
+            this.existingBean = existingBean;
+        }
+
+        /**
+         * 返回bean定义来自的资源的描述
+         */
+        @Override
+        public String getResourceDescription() {
+            return String.valueOf(super.getResourceDescription());
+        }
+
+        /**
+         * 返回bean的名称
+         */
+        @Override
+        public String getBeanName() {
+            return String.valueOf(super.getBeanName());
+        }
+
+        /**
+         * 返回新注册的bean定义
+         *
+         * @see #getBeanName()
+         */
+        public BeanHolder<?> getBeanDefinition() {
+            return this.bean;
+        }
+
+        /**
+         * 返回相同名称的现有bean定义
+         *
+         * @see #getBeanName()
+         */
+        public BeanHolder<?> getExistingDefinition() {
+            return this.existingBean;
+        }
     }
 }

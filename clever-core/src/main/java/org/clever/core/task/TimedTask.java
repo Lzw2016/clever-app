@@ -7,7 +7,7 @@ import org.clever.core.OrderIncrement;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.job.GlobalJob;
 import org.clever.core.reflection.ReflectionsUtils;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.lang.reflect.Method;
 import java.time.Duration;

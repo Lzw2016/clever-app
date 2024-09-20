@@ -1,7 +1,10 @@
-package org.clever.core.annotation;
+package org.clever.boot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.*;
 

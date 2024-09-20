@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 /**
  * 任务回调上下文

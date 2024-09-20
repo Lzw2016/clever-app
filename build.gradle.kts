@@ -14,18 +14,18 @@ val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVer
 val buildSnapshot = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
-    const val springBootVersion = "2.6.15"
-    const val springCloudVersion = "2021.0.9"
-    const val javalinVersion = "4.6.8"
+    const val springBootVersion = "3.3.4"
+    const val springCloudVersion = "2023.0.3"
+    const val javalinVersion = "6.1.6"
     const val kotlinVersion = "2.0.20"
     const val kotlinxCoroutinesVersion = "1.7.3"
-    const val groovyVersion = "4.0.22"
-    const val graaljsVersion = "21.3.10"
+    const val groovyVersion = "4.0.23"
+    const val graaljsVersion = "21.3.11"
     const val nashornVersion = "15.4"
-    const val javetVersion = "3.1.3"
+    const val javetVersion = "3.1.7"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.37"
-    const val querydslVersion = "5.0.0"
+    const val querydslVersion = "5.1.0"
     const val schemacrawlerVersion = "16.19.11"
     const val poiVersion = "4.1.2"
 }
@@ -38,8 +38,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.apache.commons:commons-lang3:3.12.0")
-        classpath("commons-io:commons-io:2.11.0")
+        classpath("org.apache.commons:commons-lang3:3.17.0")
+        classpath("commons-io:commons-io:2.16.1")
     }
 }
 
@@ -52,8 +52,8 @@ plugins {
 
 idea {
     project {
-        jdkName = "1.8"
-        languageLevel = IdeaLanguageLevel("1.8")
+        jdkName = "17"
+        languageLevel = IdeaLanguageLevel("17")
     }
     module {
         isDownloadJavadoc = true
@@ -78,8 +78,8 @@ allprojects {
         // resolutionStrategy.cacheChangingModulesFor(0, "seconds")
     }
 
-    java.sourceCompatibility = JavaVersion.VERSION_1_8
-    java.targetCompatibility = JavaVersion.VERSION_1_8
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    java.targetCompatibility = JavaVersion.VERSION_17
 
     tasks.compileJava {
         options.encoding = "UTF-8"

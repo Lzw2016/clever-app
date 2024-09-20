@@ -52,6 +52,8 @@ clever-data-redis → commons-pool2 lettuce jedis
 
 ### 其它
 javalin文档
+6.0新特性            https://javalin.io/news/javalin-6.0.0-stable.html
+5.x升级6.x升级手册    https://javalin.io/migration-guide-javalin-5-to-6
 5.0新特性            https://javalin.io/news/javalin-5.0.0-stable.html
 4.x升级5.x升级手册    https://javalin.io/migration-guide-javalin-4-to-5
 4.x文档：            https://javalin.io/archive/docs/v4.6.X.html

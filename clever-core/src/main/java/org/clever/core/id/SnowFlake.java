@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.StringPool;
 import org.clever.core.SystemClock;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;

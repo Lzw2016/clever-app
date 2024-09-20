@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.thread.SharedThreadPoolExecutor;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

@@ -1,6 +1,6 @@
 package org.clever.core.watch;
 
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

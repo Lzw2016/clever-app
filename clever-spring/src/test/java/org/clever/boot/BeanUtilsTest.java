@@ -1,10 +1,11 @@
-package org.clever.beans;
+package org.clever.boot;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;

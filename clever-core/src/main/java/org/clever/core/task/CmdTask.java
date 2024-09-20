@@ -9,7 +9,7 @@ import org.clever.core.OrderIncrement;
 import org.clever.core.PlatformOS;
 import org.clever.core.SystemClock;
 import org.clever.core.job.DaemonExecutor;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.io.*;
 import java.time.Duration;

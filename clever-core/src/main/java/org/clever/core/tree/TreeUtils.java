@@ -3,7 +3,7 @@ package org.clever.core.tree;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.tuples.TupleOne;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.util.*;
 

@@ -1,7 +1,8 @@
-package org.clever.util;
+package org.clever.boot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.ClassUtils;
 
 /**
  * 作者：lizw <br/>

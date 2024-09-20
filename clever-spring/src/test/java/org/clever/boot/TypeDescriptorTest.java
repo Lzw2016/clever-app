@@ -1,10 +1,11 @@
-package org.clever.core.convert;
+package org.clever.boot;
 
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.GenericTypeResolver;
-import org.clever.core.ResolvableType;
-import org.clever.format.Printer;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.format.Printer;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.*;
  * 作者：lizw <br/>
  * 创建时间：2022/04/30 22:45 <br/>
  */
+@SuppressWarnings("DataFlowIssue")
 @Slf4j
 public class TypeDescriptorTest {
     @Test
@@ -58,6 +60,7 @@ public class TypeDescriptorTest {
         log.info("--> {}", GenericTypeResolver.resolveTypeArgument(PrinterDate.class, Printer.class)); // class java.util.Date
     }
 
+    @SuppressWarnings("NullableProblems")
     static class PrinterDate implements Printer<Date> {
         @Override
         public String print(Date object, Locale locale) {

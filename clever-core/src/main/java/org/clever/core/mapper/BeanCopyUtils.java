@@ -1,9 +1,9 @@
 package org.clever.core.mapper;
 
 import lombok.SneakyThrows;
-import org.clever.beans.BeanUtils;
-import org.clever.beans.BeanWrapper;
-import org.clever.beans.BeanWrapperImpl;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
 import java.beans.PropertyDescriptor;
 import java.math.BigDecimal;

@@ -1,0 +1,8 @@
+spring:
+  application.name: clever-test
+
+clever:
+  name: clever-test
+  server:
+    address: '333'
+    port: 3000

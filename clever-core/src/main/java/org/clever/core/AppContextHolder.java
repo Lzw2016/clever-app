@@ -1,7 +1,5 @@
 package org.clever.core;
 
-import org.clever.context.AppContext;
-
 import java.util.List;
 
 /**

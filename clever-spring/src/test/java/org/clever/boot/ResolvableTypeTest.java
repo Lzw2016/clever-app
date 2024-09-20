@@ -1,8 +1,9 @@
-package org.clever.core;
+package org.clever.boot;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ResolvableType;
 
 /**
  * 作者：lizw <br/>

@@ -2,7 +2,7 @@ package org.clever.core.watch;
 
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.io.File;
 import java.io.FileFilter;

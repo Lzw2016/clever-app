@@ -1,6 +1,0 @@
-clever:
-  application.name: clever-dev
-
-server:
-  address: '222'
-  port: 2000

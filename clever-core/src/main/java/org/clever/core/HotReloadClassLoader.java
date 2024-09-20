@@ -3,8 +3,7 @@ package org.clever.core;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.util.Assert;
-import org.clever.util.ResourceUtils;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.lang.ref.PhantomReference;

@@ -3,7 +3,7 @@ package org.clever.core.mapper;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.reflection.ReflectionsUtils;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import javax.xml.bind.*;
 import javax.xml.bind.annotation.XmlAnyElement;

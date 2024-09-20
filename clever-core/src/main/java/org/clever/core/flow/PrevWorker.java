@@ -1,7 +1,7 @@
 package org.clever.core.flow;
 
 import lombok.Getter;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 /**
  * 之前的任务节点

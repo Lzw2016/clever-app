@@ -3,7 +3,7 @@ package org.clever.core.proxy;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;

@@ -8,12 +8,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.beans.BeanUtils;
-import org.clever.beans.FatalBeanException;
+import org.clever.core.Assert;
 import org.clever.core.function.ThreeConsumer;
-import org.clever.util.Assert;
-import org.clever.util.ClassUtils;
-import org.clever.util.ReflectionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.FatalBeanException;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -82,6 +82,7 @@ public class JacksonConfig {
     /**
      * 应用当前配置到 ObjectMapper
      */
+    @SuppressWarnings("deprecation")
     public void apply(ObjectMapper mapper) {
         Assert.notNull(mapper, "参数 mapper 不能为空");
         JacksonConfig jackson = this;
@@ -132,7 +133,6 @@ public class JacksonConfig {
             } else if (feature instanceof DeserializationFeature) {
                 objectMapper.configure((DeserializationFeature) feature, enabled);
             } else if (feature instanceof MapperFeature) {
-                // noinspection deprecation
                 objectMapper.configure((MapperFeature) feature, enabled);
             } else {
                 throw new FatalBeanException("Unknown feature class: " + feature.getClass().getName());

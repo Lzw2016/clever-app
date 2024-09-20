@@ -7,9 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.beans.BeanCopier;
 import net.sf.cglib.core.Converter;
 import org.apache.commons.lang3.ClassUtils;
-import org.clever.beans.BeanUtils;
 import org.clever.core.converter.TypeConverter;
 import org.clever.core.mapper.SharedConversionService;
+import org.springframework.beans.BeanUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -109,8 +109,8 @@ public class BeanConverter {
         ConverterAdapter(List<TypeConverter> converterList) {
             Objects.requireNonNull(converterList, "converterList must not be null");
             this.converterList = converterList.stream()
-                    .map(this::resolveTypeConverter)
-                    .collect(Collectors.toList());
+                .map(this::resolveTypeConverter)
+                .collect(Collectors.toList());
         }
 
         private ResolvedTypeConverter resolveTypeConverter(TypeConverter converter) {
@@ -127,6 +127,7 @@ public class BeanConverter {
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public Object convert(Object source, Class targetType, Object context) {
             if (source == null) {
@@ -144,16 +145,15 @@ public class BeanConverter {
                 }
                 if (log.isDebugEnabled()) {
                     log.debug(
-                            "[ConverterAdapter] 自定义类型转换 sourceType=[{}] --> targetType=[{}] | 转换器[{}]",
-                            sourceType.getName(),
-                            targetType.getName(),
-                            resolvedTypeConverter.delegatingConverter.getClass().getName()
+                        "[ConverterAdapter] 自定义类型转换 sourceType=[{}] --> targetType=[{}] | 转换器[{}]",
+                        sourceType.getName(),
+                        targetType.getName(),
+                        resolvedTypeConverter.delegatingConverter.getClass().getName()
                     );
                 }
                 return resolvedTypeConverter.convert(source, targetType, context);
             }
             if (SharedConversionService.Instance.canConvert(source.getClass(), targetType)) {
-                // noinspection unchecked
                 return SharedConversionService.Instance.convert(source, targetType);
             }
             return null;

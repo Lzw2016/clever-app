@@ -1,7 +1,8 @@
-package org.clever.core;
+package org.clever.boot;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.CollectionFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,10 +1,10 @@
-package org.clever.core.convert;
+package org.clever.boot;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.convert.support.ConfigurableConversionService;
-import org.clever.format.support.DefaultFormattingConversionService;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 
 import java.math.BigDecimal;
 

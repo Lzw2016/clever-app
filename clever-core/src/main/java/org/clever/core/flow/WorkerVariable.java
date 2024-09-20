@@ -2,8 +2,8 @@ package org.clever.core.flow;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.clever.core.Assert;
 import org.clever.core.exception.AssertException;
-import org.clever.util.Assert;
 
 import java.util.Collections;
 import java.util.HashMap;

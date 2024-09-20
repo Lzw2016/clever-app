@@ -1,4 +1,8 @@
-package org.clever.util;
+package org.clever.core;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -51,10 +55,10 @@ public class Assert {
 
     public static void doesNotContain(String textToSearch, String substring, String message) {
         if ((textToSearch != null
-                && !textToSearch.isEmpty())
-                && (substring != null
-                && !substring.isEmpty())
-                && textToSearch.contains(substring)) {
+            && !textToSearch.isEmpty())
+            && (substring != null
+            && !substring.isEmpty())
+            && textToSearch.contains(substring)) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -77,10 +81,10 @@ public class Assert {
             return true;
         }
         if (obj instanceof Optional) {
-            return !((Optional) obj).isPresent();
+            return ((Optional) obj).isEmpty();
         }
         if (obj instanceof CharSequence) {
-            return ((CharSequence) obj).length() == 0;
+            return ((CharSequence) obj).isEmpty();
         }
         if (obj.getClass().isArray()) {
             return Array.getLength(obj) == 0;
@@ -144,19 +148,19 @@ public class Assert {
     }
 
     public static void hasText(String text, String message) {
-        if (!StringUtils.hasText(text)) {
+        if (!org.springframework.util.StringUtils.hasText(text)) {
             throw new IllegalArgumentException(message);
         }
     }
 
     public static void hasText(String text, Supplier<String> messageSupplier) {
-        if (!StringUtils.hasText(text)) {
+        if (!org.springframework.util.StringUtils.hasText(text)) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
     }
 
     public static void hasLength(String text, String message) {
-        if (!StringUtils.hasLength(text)) {
+        if (!org.springframework.util.StringUtils.hasLength(text)) {
             throw new IllegalArgumentException(message);
         }
     }
@@ -274,7 +278,7 @@ public class Assert {
         String className = (obj != null ? obj.getClass().getName() : "null");
         String result = "";
         boolean defaultMessage = true;
-        if (StringUtils.hasLength(msg)) {
+        if (org.springframework.util.StringUtils.hasLength(msg)) {
             if (endsWithSeparator(msg)) {
                 result = msg + " ";
             } else {
@@ -291,7 +295,7 @@ public class Assert {
     private static void assignableCheckFailed(Class<?> superType, Class<?> subType, String msg) {
         String result = "";
         boolean defaultMessage = true;
-        if (StringUtils.hasLength(msg)) {
+        if (org.springframework.util.StringUtils.hasLength(msg)) {
             if (endsWithSeparator(msg)) {
                 result = msg + " ";
             } else {

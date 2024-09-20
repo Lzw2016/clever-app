@@ -3,7 +3,7 @@ package org.clever.core.id;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.text.NumberFormat;
 import java.util.Arrays;

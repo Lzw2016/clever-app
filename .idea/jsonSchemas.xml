@@ -8,7 +8,7 @@
             <SchemaInfo>
               <option name="generatedName" value="New Schema" />
               <option name="name" value="app.schema" />
-              <option name="relativePathToSchema" value="clever-boot/src/main/resources/app.schema.json" />
+              <option name="relativePathToSchema" value="clever-boot/src/main/resources/bak/app.schema.json" />
               <option name="patterns">
                 <list>
                   <Item>

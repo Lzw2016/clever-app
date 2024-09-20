@@ -1,0 +1,22 @@
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    name: '${clever.name:server}'
+    path: './logs/${logging.file.name}'
+  level:
+    root: debug
+    org.springframework.boot.env.OriginTrackedYamlLoader: debug
+    org.springframework.core.env.StandardEnvironment: debug
+    org.springframework.boot.context.logging.LoggingBootstrapTest: info
+
+spring:
+  output.ansi.enabled: always
+  application.name: clever
+  profiles.active: dev
+
+clever:
+  name: clever
+  server:
+    address: '111'
+    port: 1000
+    timeout: 3d
