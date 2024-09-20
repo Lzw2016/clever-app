@@ -39,6 +39,8 @@ public class AppBasicsConfig {
      */
     public static AppBasicsConfig init(Environment environment) {
         AppBasicsConfig config = Binder.get(environment).bind(AppBasicsConfig.PREFIX, AppBasicsConfig.class).orElseGet(AppBasicsConfig::new);
+        AnsiOutput.setEnabled(config.ansi);
+        AnsiOutput.setConsoleAvailable(config.consoleAvailable);
         AppContextHolder.registerBean("rootPath", config.rootPath, true);
         AppContextHolder.registerBean("appBasicsConfig", config, true);
         List<String> logs = new ArrayList<>();
@@ -46,8 +48,6 @@ public class AppBasicsConfig {
         logs.add("ansi            : " + config.ansi);
         logs.add("consoleAvailable: " + config.consoleAvailable);
         BannerUtils.printConfig(log, "应用配置", logs.toArray(new String[0]));
-        AnsiOutput.setEnabled(config.ansi);
-        AnsiOutput.setConsoleAvailable(config.consoleAvailable);
         return config;
     }
 }
