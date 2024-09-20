@@ -12,6 +12,7 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.datatype:jackson-datatype-joda")
     api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     // 可选依赖
     compileOnly("com.squareup.retrofit2:converter-jackson")
     compileOnly("com.google.zxing:javase")
