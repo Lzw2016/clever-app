@@ -115,6 +115,8 @@ subprojects {
             // performance test
             dependency("org.openjdk.jmh:jmh-core:${Ver.jmhVersion}")
             dependency("org.openjdk.jmh:jmh-generator-annprocess:${Ver.jmhVersion}")
+            // jakarta
+            dependency("org.glassfish:jakarta.el:4.0.2")
             // time
             dependency("joda-time:joda-time:2.10.14")
             dependency("org.joda:joda-convert:2.2.2")

@@ -18,6 +18,7 @@ dependencies {
     compileOnly("jakarta.servlet:jakarta.servlet-api")
     compileOnly("jakarta.validation:jakarta.validation-api")
     compileOnly("org.hibernate.validator:hibernate-validator")
+    compileOnly("org.glassfish:jakarta.el")
     compileOnly("com.google.zxing:javase")
     compileOnly("com.belerweb:pinyin4j")
     compileOnly("com.github.cage:cage")
@@ -25,4 +26,5 @@ dependencies {
     compileOnly("com.github.bingoohuang:patchca")
     // 单元测试
     testImplementation("org.hibernate.validator:hibernate-validator")
+    testImplementation("org.glassfish:jakarta.el")
 }
