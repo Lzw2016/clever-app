@@ -9,10 +9,9 @@ dependencies {
     api("org.springframework.boot:spring-boot")
     compileOnlyApi("org.jetbrains.kotlin:kotlin-stdlib")
     compileOnlyApi("org.jetbrains.kotlin:kotlin-reflect")
-    compileOnlyApi("javax.money:money-api")
     compileOnlyApi("joda-time:joda-time")
     compileOnlyApi("org.joda:joda-convert")
-    compileOnlyApi("javax.validation:validation-api")
+    compileOnlyApi("jakarta.validation:jakarta.validation-api")
     testImplementation("commons-io:commons-io")
     testImplementation("org.springframework.boot:spring-boot-starter-web")
 }

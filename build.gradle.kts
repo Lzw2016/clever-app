@@ -115,18 +115,6 @@ subprojects {
             // performance test
             dependency("org.openjdk.jmh:jmh-core:${Ver.jmhVersion}")
             dependency("org.openjdk.jmh:jmh-generator-annprocess:${Ver.jmhVersion}")
-            // javax
-            dependency("javax.servlet:javax.servlet-api:4.0.1")
-            dependency("javax.inject:javax.inject:1")
-            dependency("javax.persistence:persistence-api:1.0.2")
-            dependency("jakarta.persistence:jakarta.persistence-api:2.2.3")
-            dependency("com.google.code.findbugs:jsr305:3.0.2")
-            dependency("org.glassfish:javax.el:3.0.0")
-            // 新版本jdk缺少的lib
-            dependency("javax.xml.bind:jaxb-api:2.3.1")
-            // validation
-            dependency("javax.validation:validation-api:2.0.1.Final")
-            dependency("org.hibernate.validator:hibernate-validator:6.2.5.Final")
             // time
             dependency("joda-time:joda-time:2.10.14")
             dependency("org.joda:joda-convert:2.2.2")

@@ -1,10 +1,11 @@
 package org.clever.core.http;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,7 +88,7 @@ public class HttpServletRequestUtils {
      * 字符串数组输出
      */
     private static String arrayToString(String[] array) {
-        if (array == null || array.length <= 0) {
+        if (array == null || array.length == 0) {
             return "";
         }
         if (array.length == 1) {
@@ -129,7 +130,7 @@ public class HttpServletRequestUtils {
             }
         }
         String result = paramStr.toString();
-        result = URLDecoder.decode(result, "UTF-8");
+        result = URLDecoder.decode(result, StandardCharsets.UTF_8);
         return result;
     }
 

@@ -1,12 +1,12 @@
 package org.clever.core.http;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -152,7 +152,7 @@ public class CookieUtils {
      * @param request 当前 HTTP 请求
      * @param source  要解码的字符串
      * @return 解码后的字符串
-     * @see javax.servlet.ServletRequest#getCharacterEncoding
+     * @see jakarta.servlet.ServletRequest#getCharacterEncoding
      * @see java.net.URLDecoder#decode(String, String)
      */
     @SuppressWarnings("deprecation")
@@ -179,7 +179,7 @@ public class CookieUtils {
      * @param response 当前 HTTP 响应
      * @param source   要解码的字符串
      * @return 解码后的字符串
-     * @see javax.servlet.ServletResponse#getCharacterEncoding
+     * @see jakarta.servlet.ServletResponse#getCharacterEncoding
      * @see java.net.URLEncoder#encode(String, String)
      */
     @SuppressWarnings("deprecation")

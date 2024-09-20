@@ -3,7 +3,7 @@ package org.clever.core.validator;
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.HibernateValidatorConfiguration;
 
-import javax.validation.*;
+import jakarta.validation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

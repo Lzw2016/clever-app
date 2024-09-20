@@ -1,12 +1,12 @@
 package org.clever.core.mapper;
 
+import jakarta.xml.bind.*;
+import jakarta.xml.bind.annotation.XmlAnyElement;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.core.Assert;
+import org.clever.core.reflection.ReflectionsUtils;
 
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.namespace.QName;
 import java.io.StringReader;
 import java.io.StringWriter;

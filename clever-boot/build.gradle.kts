@@ -10,13 +10,16 @@ plugins {
 }
 
 dependencies {
-    api(project(":clever-web"))
-    api(project(":clever-security"))
-    api(project(":clever-data-jdbc"))
-    api(project(":clever-data-redis"))
+    api(project(":clever-spring"))
+    api(project(":clever-core"))
+
+//    api(project(":clever-web"))
+//    api(project(":clever-security"))
+//    api(project(":clever-data-jdbc"))
+//    api(project(":clever-data-redis"))
     // api(project(":clever-groovy"))
-    api(project(":clever-task"))
-    api(project(":clever-task-ext"))
+//    api(project(":clever-task"))
+//    api(project(":clever-task-ext"))
     // api("org.jetbrains.kotlin:kotlin-stdlib-common")
     // api("org.jetbrains.kotlin:kotlin-stdlib")
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk7")
