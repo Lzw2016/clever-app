@@ -1,0 +1,66 @@
+app:
+  root-path: './'
+
+startup-task:
+  pool-size: 8
+  timed-task:
+    - name: '测试定时任务'
+      enable: true
+      interval: 120s
+      clazz: 'org.clever.app.task.TaskTest'
+      method: 'job01'
+  cmd-task:
+    - name: '持续编译源码'
+      enable: false
+      async: true
+      work-dir: './'
+      cmd:
+        windows: 'gradlew.bat classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        linux: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        macos: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+
+mybatis:
+  enable: true
+  watcher: true
+  interval: 1s
+  locations:
+    - fileType: filesystem
+      location: './clever-boot/src/main/kotlin'
+      filter: '**/*.xml'
+    - fileType: filesystem
+      location: './clever-boot/src/main/java'
+      filter: '**/*.xml'
+    #- fileType: jar
+    #  location: 'classpath*:org/clever/app/**/*.xml'
+    #  filter: ''
+    #- fileType: filesystem
+    #  location: './clever-data-jdbc/src/test/resources/performance_test'
+    #  filter: '**/*.xml'
+
+jdbc:
+  enable: true
+  defaultName: 'mysql'
+  dataSource:
+    mysql:
+      jdbcUrl: jdbc:p6spy:mysql://192.168.1.211:30019/test
+      username: admin
+      password: admin123456
+      minimumIdle: 2
+      maximumPoolSize: 100
+      connectionTestQuery: 'select 1 from dual'
+    postgresql:
+      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.211:30010/test
+      username: admin
+      password: admin123456
+      minimumIdle: 2
+      maximumPoolSize: 100
+      connectionTestQuery: 'select 1'
+      dataSourceProperties:
+        stringtype: unspecified
+    #oracle:
+    #  jdbcUrl: jdbc:p6spy:oracle:thin:@122.9.140.63:1521:wms8dev
+    #  username: wms8dev
+    #  password: lmis9system
+    #  minimumIdle: 2
+    #  maximumPoolSize: 100
+    #  connectionTestQuery: 'select 1 from dual'
