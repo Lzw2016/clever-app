@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.util.ArrayList;
 import java.util.List;

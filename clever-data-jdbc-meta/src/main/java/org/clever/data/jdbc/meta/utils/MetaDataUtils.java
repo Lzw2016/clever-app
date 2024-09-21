@@ -1,10 +1,10 @@
 package org.clever.data.jdbc.meta.utils;
 
+import org.clever.core.Assert;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.*;
 import org.clever.data.jdbc.meta.model.Schema;
 import org.clever.data.jdbc.meta.model.Table;
-import org.clever.util.Assert;
 
 import java.util.Collection;
 import java.util.List;

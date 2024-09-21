@@ -1,7 +1,7 @@
 package org.clever.data.jdbc.meta.model;
 
 import lombok.Getter;
-import org.clever.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.Map;
 

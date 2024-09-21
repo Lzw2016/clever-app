@@ -1,13 +1,13 @@
 package org.clever.data.jdbc.meta;
 
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
-import org.clever.util.Assert;
 
 import java.util.*;
 

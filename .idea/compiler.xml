@@ -13,11 +13,13 @@
         <module name="clever-app.clever-data-dynamic-sql.main" />
         <module name="clever-app.clever-data-commons.main" />
         <module name="clever-app.clever-data-commons.test" />
+        <module name="clever-app.clever-data-jdbc-meta.test" />
         <module name="clever-app.clever-data-dynamic-sql.test" />
         <module name="clever-app.clever-data-jdbc.test" />
         <module name="clever-app.clever-spring.main" />
         <module name="clever-app.clever-core.test" />
         <module name="clever-app.clever-boot.test" />
+        <module name="clever-app.clever-data-jdbc-meta.main" />
         <module name="clever-app.clever-spring.test" />
       </profile>
       <profile name="Gradle Imported" enabled="true">

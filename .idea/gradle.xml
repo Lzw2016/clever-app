@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/clever-data-commons" />
             <option value="$PROJECT_DIR$/clever-data-dynamic-sql" />
             <option value="$PROJECT_DIR$/clever-data-jdbc" />
+            <option value="$PROJECT_DIR$/clever-data-jdbc-meta" />
             <option value="$PROJECT_DIR$/clever-spring" />
           </set>
         </option>
