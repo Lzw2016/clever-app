@@ -63,21 +63,25 @@ public class JdbcLockTest {
         final String lockName = "abc1234567890";
         Jdbc jdbc = newJdbc();
         Thread thread = new Thread(() -> {
-            jdbc.tryLock(lockName, -1, locked -> {
+            int res = jdbc.tryLock(lockName, -1, locked -> {
                 log.info("### 1 locked={}", locked);
                 try {
                     Thread.sleep(10_000);
                 } catch (InterruptedException ignored) {
                     Thread.yield();
                 }
+                return 111;
             });
+            log.info("### 1 locked={}", res);
         });
         thread.start();
         Thread.sleep(1_000);
         Thread thread2 = new Thread(() -> {
-            jdbc.tryLock(lockName, 3, locked -> {
+            int res = jdbc.tryLock(lockName, 3, locked -> {
                 log.info("### 2 locked={}", locked);
+                return 222;
             });
+            log.info("### 2 locked={}", res);
         });
         thread2.start();
         thread.join();
