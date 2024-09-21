@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ReflectionsUtils {
-    private static Class<?> clazz;
     /**
      * set方法前缀
      */
