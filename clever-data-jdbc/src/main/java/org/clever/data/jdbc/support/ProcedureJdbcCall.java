@@ -1,13 +1,17 @@
 package org.clever.data.jdbc.support;
 
+import org.apache.commons.lang3.StringUtils;
 import org.clever.core.reflection.ReflectionsUtils;
+import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.listener.JdbcListeners;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.jdbc.core.CallableStatementCreatorFactory;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -32,21 +36,41 @@ public class ProcedureJdbcCall extends SimpleJdbcCall {
      * bug fix 标准sql调用存贮过程使用 {call procedure_name(...params)} 但是 postgresql 不支持，这里改造一下
      */
     @Override
-    protected void compileInternal() {
-        super.compileInternal();
-//        TODO 测试 compileInternal
-//        String callString = this.getCallString();
-//        if (DbType.POSTGRE_SQL.equals(jdbc.getDbType())
-//            && callString != null
-//            && StringUtils.startsWith(callString, "{call")
-//            && StringUtils.endsWith(callString, ")}")) {
-//            callString = callString.substring(1, callString.length() - 1);
-//            this.callString = callString;
-//            CallableStatementCreatorFactory cscf = this.callableStatementFactory;
-//            if (!Objects.equals(cscf.getCallString(), callString)) {
-//                this.callableStatementFactory = cscf.mutate(callString);
-//            }
-//        }
+    protected void onCompileInternal() {
+        String callString = this.getCallString();
+        if (DbType.POSTGRE_SQL.equals(jdbc.getDbType())
+            && callString != null
+            && StringUtils.startsWith(callString, "{call")
+            && StringUtils.endsWith(callString, ")}")) {
+            callString = callString.substring(1, callString.length() - 1);
+            ReflectionsUtils.setFieldValue(this, "callString", callString);
+            CallableStatementCreatorFactory cscf = ReflectionsUtils.getFieldValue(this, "callableStatementFactory");
+            if (!Objects.equals(cscf.getCallString(), callString)) {
+                ReflectionsUtils.setFieldValue(
+                    this,
+                    "callableStatementFactory",
+                    mutate(cscf, callString)
+                );
+            }
+        }
+    }
+
+    protected CallableStatementCreatorFactory mutate(CallableStatementCreatorFactory cscf, String callString) {
+        CallableStatementCreatorFactory result = new CallableStatementCreatorFactory(
+            callString,
+            ReflectionsUtils.getFieldValue(cscf, "declaredParameters")
+        );
+        ReflectionsUtils.setFieldValue(
+            result,
+            "resultSetType",
+            ReflectionsUtils.getFieldValue(cscf, "resultSetType")
+        );
+        ReflectionsUtils.setFieldValue(
+            result,
+            "updatableResults",
+            ReflectionsUtils.getFieldValue(cscf, "updatableResults")
+        );
+        return result;
     }
 
     @NotNull
