@@ -19,6 +19,7 @@ import org.clever.core.function.ZeroConsumer;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.querydsl.SQLCoreListener;
+import org.clever.data.jdbc.querydsl.SQLLogListener;
 import org.clever.data.jdbc.querydsl.sql.OracleTemplates;
 import org.clever.data.jdbc.querydsl.sql.PostgreSQLTemplates;
 import org.clever.data.jdbc.querydsl.sql.SQLQueryFactory;
@@ -59,6 +60,7 @@ public class QueryDSL extends SQLQueryFactory {
         Configuration configuration = new Configuration(getSQLTemplates(dbType));
         SQLCoreListener sqlCoreListener = new SQLCoreListener(jdbc.getDbType(), jdbc.getJdbcTemplate(), jdbc.getListeners());
         configuration.addListener(sqlCoreListener);
+        configuration.addListener(new SQLLogListener());
         // configuration.addListener(new SQLRewriteListener());
         return new QueryDSL(configuration, sqlCoreListener.getConnProvider(), jdbc);
     }

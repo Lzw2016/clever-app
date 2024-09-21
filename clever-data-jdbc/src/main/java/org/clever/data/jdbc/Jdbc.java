@@ -39,6 +39,7 @@ import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.dialects.DialectFactory;
 import org.clever.data.jdbc.listener.JdbcListeners;
 import org.clever.data.jdbc.listener.OracleDbmsOutputListener;
+import org.clever.data.jdbc.querydsl.SQLLogListener;
 import org.clever.data.jdbc.support.*;
 import org.clever.data.jdbc.support.features.DataBaseFeatures;
 import org.clever.data.jdbc.support.features.DataBaseFeaturesFactory;
@@ -3153,6 +3154,7 @@ public class Jdbc extends AbstractDataSource {
                     }
                 });
             }
+            configuration.addListener(new SQLLogListener());
             return configuration;
         };
         TupleOne<Boolean> executedSyncBlock = TupleOne.creat(false);

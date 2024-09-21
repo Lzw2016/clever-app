@@ -1,20 +1,16 @@
 package org.clever.data.jdbc.querydsl;
 
 import com.querydsl.sql.SQLBaseListener;
-import com.querydsl.sql.SQLBindings;
 import com.querydsl.sql.SQLListenerContext;
 import lombok.Getter;
-import org.clever.core.Conv;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.listener.JdbcListeners;
-import org.clever.data.jdbc.support.SqlLoggerUtils;
 import org.clever.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.clever.jdbc.datasource.DataSourceUtils;
 import org.clever.util.Assert;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.util.Collection;
 import java.util.function.Supplier;
 
 /**
@@ -49,25 +45,6 @@ public class SQLCoreListener extends SQLBaseListener {
     @Override
     public void prePrepare(SQLListenerContext context) {
         listeners.beforeExec(dbType, jdbcTemplate);
-    }
-
-    @Override
-    public void preExecute(SQLListenerContext context) {
-        // 打印SQL see com.querydsl.sql.AbstractSQLQuery.logQuery
-        Collection<SQLBindings> allSqlBindings = context.getAllSQLBindings();
-        if (allSqlBindings != null && !allSqlBindings.isEmpty()) {
-            for (SQLBindings sqlBindings : allSqlBindings) {
-                SqlLoggerUtils.printfSql(sqlBindings.getSQL(), sqlBindings.getNullFriendlyBindings());
-            }
-        }
-    }
-
-    @Override
-    public void executed(SQLListenerContext context) {
-        Integer updateTotal = Conv.asInteger(context.getData(SqlLoggerUtils.QUERYDSL_UPDATE_TOTAL), null);
-        if (updateTotal != null) {
-            SqlLoggerUtils.printfUpdateTotal(updateTotal);
-        }
     }
 
     @Override
