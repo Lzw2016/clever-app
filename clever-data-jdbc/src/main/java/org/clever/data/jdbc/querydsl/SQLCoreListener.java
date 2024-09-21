@@ -4,13 +4,13 @@ import com.querydsl.sql.SQLBaseListener;
 import com.querydsl.sql.SQLBindings;
 import com.querydsl.sql.SQLListenerContext;
 import lombok.Getter;
+import org.clever.core.Assert;
 import org.clever.core.Conv;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.listener.JdbcListeners;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
-import org.clever.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.clever.jdbc.datasource.DataSourceUtils;
-import org.clever.util.Assert;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

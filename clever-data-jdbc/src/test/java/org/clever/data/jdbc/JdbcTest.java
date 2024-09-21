@@ -2,8 +2,8 @@ package org.clever.data.jdbc;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.jdbc.core.ConnectionCallback;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.ConnectionCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;

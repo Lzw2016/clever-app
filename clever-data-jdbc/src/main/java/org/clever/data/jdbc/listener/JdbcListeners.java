@@ -1,7 +1,7 @@
 package org.clever.data.jdbc.listener;
 
 import org.clever.data.dynamic.sql.dialect.DbType;
-import org.clever.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.Comparator;

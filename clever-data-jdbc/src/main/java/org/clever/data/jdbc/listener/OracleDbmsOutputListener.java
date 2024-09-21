@@ -1,13 +1,13 @@
 package org.clever.data.jdbc.listener;
 
+import org.clever.core.Assert;
 import org.clever.core.Conv;
 import org.clever.core.Ordered;
 import org.clever.data.dynamic.sql.dialect.DbType;
-import org.clever.jdbc.core.ConnectionCallback;
-import org.clever.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.clever.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.sql.Array;
 import java.sql.CallableStatement;
@@ -25,11 +25,11 @@ public class OracleDbmsOutputListener implements JdbcListener {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     public final static String ENABLE_OUTPUT = "begin dbms_output.enable(); end;";
     public final static String FETCH_OUTPUT = "declare " +
-            "    num integer := 1000; " +
-            "begin " +
-            "    dbms_output.get_lines(?, num); " +
-            "    dbms_output.disable(); " +
-            "end;";
+        "    num integer := 1000; " +
+        "begin " +
+        "    dbms_output.get_lines(?, num); " +
+        "    dbms_output.disable(); " +
+        "end;";
 
     /**
      * 是否启用收集SQLWarning输出(支持Oracle的dbms_output输出)

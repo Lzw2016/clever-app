@@ -5,9 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.core.Conv;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.support.ProcedureJdbcCall;
-import org.clever.jdbc.core.SqlOutParameter;
-import org.clever.jdbc.core.SqlParameter;
-import org.clever.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 
 import java.sql.Types;
 import java.util.HashMap;

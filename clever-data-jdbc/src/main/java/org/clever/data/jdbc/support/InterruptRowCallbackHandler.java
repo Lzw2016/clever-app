@@ -1,8 +1,8 @@
 package org.clever.data.jdbc.support;
 
-import org.clever.dao.DataAccessException;
-import org.clever.jdbc.core.ResultSetExtractor;
-import org.clever.jdbc.core.RowCountCallbackHandler;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowCountCallbackHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

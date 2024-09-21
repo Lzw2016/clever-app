@@ -17,8 +17,8 @@ public class QLinkedMap extends AbstractQResult<LinkedHashMap<String, Object>> {
      * @param renameStrategy 字段名重命名规则
      * @param exprs          需要查询的“表字段、表”
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public QLinkedMap(RenameStrategy renameStrategy, Expression<?>... exprs) {
-        // noinspection unchecked,rawtypes
         super((Class) LinkedHashMap.class, renameStrategy, exprs);
     }
 

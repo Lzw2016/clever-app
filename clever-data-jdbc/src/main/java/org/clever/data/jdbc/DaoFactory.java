@@ -1,8 +1,8 @@
 package org.clever.data.jdbc;
 
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.data.jdbc.mybatis.MyBatisMapperSql;
-import org.clever.util.Assert;
 
 import java.lang.reflect.Proxy;
 import java.util.Collections;

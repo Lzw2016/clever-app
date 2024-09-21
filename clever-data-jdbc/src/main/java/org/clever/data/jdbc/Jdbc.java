@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.clever.core.Assert;
 import org.clever.core.RenameStrategy;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.ExceptionUtils;
@@ -30,9 +31,6 @@ import org.clever.core.model.request.page.Page;
 import org.clever.core.tuples.TupleFour;
 import org.clever.core.tuples.TupleThree;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.dao.DataAccessException;
-import org.clever.dao.DuplicateKeyException;
-import org.clever.dao.support.DataAccessUtils;
 import org.clever.data.AbstractDataSource;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.dialects.DialectFactory;
@@ -41,24 +39,26 @@ import org.clever.data.jdbc.listener.OracleDbmsOutputListener;
 import org.clever.data.jdbc.support.*;
 import org.clever.data.jdbc.support.features.DataBaseFeatures;
 import org.clever.data.jdbc.support.features.DataBaseFeaturesFactory;
-import org.clever.jdbc.UncategorizedSQLException;
-import org.clever.jdbc.core.*;
-import org.clever.jdbc.core.namedparam.*;
-import org.clever.jdbc.core.simple.SimpleJdbcCall;
-import org.clever.jdbc.datasource.DataSourceTransactionManager;
-import org.clever.jdbc.support.GeneratedKeyHolder;
-import org.clever.jdbc.support.JdbcUtils;
-import org.clever.jdbc.support.KeyHolder;
-import org.clever.jdbc.support.SQLExceptionTranslator;
-import org.clever.transaction.TransactionDefinition;
-import org.clever.transaction.TransactionStatus;
-import org.clever.transaction.annotation.Isolation;
-import org.clever.transaction.annotation.Propagation;
-import org.clever.transaction.support.DefaultTransactionDefinition;
-import org.clever.transaction.support.TransactionCallback;
-import org.clever.transaction.support.TransactionTemplate;
-import org.clever.util.Assert;
-import org.clever.util.ConcurrentLruCache;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.namedparam.*;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.ConcurrentLruCache;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
@@ -274,8 +274,7 @@ public class Jdbc extends AbstractDataSource {
 
     @Override
     public boolean isClosed() {
-        if (dataSource instanceof HikariDataSource) {
-            HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
+        if (dataSource instanceof HikariDataSource hikariDataSource) {
             return hikariDataSource.isClosed();
         }
         return closed;
@@ -286,8 +285,7 @@ public class Jdbc extends AbstractDataSource {
         if (closed) {
             return;
         }
-        if (dataSource instanceof HikariDataSource) {
-            HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
+        if (dataSource instanceof HikariDataSource hikariDataSource) {
             if (!hikariDataSource.isClosed()) {
                 super.close();
                 hikariDataSource.close();

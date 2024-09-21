@@ -5,10 +5,10 @@ import com.querydsl.core.types.Path;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.RelationalPath;
 import com.querydsl.sql.dml.SQLInsertClause;
+import org.clever.core.Assert;
 import org.clever.data.jdbc.querydsl.sql.SQLInsertFill;
 import org.clever.data.jdbc.querydsl.utils.SQLClause;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
-import org.clever.util.Assert;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;

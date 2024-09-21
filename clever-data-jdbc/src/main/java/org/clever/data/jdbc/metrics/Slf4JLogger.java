@@ -2,10 +2,10 @@ package org.clever.data.jdbc.metrics;
 
 import com.p6spy.engine.logging.Category;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.p6spy.P6SpyFormatter;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
-import org.clever.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

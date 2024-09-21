@@ -1,16 +1,13 @@
 package org.clever.data.jdbc.support;
 
-import org.apache.commons.lang3.StringUtils;
 import org.clever.core.reflection.ReflectionsUtils;
-import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.listener.JdbcListeners;
-import org.clever.jdbc.core.CallableStatementCreatorFactory;
-import org.clever.jdbc.core.namedparam.SqlParameterSource;
-import org.clever.jdbc.core.simple.SimpleJdbcCall;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -37,32 +34,36 @@ public class ProcedureJdbcCall extends SimpleJdbcCall {
     @Override
     protected void compileInternal() {
         super.compileInternal();
-        String callString = this.getCallString();
-        if (DbType.POSTGRE_SQL.equals(jdbc.getDbType())
-                && callString != null
-                && StringUtils.startsWith(callString, "{call")
-                && StringUtils.endsWith(callString, ")}")) {
-            callString = callString.substring(1, callString.length() - 1);
-            this.callString = callString;
-            CallableStatementCreatorFactory cscf = this.callableStatementFactory;
-            if (!Objects.equals(cscf.getCallString(), callString)) {
-                this.callableStatementFactory = cscf.mutate(callString);
-            }
-        }
+//        TODO 测试 compileInternal
+//        String callString = this.getCallString();
+//        if (DbType.POSTGRE_SQL.equals(jdbc.getDbType())
+//            && callString != null
+//            && StringUtils.startsWith(callString, "{call")
+//            && StringUtils.endsWith(callString, ")}")) {
+//            callString = callString.substring(1, callString.length() - 1);
+//            this.callString = callString;
+//            CallableStatementCreatorFactory cscf = this.callableStatementFactory;
+//            if (!Objects.equals(cscf.getCallString(), callString)) {
+//                this.callableStatementFactory = cscf.mutate(callString);
+//            }
+//        }
     }
 
+    @NotNull
     @Override
-    protected Map<String, Object> doExecute(SqlParameterSource parameterSource) {
+    protected Map<String, Object> doExecute(@NotNull SqlParameterSource parameterSource) {
         return doExecute(() -> super.doExecute(parameterSource));
     }
 
+    @NotNull
     @Override
-    protected Map<String, Object> doExecute(Object... args) {
+    protected Map<String, Object> doExecute(@NotNull Object... args) {
         return doExecute(() -> super.doExecute(args));
     }
 
+    @NotNull
     @Override
-    protected Map<String, Object> doExecute(Map<String, ?> args) {
+    protected Map<String, Object> doExecute(@NotNull Map<String, ?> args) {
         return doExecute(() -> super.doExecute(args));
     }
 

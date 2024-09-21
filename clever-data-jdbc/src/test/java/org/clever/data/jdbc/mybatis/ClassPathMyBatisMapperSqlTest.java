@@ -3,12 +3,12 @@ package org.clever.data.jdbc.mybatis;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.clever.core.io.ClassPathResource;
-import org.clever.core.io.Resource;
-import org.clever.core.io.support.PathMatchingResourcePatternResolver;
 import org.clever.data.dynamic.sql.builder.SqlSource;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.util.HashMap;
 
@@ -54,25 +54,25 @@ public class ClassPathMyBatisMapperSqlTest {
         Resource[] resources = resolver.getResources("classpath*:**/*.xml");
         for (Resource res : resources) {
             String[] flagArr = {
-                    // jar包
-                    ".jar!/",
-                    // IDEA 自带编译器
-                    "/out/production/classes/",
-                    "/out/production/resources/",
-                    "/out/test/classes/",
-                    "/out/test/resources/",
-                    // gradle编译器
-                    "/build/classes/java/main/",
-                    "/build/classes/java/test/",
-                    "/build/classes/kotlin/main/",
-                    "/build/classes/kotlin/test/",
-                    "/build/classes/groovy/main/",
-                    "/build/classes/groovy/test/",
-                    "/build/resources/main/",
-                    "/build/resources/test/",
-                    // maven编译器
-                    "/target/classes/",
-                    "/target/test-classes/",
+                // jar包
+                ".jar!/",
+                // IDEA 自带编译器
+                "/out/production/classes/",
+                "/out/production/resources/",
+                "/out/test/classes/",
+                "/out/test/resources/",
+                // gradle编译器
+                "/build/classes/java/main/",
+                "/build/classes/java/test/",
+                "/build/classes/kotlin/main/",
+                "/build/classes/kotlin/test/",
+                "/build/classes/groovy/main/",
+                "/build/classes/groovy/test/",
+                "/build/resources/main/",
+                "/build/resources/test/",
+                // maven编译器
+                "/target/classes/",
+                "/target/test-classes/",
             };
             String url = res.getURL().toExternalForm();
             for (String flag : flagArr) {
@@ -120,10 +120,10 @@ public class ClassPathMyBatisMapperSqlTest {
         ClassPathMyBatisMapperSql myBatisMapperSql = new ClassPathMyBatisMapperSql(locationPattern);
         // 198ms/次 | 第一次:434ms | 总时间:1989ms | sql.xml文件数量:157
         log.info("{}ms/次 | 第一次:{}ms | 总时间:{}ms | sql.xml文件数量:{}",
-                (endTime - startTime) / count,
-                firstTime,
-                (endTime - startTime),
-                myBatisMapperSql.getAllLastModified().size()
+            (endTime - startTime) / count,
+            firstTime,
+            (endTime - startTime),
+            myBatisMapperSql.getAllLastModified().size()
         );
     }
 

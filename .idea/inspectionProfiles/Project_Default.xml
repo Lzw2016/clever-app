@@ -4,6 +4,18 @@
     <inspection_tool class="CatchMayIgnoreException" enabled="true" level="WARNING" enabled_by_default="true">
       <scope name="Tests" level="WARNING" enabled="false" />
     </inspection_tool>
+    <inspection_tool class="ClassCanBeRecord" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="myIgnoredAnnotations">
+        <list>
+          <option value="io.micronaut.*" />
+          <option value="jakarta.*" />
+          <option value="javax.*" />
+          <option value="lombok.Data" />
+          <option value="lombok.Getter" />
+          <option value="org.springframework.*" />
+        </list>
+      </option>
+    </inspection_tool>
     <inspection_tool class="CommentedOutCode" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="LoggingSimilarMessage" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="LombokGetterMayBeUsed" enabled="false" level="WARNING" enabled_by_default="false" />

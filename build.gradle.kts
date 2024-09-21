@@ -27,7 +27,7 @@ object Ver {
     const val jmhVersion = "1.37"
     const val querydslVersion = "5.1.0"
     const val schemacrawlerVersion = "16.19.11"
-    const val poiVersion = "4.1.2"
+    const val poiVersion = "5.2.5"
 }
 
 buildscript {
@@ -118,29 +118,29 @@ subprojects {
             // jakarta
             dependency("org.glassfish:jakarta.el:4.0.2")
             // time
-            dependency("joda-time:joda-time:2.10.14")
-            dependency("org.joda:joda-convert:2.2.2")
+            dependency("joda-time:joda-time:2.12.7")
+            dependency("org.joda:joda-convert:2.2.3")
             // jdbc
             dependency("p6spy:p6spy:3.9.1")
             dependency("com.oracle.database.jdbc:ojdbc8:21.6.0.0.1")
             dependency("com.oracle.database.nls:orai18n:21.3.0.0")
-            dependency("org.postgresql:postgresql:42.3.6")
+            dependency("org.postgresql:postgresql:42.5.6")
             dependency("mysql:mysql-connector-java:8.0.33")
             dependency("com.mysql:mysql-connector-j:8.0.33")
-            dependency("com.microsoft.sqlserver:mssql-jdbc:11.2.1.jre8")
+            dependency("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre8")
             // apache commons
-            dependency("commons-io:commons-io:2.11.0")
-            dependency("org.apache.commons:commons-text:1.9")
-            dependency("org.apache.commons:commons-email:1.5")
-            dependency("commons-beanutils:commons-beanutils:1.9.4")
+            dependency("commons-io:commons-io:2.16.1")
+            dependency("org.apache.commons:commons-text:1.12.0")
+//            dependency("org.apache.commons:commons-email:1.6.0")
+//            dependency("commons-beanutils:commons-beanutils:1.9.4")
             // http相关
-            dependency("com.squareup.okhttp3:okhttp:4.9.3")
-            dependency("com.squareup.retrofit2:converter-jackson:2.9.0")
-            dependency("com.squareup.retrofit2:retrofit:2.9.0")
+            dependency("com.squareup.okhttp3:okhttp:4.12.0")
+            dependency("com.squareup.retrofit2:converter-jackson:2.11.0")
+            dependency("com.squareup.retrofit2:retrofit:2.11.0")
             // json、xml相关
-            dependency("org.json:json:20210307")
-            dependency("com.alibaba:fastjson:1.2.78")
-            dependency("com.thoughtworks.xstream:xstream:1.4.19")
+            dependency("org.json:json:20240303")
+            dependency("com.alibaba.fastjson2:fastjson2:2.0.53")
+            dependency("com.thoughtworks.xstream:xstream:1.4.20")
             // 反射相关
             dependency("net.jodah:typetools:0.6.3")
             dependency("cglib:cglib:3.3.0")
@@ -184,7 +184,7 @@ subprojects {
             dependency("org.apache.poi:poi-ooxml:${Ver.poiVersion}")
             dependency("org.apache.poi:poi-ooxml:${Ver.poiVersion}")
             dependency("org.apache.poi:poi-ooxml-schemas:${Ver.poiVersion}")
-            dependency("com.alibaba:easyexcel:3.3.2")
+            dependency("com.alibaba:easyexcel:4.0.3")
             // querydsl
             dependency("com.querydsl:querydsl-core:${Ver.querydslVersion}")
             dependency("com.querydsl:querydsl-sql:${Ver.querydslVersion}")
@@ -193,9 +193,9 @@ subprojects {
             dependency("com.querydsl:querydsl-codegen:${Ver.querydslVersion}")
             dependency("com.querydsl:querydsl-sql-codegen:${Ver.querydslVersion}")
             // jwt
-            dependency("io.jsonwebtoken:jjwt-api:0.11.5")
-            dependency("io.jsonwebtoken:jjwt-impl:0.11.5")
-            dependency("io.jsonwebtoken:jjwt-jackson:0.11.5")
+            dependency("io.jsonwebtoken:jjwt-api:0.12.6")
+            dependency("io.jsonwebtoken:jjwt-impl:0.12.6")
+            dependency("io.jsonwebtoken:jjwt-jackson:0.12.6")
             // schemacrawler
             dependency("us.fatehi:schemacrawler:${Ver.schemacrawlerVersion}")
             dependency("us.fatehi:schemacrawler-commandline:${Ver.schemacrawlerVersion}")
@@ -204,18 +204,18 @@ subprojects {
             dependency("us.fatehi:schemacrawler-sqlserver:${Ver.schemacrawlerVersion}")
             dependency("us.fatehi:schemacrawler-mysql:${Ver.schemacrawlerVersion}")
             // 其他工具包
-            dependency("org.jetbrains:annotations:23.0.0")
-            dependency("com.google.guava:guava:31.0.1-jre")
+//            dependency("org.jetbrains:annotations:24.0.1")
+            dependency("com.google.guava:guava:33.2.1-jre")
             dependency("com.google.zxing:javase:3.4.1")
-            dependency("ognl:ognl:3.2.21")
-            dependency("com.github.jsqlparser:jsqlparser:4.4")
-            dependency("com.jfinal:enjoy:5.0.3")
+            dependency("ognl:ognl:3.3.5")
+            dependency("com.github.jsqlparser:jsqlparser:4.6")
+            dependency("com.jfinal:enjoy:5.1.3")
             dependency("com.belerweb:pinyin4j:2.5.1")
-            dependency("org.ow2.asm:asm:7.1")
+//            dependency("org.ow2.asm:asm:7.1")
             dependency("org.apache.commons:commons-math3:3.6.1")
-            dependency("org.javassist:javassist:3.28.0-GA")
+//            dependency("org.javassist:javassist:3.28.0-GA")
             dependency("org.redisson:redisson:3.19.3")
-            dependency("de.ruedigermoeller:fst:2.57")
+//            dependency("de.ruedigermoeller:fst:2.57")
         }
     }
 

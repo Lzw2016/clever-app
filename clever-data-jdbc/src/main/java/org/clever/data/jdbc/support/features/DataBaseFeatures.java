@@ -1,8 +1,8 @@
 package org.clever.data.jdbc.support.features;
 
 import lombok.Getter;
+import org.clever.core.Assert;
 import org.clever.data.jdbc.Jdbc;
-import org.clever.util.Assert;
 
 /**
  * 数据库特性
