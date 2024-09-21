@@ -28,6 +28,7 @@ import org.clever.core.model.request.page.IPage;
 import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
 import org.clever.core.tuples.TupleFour;
+import org.clever.core.tuples.TupleOne;
 import org.clever.core.tuples.TupleThree;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.dao.DataAccessException;
@@ -3154,26 +3155,19 @@ public class Jdbc extends AbstractDataSource {
             }
             return configuration;
         };
+        TupleOne<Boolean> executedSyncBlock = TupleOne.creat(false);
+        TupleOne<T> resValue = TupleOne.creat(null);
         try {
             // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
             return newConnectionExecute(connection -> {
                 // 这里使用新的连接获取数据库行级锁
                 final SQLQueryFactory dsl = new SQLQueryFactory(newConfiguration.get(), () -> connection);
-                long lock;
-                try {
-                    // 使用数据库行级锁保证并发性
-                    lock = dsl.update(sysLock)
-                        .set(sysLock.lockCount, sysLock.lockCount.add(1))
-                        .set(sysLock.updateAt, Expressions.currentTimestamp())
-                        .where(sysLock.lockName.eq(lockName))
-                        .execute();
-                } catch (Throwable e) {
-                    if (!ExceptionUtils.isCausedBy(e, SQLException.class)) {
-                        log.warn("[tryLock]获取数据库行级锁异常", e);
-                    }
-                    // 获取锁异常
-                    return syncBlock.apply(false);
-                }
+                // 使用数据库行级锁保证并发性
+                long lock = dsl.update(sysLock)
+                    .set(sysLock.lockCount, sysLock.lockCount.add(1))
+                    .set(sysLock.updateAt, Expressions.currentTimestamp())
+                    .where(sysLock.lockName.eq(lockName))
+                    .execute();
                 // 锁数据不存在就创建锁数据
                 if (lock <= 0) {
                     try {
@@ -3208,7 +3202,10 @@ public class Jdbc extends AbstractDataSource {
                         }
                         if (wait && (waitSeconds * 1000L) < (SystemClock.now() - startTime)) {
                             // 执行同步代码块(未得到锁)
-                            return syncBlock.apply(false);
+                            executedSyncBlock.setValue1(true);
+                            T res = syncBlock.apply(false);
+                            resValue.setValue1(res);
+                            return res;
                         }
                     }
                     // 使用数据库行级锁保证并发性
@@ -3222,15 +3219,20 @@ public class Jdbc extends AbstractDataSource {
                     }
                 }
                 // 执行同步代码块
-                return syncBlock.apply(true);
+                executedSyncBlock.setValue1(true);
+                T res = syncBlock.apply(true);
+                resValue.setValue1(res);
+                return res;
             });
         } catch (Exception e) {
-            // 超时异常
-            if (ExceptionUtils.isCausedBy(e, SQLTimeoutException.class)) {
+            if (!ExceptionUtils.isCausedBy(e, SQLException.class)) {
+                log.warn("[tryLock]获取数据库行级锁异常", e);
+            }
+            if (!executedSyncBlock.getValue1()) {
                 // 执行同步代码块(未得到锁)
                 return syncBlock.apply(false);
             }
-            throw ExceptionUtils.unchecked(e);
+            return resValue.getValue1();
         }
     }
 
