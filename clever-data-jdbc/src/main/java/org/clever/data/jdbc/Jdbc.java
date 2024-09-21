@@ -29,6 +29,7 @@ import org.clever.core.model.request.page.IPage;
 import org.clever.core.model.request.page.OrderItem;
 import org.clever.core.model.request.page.Page;
 import org.clever.core.tuples.TupleFour;
+import org.clever.core.tuples.TupleOne;
 import org.clever.core.tuples.TupleThree;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.AbstractDataSource;
@@ -36,6 +37,7 @@ import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.dialects.DialectFactory;
 import org.clever.data.jdbc.listener.JdbcListeners;
 import org.clever.data.jdbc.listener.OracleDbmsOutputListener;
+import org.clever.data.jdbc.querydsl.SQLLogListener;
 import org.clever.data.jdbc.support.*;
 import org.clever.data.jdbc.support.features.DataBaseFeatures;
 import org.clever.data.jdbc.support.features.DataBaseFeaturesFactory;
@@ -2943,9 +2945,9 @@ public class Jdbc extends AbstractDataSource {
                     });
                 } catch (DuplicateKeyException e) {
                     // 插入数据失败: 唯一约束错误
-                    log.warn("插入 {} 表失败: {}", autoIncrementId.getTableName(), e.getMessage());
+                    log.warn("[nextIds]插入 {} 表失败: {}", autoIncrementId.getTableName(), e.getMessage());
                 } catch (Exception e) {
-                    log.warn("插入 {} 表失败", autoIncrementId.getTableName(), e);
+                    log.warn("[nextIds]插入 {} 表失败", autoIncrementId.getTableName(), e);
                 }
                 // 等待数据插入成功
                 final int maxRetryCount = 128;
@@ -3150,8 +3152,11 @@ public class Jdbc extends AbstractDataSource {
                     }
                 });
             }
+            configuration.addListener(new SQLLogListener());
             return configuration;
         };
+        TupleOne<Boolean> executedSyncBlock = TupleOne.creat(false);
+        TupleOne<T> resValue = TupleOne.creat(null);
         try {
             // 在一个新连接中操作，不会受到 JDBC 原始的事务影响
             return newConnectionExecute(connection -> {
@@ -3179,9 +3184,9 @@ public class Jdbc extends AbstractDataSource {
                         });
                     } catch (DuplicateKeyException e) {
                         // 插入数据失败: 唯一约束错误
-                        log.warn("插入 {} 表失败: {}", sysLock.getTableName(), e.getMessage());
+                        log.warn("[tryLock]插入 {} 表失败: {}", sysLock.getTableName(), e.getMessage());
                     } catch (DataAccessException e) {
-                        log.warn("插入 {} 表失败", sysLock.getTableName(), e);
+                        log.warn("[tryLock]插入 {} 表失败", sysLock.getTableName(), e);
                     }
                     // 等待锁数据插入完成
                     final int maxRetryCount = 128;
@@ -3197,7 +3202,10 @@ public class Jdbc extends AbstractDataSource {
                         }
                         if (wait && (waitSeconds * 1000L) < (SystemClock.now() - startTime)) {
                             // 执行同步代码块(未得到锁)
-                            return syncBlock.apply(false);
+                            executedSyncBlock.setValue1(true);
+                            T res = syncBlock.apply(false);
+                            resValue.setValue1(res);
+                            return res;
                         }
                     }
                     // 使用数据库行级锁保证并发性
@@ -3211,15 +3219,20 @@ public class Jdbc extends AbstractDataSource {
                     }
                 }
                 // 执行同步代码块
-                return syncBlock.apply(true);
+                executedSyncBlock.setValue1(true);
+                T res = syncBlock.apply(true);
+                resValue.setValue1(res);
+                return res;
             });
         } catch (Exception e) {
-            // 超时异常
-            if (ExceptionUtils.isCausedBy(e, Collections.singletonList(SQLTimeoutException.class))) {
+            if (!ExceptionUtils.isCausedBy(e, SQLException.class)) {
+                log.warn("[tryLock]获取数据库行级锁异常", e);
+            }
+            if (!executedSyncBlock.getValue1()) {
                 // 执行同步代码块(未得到锁)
                 return syncBlock.apply(false);
             }
-            throw ExceptionUtils.unchecked(e);
+            return resValue.getValue1();
         }
     }
 

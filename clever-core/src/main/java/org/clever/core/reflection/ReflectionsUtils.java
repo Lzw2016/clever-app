@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class ReflectionsUtils {
-    private static Class<?> clazz;
     /**
      * set方法前缀
      */
@@ -45,7 +44,7 @@ public class ReflectionsUtils {
         if (Modifier.isPublic(method.getModifiers()) && Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
             return;
         }
-        if (method.canAccess(obj)) {
+        if (!method.canAccess(obj)) {
             method.setAccessible(true);
         }
     }
@@ -59,7 +58,7 @@ public class ReflectionsUtils {
         if (Modifier.isPublic(field.getModifiers()) && Modifier.isPublic(field.getDeclaringClass().getModifiers()) && Modifier.isFinal(field.getModifiers())) {
             return;
         }
-        if (field.canAccess(obj)) {
+        if (!field.canAccess(obj)) {
             field.setAccessible(true);
         }
     }

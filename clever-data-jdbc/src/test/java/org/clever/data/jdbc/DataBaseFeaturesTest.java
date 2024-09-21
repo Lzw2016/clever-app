@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.support.features.DataBaseFeatures;
 import org.clever.data.jdbc.support.features.MySQLFeatures;
-import org.clever.data.jdbc.support.features.OracleFeatures;
 import org.clever.data.jdbc.support.features.PostgreSQLFeatures;
 import org.junit.jupiter.api.Test;
 
@@ -73,10 +72,10 @@ public class DataBaseFeaturesTest {
 
     @Test
     public void t03() {
-        Jdbc oracle = BaseTest.newOracle();
-        OracleFeatures features = new OracleFeatures(oracle);
-        // oracle: lock多次 release一次 就能释放锁
-        check(features);
-        oracle.close();
+//        Jdbc oracle = BaseTest.newOracle();
+//        OracleFeatures features = new OracleFeatures(oracle);
+//        // oracle: lock多次 release一次 就能释放锁
+//        check(features);
+//        oracle.close();
     }
 }

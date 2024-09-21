@@ -16,8 +16,8 @@ import java.util.concurrent.Future;
 @Slf4j
 public class JdbcNativeLockTest {
     private Jdbc newJdbc() {
-        return BaseTest.newMysql();
-        //return BaseTest.newPostgresql();
+        //return BaseTest.newMysql();
+        return BaseTest.newPostgresql();
         //return BaseTest.newOracle();
     }
 
@@ -64,21 +64,25 @@ public class JdbcNativeLockTest {
         final String lockName = "abc1234567890";
         Jdbc jdbc = newJdbc();
         Thread thread = new Thread(() -> {
-            jdbc.nativeLock(lockName, () -> {
+            int res = jdbc.nativeLock(lockName, () -> {
                 log.info("### 1 locked");
                 try {
                     Thread.sleep(10_000);
                 } catch (InterruptedException ignored) {
                     Thread.yield();
                 }
+                return 111;
             });
+            log.info("### 1 locked={}", res);
         });
         thread.start();
         Thread.sleep(1_000);
         Thread thread2 = new Thread(() -> {
-            jdbc.nativeTryLock(lockName, 3, locked -> {
+            int res = jdbc.nativeTryLock(lockName, 3, locked -> {
                 log.info("### 2 locked={}", locked);
+                return 222;
             });
+            log.info("### 2 locked={}", res);
         });
         thread2.start();
         thread.join();

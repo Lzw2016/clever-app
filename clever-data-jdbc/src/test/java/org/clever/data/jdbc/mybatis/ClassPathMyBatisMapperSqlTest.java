@@ -37,7 +37,7 @@ public class ClassPathMyBatisMapperSqlTest {
     @Test
     public void t02() {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource resource = resolver.getResource("org/clever/jdbc/support/sql-error-codes.xml");
+        Resource resource = resolver.getResource("org/springframework/jdbc/support/sql-error-codes.xml");
         log.info("--> {} | lastModified={}", resource.getURL(), resource.lastModified());
         // HikariCP-4.0.3.jar!/META-INF/maven/com.zaxxer/HikariCP/pom.xml
         resource = resolver.getResource("META-INF/maven/com.zaxxer/HikariCP/pom.xml");

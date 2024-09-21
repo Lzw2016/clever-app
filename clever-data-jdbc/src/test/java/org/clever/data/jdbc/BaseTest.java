@@ -29,7 +29,7 @@ public class BaseTest {
     public static HikariConfig mysqlConfig() {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        hikariConfig.setJdbcUrl("jdbc:mysql://192.168.1.201:30011/test");
+        hikariConfig.setJdbcUrl("jdbc:mysql://192.168.1.211:30019/test");
         hikariConfig.setUsername("admin");
         hikariConfig.setPassword("admin123456");
         hikariConfig.setAutoCommit(false);
