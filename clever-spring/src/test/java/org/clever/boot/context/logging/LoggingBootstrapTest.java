@@ -59,6 +59,13 @@ public class LoggingBootstrapTest {
         log.warn("### #. -> {}", System.currentTimeMillis());
         log.error("### #. -> {}", System.currentTimeMillis());
         log.info("### 1. -> {}", System.currentTimeMillis());
+        log.info("### 2. -> {}", System.currentTimeMillis());
+        log.info("### 3. -> {}", System.currentTimeMillis());
+        log.info("### 4. -> {}", System.currentTimeMillis());
+        log.info("### 5. -> {}", System.currentTimeMillis());
+        log.info("### 6. -> {}", System.currentTimeMillis());
+        log.info("### 7. -> {}", System.currentTimeMillis());
+        log.info("### 8. -> {}", System.currentTimeMillis());
         ConfigDataBootstrap configDataBootstrap = new ConfigDataBootstrap();
         configDataBootstrap.init(environment);
         Binder.get(environment).bind("clever.output.ansi.enabled", AnsiOutput.Enabled.class).ifBound(AnsiOutput::setEnabled);

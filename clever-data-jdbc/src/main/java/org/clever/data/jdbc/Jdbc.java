@@ -2945,9 +2945,9 @@ public class Jdbc extends AbstractDataSource {
                     });
                 } catch (DuplicateKeyException e) {
                     // 插入数据失败: 唯一约束错误
-                    log.warn("插入 {} 表失败: {}", autoIncrementId.getTableName(), e.getMessage());
+                    log.warn("[nextIds]插入 {} 表失败: {}", autoIncrementId.getTableName(), e.getMessage());
                 } catch (Exception e) {
-                    log.warn("插入 {} 表失败", autoIncrementId.getTableName(), e);
+                    log.warn("[nextIds]插入 {} 表失败", autoIncrementId.getTableName(), e);
                 }
                 // 等待数据插入成功
                 final int maxRetryCount = 128;
@@ -3159,12 +3159,21 @@ public class Jdbc extends AbstractDataSource {
             return newConnectionExecute(connection -> {
                 // 这里使用新的连接获取数据库行级锁
                 final SQLQueryFactory dsl = new SQLQueryFactory(newConfiguration.get(), () -> connection);
-                // 使用数据库行级锁保证并发性
-                long lock = dsl.update(sysLock)
-                    .set(sysLock.lockCount, sysLock.lockCount.add(1))
-                    .set(sysLock.updateAt, Expressions.currentTimestamp())
-                    .where(sysLock.lockName.eq(lockName))
-                    .execute();
+                long lock;
+                try {
+                    // 使用数据库行级锁保证并发性
+                    lock = dsl.update(sysLock)
+                        .set(sysLock.lockCount, sysLock.lockCount.add(1))
+                        .set(sysLock.updateAt, Expressions.currentTimestamp())
+                        .where(sysLock.lockName.eq(lockName))
+                        .execute();
+                } catch (Throwable e) {
+                    if (!ExceptionUtils.isCausedBy(e, SQLException.class)) {
+                        log.warn("[tryLock] 获取数据库行级锁异常", e);
+                    }
+                    // 获取锁异常
+                    return syncBlock.apply(false);
+                }
                 // 锁数据不存在就创建锁数据
                 if (lock <= 0) {
                     try {
@@ -3181,9 +3190,9 @@ public class Jdbc extends AbstractDataSource {
                         });
                     } catch (DuplicateKeyException e) {
                         // 插入数据失败: 唯一约束错误
-                        log.warn("插入 {} 表失败: {}", sysLock.getTableName(), e.getMessage());
+                        log.warn("[tryLock]插入 {} 表失败: {}", sysLock.getTableName(), e.getMessage());
                     } catch (DataAccessException e) {
-                        log.warn("插入 {} 表失败", sysLock.getTableName(), e);
+                        log.warn("[tryLock]插入 {} 表失败", sysLock.getTableName(), e);
                     }
                     // 等待锁数据插入完成
                     final int maxRetryCount = 128;
@@ -3217,7 +3226,7 @@ public class Jdbc extends AbstractDataSource {
             });
         } catch (Exception e) {
             // 超时异常
-            if (ExceptionUtils.isCausedBy(e, Collections.singletonList(SQLTimeoutException.class))) {
+            if (ExceptionUtils.isCausedBy(e, SQLTimeoutException.class)) {
                 // 执行同步代码块(未得到锁)
                 return syncBlock.apply(false);
             }

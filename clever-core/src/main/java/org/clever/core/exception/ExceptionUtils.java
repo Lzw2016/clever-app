@@ -2,6 +2,7 @@ package org.clever.core.exception;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -45,12 +46,12 @@ public class ExceptionUtils {
      * @param causeExceptionClasses 异常类型数组
      * @return 如果异常对象(ex)的内部异常含有异常类型集合(causeExceptionClasses)中的异常类型返回true，否则返回false
      */
-    public static boolean isCausedBy(Throwable ex, Collection<Class<? extends Throwable>> causeExceptionClasses) {
+    public static boolean isCausedBy(Throwable ex, Collection<Class<?>> causeExceptionClasses) {
         final int maxDepth = 256;
         int depth = 0;
         Throwable cause = ex.getCause();
         while (cause != null) {
-            for (Class<? extends Throwable> causeClass : causeExceptionClasses) {
+            for (Class<?> causeClass : causeExceptionClasses) {
                 if (causeClass.isInstance(cause)) {
                     return true;
                 }
@@ -62,6 +63,20 @@ public class ExceptionUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * 判断异常是否由某些底层的异常引起.<br/>
+     *
+     * @param ex                    异常对象
+     * @param causeExceptionClasses 异常类型
+     * @return 如果异常对象(ex)的内部异常含有异常类型集合(causeExceptionClasses)中的异常类型返回true，否则返回false
+     */
+    public static boolean isCausedBy(Throwable ex, Class<?>... causeExceptionClasses) {
+        if (causeExceptionClasses == null || causeExceptionClasses.length == 0) {
+            return false;
+        }
+        return isCausedBy(ex, Arrays.asList(causeExceptionClasses));
     }
 
     /**
