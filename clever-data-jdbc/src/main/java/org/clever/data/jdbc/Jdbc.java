@@ -3169,7 +3169,7 @@ public class Jdbc extends AbstractDataSource {
                         .execute();
                 } catch (Throwable e) {
                     if (!ExceptionUtils.isCausedBy(e, SQLException.class)) {
-                        log.warn("[tryLock] 获取数据库行级锁异常", e);
+                        log.warn("[tryLock]获取数据库行级锁异常", e);
                     }
                     // 获取锁异常
                     return syncBlock.apply(false);
