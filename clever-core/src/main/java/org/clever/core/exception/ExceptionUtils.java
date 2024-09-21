@@ -47,6 +47,9 @@ public class ExceptionUtils {
      * @return 如果异常对象(ex)的内部异常含有异常类型集合(causeExceptionClasses)中的异常类型返回true，否则返回false
      */
     public static boolean isCausedBy(Throwable ex, Collection<Class<?>> causeExceptionClasses) {
+        if (causeExceptionClasses == null || causeExceptionClasses.isEmpty()) {
+            return false;
+        }
         final int maxDepth = 256;
         int depth = 0;
         Throwable cause = ex.getCause();
@@ -55,6 +58,9 @@ public class ExceptionUtils {
                 if (causeClass.isInstance(cause)) {
                     return true;
                 }
+            }
+            if (cause.getCause() == cause) {
+                break;
             }
             cause = cause.getCause();
             depth++;
@@ -94,6 +100,9 @@ public class ExceptionUtils {
         while (cause != null) {
             if (clazz.isInstance(cause)) {
                 return (T) cause;
+            }
+            if (cause.getCause() == cause) {
+                break;
             }
             cause = cause.getCause();
             depth++;
