@@ -2534,7 +2534,7 @@ public class Redis extends AbstractDataSource {
             log.error("执行限流lua脚本失败", e);
             redisTemplate.executePipelined((RedisCallback<?>) connection -> {
                 for (String key : keys) {
-                    connection.del(RedisSerializer.string().serialize(key));
+                    connection.keyCommands().del(RedisSerializer.string().serialize(key));
                 }
                 return null;
             });

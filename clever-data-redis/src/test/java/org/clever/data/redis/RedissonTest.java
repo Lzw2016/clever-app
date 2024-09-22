@@ -2,8 +2,8 @@ package org.clever.data.redis;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomUtils;
 import org.clever.core.SystemClock;
+import org.clever.core.random.RandomUtil;
 import org.clever.data.redis.config.RedisProperties;
 import org.clever.data.redis.support.RedissonClientFactory;
 import org.junit.jupiter.api.Test;
@@ -299,7 +299,7 @@ public class RedissonTest {
                     return;
                 }
                 try {
-                    Thread.sleep(RandomUtils.nextLong(3, 30) * 1000);
+                    Thread.sleep(RandomUtil.randomLong(3, 30) * 1000);
                     countDownLatch.countDown();
                     log.info("### -> getCount={}", countDownLatch.getCount());
                 } catch (InterruptedException e) {

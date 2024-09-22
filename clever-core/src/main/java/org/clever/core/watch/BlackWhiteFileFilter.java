@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -29,22 +30,18 @@ public class BlackWhiteFileFilter implements FileFilter {
      * @param caseSensitivity 文件大小写敏感设置
      */
     public BlackWhiteFileFilter(String[] include, String[] exclude, IOCase caseSensitivity) {
-        if (caseSensitivity == null) {
-            this.caseSensitivity = IOCase.SYSTEM;
-        } else {
-            this.caseSensitivity = caseSensitivity;
-        }
+        this.caseSensitivity = Objects.requireNonNullElse(caseSensitivity, IOCase.SYSTEM);
         include = trim(include);
-        if (include == null || include.length <= 0) {
+        if (include == null || include.length == 0) {
             this.includeFilter = null;
         } else {
-            this.includeFilter = new WildcardFileFilter(include, this.caseSensitivity);
+            this.includeFilter = WildcardFileFilter.builder().setWildcards(include).setIoCase(this.caseSensitivity).get();
         }
         exclude = trim(exclude);
-        if (exclude == null || exclude.length <= 0) {
+        if (exclude == null || exclude.length == 0) {
             this.excludeFilter = null;
         } else {
-            this.excludeFilter = new WildcardFileFilter(exclude, this.caseSensitivity);
+            this.excludeFilter = WildcardFileFilter.builder().setWildcards(exclude).setIoCase(this.caseSensitivity).get();
         }
     }
 
@@ -62,22 +59,18 @@ public class BlackWhiteFileFilter implements FileFilter {
      * @param caseSensitivity 文件大小写敏感设置
      */
     public BlackWhiteFileFilter(Set<String> includeSet, Set<String> excludeSet, IOCase caseSensitivity) {
-        if (caseSensitivity == null) {
-            this.caseSensitivity = IOCase.SYSTEM;
-        } else {
-            this.caseSensitivity = caseSensitivity;
-        }
+        this.caseSensitivity = Objects.requireNonNullElse(caseSensitivity, IOCase.SYSTEM);
         String[] include = trim(includeSet);
-        if (include == null || include.length <= 0) {
+        if (include == null || include.length == 0) {
             this.includeFilter = null;
         } else {
-            this.includeFilter = new WildcardFileFilter(include, this.caseSensitivity);
+            this.includeFilter = WildcardFileFilter.builder().setWildcards(include).setIoCase(this.caseSensitivity).get();
         }
         String[] exclude = trim(excludeSet);
-        if (exclude == null || exclude.length <= 0) {
+        if (exclude == null || exclude.length == 0) {
             this.excludeFilter = null;
         } else {
-            this.excludeFilter = new WildcardFileFilter(exclude, this.caseSensitivity);
+            this.excludeFilter = WildcardFileFilter.builder().setWildcards(exclude).setIoCase(this.caseSensitivity).get();
         }
     }
 
