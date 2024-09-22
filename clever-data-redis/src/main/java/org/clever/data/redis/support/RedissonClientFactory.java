@@ -1,7 +1,6 @@
 package org.clever.data.redis.support;
 
 import org.clever.core.Assert;
-import org.clever.data.redis.RedissonClientConfigurationCustomizer;
 import org.clever.data.redis.config.RedisProperties;
 import org.redisson.config.*;
 

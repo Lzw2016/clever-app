@@ -10,7 +10,6 @@ import io.lettuce.core.resource.ClientResources;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.clever.core.Assert;
-import org.clever.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.clever.data.redis.config.RedisProperties;
 import org.springframework.data.redis.connection.*;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;

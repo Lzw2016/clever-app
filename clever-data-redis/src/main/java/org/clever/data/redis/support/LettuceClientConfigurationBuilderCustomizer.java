@@ -1,4 +1,4 @@
-package org.clever.data.redis;
+package org.clever.data.redis.support;
 
 
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;

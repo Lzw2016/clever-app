@@ -9,6 +9,8 @@ import org.clever.core.BannerUtils;
 import org.clever.core.SystemClock;
 import org.clever.data.redis.config.RedisConfig;
 import org.clever.data.redis.config.RedisProperties;
+import org.clever.data.redis.support.LettuceClientConfigurationBuilderCustomizer;
+import org.clever.data.redis.support.RedissonClientConfigurationCustomizer;
 import org.clever.data.redis.util.MergeRedisProperties;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
