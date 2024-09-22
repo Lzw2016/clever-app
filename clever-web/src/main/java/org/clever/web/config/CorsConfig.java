@@ -2,10 +2,10 @@ package org.clever.web.config;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.clever.util.CollectionUtils;
-import org.clever.util.ObjectUtils;
-import org.clever.util.StringUtils;
 import org.clever.web.http.HttpMethod;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.util.*;
@@ -28,11 +28,11 @@ public class CorsConfig {
     private static final OriginPattern ALL_PATTERN = new OriginPattern("*");
     private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.singletonList(ALL_PATTERN);
     private static final List<String> DEFAULT_PERMIT_ALL = Collections.singletonList(ALL);
-    private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
-            Arrays.asList(HttpMethod.GET, HttpMethod.HEAD)
+    private static final List<HttpMethod> DEFAULT_METHODS = List.of(
+        HttpMethod.GET, HttpMethod.HEAD
     );
-    private static final List<String> DEFAULT_PERMIT_METHODS = Collections.unmodifiableList(
-            Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name())
+    private static final List<String> DEFAULT_PERMIT_METHODS = List.of(
+        HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()
     );
 
     /**
@@ -108,7 +108,7 @@ public class CorsConfig {
 
     public void setAllowedOrigins(List<String> origins) {
         this.allowedOrigins = (origins == null ? null : origins.stream()
-                .filter(Objects::nonNull).map(this::trimTrailingSlash).collect(Collectors.toList()));
+            .filter(Objects::nonNull).map(this::trimTrailingSlash).collect(Collectors.toList()));
     }
 
     public void addAllowedOrigin(String origin) {
@@ -261,10 +261,10 @@ public class CorsConfig {
     public void validateAllowCredentials() {
         if (this.allowCredentials == Boolean.TRUE && this.allowedOrigins != null && this.allowedOrigins.contains(ALL)) {
             throw new IllegalArgumentException(
-                    "When allowCredentials is true, allowedOrigins cannot contain the special value \"*\" " +
-                            "since that cannot be set on the \"Access-Control-Allow-Origin\" response header. " +
-                            "To allow credentials to a set of origins, list them explicitly " +
-                            "or consider using \"allowedOriginPatterns\" instead.");
+                "When allowCredentials is true, allowedOrigins cannot contain the special value \"*\" " +
+                    "since that cannot be set on the \"Access-Control-Allow-Origin\" response header. " +
+                    "To allow credentials to a set of origins, list them explicitly " +
+                    "or consider using \"allowedOriginPatterns\" instead.");
         }
     }
 

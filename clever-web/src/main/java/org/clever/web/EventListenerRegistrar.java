@@ -3,8 +3,8 @@ package org.clever.web;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.util.Assert;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import java.util.*;
@@ -68,9 +68,9 @@ public class EventListenerRegistrar {
         int idx = 1;
         for (OrderEventListener item : eventListeners) {
             logs.add(String.format(
-                    "%2s. %s",
-                    idx++,
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : "EventListener"
+                "%2s. %s",
+                idx++,
+                StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : "EventListener"
             ));
             servletContextHandler.addEventListener(item.eventListener);
         }

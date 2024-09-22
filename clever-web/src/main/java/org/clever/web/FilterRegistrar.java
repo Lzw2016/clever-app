@@ -1,17 +1,17 @@
 package org.clever.web;
 
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.util.Assert;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
@@ -147,11 +147,11 @@ public class FilterRegistrar {
         int dispatchesMaxLength = filters.stream().map(item -> StringUtils.length(item.dispatches.toString())).max(Integer::compare).orElse(0) + 2;
         for (OrderFilter item : filters) {
             logs.add(String.format(
-                    "%2s. path=%s | dispatches=%s%s",
-                    idx++,
-                    StringUtils.rightPad(item.pathSpec, pathSpecMaxLength),
-                    StringUtils.rightPad(item.dispatches.toString(), dispatchesMaxLength),
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
+                "%2s. path=%s | dispatches=%s%s",
+                idx++,
+                StringUtils.rightPad(item.pathSpec, pathSpecMaxLength),
+                StringUtils.rightPad(item.dispatches.toString(), dispatchesMaxLength),
+                StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
             ));
             servletContextHandler.addFilter(new FilterHolder(item.filter), item.pathSpec, item.dispatches);
         }
@@ -215,10 +215,6 @@ public class FilterRegistrar {
         @Override
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
             fuc.doFilter(new Context((HttpServletRequest) request, (HttpServletResponse) response, chain));
-        }
-
-        @Override
-        public void destroy() {
         }
     }
 }

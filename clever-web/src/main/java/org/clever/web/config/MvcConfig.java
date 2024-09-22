@@ -1,10 +1,10 @@
 package org.clever.web.config;
 
 import lombok.Data;
-import org.clever.transaction.TransactionDefinition;
-import org.clever.transaction.annotation.Isolation;
-import org.clever.transaction.annotation.Propagation;
 import org.clever.web.http.HttpMethod;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.time.Duration;
 import java.util.*;
@@ -30,7 +30,7 @@ public class MvcConfig {
     /**
      * mvc支持的Http Method
      */
-    private Set<HttpMethod> httpMethod = new HashSet<HttpMethod>() {{
+    private Set<HttpMethod> httpMethod = new HashSet<>() {{
         add(HttpMethod.POST);
         add(HttpMethod.GET);
         add(HttpMethod.PUT);
@@ -122,8 +122,8 @@ public class MvcConfig {
          * 热重载class位置
          * <pre>
          * 1.classpath路径
-         *   classpath:com/mycompany/**&#47;*.xml
-         *   classpath*:com/mycompany/**&#47;*.xml
+         *   classpath:com/app/**&#47;*.xml
+         *   classpath*:com/app/**&#47;*.xml
          * 2.本机绝对路径
          *   file:/home/www/public/
          *   file:D:/resources/static/
@@ -134,10 +134,10 @@ public class MvcConfig {
          * </pre>
          */
         private List<String> locations = Arrays.asList(
-                "./build/classes/java/main",
-                "./build/classes/kotlin/main",
-                "./build/classes/groovy/main",
-                "./out/production/classes"
+            "./build/classes/java/main",
+            "./build/classes/kotlin/main",
+            "./build/classes/groovy/main",
+            "./out/production/classes"
         );
     }
 }

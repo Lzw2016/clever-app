@@ -1,24 +1,24 @@
 package org.clever.web;
 
-import io.javalin.core.JavalinConfig;
+import io.javalin.config.JavalinConfig;
 import io.javalin.http.Context;
 import io.javalin.http.HandlerType;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.reflection.ReflectionsUtils;
-import org.clever.util.Assert;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 /**
@@ -98,10 +98,10 @@ public class ServletRegistrar {
         int idx = 1;
         for (OrderServlet item : servlets) {
             logs.add(String.format(
-                    "%2s. path=%s%s",
-                    idx++,
-                    item.pathSpec,
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
+                "%2s. path=%s%s",
+                idx++,
+                item.pathSpec,
+                StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
             ));
             servletContextHandler.addServlet(new ServletHolder(item.servlet), item.pathSpec);
         }

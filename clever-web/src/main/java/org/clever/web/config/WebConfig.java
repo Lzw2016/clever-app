@@ -1,19 +1,20 @@
 package org.clever.web.config;
 
-import io.javalin.core.JavalinConfig;
-import io.javalin.core.util.Header;
+import io.javalin.config.JavalinConfig;
 import io.javalin.http.ContentType;
+import io.javalin.http.Header;
 import io.javalin.http.staticfiles.Location;
-import io.javalin.jetty.JettyUtil;
+import io.javalin.plugin.bundled.CorsPluginConfig;
+import jakarta.servlet.MultipartConfigElement;
 import lombok.Data;
+import org.clever.core.Assert;
 import org.clever.core.json.jackson.JacksonConfig;
-import org.clever.util.Assert;
-import org.clever.util.unit.DataSize;
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.util.unit.DataSize;
 
-import javax.servlet.MultipartConfigElement;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -25,6 +26,7 @@ import java.util.concurrent.SynchronousQueue;
  * 作者：lizw <br/>
  * 创建时间：2022/07/17 12:35 <br/>
  */
+@ConfigurationProperties(prefix = WebConfig.PREFIX)
 @Data
 public class WebConfig {
     public static final String PREFIX = "web";
@@ -39,34 +41,31 @@ public class WebConfig {
     /**
      * Server 配置
      */
+    @NestedConfigurationProperty
     private ServerConfig server = new ServerConfig();
     /**
      * Jackson 配置
      */
+    @NestedConfigurationProperty
     private JacksonConfig jackson = new JacksonConfig();
     /**
      * HTTP 配置
      */
+    @NestedConfigurationProperty
     private HttpConfig http = new HttpConfig();
     /**
      * WebSocket 配置
      */
+    @NestedConfigurationProperty
     private WebSocketConfig websocket = new WebSocketConfig();
     /**
      * Misc(杂项) 配置
      */
+    @NestedConfigurationProperty
     private MiscConfig misc = new MiscConfig();
 
     @Data
     public static class ServerConfig {
-        /**
-         * web server 的 context path，默认："/"
-         */
-        private String contextPath = "/";
-        /**
-         * 将“/path”和“/path/”视为同一路径，默认：true
-         */
-        private boolean ignoreTrailingSlashes = true;
         /**
          * 启用开发日志（用于开发的广泛调试日志），默认：false
          */
@@ -100,35 +99,27 @@ public class WebConfig {
         /**
          * 应用当前配置到 JavalinConfig
          */
-        @SuppressWarnings("ExtractMethodRecommender")
         public void apply(JavalinConfig config) {
             Assert.notNull(config, "参数 config 不能为空");
             ServerConfig server = this;
-            config.contextPath = server.getContextPath();
-            config.ignoreTrailingSlashes = server.isIgnoreTrailingSlashes();
             if (server.isEnableDevLogging()) {
-                config.enableDevLogging();
+                config.bundledPlugins.enableDevLogging();
             }
-
             // 自定义 Jetty Server
             ServerConfig.Threads threads = server.getThreads();
             if (threads != null) {
-                config.server(() -> {
-                    BlockingQueue<Runnable> queue = null;
-                    if (Objects.equals(threads.getMaxQueueCapacity(), 0)) {
-                        queue = new SynchronousQueue<>();
-                    } else if (threads.getMaxQueueCapacity() != null && threads.getMaxQueueCapacity() > 0) {
-                        queue = new BlockingArrayQueue<>(threads.getMaxQueueCapacity());
-                    }
-                    int maxThreadCount = (threads.getMax() > 0) ? threads.getMax() : 250;
-                    int minThreadCount = (threads.getMin() > 0) ? threads.getMin() : 8;
-                    int threadIdleTimeout = (threads.getIdleTimeout() != null) ? (int) threads.getIdleTimeout().toMillis() : 60_000;
-                    QueuedThreadPool queuedThreadPool = new QueuedThreadPool(maxThreadCount, minThreadCount, threadIdleTimeout, queue);
-                    queuedThreadPool.setName("JettyServerThreadPool");
-                    Server jettyServer = new Server(queuedThreadPool);
-                    jettyServer = JettyUtil.getOrDefault(jettyServer);
-                    return jettyServer;
-                });
+                BlockingQueue<Runnable> queue = null;
+                if (Objects.equals(threads.getMaxQueueCapacity(), 0)) {
+                    queue = new SynchronousQueue<>();
+                } else if (threads.getMaxQueueCapacity() != null && threads.getMaxQueueCapacity() > 0) {
+                    queue = new BlockingArrayQueue<>(threads.getMaxQueueCapacity());
+                }
+                int maxThreadCount = (threads.getMax() > 0) ? threads.getMax() : 250;
+                int minThreadCount = (threads.getMin() > 0) ? threads.getMin() : 8;
+                int threadIdleTimeout = (threads.getIdleTimeout() != null) ? (int) threads.getIdleTimeout().toMillis() : 60_000;
+                QueuedThreadPool queuedThreadPool = new QueuedThreadPool(maxThreadCount, minThreadCount, threadIdleTimeout, queue);
+                queuedThreadPool.setName("JettyServerThreadPool");
+                config.jetty.threadPool = queuedThreadPool;
             }
         }
     }
@@ -136,9 +127,25 @@ public class WebConfig {
     @Data
     public static class HttpConfig {
         /**
+         * web server 的 context path，默认："/"
+         */
+        private String contextPath = "/";
+        /**
+         * 将“/path”和“/path/”视为同一路径，默认：true
+         */
+        private boolean ignoreTrailingSlashes = true;
+        /**
+         * 如果为true，则将“/path//sub_path”和“/path/sub_path”视为相同的路径(默认值：false)
+         */
+        private boolean treatMultipleSlashesAsSingleSlash = false;
+        /**
+         * 如果为true，则将“/PATH”和“/path”视为相同的路径(默认值：false)
+         */
+        private boolean caseInsensitiveRoutes = false;
+        /**
          * 为响应生成 etag，默认：false (ETag是HTTP协议提供的一种Web缓存验证机制，并且允许客户端进行缓存协商。这就使得缓存变得更加高效，而且节省带宽)
          */
-        private boolean autogenerateEtags = false;
+        private boolean generateEtags = false;
         /**
          * 如果路径映射到不同的 HTTP 方法，则返回 405 而不是 404，默认：true
          */
@@ -162,7 +169,7 @@ public class WebConfig {
         /**
          * 异步请求超时时间，默认：0s (0表示不超时)
          */
-        private Duration asyncRequestTimeout = Duration.ofSeconds(0);
+        private Duration asyncTimeout = Duration.ofSeconds(0);
         /**
          * 用于配置 {@link MultipartConfigElement} 的属性
          */
@@ -253,7 +260,7 @@ public class WebConfig {
             /**
              * 自定义响应头，默认：["Cache-Control": "max-age=0"]
              */
-            private Map<String, String> headers = new HashMap<String, String>(1) {{
+            private Map<String, String> headers = new HashMap<>(1) {{
                 put(Header.CACHE_CONTROL, "max-age=0");
             }};
         }
@@ -264,24 +271,33 @@ public class WebConfig {
         public void apply(JavalinConfig config) {
             Assert.notNull(config, "参数 config 不能为空");
             HttpConfig http = this;
-            config.autogenerateEtags = http.isAutogenerateEtags();
-            config.prefer405over404 = http.isPrefer405over404();
-            config.enforceSsl = http.isEnforceSsl();
-            config.defaultContentType = http.getDefaultContentType();
-            if (http.getMaxRequestSize() != null) {
-                config.maxRequestSize = http.getMaxRequestSize().toBytes();
+            config.router.contextPath = http.getContextPath();
+            config.router.ignoreTrailingSlashes = http.isIgnoreTrailingSlashes();
+            config.router.caseInsensitiveRoutes = http.isCaseInsensitiveRoutes();
+            config.http.generateEtags = http.isGenerateEtags();
+            config.http.prefer405over404 = http.isPrefer405over404();
+            if (http.isEnforceSsl()) {
+                config.bundledPlugins.enableSslRedirects();
             }
-            if (http.getAsyncRequestTimeout() != null) {
-                config.asyncRequestTimeout = http.getAsyncRequestTimeout().toMillis();
+            config.http.defaultContentType = http.getDefaultContentType();
+            if (http.getMaxRequestSize() != null) {
+                config.http.maxRequestSize = http.getMaxRequestSize().toBytes();
+            }
+            if (http.getAsyncTimeout() != null) {
+                config.http.asyncTimeout = http.getAsyncTimeout().toMillis();
             }
             if (http.getSinglePageRoot() != null) {
                 for (HttpConfig.SinglePageRoot singlePageRoot : http.getSinglePageRoot()) {
-                    config.addSinglePageRoot(singlePageRoot.getHostedPath(), singlePageRoot.getFilePath(), singlePageRoot.getLocation());
+                    config.spaRoot.addFile(
+                        singlePageRoot.getHostedPath(),
+                        singlePageRoot.getFilePath(),
+                        singlePageRoot.getLocation()
+                    );
                 }
             }
             if (http.getStaticFile() != null) {
                 for (HttpConfig.StaticFile staticFile : http.getStaticFile()) {
-                    config.addStaticFiles(staticFileConfig -> {
+                    config.staticFiles.add(staticFileConfig -> {
                         staticFileConfig.hostedPath = staticFile.getHostedPath();
                         staticFileConfig.directory = staticFile.getDirectory();
                         staticFileConfig.location = staticFile.getLocation();
@@ -291,13 +307,17 @@ public class WebConfig {
                 }
             }
             if (http.isEnableWebjars()) {
-                config.enableWebjars();
+                config.staticFiles.enableWebjars();
             }
             if (http.isEnableCorsForAllOrigins()) {
-                config.enableCorsForAllOrigins();
+                config.bundledPlugins.enableCors(corsPluginConfig -> corsPluginConfig.addRule(CorsPluginConfig.CorsRule::anyHost));
             }
             if (http.getEnableCorsForOrigin() != null && !http.getEnableCorsForOrigin().isEmpty()) {
-                config.enableCorsForOrigin(http.getEnableCorsForOrigin().toArray(new String[0]));
+                config.bundledPlugins.enableCors(corsPluginConfig -> {
+                    for (String host : http.getEnableCorsForOrigin()) {
+                        corsPluginConfig.addRule(corsRule -> corsRule.allowHost(host));
+                    }
+                });
             }
         }
     }
@@ -333,6 +353,30 @@ public class WebConfig {
             Assert.notNull(config, "参数 config 不能为空");
             MiscConfig misc = this;
             config.showJavalinBanner = misc.isShowJavalinBanner();
+        }
+    }
+
+    /**
+     * 应用当前配置到 JavalinConfig
+     */
+    public void apply(JavalinConfig config) {
+        Assert.notNull(config, "参数 config 不能为空");
+        config.jetty.defaultHost = this.host;
+        config.jetty.defaultPort = this.port;
+        if (this.server != null) {
+            this.server.apply(config);
+        }
+        if (this.http != null) {
+            this.http.apply(config);
+        }
+        if (this.websocket != null) {
+            this.websocket.apply(config);
+        }
+//        if (this.jackson != null) {
+//            this.jackson.apply(config);
+//        }
+        if (this.misc != null) {
+            this.misc.apply(config);
         }
     }
 }

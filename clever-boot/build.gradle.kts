@@ -12,8 +12,7 @@ plugins {
 dependencies {
     api(project(":clever-spring"))
     api(project(":clever-core"))
-
-//    api(project(":clever-web"))
+    api(project(":clever-web"))
 //    api(project(":clever-security"))
     api(project(":clever-data-jdbc"))
     api(project(":clever-data-redis"))

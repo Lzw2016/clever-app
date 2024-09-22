@@ -1,12 +1,15 @@
 package org.clever.web;
 
-import io.javalin.core.event.EventListener;
-import io.javalin.core.event.*;
+
+import io.javalin.config.EventConfig;
+import io.javalin.event.HandlerMetaInfo;
+import io.javalin.event.LifecycleEventListener;
+import io.javalin.event.WsHandlerMetaInfo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.util.Assert;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,11 +29,10 @@ public class JavalinEventListenerRegistrar {
      * @param name         名称
      * @param order        顺序，值越小，优先级越高
      */
-    public JavalinEventListenerRegistrar addListener(JavalinEvent event, EventHandler eventHandler, String name, double order) {
+    public JavalinEventListenerRegistrar addListener(JavalinEvent event, LifecycleEventListener eventHandler, String name, double order) {
         Assert.notNull(event, "event 不能为 null");
         Assert.notNull(eventHandler, "eventHandler 不能为 null");
-        eventHandlerMap.computeIfAbsent(event, e -> new LinkedList<>())
-                .add(new OrderEventHandler(eventHandler, order, name));
+        eventHandlerMap.computeIfAbsent(event, e -> new LinkedList<>()).add(new OrderEventHandler(eventHandler, order, name));
         return this;
     }
 
@@ -39,7 +41,7 @@ public class JavalinEventListenerRegistrar {
      * @param name         名称
      * @param order        顺序，值越小，优先级越高
      */
-    public JavalinEventListenerRegistrar addServerStartingListener(EventHandler eventHandler, String name, double order) {
+    public JavalinEventListenerRegistrar addServerStartingListener(LifecycleEventListener eventHandler, String name, double order) {
         return addListener(JavalinEvent.SERVER_STARTING, eventHandler, name, order);
     }
 
@@ -47,7 +49,7 @@ public class JavalinEventListenerRegistrar {
      * @param eventHandler EventHandler
      * @param name         名称
      */
-    public JavalinEventListenerRegistrar addServerStartingListener(EventHandler eventHandler, String name) {
+    public JavalinEventListenerRegistrar addServerStartingListener(LifecycleEventListener eventHandler, String name) {
         return addListener(JavalinEvent.SERVER_STARTING, eventHandler, name, 0);
     }
 
@@ -56,7 +58,7 @@ public class JavalinEventListenerRegistrar {
      * @param name         名称
      * @param order        顺序，值越小，优先级越高
      */
-    public JavalinEventListenerRegistrar addServerStartedListener(EventHandler eventHandler, String name, double order) {
+    public JavalinEventListenerRegistrar addServerStartedListener(LifecycleEventListener eventHandler, String name, double order) {
         return addListener(JavalinEvent.SERVER_STARTED, eventHandler, name, order);
     }
 
@@ -64,7 +66,7 @@ public class JavalinEventListenerRegistrar {
      * @param eventHandler EventHandler
      * @param name         名称
      */
-    public JavalinEventListenerRegistrar addServerStartedListener(EventHandler eventHandler, String name) {
+    public JavalinEventListenerRegistrar addServerStartedListener(LifecycleEventListener eventHandler, String name) {
         return addListener(JavalinEvent.SERVER_STARTED, eventHandler, name, 0);
     }
 
@@ -73,7 +75,7 @@ public class JavalinEventListenerRegistrar {
      * @param name         名称
      * @param order        顺序，值越小，优先级越高
      */
-    public JavalinEventListenerRegistrar addServerStartFailedListener(EventHandler eventHandler, String name, double order) {
+    public JavalinEventListenerRegistrar addServerStartFailedListener(LifecycleEventListener eventHandler, String name, double order) {
         return addListener(JavalinEvent.SERVER_START_FAILED, eventHandler, name, order);
     }
 
@@ -81,7 +83,7 @@ public class JavalinEventListenerRegistrar {
      * @param eventHandler EventHandler
      * @param name         名称
      */
-    public JavalinEventListenerRegistrar addServerStartFailedListener(EventHandler eventHandler, String name) {
+    public JavalinEventListenerRegistrar addServerStartFailedListener(LifecycleEventListener eventHandler, String name) {
         return addListener(JavalinEvent.SERVER_START_FAILED, eventHandler, name, 0);
     }
 
@@ -90,7 +92,7 @@ public class JavalinEventListenerRegistrar {
      * @param name         名称
      * @param order        顺序，值越小，优先级越高
      */
-    public JavalinEventListenerRegistrar addServerStopFailedListener(EventHandler eventHandler, String name, double order) {
+    public JavalinEventListenerRegistrar addServerStopFailedListener(LifecycleEventListener eventHandler, String name, double order) {
         return addListener(JavalinEvent.SERVER_STOP_FAILED, eventHandler, name, order);
     }
 
@@ -98,7 +100,7 @@ public class JavalinEventListenerRegistrar {
      * @param eventHandler EventHandler
      * @param name         名称
      */
-    public JavalinEventListenerRegistrar addServerStopFailedListener(EventHandler eventHandler, String name) {
+    public JavalinEventListenerRegistrar addServerStopFailedListener(LifecycleEventListener eventHandler, String name) {
         return addListener(JavalinEvent.SERVER_STOP_FAILED, eventHandler, name, 0);
     }
 
@@ -107,7 +109,7 @@ public class JavalinEventListenerRegistrar {
      * @param name         名称
      * @param order        顺序，值越小，优先级越高
      */
-    public JavalinEventListenerRegistrar addServerStoppingListener(EventHandler eventHandler, String name, double order) {
+    public JavalinEventListenerRegistrar addServerStoppingListener(LifecycleEventListener eventHandler, String name, double order) {
         return addListener(JavalinEvent.SERVER_STOPPING, eventHandler, name, order);
     }
 
@@ -115,7 +117,7 @@ public class JavalinEventListenerRegistrar {
      * @param eventHandler EventHandler
      * @param name         名称
      */
-    public JavalinEventListenerRegistrar addServerStoppingListener(EventHandler eventHandler, String name) {
+    public JavalinEventListenerRegistrar addServerStoppingListener(LifecycleEventListener eventHandler, String name) {
         return addListener(JavalinEvent.SERVER_STOPPING, eventHandler, name, 0);
     }
 
@@ -124,7 +126,7 @@ public class JavalinEventListenerRegistrar {
      * @param name         名称
      * @param order        顺序，值越小，优先级越高
      */
-    public JavalinEventListenerRegistrar addServerStoppedListener(EventHandler eventHandler, String name, double order) {
+    public JavalinEventListenerRegistrar addServerStoppedListener(LifecycleEventListener eventHandler, String name, double order) {
         return addListener(JavalinEvent.SERVER_STOPPED, eventHandler, name, order);
     }
 
@@ -132,7 +134,7 @@ public class JavalinEventListenerRegistrar {
      * @param eventHandler EventHandler
      * @param name         名称
      */
-    public JavalinEventListenerRegistrar addServerStoppedListener(EventHandler eventHandler, String name) {
+    public JavalinEventListenerRegistrar addServerStoppedListener(LifecycleEventListener eventHandler, String name) {
         return addListener(JavalinEvent.SERVER_STOPPED, eventHandler, name, 0);
     }
 
@@ -174,8 +176,8 @@ public class JavalinEventListenerRegistrar {
         return addWsHandlerAddedListener(callback, name, 0);
     }
 
-    synchronized void init(EventListener eventListener) {
-        Assert.notNull(eventListener, "eventListener 不能为 null");
+    synchronized void init(EventConfig eventConfig) {
+        Assert.notNull(eventConfig, "eventConfig 不能为 null");
         List<String> logs = new ArrayList<>();
         for (Map.Entry<JavalinEvent, LinkedList<OrderEventHandler>> entry : eventHandlerMap.entrySet()) {
             JavalinEvent event = entry.getKey();
@@ -184,29 +186,29 @@ public class JavalinEventListenerRegistrar {
             int idx = 1;
             for (OrderEventHandler item : items) {
                 logs.add(String.format(
-                        "%2s. %s%s",
-                        idx++,
-                        event,
-                        StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
+                    "%2s. %s%s",
+                    idx++,
+                    event,
+                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
                 ));
                 switch (event) {
                     case SERVER_STARTING:
-                        eventListener.serverStarting(item.eventHandler);
+                        eventConfig.serverStarting(item.eventHandler);
                         break;
                     case SERVER_STARTED:
-                        eventListener.serverStarted(item.eventHandler);
+                        eventConfig.serverStarted(item.eventHandler);
                         break;
                     case SERVER_START_FAILED:
-                        eventListener.serverStartFailed(item.eventHandler);
+                        eventConfig.serverStartFailed(item.eventHandler);
                         break;
                     case SERVER_STOP_FAILED:
-                        eventListener.serverStopFailed(item.eventHandler);
+                        eventConfig.serverStopFailed(item.eventHandler);
                         break;
                     case SERVER_STOPPING:
-                        eventListener.serverStopping(item.eventHandler);
+                        eventConfig.serverStopping(item.eventHandler);
                         break;
                     case SERVER_STOPPED:
-                        eventListener.serverStopped(item.eventHandler);
+                        eventConfig.serverStopped(item.eventHandler);
                         break;
                 }
             }
@@ -219,11 +221,11 @@ public class JavalinEventListenerRegistrar {
         int idx = 1;
         for (OrderHandlerMetaInfo item : handlerMetaInfos) {
             logs.add(String.format(
-                    "%2s. HandlerAdded%s",
-                    idx++,
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
+                "%2s. HandlerAdded%s",
+                idx++,
+                StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
             ));
-            eventListener.handlerAdded(item.callback);
+            eventConfig.handlerAdded(item.callback);
         }
         if (!logs.isEmpty()) {
             BannerUtils.printConfig(log, "Javalin新增Http Handler监听", logs.toArray(new String[0]));
@@ -233,11 +235,11 @@ public class JavalinEventListenerRegistrar {
         idx = 1;
         for (OrderWsHandlerMetaInfo item : wsHandlerMetaInfos) {
             logs.add(String.format(
-                    "%2s. WsHandlerAdded%s",
-                    idx++,
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
+                "%2s. WsHandlerAdded%s",
+                idx++,
+                StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
             ));
-            eventListener.wsHandlerAdded(item.callback);
+            eventConfig.wsHandlerAdded(item.callback);
         }
         if (!logs.isEmpty()) {
             BannerUtils.printConfig(log, "Javalin新增Websocket Handler监听", logs.toArray(new String[0]));
@@ -246,7 +248,7 @@ public class JavalinEventListenerRegistrar {
 
     @Data
     private static class OrderEventHandler {
-        private final EventHandler eventHandler;
+        private final LifecycleEventListener eventHandler;
         private final double order;
         private final String name;
     }

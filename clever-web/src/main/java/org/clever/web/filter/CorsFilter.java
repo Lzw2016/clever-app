@@ -1,23 +1,24 @@
 package org.clever.web.filter;
 
+import jakarta.servlet.ServletException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.core.env.Environment;
-import org.clever.util.AntPathMatcher;
-import org.clever.util.Assert;
-import org.clever.util.PathMatcher;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.CorsConfig;
 import org.clever.web.http.HttpStatus;
-import org.clever.web.support.cors.CorsProcessor;
-import org.clever.web.support.cors.DefaultCorsProcessor;
-import org.clever.web.utils.CorsUtils;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsProcessor;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.DefaultCorsProcessor;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.List;
 
@@ -39,18 +40,18 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
         if (corsConfig.isEnable()) {
             // noinspection ConstantValue
             BannerUtils.printConfig(log, "cors跨域配置",
-                    new String[]{
-                            "cors:",
-                            "  enable               : " + corsConfig.isEnable(),
-                            "  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "),
-                            "  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "),
-                            "  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "),
-                            "  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "),
-                            "  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "),
-                            "  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "),
-                            "  allowCredentials     : " + corsConfig.getAllowCredentials(),
-                            "  maxAge               : " + corsConfig.getMaxAge(),
-                    }
+                new String[]{
+                    "cors:",
+                    "  enable               : " + corsConfig.isEnable(),
+                    "  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "),
+                    "  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "),
+                    "  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "),
+                    "  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "),
+                    "  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "),
+                    "  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "),
+                    "  allowCredentials     : " + corsConfig.getAllowCredentials(),
+                    "  maxAge               : " + corsConfig.getMaxAge(),
+                }
             );
         }
         return create(corsConfig);
@@ -91,7 +92,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         // 跨域处理
-        boolean supportCors = corsProcessor.processRequest(corsConfig, ctx.req, ctx.res);
+        boolean supportCors = corsProcessor.processRequest(toCorsConfiguration(corsConfig), ctx.req, ctx.res);
         if (supportCors) {
             boolean preFlightRequest = CorsUtils.isPreFlightRequest(ctx.req);
             if (preFlightRequest) {
@@ -105,5 +106,10 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         ctx.next();
+    }
+
+    protected CorsConfiguration toCorsConfiguration(CorsConfig corsConfig) {
+        // TODO CorsConfig TO CorsConfiguration
+        return null;
     }
 }

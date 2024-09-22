@@ -1,12 +1,12 @@
 package org.clever.web;
 
-import io.javalin.core.JavalinConfig;
-import io.javalin.core.plugin.Plugin;
+import io.javalin.config.JavalinConfig;
+import io.javalin.plugin.Plugin;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,7 +24,7 @@ public class JavalinPluginRegistrar {
     /**
      * 插件列表
      */
-    private final List<OrderPlugin> plugins = new LinkedList<>();
+    private final List<OrderPlugin<?>> plugins = new LinkedList<>();
 
     /**
      * 增加插件
@@ -33,9 +33,9 @@ public class JavalinPluginRegistrar {
      * @param name   插件名称
      * @param order  顺序，值越小，优先级越高
      */
-    public JavalinPluginRegistrar addPlugin(Plugin plugin, String name, double order) {
+    public JavalinPluginRegistrar addPlugin(Plugin<?> plugin, String name, double order) {
         Assert.notNull(plugin, "plugin 不能为 null");
-        plugins.add(new OrderPlugin(plugin, order, name));
+        plugins.add(new OrderPlugin<>(plugin, order, name));
         return this;
     }
 
@@ -45,7 +45,7 @@ public class JavalinPluginRegistrar {
      * @param plugin 插件
      * @param name   插件名称
      */
-    public JavalinPluginRegistrar addPlugin(Plugin plugin, String name) {
+    public JavalinPluginRegistrar addPlugin(Plugin<?> plugin, String name) {
         return addPlugin(plugin, name, 0);
     }
 
@@ -54,11 +54,11 @@ public class JavalinPluginRegistrar {
         plugins.sort(Comparator.comparingDouble(o -> o.order));
         List<String> logs = new ArrayList<>();
         int idx = 1;
-        for (OrderPlugin item : plugins) {
+        for (OrderPlugin<?> item : plugins) {
             logs.add(String.format(
-                    "%2s. %s",
-                    idx++,
-                    StringUtils.isNoneBlank(item.name) ? item.name.trim() : "JavalinPlugin"
+                "%2s. %s",
+                idx++,
+                StringUtils.isNoneBlank(item.name) ? item.name.trim() : "JavalinPlugin"
             ));
             config.registerPlugin(item.plugin);
         }
@@ -68,8 +68,8 @@ public class JavalinPluginRegistrar {
     }
 
     @Data
-    private static class OrderPlugin {
-        private final Plugin plugin;
+    private static class OrderPlugin<T> {
+        private final Plugin<T> plugin;
         private final double order;
         private final String name;
     }

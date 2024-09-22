@@ -12,8 +12,10 @@
         <module name="clever-app.clever-data-redis.test" />
         <module name="clever-app.clever-data-jdbc-meta.test" />
         <module name="clever-app.clever-spring.main" />
+        <module name="clever-app.clever-web.main" />
         <module name="clever-app.clever-boot.test" />
         <module name="clever-app.clever-data-jdbc-meta.main" />
+        <module name="clever-app.clever-web.test" />
         <module name="clever-app.clever-spring.test" />
         <module name="clever-app.clever-boot.main" />
         <module name="clever-app.clever-data-dynamic-sql.main" />

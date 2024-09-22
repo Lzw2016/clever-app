@@ -10,6 +10,7 @@
           <option value="io.micronaut.*" />
           <option value="jakarta.*" />
           <option value="javax.*" />
+          <option value="lombok.AllArgsConstructor" />
           <option value="lombok.Data" />
           <option value="lombok.Getter" />
           <option value="org.springframework.*" />

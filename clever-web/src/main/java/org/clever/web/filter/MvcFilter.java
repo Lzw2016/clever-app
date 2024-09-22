@@ -2,15 +2,16 @@ package org.clever.web.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
-import io.javalin.core.plugin.Plugin;
+import io.javalin.plugin.Plugin;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppContextHolder;
-import org.clever.core.MethodParameter;
+import org.clever.core.Assert;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.util.Assert;
-import org.clever.util.ObjectUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.JavalinAttrKey;
 import org.clever.web.config.MvcConfig;
@@ -26,10 +27,9 @@ import org.clever.web.support.mvc.interceptor.TransactionInterceptor;
 import org.clever.web.support.mvc.method.DefaultHandlerMethodResolver;
 import org.clever.web.support.mvc.method.HandlerMethodResolver;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.MethodParameter;
+import org.springframework.util.ObjectUtils;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
  * 作者：lizw <br/>
  * 创建时间：2023/01/06 13:29 <br/>
  */
-public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
+public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc {
     /**
      * 当前 Javalin 实例
      */
@@ -324,15 +324,15 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
      */
     protected String formatInvokeError(String text, Method method, Object[] args) {
         String formattedArgs = IntStream.range(0, args.length)
-                .mapToObj(i -> (
-                        args[i] != null ?
-                                "[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
-                                "[" + i + "] [null]"
-                )).collect(Collectors.joining(",\n", " ", " "));
+            .mapToObj(i -> (
+                args[i] != null ?
+                    "[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
+                    "[" + i + "] [null]"
+            )).collect(Collectors.joining(",\n", " ", " "));
         return text + "\n"
-                + "Controller [" + method.getDeclaringClass().getName() + "]\n"
-                + "Method [" + method.toGenericString() + "] " + "with argument values:\n"
-                + formattedArgs;
+            + "Controller [" + method.getDeclaringClass().getName() + "]\n"
+            + "Method [" + method.toGenericString() + "] " + "with argument values:\n"
+            + formattedArgs;
     }
 
     /**
@@ -353,7 +353,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         if (errs != null) {
             // 合并异常信息，errs优先!
             List<Throwable> tmp = new ArrayList<>(errs.length);
-            tmp.addAll(Arrays.stream(errs).collect(Collectors.toList()));
+            tmp.addAll(Arrays.stream(errs).toList());
             tmp.addAll(errList);
             errList = tmp;
         }

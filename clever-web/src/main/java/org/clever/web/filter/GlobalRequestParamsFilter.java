@@ -1,5 +1,6 @@
 package org.clever.web.filter;
 
+import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.Conv;
@@ -8,7 +9,6 @@ import org.clever.core.model.request.QueryBySort;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.utils.GlobalExceptionHandler;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -61,4 +61,3 @@ public class GlobalRequestParamsFilter implements FilterRegistrar.FilterFuc {
         return queryByPage;
     }
 }
-

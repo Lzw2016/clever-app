@@ -2,17 +2,17 @@ package org.clever.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
-import io.javalin.core.JavalinConfig;
-import io.javalin.plugin.json.JavalinJackson;
+import io.javalin.config.JavalinConfig;
+import io.javalin.json.JavalinJackson;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
-import org.clever.core.env.Environment;
+import org.clever.core.Assert;
 import org.clever.core.json.jackson.JacksonConfig;
 import org.clever.core.mapper.JacksonMapper;
-import org.clever.util.Assert;
 import org.clever.web.config.WebConfig;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -75,6 +75,8 @@ public class WebServerBootstrap {
             JacksonConfig jackson = webConfig.getJackson();
             ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
             Optional.of(jackson).orElse(new JacksonConfig()).apply(webServerMapper);
+
+
             config.jsonMapper(new JavalinJackson(webServerMapper));
             config.inner.appAttributes.put(JavalinAttrKey.JACKSON_OBJECT_MAPPER, webServerMapper);
             // 初始化http相关配置
@@ -87,7 +89,7 @@ public class WebServerBootstrap {
             WebConfig.MiscConfig misc = webConfig.getMisc();
             Optional.of(misc).orElse(new WebConfig.MiscConfig()).apply(config);
             // 配置Filter Servlet EventListener
-            config.configureServletContextHandler(servletContextHandler -> {
+            config.jetty.modifyServletContextHandler(servletContextHandler -> {
                 // 注册自定义 Filter
                 filterRegistrar.init(servletContextHandler);
                 // 注册自定义 Servlet

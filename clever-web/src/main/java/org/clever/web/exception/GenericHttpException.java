@@ -1,6 +1,6 @@
 package org.clever.web.exception;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 /**
  * 作者：lizw <br/>

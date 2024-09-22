@@ -1,14 +1,14 @@
 package org.clever.web.filter;
 
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.ResourcePathUtils;
-import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.WebConfig;
 
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -57,13 +57,13 @@ public class ApplyConfigFilter implements FilterRegistrar.FilterFuc {
         Object existingConfig = request.getAttribute(MULTIPART_CONFIG_ATTRIBUTE);
         if (existingConfig == null) {
             request.setAttribute(
-                    MULTIPART_CONFIG_ATTRIBUTE,
-                    new MultipartConfigElement(
-                            ResourcePathUtils.getAbsolutePath(rootPath, multipart.getLocation()),
-                            multipart.getMaxFileSize().toBytes(),
-                            multipart.getMaxRequestSize().toBytes(),
-                            (int) multipart.getFileSizeThreshold().toBytes()
-                    )
+                MULTIPART_CONFIG_ATTRIBUTE,
+                new MultipartConfigElement(
+                    ResourcePathUtils.getAbsolutePath(rootPath, multipart.getLocation()),
+                    multipart.getMaxFileSize().toBytes(),
+                    multipart.getMaxRequestSize().toBytes(),
+                    (int) multipart.getFileSizeThreshold().toBytes()
+                )
             );
         }
     }

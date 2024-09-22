@@ -6,8 +6,8 @@ import io.javalin.websocket.WsConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -194,10 +194,10 @@ public class JavalinHandlerRegistrar {
         int idx = 1;
         for (OrderItem<Handler> handler : beforeHandler) {
             logs.add(String.format(
-                    "%2s. path=%s%s",
-                    idx++,
-                    handler.path,
-                    StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
+                "%2s. path=%s%s",
+                idx++,
+                handler.path,
+                StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
             ));
             javalin.before(handler.path, handler.item);
         }
@@ -209,10 +209,10 @@ public class JavalinHandlerRegistrar {
         idx = 1;
         for (OrderItem<Handler> handler : afterHandler) {
             logs.add(String.format(
-                    "%2s. path=%s%s",
-                    idx++,
-                    handler.path,
-                    StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
+                "%2s. path=%s%s",
+                idx++,
+                handler.path,
+                StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
             ));
             javalin.after(handler.path, handler.item);
         }
@@ -224,10 +224,10 @@ public class JavalinHandlerRegistrar {
         idx = 1;
         for (OrderItem<Consumer<WsConfig>> handler : wsBeforeHandler) {
             logs.add(String.format(
-                    "%2s. path=%s%s",
-                    idx++,
-                    handler.path,
-                    StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
+                "%2s. path=%s%s",
+                idx++,
+                handler.path,
+                StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
             ));
             javalin.wsBefore(handler.path, handler.item);
         }
@@ -239,10 +239,10 @@ public class JavalinHandlerRegistrar {
         idx = 1;
         for (OrderItem<Consumer<WsConfig>> handler : wsAfterHandler) {
             logs.add(String.format(
-                    "%2s. path=%s%s",
-                    idx++,
-                    handler.path,
-                    StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
+                "%2s. path=%s%s",
+                idx++,
+                handler.path,
+                StringUtils.isNoneBlank(handler.name) ? String.format(" | %s", handler.name) : ""
             ));
             javalin.wsAfter(handler.path, handler.item);
         }

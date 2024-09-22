@@ -20,7 +20,7 @@ public class EchoConfig {
     /**
      * 忽略地址(支持AntPath风格)
      */
-    private List<String> ignorePaths = new ArrayList<String>() {{
+    private List<String> ignorePaths = new ArrayList<>() {{
         add("/**/*.png");
         add("/**/*.ico");
         add("/**/*.jpg");
