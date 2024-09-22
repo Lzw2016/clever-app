@@ -73,7 +73,7 @@ public class ReflectionsUtils {
      * @param parameterTypes 方法签名参数类型
      * @return 方法实例，获取失败返回null
      */
-    private static Method getAccessibleMethod(final Object obj, final String methodName, final Class<?>... parameterTypes) {
+    public static Method getAccessibleMethod(final Object obj, final String methodName, final Class<?>... parameterTypes) {
         Class<?> searchType = obj.getClass();
         while (searchType != Object.class) {
             try {
@@ -104,7 +104,7 @@ public class ReflectionsUtils {
      * @param methodName 方法名称
      * @return 方法实例，获取失败返回null
      */
-    private static Method getAccessibleMethodByName(final Object obj, final String methodName) {
+    public static Method getAccessibleMethodByName(final Object obj, final String methodName) {
         Class<?> searchType = obj.getClass();
         while (searchType != Object.class) {
             Method[] methods = searchType.getDeclaredMethods();

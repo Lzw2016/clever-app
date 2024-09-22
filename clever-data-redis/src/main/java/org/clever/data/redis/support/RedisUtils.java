@@ -2,10 +2,10 @@ package org.clever.data.redis.support;
 
 import lombok.SneakyThrows;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.clever.data.redis.connection.*;
-import org.clever.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.clever.data.redis.core.RedisTemplate;
-import org.clever.util.ReflectionUtils;
+import org.springframework.data.redis.connection.*;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -31,7 +31,7 @@ public class RedisUtils {
     @SneakyThrows
     protected static RedisPoolStatus getPoolStatus(LettuceConnectionFactory lettuceConnectionFactory) {
         Object connectionProvider = getField(LettuceConnectionFactory.class, "connectionProvider", lettuceConnectionFactory);
-        final String providerClassName = "org.clever.data.redis.connection.lettuce.LettucePoolingConnectionProvider";
+        final String providerClassName = "org.springframework.data.redis.connection.lettuce.LettucePoolingConnectionProvider";
         if (connectionProvider != null && providerClassName.equals(connectionProvider.getClass().getName())) {
             Object pools = getField(Class.forName(providerClassName), "pools", connectionProvider);
             if (pools instanceof Map) {
@@ -39,7 +39,7 @@ public class RedisUtils {
                 return getPoolStatus(poolList);
             }
         }
-        final String providerClassName_2 = "org.clever.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider";
+        final String providerClassName_2 = "org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory$ExceptionTranslatingConnectionProvider";
         if (connectionProvider != null && providerClassName_2.equals(connectionProvider.getClass().getName())) {
             Object delegate = getField(connectionProvider.getClass(), "delegate", connectionProvider);
             if (delegate == null) {
@@ -87,10 +87,10 @@ public class RedisUtils {
         status.setActiveConnections(genericObjectPool.getNumActive());
         status.setTotalConnections(status.getIdleConnections() + status.getActiveConnections());
         status.setThreadsAwaitingConnection(genericObjectPool.getNumWaiters());
-        status.setMaxBorrowWaitTimeMillis(genericObjectPool.getMaxBorrowWaitTimeMillis());
-        status.setMeanBorrowWaitTimeMillis(genericObjectPool.getMeanBorrowWaitTimeMillis());
-        status.setMeanActiveTimeMillis(genericObjectPool.getMeanActiveTimeMillis());
-        status.setMeanIdleTimeMillis(genericObjectPool.getMeanIdleTimeMillis());
+        status.setMaxBorrowWaitTimeMillis(genericObjectPool.getMaxBorrowWaitDuration().toMillis());
+        status.setMeanBorrowWaitTimeMillis(genericObjectPool.getMeanBorrowWaitDuration().toMillis());
+        status.setMeanActiveTimeMillis(genericObjectPool.getMeanActiveDuration().toMillis());
+        status.setMeanIdleTimeMillis(genericObjectPool.getMeanIdleDuration().toMillis());
         return status;
     }
 
@@ -192,11 +192,11 @@ public class RedisUtils {
     protected static void fill(RedisInfo redisInfo, RedisStandaloneConfiguration redisStandaloneConfiguration) {
         RedisInfo.StandaloneInfo standaloneInfo = getRedisStandaloneInfo(redisStandaloneConfiguration);
         if (redisInfo.getClusterInfo() == null
-                && redisInfo.getSentinelInfo() == null
-                && redisInfo.getSocketInfo() == null
-                && redisInfo.getStaticMasterReplicaInfo() == null
-                || !Objects.equals(standaloneInfo.getHostName(), "localhost")
-                || !Objects.equals(standaloneInfo.getPort(), 6379)) {
+            && redisInfo.getSentinelInfo() == null
+            && redisInfo.getSocketInfo() == null
+            && redisInfo.getStaticMasterReplicaInfo() == null
+            || !Objects.equals(standaloneInfo.getHostName(), "localhost")
+            || !Objects.equals(standaloneInfo.getPort(), 6379)) {
             redisInfo.setStandaloneInfo(standaloneInfo);
         }
     }

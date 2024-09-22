@@ -1,8 +1,8 @@
 package org.clever.data.redis.support;
 
+import org.clever.core.Assert;
 import org.clever.data.redis.RedissonClientConfigurationCustomizer;
 import org.clever.data.redis.config.RedisProperties;
-import org.clever.util.Assert;
 import org.redisson.config.*;
 
 import java.time.Duration;
@@ -36,12 +36,12 @@ public class RedissonClientFactory {
         if (Objects.equals(RedisProperties.Mode.Sentinel, properties.getMode()) && sentinel != null) {
             String[] nodes = convert(sentinel.getNodes());
             SentinelServersConfig sentinelServersConfig = config.useSentinelServers()
-                    .setMasterName(sentinel.getMaster())
-                    .addSentinelAddress(nodes)
-                    .setDatabase(sentinel.getDatabase())
-                    .setUsername(sentinel.getUsername())
-                    .setPassword(sentinel.getPassword())
-                    .setClientName(clientName);
+                .setMasterName(sentinel.getMaster())
+                .addSentinelAddress(nodes)
+                .setDatabase(sentinel.getDatabase())
+                .setUsername(sentinel.getUsername())
+                .setPassword(sentinel.getPassword())
+                .setClientName(clientName);
             applyConfig(properties, sentinelServersConfig);
             return config;
         }
@@ -49,10 +49,10 @@ public class RedissonClientFactory {
         if (Objects.equals(RedisProperties.Mode.Cluster, properties.getMode()) && cluster != null) {
             String[] nodes = convert(cluster.getNodes());
             ClusterServersConfig clusterServersConfig = config.useClusterServers()
-                    .addNodeAddress(nodes)
-                    .setUsername(cluster.getUsername())
-                    .setPassword(cluster.getPassword())
-                    .setClientName(clientName);
+                .addNodeAddress(nodes)
+                .setUsername(cluster.getUsername())
+                .setPassword(cluster.getPassword())
+                .setClientName(clientName);
             applyConfig(properties, clusterServersConfig);
             return config;
         }
@@ -60,11 +60,11 @@ public class RedissonClientFactory {
         if (Objects.equals(RedisProperties.Mode.Standalone, properties.getMode()) && standalone != null) {
             String prefix = properties.isSsl() ? REDIS_SSL_PROTOCOL_PREFIX : REDIS_PROTOCOL_PREFIX;
             SingleServerConfig singleServerConfig = config.useSingleServer()
-                    .setAddress(prefix + standalone.getHost() + ":" + standalone.getPort())
-                    .setDatabase(standalone.getDatabase())
-                    .setUsername(standalone.getUsername())
-                    .setPassword(standalone.getPassword())
-                    .setClientName(clientName);
+                .setAddress(prefix + standalone.getHost() + ":" + standalone.getPort())
+                .setDatabase(standalone.getDatabase())
+                .setUsername(standalone.getUsername())
+                .setPassword(standalone.getPassword())
+                .setClientName(clientName);
             applyConfig(properties, singleServerConfig);
             return config;
         }

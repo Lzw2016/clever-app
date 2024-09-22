@@ -9,16 +9,16 @@ import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import io.lettuce.core.resource.ClientResources;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.clever.core.Assert;
 import org.clever.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.clever.data.redis.config.RedisProperties;
-import org.clever.data.redis.connection.*;
-import org.clever.data.redis.connection.lettuce.LettuceClientConfiguration;
-import org.clever.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.clever.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
-import org.clever.data.redis.core.RedisTemplate;
-import org.clever.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.clever.data.redis.serializer.RedisSerializer;
-import org.clever.util.Assert;
+import org.springframework.data.redis.connection.*;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +44,7 @@ public class RedisTemplateFactory {
 
     private static void initRedisTemplate(RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
         // redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(objectMapper));
-        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        serializer.setObjectMapper(objectMapper);
+        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
         // 设置序列化规则
         redisTemplate.setStringSerializer(RedisSerializer.string());
         redisTemplate.setDefaultSerializer(RedisSerializer.string());
@@ -147,24 +146,20 @@ public class RedisTemplateFactory {
     private static LettuceConnectionFactory createConnectionFactory(RedisProperties properties, LettuceClientConfiguration clientConfiguration) {
         RedisProperties.Mode mode = properties.getMode();
         Assert.notNull(mode, "参数 properties.getMode() 不能为 null");
-        switch (mode) {
-            case Standalone:
-                return new LettuceConnectionFactory(
-                        createStandaloneConfig(properties.getStandalone()),
-                        clientConfiguration
-                );
-            case Sentinel:
-                return new LettuceConnectionFactory(
-                        createSentinelConfig(properties.getSentinel()),
-                        clientConfiguration
-                );
-            case Cluster:
-                return new LettuceConnectionFactory(
-                        createClusterConfig(properties.getCluster()),
-                        clientConfiguration
-                );
-        }
-        throw new IllegalArgumentException("参数 properties.getMode() 不能为 null");
+        return switch (mode) {
+            case Standalone -> new LettuceConnectionFactory(
+                createStandaloneConfig(properties.getStandalone()),
+                clientConfiguration
+            );
+            case Sentinel -> new LettuceConnectionFactory(
+                createSentinelConfig(properties.getSentinel()),
+                clientConfiguration
+            );
+            case Cluster -> new LettuceConnectionFactory(
+                createClusterConfig(properties.getCluster()),
+                clientConfiguration
+            );
+        };
     }
 
     private static RedisStandaloneConfiguration createStandaloneConfig(RedisProperties.Standalone standalone) {

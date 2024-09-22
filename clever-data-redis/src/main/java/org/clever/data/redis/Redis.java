@@ -5,28 +5,33 @@ import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.core.DateUtils;
 import org.clever.core.function.ZeroConsumer;
-import org.clever.core.io.ClassPathResource;
 import org.clever.core.mapper.JacksonMapper;
-import org.clever.dao.DataAccessException;
+import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.data.AbstractDataSource;
-import org.clever.data.geo.Distance;
-import org.clever.data.geo.Point;
 import org.clever.data.redis.config.RedisProperties;
-import org.clever.data.redis.connection.*;
-import org.clever.data.redis.core.*;
-import org.clever.data.redis.core.script.DefaultRedisScript;
-import org.clever.data.redis.core.script.RedisScript;
-import org.clever.data.redis.serializer.RedisSerializer;
 import org.clever.data.redis.support.*;
-import org.clever.scripting.support.ResourceScriptSource;
-import org.clever.util.Assert;
 import org.redisson.Redisson;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Range;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.*;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.scripting.support.ResourceScriptSource;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -239,20 +244,40 @@ public class Redis extends AbstractDataSource {
             return;
         }
         super.close();
-        try {
-            clientResources.shutdown();
-        } catch (Throwable e) {
-            log.error("ClientResources shutdown 错误", e);
+        if (clientResources != null) {
+            try {
+                clientResources.shutdown();
+            } catch (Throwable e) {
+                log.error("ClientResources shutdown 错误", e);
+            }
         }
-        try {
-            connectionFactory.destroy();
-        } catch (Throwable e) {
-            log.error("RedisConnectionFactory destroy 错误", e);
+        if (connectionFactory != null) {
+            try {
+                if (connectionFactory instanceof LettuceConnectionFactory lettuceConnectionFactory) {
+                    lettuceConnectionFactory.destroy();
+                } else if (connectionFactory instanceof JedisConnectionFactory jedisConnectionFactory) {
+                    jedisConnectionFactory.destroy();
+                } else {
+                    Method method = ReflectionsUtils.getAccessibleMethod(connectionFactory, "destroy");
+                    if (method != null) {
+                        method.invoke(connectionFactory);
+                    } else {
+                        method = ReflectionsUtils.getAccessibleMethod(connectionFactory, "close");
+                        if (method != null) {
+                            method.invoke(connectionFactory);
+                        }
+                    }
+                }
+            } catch (Throwable e) {
+                log.error("RedisConnectionFactory destroy 错误", e);
+            }
         }
-        try {
-            redisson.shutdown();
-        } catch (Throwable e) {
-            log.error("Redisson shutdown 错误", e);
+        if (redisson != null) {
+            try {
+                redisson.shutdown();
+            } catch (Throwable e) {
+                log.error("Redisson shutdown 错误", e);
+            }
         }
     }
 
@@ -2119,7 +2144,7 @@ public class Redis extends AbstractDataSource {
      * @param equalsMax equalsMax
      */
     public <T> Set<T> zsRangeByLex(String key, Object minValue, boolean equalsMin, Object maxValue, boolean equalsMax, Class<T> clazz) {
-        RedisZSetCommands.Range range = newRange(minValue, equalsMin, maxValue, equalsMax);
+        Range<String> range = newRange(serializer(minValue), equalsMin, serializer(maxValue), equalsMax);
         Set<String> res = redisTemplate.opsForZSet().rangeByLex(key, range);
         return deserializer(res, clazz);
     }
@@ -2151,10 +2176,10 @@ public class Redis extends AbstractDataSource {
      * @param clazz     返回数据类型
      */
     public <T> Set<T> zsRangeByLex(String key, Object minValue, boolean equalsMin, Object maxValue, boolean equalsMax, Number count, Number offset, Class<T> clazz) {
-        RedisZSetCommands.Range range = newRange(minValue, equalsMin, maxValue, equalsMax);
-        RedisZSetCommands.Limit limit;
+        Range<String> range = newRange(serializer(minValue), equalsMin, serializer(maxValue), equalsMax);
+        Limit limit;
         if (count != null || offset != null) {
-            limit = RedisZSetCommands.Limit.limit();
+            limit = Limit.limit();
             if (count != null) {
                 limit.count(count.intValue());
             }
@@ -2162,7 +2187,7 @@ public class Redis extends AbstractDataSource {
                 limit.offset(offset.intValue());
             }
         } else {
-            limit = RedisZSetCommands.Limit.unlimited();
+            limit = Limit.unlimited();
         }
         Set<String> res = redisTemplate.opsForZSet().rangeByLex(key, range, limit);
         return deserializer(res, clazz);
@@ -2881,23 +2906,24 @@ public class Redis extends AbstractDataSource {
         return result;
     }
 
-    private RedisZSetCommands.Range newRange(Object minValue, boolean equalsMin, Object maxValue, boolean equalsMax) {
-        RedisZSetCommands.Range range = RedisZSetCommands.Range.range();
+    private <T> Range<T> newRange(T minValue, boolean equalsMin, T maxValue, boolean equalsMax) {
+        Range.Bound<T> lowerBound = Range.Bound.unbounded();
+        Range.Bound<T> upperBound = Range.Bound.unbounded();
         if (minValue != null) {
             if (equalsMin) {
-                range.gte(minValue);
+                lowerBound = Range.Bound.inclusive(minValue);
             } else {
-                range.gt(minValue);
+                lowerBound = Range.Bound.exclusive(minValue);
             }
         }
         if (maxValue != null) {
             if (equalsMax) {
-                range.lte(maxValue);
+                upperBound = Range.Bound.inclusive(maxValue);
             } else {
-                range.lt(maxValue);
+                upperBound = Range.Bound.exclusive(maxValue);
             }
         }
-        return range;
+        return Range.of(lowerBound, upperBound);
     }
 
     private RedisGeoCommands.GeoLocation<String> getGeoLocation(PointValue pointValue) {

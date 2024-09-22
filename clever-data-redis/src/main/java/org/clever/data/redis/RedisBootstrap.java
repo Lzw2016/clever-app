@@ -3,15 +3,15 @@ package org.clever.data.redis;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
 import org.clever.core.SystemClock;
-import org.clever.core.env.Environment;
 import org.clever.data.redis.config.RedisConfig;
 import org.clever.data.redis.config.RedisProperties;
 import org.clever.data.redis.util.MergeRedisProperties;
-import org.clever.util.Assert;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 
 import java.util.*;
 

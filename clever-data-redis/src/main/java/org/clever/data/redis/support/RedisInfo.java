@@ -1,8 +1,8 @@
 package org.clever.data.redis.support;
 
 import lombok.Data;
-import org.clever.data.redis.connection.RedisNode;
-import org.clever.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.RedisNode;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 
 import java.io.Serializable;
 import java.util.ArrayList;

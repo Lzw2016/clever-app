@@ -5,4 +5,6 @@ dependencies {
     api("io.lettuce:lettuce-core")
     api("org.redisson:redisson")
     // api("de.ruedigermoeller:fst")
+    api("org.springframework.data:spring-data-redis")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-redis")
 }

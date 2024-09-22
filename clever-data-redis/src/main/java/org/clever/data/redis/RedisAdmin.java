@@ -1,10 +1,10 @@
 package org.clever.data.redis;
 
 import org.clever.core.AppShutdownHook;
+import org.clever.core.Assert;
 import org.clever.core.OrderIncrement;
 import org.clever.data.redis.support.RedisInfo;
 import org.clever.data.redis.support.RedisPoolStatus;
-import org.clever.util.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
