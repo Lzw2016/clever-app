@@ -1,6 +1,7 @@
 package org.clever.web.support.mvc.annotation;
 
-import org.clever.core.annotation.AliasFor;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.web.bind.annotation.ValueConstants;
 
 import java.lang.annotation.*;
 

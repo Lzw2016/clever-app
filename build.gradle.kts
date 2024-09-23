@@ -16,7 +16,8 @@ val buildSnapshot = (System.getenv("buildSnapshot") ?: project.properties["build
 object Ver {
     const val springBootVersion = "3.3.4"
     const val springCloudVersion = "2023.0.3"
-    const val javalinVersion = "6.1.6"
+    const val javalinVersion = "6.3.0"
+    const val jettyVersion = "11.0.24"
     const val kotlinVersion = "2.0.20"
     const val kotlinxCoroutinesVersion = "1.7.3"
     const val groovyVersion = "4.0.23"
@@ -109,6 +110,7 @@ subprojects {
             mavenBom("org.springframework.boot:spring-boot-dependencies:${Ver.springBootVersion}")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:${Ver.springCloudVersion}")
             mavenBom("org.jetbrains.kotlinx:kotlinx-coroutines-bom:${Ver.kotlinxCoroutinesVersion}")
+            mavenBom("org.eclipse.jetty:jetty-bom:${Ver.jettyVersion}")
         }
 
         dependencies {
@@ -122,12 +124,12 @@ subprojects {
             dependency("org.joda:joda-convert:2.2.3")
             // jdbc
             dependency("p6spy:p6spy:3.9.1")
-            dependency("com.oracle.database.jdbc:ojdbc8:21.6.0.0.1")
-            dependency("com.oracle.database.nls:orai18n:21.3.0.0")
             dependency("org.postgresql:postgresql:42.5.6")
             dependency("mysql:mysql-connector-java:8.0.33")
             dependency("com.mysql:mysql-connector-j:8.0.33")
             dependency("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre8")
+            dependency("com.oracle.database.jdbc:ojdbc8:21.6.0.0.1")
+            dependency("com.oracle.database.nls:orai18n:21.3.0.0")
             // apache commons
             dependency("commons-io:commons-io:2.16.1")
             dependency("org.apache.commons:commons-text:1.12.0")

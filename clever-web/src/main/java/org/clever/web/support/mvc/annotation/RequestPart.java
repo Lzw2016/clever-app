@@ -1,6 +1,6 @@
 package org.clever.web.support.mvc.annotation;
 
-import org.clever.core.annotation.AliasFor;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 

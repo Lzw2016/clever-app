@@ -1,8 +1,8 @@
 package org.clever.web.support.mvc.annotation;
 
-import org.clever.transaction.TransactionDefinition;
-import org.clever.transaction.annotation.Isolation;
-import org.clever.transaction.annotation.Propagation;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.lang.annotation.*;
 
@@ -36,7 +36,7 @@ public @interface Transactional {
     /**
      * 事务隔离级别。
      *
-     * @see org.clever.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
+     * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
      */
     Isolation isolation() default Isolation.DEFAULT;
 
@@ -50,7 +50,7 @@ public @interface Transactional {
     /**
      * 如果事务实际上是只读的，则可以设置为 {@code true} 的布尔标志，允许在运行时进行相应的优化。
      *
-     * @see org.clever.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
+     * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
      */
     boolean readOnly() default false;
 }

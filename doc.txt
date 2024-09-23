@@ -203,7 +203,7 @@ Javalin.create(config -> {
 });
 ###---
 --------------------------
-[  ] useVirtualThreads
+[OK] useVirtualThreads
 [OK] showJavalinBanner
 [  ] validation
 [  ] startupWatcherEnabled
@@ -221,7 +221,7 @@ Javalin.create(config -> {
 [OK] jetty
 [OK]     defaultHost
 [OK]     defaultPort
-[  ]     multipartConfig
+[OK]     multipartConfig
 [OK]     threadPool
 [OK] spaRoot
 [OK]     hostedPath

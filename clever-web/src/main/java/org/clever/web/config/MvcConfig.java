@@ -1,7 +1,7 @@
 package org.clever.web.config;
 
 import lombok.Data;
-import org.clever.web.http.HttpMethod;
+import org.springframework.http.HttpMethod;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;

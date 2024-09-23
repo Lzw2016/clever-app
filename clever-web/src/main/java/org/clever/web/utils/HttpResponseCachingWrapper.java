@@ -1,6 +1,7 @@
 package org.clever.web.utils;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 
 /**
  * 缓存响应数据

@@ -2,7 +2,7 @@ package org.clever.web.config;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.clever.web.http.HttpMethod;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -166,7 +166,7 @@ public class CorsConfig {
                     this.resolvedMethods = null;
                     break;
                 }
-                this.resolvedMethods.add(HttpMethod.resolve(method));
+                this.resolvedMethods.add(HttpMethod.valueOf(method.toUpperCase()));
             }
         } else {
             this.resolvedMethods = DEFAULT_METHODS;
@@ -189,7 +189,7 @@ public class CorsConfig {
             if (ALL.equals(method)) {
                 this.resolvedMethods = null;
             } else if (this.resolvedMethods != null) {
-                this.resolvedMethods.add(HttpMethod.resolve(method));
+                this.resolvedMethods.add(HttpMethod.valueOf(method.toUpperCase()));
             }
         }
     }
@@ -247,7 +247,7 @@ public class CorsConfig {
         }
         if (this.allowedMethods == null) {
             this.allowedMethods = DEFAULT_PERMIT_METHODS;
-            this.resolvedMethods = DEFAULT_PERMIT_METHODS.stream().map(HttpMethod::resolve).collect(Collectors.toList());
+            this.resolvedMethods = DEFAULT_PERMIT_METHODS.stream().map(HttpMethod::valueOf).collect(Collectors.toList());
         }
         if (this.allowedHeaders == null) {
             this.allowedHeaders = DEFAULT_PERMIT_ALL;

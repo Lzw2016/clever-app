@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Assert;
 import org.clever.core.ResourcePathUtils;
 import org.clever.web.config.StaticResourceConfig;
-import org.clever.web.utils.UriUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -17,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.resource.HttpResource;
+import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
 import java.net.URLDecoder;
