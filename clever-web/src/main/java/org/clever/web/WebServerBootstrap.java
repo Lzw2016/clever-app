@@ -54,8 +54,8 @@ public class WebServerBootstrap {
     private volatile boolean started = false;
     @Getter
     private final FilterRegistrar filterRegistrar = new FilterRegistrar();
-    //    @Getter
-//    private final ServletRegistrar servletRegistrar = new ServletRegistrar();
+    @Getter
+    private final ServletRegistrar servletRegistrar = new ServletRegistrar();
     @Getter
     private final EventListenerRegistrar eventListenerRegistrar = new EventListenerRegistrar();
     @Getter
@@ -79,14 +79,14 @@ public class WebServerBootstrap {
         Assert.isTrue(!initialized, "不能多次初始化");
         initialized = true;
         javalin = Javalin.create(config -> {
-            //
+            // 应用配置
             applyConfig(rootPath, config);
             // 配置Filter Servlet EventListener
             config.jetty.modifyServletContextHandler(servletContextHandler -> {
                 // 注册自定义 Filter
                 filterRegistrar.init(servletContextHandler);
-//                // 注册自定义 Servlet
-//                servletRegistrar.init(servletContextHandler, config.inner);
+                // 注册自定义 Servlet
+                servletRegistrar.init(servletContextHandler, config);
                 // 注册自定义 EventListener
                 eventListenerRegistrar.init(servletContextHandler);
             });
@@ -135,6 +135,7 @@ public class WebServerBootstrap {
             webConfig.getThreadPoolMax(),
             webConfig.isUseVirtualThreads()
         );
+        config.startupWatcherEnabled = false;
         // jackson
         ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
         jackson.apply(webServerMapper);
@@ -216,6 +217,12 @@ public class WebServerBootstrap {
                     corsPluginConfig.addRule(corsRule -> corsRule.allowHost(host));
                 }
             });
+        }
+        if (webConfig.isEnableHttpAllowedMethodsOnRoutes()) {
+            config.bundledPlugins.enableHttpAllowedMethodsOnRoutes();
+        }
+        if (webConfig.isEnableRedirectToLowercasePaths()) {
+            config.bundledPlugins.enableRedirectToLowercasePaths();
         }
     }
 

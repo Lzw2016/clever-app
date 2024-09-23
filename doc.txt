@@ -205,8 +205,8 @@ Javalin.create(config -> {
 --------------------------
 [OK] useVirtualThreads
 [OK] showJavalinBanner
-[  ] validation
-[  ] startupWatcherEnabled
+[NO] validation
+[NO] startupWatcherEnabled
 [OK] http
 [OK]     generateEtags
 [OK]     prefer405over404
@@ -237,17 +237,17 @@ Javalin.create(config -> {
 [OK]     headers
 [NO]     skipFileFunction
 [??]     mimeTypes
-[  ] requestLogger
-[  ]     RequestLogger
-[  ]     WsConfig
-[  ] bundledPlugins
-[  ]     enableRouteOverview
-[  ]     enableBasicAuth
-[  ]     enableGlobalHeaders
+[OK] requestLogger
+[NO]     RequestLogger
+[NO]     WsConfig
+[OK] bundledPlugins
+[NO]     enableRouteOverview
+[NO]     enableBasicAuth
+[NO]     enableGlobalHeaders
 [OK]     enableCors
-[  ]     enableHttpAllowedMethodsOnRoutes
+[OK]     enableHttpAllowedMethodsOnRoutes
 [OK]     enableDevLogging
-[  ]     enableRedirectToLowercasePaths
+[OK]     enableRedirectToLowercasePaths
 [OK]     enableSslRedirects
 [  ] events
 [  ]     serverStarting

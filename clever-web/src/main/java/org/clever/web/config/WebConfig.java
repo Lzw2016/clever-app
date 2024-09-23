@@ -52,6 +52,14 @@ public class WebConfig {
      */
     private boolean enableDevLogging = false;
     /**
+     * 启用 HttpAllowedMethodsPlugin 插件
+     */
+    private boolean enableHttpAllowedMethodsOnRoutes = false;
+    /**
+     * 启用 RedirectToLowercasePathPlugin 插件
+     */
+    private boolean enableRedirectToLowercasePaths = false;
+    /**
      * Jackson 配置
      */
     @NestedConfigurationProperty
