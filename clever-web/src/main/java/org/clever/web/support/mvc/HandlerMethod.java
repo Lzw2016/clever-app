@@ -1,7 +1,7 @@
 package org.clever.web.support.mvc;
 
 import lombok.Data;
-import org.clever.core.MethodParameter;
+import org.springframework.core.MethodParameter;
 
 import java.lang.reflect.Method;
 

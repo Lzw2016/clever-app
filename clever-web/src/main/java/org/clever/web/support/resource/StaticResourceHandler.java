@@ -1,24 +1,24 @@
 package org.clever.web.support.resource;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.core.ResourcePathUtils;
-import org.clever.core.io.ClassPathResource;
-import org.clever.core.io.Resource;
-import org.clever.core.io.UrlResource;
-import org.clever.util.Assert;
-import org.clever.util.CollectionUtils;
-import org.clever.util.ResourceUtils;
-import org.clever.util.StringUtils;
 import org.clever.web.config.StaticResourceConfig;
-import org.clever.web.http.*;
 import org.clever.web.utils.UriUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.*;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.resource.HttpResource;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -100,7 +100,7 @@ public class StaticResourceHandler {
     public Resource getResource(HttpServletRequest request) throws IOException {
         String path = request.getPathInfo();
         // 判断请求前缀是否满足配置
-        if (StringUtils.isBlank(path) || !path.startsWith(hostedPath)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(path) || !path.startsWith(hostedPath)) {
             return null;
         }
         // 处理请求path获取resourcePath
@@ -115,7 +115,7 @@ public class StaticResourceHandler {
         }
         String resourcePath = encodeOrDecodeIfNecessary(path);
         // 如果path完全匹配且location就是一个存在的文件就直接返回location
-        if (StringUtils.isBlank(path) && ResourcePathUtils.isExistsFile(location)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(path) && ResourcePathUtils.isExistsFile(location)) {
             return location;
         }
         Resource resource = location.createRelative(resourcePath);
@@ -196,8 +196,8 @@ public class StaticResourceHandler {
         if (mediaType != null) {
             response.setContentType(mediaType.toString());
         }
-        if (resource instanceof HttpResource) {
-            HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
+        if (resource instanceof HttpResource httpResource) {
+            HttpHeaders resourceHeaders = httpResource.getResponseHeaders();
             resourceHeaders.forEach((headerName, headerValues) -> {
                 boolean first = true;
                 for (String headerValue : headerValues) {
@@ -237,7 +237,7 @@ public class StaticResourceHandler {
     }
 
     private String encodeOrDecodeIfNecessary(String path) {
-        if (StringUtils.isBlank(path)) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(path)) {
             return "";
         }
         Charset charset = StandardCharsets.UTF_8;
@@ -258,7 +258,7 @@ public class StaticResourceHandler {
         if (path.contains("%")) {
             try {
                 // Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
-                String decodedPath = URLDecoder.decode(path, "UTF-8");
+                String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
                 if (isInvalidPath(decodedPath)) {
                     return true;
                 }
@@ -268,8 +268,6 @@ public class StaticResourceHandler {
                 }
             } catch (IllegalArgumentException ex) {
                 // May not be possible to decode...
-            } catch (UnsupportedEncodingException ex) {
-                // Should never happen...
             }
         }
         return false;
@@ -278,7 +276,7 @@ public class StaticResourceHandler {
     private boolean isInvalidPath(String path) {
         if (path.contains("WEB-INF") || path.contains("META-INF")) {
             if (log.isWarnEnabled()) {
-                log.warn("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
+                log.warn("Path with 'WEB-INF' or 'META-INF': [{}]", path);
             }
             return true;
         }
@@ -286,14 +284,14 @@ public class StaticResourceHandler {
             String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
             if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
                 if (log.isWarnEnabled()) {
-                    log.warn("Path represents URL or has \"url:\" prefix: [" + path + "]");
+                    log.warn("Path represents URL or has 'url:' prefix: [{}]", path);
                 }
                 return true;
             }
         }
         if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
             if (log.isWarnEnabled()) {
-                log.warn("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
+                log.warn("Path contains '../' after call to StringUtils#cleanPath: [{}]", path);
             }
             return true;
         }
@@ -368,9 +366,9 @@ public class StaticResourceHandler {
          * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
          */
         private static final String[] DATE_FORMATS = new String[]{
-                "EEE, dd MMM yyyy HH:mm:ss zzz",
-                "EEE, dd-MMM-yy HH:mm:ss zzz",
-                "EEE MMM dd HH:mm:ss yyyy"
+            "EEE, dd MMM yyyy HH:mm:ss zzz",
+            "EEE, dd-MMM-yy HH:mm:ss zzz",
+            "EEE MMM dd HH:mm:ss yyyy"
         };
         private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
@@ -481,7 +479,6 @@ public class StaticResourceHandler {
             return "\"" + etag + "\"";
         }
 
-        @SuppressWarnings("UnusedReturnValue")
         private boolean validateIfModifiedSince(long lastModifiedTimestamp) {
             if (lastModifiedTimestamp < 0) {
                 return false;
@@ -554,7 +551,7 @@ public class StaticResourceHandler {
          */
         public void prepareResponse(HttpServletResponse res) {
             if (log.isTraceEnabled()) {
-                log.trace("Applying default " + this.cacheControl);
+                log.trace("Applying default {}", this.cacheControl);
             }
             applyCacheControl(res, this.cacheControl);
             if (this.varyByRequestHeaders != null) {

@@ -1,36 +1,34 @@
 package org.clever.web.filter;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.core.env.Environment;
-import org.clever.core.io.Resource;
-import org.clever.core.io.support.ResourceRegion;
-import org.clever.util.Assert;
-import org.clever.util.MimeTypeUtils;
-import org.clever.util.StreamUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.StaticResourceConfig;
 import org.clever.web.exception.GenericHttpException;
-import org.clever.web.http.HttpHeaders;
-import org.clever.web.http.HttpRange;
-import org.clever.web.http.HttpStatus;
-import org.clever.web.http.MediaType;
 import org.clever.web.support.resource.StaticResourceHandler;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
+import org.springframework.http.*;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 静态资源的访问Filter，参考Spring {@code ResourceHttpRequestHandler}
@@ -52,8 +50,8 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         List<StaticResourceHandler> handlers = createHandler(rootPath, staticResourceConfig.getMappings());
         int maxLength = handlers.stream().map(StaticResourceHandler::getHostedPath).max(Comparator.comparingInt(String::length)).orElse("").length();
         List<String> logs = new ArrayList<>();
-        logs.add(StringUtils.rightPad("enable", maxLength) + ": " + staticResourceConfig.isEnable());
-        logs.addAll(handlers.stream().map(handler -> StringUtils.rightPad(handler.getHostedPath(), maxLength) + ": " + handler.getLocationAbsPath()).collect(Collectors.toList()));
+        logs.add(org.apache.commons.lang3.StringUtils.rightPad("enable", maxLength) + ": " + staticResourceConfig.isEnable());
+        logs.addAll(handlers.stream().map(handler -> org.apache.commons.lang3.StringUtils.rightPad(handler.getHostedPath(), maxLength) + ": " + handler.getLocationAbsPath()).toList());
         if (staticResourceConfig.isEnable()) {
             BannerUtils.printConfig(log, "StaticResource配置", logs.toArray(new String[0]));
         }
@@ -70,7 +68,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         return handlers;
     }
 
-    public static final Set<String> SUPPORTED_METHODS = new HashSet<String>() {{
+    public static final Set<String> SUPPORTED_METHODS = new HashSet<>() {{
         add("GET");
         add("HEAD");
     }};
@@ -122,7 +120,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
             write(ctx.res, resource);
         } else {
             try {
-                List<HttpRange> httpRanges = HttpHeaders.create(ctx.req).getRange();
+                List<HttpRange> httpRanges = createHttpHeaders(ctx.req).getRange();
                 ctx.res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 List<ResourceRegion> resourceRegions = HttpRange.toResourceRegions(httpRanges, resource);
                 if (resourceRegions.size() == 1) {
@@ -143,7 +141,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         if (!SUPPORTED_METHODS.contains(method.toUpperCase())) {
             throw new GenericHttpException(
                 HttpStatus.METHOD_NOT_ALLOWED.value(),
-                "Method Not Allowed, Allowed Methods: " + StringUtils.join(SUPPORTED_METHODS, ", ")
+                "Method Not Allowed, Allowed Methods: " + org.apache.commons.lang3.StringUtils.join(SUPPORTED_METHODS, ", ")
             );
         }
     }
@@ -178,7 +176,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
 
     private void writeResourceRegions(HttpServletResponse response, Collection<ResourceRegion> resourceRegions) throws IOException {
         Assert.notNull(resourceRegions, "Collection of ResourceRegion should not be null");
-        MediaType contentType = MediaType.tryParseMediaType(response.getContentType());
+        MediaType contentType = tryParseMediaType(response.getContentType());
         String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
         response.setHeader(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
         OutputStream out = response.getOutputStream();
@@ -236,5 +234,61 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
 
     private static void print(OutputStream os, String buf) throws IOException {
         os.write(buf.getBytes(StandardCharsets.US_ASCII));
+    }
+
+    private static HttpHeaders createHttpHeaders(HttpServletRequest request) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
+            String headerName = (String) names.nextElement();
+            for (Enumeration<?> headerValues = request.getHeaders(headerName); headerValues.hasMoreElements(); ) {
+                String headerValue = (String) headerValues.nextElement();
+                httpHeaders.add(headerName, headerValue);
+            }
+        }
+        // HttpServletRequest exposes some headers as properties: we should include those if not already present
+        try {
+            MediaType contentType = httpHeaders.getContentType();
+            if (contentType == null) {
+                String requestContentType = request.getContentType();
+                if (StringUtils.hasLength(requestContentType)) {
+                    contentType = MediaType.parseMediaType(requestContentType);
+                    httpHeaders.setContentType(contentType);
+                }
+            }
+            if (contentType != null && contentType.getCharset() == null) {
+                String requestEncoding = request.getCharacterEncoding();
+                if (StringUtils.hasLength(requestEncoding)) {
+                    Charset charSet = Charset.forName(requestEncoding);
+                    Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+                    params.putAll(contentType.getParameters());
+                    params.put("charset", charSet.toString());
+                    MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+                    httpHeaders.setContentType(mediaType);
+                }
+            }
+        } catch (InvalidMediaTypeException ex) {
+            // Ignore: simply not exposing an invalid content type in HttpHeaders...
+        }
+        if (httpHeaders.getContentLength() < 0) {
+            int requestContentLength = request.getContentLength();
+            if (requestContentLength != -1) {
+                httpHeaders.setContentLength(requestContentLength);
+            }
+        }
+        return httpHeaders;
+    }
+
+    /**
+     * 尝试将给定的字符串解析为单个 {@code MediaType}，解析失败返回 null
+     */
+    private static MediaType tryParseMediaType(String mediaType) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(mediaType)) {
+            return null;
+        }
+        try {
+            return MediaType.parseMediaType(mediaType);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
