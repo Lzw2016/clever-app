@@ -13,5 +13,5 @@ dependencies {
     compileOnlyApi("org.joda:joda-convert")
     compileOnlyApi("jakarta.validation:jakarta.validation-api")
     testImplementation("commons-io:commons-io")
-    testImplementation("org.springframework.boot:spring-boot-starter-web")
+    // testImplementation("org.springframework.boot:spring-boot-starter-web")
 }

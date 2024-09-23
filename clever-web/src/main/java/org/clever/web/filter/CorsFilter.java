@@ -14,7 +14,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.DefaultCorsProcessor;
@@ -92,7 +91,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         // 跨域处理
-        boolean supportCors = corsProcessor.processRequest(toCorsConfiguration(corsConfig), ctx.req, ctx.res);
+        boolean supportCors = corsProcessor.processRequest(corsConfig, ctx.req, ctx.res);
         if (supportCors) {
             boolean preFlightRequest = CorsUtils.isPreFlightRequest(ctx.req);
             if (preFlightRequest) {
@@ -106,10 +105,5 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         ctx.next();
-    }
-
-    protected CorsConfiguration toCorsConfiguration(CorsConfig corsConfig) {
-        // TODO CorsConfig TO CorsConfiguration
-        return null;
     }
 }

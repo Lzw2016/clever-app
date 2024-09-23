@@ -39,6 +39,7 @@ public class WebServerBootstrap {
     public static WebServerBootstrap create(String rootPath, Environment environment) {
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
         AppContextHolder.registerBean("webConfig", webConfig, true);
+        // TODO BannerUtils.printConfig
         return create(rootPath, webConfig);
     }
 
