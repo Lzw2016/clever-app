@@ -256,24 +256,24 @@ Javalin.create(config -> {
 [  ]     serverStopFailed
 [  ]     serverStopping
 [  ]     serverStopped
-[  ] contextResolver
-[  ]     ip
-[  ]     host
-[  ]     scheme
-[  ]     url
-[  ]     fullUrl
-[  ] pvt
-[  ]     eventManager
-[  ]     wsRouter
-[  ]     internalRouter
-[  ]     appDataManager
-[  ]     pluginManager
-[  ]     jsonMapper
-[  ]     requestLogger
-[  ]     resourceHandler
-[  ]     singlePageHandler
-[  ]     wsLogger
-[  ]     compressionStrategy
-[  ]     asyncExecutor
-[  ]     servletRequestLifecycle
-[  ]     servlet
+[NO] contextResolver
+[NO]     ip
+[NO]     host
+[NO]     scheme
+[NO]     url
+[NO]     fullUrl
+[NO] pvt
+[NO]     eventManager
+[NO]     wsRouter
+[NO]     internalRouter
+[NO]     appDataManager
+[NO]     pluginManager
+[NO]     jsonMapper
+[NO]     requestLogger
+[NO]     resourceHandler
+[NO]     singlePageHandler
+[NO]     wsLogger
+[NO]     compressionStrategy
+[NO]     asyncExecutor
+[NO]     servletRequestLifecycle
+[NO]     servlet

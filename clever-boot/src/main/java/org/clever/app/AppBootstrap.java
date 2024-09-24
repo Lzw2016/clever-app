@@ -128,19 +128,6 @@ public abstract class AppBootstrap {
 //        // 自定义请求处理
 //        // javalin.get();
 //        // javalin.post();
-//        // TODO WebSocket未实现
-//        javalin.ws("/ws", wsConfig -> {
-//            wsConfig.onConnect(ctx -> {
-//            });
-//            wsConfig.onMessage(ctx -> {
-//            });
-//            wsConfig.onBinaryMessage(ctx -> {
-//            });
-//            wsConfig.onClose(ctx -> {
-//            });
-//            wsConfig.onError(ctx -> {
-//            });
-//        });
         // 启动web服务
         webServerBootstrap.start();
         // 系统关闭时的任务处理

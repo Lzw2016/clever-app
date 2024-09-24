@@ -1,6 +1,7 @@
 package org.clever.web.config;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.List;
  * 作者：lizw <br/>
  * 创建时间：2022/12/23 17:26 <br/>
  */
+@ConfigurationProperties(prefix = StaticResourceConfig.PREFIX)
 @Data
 public class StaticResourceConfig {
     public static final String PREFIX = WebConfig.PREFIX + ".resources";

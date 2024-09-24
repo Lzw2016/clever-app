@@ -100,6 +100,8 @@ web:
     multipart:
       max-file-size: 10MB
       max-total-request-size: 50MB
+  resources:
+    enable: false
   echo:
     enable: true
     ignore-paths:

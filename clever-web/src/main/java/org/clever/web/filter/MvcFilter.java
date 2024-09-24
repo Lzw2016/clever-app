@@ -13,17 +13,17 @@ import org.clever.core.Assert;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.web.FilterRegistrar;
-import org.clever.web.WebServerBootstrap;
+import org.clever.web.JavalinAppDataKey;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.exception.MultiExceptionWrapper;
-import org.clever.web.support.mvc.HandlerContext;
-import org.clever.web.support.mvc.HandlerMethod;
-import org.clever.web.support.mvc.argument.*;
-import org.clever.web.support.mvc.interceptor.ArgumentsValidated;
-import org.clever.web.support.mvc.interceptor.HandlerInterceptor;
-import org.clever.web.support.mvc.interceptor.TransactionInterceptor;
-import org.clever.web.support.mvc.method.DefaultHandlerMethodResolver;
-import org.clever.web.support.mvc.method.HandlerMethodResolver;
+import org.clever.web.mvc.HandlerContext;
+import org.clever.web.mvc.HandlerMethod;
+import org.clever.web.mvc.argument.*;
+import org.clever.web.mvc.interceptor.ArgumentsValidated;
+import org.clever.web.mvc.interceptor.HandlerInterceptor;
+import org.clever.web.mvc.interceptor.TransactionInterceptor;
+import org.clever.web.mvc.method.DefaultHandlerMethodResolver;
+import org.clever.web.mvc.method.HandlerMethodResolver;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
@@ -124,7 +124,7 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
 
     @Override
     public void onStart(@NotNull JavalinConfig config) {
-        objectMapper = Optional.ofNullable(config.pvt.appDataManager.get(WebServerBootstrap.OBJECT_MAPPER_KEY)).orElse(DEF_OBJECT_MAPPER);
+        objectMapper = Optional.ofNullable(config.pvt.appDataManager.get(JavalinAppDataKey.OBJECT_MAPPER_KEY)).orElse(DEF_OBJECT_MAPPER);
         initialize();
     }
 

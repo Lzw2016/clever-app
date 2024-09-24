@@ -7,7 +7,13 @@ import jakarta.servlet.ServletResponseWrapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.Assert;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.InvalidMediaTypeException;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
@@ -119,5 +125,50 @@ public abstract class WebUtils {
             }
         }
         return params;
+    }
+
+    /**
+     * 基于 HttpServletRequest 创建 HttpHeaders 对象
+     */
+    public static HttpHeaders createHttpHeaders(HttpServletRequest request) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
+            String headerName = (String) names.nextElement();
+            for (Enumeration<?> headerValues = request.getHeaders(headerName); headerValues.hasMoreElements(); ) {
+                String headerValue = (String) headerValues.nextElement();
+                httpHeaders.add(headerName, headerValue);
+            }
+        }
+        // HttpServletRequest exposes some headers as properties: we should include those if not already present
+        try {
+            MediaType contentType = httpHeaders.getContentType();
+            if (contentType == null) {
+                String requestContentType = request.getContentType();
+                if (StringUtils.hasLength(requestContentType)) {
+                    contentType = MediaType.parseMediaType(requestContentType);
+                    httpHeaders.setContentType(contentType);
+                }
+            }
+            if (contentType != null && contentType.getCharset() == null) {
+                String requestEncoding = request.getCharacterEncoding();
+                if (StringUtils.hasLength(requestEncoding)) {
+                    Charset charSet = Charset.forName(requestEncoding);
+                    Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+                    params.putAll(contentType.getParameters());
+                    params.put("charset", charSet.toString());
+                    MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+                    httpHeaders.setContentType(mediaType);
+                }
+            }
+        } catch (InvalidMediaTypeException ex) {
+            // Ignore: simply not exposing an invalid content type in HttpHeaders...
+        }
+        if (httpHeaders.getContentLength() < 0) {
+            int requestContentLength = request.getContentLength();
+            if (requestContentLength != -1) {
+                httpHeaders.setContentLength(requestContentLength);
+            }
+        }
+        return httpHeaders;
     }
 }

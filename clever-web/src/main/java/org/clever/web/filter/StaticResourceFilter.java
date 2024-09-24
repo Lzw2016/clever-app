@@ -11,27 +11,28 @@ import org.clever.core.BannerUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.StaticResourceConfig;
 import org.clever.web.exception.GenericHttpException;
-import org.clever.web.support.resource.StaticResourceHandler;
+import org.clever.web.support.StaticResourceHandler;
+import org.clever.web.utils.WebUtils;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
-import org.springframework.http.*;
-import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * 静态资源的访问Filter，参考Spring {@code ResourceHttpRequestHandler}
+ * 静态资源的访问Filter，参考Spring {@link org.springframework.web.servlet.resource.ResourceHttpRequestHandler}
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2022/12/22 22:00 <br/>
@@ -120,7 +121,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
             write(ctx.res, resource);
         } else {
             try {
-                List<HttpRange> httpRanges = createHttpHeaders(ctx.req).getRange();
+                List<HttpRange> httpRanges = WebUtils.createHttpHeaders(ctx.req).getRange();
                 ctx.res.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 List<ResourceRegion> resourceRegions = HttpRange.toResourceRegions(httpRanges, resource);
                 if (resourceRegions.size() == 1) {
@@ -234,48 +235,6 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
 
     private static void print(OutputStream os, String buf) throws IOException {
         os.write(buf.getBytes(StandardCharsets.US_ASCII));
-    }
-
-    private static HttpHeaders createHttpHeaders(HttpServletRequest request) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
-            String headerName = (String) names.nextElement();
-            for (Enumeration<?> headerValues = request.getHeaders(headerName); headerValues.hasMoreElements(); ) {
-                String headerValue = (String) headerValues.nextElement();
-                httpHeaders.add(headerName, headerValue);
-            }
-        }
-        // HttpServletRequest exposes some headers as properties: we should include those if not already present
-        try {
-            MediaType contentType = httpHeaders.getContentType();
-            if (contentType == null) {
-                String requestContentType = request.getContentType();
-                if (StringUtils.hasLength(requestContentType)) {
-                    contentType = MediaType.parseMediaType(requestContentType);
-                    httpHeaders.setContentType(contentType);
-                }
-            }
-            if (contentType != null && contentType.getCharset() == null) {
-                String requestEncoding = request.getCharacterEncoding();
-                if (StringUtils.hasLength(requestEncoding)) {
-                    Charset charSet = Charset.forName(requestEncoding);
-                    Map<String, String> params = new LinkedCaseInsensitiveMap<>();
-                    params.putAll(contentType.getParameters());
-                    params.put("charset", charSet.toString());
-                    MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
-                    httpHeaders.setContentType(mediaType);
-                }
-            }
-        } catch (InvalidMediaTypeException ex) {
-            // Ignore: simply not exposing an invalid content type in HttpHeaders...
-        }
-        if (httpHeaders.getContentLength() < 0) {
-            int requestContentLength = request.getContentLength();
-            if (requestContentLength != -1) {
-                httpHeaders.setContentLength(requestContentLength);
-            }
-        }
-        return httpHeaders;
     }
 
     /**

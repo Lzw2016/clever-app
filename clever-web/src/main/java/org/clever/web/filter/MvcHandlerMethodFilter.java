@@ -6,8 +6,8 @@ import lombok.Getter;
 import org.clever.core.Assert;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.MvcConfig;
-import org.clever.web.support.mvc.HandlerMethod;
-import org.clever.web.support.mvc.method.HandlerMethodResolver;
+import org.clever.web.mvc.HandlerMethod;
+import org.clever.web.mvc.method.HandlerMethodResolver;
 import org.springframework.http.HttpMethod;
 
 import java.io.IOException;
