@@ -39,8 +39,8 @@ mybatis:
 
 jdbc:
   enable: true
-  defaultName: 'mysql'
-  dataSource:
+  default-name: 'mysql'
+  data-source:
     mysql:
       jdbcUrl: jdbc:p6spy:mysql://192.168.1.211:30019/test
       username: admin
@@ -64,3 +64,56 @@ jdbc:
     #  minimumIdle: 2
     #  maximumPoolSize: 100
     #  connectionTestQuery: 'select 1 from dual'
+
+redis:
+  enable: true
+  default-name: 'default'
+  data-source:
+    default:
+      mode: standalone
+      standalone:
+        host: '192.168.1.211'
+        port: 30007
+        database: 0
+        password: 'admin123456'
+
+web:
+  mvc:
+    path: '/api/'
+    http-method: [ 'POST', 'GET' ]
+    package-mapping:
+      - path-Prefix: '/app'
+        package-Prefix: 'org.clever.app.mvc'
+      - path-Prefix: '/task'
+        package-Prefix: 'org.clever.task.manage.mvc'
+    allow-packages:
+      - 'org.clever.app.mvc.'
+      - 'org.clever.task.manage.mvc.'
+    transactional-def-datasource: []
+    def-transactional:
+      datasource: [ ]
+      timeout: -1
+      read-only: false
+    hot-reload:
+      enable: true
+      # watchFile: './build/.hotReload'
+      interval: 1s
+      exclude-packages:
+        - 'org.clever.task.core.model'
+      exclude-classes:
+#        - 'org.clever.task.core.model.JobInfo'
+#        - 'org.clever.task.core.model.AbstractTrigger'
+#        - 'org.clever.task.core.job.JobContext'
+      locations:
+        - './clever-boot/out/production/classes'
+        - './clever-task/out/production/classes'
+        #- './clever-boot/build/classes/java/main'
+        #- './clever-boot/build/classes/kotlin/main'
+        #- './clever-task/build/classes/java/main'
+  security:
+    enable: false
+    dataSource:
+      jdbcName: "mysql"
+      enableRedis: true
+      redisName: "default"
+      redisNamespace: "security"

@@ -68,7 +68,7 @@ public class StaticResourceHandler {
     private final Map<String, MediaType> mediaTypes = new HashMap<>(4);
 
     public StaticResourceHandler(String rootPath, StaticResourceConfig.ResourceMapping resourceMapping) {
-        Assert.notNull(rootPath, "参数 rootPath 不能为 null");
+        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(resourceMapping, "参数 resourceMapping 不能为 null");
         this.hostedPath = resourceMapping.getHostedPath();
         this.location = ResourcePathUtils.getResource(rootPath, resourceMapping.getLocation());

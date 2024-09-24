@@ -8,10 +8,13 @@ logging:
     name: '${clever.name:server}'
     path: './logs/${logging.file.name}'
   level:
-    root: debug
-    org.springframework.boot.env.OriginTrackedYamlLoader: debug
-    org.springframework.core.env.StandardEnvironment: debug
-    org.springframework.boot.context.logging.LoggingBootstrapTest: info
+    root: info
+    org.springframework.jdbc.datasource.DataSourceTransactionManager: info
+    org.springframework.jdbc.datasource.DataSourceUtils: info
+    org.springframework.core.HotReloadClassLoader: debug
+    org.springframework.security: debug
+    com.zaxxer.hikari.HikariConfig: debug
+    #org.eclipse.jetty.util.log: warn
 
 app:
   root-path: './'
@@ -59,3 +62,114 @@ jdbc:
     exceptionOverrideClassName: 'org.clever.data.jdbc.hikari.HikariPreventQueryTimeoutEviction'
     #dataSourceProperties:
     #  stringtype: unspecified
+
+redis:
+  global:
+    mode: standalone
+    ssl: false
+    read-timeout: 30s
+    connect-timeout: 10s
+    shutdown-timeout: 100ms
+    client-name: 'clever-app'
+    pool:
+      enabled: true
+      max-idle: 8
+      min-idle: 0
+      max-active: 8
+      max-wait: 30s
+      time-between-eviction-runs: 1m
+
+web:
+  host: '0.0.0.0'
+  port: 9090
+  show-javalin-banner: false
+  use-virtual-threads: false
+  thread-pool-max: 250
+  thread-pool-min: 8
+  thread-pool-name: 'JettyServerThreadPool'
+  enable-dev-logging: false
+  enable-http-allowed-methods-on-routes: false
+  enable-redirect-to-lowercase-paths: false
+  jackson:
+    locale: 'zh_CN'
+    dateFormat: 'yyyy-MM-dd HH:mm:ss'
+  http:
+    context-path: '/'
+    generate-etags: true
+    max-request-size: 10MB
+    multipart:
+      max-file-size: 10MB
+      max-total-request-size: 50MB
+  echo:
+    enable: true
+    ignore-paths:
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/*.pdf'
+  cors:
+    enable: true
+    path-pattern: [ '/**' ]
+    allowed-origin-patterns: [ '*' ]
+    allowed-origins: [ ]
+    allowed-methods: [ '*' ]
+    allowed-headers: [ '*' ]
+    exposed-headers: [ ]
+    allow-credentials: true
+    max-age: 3600
+  mvc:
+    http-Method: [ 'POST', 'GET' ]
+    def-transactional:
+      propagation: required
+      isolation: default
+      timeout: -1
+      read-only: false
+  security:
+    ignorePaths:
+      - '/favicon.ico'
+      - '/dist/**'
+      - '/static/**'
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.png'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/.git'
+    ignoreAuthPaths: [ ]
+    ignoreAuthFailedPaths: [ ]
+    currentUserPath: '/current_user'
+    login:
+      paths: [ '/login' ]
+      postOnly: true
+      allowRepeatLogin: true
+      concurrentLoginCount: 1
+      allowAfterLogin: true
+    logout:
+      path: '/logout'
+    token:
+      secretKey: 'security'
+      tokenValidity: 30d
+      jwtTokenName: 'authorization'
+      refreshTokenName: 'refresh-token'
+
+
+

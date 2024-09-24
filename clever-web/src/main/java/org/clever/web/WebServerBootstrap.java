@@ -3,6 +3,7 @@ package org.clever.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
+import io.javalin.config.Key;
 import io.javalin.config.SizeUnit;
 import io.javalin.json.JavalinJackson;
 import io.javalin.plugin.bundled.CorsPluginConfig;
@@ -42,6 +43,8 @@ public class WebServerBootstrap {
         // TODO BannerUtils.printConfig
         return create(rootPath, webConfig);
     }
+
+    public static final Key<ObjectMapper> OBJECT_MAPPER_KEY = new Key<>("__object_mapper_key");
 
     @Getter
     private final String rootPath;
@@ -141,6 +144,7 @@ public class WebServerBootstrap {
         ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
         jackson.apply(webServerMapper);
         config.jsonMapper(new JavalinJackson(webServerMapper, webConfig.isUseVirtualThreads()));
+        config.appData(OBJECT_MAPPER_KEY, webServerMapper);
         // http
         config.router.contextPath = http.getContextPath();
         config.router.ignoreTrailingSlashes = http.isIgnoreTrailingSlashes();

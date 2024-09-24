@@ -13,6 +13,7 @@ import org.clever.core.Assert;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.web.FilterRegistrar;
+import org.clever.web.WebServerBootstrap;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.exception.MultiExceptionWrapper;
 import org.clever.web.support.mvc.HandlerContext;
@@ -48,35 +49,45 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
      * 空的 HandlerMethod 参数
      */
     protected static final Object[] EMPTY_ARGS = new Object[0];
+    /**
+     * 默认的 ObjectMapper
+     */
+    protected static final ObjectMapper DEF_OBJECT_MAPPER = JacksonMapper.getInstance().getMapper();
     @Getter
     protected final String rootPath;
     @Getter
     protected final MvcConfig mvcConfig;
     @Getter
+    protected ObjectMapper objectMapper;
     protected HandlerMethodResolver handlerMethodResolver;
     protected final List<HandlerMethodArgumentResolver> argumentResolvers = new CopyOnWriteArrayList<>();
     protected final List<HandlerInterceptor> interceptors = new CopyOnWriteArrayList<>();
-    protected ObjectMapper objectMapper = JacksonMapper.getInstance().getMapper();
 
-    public MvcFilter(String rootPath, MvcConfig mvcConfig) {
+    public MvcFilter(String rootPath, MvcConfig mvcConfig, ObjectMapper objectMapper) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
         MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
         mvcConfig.setHotReload(hotReload);
         this.rootPath = rootPath;
         this.mvcConfig = mvcConfig;
+        this.objectMapper = Optional.ofNullable(objectMapper).orElse(DEF_OBJECT_MAPPER);
         this.handlerMethodResolver = new DefaultHandlerMethodResolver(rootPath, hotReload);
+    }
+
+    public MvcFilter(String rootPath, MvcConfig mvcConfig) {
+        this(rootPath, mvcConfig, null);
+    }
+
+    protected void initialize() {
+        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
+        this.interceptors.addAll(this.getDefaultHandlerInterceptors());
     }
 
     /**
      * 返回要使用的参数解析器列表
      */
     protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
-//        TODO ObjectMapper
-//        ObjectMapper mapper = javalin.attribute(JavalinAttrKey.JACKSON_OBJECT_MAPPER);
-//        if (mapper != null) {
-//            objectMapper = mapper;
-//        }
+        objectMapper = Optional.ofNullable(objectMapper).orElse(DEF_OBJECT_MAPPER);
         final boolean useCache = !handlerMethodResolver.isEnableHotReload();
         // 设置默认的 HandlerMethodArgumentResolver
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>(16);
@@ -113,10 +124,8 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
 
     @Override
     public void onStart(@NotNull JavalinConfig config) {
-        // TODO javalin 插件
-//        this.javalin = app;
-//        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
-//        this.interceptors.addAll(this.getDefaultHandlerInterceptors());
+        objectMapper = Optional.ofNullable(config.pvt.appDataManager.get(WebServerBootstrap.OBJECT_MAPPER_KEY)).orElse(DEF_OBJECT_MAPPER);
+        initialize();
     }
 
     @Override

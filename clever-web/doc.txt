@@ -58,3 +58,14 @@ JavalinJettyServlet
     Javalin#requestLogger
     🡓
 🡓
+
+
+# MVC支持的注解
+Transactional
+Validated
+CookieValue
+RequestBody
+RequestHeader
+RequestParam
+RequestPart
+
