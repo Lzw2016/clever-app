@@ -29,6 +29,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -85,6 +86,8 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
 
     /**
      * 返回要使用的参数解析器列表
+     *
+     * @see RequestMappingHandlerAdapter 的 getDefaultArgumentResolvers 函数
      */
     protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
         objectMapper = Optional.ofNullable(objectMapper).orElse(DEF_OBJECT_MAPPER);
