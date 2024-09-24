@@ -30,7 +30,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Slf4j
 public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
-    // private static final Method NULL_METHOD =
     @Getter
     protected final String rootPath;
     /**
@@ -103,7 +102,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
             hotReloadClassLoader = new HotReloadClassLoader(
                 parentClassLoader,
                 // Thread.currentThread().getContextClassLoader(),
-                // new Launcher().getClassLoader(),
+                // new ClassLoader() {},
                 excludeClassPrefixes.toArray(new String[0]),
                 hotReload.getLocations().stream().map(location -> locationMap.getOrDefault(location, location)).toArray(String[]::new)
             );

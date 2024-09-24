@@ -86,15 +86,15 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
         resolvers.add(new ServletModelAttributeMethodProcessor(false));
         resolvers.add(new RequestBodyMethodProcessor(objectMapper));
         resolvers.add(new RequestPartMethodArgumentResolver(objectMapper));
-//        resolvers.add(new RequestHeaderMethodArgumentResolver(useCache));
-//        resolvers.add(new RequestHeaderMapMethodArgumentResolver());
-//        resolvers.add(new CookieValueMethodArgumentResolver(useCache));
-//        // Type-based argument resolution
-//        resolvers.add(new ServletRequestMethodArgumentResolver());
-//        resolvers.add(new ServletResponseMethodArgumentResolver());
-//        // Catch-all
-//        resolvers.add(new PrincipalMethodArgumentResolver());
-//        resolvers.add(new ContextMethodArgumentResolver(javalin._conf.inner.appAttributes));
+        resolvers.add(new RequestHeaderMethodArgumentResolver(useCache));
+        resolvers.add(new RequestHeaderMapMethodArgumentResolver());
+        resolvers.add(new CookieValueMethodArgumentResolver(useCache));
+        // Type-based argument resolution
+        resolvers.add(new ServletRequestMethodArgumentResolver());
+        resolvers.add(new ServletResponseMethodArgumentResolver());
+        // Catch-all
+        resolvers.add(new PrincipalMethodArgumentResolver());
+        // resolvers.add(new ContextMethodArgumentResolver(javalin._conf.inner.appAttributes));
         resolvers.add(new RequestParamMethodArgumentResolver(useCache, true));
         resolvers.add(new ServletModelAttributeMethodProcessor(true));
         return resolvers;
