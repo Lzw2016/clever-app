@@ -23,6 +23,8 @@ import java.lang.reflect.Type;
  * 创建时间：2023/01/06 11:20 <br/>
  */
 public class RequestBodyMethodProcessor implements HandlerMethodArgumentResolver {
+    private static final Class<org.springframework.web.bind.annotation.RequestBody> SPRING_ANNOTATION = org.springframework.web.bind.annotation.RequestBody.class;
+
     private final ObjectMapper objectMapper;
 
     public RequestBodyMethodProcessor(ObjectMapper objectMapper) {
@@ -32,7 +34,7 @@ public class RequestBodyMethodProcessor implements HandlerMethodArgumentResolver
 
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
-        return parameter.hasParameterAnnotation(RequestBody.class);
+        return parameter.hasParameterAnnotation(RequestBody.class) || parameter.hasParameterAnnotation(SPRING_ANNOTATION);
     }
 
     /**
@@ -57,6 +59,13 @@ public class RequestBodyMethodProcessor implements HandlerMethodArgumentResolver
 
     protected boolean checkRequired(MethodParameter parameter) {
         RequestBody requestBody = parameter.getParameterAnnotation(RequestBody.class);
-        return (requestBody != null && requestBody.required() && !parameter.isOptional());
+        boolean required;
+        if (requestBody != null) {
+            required = requestBody.required();
+        } else {
+            org.springframework.web.bind.annotation.RequestBody springRequestBody = parameter.getParameterAnnotation(SPRING_ANNOTATION);
+            required = springRequestBody != null && springRequestBody.required();
+        }
+        return (required && !parameter.isOptional());
     }
 }

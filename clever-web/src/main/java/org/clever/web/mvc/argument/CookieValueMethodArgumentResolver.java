@@ -19,17 +19,19 @@ import org.springframework.web.bind.ServletRequestBindingException;
  * 创建时间：2023/01/04 22:57 <br/>
  */
 public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+    private static final Class<org.springframework.web.bind.annotation.CookieValue> SPRING_ANNOTATION = org.springframework.web.bind.annotation.CookieValue.class;
+
     public CookieValueMethodArgumentResolver(boolean useCache) {
         super(useCache);
     }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
-        return parameter.hasParameterAnnotation(CookieValue.class);
+        return parameter.hasParameterAnnotation(CookieValue.class) || parameter.hasParameterAnnotation(SPRING_ANNOTATION);
     }
 
     @Override
-    protected Object resolveValue(String name, MethodParameter parameter, HttpServletRequest request) throws Exception {
+    protected Object resolveValue(String name, MethodParameter parameter, HttpServletRequest request) {
         Cookie cookieValue = WebUtils.getCookie(request, name);
         if (Cookie.class.isAssignableFrom(parameter.getNestedParameterType())) {
             return cookieValue;
@@ -43,6 +45,16 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodA
     @Override
     protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
         CookieValue annotation = parameter.getParameterAnnotation(CookieValue.class);
+        if (annotation == null) {
+            org.springframework.web.bind.annotation.CookieValue springCookieValue = parameter.getParameterAnnotation(SPRING_ANNOTATION);
+            if (springCookieValue != null) {
+                return new CookieValueNamedValueInfo(
+                    springCookieValue.name(),
+                    springCookieValue.required(),
+                    springCookieValue.defaultValue()
+                );
+            }
+        }
         Assert.state(annotation != null, "No CookieValue annotation");
         return new CookieValueNamedValueInfo(annotation);
     }
@@ -60,6 +72,10 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodA
     private static final class CookieValueNamedValueInfo extends NamedValueInfo {
         private CookieValueNamedValueInfo(CookieValue annotation) {
             super(annotation.name(), annotation.required(), annotation.defaultValue());
+        }
+
+        public CookieValueNamedValueInfo(String name, boolean required, String defaultValue) {
+            super(name, required, defaultValue);
         }
     }
 }

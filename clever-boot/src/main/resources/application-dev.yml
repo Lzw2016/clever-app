@@ -89,7 +89,7 @@ web:
     allow-packages:
       - 'org.clever.app.mvc.'
       - 'org.clever.task.manage.mvc.'
-    transactional-def-datasource: []
+    transactional-def-datasource: [ ]
     def-transactional:
       datasource: [ ]
       timeout: -1

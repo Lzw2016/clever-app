@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.clever.core.Assert;
 import org.clever.core.OrderIncrement;
 import org.clever.data.jdbc.DataSourceAdmin;
@@ -14,6 +15,8 @@ import org.clever.web.mvc.HandlerContext;
 import org.clever.web.mvc.annotation.Transactional;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.lang.reflect.Method;
@@ -28,6 +31,9 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class TransactionInterceptor implements HandlerInterceptor {
+    private static final Class<org.springframework.transaction.annotation.Transactional> SPRING_ANNOTATION = org.springframework.transaction.annotation.Transactional.class;
+    private static final Propagation DEF_PROPAGATION = Propagation.REQUIRED;
+    private static final Isolation DEF_ISOLATION = Isolation.DEFAULT;
     private static final ThreadLocal<List<TransactionInfo>> TX_INFO = new ThreadLocal<>();
 
     @Getter
@@ -44,38 +50,62 @@ public class TransactionInterceptor implements HandlerInterceptor {
         });
     }
 
+    protected TransactionalAnnotation readTransactionalConfig(final Method method) {
+        Transactional tx = method.getAnnotation(Transactional.class);
+        if (tx != null) {
+            return new TransactionalAnnotation(
+                tx.disabled(),
+                tx.datasource(),
+                tx.propagation(),
+                tx.isolation(),
+                tx.timeout(),
+                tx.readOnly()
+            );
+        }
+        org.springframework.transaction.annotation.Transactional springTX = method.getAnnotation(SPRING_ANNOTATION);
+        if (springTX != null) {
+            return new TransactionalAnnotation(
+                false,
+                defDatasource.toArray(new String[0]),
+                springTX.propagation(),
+                springTX.isolation(),
+                NumberUtils.toInt(springTX.timeoutString(), springTX.timeout()),
+                springTX.readOnly()
+            );
+        }
+        return null;
+    }
+
     @Override
-    public boolean beforeHandle(HandlerContext context) throws Exception {
+    public boolean beforeHandle(HandlerContext context) {
         boolean disabledTX;
         final Method method = context.getHandleMethod().getMethod();
-        final Transactional tx = method.getAnnotation(Transactional.class);
-        // TODO 兼容 org.springframework.transaction.annotation.Transactional
+        final TransactionalAnnotation tx = readTransactionalConfig(method);
         MvcConfig.TransactionalConfig txConfig;
         if (tx == null) {
             // 使用defTransactional配置
             txConfig = defTransactional;
             disabledTX = txConfig.getDatasource() == null || txConfig.getDatasource().isEmpty();
             // 设置TransactionalConfig默认值
-            MvcConfig.TransactionalConfig defTX = new MvcConfig.TransactionalConfig();
             if (txConfig.getPropagation() == null) {
-                txConfig.setPropagation(defTX.getPropagation());
+                txConfig.setPropagation(DEF_PROPAGATION);
             }
             if (txConfig.getIsolation() == null) {
-                txConfig.setIsolation(defTX.getIsolation());
+                txConfig.setIsolation(DEF_ISOLATION);
             }
         } else {
             // 使用@Transactional注解
             txConfig = new MvcConfig.TransactionalConfig();
-            txConfig.setDatasource(Arrays.stream(tx.datasource()).collect(Collectors.toList()));
+            txConfig.setDatasource(Arrays.stream(tx.datasource).collect(Collectors.toList()));
             // 使用默认的数据源
             if (txConfig.getDatasource() == null || txConfig.getDatasource().isEmpty()) {
                 txConfig.setDatasource(defDatasource);
             }
-            txConfig.setPropagation(tx.propagation());
-            txConfig.setIsolation(tx.isolation());
-            txConfig.setTimeout(tx.timeout());
-            txConfig.setReadOnly(tx.readOnly());
-            disabledTX = tx.disabled();
+            txConfig.setPropagation(tx.propagation);
+            txConfig.setIsolation(tx.isolation);
+            txConfig.setTimeout(tx.timeout);
+            txConfig.setReadOnly(tx.readOnly);
+            disabledTX = tx.disabled;
         }
         // 未启用事务
         if (disabledTX) {
@@ -184,5 +214,14 @@ public class TransactionInterceptor implements HandlerInterceptor {
                 transactionManager.commit(transactionStatus);
             }
         }
+    }
+
+    protected record TransactionalAnnotation(
+        boolean disabled,
+        String[] datasource,
+        Propagation propagation,
+        Isolation isolation,
+        int timeout,
+        boolean readOnly) {
     }
 }

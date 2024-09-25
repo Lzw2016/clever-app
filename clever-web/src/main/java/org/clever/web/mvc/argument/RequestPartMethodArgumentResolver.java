@@ -41,6 +41,8 @@ import java.util.Optional;
  * 创建时间：2023/01/04 23:05 <br/>
  */
 public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentResolver {
+    private static final Class<org.springframework.web.bind.annotation.RequestPart> SPRING_REQUEST_PART = org.springframework.web.bind.annotation.RequestPart.class;
+    private static final Class<org.springframework.web.bind.annotation.RequestParam> SPRING_REQUEST_PARAM = org.springframework.web.bind.annotation.RequestParam.class;
     private final ObjectMapper objectMapper;
 
     public RequestPartMethodArgumentResolver(ObjectMapper objectMapper) {
@@ -58,10 +60,10 @@ public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentR
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
-        if (parameter.hasParameterAnnotation(RequestPart.class)) {
+        if (parameter.hasParameterAnnotation(RequestPart.class) || parameter.hasParameterAnnotation(SPRING_REQUEST_PART)) {
             return true;
         } else {
-            if (parameter.hasParameterAnnotation(RequestParam.class)) {
+            if (parameter.hasParameterAnnotation(RequestParam.class) || parameter.hasParameterAnnotation(SPRING_REQUEST_PARAM)) {
                 return false;
             }
             return MultipartResolutionDelegate.isMultipartArgument(parameter.nestedIfOptional());
@@ -71,8 +73,18 @@ public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentR
     @Override
     public Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception {
         RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
-        boolean isRequired = ((requestPart == null || requestPart.required()) && !parameter.isOptional());
-        String name = getPartName(parameter, requestPart);
+        boolean isRequired;
+        String partName = "";
+        if (requestPart != null) {
+            isRequired = requestPart.required();
+            partName = requestPart.value();
+        } else {
+            org.springframework.web.bind.annotation.RequestParam springRequestParam = parameter.getParameterAnnotation(SPRING_REQUEST_PARAM);
+            isRequired = springRequestParam == null || springRequestParam.required();
+            partName = Optional.ofNullable(springRequestParam).map(org.springframework.web.bind.annotation.RequestParam::name).orElse("");
+        }
+        isRequired = isRequired && !parameter.isOptional();
+        String name = getPartName(parameter, partName);
         parameter = parameter.nestedIfOptional();
         Object arg = null;
         Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, request);
@@ -136,8 +148,8 @@ public class RequestPartMethodArgumentResolver implements HandlerMethodArgumentR
         return HandlerMethodArgumentResolver.adaptArgumentIfNecessary(arg, parameter);
     }
 
-    private String getPartName(MethodParameter methodParam, RequestPart requestPart) {
-        String partName = (requestPart != null ? requestPart.name() : "");
+    private String getPartName(MethodParameter methodParam, String name) {
+        String partName = Optional.ofNullable(name).orElse("");
         if (partName.isEmpty()) {
             partName = methodParam.getParameterName();
             if (partName == null) {

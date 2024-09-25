@@ -38,12 +38,21 @@ import java.util.Map;
  * @see MultipartRequest#getFileMap()
  */
 public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
+    private static final Class<org.springframework.web.bind.annotation.RequestParam> SPRING_ANNOTATION = org.springframework.web.bind.annotation.RequestParam.class;
+
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
+        String name = null;
         RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
-        return (requestParam != null
+        org.springframework.web.bind.annotation.RequestParam springRequestParam = parameter.getParameterAnnotation(SPRING_ANNOTATION);
+        if (requestParam != null) {
+            name = requestParam.name();
+        } else if (springRequestParam != null) {
+            name = springRequestParam.name();
+        }
+        return ((requestParam != null || springRequestParam != null)
             && Map.class.isAssignableFrom(parameter.getParameterType())
-            && !StringUtils.hasText(requestParam.name()));
+            && !StringUtils.hasText(name));
     }
 
     @Override

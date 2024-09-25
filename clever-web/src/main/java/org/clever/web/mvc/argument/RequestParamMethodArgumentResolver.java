@@ -38,6 +38,8 @@ import java.util.Map;
  * @see RequestParamMapMethodArgumentResolver
  */
 public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+    private static final Class<org.springframework.web.bind.annotation.RequestPart> SPRING_REQUEST_PART = org.springframework.web.bind.annotation.RequestPart.class;
+    private static final Class<org.springframework.web.bind.annotation.RequestParam> SPRING_REQUEST_PARAM = org.springframework.web.bind.annotation.RequestParam.class;
     private final boolean useDefaultResolution;
 
     /**
@@ -63,15 +65,19 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
-        if (parameter.hasParameterAnnotation(RequestParam.class)) {
+        if (parameter.hasParameterAnnotation(RequestParam.class) || parameter.hasParameterAnnotation(SPRING_REQUEST_PARAM)) {
             if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
                 RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
-                return (requestParam != null && StringUtils.hasText(requestParam.name()));
+                if (requestParam != null) {
+                    return StringUtils.hasText(requestParam.name());
+                }
+                org.springframework.web.bind.annotation.RequestParam springRequestParam = parameter.getParameterAnnotation(SPRING_REQUEST_PARAM);
+                return (springRequestParam != null && StringUtils.hasText(springRequestParam.name()));
             } else {
                 return true;
             }
         } else {
-            if (parameter.hasParameterAnnotation(RequestPart.class)) {
+            if (parameter.hasParameterAnnotation(RequestPart.class) || parameter.hasParameterAnnotation(SPRING_REQUEST_PART)) {
                 return false;
             }
             parameter = parameter.nestedIfOptional();
@@ -88,7 +94,18 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
     @Override
     protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
         RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
-        return (ann != null ? new RequestParamNamedValueInfo(ann) : new RequestParamNamedValueInfo());
+        if (ann != null) {
+            return new RequestParamNamedValueInfo(ann);
+        }
+        org.springframework.web.bind.annotation.RequestParam springRequestParam = parameter.getParameterAnnotation(SPRING_REQUEST_PARAM);
+        if (springRequestParam != null) {
+            return new RequestParamNamedValueInfo(
+                springRequestParam.name(),
+                springRequestParam.required(),
+                springRequestParam.defaultValue()
+            );
+        }
+        return new RequestParamNamedValueInfo();
     }
 
     @Override
@@ -143,6 +160,10 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
         public RequestParamNamedValueInfo(RequestParam annotation) {
             super(annotation.name(), annotation.required(), annotation.defaultValue());
+        }
+
+        public RequestParamNamedValueInfo(String name, boolean required, String defaultValue) {
+            super(name, required, defaultValue);
         }
     }
 }

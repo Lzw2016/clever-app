@@ -23,9 +23,12 @@ import java.util.Map;
  * 创建时间：2023/01/04 23:03 <br/>
  */
 public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
+    private static final Class<org.springframework.web.bind.annotation.RequestHeader> SPRING_ANNOTATION = org.springframework.web.bind.annotation.RequestHeader.class;
+
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
-        return (parameter.hasParameterAnnotation(RequestHeader.class) && Map.class.isAssignableFrom(parameter.getParameterType()));
+        boolean hasAnnotation = parameter.hasParameterAnnotation(RequestHeader.class) || parameter.hasParameterAnnotation(SPRING_ANNOTATION);
+        return (hasAnnotation && Map.class.isAssignableFrom(parameter.getParameterType()));
     }
 
     @Override

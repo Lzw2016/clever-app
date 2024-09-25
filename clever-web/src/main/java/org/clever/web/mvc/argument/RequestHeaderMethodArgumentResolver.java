@@ -22,13 +22,16 @@ import java.util.Map;
  * 创建时间：2023/01/09 21:49 <br/>
  */
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+    private static final Class<org.springframework.web.bind.annotation.RequestHeader> SPRING_ANNOTATION = org.springframework.web.bind.annotation.RequestHeader.class;
+
     public RequestHeaderMethodArgumentResolver(boolean useCache) {
         super(useCache);
     }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter, HttpServletRequest request) {
-        return (parameter.hasParameterAnnotation(RequestHeader.class) && !Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));
+        boolean hasAnnotation = parameter.hasParameterAnnotation(RequestHeader.class) || parameter.hasParameterAnnotation(SPRING_ANNOTATION);
+        return (hasAnnotation && !Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));
     }
 
     @Override
@@ -45,6 +48,16 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
     @Override
     protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
         RequestHeader ann = parameter.getParameterAnnotation(RequestHeader.class);
+        if (ann == null) {
+            org.springframework.web.bind.annotation.RequestHeader springRequestHeader = parameter.getParameterAnnotation(SPRING_ANNOTATION);
+            if (springRequestHeader != null) {
+                return new RequestHeaderNamedValueInfo(
+                    springRequestHeader.name(),
+                    springRequestHeader.required(),
+                    springRequestHeader.defaultValue()
+                );
+            }
+        }
         Assert.state(ann != null, "No RequestHeader annotation");
         return new RequestHeaderNamedValueInfo(ann);
     }
@@ -62,6 +75,10 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
     private static final class RequestHeaderNamedValueInfo extends NamedValueInfo {
         private RequestHeaderNamedValueInfo(RequestHeader annotation) {
             super(annotation.name(), annotation.required(), annotation.defaultValue());
+        }
+
+        public RequestHeaderNamedValueInfo(String name, boolean required, String defaultValue) {
+            super(name, required, defaultValue);
         }
     }
 }
