@@ -1,6 +1,10 @@
 package org.clever.web;
 
-import jakarta.servlet.*;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -37,7 +41,7 @@ public class FilterRegistrar {
      * @param name       过滤器名称
      * @param order      顺序，值越小，优先级越高
      */
-    public FilterRegistrar addFilter(Filter filter, String pathSpec, EnumSet<DispatcherType> dispatches, String name, double order) {
+    public FilterRegistrar addFilter(HttpFilter filter, String pathSpec, EnumSet<DispatcherType> dispatches, String name, double order) {
         Assert.notNull(filter, "filter 不能为 null");
         Assert.isNotBlank(pathSpec, "pathSpec 不能为空");
         Assert.notEmpty(dispatches, "dispatches 不能为空");
@@ -70,7 +74,7 @@ public class FilterRegistrar {
      * @param dispatches 过滤器拦截 DispatcherType
      * @param name       过滤器名称
      */
-    public FilterRegistrar addFilter(Filter filter, String pathSpec, EnumSet<DispatcherType> dispatches, String name) {
+    public FilterRegistrar addFilter(HttpFilter filter, String pathSpec, EnumSet<DispatcherType> dispatches, String name) {
         return addFilter(filter, pathSpec, dispatches, name, 0);
     }
 
@@ -94,7 +98,7 @@ public class FilterRegistrar {
      * @param name     过滤器名称
      * @param order    顺序，值越小，优先级越高
      */
-    public FilterRegistrar addFilter(Filter filter, String pathSpec, String name, double order) {
+    public FilterRegistrar addFilter(HttpFilter filter, String pathSpec, String name, double order) {
         Assert.notNull(filter, "filter 不能为 null");
         Assert.isNotBlank(pathSpec, "pathSpec 不能为空");
         filters.add(new OrderFilter(filter, pathSpec, order, name));
@@ -123,7 +127,7 @@ public class FilterRegistrar {
      * @param pathSpec 过滤器拦截路径
      * @param name     过滤器名称
      */
-    public FilterRegistrar addFilter(Filter filter, String pathSpec, String name) {
+    public FilterRegistrar addFilter(HttpFilter filter, String pathSpec, String name) {
         return addFilter(filter, pathSpec, name, 0);
     }
 
@@ -162,13 +166,13 @@ public class FilterRegistrar {
 
     @Data
     private static class OrderFilter {
-        private final Filter filter;
+        private final HttpFilter filter;
         private final String pathSpec;
         private final EnumSet<DispatcherType> dispatches;
         private final double order;
         private final String name;
 
-        public OrderFilter(Filter filter, String pathSpec, EnumSet<DispatcherType> dispatches, double order, String name) {
+        public OrderFilter(HttpFilter filter, String pathSpec, EnumSet<DispatcherType> dispatches, double order, String name) {
             this.filter = filter;
             this.pathSpec = pathSpec;
             this.dispatches = dispatches;
@@ -176,7 +180,7 @@ public class FilterRegistrar {
             this.name = name;
         }
 
-        public OrderFilter(Filter filter, String pathSpec, double order, String name) {
+        public OrderFilter(HttpFilter filter, String pathSpec, double order, String name) {
             this(filter, pathSpec, EnumSet.allOf(DispatcherType.class), order, name);
         }
     }
@@ -200,7 +204,7 @@ public class FilterRegistrar {
         void doFilter(Context ctx) throws IOException, ServletException;
     }
 
-    public static class FilterAdapter implements Filter {
+    public static class FilterAdapter extends HttpFilter {
         private final FilterFuc fuc;
 
         public FilterAdapter(FilterFuc fuc) {
@@ -213,8 +217,8 @@ public class FilterRegistrar {
         }
 
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
-            fuc.doFilter(new Context((HttpServletRequest) request, (HttpServletResponse) response, chain));
+        protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
+            fuc.doFilter(new Context(req, res, chain));
         }
     }
 }

@@ -6,7 +6,6 @@ import io.javalin.plugin.Plugin;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppContextHolder;
 import org.clever.core.Assert;
@@ -54,11 +53,9 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
      * 默认的 ObjectMapper
      */
     protected static final ObjectMapper DEF_OBJECT_MAPPER = JacksonMapper.getInstance().getMapper();
-    @Getter
     protected final String rootPath;
-    @Getter
     protected final MvcConfig mvcConfig;
-    @Getter
+    protected JavalinConfig javalinConfig;
     protected ObjectMapper objectMapper;
     protected HandlerMethodResolver handlerMethodResolver;
     protected final List<HandlerMethodArgumentResolver> argumentResolvers = new CopyOnWriteArrayList<>();
@@ -108,7 +105,7 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
         resolvers.add(new ServletResponseMethodArgumentResolver());
         // Catch-all
         resolvers.add(new PrincipalMethodArgumentResolver());
-        // resolvers.add(new ContextMethodArgumentResolver(javalin._conf.inner.appAttributes));
+        resolvers.add(new ContextMethodArgumentResolver(javalinConfig));
         resolvers.add(new RequestParamMethodArgumentResolver(useCache, true));
         resolvers.add(new ServletModelAttributeMethodProcessor(true));
         return resolvers;
@@ -127,7 +124,8 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
 
     @Override
     public void onStart(@NotNull JavalinConfig config) {
-        objectMapper = Optional.ofNullable(config.pvt.appDataManager.get(JavalinAppDataKey.OBJECT_MAPPER_KEY)).orElse(DEF_OBJECT_MAPPER);
+        this.javalinConfig = config;
+        this.objectMapper = Optional.ofNullable(config.pvt.appDataManager.get(JavalinAppDataKey.OBJECT_MAPPER_KEY)).orElse(DEF_OBJECT_MAPPER);
         initialize();
     }
 

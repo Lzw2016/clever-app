@@ -1,10 +1,7 @@
 package org.clever.web;
 
 import io.javalin.config.JavalinConfig;
-import jakarta.servlet.Servlet;
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
@@ -29,7 +26,7 @@ import java.util.List;
  */
 @Slf4j
 public class ServletRegistrar {
-
+    private JavalinConfig javalinConfig;
     /**
      * Servlet列表
      */
@@ -43,7 +40,7 @@ public class ServletRegistrar {
      * @param name     Servlet名称
      * @param order    顺序，值越小，优先级越高
      */
-    public ServletRegistrar addServlet(Servlet servlet, String pathSpec, String name, double order) {
+    public ServletRegistrar addServlet(HttpServlet servlet, String pathSpec, String name, double order) {
         Assert.notNull(servlet, "servlet 不能为 null");
         Assert.isNotBlank(pathSpec, "pathSpec 不能为空");
         servlets.add(new OrderServlet(servlet, pathSpec, order, name));
@@ -72,7 +69,7 @@ public class ServletRegistrar {
      * @param pathSpec Servlet处理路径
      * @param name     Servlet名称
      */
-    public ServletRegistrar addServlet(Servlet servlet, String pathSpec, String name) {
+    public ServletRegistrar addServlet(HttpServlet servlet, String pathSpec, String name) {
         return addServlet(servlet, pathSpec, name, 0);
     }
 
@@ -91,6 +88,7 @@ public class ServletRegistrar {
         Assert.notNull(servletContextHandler, "servletContextHandler 不能为 null");
         Assert.notNull(config, "参数 config 不能为 null");
         servlets.sort(Comparator.comparingDouble(o -> o.order));
+        this.javalinConfig = config;
         List<String> logs = new ArrayList<>();
         int idx = 1;
         for (OrderServlet item : servlets) {
@@ -109,7 +107,7 @@ public class ServletRegistrar {
 
     @Data
     private static class OrderServlet {
-        private final Servlet servlet;
+        private final HttpServlet servlet;
         private final String pathSpec;
         private final double order;
         private final String name;
@@ -117,10 +115,10 @@ public class ServletRegistrar {
 
     @FunctionalInterface
     public interface ServletFuc {
-        void service(HttpServletRequest req, HttpServletResponse res) throws Exception;
+        void service(Context ctx) throws Exception;
     }
 
-    public static class ServletAdapter implements Servlet {
+    public class ServletAdapter extends HttpServlet {
         private final ServletFuc fuc;
 
         public ServletAdapter(ServletFuc fuc) {
@@ -129,30 +127,14 @@ public class ServletRegistrar {
         }
 
         @Override
-        public void init(ServletConfig config) {
-        }
-
-        @Override
-        public ServletConfig getServletConfig() {
-            return null;
-        }
-
-        @Override
-        public void service(ServletRequest req, ServletResponse res) {
+        protected void service(HttpServletRequest req, HttpServletResponse res) {
+            Context ctx = new Context(req, res, javalinConfig);
             try {
-                fuc.service((HttpServletRequest) req, (HttpServletResponse) res);
+                fuc.service(ctx);
+                Context.flushResultStream(ctx);
             } catch (Exception e) {
                 throw ExceptionUtils.unchecked(e);
             }
-        }
-
-        @Override
-        public String getServletInfo() {
-            return null;
-        }
-
-        @Override
-        public void destroy() {
         }
     }
 }

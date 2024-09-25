@@ -5,6 +5,7 @@ import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.config.SizeUnit;
 import io.javalin.json.JavalinJackson;
+import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 import io.javalin.util.ConcurrencyUtil;
 import lombok.Getter;
@@ -140,8 +141,10 @@ public class WebServerBootstrap {
         // jackson
         ObjectMapper webServerMapper = JacksonMapper.newObjectMapper();
         jackson.apply(webServerMapper);
-        config.jsonMapper(new JavalinJackson(webServerMapper, webConfig.isUseVirtualThreads()));
+        JsonMapper jsonMapper = new JavalinJackson(webServerMapper, webConfig.isUseVirtualThreads());
+        config.jsonMapper(jsonMapper);
         config.appData(JavalinAppDataKey.OBJECT_MAPPER_KEY, webServerMapper);
+        config.appData(JavalinAppDataKey.JSON_MAPPER_KEY, jsonMapper);
         // http
         config.router.contextPath = http.getContextPath();
         config.router.ignoreTrailingSlashes = http.isIgnoreTrailingSlashes();
