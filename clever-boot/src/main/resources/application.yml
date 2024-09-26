@@ -52,14 +52,14 @@ jdbc:
     histogram: [ 20, 50, 100, 200, 500, 1000, 2000, 5000, 20000 ]
     histogram-top-n: 3
   global:
-    driverClassName: 'com.p6spy.engine.spy.P6SpyDriver'
+    driver-class-name: 'com.p6spy.engine.spy.P6SpyDriver'
     autocommit: true
-    maximumPoolSize: 100
-    minimumIdle: 5
-    maxLifetime: 21600000
-    connectionTimeout: 30000
-    connectionTestQuery: 'select 1'
-    exceptionOverrideClassName: 'org.clever.data.jdbc.hikari.HikariPreventQueryTimeoutEviction'
+    maximum-pool-size: 100
+    minimum-idle: 5
+    max-lifetime: 21600000
+    connection-timeout: 30000
+    connection-test-query: 'select 1'
+    exception-override-class-name: 'org.clever.data.jdbc.hikari.HikariPreventQueryTimeoutEviction'
     #dataSourceProperties:
     #  stringtype: unspecified
 

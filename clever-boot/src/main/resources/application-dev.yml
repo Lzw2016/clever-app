@@ -111,7 +111,7 @@ web:
         #- './clever-boot/build/classes/kotlin/main'
         #- './clever-task/build/classes/java/main'
   security:
-    enable: false
+    enable: true
     dataSource:
       jdbcName: "mysql"
       enableRedis: true
