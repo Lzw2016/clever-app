@@ -2,10 +2,8 @@ package org.clever.task.ext;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
-import org.clever.core.env.Environment;
 import org.clever.js.api.folder.EmptyFolder;
 import org.clever.js.api.module.MemoryCache;
 import org.clever.js.api.pool.EngineInstancePool;
@@ -20,6 +18,8 @@ import org.clever.task.ext.config.JsEngineConfig;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.Value;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;

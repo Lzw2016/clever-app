@@ -1,6 +1,7 @@
 package org.clever.task.core.config;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -9,6 +10,7 @@ import java.time.Duration;
  * 作者：lizw <br/>
  * 创建时间：2021/08/02 17:54 <br/>
  */
+@ConfigurationProperties(prefix = SchedulerConfig.PREFIX)
 @Data
 public class SchedulerConfig implements Serializable {
     public static final String PREFIX = "timed-task";

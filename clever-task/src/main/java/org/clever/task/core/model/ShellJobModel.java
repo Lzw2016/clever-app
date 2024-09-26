@@ -2,8 +2,8 @@ package org.clever.task.core.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.clever.core.Assert;
 import org.clever.task.core.model.entity.TaskShellJob;
-import org.clever.util.Assert;
 
 /**
  * 作者：lizw <br/>

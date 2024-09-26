@@ -14,6 +14,8 @@ import org.clever.security.SecurityBootstrap;
 import org.clever.spring.boot.ConfigDataBootstrap;
 import org.clever.spring.boot.LoggingBootstrap;
 import org.clever.spring.boot.StartupInfoLogger;
+import org.clever.task.TaskBootstrap;
+import org.clever.task.ext.JsExecutorBootstrap;
 import org.clever.web.MvcBootstrap;
 import org.clever.web.PathConstants;
 import org.clever.web.WebServerBootstrap;
@@ -136,11 +138,11 @@ public abstract class AppBootstrap {
             startupTaskBootstrap.setClassLoader(classLoader);
         }
         startupTaskBootstrap.start();
-//        // 分布式定时任务
-//        TaskBootstrap taskBootstrap = TaskBootstrap.create(rootPath, environment);
-//        JsExecutorBootstrap jsExecutorBootstrap = JsExecutorBootstrap.create(taskBootstrap.getSchedulerConfig(), environment);
-//        jsExecutorBootstrap.init();
-//        taskBootstrap.start();
+        // 分布式定时任务
+        TaskBootstrap taskBootstrap = TaskBootstrap.create(rootPath, environment);
+        JsExecutorBootstrap jsExecutorBootstrap = JsExecutorBootstrap.create(taskBootstrap.getSchedulerConfig(), environment);
+        jsExecutorBootstrap.init();
+        taskBootstrap.start();
         // 系统启动完成日志
         startupInfoLogger.logStarted(log, Duration.ofMillis(System.currentTimeMillis() - startTime));
     }

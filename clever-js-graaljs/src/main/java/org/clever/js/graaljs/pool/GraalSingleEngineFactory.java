@@ -2,11 +2,11 @@ package org.clever.js.graaljs.pool;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.js.api.ScriptEngineInstance;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.pool.AbstractEngineFactory;
 import org.clever.js.graaljs.GraalScriptEngineInstance;
-import org.clever.util.Assert;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;

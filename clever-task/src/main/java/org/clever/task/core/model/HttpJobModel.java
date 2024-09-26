@@ -2,9 +2,9 @@ package org.clever.task.core.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.clever.core.Assert;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.task.core.model.entity.TaskHttpJob;
-import org.clever.util.Assert;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;

@@ -6,9 +6,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.exception.ExceptionUtils;
-import org.clever.core.io.Resource;
-import org.clever.core.io.support.PathMatchingResourcePatternResolver;
-import org.clever.util.ResourceUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.ResourceUtils;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -332,10 +332,7 @@ public class ClassPathFolder implements Folder {
      * 处理路径分隔符，使用统一的分隔符
      */
     protected static String replaceSeparate(String path) {
-        if (StringUtils.isBlank(path)) {
-            return path;
-        }
-        return path.replaceAll("\\\\", Folder.PATH_SEPARATE);
+        return AbstractFolder.replaceSeparate(path);
     }
 
     protected static boolean resourceExists(Resource resource) {

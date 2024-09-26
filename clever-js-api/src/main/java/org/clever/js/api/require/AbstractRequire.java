@@ -2,11 +2,12 @@ package org.clever.js.api.require;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.api.ScriptEngineContext;
 import org.clever.js.api.folder.Folder;
+import org.clever.js.api.module.Module;
 import org.clever.js.api.module.*;
-import org.clever.util.Assert;
 import org.json.JSONObject;
 
 import java.util.HashMap;

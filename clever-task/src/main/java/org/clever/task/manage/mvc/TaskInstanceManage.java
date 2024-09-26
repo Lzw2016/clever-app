@@ -21,10 +21,10 @@ import org.clever.task.manage.dao.TaskManageStore;
 import org.clever.task.manage.model.JobLogInfo;
 import org.clever.task.manage.model.request.*;
 import org.clever.task.manage.model.response.*;
-import org.clever.validation.annotation.Validated;
-import org.clever.web.support.mvc.annotation.RequestBody;
-import org.clever.web.support.mvc.annotation.RequestParam;
-import org.clever.web.support.mvc.annotation.Transactional;
+import org.clever.web.mvc.annotation.RequestBody;
+import org.clever.web.mvc.annotation.RequestParam;
+import org.clever.web.mvc.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Objects;

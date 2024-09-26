@@ -4,11 +4,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.io.Resource;
-import org.clever.core.io.support.PathMatchingResourcePatternResolver;
-import org.clever.core.io.support.ResourcePatternResolver;
-import org.clever.util.ResourceUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;

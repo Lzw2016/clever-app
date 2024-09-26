@@ -1,7 +1,5 @@
 package org.clever.js.nashorn;
 
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.clever.js.api.AbstractScriptEngineContext;
 import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
@@ -17,6 +15,8 @@ import org.clever.js.nashorn.module.NashornModule;
 import org.clever.js.nashorn.require.NashornRequire;
 import org.clever.js.nashorn.support.NashornObjectToString;
 import org.clever.js.nashorn.utils.ScriptEngineUtils;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngine;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.util.Collections;
 import java.util.HashSet;

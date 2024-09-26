@@ -2,7 +2,6 @@
 clever-spring           参考spring最核心的代码实现：通用类、工具类、注解扩展、类型反射、IO流、应用环境、基础类型转换、Bean类型转换
 clever-core             封装常用的工具类: 序列化反序列化、HTTP、编码解码、ID生成、Bean转换验证、Excel、异常、验证码等等
 clever-web              基于javalin封装servlet web服务器的实现,参考spring mvc部分注解的实现,支持web mvc动态调用java class(包含kotlin或groovy等JVM语言,需要编译器支持)
-clever-groovy           基于groovy实现web mvc动态调用groovy class(无需编译器支持)
 
 clever-js-api           JS引擎API层
 clever-js-graaljs       graaljs引擎实现(推荐)
@@ -29,8 +28,6 @@ clever-boot             应用启动项目,各个组件模块整合示例
 ### 依赖关系
 
 clever-boot -> ...
-🡓
-clever-groovy -> groovy
 🡓
 clever-web → javalin
 🡓

@@ -4,7 +4,7 @@ import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.values.reference.IV8ValueObject;
 import com.caoccao.javet.values.reference.V8ValueArray;
 import lombok.SneakyThrows;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 /**
  * 作者：lizw <br/>

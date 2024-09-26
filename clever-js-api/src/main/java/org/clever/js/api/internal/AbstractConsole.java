@@ -2,8 +2,8 @@ package org.clever.js.api.internal;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.clever.core.Assert;
 import org.clever.js.api.support.ObjectToString;
-import org.clever.util.Assert;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

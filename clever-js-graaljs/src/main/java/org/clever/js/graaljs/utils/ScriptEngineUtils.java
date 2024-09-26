@@ -1,8 +1,8 @@
 package org.clever.js.graaljs.utils;
 
+import org.clever.core.Assert;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.graaljs.GraalConstant;
-import org.clever.util.Assert;
 import org.graalvm.polyglot.*;
 
 import java.time.ZoneId;

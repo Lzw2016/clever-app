@@ -6,6 +6,7 @@ import com.caoccao.javet.values.reference.IV8ValueFunction;
 import com.caoccao.javet.values.reference.IV8ValueObject;
 import com.caoccao.javet.values.reference.V8ValueFunction;
 import lombok.SneakyThrows;
+import org.clever.core.Assert;
 import org.clever.js.api.ScriptEngineContext;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.module.Module;
@@ -13,7 +14,6 @@ import org.clever.js.api.require.AbstractRequire;
 import org.clever.js.api.require.Require;
 import org.clever.js.v8.module.V8Module;
 import org.clever.js.v8.utils.ScriptEngineUtils;
-import org.clever.util.Assert;
 
 /**
  * 作者：lizw <br/>

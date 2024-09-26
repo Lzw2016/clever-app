@@ -2,9 +2,9 @@ package org.clever.task.core.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.clever.core.Assert;
 import org.clever.task.core.cron.CronExpressionUtil;
 import org.clever.task.core.model.entity.TaskJobTrigger;
-import org.clever.util.Assert;
 
 /**
  * 作者：lizw <br/>

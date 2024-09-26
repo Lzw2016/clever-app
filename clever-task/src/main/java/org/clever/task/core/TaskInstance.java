@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.clever.core.Assert;
 import org.clever.core.Conv;
 import org.clever.core.DateUtils;
 import org.clever.core.exception.ExceptionUtils;
@@ -25,7 +26,6 @@ import org.clever.task.core.model.*;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.support.JobTriggerUtils;
 import org.clever.task.core.support.TaskContext;
-import org.clever.util.Assert;
 
 import java.util.*;
 import java.util.concurrent.*;

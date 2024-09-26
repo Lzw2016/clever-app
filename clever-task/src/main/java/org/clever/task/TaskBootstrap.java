@@ -2,9 +2,7 @@ package org.clever.task;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.*;
-import org.clever.core.env.Environment;
 import org.clever.task.core.TaskInstance;
 import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.job.HttpJobExecutor;
@@ -12,7 +10,8 @@ import org.clever.task.core.job.JavaJobExecutor;
 import org.clever.task.core.job.JobExecutor;
 import org.clever.task.core.job.ShellJobExecutor;
 import org.clever.task.core.listeners.*;
-import org.clever.util.Assert;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;

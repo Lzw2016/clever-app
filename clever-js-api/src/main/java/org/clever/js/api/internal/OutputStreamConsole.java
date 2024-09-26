@@ -2,7 +2,7 @@ package org.clever.js.api.internal;
 
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.io.Closeable;
 import java.io.IOException;

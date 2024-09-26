@@ -2,15 +2,15 @@ package org.clever.js.graaljs;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.js.api.AbstractScriptEngineInstance;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.api.ScriptEngineContext;
 import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.graaljs.utils.EngineGlobalUtils;
-import org.clever.util.Assert;
-import org.clever.util.DigestUtils;
 import org.graalvm.polyglot.*;
+import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;

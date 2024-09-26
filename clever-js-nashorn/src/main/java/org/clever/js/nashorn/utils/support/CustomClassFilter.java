@@ -1,6 +1,6 @@
 package org.clever.js.nashorn.utils.support;
 
-import jdk.nashorn.api.scripting.ClassFilter;
+import org.openjdk.nashorn.api.scripting.ClassFilter;
 
 import java.util.Collections;
 import java.util.Set;

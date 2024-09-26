@@ -1,8 +1,8 @@
 package org.clever.js.nashorn.utils;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
  * 作者：lizw <br/>

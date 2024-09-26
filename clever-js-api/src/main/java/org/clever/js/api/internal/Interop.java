@@ -117,7 +117,7 @@ public abstract class Interop<T> {
     // --------------------------------------------------------------------------------------------------- Float
 
     public float asJFloat(double d) {
-        return new Double(d).floatValue();
+        return Double.valueOf(d).floatValue();
     }
 
     public float asJFloat(String d) {

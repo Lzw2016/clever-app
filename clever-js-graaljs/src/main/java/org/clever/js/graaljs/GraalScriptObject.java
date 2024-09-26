@@ -1,8 +1,8 @@
 package org.clever.js.graaljs;
 
+import org.clever.core.Assert;
 import org.clever.js.api.AbstractScriptObject;
 import org.clever.js.api.ScriptEngineContext;
-import org.clever.util.Assert;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 

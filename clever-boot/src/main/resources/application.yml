@@ -92,7 +92,7 @@ web:
   enable-redirect-to-lowercase-paths: false
   jackson:
     locale: 'zh_CN'
-    dateFormat: 'yyyy-MM-dd HH:mm:ss'
+    date-format: 'yyyy-MM-dd HH:mm:ss'
   http:
     context-path: '/'
     generate-etags: true

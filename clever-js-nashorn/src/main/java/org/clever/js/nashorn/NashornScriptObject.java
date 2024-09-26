@@ -1,10 +1,10 @@
 package org.clever.js.nashorn;
 
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.clever.core.Assert;
 import org.clever.js.api.AbstractScriptObject;
 import org.clever.js.api.ScriptEngineContext;
-import org.clever.util.Assert;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngine;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.util.Arrays;
 import java.util.Collection;
