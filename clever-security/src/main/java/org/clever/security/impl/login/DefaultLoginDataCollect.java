@@ -1,5 +1,6 @@
 package org.clever.security.impl.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.OrderIncrement;
 import org.clever.security.config.LoginConfig;
 import org.clever.security.config.SecurityConfig;
@@ -7,8 +8,6 @@ import org.clever.security.impl.model.request.NamePasswordLoginReq;
 import org.clever.security.login.AbstractLoginDataCollect;
 import org.clever.security.model.request.AbstractLoginReq;
 import org.clever.security.utils.HttpServletRequestUtils;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 作者：lizw <br/>

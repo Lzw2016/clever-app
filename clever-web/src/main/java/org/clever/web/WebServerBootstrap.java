@@ -145,6 +145,8 @@ public class WebServerBootstrap {
         config.jsonMapper(jsonMapper);
         config.appData(JavalinAppDataKey.OBJECT_MAPPER_KEY, webServerMapper);
         config.appData(JavalinAppDataKey.JSON_MAPPER_KEY, jsonMapper);
+        AppContextHolder.registerBean("javalinJsonMapper", jsonMapper, true);
+        AppContextHolder.registerBean("javalinObjectMapper", webServerMapper, true);
         // http
         config.router.contextPath = http.getContextPath();
         config.router.ignoreTrailingSlashes = http.isIgnoreTrailingSlashes();

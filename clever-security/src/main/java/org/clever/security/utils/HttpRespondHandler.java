@@ -1,5 +1,7 @@
 package org.clever.security.utils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.clever.core.exception.BusinessException;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.model.response.ErrorResponse;
@@ -11,12 +13,10 @@ import org.clever.security.model.AuthorizationContext;
 import org.clever.security.model.LoginContext;
 import org.clever.security.model.LogoutContext;
 import org.clever.security.model.UserInfo;
-import org.clever.web.http.HttpStatus;
-import org.clever.web.http.MediaType;
 import org.clever.web.utils.GlobalExceptionHandler;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -34,15 +34,15 @@ public abstract class HttpRespondHandler {
             return HttpStatus.OK;
         }
         if (e instanceof AuthenticationInnerException
-                || e instanceof AuthorizationInnerException
-                || e instanceof LoginInnerException) {
+            || e instanceof AuthorizationInnerException
+            || e instanceof LoginInnerException) {
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
         if (e instanceof AuthenticationException
-                || e instanceof AuthorizationException
-                || e instanceof LoginException
-                || e instanceof LogoutException
-                || e instanceof BusinessException) {
+            || e instanceof AuthorizationException
+            || e instanceof LoginException
+            || e instanceof LogoutException
+            || e instanceof BusinessException) {
             return HttpStatus.BAD_REQUEST;
         }
         return HttpStatus.INTERNAL_SERVER_ERROR;
@@ -166,8 +166,7 @@ public abstract class HttpRespondHandler {
             }
             response.setStatus(httpStatus.value());
             res.setStatus(httpStatus.value());
-            // noinspection deprecation
-            response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().print(JacksonMapper.getInstance().toJson(res));
             response.getWriter().flush();
         }

@@ -1,13 +1,13 @@
 package org.clever.security.utils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.security.config.LoginConfig;
 import org.clever.security.config.LogoutConfig;
 import org.clever.security.config.SecurityConfig;
-import org.clever.util.AntPathMatcher;
-import org.clever.web.http.HttpMethod;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.AntPathMatcher;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 

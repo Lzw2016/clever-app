@@ -2,6 +2,8 @@ package org.clever.security.impl;
 
 import com.querydsl.core.Tuple;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Conv;
 import org.clever.core.mapper.JacksonMapper;
@@ -23,8 +25,6 @@ import org.clever.security.model.SecurityContext;
 import org.clever.security.utils.SecurityContextEqualsUtils;
 import org.clever.security.utils.SecurityRedisKey;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;

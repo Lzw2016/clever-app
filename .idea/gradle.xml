@@ -18,6 +18,7 @@
             <option value="$PROJECT_DIR$/clever-data-jdbc" />
             <option value="$PROJECT_DIR$/clever-data-jdbc-meta" />
             <option value="$PROJECT_DIR$/clever-data-redis" />
+            <option value="$PROJECT_DIR$/clever-security" />
             <option value="$PROJECT_DIR$/clever-spring" />
             <option value="$PROJECT_DIR$/clever-web" />
           </set>

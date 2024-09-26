@@ -1,11 +1,10 @@
 package org.clever.security.utils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.mapper.JacksonMapper;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 作者：ymx <br/>

@@ -1,5 +1,6 @@
 package org.clever.security.impl.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.OrderIncrement;
 import org.clever.core.validator.BaseValidatorUtils;
 import org.clever.security.config.SecurityConfig;
@@ -7,8 +8,6 @@ import org.clever.security.exception.LoginDataValidateException;
 import org.clever.security.exception.LoginException;
 import org.clever.security.login.VerifyLoginData;
 import org.clever.security.model.request.AbstractLoginReq;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 作者：lizw <br/>

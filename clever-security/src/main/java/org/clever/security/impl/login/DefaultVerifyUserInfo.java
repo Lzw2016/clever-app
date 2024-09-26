@@ -1,5 +1,6 @@
 package org.clever.security.impl.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.DateUtils;
 import org.clever.core.OrderIncrement;
 import org.clever.security.SecurityDataSource;
@@ -16,7 +17,6 @@ import org.clever.security.model.UserInfo;
 import org.clever.security.model.request.AbstractLoginReq;
 import org.clever.security.utils.AesUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.Objects;
 

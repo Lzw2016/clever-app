@@ -10,6 +10,7 @@ import org.clever.core.OrderIncrement;
 import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
 import org.clever.data.redis.RedisBootstrap;
+import org.clever.security.SecurityBootstrap;
 import org.clever.spring.boot.ConfigDataBootstrap;
 import org.clever.spring.boot.LoggingBootstrap;
 import org.clever.spring.boot.StartupInfoLogger;
@@ -67,9 +68,9 @@ public abstract class AppBootstrap {
         final WebConfig webConfig = webServerBootstrap.getWebConfig();
         // mvc功能
         MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, environment);
-//        // security功能
-//        SecurityBootstrap securityBootstrap = SecurityBootstrap.create(environment);
-//        SecurityBootstrap.useDefaultSecurity(securityBootstrap.getSecurityConfig());
+        // security功能
+        SecurityBootstrap securityBootstrap = SecurityBootstrap.create(environment);
+        SecurityBootstrap.useDefaultSecurity(securityBootstrap.getSecurityConfig());
         // 注册 Filter
         OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
@@ -79,10 +80,10 @@ public abstract class AppBootstrap {
             .addFilter(GlobalRequestParamsFilter.INSTANCE, PathConstants.ALL, "GlobalRequestParamsFilter", filterOrder.incrL1())
             .addFilter(CorsFilter.create(environment), PathConstants.ALL, "CorsFilter", filterOrder.incrL1())
             .addFilter(mvcBootstrap.getMvcHandlerMethodFilter(), PathConstants.ALL, "MvcHandlerMethodFilter", filterOrder.incrL1())
-//            .addFilter(securityBootstrap.getAuthenticationFilter(), PathConstants.ALL, "AuthenticationFilter", filterOrder.incrL1())
-//            .addFilter(securityBootstrap.getLoginFilter(), PathConstants.ALL, "LoginFilter", filterOrder.incrL1())
-//            .addFilter(securityBootstrap.getLogoutFilter(), PathConstants.ALL, "LogoutFilter", filterOrder.incrL1())
-//            .addFilter(securityBootstrap.getAuthorizationFilter(), PathConstants.ALL, "AuthorizationFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getAuthenticationFilter(), PathConstants.ALL, "AuthenticationFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getLoginFilter(), PathConstants.ALL, "LoginFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getLogoutFilter(), PathConstants.ALL, "LogoutFilter", filterOrder.incrL1())
+            .addFilter(securityBootstrap.getAuthorizationFilter(), PathConstants.ALL, "AuthorizationFilter", filterOrder.incrL1())
             .addFilter(StaticResourceFilter.create(rootPath, environment), PathConstants.ALL, "StaticResourceFilter", filterOrder.incrL1())
             .addFilter(mvcBootstrap.getMvcFilter(), PathConstants.ALL, "MvcFilter", filterOrder.incrL1());
         // 注册 Servlet
@@ -120,14 +121,9 @@ public abstract class AppBootstrap {
         // 初始化web服务
         Javalin javalin = webServerBootstrap.init();
         AppContextHolder.registerBean("javalin", javalin, true);
-//        JsonMapper jsonMapper = javalin.attribute(JsonMapperKt.JSON_MAPPER_KEY);
-//        if (jsonMapper != null) {
-//            AppContextHolder.registerBean("javalinJsonMapper", jsonMapper, true);
-//            AppContextHolder.registerBean("javalinObjectMapper", javalin._conf.inner.appAttributes.get(JavalinAttrKey.JACKSON_OBJECT_MAPPER), true);
-//        }
-//        // 自定义请求处理
-//        // javalin.get();
-//        // javalin.post();
+        // 自定义请求处理
+        // javalin.get();
+        // javalin.post();
         // 启动web服务
         webServerBootstrap.start();
         // 系统关闭时的任务处理

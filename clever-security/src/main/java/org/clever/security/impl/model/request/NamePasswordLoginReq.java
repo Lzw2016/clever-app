@@ -1,11 +1,10 @@
 package org.clever.security.impl.model.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.clever.security.model.LoginType;
 import org.clever.security.model.request.AbstractLoginReq;
-
-import javax.validation.constraints.NotBlank;
 
 /**
  * 用户名/密码登录数据

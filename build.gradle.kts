@@ -195,9 +195,9 @@ subprojects {
             dependency("com.querydsl:querydsl-codegen:${Ver.querydslVersion}")
             dependency("com.querydsl:querydsl-sql-codegen:${Ver.querydslVersion}")
             // jwt
-            dependency("io.jsonwebtoken:jjwt-api:0.12.6")
-            dependency("io.jsonwebtoken:jjwt-impl:0.12.6")
-            dependency("io.jsonwebtoken:jjwt-jackson:0.12.6")
+            dependency("io.jsonwebtoken:jjwt-api:0.11.5")
+            dependency("io.jsonwebtoken:jjwt-impl:0.11.5")
+            dependency("io.jsonwebtoken:jjwt-jackson:0.11.5")
             // schemacrawler
             dependency("us.fatehi:schemacrawler:${Ver.schemacrawlerVersion}")
             dependency("us.fatehi:schemacrawler-commandline:${Ver.schemacrawlerVersion}")

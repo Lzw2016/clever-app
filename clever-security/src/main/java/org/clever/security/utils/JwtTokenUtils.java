@@ -3,6 +3,7 @@ package org.clever.security.utils;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.DateUtils;
@@ -17,7 +18,6 @@ import org.clever.security.exception.ParserJwtTokenException;
 import org.clever.security.login.AddJwtTokenExtData;
 import org.clever.security.model.UserInfo;
 
-import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;

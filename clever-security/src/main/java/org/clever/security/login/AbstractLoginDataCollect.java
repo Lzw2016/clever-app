@@ -1,11 +1,10 @@
 package org.clever.security.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.security.model.LoginChannel;
 import org.clever.security.model.LoginType;
 import org.clever.security.model.request.AbstractLoginReq;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 作者：lizw <br/>

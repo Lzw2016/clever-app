@@ -1,10 +1,12 @@
 package org.clever.security.login;
 
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.DateUtils;
-import org.clever.core.OrderComparator;
+import org.clever.core.Ordered;
 import org.clever.core.http.CookieUtils;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.security.SecurityContextHolder;
@@ -26,11 +28,9 @@ import org.clever.security.model.request.AbstractLoginReq;
 import org.clever.security.utils.HttpRespondHandler;
 import org.clever.security.utils.JwtTokenUtils;
 import org.clever.security.utils.PathFilterUtils;
-import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
-import org.clever.web.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -102,13 +102,13 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
         Assert.notEmpty(verifyUserInfoList, "用户登录验证器(VerifyUserInfo)不存在");
         Assert.notNull(securityContextRepository, "安全上下文存取器(SecurityContextRepository)不能为null");
         Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
-        OrderComparator.sort(loginDataCollectList);
-        OrderComparator.sort(verifyLoginDataList);
-        OrderComparator.sort(loadUserList);
-        OrderComparator.sort(verifyUserInfoList);
-        OrderComparator.sort(addJwtTokenExtDataList);
-        OrderComparator.sort(loginSuccessHandlerList);
-        OrderComparator.sort(loginFailureHandlerList);
+        Ordered.sort(loginDataCollectList);
+        Ordered.sort(verifyLoginDataList);
+        Ordered.sort(loadUserList);
+        Ordered.sort(verifyUserInfoList);
+        Ordered.sort(addJwtTokenExtDataList);
+        Ordered.sort(loginSuccessHandlerList);
+        Ordered.sort(loginFailureHandlerList);
         this.securityConfig = securityConfig;
         this.loginDataCollectList = loginDataCollectList;
         this.verifyLoginDataList = verifyLoginDataList;

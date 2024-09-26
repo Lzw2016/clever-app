@@ -137,7 +137,7 @@ web:
       timeout: -1
       read-only: false
   security:
-    ignorePaths:
+    ignore-paths:
       - '/favicon.ico'
       - '/dist/**'
       - '/static/**'
@@ -156,22 +156,19 @@ web:
       - '/**/*.woff'
       - '/**/*.woff2'
       - '/**/.git'
-    ignoreAuthPaths: [ ]
-    ignoreAuthFailedPaths: [ ]
-    currentUserPath: '/current_user'
+    ignore-auth-paths: [ ]
+    ignore-auth-failed-paths: [ ]
+    current-user-path: '/current_user'
     login:
       paths: [ '/login' ]
-      postOnly: true
-      allowRepeatLogin: true
-      concurrentLoginCount: 1
-      allowAfterLogin: true
+      post-only: true
+      allow-repeat-login: true
+      concurrent-login-count: 1
+      allow-after-login: true
     logout:
       path: '/logout'
     token:
-      secretKey: 'security'
-      tokenValidity: 30d
-      jwtTokenName: 'authorization'
-      refreshTokenName: 'refresh-token'
-
-
-
+      secret-key: 'security'
+      token-validity: 30d
+      jwt-token-name: 'authorization'
+      refresh-token-name: 'refresh-token'

@@ -2,6 +2,7 @@ package org.clever.web.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.http.HttpMethod;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -57,10 +58,12 @@ public class MvcConfig {
     /**
      * 默认的事务配置
      */
+    @NestedConfigurationProperty
     private TransactionalConfig defTransactional = new TransactionalConfig();
     /**
      * 热重载配置
      */
+    @NestedConfigurationProperty
     private HotReload hotReload = new HotReload();
 
     @Data
