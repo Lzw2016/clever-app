@@ -133,8 +133,6 @@ subprojects {
             // apache commons
             dependency("commons-io:commons-io:2.16.1")
             dependency("org.apache.commons:commons-text:1.12.0")
-//            dependency("org.apache.commons:commons-email:1.6.0")
-//            dependency("commons-beanutils:commons-beanutils:1.9.4")
             // http相关
             dependency("com.squareup.okhttp3:okhttp:4.12.0")
             dependency("com.squareup.retrofit2:converter-jackson:2.11.0")
@@ -207,18 +205,15 @@ subprojects {
             dependency("us.fatehi:schemacrawler-sqlserver:${Ver.schemacrawlerVersion}")
             dependency("us.fatehi:schemacrawler-mysql:${Ver.schemacrawlerVersion}")
             // 其他工具包
-//            dependency("org.jetbrains:annotations:24.0.1")
             dependency("com.google.guava:guava:33.2.1-jre")
             dependency("com.google.zxing:javase:3.4.1")
             dependency("ognl:ognl:3.3.5")
             dependency("com.github.jsqlparser:jsqlparser:4.6")
             dependency("com.jfinal:enjoy:5.1.3")
             dependency("com.belerweb:pinyin4j:2.5.1")
-//            dependency("org.ow2.asm:asm:7.1")
             dependency("org.apache.commons:commons-math3:3.6.1")
-//            dependency("org.javassist:javassist:3.28.0-GA")
             dependency("org.redisson:redisson:3.19.3")
-//            dependency("de.ruedigermoeller:fst:2.57")
+            // dependency("de.ruedigermoeller:fst:2.57")
         }
     }
 

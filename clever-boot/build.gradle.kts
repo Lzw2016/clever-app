@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 plugins {
-    //groovy
     id("org.jetbrains.kotlin.jvm")
     //id("org.springframework.boot")
 }
@@ -48,7 +47,7 @@ sourceSets {
 kotlin {
     compilerOptions {
         apiVersion = KotlinVersion.KOTLIN_2_0
-        jvmTarget = JvmTarget.JVM_1_8
+        jvmTarget = JvmTarget.JVM_17
         javaParameters = true
         freeCompilerArgs.add("-Xjsr305=strict")
     }

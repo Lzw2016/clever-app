@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.util.concurrent.atomic.AtomicLong;
 

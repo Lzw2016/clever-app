@@ -1,8 +1,8 @@
 package org.clever.rabbitmq;
 
 import com.rabbitmq.client.ConnectionFactory;
+import org.clever.core.Assert;
 import org.clever.rabbitmq.config.RabbitMQProperties;
-import org.clever.util.Assert;
 
 /**
  * 作者：lizw <br/>

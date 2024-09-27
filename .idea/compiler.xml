@@ -21,6 +21,7 @@
         <module name="clever-app.clever-data-commons.test" />
         <module name="clever-app.clever-task-ext.test" />
         <module name="clever-app.clever-data-dynamic-sql.test" />
+        <module name="clever-app.clever-data-rabbitmq.main" />
         <module name="clever-app.clever-task.test" />
         <module name="clever-app.clever-data-jdbc.test" />
         <module name="clever-app.clever-core.test" />
@@ -38,6 +39,7 @@
         <module name="clever-app.clever-data-redis.main" />
         <module name="clever-app.clever-security.main" />
         <module name="clever-app.clever-task-ext.main" />
+        <module name="clever-app.clever-data-rabbitmq.test" />
         <module name="clever-app.clever-data-commons.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
