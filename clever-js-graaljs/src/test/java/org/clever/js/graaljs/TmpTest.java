@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.clever.core.tuples.TupleOne;
 import org.clever.js.graaljs.proxy.ArrayListProxy;
 import org.clever.js.graaljs.utils.InteropScriptToJavaUtils;
 import org.clever.js.graaljs.utils.ScriptEngineUtils;
@@ -49,25 +50,30 @@ public class TmpTest {
         context.getBindings(GraalConstant.JS_LANGUAGE_ID).putMember("x", atomicInteger);
         String jsCode = "(function() { while (true) { x.incrementAndGet(); } });";
         Value function = context.eval(GraalConstant.JS_LANGUAGE_ID, jsCode);
+        TupleOne<Boolean> closed = TupleOne.creat(false);
         new Thread(() -> {
             try {
                 Thread.sleep(1_000);
                 context.close(true);
+                closed.setValue1(true);
                 log.info("### context.close()");
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.info(e.getMessage(), e);
             }
         }).start();
         try {
             function.executeVoid();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info(e.getMessage(), e);
         }
         for (int i = 0; i < 10; i++) {
             log.info("### -> {}", atomicInteger.get());
         }
         log.info("### end");
-        context.close();
+        // Context 不能在不同的线程上关闭
+        if (!closed.getValue1()) {
+            context.close();
+        }
     }
 
     @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")

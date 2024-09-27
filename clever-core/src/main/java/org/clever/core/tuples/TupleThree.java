@@ -8,9 +8,9 @@ package org.clever.core.tuples;
 public final class TupleThree<A, B, C> extends Tuple implements Tuple.One<A>, Tuple.Two<B>, Tuple.Three<C> {
     private static final int SIZE = 3;
 
-    private A value1;
-    private B value2;
-    private C value3;
+    private volatile A value1;
+    private volatile B value2;
+    private volatile C value3;
 
     public static <A, B, C> TupleThree<A, B, C> creat(final A value1, final B value2, final C value3) {
         return new TupleThree<>(value1, value2, value3);

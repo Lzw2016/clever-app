@@ -108,7 +108,7 @@ public class JobContext {
      * @param name  名称
      * @param value 值
      */
-    void setInnerData(String name, Object value) {
+    public void setInnerData(String name, Object value) {
         innerData.put(name, value);
     }
 

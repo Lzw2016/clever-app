@@ -21,7 +21,7 @@ import java.util.Date;
  * 创建时间：2020/07/25 21:34 <br/>
  */
 @Slf4j
-public class Tmp {
+public class TmpTest {
 
     @Test
     public void t01() {

@@ -21,9 +21,9 @@ object Ver {
     const val kotlinVersion = "2.0.20"
     const val kotlinxCoroutinesVersion = "1.7.3"
     const val groovyVersion = "4.0.23"
-    const val graaljsVersion = "21.3.11"
+    const val graaljsVersion = "23.1.4"
     const val nashornVersion = "15.4"
-    const val javetVersion = "3.1.7"
+    const val javetVersion = "3.1.8"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.37"
     const val querydslVersion = "5.1.0"
@@ -161,12 +161,13 @@ subprojects {
             dependency("org.apache.groovy:groovy:${Ver.groovyVersion}")
             // graaljs
             dependency("org.graalvm.truffle:truffle-api:${Ver.graaljsVersion}")
-            dependency("org.graalvm.sdk:graal-sdk:${Ver.graaljsVersion}")
-            dependency("org.graalvm.js:js-scriptengine:${Ver.graaljsVersion}")
-            dependency("org.graalvm.js:js:${Ver.graaljsVersion}")
-            dependency("org.graalvm.tools:profiler:${Ver.graaljsVersion}")
-            dependency("org.graalvm.tools:chromeinspector:${Ver.graaljsVersion}")
-            dependency("org.graalvm.compiler:compiler:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:polyglot:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:js-community:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:js:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:inspect-community:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:inspect:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:profiler-community:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:profiler:${Ver.graaljsVersion}")
             // nashorn
             dependency("org.openjdk.nashorn:nashorn-core:${Ver.nashornVersion}")
             // javet

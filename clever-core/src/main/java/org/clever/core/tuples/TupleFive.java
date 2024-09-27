@@ -8,11 +8,11 @@ package org.clever.core.tuples;
 public final class TupleFive<A, B, C, D, E> extends Tuple implements Tuple.One<A>, Tuple.Two<B>, Tuple.Three<C>, Tuple.Four<D>, Tuple.Five<E> {
     private static final int SIZE = 5;
 
-    private A value1;
-    private B value2;
-    private C value3;
-    private D value4;
-    private E value5;
+    private volatile A value1;
+    private volatile B value2;
+    private volatile C value3;
+    private volatile D value4;
+    private volatile E value5;
 
     public static <A, B, C, D, E> TupleFive<A, B, C, D, E> creat(final A value1, final B value2, final C value3, final D value4, final E value5) {
         return new TupleFive<>(value1, value2, value3, value4, value5);

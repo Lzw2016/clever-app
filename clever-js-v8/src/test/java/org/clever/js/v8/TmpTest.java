@@ -9,7 +9,6 @@ import com.caoccao.javet.interop.callback.JavetCallbackContext;
 import com.caoccao.javet.interop.executors.IV8Executor;
 import com.caoccao.javet.utils.JavetResourceUtils;
 import com.caoccao.javet.values.V8Value;
-import com.caoccao.javet.values.reference.IV8ValueFunction;
 import com.caoccao.javet.values.reference.V8ValueFunction;
 import com.caoccao.javet.values.reference.V8ValueObject;
 import lombok.SneakyThrows;
@@ -36,15 +35,14 @@ public class TmpTest {
             IV8Executor executor = v8Runtime.getExecutor(jsCode);
             V8Value v8Value = executor.execute();
             log.info("v8Value -> {}", v8Value);
-            if (v8Value instanceof IV8ValueFunction) {
-                IV8ValueFunction function = (IV8ValueFunction) v8Value;
+            if (v8Value instanceof V8ValueFunction function) {
                 v8Runtime.getGlobalObject().set("x", 10);
                 log.info("call -> {}", function.call(function));
                 v8Runtime.getGlobalObject().set("x", 100);
                 log.info("call -> {}", function.call(function));
             }
             v8Value.close();
-            IV8ValueFunction function = executor.execute();
+            V8ValueFunction function = executor.execute();
             log.info("call -> {}", function.call(function));
             function.close();
             // log.info("call -> {}", function.call(function));
@@ -61,7 +59,7 @@ public class TmpTest {
             NodeRuntime nodeRuntime = V8Host.getNodeInstance().createV8Runtime();
             nodeRuntime.setLogger(V8Logger.INSTANCE);
             IV8Executor executor = nodeRuntime.getExecutor(jsCode);
-            IV8ValueFunction function = executor.execute();
+            V8ValueFunction function = executor.execute();
             log.info("v8Value -> {}", function);
             nodeRuntime.getGlobalObject().set("x", 10);
             log.info("call -> {}", function.call(function));
@@ -116,7 +114,7 @@ public class TmpTest {
         V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime();
         v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(jsCode);
-        IV8ValueFunction function = executor.execute();
+        V8ValueFunction function = executor.execute();
 
         JavetCallbackContext call = new JavetCallbackContext(
             "t01",

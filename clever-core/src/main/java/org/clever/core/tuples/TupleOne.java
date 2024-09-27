@@ -7,7 +7,7 @@ package org.clever.core.tuples;
 public class TupleOne<A> extends Tuple implements Tuple.One<A> {
     private static final int SIZE = 1;
 
-    private A value1;
+    private volatile A value1;
 
     public static <A> TupleOne<A> creat(final A value1) {
         return new TupleOne<>(value1);

@@ -8,14 +8,14 @@ package org.clever.core.tuples;
 public final class TupleEight<A, B, C, D, E, F, G, H> extends Tuple implements Tuple.One<A>, Tuple.Two<B>, Tuple.Three<C>, Tuple.Four<D>, Tuple.Five<E>, Tuple.Six<F>, Tuple.Seven<G>, Tuple.Eight<H> {
     private static final int SIZE = 8;
 
-    private A value1;
-    private B value2;
-    private C value3;
-    private D value4;
-    private E value5;
-    private F value6;
-    private G value7;
-    private H value8;
+    private volatile A value1;
+    private volatile B value2;
+    private volatile C value3;
+    private volatile D value4;
+    private volatile E value5;
+    private volatile F value6;
+    private volatile G value7;
+    private volatile H value8;
 
     public static <A, B, C, D, E, F, G, H> TupleEight<A, B, C, D, E, F, G, H> creat(final A value1, final B value2, final C value3, final D value4, final E value5, final F value6, final G value7, final H value8) {
         return new TupleEight<>(value1, value2, value3, value4, value5, value6, value7, value8);
