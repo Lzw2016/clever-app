@@ -9,4 +9,5 @@ dependencies {
     api("org.glassfish:jakarta.el")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }

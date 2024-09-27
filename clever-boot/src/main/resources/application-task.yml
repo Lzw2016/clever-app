@@ -1,0 +1,94 @@
+logging.file:
+  name: 'clever-app-task'
+  path: '/data/logs/${logging.file.name}'
+
+app:
+  root-path: '/app'
+
+startup-task:
+  pool-size: 8
+  timed-task: [ ]
+  cmd-task: [ ]
+
+mybatis:
+  enable: false
+  watcher: false
+  interval: 1s
+  locations:
+    - fileType: jar
+      location: 'classpath*:org/clever/app/**/*.xml'
+
+jdbc:
+  enable: true
+  p6spylog:
+    ignore-contains-sql:
+      - ' task_job_log '
+      - ' task_job_trigger_log '
+      - ' task_scheduler_log '
+      - ' task_job_console_log '
+  default-name: 'postgresql'
+  data-source:
+    postgresql:
+      jdbc-url: jdbc:p6spy:postgresql://192.168.1.211:30010/test
+      username: admin
+      password: admin123456
+      minimum-idle: 2
+      maximum-pool-size: 100
+      connection-test-query: 'select 1'
+      data-source-properties:
+        stringtype: unspecified
+
+redis:
+  enable: false
+  default-name: 'default'
+  data-source:
+    default:
+      mode: standalone
+      standalone:
+        host: '192.168.1.211'
+        port: 30007
+        database: 0
+        password: 'admin123456'
+
+web:
+  mvc:
+    path: '/api/'
+    http-method: [ 'POST', 'GET' ]
+    package-mapping:
+      - path-prefix: '/app'
+        package-prefix: 'org.clever.app.mvc'
+      - path-prefix: '/task'
+        package-prefix: 'org.clever.task.manage.mvc'
+    allow-packages:
+      - 'org.clever.app.mvc.'
+      - 'org.clever.task.manage.mvc.'
+    transactional-def-datasource: [ ]
+    def-transactional:
+      datasource: [ ]
+      timeout: -1
+      read-only: false
+    hot-reload:
+      enable: false
+  security:
+    enable: false
+
+timed-task:
+  enable: true
+  standby: false
+  jdbc-name: 'postgresql'
+  namespace: 'test'
+  instance-name: 'node01'
+  description: '测试节点01'
+  heartbeat-interval: 10000
+  scheduler-executor-pool-size: 16
+  job-executor-pool-size: 64
+  job-executor-queue-size: 64
+  load-weight: 1.0
+  shell-job-working-dir: './shell_job_log'
+  log-retention: 3d
+  js-executor:
+    engine-pool:
+      max-idle: 8
+      min-idle: 0
+      max-total: 8
+      max-wait: 30s

@@ -6,4 +6,5 @@ dependencies {
     api("org.redisson:redisson")
     // api("de.ruedigermoeller:fst")
     api("org.springframework.data:spring-data-redis")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }

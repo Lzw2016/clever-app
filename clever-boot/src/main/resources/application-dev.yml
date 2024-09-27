@@ -42,28 +42,28 @@ jdbc:
   default-name: 'mysql'
   data-source:
     mysql:
-      jdbcUrl: jdbc:p6spy:mysql://192.168.1.211:30019/test
+      jdbc-url: jdbc:p6spy:mysql://192.168.1.211:30019/test
       username: admin
       password: admin123456
-      minimumIdle: 2
-      maximumPoolSize: 100
-      connectionTestQuery: 'select 1 from dual'
+      minimum-idle: 2
+      maximum-pool-size: 100
+      connection-test-query: 'select 1 from dual'
     postgresql:
-      jdbcUrl: jdbc:p6spy:postgresql://192.168.1.211:30010/test
+      jdbc-url: jdbc:p6spy:postgresql://192.168.1.211:30010/test
       username: admin
       password: admin123456
-      minimumIdle: 2
-      maximumPoolSize: 100
-      connectionTestQuery: 'select 1'
-      dataSourceProperties:
+      minimum-idle: 2
+      maximum-pool-size: 100
+      connection-test-query: 'select 1'
+      data-source-properties:
         stringtype: unspecified
     #oracle:
     #  jdbcUrl: jdbc:p6spy:oracle:thin:@122.9.140.63:1521:wms8dev
     #  username: wms8dev
     #  password: lmis9system
-    #  minimumIdle: 2
-    #  maximumPoolSize: 100
-    #  connectionTestQuery: 'select 1 from dual'
+    #  minimum-idle: 2
+    #  maximum-pool-size: 100
+    #  data-source-properties: 'select 1 from dual'
 
 redis:
   enable: true
@@ -82,10 +82,10 @@ web:
     path: '/api/'
     http-method: [ 'POST', 'GET' ]
     package-mapping:
-      - path-Prefix: '/app'
-        package-Prefix: 'org.clever.app.mvc'
-      - path-Prefix: '/task'
-        package-Prefix: 'org.clever.task.manage.mvc'
+      - path-prefix: '/app'
+        package-prefix: 'org.clever.app.mvc'
+      - path-prefix: '/task'
+        package-prefix: 'org.clever.task.manage.mvc'
     allow-packages:
       - 'org.clever.app.mvc.'
       - 'org.clever.task.manage.mvc.'
@@ -101,9 +101,9 @@ web:
       exclude-packages:
         - 'org.clever.task.core.model'
       exclude-classes:
-#        - 'org.clever.task.core.model.JobInfo'
-#        - 'org.clever.task.core.model.AbstractTrigger'
-#        - 'org.clever.task.core.job.JobContext'
+        - 'org.clever.task.core.model.JobInfo'
+        - 'org.clever.task.core.model.AbstractTrigger'
+        - 'org.clever.task.core.job.JobContext'
       locations:
         - './clever-boot/out/production/classes'
         - './clever-task/out/production/classes'
