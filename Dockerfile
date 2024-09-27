@@ -1,4 +1,4 @@
-FROM openjdk:8u342-oracle AS task
+FROM eclipse-temurin:17.0.12_7-jre-alpine AS task
 COPY clever-boot/build/libs/ /app/
 WORKDIR /app
 SHELL ["/bin/bash", "-c"]
