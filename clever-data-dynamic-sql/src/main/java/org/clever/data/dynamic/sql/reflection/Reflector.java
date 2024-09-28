@@ -287,20 +287,12 @@ public class Reflector {
     }
 
     /**
-     * Checks whether can control member accessible.
+     * Checks whether you can control member accessible.
      *
-     * @return If can control member accessible, it return {@literal true}
+     * @return If you can control member accessible, it return {@literal true}
      * @since 3.5.0
      */
     public static boolean canControlMemberAccessible() {
-        try {
-            SecurityManager securityManager = System.getSecurityManager();
-            if (null != securityManager) {
-                securityManager.checkPermission(new ReflectPermission("suppressAccessChecks"));
-            }
-        } catch (SecurityException e) {
-            return false;
-        }
         return true;
     }
 

@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * 作者：lizw <br/>
@@ -120,7 +119,7 @@ public class ExecShellUtils {
             commands.addAll(command);
             commands.add(scriptFile);
             if (params != null) {
-                commands.addAll(Arrays.stream(params).collect(Collectors.toList()));
+                commands.addAll(Arrays.stream(params).toList());
             }
             File dir = DEF_WORKING_DIR;
             if (StringUtils.isNotBlank(workingDir)) {

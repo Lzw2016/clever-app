@@ -229,7 +229,7 @@ public interface EnumConstant {
      * shell脚本类型对应的文件后缀
      */
     Map<String, String> SHELL_TYPE_FILE_SUFFIX_MAPPING = Collections.unmodifiableMap(
-        new HashMap<String, String>() {{
+        new HashMap<>() {{
             put(SHELL_JOB_SHELL_TYPE_BASH, ".sh");
             put(SHELL_JOB_SHELL_TYPE_SH, ".sh");
             put(SHELL_JOB_SHELL_TYPE_ASH, ".sh");
@@ -246,7 +246,7 @@ public interface EnumConstant {
      * shell脚本类型对应的command命令
      */
     Map<String, List<String>> SHELL_TYPE_COMMAND_MAPPING = Collections.unmodifiableMap(
-        new HashMap<String, List<String>>() {{
+        new HashMap<>() {{
             put(SHELL_JOB_SHELL_TYPE_BASH, Arrays.asList("sh", "-c"));
             put(SHELL_JOB_SHELL_TYPE_SH, Arrays.asList("sh", "-c"));
             put(SHELL_JOB_SHELL_TYPE_ASH, Arrays.asList("sh", "-c"));

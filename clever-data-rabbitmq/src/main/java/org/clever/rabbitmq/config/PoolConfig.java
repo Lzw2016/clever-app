@@ -76,7 +76,7 @@ public class PoolConfig {
     /**
      * 空闲链接检测线程检测的周期，毫秒数。如果为负值，表示不运行检测线程。默认为-1
      */
-    private Duration timeBetweenEvictionRuns = BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS;
+    private Duration timeBetweenEvictionRuns = BaseObjectPoolConfig.DEFAULT_DURATION_BETWEEN_EVICTION_RUNS;
     /**
      * 在每次空闲连接回收器线程(如果有)运行时检查的连接数量，默认为3
      */
@@ -130,8 +130,8 @@ public class PoolConfig {
         config.setTestWhileIdle(isTestWhileIdle());
         config.setTimeBetweenEvictionRuns(getTimeBetweenEvictionRuns());
         config.setNumTestsPerEvictionRun(getNumTestsPerEvictionRun());
-        config.setMinEvictableIdleTime(getMinEvictableIdleTime());
-        config.setSoftMinEvictableIdleTime(getSoftMinEvictableIdleTime());
+        config.setMinEvictableIdleDuration(getMinEvictableIdleTime());
+        config.setSoftMinEvictableIdleDuration(getSoftMinEvictableIdleTime());
         config.setEvictionPolicyClassName(getEvictionPolicyClassName());
         config.setEvictorShutdownTimeout(getEvictorShutdownTimeout());
         config.setJmxEnabled(isJmxEnabled());
