@@ -1,5 +1,5 @@
-#FROM eclipse-temurin:17.0.12_7-jre-alpine AS task
 FROM container-registry.oracle.com/graalvm/jdk:17 AS task
+#FROM eclipse-temurin:17.0.12_7-jre-alpine AS task
 COPY clever-boot/build/libs/ /app/
 WORKDIR /app
 ENV LANG=C.UTF-8
