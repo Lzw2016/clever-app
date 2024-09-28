@@ -11,9 +11,9 @@ public interface GraalConstant {
     String ERROR_ENGINE_NAME = "Interpreted";
 
     /**
-     * ECMAScript Version: 11 (ES2020)
+     * ECMAScript Version: 13 (ES2022)，参考：<a href="https://www.graalvm.org/latest/reference-manual/js/Options/">GraalJS 引擎选项</a>
      */
-    String ECMASCRIPT_VERSION = "11";
+    String ECMASCRIPT_VERSION = "13";
 
     /**
      * JS 语言ID
