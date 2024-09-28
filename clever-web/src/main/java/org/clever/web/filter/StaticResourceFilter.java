@@ -49,7 +49,7 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         StaticResourceConfig staticResourceConfig = Binder.get(environment).bind(StaticResourceConfig.PREFIX, StaticResourceConfig.class).orElseGet(StaticResourceConfig::new);
         AppContextHolder.registerBean("staticResourceConfig", staticResourceConfig, true);
         List<StaticResourceHandler> handlers = createHandler(rootPath, staticResourceConfig.getMappings());
-        int maxLength = handlers.stream().map(StaticResourceHandler::getHostedPath).max(Comparator.comparingInt(String::length)).orElse("").length();
+        int maxLength = handlers.stream().map(StaticResourceHandler::getHostedPath).max(Comparator.comparingInt(String::length)).orElse("").length() + 6;
         List<String> logs = new ArrayList<>();
         logs.add(org.apache.commons.lang3.StringUtils.rightPad("enable", maxLength) + ": " + staticResourceConfig.isEnable());
         logs.addAll(handlers.stream().map(handler -> org.apache.commons.lang3.StringUtils.rightPad(handler.getHostedPath(), maxLength) + ": " + handler.getLocationAbsPath()).toList());

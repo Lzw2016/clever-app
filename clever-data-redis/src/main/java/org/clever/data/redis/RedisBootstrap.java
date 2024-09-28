@@ -60,8 +60,8 @@ public class RedisBootstrap {
     }
 
     private void initRedis() {
-        final RedisProperties global = Optional.of(redisConfig.getGlobal()).orElse(new RedisProperties());
-        final Map<String, RedisProperties> dataSource = Optional.of(redisConfig.getDataSource()).orElse(Collections.emptyMap());
+        final RedisProperties global = Optional.ofNullable(redisConfig.getGlobal()).orElse(new RedisProperties());
+        final Map<String, RedisProperties> dataSource = Optional.ofNullable(redisConfig.getDataSource()).orElse(Collections.emptyMap());
         // 合并数据源配置
         dataSource.forEach((name, config) -> MergeRedisProperties.mergeConfig(global, config));
         // 打印配置日志

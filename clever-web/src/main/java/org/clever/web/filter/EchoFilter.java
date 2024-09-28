@@ -18,6 +18,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,14 +38,11 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
     public static EchoFilter create(Environment environment) {
         EchoConfig echoConfig = Binder.get(environment).bind(EchoConfig.PREFIX, EchoConfig.class).orElseGet(EchoConfig::new);
         AppContextHolder.registerBean("echoConfig", echoConfig, true);
+        List<String> logs = new ArrayList<>();
+        logs.add("enable     : " + echoConfig.isEnable());
+        logs.add("ignorePaths: " + StringUtils.join(echoConfig.getIgnorePaths(), " | "));
         if (echoConfig.isEnable()) {
-            // noinspection ConstantValue
-            BannerUtils.printConfig(log, "Echo配置",
-                new String[]{
-                    "enable     : " + echoConfig.isEnable(),
-                    "ignorePaths: " + StringUtils.join(echoConfig.getIgnorePaths(), " | ")
-                }
-            );
+            BannerUtils.printConfig(log, "Echo配置", logs.toArray(new String[0]));
         }
         return create(echoConfig);
     }

@@ -72,7 +72,7 @@ public class StaticResourceHandler {
         Assert.notNull(resourceMapping, "参数 resourceMapping 不能为 null");
         this.hostedPath = resourceMapping.getHostedPath();
         this.location = ResourcePathUtils.getResource(rootPath, resourceMapping.getLocation());
-        Duration cachePeriod = Optional.of(resourceMapping.getCachePeriod()).orElse(Duration.ofSeconds(0));
+        Duration cachePeriod = Optional.ofNullable(resourceMapping.getCachePeriod()).orElse(Duration.ofSeconds(0));
         CacheControl cacheControl = cachePeriod.isZero() ? CacheControl.noStore() : CacheControl.maxAge(cachePeriod);
         this.resourceCacheControl = new ResourceCacheControl(cacheControl);
     }

@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.DefaultCorsProcessor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,22 +37,19 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
     public static CorsFilter create(Environment environment) {
         CorsConfig corsConfig = Binder.get(environment).bind(CorsConfig.PREFIX, CorsConfig.class).orElseGet(CorsConfig::new);
         AppContextHolder.registerBean("corsConfig", corsConfig, true);
+        List<String> logs = new ArrayList<>();
+        logs.add("cors:");
+        logs.add("  enable               : " + corsConfig.isEnable());
+        logs.add("  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "));
+        logs.add("  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "));
+        logs.add("  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "));
+        logs.add("  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "));
+        logs.add("  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "));
+        logs.add("  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "));
+        logs.add("  allowCredentials     : " + corsConfig.getAllowCredentials());
+        logs.add("  maxAge               : " + corsConfig.getMaxAge());
         if (corsConfig.isEnable()) {
-            // noinspection ConstantValue
-            BannerUtils.printConfig(log, "cors跨域配置",
-                new String[]{
-                    "cors:",
-                    "  enable               : " + corsConfig.isEnable(),
-                    "  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "),
-                    "  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "),
-                    "  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "),
-                    "  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "),
-                    "  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "),
-                    "  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "),
-                    "  allowCredentials     : " + corsConfig.getAllowCredentials(),
-                    "  maxAge               : " + corsConfig.getMaxAge(),
-                }
-            );
+            BannerUtils.printConfig(log, "Cors跨域配置", logs.toArray(new String[0]));
         }
         return create(corsConfig);
     }

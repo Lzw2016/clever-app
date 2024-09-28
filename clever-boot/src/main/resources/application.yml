@@ -86,7 +86,7 @@ web:
   use-virtual-threads: false
   thread-pool-max: 250
   thread-pool-min: 8
-  thread-pool-name: 'JettyServerThreadPool'
+  thread-pool-name: 'jetty-exec'
   enable-dev-logging: false
   enable-http-allowed-methods-on-routes: false
   enable-redirect-to-lowercase-paths: false

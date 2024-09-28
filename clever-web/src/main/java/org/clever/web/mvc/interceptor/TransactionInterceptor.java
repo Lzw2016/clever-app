@@ -44,7 +44,7 @@ public class TransactionInterceptor implements HandlerInterceptor {
     public TransactionInterceptor(MvcConfig mvcConfig) {
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为null");
         this.defDatasource = Collections.unmodifiableList(mvcConfig.getTransactionalDefDatasource());
-        this.defTransactional = Optional.of(mvcConfig.getDefTransactional()).orElseGet(() -> {
+        this.defTransactional = Optional.ofNullable(mvcConfig.getDefTransactional()).orElseGet(() -> {
             mvcConfig.setDefTransactional(new MvcConfig.TransactionalConfig());
             return mvcConfig.getDefTransactional();
         });

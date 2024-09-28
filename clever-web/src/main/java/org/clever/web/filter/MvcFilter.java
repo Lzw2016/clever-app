@@ -64,7 +64,7 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
     public MvcFilter(String rootPath, MvcConfig mvcConfig, ObjectMapper objectMapper) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
+        MvcConfig.HotReload hotReload = Optional.ofNullable(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
         mvcConfig.setHotReload(hotReload);
         this.rootPath = rootPath;
         this.mvcConfig = mvcConfig;

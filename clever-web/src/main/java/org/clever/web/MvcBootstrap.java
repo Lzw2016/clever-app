@@ -30,32 +30,33 @@ public class MvcBootstrap {
 
     public static MvcBootstrap create(String rootPath, Environment environment) {
         MvcConfig mvcConfig = Binder.get(environment).bind(MvcConfig.PREFIX, MvcConfig.class).orElseGet(MvcConfig::new);
-        MvcConfig.TransactionalConfig defTransactional = Optional.of(mvcConfig.getDefTransactional()).orElse(new MvcConfig.TransactionalConfig());
+        MvcConfig.TransactionalConfig defTransactional = Optional.ofNullable(mvcConfig.getDefTransactional()).orElse(new MvcConfig.TransactionalConfig());
         mvcConfig.setDefTransactional(defTransactional);
-        MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
+        MvcConfig.HotReload hotReload = Optional.ofNullable(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
         mvcConfig.setHotReload(hotReload);
         Map<String, String> locationMap = ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations());
         AppContextHolder.registerBean("mvcConfig", mvcConfig, true);
         List<String> logs = new ArrayList<>();
         logs.add("mvc: ");
-        logs.add("  enable           : " + mvcConfig.isEnable());
-        logs.add("  path             : " + mvcConfig.getPath());
-        logs.add("  httpMethod       : " + StringUtils.join(mvcConfig.getHttpMethod(), " | "));
-        logs.add("  allowPackages    : " + StringUtils.join(mvcConfig.getAllowPackages(), " | "));
-        logs.add("  packageMapping   : " + mvcConfig.getPackageMapping());
+        logs.add("  enable                    : " + mvcConfig.isEnable());
+        logs.add("  path                      : " + mvcConfig.getPath());
+        logs.add("  httpMethod                : " + StringUtils.join(mvcConfig.getHttpMethod(), " | "));
+        logs.add("  allowPackages             : " + StringUtils.join(mvcConfig.getAllowPackages(), " | "));
+        logs.add("  packageMapping            : " + mvcConfig.getPackageMapping());
+        logs.add("  transactionalDefDatasource: " + StringUtils.join(mvcConfig.getTransactionalDefDatasource(), " | "));
         logs.add("  defTransactional: ");
-        logs.add("    datasource     : " + StringUtils.join(defTransactional.getDatasource(), " | "));
-        logs.add("    propagation    : " + defTransactional.getPropagation());
-        logs.add("    isolation      : " + defTransactional.getIsolation());
-        logs.add("    timeout        : " + defTransactional.getTimeout());
-        logs.add("    readOnly       : " + defTransactional.isReadOnly());
+        logs.add("    datasource              : " + StringUtils.join(defTransactional.getDatasource(), " | "));
+        logs.add("    propagation             : " + defTransactional.getPropagation());
+        logs.add("    isolation               : " + defTransactional.getIsolation());
+        logs.add("    timeout                 : " + defTransactional.getTimeout());
+        logs.add("    readOnly                : " + defTransactional.isReadOnly());
         logs.add("  hotReload: ");
-        logs.add("    enable         : " + hotReload.isEnable());
-        logs.add("    watchFile      : " + ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getWatchFile()));
-        logs.add("    interval       : " + hotReload.getInterval().toMillis() + "ms");
-        logs.add("    excludePackages: " + StringUtils.join(hotReload.getExcludePackages(), " | "));
-        logs.add("    excludeClasses : " + StringUtils.join(hotReload.getExcludeClasses(), " | "));
-        logs.add("    locations      : " + StringUtils.join(hotReload.getLocations().stream().map(locationMap::get).toArray(), " | "));
+        logs.add("    enable                  : " + hotReload.isEnable());
+        logs.add("    watchFile               : " + ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getWatchFile()));
+        logs.add("    interval                : " + hotReload.getInterval().toMillis() + "ms");
+        logs.add("    excludePackages         : " + StringUtils.join(hotReload.getExcludePackages(), " | "));
+        logs.add("    excludeClasses          : " + StringUtils.join(hotReload.getExcludeClasses(), " | "));
+        logs.add("    locations               : " + StringUtils.join(hotReload.getLocations().stream().map(locationMap::get).toArray(), " | "));
         if (mvcConfig.isEnable()) {
             BannerUtils.printConfig(log, "mvc配置", logs.toArray(new String[0]));
         }

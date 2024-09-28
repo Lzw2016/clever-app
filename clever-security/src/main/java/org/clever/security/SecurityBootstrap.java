@@ -175,15 +175,15 @@ public class SecurityBootstrap {
     public static SecurityBootstrap create(Environment environment) {
         SecurityConfig securityConfig = Binder.get(environment).bind(SecurityConfig.PREFIX, SecurityConfig.class).orElseGet(SecurityConfig::new);
         AppContextHolder.registerBean("securityConfig", securityConfig, true);
-        DataSourceConfig dataSource = Optional.of(securityConfig.getDataSource()).orElse(new DataSourceConfig());
+        DataSourceConfig dataSource = Optional.ofNullable(securityConfig.getDataSource()).orElse(new DataSourceConfig());
         securityConfig.setDataSource(dataSource);
-        LoginConfig login = Optional.of(securityConfig.getLogin()).orElse(new LoginConfig());
+        LoginConfig login = Optional.ofNullable(securityConfig.getLogin()).orElse(new LoginConfig());
         securityConfig.setLogin(login);
-        LogoutConfig logout = Optional.of(securityConfig.getLogout()).orElse(new LogoutConfig());
+        LogoutConfig logout = Optional.ofNullable(securityConfig.getLogout()).orElse(new LogoutConfig());
         securityConfig.setLogout(logout);
-        AesKeyConfig reqAesKey = Optional.of(securityConfig.getReqAesKey()).orElse(new AesKeyConfig());
+        AesKeyConfig reqAesKey = Optional.ofNullable(securityConfig.getReqAesKey()).orElse(new AesKeyConfig());
         securityConfig.setReqAesKey(reqAesKey);
-        TokenConfig token = Optional.of(securityConfig.getToken()).orElse(new TokenConfig());
+        TokenConfig token = Optional.ofNullable(securityConfig.getToken()).orElse(new TokenConfig());
         securityConfig.setToken(token);
         List<String> logs = new ArrayList<>();
         logs.add("security: ");
@@ -255,13 +255,13 @@ public class SecurityBootstrap {
     public synchronized AuthenticationFilter getAuthenticationFilter() {
         if (authenticationFilter == null) {
             authenticationFilter = new AuthenticationFilter(
-                    securityConfig,
-                    VERIFY_JWT_TOKEN_LIST,
-                    SECURITY_CONTEXT_REPOSITORY,
-                    AUTHENTICATION_SUCCESS_HANDLER_LIST,
-                    AUTHENTICATION_FAILURE_HANDLER_LIST,
-                    REFRESH_JWT_TOKEN,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                VERIFY_JWT_TOKEN_LIST,
+                SECURITY_CONTEXT_REPOSITORY,
+                AUTHENTICATION_SUCCESS_HANDLER_LIST,
+                AUTHENTICATION_FAILURE_HANDLER_LIST,
+                REFRESH_JWT_TOKEN,
+                HTTP_RESPOND_HANDLER
             );
         }
         return authenticationFilter;
@@ -270,16 +270,16 @@ public class SecurityBootstrap {
     public synchronized LoginFilter getLoginFilter() {
         if (loginFilter == null) {
             loginFilter = new LoginFilter(
-                    securityConfig,
-                    LOGIN_DATA_COLLECT_LIST,
-                    VERIFY_LOGIN_DATA_LIST,
-                    LOAD_USER_LIST,
-                    VERIFY_USER_INFO_LIST,
-                    ADD_JWT_TOKEN_EXT_DATA_LIST,
-                    LOGIN_SUCCESS_HANDLER_LIST,
-                    LOGIN_FAILURE_HANDLER_LIST,
-                    SECURITY_CONTEXT_REPOSITORY,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                LOGIN_DATA_COLLECT_LIST,
+                VERIFY_LOGIN_DATA_LIST,
+                LOAD_USER_LIST,
+                VERIFY_USER_INFO_LIST,
+                ADD_JWT_TOKEN_EXT_DATA_LIST,
+                LOGIN_SUCCESS_HANDLER_LIST,
+                LOGIN_FAILURE_HANDLER_LIST,
+                SECURITY_CONTEXT_REPOSITORY,
+                HTTP_RESPOND_HANDLER
             );
         }
         return loginFilter;
@@ -288,10 +288,10 @@ public class SecurityBootstrap {
     public synchronized LogoutFilter getLogoutFilter() {
         if (logoutFilter == null) {
             logoutFilter = new LogoutFilter(
-                    securityConfig,
-                    LOGOUT_SUCCESS_HANDLER_LIST,
-                    LOGOUT_FAILURE_HANDLER_LIST,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                LOGOUT_SUCCESS_HANDLER_LIST,
+                LOGOUT_FAILURE_HANDLER_LIST,
+                HTTP_RESPOND_HANDLER
             );
         }
         return logoutFilter;
@@ -300,11 +300,11 @@ public class SecurityBootstrap {
     public synchronized AuthorizationFilter getAuthorizationFilter() {
         if (authorizationFilter == null) {
             authorizationFilter = new AuthorizationFilter(
-                    securityConfig,
-                    AUTHORIZATION_VOTER_LIST,
-                    AUTHORIZATION_SUCCESS_HANDLER_LIST,
-                    AUTHORIZATION_FAILURE_HANDLER_LIST,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                AUTHORIZATION_VOTER_LIST,
+                AUTHORIZATION_SUCCESS_HANDLER_LIST,
+                AUTHORIZATION_FAILURE_HANDLER_LIST,
+                HTTP_RESPOND_HANDLER
             );
         }
         return authorizationFilter;

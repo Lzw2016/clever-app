@@ -44,9 +44,9 @@ public class WebConfig {
      */
     private int threadPoolMin = 8;
     /**
-     * 线程池名称
+     * 线程池名称：http-exec
      */
-    private String threadPoolName = "JettyServerThreadPool";
+    private String threadPoolName = "jetty-exec";
     /**
      * 启用开发日志（用于开发的广泛调试日志），默认：false
      */

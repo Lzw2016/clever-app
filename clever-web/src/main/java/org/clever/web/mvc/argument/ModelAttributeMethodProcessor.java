@@ -103,7 +103,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
         Constructor<?> ctor = BeanUtils.getResolvableConstructor(clazz);
         Object attribute = constructAttribute(ctor, attributeName, parameter, request);
         if (parameter != nestedParameter) {
-            attribute = Optional.of(attribute);
+            attribute = Optional.ofNullable(attribute);
         }
         return attribute;
     }

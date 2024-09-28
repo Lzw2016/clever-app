@@ -49,7 +49,7 @@ public class ApplyConfigFilter implements FilterRegistrar.FilterFuc {
             }
             // 文件上传设置
             String contentType = ctx.req.getContentType();
-            HttpConfig.Multipart multipart = Optional.of(http.getMultipart()).orElse(new HttpConfig.Multipart());
+            HttpConfig.Multipart multipart = Optional.ofNullable(http.getMultipart()).orElse(new HttpConfig.Multipart());
             if (StringUtils.startsWith(contentType, "multipart/")) {
                 preUploadFunction(ctx.req, multipart);
             }
