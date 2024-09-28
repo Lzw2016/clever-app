@@ -81,8 +81,13 @@ web:
   http:
     static-file:
       - hosted-path: '/'
-        directory: './'
+        directory: './clever-boot/src/main/resources/static'
         location: external
+  resources:
+    enable: true
+    mappings:
+      - hosted-path: '/'
+        location: './clever-boot/src/main/resources/static'
   mvc:
     path: '/api/'
     http-method: [ 'POST', 'GET' ]

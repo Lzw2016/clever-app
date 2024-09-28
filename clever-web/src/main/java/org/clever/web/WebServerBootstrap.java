@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.config.SizeUnit;
+import io.javalin.http.staticfiles.Location;
 import io.javalin.json.JavalinJackson;
 import io.javalin.json.JsonMapper;
 import io.javalin.plugin.bundled.CorsPluginConfig;
@@ -193,7 +194,11 @@ public class WebServerBootstrap {
             for (HttpConfig.StaticFile staticFile : http.getStaticFile()) {
                 config.staticFiles.add(staticFileConfig -> {
                     staticFileConfig.hostedPath = staticFile.getHostedPath();
-                    staticFileConfig.directory = staticFile.getDirectory();
+                    if (Location.EXTERNAL.equals(staticFile.getLocation())) {
+                        staticFileConfig.directory = ResourcePathUtils.getAbsolutePath(rootPath, staticFile.getDirectory());
+                    } else {
+                        staticFileConfig.directory = staticFile.getDirectory();
+                    }
                     staticFileConfig.location = staticFile.getLocation();
                     staticFileConfig.precompress = staticFile.isPreCompress();
                     staticFileConfig.headers = staticFile.getHeaders();
