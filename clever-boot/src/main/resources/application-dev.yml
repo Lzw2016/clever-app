@@ -78,6 +78,11 @@ redis:
         password: 'admin123456'
 
 web:
+  http:
+    static-file:
+      - hosted-path: '/'
+        directory: './'
+        location: external
   mvc:
     path: '/api/'
     http-method: [ 'POST', 'GET' ]
@@ -111,15 +116,15 @@ web:
         #- './clever-boot/build/classes/kotlin/main'
         #- './clever-task/build/classes/java/main'
   security:
-    enable: true
-    dataSource:
-      jdbcName: "mysql"
-      enableRedis: true
-      redisName: "default"
-      redisNamespace: "security"
+    enable: false
+    data-source:
+      jdbc-name: "mysql"
+      enable-redis: true
+      redis-name: "default"
+      redis-namespace: "security"
 
 timed-task:
-  enable: true
+  enable: false
   standby: true
   jdbc-name: 'postgresql'
   namespace: 'default'
