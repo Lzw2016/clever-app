@@ -6,7 +6,7 @@ ENTRYPOINT exec java ${JAVA_MEM_OPTS} ${DATABASE_OPTS} ${JAVA_OPTS_EXT} ${JAVA_A
 EXPOSE 8080
 
 
-FROM ghcr.io/graalvm/graalvm-community:23.0.0 AS task_graalvm
+FROM container-registry.oracle.com/graalvm/jdk:17 AS task_graalvm
 COPY clever-boot/build/libs/ /app/
 WORKDIR /app
 ENV LANG=C.UTF-8
