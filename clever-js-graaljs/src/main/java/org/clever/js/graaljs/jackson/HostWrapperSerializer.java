@@ -9,16 +9,19 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * 作者：lizw <br/>
  * 创建时间：2020/08/26 18:37 <br/>
  */
 public class HostWrapperSerializer extends JsonSerializer<Object> {
-    // TODO 这里需要根据 graaljs 版本调整
-    public static final String FunctionProxyHandler_Class = "com.oracle.truffle.polyglot.FunctionProxyHandler";
-    public static final String ObjectProxyHandler_Class = "com.oracle.truffle.polyglot.ObjectProxyHandler";
+    // 这里需要根据 graaljs 版本调整
+    public static final String PolyglotFunctionProxyHandler_Class = "com.oracle.truffle.polyglot.PolyglotFunctionProxyHandler";
+    public static final String PolyglotObjectProxyHandler_Class = "com.oracle.truffle.polyglot.PolyglotObjectProxyHandler";
     public static final String PolyglotFunction_Class = "com.oracle.truffle.polyglot.PolyglotFunction";
     public static final String PolyglotList_Class = "com.oracle.truffle.polyglot.PolyglotList";
     public static final String PolyglotListAndFunction_Class = "com.oracle.truffle.polyglot.PolyglotListAndFunction";
@@ -27,17 +30,15 @@ public class HostWrapperSerializer extends JsonSerializer<Object> {
     public static final String ProxyObject_Class = "org.graalvm.polyglot.proxy.ProxyObject";
     public static final String ProxyArray_Class = "org.graalvm.polyglot.proxy.ProxyArray";
 
-    public static final Set<String> Support_Class = Collections.unmodifiableSet(new HashSet<>(
-            Arrays.asList(
-                    FunctionProxyHandler_Class,
-                    ObjectProxyHandler_Class,
-                    PolyglotFunction_Class,
-                    PolyglotList_Class,
-                    PolyglotListAndFunction_Class,
-                    PolyglotMap_Class,
-                    PolyglotMapAndFunction_Class
-            )
-    ));
+    public static final Set<String> Support_Class = Set.of(
+        PolyglotFunctionProxyHandler_Class,
+        PolyglotObjectProxyHandler_Class,
+        PolyglotFunction_Class,
+        PolyglotList_Class,
+        PolyglotListAndFunction_Class,
+        PolyglotMap_Class,
+        PolyglotMapAndFunction_Class
+    );
 
     public final static HostWrapperSerializer INSTANCE = new HostWrapperSerializer();
 
@@ -49,9 +50,9 @@ public class HostWrapperSerializer extends JsonSerializer<Object> {
             return;
         }
         String className = value.getClass().getName();
-        if (Objects.equals(FunctionProxyHandler_Class, className)) {
+        if (Objects.equals(PolyglotFunctionProxyHandler_Class, className)) {
             gen.writeString(String.valueOf(value));
-        } else if (Objects.equals(ObjectProxyHandler_Class, className)) {
+        } else if (Objects.equals(PolyglotObjectProxyHandler_Class, className)) {
             gen.writeString(String.valueOf(value));
         } else if (Objects.equals(PolyglotFunction_Class, className)) {
             gen.writeString(String.valueOf(value));

@@ -21,7 +21,7 @@ public class ScriptEngineUtils {
      * Context 默认选项
      */
     public static final Map<String, String> CONTEXT_DEFAULT_OPTIONS = new HashMap<>() {{
-        put("js.ecmascript-version", GraalConstant.ECMASCRIPT_VERSION);
+        // put("js.ecmascript-version", GraalConstant.ECMASCRIPT_VERSION);
         // "js.nashorn-compat", "true", // EXPERIMENTAL | js.nashorn-compat -> 实验性特性需要删除
         // "js.experimental-foreign-object-prototype", "true" // 实验性特性需要删除
     }};
