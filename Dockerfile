@@ -8,6 +8,7 @@ EXPOSE 8080
 FROM 192.168.1.211:30001/library/graaljs:jdk-17.0.12 AS task_graaljs
 COPY clever-boot/build/libs/ /app/
 WORKDIR /app
+ENV LANG=C.UTF-8
 SHELL ["/bin/sh", "-c"]
 ENTRYPOINT exec java ${JAVA_MEM_OPTS} ${DATABASE_OPTS} ${JAVA_OPTS_EXT} ${JAVA_ADD_OPENS} -jar /app/clever-boot-1.0.1-SNAPSHOT.jar --spring.profiles.active=${ACTIVE_PROFILES} --web.port=8080
 EXPOSE 8080
