@@ -1,6 +1,9 @@
 package org.clever.task.core.model;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 作者：lizw <br/>
@@ -228,34 +231,30 @@ public interface EnumConstant {
     /**
      * shell脚本类型对应的文件后缀
      */
-    Map<String, String> SHELL_TYPE_FILE_SUFFIX_MAPPING = Collections.unmodifiableMap(
-        new HashMap<>() {{
-            put(SHELL_JOB_SHELL_TYPE_BASH, ".sh");
-            put(SHELL_JOB_SHELL_TYPE_SH, ".sh");
-            put(SHELL_JOB_SHELL_TYPE_ASH, ".sh");
-            put(SHELL_JOB_SHELL_TYPE_POWERSHELL, ".ps1");
-            put(SHELL_JOB_SHELL_TYPE_CMD, ".bat");
-            put(SHELL_JOB_SHELL_TYPE_PYTHON, ".py");
-            put(SHELL_JOB_SHELL_TYPE_NODE, ".js");
-            put(SHELL_JOB_SHELL_TYPE_DENO, ".ts");
-            put(SHELL_JOB_SHELL_TYPE_PHP, ".php");
-        }}
+    Map<String, String> SHELL_TYPE_FILE_SUFFIX_MAPPING = Map.of(
+        SHELL_JOB_SHELL_TYPE_BASH, ".sh",
+        SHELL_JOB_SHELL_TYPE_SH, ".sh",
+        SHELL_JOB_SHELL_TYPE_ASH, ".sh",
+        SHELL_JOB_SHELL_TYPE_POWERSHELL, ".ps1",
+        SHELL_JOB_SHELL_TYPE_CMD, ".bat",
+        SHELL_JOB_SHELL_TYPE_PYTHON, ".py",
+        SHELL_JOB_SHELL_TYPE_NODE, ".js",
+        SHELL_JOB_SHELL_TYPE_DENO, ".ts",
+        SHELL_JOB_SHELL_TYPE_PHP, ".php"
     );
 
     /**
      * shell脚本类型对应的command命令
      */
-    Map<String, List<String>> SHELL_TYPE_COMMAND_MAPPING = Collections.unmodifiableMap(
-        new HashMap<>() {{
-            put(SHELL_JOB_SHELL_TYPE_BASH, Arrays.asList("sh", "-c"));
-            put(SHELL_JOB_SHELL_TYPE_SH, Arrays.asList("sh", "-c"));
-            put(SHELL_JOB_SHELL_TYPE_ASH, Arrays.asList("sh", "-c"));
-            put(SHELL_JOB_SHELL_TYPE_POWERSHELL, Collections.singletonList("powershell"));
-            put(SHELL_JOB_SHELL_TYPE_CMD, Arrays.asList("cmd", "/q", "/c"));
-            put(SHELL_JOB_SHELL_TYPE_PYTHON, Collections.singletonList("python"));
-            put(SHELL_JOB_SHELL_TYPE_NODE, Collections.singletonList("node"));
-            put(SHELL_JOB_SHELL_TYPE_DENO, Arrays.asList("deno", "run"));
-            put(SHELL_JOB_SHELL_TYPE_PHP, Collections.singletonList("php"));
-        }}
+    Map<String, List<String>> SHELL_TYPE_COMMAND_MAPPING = Map.of(
+        SHELL_JOB_SHELL_TYPE_BASH, Arrays.asList("/bin/bash", "-c"),
+        SHELL_JOB_SHELL_TYPE_SH, Arrays.asList("/bin/sh", "-c"),
+        SHELL_JOB_SHELL_TYPE_ASH, Arrays.asList("/bin/ash", "-c"),
+        SHELL_JOB_SHELL_TYPE_POWERSHELL, Collections.singletonList("powershell"),
+        SHELL_JOB_SHELL_TYPE_CMD, Arrays.asList("cmd", "/q", "/c"),
+        SHELL_JOB_SHELL_TYPE_PYTHON, Collections.singletonList("python"),
+        SHELL_JOB_SHELL_TYPE_NODE, Collections.singletonList("node"),
+        SHELL_JOB_SHELL_TYPE_DENO, Arrays.asList("deno", "run"),
+        SHELL_JOB_SHELL_TYPE_PHP, Collections.singletonList("php")
     );
 }
