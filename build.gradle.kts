@@ -260,7 +260,6 @@ subprojects {
         repositories {
             maven {
                 // setUrl("https://nexus.msvc.top/repository/maven-${if (buildSnapshot) "snapshots" else "releases"}/")
-                @Suppress("HttpUrlsUsage")
                 setUrl("http://all.msvc.top:30005/api/packages/clever/maven")
                 isAllowInsecureProtocol = true
                 credentials(HttpHeaderCredentials::class) {
