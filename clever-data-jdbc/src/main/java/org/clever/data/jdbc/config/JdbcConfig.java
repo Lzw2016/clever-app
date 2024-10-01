@@ -63,6 +63,10 @@ public class JdbcConfig {
          * 忽略的SQL语句(包含匹配，大小写敏感)
          */
         private Set<String> ignoreContainsSql = new HashSet<>();
+        /**
+         * 忽略的线程名(包含匹配，大小写敏感)
+         */
+        private Set<String> ignoreThread = new HashSet<>();
     }
 
     @Data

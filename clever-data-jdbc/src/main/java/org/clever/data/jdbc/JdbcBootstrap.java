@@ -73,11 +73,11 @@ public class JdbcBootstrap {
 
     private JdbcConfig.P6SpyLog initP6SpyLog() {
         final JdbcConfig.P6SpyLog p6spylog = Optional.ofNullable(jdbcConfig.getP6spylog()).orElse(new JdbcConfig.P6SpyLog());
-        Function<Collection<String>, List<String>> getSql = list -> {
+        Function<Collection<String>, List<String>> getStrings = list -> {
             List<String> sqlList = new ArrayList<>();
             if (list != null) {
-                for (String sql : list) {
-                    sqlList.add("    - " + SqlLoggerUtils.deleteWhitespace(sql));
+                for (String item : list) {
+                    sqlList.add("    - " + SqlLoggerUtils.deleteWhitespace(item));
                 }
             }
             return sqlList;
@@ -87,9 +87,11 @@ public class JdbcBootstrap {
         logs.add("  enable           : " + p6spylog.isEnable());
         logs.add("  slow             : " + p6spylog.getSlow() + "ms");
         logs.add("  ignoreSql        : ");
-        logs.addAll(getSql.apply(p6spylog.getIgnoreSql()));
+        logs.addAll(getStrings.apply(p6spylog.getIgnoreSql()));
         logs.add("  ignoreContainsSql: ");
-        logs.addAll(getSql.apply(p6spylog.getIgnoreContainsSql()));
+        logs.addAll(getStrings.apply(p6spylog.getIgnoreContainsSql()));
+        logs.add("  ignoreThread     : ");
+        logs.addAll(getStrings.apply(p6spylog.getIgnoreThread()));
         BannerUtils.printConfig(log, "p6spy打印sql日志配置", logs.toArray(new String[0]));
         return p6spylog;
     }

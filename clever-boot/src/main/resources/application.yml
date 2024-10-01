@@ -46,6 +46,8 @@ jdbc:
       - ' task_shell_job '
       - ' task_job_console_log '
       - ' task_scheduler_cmd '
+    ignore-thread:
+      - 'task-scheduler-pool-'
   metrics:
     enable: true
     max-sql-count: 200

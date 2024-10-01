@@ -100,6 +100,12 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
             } else if (LOG_CONFIG.getIgnoreContainsSql() != null && LOG_CONFIG.getIgnoreContainsSql().stream().anyMatch(preparedSql::contains)) {
                 // 忽略的SQL语句(包含匹配，大小写敏感)
                 ignore = true;
+            } else if (LOG_CONFIG.getIgnoreThread() != null) {
+                String threadName = Thread.currentThread().getName();
+                if (LOG_CONFIG.getIgnoreThread().stream().anyMatch(threadName::contains)) {
+                    // 忽略的线程名(包含匹配，大小写敏感)
+                    ignore = true;
+                }
             }
         }
         // 忽略打印SQL，输出DEBUG级别日志
