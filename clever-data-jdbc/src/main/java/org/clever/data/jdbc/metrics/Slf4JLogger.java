@@ -22,7 +22,6 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
     private static final Logger log = LoggerFactory.getLogger("p6spy.ignore");
     private static final Set<String> FORCE_LOG_CATEGORY = new HashSet<>();
     private static volatile JdbcConfig.P6SpyLog LOG_CONFIG;
-    private static volatile JdbcConfig.JdbcMetrics METRICS_CONFIG;
     private static volatile JdbcMetrics JDBC_METRICS;
     private static volatile boolean ENABLE_JDBC_METRICS = false;
 
@@ -41,7 +40,6 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
         Assert.notNull(logConfig, "参数 logConfig 不能为 null");
         Assert.notNull(metricsConfig, "参数 metricsConfig 不能为 null");
         LOG_CONFIG = logConfig;
-        METRICS_CONFIG = metricsConfig;
         JDBC_METRICS = new JdbcMetrics(metricsConfig);
         ENABLE_JDBC_METRICS = JDBC_METRICS != null
             && JDBC_METRICS.getConfig() != null
@@ -56,8 +54,7 @@ public class Slf4JLogger extends com.p6spy.engine.spy.appender.Slf4JLogger {
         }
         formatterInitialized = true;
         if (LOG_CONFIG != null) {
-            if (strategy instanceof P6SpyFormatter) {
-                P6SpyFormatter formatter = (P6SpyFormatter) strategy;
+            if (strategy instanceof P6SpyFormatter formatter) {
                 formatter.setSlow(LOG_CONFIG.getSlow());
             }
         }
