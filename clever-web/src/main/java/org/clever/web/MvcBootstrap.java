@@ -49,7 +49,7 @@ public class MvcBootstrap {
         logs.add("    datasource              : " + StringUtils.join(defTransactional.getDatasource(), " | "));
         logs.add("    propagation             : " + defTransactional.getPropagation());
         logs.add("    isolation               : " + defTransactional.getIsolation());
-        logs.add("    timeout                 : " + defTransactional.getTimeout());
+        logs.add("    timeout                 : " + defTransactional.getTimeout() + "s");
         logs.add("    readOnly                : " + defTransactional.isReadOnly());
         logs.add("  hotReload: ");
         logs.add("    enable                  : " + hotReload.isEnable());
