@@ -222,7 +222,7 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
     }
 
     /**
-     * 执行mvc拦截器 和
+     * 执行mvc拦截器
      *
      * @return {@code TupleTwo<Handler Method返回值, 出现的异常>}
      */
