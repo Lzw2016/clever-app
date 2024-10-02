@@ -2,6 +2,7 @@ package org.clever.security.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.security.config.LoginConfig;
 import org.clever.security.config.LogoutConfig;
 import org.clever.security.config.SecurityConfig;
@@ -19,10 +20,7 @@ public class PathFilterUtils {
     private static final AntPathMatcher ANT_PATH_MATCHER = new AntPathMatcher();
 
     public static String getPath(HttpServletRequest request) {
-        // request.getContextPath() /a
-        // request.getPathInfo() /b/c/xxx.html
-        // request.getRequestURI()  /a/b/c/xxx.html
-        return request.getPathInfo();
+        return HttpServletRequestUtils.getPathWithoutContextPath(request);
     }
 
     /**

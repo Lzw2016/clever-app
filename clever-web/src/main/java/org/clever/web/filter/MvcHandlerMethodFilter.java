@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.clever.core.Assert;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.mvc.HandlerMethod;
@@ -74,7 +75,7 @@ public class MvcHandlerMethodFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         // 当前请求是否满足mvc拦截配置
-        final String reqPath = ctx.req.getPathInfo();
+        final String reqPath = HttpServletRequestUtils.getPathWithoutContextPath(ctx.req);
         final HttpMethod httpMethod = HttpMethod.valueOf(ctx.req.getMethod());
         if (!reqPath.startsWith(mvcConfig.getPath()) || !mvcConfig.getHttpMethod().contains(httpMethod)) {
             ctx.next();

@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.*;
 import org.clever.core.exception.ExceptionUtils;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.core.job.DaemonExecutor;
 import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.web.config.MvcConfig;
@@ -127,7 +128,7 @@ public class DefaultHandlerMethodResolver implements HandlerMethodResolver {
 
     @Override
     public HandlerMethod getHandleMethod(HttpServletRequest request, HttpServletResponse response, MvcConfig mvcConfig) {
-        final String reqPath = request.getPathInfo();
+        final String reqPath = HttpServletRequestUtils.getPathWithoutContextPath(request);
         final List<MvcConfig.PackageMapping> packageMapping = mvcConfig.getPackageMapping();
         // 验证 path 前缀
         if (!reqPath.startsWith(mvcConfig.getPath())) {

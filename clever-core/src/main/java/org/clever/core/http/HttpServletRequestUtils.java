@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -82,6 +83,23 @@ public class HttpServletRequestUtils {
             }
             return requestUrl;
         }
+    }
+
+    /**
+     * 获取请求地址：request.getRequestURI() - request.getContextPath()
+     *
+     * @param request 请求对象
+     */
+    public static String getPathWithoutContextPath(HttpServletRequest request) {
+        String contextPath = StringUtils.trim(request.getContextPath());
+        String requestURI = request.getRequestURI();
+        if (StringUtils.isBlank(contextPath) || Objects.equals(contextPath, "/")) {
+            return requestURI;
+        }
+        if (StringUtils.startsWith(requestURI, contextPath)) {
+            return requestURI.substring(contextPath.length());
+        }
+        return requestURI;
     }
 
     /**

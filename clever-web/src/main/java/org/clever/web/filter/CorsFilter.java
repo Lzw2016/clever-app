@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppContextHolder;
 import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.CorsConfig;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -72,7 +73,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
             return;
         }
-        final String reqPath = ctx.req.getPathInfo();
+        final String reqPath = HttpServletRequestUtils.getPathWithoutContextPath(ctx.req);
         // 当前请求路径是否支持跨域
         boolean match = false;
         List<String> pathPattern = corsConfig.getPathPattern();

@@ -8,6 +8,7 @@ import org.clever.core.AppContextHolder;
 import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
 import org.clever.core.SystemClock;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.EchoConfig;
 import org.slf4j.Logger;
@@ -63,7 +64,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
             return;
         }
-        final String reqPath = ctx.req.getPathInfo();
+        final String reqPath = HttpServletRequestUtils.getPathWithoutContextPath(ctx.req);
         // 在 ignore 出现的路径，忽略掉
         List<String> ignore = echoConfig.getIgnorePaths();
         if (ignore != null && !ignore.isEmpty()) {

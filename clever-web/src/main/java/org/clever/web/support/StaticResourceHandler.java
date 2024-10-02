@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Assert;
 import org.clever.core.ResourcePathUtils;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.web.config.StaticResourceConfig;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -98,7 +99,7 @@ public class StaticResourceHandler {
      * @return 不匹配或者不存在则返回 null
      */
     public Resource getResource(HttpServletRequest request) throws IOException {
-        String path = request.getPathInfo();
+        String path = HttpServletRequestUtils.getPathWithoutContextPath(request);
         // 判断请求前缀是否满足配置
         if (org.apache.commons.lang3.StringUtils.isBlank(path) || !path.startsWith(hostedPath)) {
             return null;
