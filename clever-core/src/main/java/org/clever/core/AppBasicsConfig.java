@@ -20,6 +20,13 @@ import java.util.List;
 @Data
 @Slf4j
 public class AppBasicsConfig {
+    public static AppBasicsConfig create(Environment environment) {
+        AppBasicsConfig appBasicsConfig = Binder.get(environment).bind(AppBasicsConfig.PREFIX, AppBasicsConfig.class).orElseGet(AppBasicsConfig::new);
+        AppContextHolder.registerBean("rootPath", appBasicsConfig.rootPath, true);
+        AppContextHolder.registerBean("appBasicsConfig", appBasicsConfig, true);
+        return appBasicsConfig;
+    }
+
     public static final String PREFIX = "app";
     /**
      * 应用根路径配置
@@ -37,17 +44,13 @@ public class AppBasicsConfig {
     /**
      * 初始化应用基础配置
      */
-    public static AppBasicsConfig init(Environment environment) {
-        AppBasicsConfig config = Binder.get(environment).bind(AppBasicsConfig.PREFIX, AppBasicsConfig.class).orElseGet(AppBasicsConfig::new);
-        AnsiOutput.setEnabled(config.ansi);
-        AnsiOutput.setConsoleAvailable(config.consoleAvailable);
-        AppContextHolder.registerBean("rootPath", config.rootPath, true);
-        AppContextHolder.registerBean("appBasicsConfig", config, true);
+    public void init() {
+        AnsiOutput.setEnabled(this.ansi);
+        AnsiOutput.setConsoleAvailable(this.consoleAvailable);
         List<String> logs = new ArrayList<>();
-        logs.add("rootPath        : " + ResourcePathUtils.getAbsolutePath(config.rootPath, ""));
-        logs.add("ansi            : " + config.ansi);
-        logs.add("consoleAvailable: " + config.consoleAvailable);
+        logs.add("rootPath        : " + ResourcePathUtils.getAbsolutePath(this.rootPath, ""));
+        logs.add("ansi            : " + this.ansi);
+        logs.add("consoleAvailable: " + this.consoleAvailable);
         BannerUtils.printConfig(log, "应用配置", logs.toArray(new String[0]));
-        return config;
     }
 }

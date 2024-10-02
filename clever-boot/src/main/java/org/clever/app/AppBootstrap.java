@@ -45,11 +45,11 @@ public abstract class AppBootstrap {
     private static void doStart(String[] args) {
         final long startTime = System.currentTimeMillis();
         // 读取系统配置
-        StandardEnvironment environment = new StandardEnvironment();
-        ConfigDataBootstrap configDataBootstrap = new ConfigDataBootstrap();
+        final StandardEnvironment environment = new StandardEnvironment();
+        final ConfigDataBootstrap configDataBootstrap = new ConfigDataBootstrap();
         configDataBootstrap.init(environment, args);
         // 初始化日志模块
-        LoggingBootstrap loggingBootstrap = new LoggingBootstrap();
+        final LoggingBootstrap loggingBootstrap = new LoggingBootstrap();
         loggingBootstrap.init(environment);
         AppContextHolder.registerBean("environment", environment, true);
         AppContextHolder.registerBean("loggingBootstrap", loggingBootstrap, true);
@@ -57,24 +57,25 @@ public abstract class AppBootstrap {
         startupInfoLogger.logStarting(log);
         log.info("The following profiles are active: {}", StringUtils.join(environment.getActiveProfiles(), ", "));
         // 全局的资源根路径
-        AppBasicsConfig appBasicsConfig = AppBasicsConfig.init(environment);
+        final AppBasicsConfig appBasicsConfig = AppBasicsConfig.create(environment);
         final String rootPath = appBasicsConfig.getRootPath();
+        appBasicsConfig.init();
         // Jdbc初始化
-        JdbcBootstrap jdbcBootstrap = JdbcBootstrap.create(rootPath, environment);
+        final JdbcBootstrap jdbcBootstrap = JdbcBootstrap.create(rootPath, environment);
         jdbcBootstrap.init();
         // Redis初始化
-        RedisBootstrap redisBootstrap = RedisBootstrap.create(environment);
+        final RedisBootstrap redisBootstrap = RedisBootstrap.create(environment);
         redisBootstrap.init();
         // 创建web服务
-        WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(rootPath, environment);
+        final WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(rootPath, environment);
         final WebConfig webConfig = webServerBootstrap.getWebConfig();
         // mvc功能
-        MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, environment);
+        final MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, environment);
         // security功能
-        SecurityBootstrap securityBootstrap = SecurityBootstrap.create(environment);
+        final SecurityBootstrap securityBootstrap = SecurityBootstrap.create(environment);
         SecurityBootstrap.useDefaultSecurity(securityBootstrap.getSecurityConfig());
         // 注册 Filter
-        OrderIncrement filterOrder = new OrderIncrement();
+        final OrderIncrement filterOrder = new OrderIncrement();
         webServerBootstrap.getFilterRegistrar()
             .addFilter(ApplyConfigFilter.create(rootPath, webConfig), PathConstants.ALL, "ApplyConfigFilter", filterOrder.incrL1())
             .addFilter(EchoFilter.create(environment), PathConstants.ALL, "EchoFilter", filterOrder.incrL1())
@@ -111,7 +112,7 @@ public abstract class AppBootstrap {
         // webServerBootstrap.getHandlerRegistrar()
         //         .addWsAfterHandler()
         // 注册插件
-        OrderIncrement pluginOrder = new OrderIncrement();
+        final OrderIncrement pluginOrder = new OrderIncrement();
         webServerBootstrap.getPluginRegistrar()
             .addPlugin(ExceptionHandlerPlugin.INSTANCE, "异常处理插件", pluginOrder.incrL1())
             .addPlugin(mvcBootstrap.getMvcFilter(), "MVC处理插件", pluginOrder.incrL1())
@@ -121,7 +122,7 @@ public abstract class AppBootstrap {
         // webServerBootstrap.getJavalinEventListenerRegistrar()
         //         .addListener()
         // 初始化web服务
-        Javalin javalin = webServerBootstrap.init();
+        final Javalin javalin = webServerBootstrap.init();
         AppContextHolder.registerBean("javalin", javalin, true);
         // 自定义请求处理
         // javalin.get();
@@ -132,14 +133,14 @@ public abstract class AppBootstrap {
         AppShutdownHook.addShutdownHook(javalin::stop, OrderIncrement.NORMAL, "停止WebServer");
         AppShutdownHook.addShutdownHook(loggingBootstrap::destroy, Double.MAX_VALUE, "停止日志模块");
         // 启动开机任务
-        StartupTaskBootstrap startupTaskBootstrap = StartupTaskBootstrap.create(rootPath, environment);
+        final StartupTaskBootstrap startupTaskBootstrap = StartupTaskBootstrap.create(rootPath, environment);
         ClassLoader classLoader = AppContextHolder.getBean("hotReloadClassLoader", ClassLoader.class);
         if (classLoader != null) {
             startupTaskBootstrap.setClassLoader(classLoader);
         }
         startupTaskBootstrap.start();
         // 分布式定时任务
-        TaskBootstrap taskBootstrap = TaskBootstrap.create(rootPath, environment);
+        final TaskBootstrap taskBootstrap = TaskBootstrap.create(rootPath, environment);
         JsExecutorBootstrap jsExecutorBootstrap = JsExecutorBootstrap.create(taskBootstrap.getSchedulerConfig(), environment);
         jsExecutorBootstrap.init();
         taskBootstrap.start();
