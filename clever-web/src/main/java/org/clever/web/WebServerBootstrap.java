@@ -84,9 +84,9 @@ public class WebServerBootstrap {
         }
         logs.add("    multipart:");
         logs.add("      location              :" + multipart.getLocation());
-        logs.add("      maxFileSize           :" + multipart.getMaxFileSize());
+        logs.add("      maxFileSize           :" + multipart.getMaxFileSize().toMegabytes() + "MB");
         logs.add("      maxTotalRequestSize   :" + multipart.getMaxTotalRequestSize().toMegabytes() + "MB");
-        logs.add("      maxInMemoryFileSize   :" + multipart.getMaxInMemoryFileSize().toMegabytes() + "MB");
+        logs.add("      maxInMemoryFileSize   :" + multipart.getMaxInMemoryFileSize().toKilobytes() + "KB");
         if (!singlePageRoot.isEmpty()) {
             logs.add("    singlePageRoot:");
             int maxLength = singlePageRoot.stream()
