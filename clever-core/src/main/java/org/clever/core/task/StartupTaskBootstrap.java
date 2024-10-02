@@ -4,10 +4,9 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.clever.core.*;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.Environment;
-import org.clever.core.Assert;
 
 import java.io.File;
 import java.util.ArrayList;

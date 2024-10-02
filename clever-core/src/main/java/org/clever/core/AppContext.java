@@ -5,7 +5,6 @@ import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.ResolvableType;
-import org.clever.core.Assert;
 
 import java.util.ArrayList;
 import java.util.List;

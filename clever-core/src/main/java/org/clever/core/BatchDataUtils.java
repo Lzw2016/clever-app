@@ -1,7 +1,5 @@
 package org.clever.core;
 
-import org.clever.core.Assert;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

@@ -1,9 +1,9 @@
 package org.clever.core.validator;
 
+import jakarta.validation.*;
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.HibernateValidatorConfiguration;
 
-import jakarta.validation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

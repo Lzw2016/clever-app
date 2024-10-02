@@ -3,11 +3,11 @@ package org.clever.core.task;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppShutdownHook;
+import org.clever.core.Assert;
 import org.clever.core.OrderIncrement;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.job.GlobalJob;
 import org.clever.core.reflection.ReflectionsUtils;
-import org.clever.core.Assert;
 
 import java.lang.reflect.Method;
 import java.time.Duration;

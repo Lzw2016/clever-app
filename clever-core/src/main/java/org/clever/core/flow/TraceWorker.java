@@ -1,8 +1,8 @@
 package org.clever.core.flow;
 
 import lombok.Getter;
-import org.clever.core.SystemClock;
 import org.clever.core.Assert;
+import org.clever.core.SystemClock;
 
 import java.util.Collections;
 import java.util.List;
