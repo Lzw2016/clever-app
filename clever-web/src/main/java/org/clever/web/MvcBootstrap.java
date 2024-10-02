@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppContextHolder;
 import org.clever.core.BannerUtils;
 import org.clever.core.ResourcePathUtils;
+import org.clever.core.StrFormatter;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.filter.MvcFilter;
 import org.clever.web.filter.MvcHandlerMethodFilter;
@@ -53,7 +54,7 @@ public class MvcBootstrap {
         logs.add("  hotReload: ");
         logs.add("    enable                  : " + hotReload.isEnable());
         logs.add("    watchFile               : " + ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getWatchFile()));
-        logs.add("    interval                : " + hotReload.getInterval().toMillis() + "ms");
+        logs.add("    interval                : " + StrFormatter.toPlainString(hotReload.getInterval()));
         logs.add("    excludePackages         : " + StringUtils.join(hotReload.getExcludePackages(), " | "));
         logs.add("    excludeClasses          : " + StringUtils.join(hotReload.getExcludeClasses(), " | "));
         logs.add("    locations               : " + StringUtils.join(hotReload.getLocations().stream().map(locationMap::get).toArray(), " | "));

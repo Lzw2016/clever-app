@@ -43,7 +43,7 @@ public class TaskBootstrap {
         logs.add("  jobExecutorQueueSize      : " + config.getJobExecutorQueueSize());
         logs.add("  loadWeight                : " + config.getLoadWeight());
         logs.add("  shellJobWorkingDir        : " + ResourcePathUtils.getAbsolutePath(rootPath, config.getShellJobWorkingDir()));
-        logs.add("  logRetention              : " + (config.getLogRetention() != null ? config.getLogRetention().toMillis() + "ms" : ""));
+        logs.add("  logRetention              : " + StrFormatter.toPlainString(config.getLogRetention()));
         if (config.isEnable()) {
             BannerUtils.printConfig(log, "定时任务配置", logs.toArray(new String[0]));
         }

@@ -3,10 +3,7 @@ package org.clever.data.redis;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.AppContextHolder;
-import org.clever.core.Assert;
-import org.clever.core.BannerUtils;
-import org.clever.core.SystemClock;
+import org.clever.core.*;
 import org.clever.data.redis.config.RedisConfig;
 import org.clever.data.redis.config.RedisProperties;
 import org.clever.data.redis.support.LettuceClientConfigurationBuilderCustomizer;
@@ -99,7 +96,7 @@ public class RedisBootstrap {
                 logs.add("        enabled      : " + pool.isEnabled());
                 logs.add("        maxIdle      : " + pool.getMaxIdle());
                 logs.add("        maxActive    : " + pool.getMaxActive());
-                logs.add("        maxWait      : " + pool.getMaxWait().toMillis() + "ms");
+                logs.add("        maxWait      : " + StrFormatter.toPlainString(pool.getMaxWait()));
             }
         });
         if (redisConfig.isEnable()) {

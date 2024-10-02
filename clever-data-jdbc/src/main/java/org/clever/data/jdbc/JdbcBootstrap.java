@@ -120,7 +120,7 @@ public class JdbcBootstrap {
         logs.add("mybatis: ");
         logs.add("  enable   : " + mybatisConfig.isEnable());
         logs.add("  watcher  : " + mybatisConfig.isWatcher());
-        logs.add("  interval : " + interval.toMillis() + "ms");
+        logs.add("  interval : " + StrFormatter.toPlainString(interval));
         logs.add("  locations: ");
         for (MybatisConfig.MapperLocation location : locations) {
             String path = location.getLocation();
