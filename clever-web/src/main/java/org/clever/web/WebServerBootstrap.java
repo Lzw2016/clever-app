@@ -58,7 +58,6 @@ public class WebServerBootstrap {
         AppContextHolder.registerBean("webConfig", webConfig, true);
         List<String> logs = new ArrayList<>();
         logs.add("web:");
-        logs.add("  useJavalin                :" + webConfig.isUseJavalin());
         logs.add("  host                      :" + webConfig.getHost());
         logs.add("  port                      :" + webConfig.getPort());
         logs.add("  useVirtualThreads         :" + webConfig.isUseVirtualThreads());
@@ -77,11 +76,9 @@ public class WebServerBootstrap {
         logs.add("    maxRequestSize          :" + http.getMaxRequestSize().toMegabytes() + "MB");
         logs.add("    prefer405over404        :" + http.isPrefer405over404());
         logs.add("    enforceSsl              :" + http.isEnforceSsl());
-        if (webConfig.isUseJavalin()) {
-            logs.add("    enableWebjars           :" + http.isEnableWebjars());
-            logs.add("    enableCorsForAllOrigins :" + http.isEnableCorsForAllOrigins());
-            logs.add("    enableCorsForOrigin     :" + http.getEnableCorsForOrigin());
-        }
+        logs.add("    enableWebjars           :" + http.isEnableWebjars());
+        logs.add("    enableCorsForAllOrigins :" + http.isEnableCorsForAllOrigins());
+        logs.add("    enableCorsForOrigin     :" + http.getEnableCorsForOrigin());
         logs.add("    multipart:");
         logs.add("      location              :" + multipart.getLocation());
         logs.add("      maxFileSize           :" + multipart.getMaxFileSize().toMegabytes() + "MB");

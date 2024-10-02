@@ -16,10 +16,6 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 public class WebConfig {
     public static final String PREFIX = "web";
     /**
-     * TODO 是否使用 javalin
-     */
-    private boolean useJavalin = true;
-    /**
      * web服务要绑定的主机IP，默认："0.0.0.0"
      */
     private String host = "0.0.0.0";
