@@ -1029,6 +1029,7 @@ public class TaskStore {
                     .set(taskReport.jobErrCount, report.getJobErrCount())
                     .set(taskReport.triggerCount, report.getTriggerCount())
                     .set(taskReport.misfireCount, report.getMisfireCount())
+                    .where(taskReport.namespace.eq(namespace))
                     .where(taskReport.reportTime.eq(report.getReportTime()))
                     .addBatch();
             } else {
