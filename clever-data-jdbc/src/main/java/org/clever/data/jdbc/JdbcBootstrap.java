@@ -72,7 +72,10 @@ public class JdbcBootstrap {
     }
 
     private JdbcConfig.P6SpyLog initP6SpyLog() {
-        final JdbcConfig.P6SpyLog p6spylog = Optional.ofNullable(jdbcConfig.getP6spylog()).orElse(new JdbcConfig.P6SpyLog());
+        final JdbcConfig.P6SpyLog p6spylog = Optional.ofNullable(jdbcConfig.getP6spylog()).orElseGet(() -> {
+            jdbcConfig.setP6spylog(new JdbcConfig.P6SpyLog());
+            return jdbcConfig.getP6spylog();
+        });
         Function<Collection<String>, List<String>> getStrings = list -> {
             List<String> sqlList = new ArrayList<>();
             if (list != null) {
@@ -97,7 +100,10 @@ public class JdbcBootstrap {
     }
 
     private JdbcConfig.JdbcMetrics initMetrics() {
-        final JdbcConfig.JdbcMetrics metrics = Optional.ofNullable(jdbcConfig.getMetrics()).orElse(new JdbcConfig.JdbcMetrics());
+        final JdbcConfig.JdbcMetrics metrics = Optional.ofNullable(jdbcConfig.getMetrics()).orElseGet(() -> {
+            jdbcConfig.setMetrics(new JdbcConfig.JdbcMetrics());
+            return jdbcConfig.getMetrics();
+        });
         if (metrics.isEnable()) {
             BannerUtils.printConfig(log, "jdbc性能监控配置",
                 new String[]{
@@ -169,7 +175,10 @@ public class JdbcBootstrap {
     }
 
     private void initJdbc() {
-        final HikariConfig global = Optional.ofNullable(jdbcConfig.getGlobal()).orElse(new HikariConfig());
+        final HikariConfig global = Optional.ofNullable(jdbcConfig.getGlobal()).orElseGet(() -> {
+            jdbcConfig.setGlobal(new HikariConfig());
+            return jdbcConfig.getGlobal();
+        });
         final Map<String, HikariConfig> dataSource = Optional.ofNullable(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
         // 合并数据源配置
         dataSource.forEach((name, config) -> {

@@ -37,16 +37,24 @@ public class WebServerBootstrap {
 
     public static WebServerBootstrap create(String rootPath, Environment environment) {
         WebConfig webConfig = Binder.get(environment).bind(WebConfig.PREFIX, WebConfig.class).orElseGet(WebConfig::new);
-        JacksonConfig jackson = Optional.ofNullable(webConfig.getJackson()).orElse(new JacksonConfig());
-        webConfig.setJackson(jackson);
-        HttpConfig http = Optional.ofNullable(webConfig.getHttp()).orElse(new HttpConfig());
-        webConfig.setHttp(http);
-        HttpConfig.Multipart multipart = Optional.ofNullable(http.getMultipart()).orElse(new HttpConfig.Multipart());
-        http.setMultipart(multipart);
+        JacksonConfig jackson = Optional.ofNullable(webConfig.getJackson()).orElseGet(() -> {
+            webConfig.setJackson(new JacksonConfig());
+            return webConfig.getJackson();
+        });
+        HttpConfig http = Optional.ofNullable(webConfig.getHttp()).orElseGet(() -> {
+            webConfig.setHttp(new HttpConfig());
+            return webConfig.getHttp();
+        });
+        HttpConfig.Multipart multipart = Optional.ofNullable(http.getMultipart()).orElseGet(() -> {
+            http.setMultipart(new HttpConfig.Multipart());
+            return http.getMultipart();
+        });
         List<HttpConfig.SinglePageRoot> singlePageRoot = http.getSinglePageRoot();
         List<HttpConfig.StaticFile> staticFile = http.getStaticFile();
-        WebSocketConfig websocket = Optional.ofNullable(webConfig.getWebsocket()).orElse(new WebSocketConfig());
-        webConfig.setWebsocket(websocket);
+        WebSocketConfig websocket = Optional.ofNullable(webConfig.getWebsocket()).orElseGet(() -> {
+            webConfig.setWebsocket(new WebSocketConfig());
+            return webConfig.getWebsocket();
+        });
         AppContextHolder.registerBean("webConfig", webConfig, true);
         List<String> logs = new ArrayList<>();
         logs.add("web:");

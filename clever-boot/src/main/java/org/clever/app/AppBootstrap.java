@@ -9,6 +9,7 @@ import org.clever.core.AppShutdownHook;
 import org.clever.core.OrderIncrement;
 import org.clever.core.task.StartupTaskBootstrap;
 import org.clever.data.jdbc.JdbcBootstrap;
+import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.redis.RedisBootstrap;
 import org.clever.security.SecurityBootstrap;
 import org.clever.spring.boot.ConfigDataBootstrap;
@@ -62,6 +63,7 @@ public abstract class AppBootstrap {
         appBasicsConfig.init();
         // Jdbc初始化
         final JdbcBootstrap jdbcBootstrap = JdbcBootstrap.create(rootPath, environment);
+        final JdbcConfig jdbcConfig = jdbcBootstrap.getJdbcConfig();
         jdbcBootstrap.init();
         // Redis初始化
         final RedisBootstrap redisBootstrap = RedisBootstrap.create(environment);
@@ -70,7 +72,7 @@ public abstract class AppBootstrap {
         final WebServerBootstrap webServerBootstrap = WebServerBootstrap.create(rootPath, environment);
         final WebConfig webConfig = webServerBootstrap.getWebConfig();
         // mvc功能
-        final MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, environment);
+        final MvcBootstrap mvcBootstrap = MvcBootstrap.create(rootPath, jdbcConfig.getDefaultName(), environment);
         // security功能
         final SecurityBootstrap securityBootstrap = SecurityBootstrap.create(environment);
         SecurityBootstrap.useDefaultSecurity(securityBootstrap.getSecurityConfig());

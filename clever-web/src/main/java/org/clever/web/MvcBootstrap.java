@@ -24,17 +24,21 @@ import java.util.Optional;
  */
 @Slf4j
 public class MvcBootstrap {
-    public static MvcBootstrap create(String rootPath, MvcConfig mvcConfig) {
-        MvcFilter mvcFilter = new MvcFilter(rootPath, mvcConfig);
+    public static MvcBootstrap create(String rootPath, String jdbcDefaultName, MvcConfig mvcConfig) {
+        MvcFilter mvcFilter = new MvcFilter(rootPath, jdbcDefaultName, mvcConfig);
         return new MvcBootstrap(mvcFilter);
     }
 
-    public static MvcBootstrap create(String rootPath, Environment environment) {
+    public static MvcBootstrap create(String rootPath, String jdbcDefaultName, Environment environment) {
         MvcConfig mvcConfig = Binder.get(environment).bind(MvcConfig.PREFIX, MvcConfig.class).orElseGet(MvcConfig::new);
-        MvcConfig.TransactionalConfig defTransactional = Optional.ofNullable(mvcConfig.getDefTransactional()).orElse(new MvcConfig.TransactionalConfig());
-        mvcConfig.setDefTransactional(defTransactional);
-        MvcConfig.HotReload hotReload = Optional.ofNullable(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
-        mvcConfig.setHotReload(hotReload);
+        MvcConfig.TransactionalConfig defTransactional = Optional.ofNullable(mvcConfig.getDefTransactional()).orElseGet(() -> {
+            mvcConfig.setDefTransactional(new MvcConfig.TransactionalConfig());
+            return mvcConfig.getDefTransactional();
+        });
+        MvcConfig.HotReload hotReload = Optional.ofNullable(mvcConfig.getHotReload()).orElseGet(() -> {
+            mvcConfig.setHotReload(new MvcConfig.HotReload());
+            return mvcConfig.getHotReload();
+        });
         Map<String, String> locationMap = ResourcePathUtils.getAbsolutePath(rootPath, hotReload.getLocations());
         AppContextHolder.registerBean("mvcConfig", mvcConfig, true);
         List<String> logs = new ArrayList<>();
@@ -61,7 +65,7 @@ public class MvcBootstrap {
         if (mvcConfig.isEnable()) {
             BannerUtils.printConfig(log, "mvc配置", logs.toArray(new String[0]));
         }
-        return create(rootPath, mvcConfig);
+        return create(rootPath, jdbcDefaultName, mvcConfig);
     }
 
     @Getter

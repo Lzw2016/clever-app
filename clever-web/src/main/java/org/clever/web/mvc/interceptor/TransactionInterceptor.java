@@ -36,18 +36,31 @@ public class TransactionInterceptor implements HandlerInterceptor {
     private static final Isolation DEF_ISOLATION = Isolation.DEFAULT;
     private static final ThreadLocal<List<TransactionInfo>> TX_INFO = new ThreadLocal<>();
 
-    @Getter
-    private final List<String> defDatasource;
+    /**
+     * 默认的事务配置
+     */
     @Getter
     private final MvcConfig.TransactionalConfig defTransactional;
+    /**
+     * 默认使用 {@code "jdbc.defaultName"} 配置的数据源
+     */
+    @Getter
+    private final String jdbcDefaultName;
+    /**
+     * 使用 Transactional 时的默认 datasource 值
+     */
+    @Getter
+    private final List<String> defDatasource;
 
-    public TransactionInterceptor(MvcConfig mvcConfig) {
+    public TransactionInterceptor(String jdbcDefaultName, MvcConfig mvcConfig) {
+        Assert.isNotBlank(jdbcDefaultName, "参数 jdbcDefaultName 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为null");
-        this.defDatasource = Collections.unmodifiableList(mvcConfig.getTransactionalDefDatasource());
+        this.jdbcDefaultName = jdbcDefaultName;
         this.defTransactional = Optional.ofNullable(mvcConfig.getDefTransactional()).orElseGet(() -> {
             mvcConfig.setDefTransactional(new MvcConfig.TransactionalConfig());
             return mvcConfig.getDefTransactional();
         });
+        this.defDatasource = Collections.unmodifiableList(mvcConfig.getTransactionalDefDatasource());
     }
 
     protected TransactionalAnnotation readTransactionalConfig(final Method method) {
@@ -100,6 +113,10 @@ public class TransactionInterceptor implements HandlerInterceptor {
             // 使用默认的数据源
             if (txConfig.getDatasource() == null || txConfig.getDatasource().isEmpty()) {
                 txConfig.setDatasource(defDatasource);
+                // 使用 "jdbc.defaultName" 配置的数据源
+                if (txConfig.getDatasource().isEmpty()) {
+                    txConfig.setDatasource(Collections.singletonList(this.jdbcDefaultName));
+                }
             }
             txConfig.setPropagation(tx.propagation);
             txConfig.setIsolation(tx.isolation);

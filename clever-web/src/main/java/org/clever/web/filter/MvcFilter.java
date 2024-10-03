@@ -54,6 +54,10 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
      */
     protected static final ObjectMapper DEF_OBJECT_MAPPER = JacksonMapper.getInstance().getMapper();
     protected final String rootPath;
+    /**
+     * 默认使用 {@code "jdbc.defaultName"} 配置的数据源
+     */
+    protected final String jdbcDefaultName;
     protected final MvcConfig mvcConfig;
     protected JavalinConfig javalinConfig;
     protected ObjectMapper objectMapper;
@@ -61,19 +65,23 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
     protected final List<HandlerMethodArgumentResolver> argumentResolvers = new CopyOnWriteArrayList<>();
     protected final List<HandlerInterceptor> interceptors = new CopyOnWriteArrayList<>();
 
-    public MvcFilter(String rootPath, MvcConfig mvcConfig, ObjectMapper objectMapper) {
+    public MvcFilter(String rootPath, String jdbcDefaultName, MvcConfig mvcConfig, ObjectMapper objectMapper) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
+        Assert.isNotBlank(jdbcDefaultName, "参数 jdbcDefaultName 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        MvcConfig.HotReload hotReload = Optional.ofNullable(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
-        mvcConfig.setHotReload(hotReload);
+        MvcConfig.HotReload hotReload = Optional.ofNullable(mvcConfig.getHotReload()).orElseGet(() -> {
+            mvcConfig.setHotReload(new MvcConfig.HotReload());
+            return mvcConfig.getHotReload();
+        });
         this.rootPath = rootPath;
+        this.jdbcDefaultName = jdbcDefaultName;
         this.mvcConfig = mvcConfig;
         this.objectMapper = Optional.ofNullable(objectMapper).orElse(DEF_OBJECT_MAPPER);
         this.handlerMethodResolver = new DefaultHandlerMethodResolver(rootPath, hotReload);
     }
 
-    public MvcFilter(String rootPath, MvcConfig mvcConfig) {
-        this(rootPath, mvcConfig, null);
+    public MvcFilter(String rootPath, String jdbcDefaultName, MvcConfig mvcConfig) {
+        this(rootPath, jdbcDefaultName, mvcConfig, null);
     }
 
     protected void initialize() {
@@ -118,7 +126,7 @@ public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc
         // 设置默认的 HandlerInterceptor
         List<HandlerInterceptor> interceptors = new ArrayList<>(8);
         interceptors.add(new ArgumentsValidated());
-        interceptors.add(new TransactionInterceptor(mvcConfig));
+        interceptors.add(new TransactionInterceptor(jdbcDefaultName, mvcConfig));
         return interceptors;
     }
 

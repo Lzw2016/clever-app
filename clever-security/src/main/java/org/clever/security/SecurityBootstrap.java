@@ -175,16 +175,26 @@ public class SecurityBootstrap {
     public static SecurityBootstrap create(Environment environment) {
         SecurityConfig securityConfig = Binder.get(environment).bind(SecurityConfig.PREFIX, SecurityConfig.class).orElseGet(SecurityConfig::new);
         AppContextHolder.registerBean("securityConfig", securityConfig, true);
-        DataSourceConfig dataSource = Optional.ofNullable(securityConfig.getDataSource()).orElse(new DataSourceConfig());
-        securityConfig.setDataSource(dataSource);
-        LoginConfig login = Optional.ofNullable(securityConfig.getLogin()).orElse(new LoginConfig());
-        securityConfig.setLogin(login);
-        LogoutConfig logout = Optional.ofNullable(securityConfig.getLogout()).orElse(new LogoutConfig());
-        securityConfig.setLogout(logout);
-        AesKeyConfig reqAesKey = Optional.ofNullable(securityConfig.getReqAesKey()).orElse(new AesKeyConfig());
-        securityConfig.setReqAesKey(reqAesKey);
-        TokenConfig token = Optional.ofNullable(securityConfig.getToken()).orElse(new TokenConfig());
-        securityConfig.setToken(token);
+        DataSourceConfig dataSource = Optional.ofNullable(securityConfig.getDataSource()).orElseGet(() -> {
+            securityConfig.setDataSource(new DataSourceConfig());
+            return securityConfig.getDataSource();
+        });
+        LoginConfig login = Optional.ofNullable(securityConfig.getLogin()).orElseGet(() -> {
+            securityConfig.setLogin(new LoginConfig());
+            return securityConfig.getLogin();
+        });
+        LogoutConfig logout = Optional.ofNullable(securityConfig.getLogout()).orElseGet(() -> {
+            securityConfig.setLogout(new LogoutConfig());
+            return securityConfig.getLogout();
+        });
+        AesKeyConfig reqAesKey = Optional.ofNullable(securityConfig.getReqAesKey()).orElseGet(() -> {
+            securityConfig.setReqAesKey(new AesKeyConfig());
+            return securityConfig.getReqAesKey();
+        });
+        TokenConfig token = Optional.ofNullable(securityConfig.getToken()).orElseGet(() -> {
+            securityConfig.setToken(new TokenConfig());
+            return securityConfig.getToken();
+        });
         List<String> logs = new ArrayList<>();
         logs.add("security: ");
         logs.add("  enable                : " + securityConfig.isEnable());
