@@ -75,7 +75,6 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         add("HEAD");
     }};
 
-    @Getter
     private final StaticResourceConfig staticResourceConfig;
     private final List<StaticResourceHandler> staticResourceHandlers;
 
