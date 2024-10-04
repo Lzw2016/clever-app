@@ -41,8 +41,9 @@ import java.util.*;
 @Slf4j
 public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
     public static StaticResourceFilter create(String rootPath, StaticResourceConfig staticResourceConfig) {
+        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
         Assert.notNull(staticResourceConfig, "参数 staticResourceConfig 不能为 null");
-        return new StaticResourceFilter(staticResourceConfig.isEnable(), createHandler(rootPath, staticResourceConfig.getMappings()));
+        return new StaticResourceFilter(rootPath, staticResourceConfig);
     }
 
     public static StaticResourceFilter create(String rootPath, Environment environment) {
@@ -74,18 +75,21 @@ public class StaticResourceFilter implements FilterRegistrar.FilterFuc {
         add("HEAD");
     }};
 
-    private final boolean enable;
+    @Getter
+    private final StaticResourceConfig staticResourceConfig;
     private final List<StaticResourceHandler> staticResourceHandlers;
 
-    public StaticResourceFilter(boolean enable, List<StaticResourceHandler> staticResourceHandlers) {
-        this.enable = enable;
-        this.staticResourceHandlers = staticResourceHandlers;
+    public StaticResourceFilter(String rootPath, StaticResourceConfig staticResourceConfig) {
+        Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
+        Assert.notNull(staticResourceConfig, "参数 staticResourceConfig 不能为 null");
+        this.staticResourceConfig = staticResourceConfig;
+        this.staticResourceHandlers = createHandler(rootPath, staticResourceConfig.getMappings());
     }
 
     @Override
     public void doFilter(FilterRegistrar.Context ctx) throws IOException, ServletException {
         // 是否启用
-        if (!enable) {
+        if (!staticResourceConfig.isEnable()) {
             ctx.next();
             return;
         }
