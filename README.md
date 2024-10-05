@@ -453,23 +453,23 @@ web:
 
 ```yaml
 timed-task:
-  enable: true
-  standby: true
-  jdbc-name: 'postgresql'
-  namespace: 'default'
-  instance-name: 'node01'
-  description: 'dev节点01'
-  heartbeat-interval: 10000
-  scheduler-executor-pool-size: 16
-  job-executor-pool-size: 64
-  job-executor-queue-size: 64
-  load-weight: 1.0
-  shell-job-working-dir: './shell_job_log'
-  log-retention: 3d
-  js-executor:
-    engine-pool:
-      max-idle: 8
-      min-idle: 0
-      max-total: 8
-      max-wait: 30s
+    enable: true
+    standby: true
+    jdbc-name: 'postgresql'
+    namespace: 'default'
+    instance-name: 'node01'
+    description: 'dev节点01'
+    heartbeat-interval: 10000
+    scheduler-executor-pool-size: 16
+    job-executor-pool-size: 64
+    job-executor-queue-size: 64
+    load-weight: 1.0
+    shell-job-working-dir: './shell_job_log'
+    log-retention: 3d
+    js-executor:
+        engine-pool:
+            max-idle: 8
+            min-idle: 0
+            max-total: 8
+            max-wait: 30s
 ```
