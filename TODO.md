@@ -16,7 +16,7 @@
 支持JDK
 - [OK] JDK8
 - [  ] JDK11
-- [  ] JDK17
+- [OK] JDK17
 - [  ] JDK21
 
 ### clever-spring
