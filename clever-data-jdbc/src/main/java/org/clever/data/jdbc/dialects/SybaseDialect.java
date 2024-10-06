@@ -1,7 +1,7 @@
 package org.clever.data.jdbc.dialects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class SybaseDialect extends AbstractDialect {
     public String doBuildPaginationSql(String originalSql, long offset, long limit, Map<String, Object> paramMap, String firstMark, String secondMark) {
         limit = (offset >= 1) ? (offset + limit) : limit;
         paramMap.put(secondMark, limit);
-        originalSql = StringUtils.trimWhitespace(originalSql);
+        originalSql = StringUtils.trim(originalSql);
         int index = originalSql.toUpperCase().indexOf(" FROM ");
         StringBuilder sql = new StringBuilder("select");
         if (hasTop) {
@@ -43,7 +43,7 @@ public class SybaseDialect extends AbstractDialect {
     @Override
     public String buildPaginationSql(String originalSql, long offset, long limit) {
         limit = (offset >= 1) ? (offset + limit) : limit;
-        originalSql = StringUtils.trimWhitespace(originalSql);
+        originalSql = StringUtils.trim(originalSql);
         int index = originalSql.toUpperCase().indexOf(" FROM ");
         StringBuilder sql = new StringBuilder("select");
         if (hasTop) {

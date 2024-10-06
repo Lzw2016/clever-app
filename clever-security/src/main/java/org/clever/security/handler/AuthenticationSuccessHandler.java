@@ -1,11 +1,11 @@
 package org.clever.security.handler;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.clever.core.Ordered;
 import org.clever.security.model.jackson2.event.AuthenticationSuccessEvent;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**

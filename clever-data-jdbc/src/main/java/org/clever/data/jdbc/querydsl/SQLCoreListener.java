@@ -3,11 +3,11 @@ package org.clever.data.jdbc.querydsl;
 import com.querydsl.sql.SQLBaseListener;
 import com.querydsl.sql.SQLListenerContext;
 import lombok.Getter;
+import org.clever.core.Assert;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.listener.JdbcListeners;
-import org.clever.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.clever.jdbc.datasource.DataSourceUtils;
-import org.clever.util.Assert;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -17,7 +17,6 @@ import java.util.function.Supplier;
  * 核心SQL监听器<br/>
  * 1.获取数据库连接，归还数据库连接<p>
  * 2.执行SQL之前的操作拦截<p>
- * 3.打印执行SQL日志<p>
  * <p>
  * 作者：lizw <br/>
  * 创建时间：2021/12/14 09:43 <br/>

@@ -1,23 +1,25 @@
 package org.clever.web.filter;
 
+import jakarta.servlet.ServletException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
 import org.clever.core.SystemClock;
-import org.clever.core.env.Environment;
-import org.clever.util.AntPathMatcher;
-import org.clever.util.Assert;
-import org.clever.util.PathMatcher;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.EchoConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,14 +39,11 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
     public static EchoFilter create(Environment environment) {
         EchoConfig echoConfig = Binder.get(environment).bind(EchoConfig.PREFIX, EchoConfig.class).orElseGet(EchoConfig::new);
         AppContextHolder.registerBean("echoConfig", echoConfig, true);
+        List<String> logs = new ArrayList<>();
+        logs.add("enable     : " + echoConfig.isEnable());
+        logs.add("ignorePaths: " + StringUtils.join(echoConfig.getIgnorePaths(), " | "));
         if (echoConfig.isEnable()) {
-            // noinspection ConstantValue
-            BannerUtils.printConfig(log, "Echo配置",
-                    new String[]{
-                            "enable     : " + echoConfig.isEnable(),
-                            "ignorePaths: " + StringUtils.join(echoConfig.getIgnorePaths(), " | ")
-                    }
-            );
+            BannerUtils.printConfig(log, "Echo配置", logs.toArray(new String[0]));
         }
         return create(echoConfig);
     }
@@ -65,7 +64,7 @@ public class EchoFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
             return;
         }
-        final String reqPath = ctx.req.getPathInfo();
+        final String reqPath = HttpServletRequestUtils.getPathWithoutContextPath(ctx.req);
         // 在 ignore 出现的路径，忽略掉
         List<String> ignore = echoConfig.getIgnorePaths();
         if (ignore != null && !ignore.isEmpty()) {

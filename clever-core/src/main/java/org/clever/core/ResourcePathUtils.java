@@ -4,9 +4,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.io.DefaultResourceLoader;
-import org.clever.core.io.Resource;
-import org.clever.util.ResourceUtils;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.util.ResourceUtils;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -36,8 +36,8 @@ public class ResourcePathUtils {
         String path;
         // 处理相对路径
         if (relativePath.startsWith("/")
-                || relativePath.startsWith(ResourceUtils.FILE_URL_PREFIX)
-                || relativePath.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
+            || relativePath.startsWith(ResourceUtils.FILE_URL_PREFIX)
+            || relativePath.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)) {
             path = relativePath;
         } else {
             path = FilenameUtils.concat(basePath, relativePath);
@@ -47,8 +47,8 @@ public class ResourcePathUtils {
             path = "./";
         }
         if (!path.startsWith(ResourceUtils.CLASSPATH_URL_PREFIX)
-                && !path.startsWith(ResourceUtils.JAR_URL_PREFIX)
-                && !path.startsWith(ResourceUtils.WAR_URL_PREFIX)) {
+            && !path.startsWith(ResourceUtils.JAR_URL_PREFIX)
+            && !path.startsWith(ResourceUtils.WAR_URL_PREFIX)) {
             path = ResourceUtils.FILE_URL_PREFIX + path;
         }
         // 判断resource是文件还是目录

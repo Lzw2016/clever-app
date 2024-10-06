@@ -1,7 +1,5 @@
 package org.clever.js.nashorn.module;
 
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.api.ScriptEngineContext;
@@ -11,6 +9,8 @@ import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
 import org.clever.js.nashorn.NashornScriptObject;
 import org.clever.js.nashorn.utils.ScriptEngineUtils;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngine;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
  * 作者：lizw <br/>

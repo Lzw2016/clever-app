@@ -2,7 +2,7 @@ package org.clever.core.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;

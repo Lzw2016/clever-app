@@ -3,11 +3,11 @@ package org.clever.core.flow;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.core.OrderComparator;
+import org.clever.core.Assert;
+import org.clever.core.Ordered;
 import org.clever.core.exception.AssertException;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.util.Assert;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -102,7 +102,7 @@ public class WorkerNode {
         Assert.notNull(callbacks, "参数 callbacks 不能为 null");
         Assert.notNull(prevWorkers, "参数 prevWorkers 不能为 null");
         Assert.notNull(nextWorkers, "参数 nextWorkers 不能为 null");
-        OrderComparator.sort(callbacks);
+        Ordered.sort(callbacks);
         this.id = StringUtils.trim(id);
         this.name = StringUtils.trim(name);
         this.param = param.toUnmodifiable();

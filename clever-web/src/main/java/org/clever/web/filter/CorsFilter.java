@@ -1,24 +1,26 @@
 package org.clever.web.filter;
 
+import jakarta.servlet.ServletException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.core.env.Environment;
-import org.clever.util.AntPathMatcher;
-import org.clever.util.Assert;
-import org.clever.util.PathMatcher;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.CorsConfig;
-import org.clever.web.http.HttpStatus;
-import org.clever.web.support.cors.CorsProcessor;
-import org.clever.web.support.cors.DefaultCorsProcessor;
-import org.clever.web.utils.CorsUtils;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
+import org.springframework.web.cors.CorsProcessor;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.DefaultCorsProcessor;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,22 +38,19 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
     public static CorsFilter create(Environment environment) {
         CorsConfig corsConfig = Binder.get(environment).bind(CorsConfig.PREFIX, CorsConfig.class).orElseGet(CorsConfig::new);
         AppContextHolder.registerBean("corsConfig", corsConfig, true);
+        List<String> logs = new ArrayList<>();
+        logs.add("cors:");
+        logs.add("  enable               : " + corsConfig.isEnable());
+        logs.add("  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "));
+        logs.add("  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "));
+        logs.add("  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "));
+        logs.add("  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "));
+        logs.add("  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "));
+        logs.add("  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "));
+        logs.add("  allowCredentials     : " + corsConfig.getAllowCredentials());
+        logs.add("  maxAge               : " + corsConfig.getMaxAge());
         if (corsConfig.isEnable()) {
-            // noinspection ConstantValue
-            BannerUtils.printConfig(log, "cors跨域配置",
-                    new String[]{
-                            "cors:",
-                            "  enable               : " + corsConfig.isEnable(),
-                            "  pathPattern          : " + StringUtils.join(corsConfig.getPathPattern(), " | "),
-                            "  allowedOrigins       : " + StringUtils.join(corsConfig.getAllowedOrigins(), " | "),
-                            "  allowedOriginPatterns: " + StringUtils.join(corsConfig.getAllowedOriginPatterns(), " | "),
-                            "  allowedMethods       : " + StringUtils.join(corsConfig.getAllowedMethods(), " | "),
-                            "  allowedHeaders       : " + StringUtils.join(corsConfig.getAllowedHeaders(), " | "),
-                            "  exposedHeaders       : " + StringUtils.join(corsConfig.getExposedHeaders(), " | "),
-                            "  allowCredentials     : " + corsConfig.getAllowCredentials(),
-                            "  maxAge               : " + corsConfig.getMaxAge(),
-                    }
-            );
+            BannerUtils.printConfig(log, "Cors跨域配置", logs.toArray(new String[0]));
         }
         return create(corsConfig);
     }
@@ -74,7 +73,7 @@ public class CorsFilter implements FilterRegistrar.FilterFuc {
             ctx.next();
             return;
         }
-        final String reqPath = ctx.req.getPathInfo();
+        final String reqPath = HttpServletRequestUtils.getPathWithoutContextPath(ctx.req);
         // 当前请求路径是否支持跨域
         boolean match = false;
         List<String> pathPattern = corsConfig.getPathPattern();

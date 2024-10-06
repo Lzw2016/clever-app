@@ -1,35 +1,35 @@
 package org.clever.web.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.javalin.Javalin;
-import io.javalin.core.plugin.Plugin;
-import lombok.Getter;
+import io.javalin.config.JavalinConfig;
+import io.javalin.plugin.Plugin;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppContextHolder;
-import org.clever.core.MethodParameter;
+import org.clever.core.Assert;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.util.Assert;
-import org.clever.util.ObjectUtils;
 import org.clever.web.FilterRegistrar;
-import org.clever.web.JavalinAttrKey;
+import org.clever.web.JavalinAppDataKey;
 import org.clever.web.config.MvcConfig;
 import org.clever.web.exception.MultiExceptionWrapper;
-import org.clever.web.http.HttpStatus;
-import org.clever.web.http.MediaType;
-import org.clever.web.support.mvc.HandlerContext;
-import org.clever.web.support.mvc.HandlerMethod;
-import org.clever.web.support.mvc.argument.*;
-import org.clever.web.support.mvc.interceptor.ArgumentsValidated;
-import org.clever.web.support.mvc.interceptor.HandlerInterceptor;
-import org.clever.web.support.mvc.interceptor.TransactionInterceptor;
-import org.clever.web.support.mvc.method.DefaultHandlerMethodResolver;
-import org.clever.web.support.mvc.method.HandlerMethodResolver;
+import org.clever.web.mvc.HandlerContext;
+import org.clever.web.mvc.HandlerMethod;
+import org.clever.web.mvc.argument.*;
+import org.clever.web.mvc.interceptor.ArgumentsValidated;
+import org.clever.web.mvc.interceptor.HandlerInterceptor;
+import org.clever.web.mvc.interceptor.TransactionInterceptor;
+import org.clever.web.mvc.method.DefaultHandlerMethodResolver;
+import org.clever.web.mvc.method.HandlerMethodResolver;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,43 +44,58 @@ import java.util.stream.IntStream;
  * 作者：lizw <br/>
  * 创建时间：2023/01/06 13:29 <br/>
  */
-public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
-    /**
-     * 当前 Javalin 实例
-     */
-    protected Javalin javalin;
+public class MvcFilter extends Plugin<Void> implements FilterRegistrar.FilterFuc {
     /**
      * 空的 HandlerMethod 参数
      */
     protected static final Object[] EMPTY_ARGS = new Object[0];
-    @Getter
+    /**
+     * 默认的 ObjectMapper
+     */
+    protected static final ObjectMapper DEF_OBJECT_MAPPER = JacksonMapper.getInstance().getMapper();
     protected final String rootPath;
-    @Getter
+    /**
+     * 默认使用 {@code "jdbc.defaultName"} 配置的数据源
+     */
+    protected final String jdbcDefaultName;
     protected final MvcConfig mvcConfig;
-    @Getter
+    protected JavalinConfig javalinConfig;
+    protected ObjectMapper objectMapper;
     protected HandlerMethodResolver handlerMethodResolver;
     protected final List<HandlerMethodArgumentResolver> argumentResolvers = new CopyOnWriteArrayList<>();
     protected final List<HandlerInterceptor> interceptors = new CopyOnWriteArrayList<>();
-    protected ObjectMapper objectMapper = JacksonMapper.getInstance().getMapper();
 
-    public MvcFilter(String rootPath, MvcConfig mvcConfig) {
+    public MvcFilter(String rootPath, String jdbcDefaultName, MvcConfig mvcConfig, ObjectMapper objectMapper) {
         Assert.isNotBlank(rootPath, "参数 rootPath 不能为空");
+        Assert.isNotBlank(jdbcDefaultName, "参数 jdbcDefaultName 不能为空");
         Assert.notNull(mvcConfig, "参数 mvcConfig 不能为 null");
-        MvcConfig.HotReload hotReload = Optional.of(mvcConfig.getHotReload()).orElse(new MvcConfig.HotReload());
-        mvcConfig.setHotReload(hotReload);
+        MvcConfig.HotReload hotReload = Optional.ofNullable(mvcConfig.getHotReload()).orElseGet(() -> {
+            mvcConfig.setHotReload(new MvcConfig.HotReload());
+            return mvcConfig.getHotReload();
+        });
         this.rootPath = rootPath;
+        this.jdbcDefaultName = jdbcDefaultName;
         this.mvcConfig = mvcConfig;
+        this.objectMapper = Optional.ofNullable(objectMapper).orElse(DEF_OBJECT_MAPPER);
         this.handlerMethodResolver = new DefaultHandlerMethodResolver(rootPath, hotReload);
+    }
+
+    public MvcFilter(String rootPath, String jdbcDefaultName, MvcConfig mvcConfig) {
+        this(rootPath, jdbcDefaultName, mvcConfig, null);
+    }
+
+    protected void initialize() {
+        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
+        this.interceptors.addAll(this.getDefaultHandlerInterceptors());
     }
 
     /**
      * 返回要使用的参数解析器列表
+     *
+     * @see RequestMappingHandlerAdapter 的 getDefaultArgumentResolvers 函数
      */
     protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
-        ObjectMapper mapper = javalin.attribute(JavalinAttrKey.JACKSON_OBJECT_MAPPER);
-        if (mapper != null) {
-            objectMapper = mapper;
-        }
+        objectMapper = Optional.ofNullable(objectMapper).orElse(DEF_OBJECT_MAPPER);
         final boolean useCache = !handlerMethodResolver.isEnableHotReload();
         // 设置默认的 HandlerMethodArgumentResolver
         List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>(16);
@@ -98,7 +113,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         resolvers.add(new ServletResponseMethodArgumentResolver());
         // Catch-all
         resolvers.add(new PrincipalMethodArgumentResolver());
-        resolvers.add(new ContextMethodArgumentResolver(javalin._conf.inner.appAttributes));
+        resolvers.add(new ContextMethodArgumentResolver(javalinConfig));
         resolvers.add(new RequestParamMethodArgumentResolver(useCache, true));
         resolvers.add(new ServletModelAttributeMethodProcessor(true));
         return resolvers;
@@ -111,15 +126,15 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         // 设置默认的 HandlerInterceptor
         List<HandlerInterceptor> interceptors = new ArrayList<>(8);
         interceptors.add(new ArgumentsValidated());
-        interceptors.add(new TransactionInterceptor(mvcConfig.getDefTransactional()));
+        interceptors.add(new TransactionInterceptor(jdbcDefaultName, mvcConfig));
         return interceptors;
     }
 
     @Override
-    public void apply(@NotNull Javalin app) {
-        this.javalin = app;
-        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
-        this.interceptors.addAll(this.getDefaultHandlerInterceptors());
+    public void onStart(@NotNull JavalinConfig config) {
+        this.javalinConfig = config;
+        this.objectMapper = Optional.ofNullable(config.pvt.appDataManager.get(JavalinAppDataKey.OBJECT_MAPPER_KEY)).orElse(DEF_OBJECT_MAPPER);
+        initialize();
     }
 
     @Override
@@ -215,7 +230,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
     }
 
     /**
-     * 执行mvc拦截器 和
+     * 执行mvc拦截器
      *
      * @return {@code TupleTwo<Handler Method返回值, 出现的异常>}
      */
@@ -324,15 +339,15 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
      */
     protected String formatInvokeError(String text, Method method, Object[] args) {
         String formattedArgs = IntStream.range(0, args.length)
-                .mapToObj(i -> (
-                        args[i] != null ?
-                                "[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
-                                "[" + i + "] [null]"
-                )).collect(Collectors.joining(",\n", " ", " "));
+            .mapToObj(i -> (
+                args[i] != null ?
+                    "[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
+                    "[" + i + "] [null]"
+            )).collect(Collectors.joining(",\n", " ", " "));
         return text + "\n"
-                + "Controller [" + method.getDeclaringClass().getName() + "]\n"
-                + "Method [" + method.toGenericString() + "] " + "with argument values:\n"
-                + formattedArgs;
+            + "Controller [" + method.getDeclaringClass().getName() + "]\n"
+            + "Method [" + method.toGenericString() + "] " + "with argument values:\n"
+            + formattedArgs;
     }
 
     /**
@@ -353,7 +368,7 @@ public class MvcFilter implements Plugin, FilterRegistrar.FilterFuc {
         if (errs != null) {
             // 合并异常信息，errs优先!
             List<Throwable> tmp = new ArrayList<>(errs.length);
-            tmp.addAll(Arrays.stream(errs).collect(Collectors.toList()));
+            tmp.addAll(Arrays.stream(errs).toList());
             tmp.addAll(errList);
             errList = tmp;
         }

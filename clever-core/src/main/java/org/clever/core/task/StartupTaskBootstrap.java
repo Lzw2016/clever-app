@@ -4,10 +4,9 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.*;
-import org.clever.core.env.Environment;
-import org.clever.util.Assert;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class StartupTaskBootstrap {
             for (StartupTaskConfig.TimedTaskConfig task : timedTask) {
                 logs.add("  - name    : " + task.getName());
                 logs.add("    enable  : " + task.isEnable());
-                logs.add("    interval: " + (task.getInterval() != null ? task.getInterval().toMillis() + "ms" : ""));
+                logs.add("    interval: " + StrFormatter.toPlainString(task.getInterval()));
                 logs.add("    clazz   : " + task.getClazz());
                 logs.add("    method  : " + task.getMethod());
             }
@@ -50,7 +49,7 @@ public class StartupTaskBootstrap {
                 logs.add("  - name    : " + task.getName());
                 logs.add("    enable  : " + task.isEnable());
                 logs.add("    async   : " + task.isAsync());
-                logs.add("    interval: " + (task.getInterval() != null ? task.getInterval().toMillis() + "ms" : ""));
+                logs.add("    interval: " + StrFormatter.toPlainString(task.getInterval()));
                 logs.add("    workDir : " + ResourcePathUtils.getAbsolutePath(rootPath, task.getWorkDir()));
                 logs.add("    cmd     : " + CmdTask.getCmd(task.getCmd()));
             }
@@ -82,11 +81,11 @@ public class StartupTaskBootstrap {
     private ScheduledExecutorService getScheduled() {
         if (scheduled == null) {
             scheduled = new ScheduledThreadPoolExecutor(
-                    Math.max(1, config.getPoolSize()),
-                    new BasicThreadFactory.Builder()
-                            .namingPattern("timed-task-%s")
-                            .daemon(true)
-                            .build()
+                Math.max(1, config.getPoolSize()),
+                new BasicThreadFactory.Builder()
+                    .namingPattern("timed-task-%s")
+                    .daemon(true)
+                    .build()
             );
             AppShutdownHook.addShutdownHook(scheduled::shutdownNow, OrderIncrement.NORMAL, "停止开机任务调度器");
         }
@@ -134,9 +133,9 @@ public class StartupTaskBootstrap {
         int idx = 1;
         for (StartupTask task : startupTasks) {
             log.info(
-                    "# 执行开机任务 {}{}",
-                    String.format("%-2s", idx++),
-                    StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : ""
+                "# 执行开机任务 {}{}",
+                String.format("%-2s", idx++),
+                StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : ""
             );
             try {
                 task.runnable.run();
@@ -184,11 +183,11 @@ public class StartupTaskBootstrap {
      */
     public synchronized void addTimedTask(StartupTaskConfig.TimedTaskConfig config, double order) {
         TimedTask timedTask = new TimedTask(
-                config.getName(),
-                config.getInterval(),
-                config.getClazz(),
-                config.getMethod(),
-                classLoader
+            config.getName(),
+            config.getInterval(),
+            config.getClazz(),
+            config.getMethod(),
+            classLoader
         );
         addStartupTask(() -> timedTask.start(getScheduled()), order, config.getName());
     }
@@ -210,11 +209,11 @@ public class StartupTaskBootstrap {
      */
     public synchronized void addCmdTask(StartupTaskConfig.CmdTaskConfig config, double order) {
         CmdTask cmdTask = new CmdTask(
-                config.getName(),
-                config.isAsync(),
-                config.getInterval(),
-                new File(ResourcePathUtils.getAbsolutePath(rootPath, config.getWorkDir())),
-                config.getCmd()
+            config.getName(),
+            config.isAsync(),
+            config.getInterval(),
+            new File(ResourcePathUtils.getAbsolutePath(rootPath, config.getWorkDir())),
+            config.getCmd()
         );
         addStartupTask(cmdTask::start, order, config.getName());
     }

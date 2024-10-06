@@ -1,9 +1,9 @@
 package org.clever.js.nashorn.support;
 
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.clever.js.api.support.ObjectToString;
 import org.clever.js.nashorn.utils.JSTools;
+import org.openjdk.nashorn.api.scripting.JSObject;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import javax.script.Bindings;
 

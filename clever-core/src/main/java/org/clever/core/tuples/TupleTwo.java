@@ -8,8 +8,8 @@ package org.clever.core.tuples;
 public final class TupleTwo<A, B> extends Tuple implements Tuple.One<A>, Tuple.Two<B> {
     private static final int SIZE = 2;
 
-    private A value1;
-    private B value2;
+    private volatile A value1;
+    private volatile B value2;
 
     public static <A, B> TupleTwo<A, B> creat(final A value1, final B value2) {
         return new TupleTwo<>(value1, value2);

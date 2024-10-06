@@ -3,12 +3,12 @@ package org.clever.data.jdbc.metrics;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.core.Conv;
 import org.clever.core.SystemClock;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.jdbc.config.JdbcConfig;
-import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -5,11 +5,11 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import lombok.Getter;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.clever.core.Assert;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.data.AbstractDataSource;
 import org.clever.rabbitmq.config.RabbitMQProperties;
 import org.clever.rabbitmq.pool.ConnectionFactoryWrapper;
-import org.clever.util.Assert;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

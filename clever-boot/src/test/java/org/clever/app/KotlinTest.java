@@ -21,8 +21,8 @@ public class KotlinTest {
     @Test
     public void t02() throws Exception {
         HotReloadClassLoader classLoader = new HotReloadClassLoader(
-                Thread.currentThread().getContextClassLoader(),
-                "out/production/classes"
+            Thread.currentThread().getContextClassLoader(),
+            "out/production/classes"
         );
         Class<?> clazz = classLoader.loadClass("org.clever.app.mvc.TestKt");
         clazz.getMethod("t01").invoke(null);
@@ -36,8 +36,8 @@ public class KotlinTest {
     @Test
     public void t03() throws Exception {
         HotReloadClassLoader classLoader = new HotReloadClassLoader(
-                Thread.currentThread().getContextClassLoader(),
-                "out/production/classes"
+            Thread.currentThread().getContextClassLoader(),
+            "out/production/classes"
         );
         Class<?> clazz = classLoader.loadClass("org.clever.app.mvc.TestKt");
         KClass<?> kClass = JvmClassMappingKt.getKotlinClass(clazz);
@@ -47,8 +47,8 @@ public class KotlinTest {
     @Test
     public void t04() throws Exception {
         HotReloadClassLoader classLoader = new HotReloadClassLoader(
-                Thread.currentThread().getContextClassLoader(),
-                "out/production/classes"
+            Thread.currentThread().getContextClassLoader(),
+            "out/production/classes"
         );
         Class<?> clazz = classLoader.loadClass("org.clever.app.mvc.Test2");
         Object companion = clazz.getField("Companion").get(null);
@@ -58,8 +58,8 @@ public class KotlinTest {
     @Test
     public void t05() throws Exception {
         HotReloadClassLoader classLoader = new HotReloadClassLoader(
-                Thread.currentThread().getContextClassLoader(),
-                "out/production/classes"
+            Thread.currentThread().getContextClassLoader(),
+            "out/production/classes"
         );
         Class<?> clazz = classLoader.loadClass("org.clever.app.mvc.Test3");
         Object instance = clazz.getField("INSTANCE").get(null);

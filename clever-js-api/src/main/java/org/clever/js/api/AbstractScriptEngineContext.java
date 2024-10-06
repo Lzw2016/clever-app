@@ -1,11 +1,11 @@
 package org.clever.js.api;
 
+import org.clever.core.Assert;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.module.Cache;
 import org.clever.js.api.module.CompileModule;
 import org.clever.js.api.module.Module;
 import org.clever.js.api.require.Require;
-import org.clever.util.Assert;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

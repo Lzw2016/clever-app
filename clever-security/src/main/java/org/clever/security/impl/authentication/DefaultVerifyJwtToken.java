@@ -1,6 +1,8 @@
 package org.clever.security.impl.authentication;
 
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.Conv;
 import org.clever.core.Ordered;
@@ -20,8 +22,6 @@ import org.clever.security.impl.model.entity.SysJwtToken;
 import org.clever.security.impl.model.entity.SysUser;
 import org.clever.security.utils.SecurityRedisKey;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.Objects;
 

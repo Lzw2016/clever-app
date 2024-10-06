@@ -5,8 +5,8 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.util.AntPathMatcher;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
 import java.io.InputStream;

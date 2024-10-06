@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -33,7 +34,7 @@ public class StrFormatter {
      * @param argArray   参数列表
      */
     public static String format(final String strPattern, final Object... argArray) {
-        if (StringUtils.isBlank(strPattern) || argArray == null || argArray.length <= 0) {
+        if (StringUtils.isBlank(strPattern) || argArray == null || argArray.length == 0) {
             return strPattern;
         }
         final int strPatternLength = strPattern.length();
@@ -149,7 +150,6 @@ public class StrFormatter {
         if (data == null) {
             return null;
         }
-
         if (null == charset) {
             return new String(data);
         }
@@ -178,14 +178,12 @@ public class StrFormatter {
         if (data == null) {
             return null;
         }
-
         byte[] bytes = new byte[data.length];
         Byte dataByte;
         for (int i = 0; i < data.length; i++) {
             dataByte = data[i];
             bytes[i] = (null == dataByte) ? -1 : dataByte;
         }
-
         return str(bytes, charset);
     }
 
@@ -200,7 +198,6 @@ public class StrFormatter {
         if (data == null) {
             return null;
         }
-
         return str(data, Charset.forName(charset));
     }
 
@@ -244,39 +241,30 @@ public class StrFormatter {
                 return Arrays.deepToString((Object[]) obj);
             } catch (Exception e) {
                 final String className = obj.getClass().getComponentType().getName();
-                switch (className) {
-                    case "long":
-                        return Arrays.toString((long[]) obj);
-                    case "int":
-                        return Arrays.toString((int[]) obj);
-                    case "short":
-                        return Arrays.toString((short[]) obj);
-                    case "char":
-                        return Arrays.toString((char[]) obj);
-                    case "byte":
-                        return Arrays.toString((byte[]) obj);
-                    case "boolean":
-                        return Arrays.toString((boolean[]) obj);
-                    case "float":
-                        return Arrays.toString((float[]) obj);
-                    case "double":
-                        return Arrays.toString((double[]) obj);
-                    default:
-                        throw ExceptionUtils.unchecked(e);
-                }
+                return switch (className) {
+                    case "long" -> Arrays.toString((long[]) obj);
+                    case "int" -> Arrays.toString((int[]) obj);
+                    case "short" -> Arrays.toString((short[]) obj);
+                    case "char" -> Arrays.toString((char[]) obj);
+                    case "byte" -> Arrays.toString((byte[]) obj);
+                    case "boolean" -> Arrays.toString((boolean[]) obj);
+                    case "float" -> Arrays.toString((float[]) obj);
+                    case "double" -> Arrays.toString((double[]) obj);
+                    default -> throw ExceptionUtils.unchecked(e);
+                };
             }
         }
         String str;
         if (obj instanceof Byte
-                || obj instanceof Short
-                || obj instanceof Integer
-                || obj instanceof Long
-                || obj instanceof Float
-                || obj instanceof Double
-                || obj instanceof BigInteger
-                || obj instanceof BigDecimal
-                || obj instanceof Boolean
-                || obj instanceof String) {
+            || obj instanceof Short
+            || obj instanceof Integer
+            || obj instanceof Long
+            || obj instanceof Float
+            || obj instanceof Double
+            || obj instanceof BigInteger
+            || obj instanceof BigDecimal
+            || obj instanceof Boolean
+            || obj instanceof String) {
             str = String.valueOf(obj);
         } else if (obj instanceof Date) {
             str = DateUtils.formatToString((Date) obj);
@@ -297,5 +285,36 @@ public class StrFormatter {
             return false;
         }
         return obj.getClass().isArray();
+    }
+
+    /**
+     * 返回可读的字符串
+     */
+    public static String toPlainString(Duration duration) {
+        if (duration == null) {
+            return "null";
+        }
+        if (duration.getSeconds() < 0 || duration.getNano() < 0) {
+            return duration.toMillis() + "ms";
+        }
+        long[] nums = new long[]{
+            duration.toDaysPart(),
+            duration.toHoursPart(),
+            duration.toMinutesPart(),
+            duration.toSecondsPart(),
+            duration.toMillisPart(),
+            duration.toNanosPart(),
+        };
+        String[] units = new String[]{"d", "h", "m", "s", "ms", "ns"};
+        StringBuilder sb = new StringBuilder();
+        for (int idx = 0; idx < nums.length; idx++) {
+            long num = nums[idx];
+            if (num > 0) {
+                String unit = units[idx];
+                sb.append(num).append(unit);
+            }
+        }
+        String result = sb.toString();
+        return StringUtils.isBlank(result) ? "0ms" : result;
     }
 }

@@ -1,6 +1,8 @@
 package org.clever.security.config;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.List;
  * 作者：lizw <br/>
  * 创建时间：2021/12/15 15:14 <br/>
  */
+@ConfigurationProperties(prefix = SecurityConfig.PREFIX)
 @Data
 public class SecurityConfig implements Serializable {
     public static final String PREFIX = "web.security";
@@ -21,6 +24,7 @@ public class SecurityConfig implements Serializable {
     /**
      * security 使用的数据源配置
      */
+    @NestedConfigurationProperty
     private DataSourceConfig dataSource = new DataSourceConfig();
     /**
      * 不需要认证和授权的Path(支持Ant风格的Path)
@@ -57,17 +61,21 @@ public class SecurityConfig implements Serializable {
     /**
      * 用户登录相关配置
      */
+    @NestedConfigurationProperty
     private LoginConfig login = new LoginConfig();
     /**
      * 用户登出相关配置
      */
+    @NestedConfigurationProperty
     private LogoutConfig logout = new LogoutConfig();
     /**
      * 用户请求参数加密配置AesKey(登录、注册等敏感接口使用)
      */
+    @NestedConfigurationProperty
     private AesKeyConfig reqAesKey = new AesKeyConfig();
     /**
      * token配置(JWT-Token有效)
      */
+    @NestedConfigurationProperty
     private TokenConfig token = new TokenConfig();
 }

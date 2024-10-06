@@ -1,0 +1,8 @@
+spring:
+  application.name: clever-dev
+
+clever:
+  name: clever-dev
+  server:
+    address: '222'
+    port: 2000

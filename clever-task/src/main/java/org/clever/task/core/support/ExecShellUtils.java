@@ -5,9 +5,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.PlatformOS;
 import org.clever.core.exception.ExceptionUtils;
-import org.clever.util.Assert;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * 作者：lizw <br/>
@@ -120,7 +119,7 @@ public class ExecShellUtils {
             commands.addAll(command);
             commands.add(scriptFile);
             if (params != null) {
-                commands.addAll(Arrays.stream(params).collect(Collectors.toList()));
+                commands.addAll(Arrays.stream(params).toList());
             }
             File dir = DEF_WORKING_DIR;
             if (StringUtils.isNotBlank(workingDir)) {

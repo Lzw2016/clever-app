@@ -3,15 +3,14 @@ package org.clever.data.redis;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
-import org.clever.core.AppContextHolder;
-import org.clever.core.BannerUtils;
-import org.clever.core.SystemClock;
-import org.clever.core.env.Environment;
+import org.clever.core.*;
 import org.clever.data.redis.config.RedisConfig;
 import org.clever.data.redis.config.RedisProperties;
+import org.clever.data.redis.support.LettuceClientConfigurationBuilderCustomizer;
+import org.clever.data.redis.support.RedissonClientConfigurationCustomizer;
 import org.clever.data.redis.util.MergeRedisProperties;
-import org.clever.util.Assert;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 
 import java.util.*;
 
@@ -58,8 +57,14 @@ public class RedisBootstrap {
     }
 
     private void initRedis() {
-        final RedisProperties global = Optional.of(redisConfig.getGlobal()).orElse(new RedisProperties());
-        final Map<String, RedisProperties> dataSource = Optional.of(redisConfig.getDataSource()).orElse(Collections.emptyMap());
+        final RedisProperties global = Optional.ofNullable(redisConfig.getGlobal()).orElseGet(() -> {
+            redisConfig.setGlobal(new RedisProperties());
+            return redisConfig.getGlobal();
+        });
+        final Map<String, RedisProperties> dataSource = Optional.ofNullable(redisConfig.getDataSource()).orElseGet(() -> {
+            redisConfig.setDataSource(new HashMap<>());
+            return redisConfig.getDataSource();
+        });
         // 合并数据源配置
         dataSource.forEach((name, config) -> MergeRedisProperties.mergeConfig(global, config));
         // 打印配置日志
@@ -97,7 +102,7 @@ public class RedisBootstrap {
                 logs.add("        enabled      : " + pool.isEnabled());
                 logs.add("        maxIdle      : " + pool.getMaxIdle());
                 logs.add("        maxActive    : " + pool.getMaxActive());
-                logs.add("        maxWait      : " + pool.getMaxWait().toMillis() + "ms");
+                logs.add("        maxWait      : " + StrFormatter.toPlainString(pool.getMaxWait()));
             }
         });
         if (redisConfig.isEnable()) {

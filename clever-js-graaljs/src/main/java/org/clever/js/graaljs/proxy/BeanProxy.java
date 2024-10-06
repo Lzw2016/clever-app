@@ -1,7 +1,7 @@
 package org.clever.js.graaljs.proxy;
 
+import org.clever.core.Assert;
 import org.clever.core.reflection.ReflectionsUtils;
-import org.clever.util.Assert;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyObject;
 

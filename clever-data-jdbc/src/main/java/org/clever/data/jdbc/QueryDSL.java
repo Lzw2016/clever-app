@@ -15,6 +15,7 @@ import com.querydsl.sql.dml.SQLMergeClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.clever.core.Assert;
 import org.clever.core.function.ZeroConsumer;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
@@ -26,12 +27,11 @@ import org.clever.data.jdbc.querydsl.sql.SQLQueryFactory;
 import org.clever.data.jdbc.querydsl.sql.dml.MapMapper;
 import org.clever.data.jdbc.support.JdbcDataSourceStatus;
 import org.clever.data.jdbc.support.JdbcInfo;
-import org.clever.transaction.TransactionDefinition;
-import org.clever.transaction.TransactionStatus;
-import org.clever.transaction.annotation.Isolation;
-import org.clever.transaction.annotation.Propagation;
-import org.clever.transaction.support.TransactionCallback;
-import org.clever.util.Assert;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.support.TransactionCallback;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -266,12 +266,12 @@ public class QueryDSL extends SQLQueryFactory {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
-     * @param isolationLevel      设置事务隔离级别 {@link org.clever.transaction.TransactionDefinition#ISOLATION_DEFAULT}
+     * @param isolationLevel      设置事务隔离级别 {@link org.springframework.transaction.TransactionDefinition#ISOLATION_DEFAULT}
      * @param readOnly            设置事务是否只读
      * @param <T>                 返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout, int isolationLevel, boolean readOnly) {
         return jdbc.beginTX(action, propagationBehavior, timeout, isolationLevel, readOnly);
@@ -324,11 +324,11 @@ public class QueryDSL extends SQLQueryFactory {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间(单位：秒)
-     * @param isolationLevel      设置事务隔离级别 {@link org.clever.transaction.TransactionDefinition#ISOLATION_DEFAULT}
+     * @param isolationLevel      设置事务隔离级别 {@link org.springframework.transaction.TransactionDefinition#ISOLATION_DEFAULT}
      * @param <T>                 返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout, int isolationLevel) {
         return jdbc.beginTX(action, propagationBehavior, timeout, isolationLevel);
@@ -378,10 +378,10 @@ public class QueryDSL extends SQLQueryFactory {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间(单位：秒)
      * @param <T>                 返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior, int timeout) {
         return jdbc.beginTX(action, propagationBehavior, timeout);
@@ -428,9 +428,9 @@ public class QueryDSL extends SQLQueryFactory {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param <T>                 返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action, int propagationBehavior) {
         return jdbc.beginTX(action, propagationBehavior);
@@ -475,7 +475,7 @@ public class QueryDSL extends SQLQueryFactory {
      *
      * @param action 事务内数据库操作
      * @param <T>    返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginTX(TransactionCallback<T> action) {
         return jdbc.beginTX(action);
@@ -495,11 +495,11 @@ public class QueryDSL extends SQLQueryFactory {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
-     * @param isolationLevel      设置事务隔离级别 {@link org.clever.transaction.TransactionDefinition#ISOLATION_DEFAULT}
+     * @param isolationLevel      设置事务隔离级别 {@link org.springframework.transaction.TransactionDefinition#ISOLATION_DEFAULT}
      * @param <T>                 返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action, int propagationBehavior, int timeout, int isolationLevel) {
         return jdbc.beginReadOnlyTX(action, propagationBehavior, timeout, isolationLevel);
@@ -549,10 +549,10 @@ public class QueryDSL extends SQLQueryFactory {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param timeout             设置事务超时时间，-1表示不超时(单位：秒)
      * @param <T>                 返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action, int propagationBehavior, int timeout) {
         return jdbc.beginReadOnlyTX(action, propagationBehavior, timeout);
@@ -599,9 +599,9 @@ public class QueryDSL extends SQLQueryFactory {
      * 在事务内支持操作
      *
      * @param action              事务内数据库操作
-     * @param propagationBehavior 设置事务传递性 {@link org.clever.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
+     * @param propagationBehavior 设置事务传递性 {@link org.springframework.transaction.TransactionDefinition#PROPAGATION_REQUIRED}
      * @param <T>                 返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action, int propagationBehavior) {
         return jdbc.beginReadOnlyTX(action, propagationBehavior);
@@ -646,7 +646,7 @@ public class QueryDSL extends SQLQueryFactory {
      *
      * @param action 事务内数据库操作
      * @param <T>    返回值类型
-     * @see org.clever.transaction.TransactionDefinition
+     * @see org.springframework.transaction.TransactionDefinition
      */
     public <T> T beginReadOnlyTX(TransactionCallback<T> action) {
         return jdbc.beginReadOnlyTX(action);
@@ -1080,28 +1080,17 @@ public class QueryDSL extends SQLQueryFactory {
     // --------------------------------------------------------------------------------------------
 
     public static SQLTemplates getSQLTemplates(DbType dbType) {
-        switch (dbType) {
-            case MYSQL:
-            case MARIADB:
-                return MySQLTemplates.DEFAULT;
-            case ORACLE:
-                return OracleTemplates.DEFAULT;
-            case DB2:
-                return DB2Templates.DEFAULT;
-            case H2:
-                return H2Templates.DEFAULT;
-            case HSQL:
-                return HSQLDBTemplates.DEFAULT;
-            case SQLITE:
-                return SQLiteTemplates.DEFAULT;
-            case POSTGRE_SQL:
-                return PostgreSQLTemplates.DEFAULT;
-            case SQL_SERVER2005:
-                return SQLServer2005Templates.DEFAULT;
-            case SQL_SERVER:
-                return SQLServerTemplates.DEFAULT;
-            default:
-                throw new RuntimeException("不支持的数据库类型：" + dbType.getDb());
-        }
+        return switch (dbType) {
+            case MYSQL, MARIADB -> MySQLTemplates.DEFAULT;
+            case ORACLE -> OracleTemplates.DEFAULT;
+            case DB2 -> DB2Templates.DEFAULT;
+            case H2 -> H2Templates.DEFAULT;
+            case HSQL -> HSQLDBTemplates.DEFAULT;
+            case SQLITE -> SQLiteTemplates.DEFAULT;
+            case POSTGRE_SQL -> PostgreSQLTemplates.DEFAULT;
+            case SQL_SERVER2005 -> SQLServer2005Templates.DEFAULT;
+            case SQL_SERVER -> SQLServerTemplates.DEFAULT;
+            default -> throw new RuntimeException("不支持的数据库类型：" + dbType.getDb());
+        };
     }
 }

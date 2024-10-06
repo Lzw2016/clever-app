@@ -1,10 +1,10 @@
 package org.clever.js.nashorn;
 
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.js.nashorn.utils.ScriptEngineUtils;
 import org.junit.jupiter.api.Test;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngine;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;

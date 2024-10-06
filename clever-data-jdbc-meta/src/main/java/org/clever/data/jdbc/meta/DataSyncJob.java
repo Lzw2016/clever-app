@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.AppShutdownHook;
+import org.clever.core.Assert;
 import org.clever.core.OrderIncrement;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.BusinessException;
@@ -15,8 +16,7 @@ import org.clever.core.tuples.TupleTwo;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
 import org.clever.data.jdbc.meta.utils.MetaDataUtils;
-import org.clever.transaction.support.TransactionCallback;
-import org.clever.util.Assert;
+import org.springframework.transaction.support.TransactionCallback;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,5 +1,6 @@
 package org.clever.security.impl.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.OrderIncrement;
 import org.clever.core.mapper.BeanCopyUtils;
 import org.clever.data.jdbc.QueryDSL;
@@ -13,8 +14,6 @@ import org.clever.security.impl.utils.UserInfoConvertUtils;
 import org.clever.security.login.LoadUser;
 import org.clever.security.model.UserInfo;
 import org.clever.security.model.request.AbstractLoginReq;
-
-import javax.servlet.http.HttpServletRequest;
 
 import static org.clever.security.impl.model.query.QSysUser.sysUser;
 

@@ -3,6 +3,7 @@ package org.clever.task.core.support;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.core.ResourcePathUtils;
 import org.clever.task.core.GlobalConstant;
 import org.clever.task.core.TaskInstance;
@@ -10,7 +11,6 @@ import org.clever.task.core.config.SchedulerConfig;
 import org.clever.task.core.model.SchedulerRuntimeInfo;
 import org.clever.task.core.model.entity.TaskJobTrigger;
 import org.clever.task.core.model.entity.TaskScheduler;
-import org.clever.util.Assert;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

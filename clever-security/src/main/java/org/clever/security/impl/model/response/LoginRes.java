@@ -2,9 +2,9 @@ package org.clever.security.impl.model.response;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.clever.core.Assert;
 import org.clever.core.model.response.BaseResponse;
 import org.clever.security.model.UserInfo;
-import org.clever.util.Assert;
 
 /**
  * 作者：lizw <br/>

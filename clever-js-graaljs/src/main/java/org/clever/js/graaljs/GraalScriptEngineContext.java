@@ -1,5 +1,6 @@
 package org.clever.js.graaljs;
 
+import org.clever.core.Assert;
 import org.clever.js.api.AbstractScriptEngineContext;
 import org.clever.js.api.ScriptObject;
 import org.clever.js.api.folder.Folder;
@@ -13,7 +14,6 @@ import org.clever.js.graaljs.module.GraalModule;
 import org.clever.js.graaljs.require.GraalRequire;
 import org.clever.js.graaljs.utils.EngineGlobalUtils;
 import org.clever.js.graaljs.utils.ScriptEngineUtils;
-import org.clever.util.Assert;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;

@@ -3,11 +3,11 @@ package org.clever.data.jdbc;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.clever.core.AppShutdownHook;
+import org.clever.core.Assert;
 import org.clever.core.OrderIncrement;
 import org.clever.data.jdbc.mybatis.MyBatisMapperSql;
 import org.clever.data.jdbc.support.JdbcDataSourceStatus;
 import org.clever.data.jdbc.support.JdbcInfo;
-import org.clever.util.Assert;
 
 import javax.sql.DataSource;
 import java.util.*;
@@ -55,10 +55,9 @@ public class DataSourceAdmin {
      */
     public static void closeAllDataSource() {
         for (DataSource dataSource : DATASOURCE_MAP.values()) {
-            if (!(dataSource instanceof HikariDataSource)) {
+            if (!(dataSource instanceof HikariDataSource hikariDataSource)) {
                 continue;
             }
-            HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
             try {
                 if (!hikariDataSource.isClosed()) {
                     hikariDataSource.close();

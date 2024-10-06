@@ -3,7 +3,6 @@ package org.clever.core;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.util.Assert;
 
 import java.io.Serializable;
 import java.util.ArrayList;

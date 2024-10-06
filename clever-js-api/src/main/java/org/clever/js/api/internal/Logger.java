@@ -1,9 +1,9 @@
 package org.clever.js.api.internal;
 
 import lombok.Getter;
+import org.clever.core.Assert;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.js.api.support.ObjectToString;
-import org.clever.util.Assert;
 import org.slf4j.LoggerFactory;
 
 /**

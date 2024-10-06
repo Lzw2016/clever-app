@@ -5,9 +5,9 @@ import com.caoccao.javet.values.reference.IV8ValueArray;
 import com.caoccao.javet.values.reference.IV8ValueFunction;
 import com.caoccao.javet.values.reference.IV8ValueObject;
 import lombok.SneakyThrows;
+import org.clever.core.Assert;
 import org.clever.js.api.AbstractScriptObject;
 import org.clever.js.api.ScriptEngineContext;
-import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;

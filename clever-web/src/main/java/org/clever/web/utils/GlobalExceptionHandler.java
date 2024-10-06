@@ -1,21 +1,29 @@
 package org.clever.web.utils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.core.exception.BusinessException;
 import org.clever.core.exception.NotImplementedException;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.core.model.response.ErrorResponse;
 import org.clever.core.validator.BaseValidatorUtils;
-import org.clever.dao.DuplicateKeyException;
-import org.clever.util.Assert;
-import org.clever.web.exception.*;
-import org.clever.web.http.HttpStatus;
-import org.clever.web.http.MediaType;
+import org.clever.web.exception.GenericHttpException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.InvalidMediaTypeException;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.*;
+import org.springframework.web.method.annotation.MethodArgumentConversionNotSupportedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -193,8 +201,8 @@ public abstract class GlobalExceptionHandler {
         /***
          * 处理异常
          * @param exception 服务端异常
-         * @param request 请求
-         * @param response 响应
+         * @param request   请求
+         * @param response  响应
          */
         ErrorResponse handle(T exception, HttpServletRequest request, HttpServletResponse response);
     }

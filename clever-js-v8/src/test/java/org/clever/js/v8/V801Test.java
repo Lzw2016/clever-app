@@ -3,7 +3,7 @@ package org.clever.js.v8;
 import com.caoccao.javet.interop.V8Host;
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.interop.executors.IV8Executor;
-import com.caoccao.javet.values.reference.IV8ValueFunction;
+import com.caoccao.javet.values.reference.V8ValueFunction;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +31,7 @@ public class V801Test {
         v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
-        IV8ValueFunction function = v8Runtime.getGlobalObject().get("primesMain");
+        V8ValueFunction function = v8Runtime.getGlobalObject().get("primesMain");
         log.info("function -> {}", function);
         boolean first = true;
         for (int i = 0; i < WARM_UP; i++) {
@@ -62,7 +62,7 @@ public class V801Test {
         v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
-        IV8ValueFunction function = v8Runtime.getGlobalObject().get("test");
+        V8ValueFunction function = v8Runtime.getGlobalObject().get("test");
         log.info("function -> {}", function);
         final int a = 10000;
         final int b = 10000;
@@ -96,7 +96,7 @@ public class V801Test {
         v8Runtime.setLogger(V8Logger.INSTANCE);
         IV8Executor executor = v8Runtime.getExecutor(source);
         executor.executeVoid();
-        IV8ValueFunction function = v8Runtime.getGlobalObject().get("test");
+        V8ValueFunction function = v8Runtime.getGlobalObject().get("test");
         log.info("function -> {}", function);
         boolean first = true;
         for (int i = 0; i < WARM_UP; i++) {

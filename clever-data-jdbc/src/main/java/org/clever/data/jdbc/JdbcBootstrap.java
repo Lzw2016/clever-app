@@ -5,9 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.*;
-import org.clever.core.env.Environment;
 import org.clever.data.jdbc.config.JdbcConfig;
 import org.clever.data.jdbc.config.MybatisConfig;
 import org.clever.data.jdbc.metrics.Slf4JLogger;
@@ -17,8 +15,9 @@ import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
 import org.clever.data.jdbc.mybatis.MyBatisMapperSql;
 import org.clever.data.jdbc.support.MergeDataSourceConfig;
 import org.clever.data.jdbc.support.SqlLoggerUtils;
-import org.clever.jdbc.datasource.DataSourceTransactionManager;
-import org.clever.util.Assert;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
 import java.time.Duration;
@@ -73,12 +72,15 @@ public class JdbcBootstrap {
     }
 
     private JdbcConfig.P6SpyLog initP6SpyLog() {
-        final JdbcConfig.P6SpyLog p6spylog = Optional.of(jdbcConfig.getP6spylog()).orElse(new JdbcConfig.P6SpyLog());
-        Function<Collection<String>, List<String>> getSql = list -> {
+        final JdbcConfig.P6SpyLog p6spylog = Optional.ofNullable(jdbcConfig.getP6spylog()).orElseGet(() -> {
+            jdbcConfig.setP6spylog(new JdbcConfig.P6SpyLog());
+            return jdbcConfig.getP6spylog();
+        });
+        Function<Collection<String>, List<String>> getStrings = list -> {
             List<String> sqlList = new ArrayList<>();
             if (list != null) {
-                for (String sql : list) {
-                    sqlList.add("    - " + SqlLoggerUtils.deleteWhitespace(sql));
+                for (String item : list) {
+                    sqlList.add("    - " + SqlLoggerUtils.deleteWhitespace(item));
                 }
             }
             return sqlList;
@@ -88,15 +90,20 @@ public class JdbcBootstrap {
         logs.add("  enable           : " + p6spylog.isEnable());
         logs.add("  slow             : " + p6spylog.getSlow() + "ms");
         logs.add("  ignoreSql        : ");
-        logs.addAll(getSql.apply(p6spylog.getIgnoreSql()));
+        logs.addAll(getStrings.apply(p6spylog.getIgnoreSql()));
         logs.add("  ignoreContainsSql: ");
-        logs.addAll(getSql.apply(p6spylog.getIgnoreContainsSql()));
+        logs.addAll(getStrings.apply(p6spylog.getIgnoreContainsSql()));
+        logs.add("  ignoreThread     : ");
+        logs.addAll(getStrings.apply(p6spylog.getIgnoreThread()));
         BannerUtils.printConfig(log, "p6spy打印sql日志配置", logs.toArray(new String[0]));
         return p6spylog;
     }
 
     private JdbcConfig.JdbcMetrics initMetrics() {
-        final JdbcConfig.JdbcMetrics metrics = Optional.of(jdbcConfig.getMetrics()).orElse(new JdbcConfig.JdbcMetrics());
+        final JdbcConfig.JdbcMetrics metrics = Optional.ofNullable(jdbcConfig.getMetrics()).orElseGet(() -> {
+            jdbcConfig.setMetrics(new JdbcConfig.JdbcMetrics());
+            return jdbcConfig.getMetrics();
+        });
         if (metrics.isEnable()) {
             BannerUtils.printConfig(log, "jdbc性能监控配置",
                 new String[]{
@@ -112,14 +119,14 @@ public class JdbcBootstrap {
     }
 
     private void initMybatis() {
-        final Duration interval = Optional.of(mybatisConfig.getInterval()).orElse(Duration.ZERO);
-        final List<MybatisConfig.MapperLocation> locations = Optional.of(mybatisConfig.getLocations()).orElse(Collections.emptyList());
+        final Duration interval = Optional.ofNullable(mybatisConfig.getInterval()).orElse(Duration.ZERO);
+        final List<MybatisConfig.MapperLocation> locations = Optional.ofNullable(mybatisConfig.getLocations()).orElse(Collections.emptyList());
         // 打印配置日志
         List<String> logs = new ArrayList<>();
         logs.add("mybatis: ");
         logs.add("  enable   : " + mybatisConfig.isEnable());
         logs.add("  watcher  : " + mybatisConfig.isWatcher());
-        logs.add("  interval : " + interval.toMillis() + "ms");
+        logs.add("  interval : " + StrFormatter.toPlainString(interval));
         logs.add("  locations: ");
         for (MybatisConfig.MapperLocation location : locations) {
             String path = location.getLocation();
@@ -168,8 +175,11 @@ public class JdbcBootstrap {
     }
 
     private void initJdbc() {
-        final HikariConfig global = Optional.of(jdbcConfig.getGlobal()).orElse(new HikariConfig());
-        final Map<String, HikariConfig> dataSource = Optional.of(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
+        final HikariConfig global = Optional.ofNullable(jdbcConfig.getGlobal()).orElseGet(() -> {
+            jdbcConfig.setGlobal(new HikariConfig());
+            return jdbcConfig.getGlobal();
+        });
+        final Map<String, HikariConfig> dataSource = Optional.ofNullable(jdbcConfig.getDataSource()).orElse(Collections.emptyMap());
         // 合并数据源配置
         dataSource.forEach((name, config) -> {
             config = MergeDataSourceConfig.mergeConfig(global, config);

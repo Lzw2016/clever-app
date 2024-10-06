@@ -22,7 +22,6 @@ import java.util.Optional;
  * 作者：lizw <br/>
  * 创建时间：2021/06/12 11:16 <br/>
  */
-@SuppressWarnings("ALL")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,10 +49,11 @@ public class JsqlParserCountOptimize implements ISqlParser {
         return selectItems;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public SqlInfo parser(MetaObject metaObject, String sql) {
         if (log.isDebugEnabled()) {
-            log.debug("JsqlParserCountOptimize sql=" + sql);
+            log.debug("JsqlParserCountOptimize sql={}", sql);
         }
         SqlInfo sqlInfo = SqlInfo.newInstance();
         try {
@@ -62,13 +62,12 @@ public class JsqlParserCountOptimize implements ISqlParser {
             Distinct distinct = plainSelect.getDistinct();
             GroupByElement groupBy = plainSelect.getGroupBy();
             List<OrderByElement> orderBy = plainSelect.getOrderByElements();
-
             // 添加包含groupBy 不去除orderBy
             if (null == groupBy && CollectionUtils.isNotEmpty(orderBy)) {
                 plainSelect.setOrderByElements(null);
                 sqlInfo.setOrderBy(false);
             }
-            // #95 Github, selectItems contains #{} ${}, which will be translated to ?, and it may be in a function: power(#{myInt},2)
+            // #95 GitHub, selectItems contains #{} ${}, which will be translated to ?, and it may be in a function: power(#{myInt},2)
             for (SelectItem item : plainSelect.getSelectItems()) {
                 if (item.toString().contains(StringPool.QUESTION_MARK)) {
                     return sqlInfo.setSql(SqlParserUtils.getOriginalCountSql(selectStatement.toString()));

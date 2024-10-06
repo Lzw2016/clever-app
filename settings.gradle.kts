@@ -5,7 +5,7 @@ pluginManagement {
     }
     plugins {
         id("io.spring.dependency-management").version("1.1.6")
-        id("org.springframework.boot").version("2.6.15")
+        id("org.springframework.boot").version("3.3.4")
         id("org.jetbrains.kotlin.jvm").version("2.0.20")
     }
 }
@@ -13,7 +13,6 @@ pluginManagement {
 rootProject.name = "clever-app"
 include("clever-spring")
 include("clever-core")
-include("clever-groovy")
 include("clever-js-api")
 include("clever-js-graaljs")
 include("clever-js-nashorn")

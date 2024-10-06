@@ -2,11 +2,11 @@ package org.clever.web.http;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.io.DefaultResourceLoader;
-import org.clever.core.io.FileSystemResourceLoader;
-import org.clever.core.io.Resource;
-import org.clever.util.ResourceUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 

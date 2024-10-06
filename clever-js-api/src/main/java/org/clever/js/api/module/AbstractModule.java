@@ -1,10 +1,10 @@
 package org.clever.js.api.module;
 
+import org.clever.core.Assert;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.api.ScriptEngineContext;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.require.Require;
-import org.clever.util.Assert;
 
 import java.util.Collections;
 import java.util.HashSet;

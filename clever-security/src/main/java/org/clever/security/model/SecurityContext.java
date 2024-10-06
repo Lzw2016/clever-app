@@ -2,7 +2,7 @@ package org.clever.security.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.io.Serializable;
 import java.security.Principal;

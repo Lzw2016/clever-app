@@ -1,5 +1,6 @@
 package org.clever.security.impl.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.Conv;
 import org.clever.security.config.TokenConfig;
 import org.clever.security.impl.model.EnumConstant;
@@ -7,7 +8,6 @@ import org.clever.security.impl.model.entity.SysUser;
 import org.clever.security.login.AddJwtTokenExtData;
 import org.clever.security.model.UserInfo;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

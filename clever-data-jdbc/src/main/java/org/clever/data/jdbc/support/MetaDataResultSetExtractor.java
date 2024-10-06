@@ -2,8 +2,8 @@ package org.clever.data.jdbc.support;
 
 import org.clever.core.NamingUtils;
 import org.clever.core.RenameStrategy;
-import org.clever.dao.DataAccessException;
-import org.clever.jdbc.core.ResultSetExtractor;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

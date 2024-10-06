@@ -2,9 +2,8 @@ package org.clever.data.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.RenameStrategy;
-import org.clever.core.convert.ConversionService;
-import org.clever.core.convert.support.DefaultConversionService;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
@@ -18,8 +17,9 @@ import org.clever.data.jdbc.mybatis.utils.MyBatisMapperUtils;
 import org.clever.data.jdbc.support.BatchData;
 import org.clever.data.jdbc.support.InsertResult;
 import org.clever.data.jdbc.support.RowData;
-import org.clever.util.Assert;
-import org.clever.util.NumberUtils;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.util.NumberUtils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
@@ -108,16 +108,12 @@ public class MyBatisMapperHandler implements InvocationHandler {
         if (Objects.equals(ops, Mapper.Ops.Auto)) {
             ops = autoOps(methodInfo);
         }
-        switch (ops) {
-            case Query:
-                return query(methodInfo, boundSql.getNamedParameterSql(), boundSql.getParameterMap(), args, errMsgSuffix);
-            case Update:
-                return update(methodInfo, boundSql.getNamedParameterSql(), boundSql.getParameterMap(), args, errMsgSuffix);
-            case Call:
-                return call(methodInfo, boundSql.getNamedParameterSql(), boundSql.getParameterMap(), args, errMsgSuffix);
-            default:
-                throw new UnsupportedOperationException("无效的 Mapper.Ops=" + methodInfo.getOps());
-        }
+        return switch (ops) {
+            case Query -> query(methodInfo, boundSql.getNamedParameterSql(), boundSql.getParameterMap(), args, errMsgSuffix);
+            case Update -> update(methodInfo, boundSql.getNamedParameterSql(), boundSql.getParameterMap(), args, errMsgSuffix);
+            case Call -> call(methodInfo, boundSql.getNamedParameterSql(), boundSql.getParameterMap(), args, errMsgSuffix);
+            default -> throw new UnsupportedOperationException("无效的 Mapper.Ops=" + methodInfo.getOps());
+        };
     }
 
     private Mapper.Ops autoOps(MapperMethodInfo methodInfo) {
@@ -409,29 +405,20 @@ public class MyBatisMapperHandler implements InvocationHandler {
         if (mapper != null) {
             return mapper.first();
         }
-        if (clazzMapper != null) {
-            return clazzMapper.first();
-        }
-        return DEF_CONFIG.first();
+        return Objects.requireNonNullElse(clazzMapper, DEF_CONFIG).first();
     }
 
     private boolean getCount(Mapper mapper) {
         if (mapper != null) {
             return mapper.count();
         }
-        if (clazzMapper != null) {
-            return clazzMapper.count();
-        }
-        return DEF_CONFIG.count();
+        return Objects.requireNonNullElse(clazzMapper, DEF_CONFIG).count();
     }
 
     private int getBatchSize(Mapper mapper) {
         if (mapper != null) {
             return mapper.batchSize();
         }
-        if (clazzMapper != null) {
-            return clazzMapper.batchSize();
-        }
-        return DEF_CONFIG.batchSize();
+        return Objects.requireNonNullElse(clazzMapper, DEF_CONFIG).batchSize();
     }
 }

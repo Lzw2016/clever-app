@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.clever.core.Assert;
 import org.clever.data.dynamic.sql.dialect.DbType;
-import org.clever.util.Assert;
 
 /**
  * 数据库 存储过程或函数

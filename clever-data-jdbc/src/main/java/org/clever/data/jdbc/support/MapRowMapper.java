@@ -3,7 +3,8 @@ package org.clever.data.jdbc.support;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.core.NamingUtils;
 import org.clever.core.RenameStrategy;
-import org.clever.jdbc.core.ColumnMapRowMapper;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import java.math.BigDecimal;
 import java.sql.Blob;
@@ -54,8 +55,9 @@ public class MapRowMapper extends ColumnMapRowMapper {
         }
     }
 
+    @NotNull
     @Override
-    protected String getColumnKey(String columnName) {
+    protected String getColumnKey(@NotNull String columnName) {
         // 字段重命名
         if (needRename) {
             columnName = renameCache.computeIfAbsent(columnName, name -> NamingUtils.rename(name, renameStrategy));
@@ -71,15 +73,13 @@ public class MapRowMapper extends ColumnMapRowMapper {
             return null;
         }
         String className = obj.getClass().getName();
-        if (obj instanceof Blob) { // ------------------------------------------------------------------------------------------------- byte[]
-            Blob blob = (Blob) obj;
+        if (obj instanceof Blob blob) { // ------------------------------------------------------------------------------------------------- byte[]
             obj = blob.getBytes(1, (int) blob.length());
-        } else if (obj instanceof Clob) { // ------------------------------------------------------------------------------------------ String
-            Clob clob = (Clob) obj;
+        } else if (obj instanceof Clob clob) { // ------------------------------------------------------------------------------------------ String
             obj = clob.getSubString(1, (int) clob.length());
         } else if ("oracle.sql.TIMESTAMP".equals(className)
-                || "oracle.sql.TIMESTAMPTZ".equals(className)
-                || "oracle.sql.TIMESTAMPLTZ".equals(className)) { // ------------------------------------------------------------------ java.sql.Timestamp
+            || "oracle.sql.TIMESTAMPTZ".equals(className)
+            || "oracle.sql.TIMESTAMPLTZ".equals(className)) { // ------------------------------------------------------------------ java.sql.Timestamp
             obj = rs.getTimestamp(index);
         } else if (className.startsWith("oracle.sql.DATE")) {
             String metaDataClassName = rs.getMetaData().getColumnClassName(index);
@@ -95,14 +95,14 @@ public class MapRowMapper extends ColumnMapRowMapper {
             }
         } else {
             if (obj instanceof Integer
-                    || obj instanceof Long
-                    || obj instanceof Double
-                    || obj instanceof String
-                    || obj instanceof Boolean
-                    || obj instanceof BigDecimal
-                    || obj instanceof java.util.Date
-                    || obj instanceof byte[]
-                    || obj instanceof Byte[]) {
+                || obj instanceof Long
+                || obj instanceof Double
+                || obj instanceof String
+                || obj instanceof Boolean
+                || obj instanceof BigDecimal
+                || obj instanceof java.util.Date
+                || obj instanceof byte[]
+                || obj instanceof Byte[]) {
                 return obj;
             }
             // 自定义处理

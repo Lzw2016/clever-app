@@ -1,11 +1,11 @@
 package org.clever.js.api;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.module.Cache;
 import org.clever.js.api.require.Require;
 import org.clever.js.api.utils.ScriptCodeUtils;
-import org.clever.util.Assert;
 
 /**
  * 作者：lizw <br/>

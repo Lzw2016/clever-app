@@ -1,13 +1,19 @@
 package org.clever.web.utils;
 
-import org.clever.util.Assert;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletRequestWrapper;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.ServletResponseWrapper;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import org.clever.core.Assert;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.InvalidMediaTypeException;
+import org.springframework.http.MediaType;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
@@ -92,9 +98,9 @@ public abstract class WebUtils {
      * @param request 要在其中查找参数的 HTTP 请求
      * @param prefix  参数名称的开头（如果这是 null 或空字符串，则所有参数都将匹配）
      * @return 包含请求参数<b>没有前缀</b>的映射，包含一个字符串或一个字符串数组作为值
-     * @see javax.servlet.ServletRequest#getParameterNames
-     * @see javax.servlet.ServletRequest#getParameterValues
-     * @see javax.servlet.ServletRequest#getParameterMap
+     * @see jakarta.servlet.ServletRequest#getParameterNames
+     * @see jakarta.servlet.ServletRequest#getParameterValues
+     * @see jakarta.servlet.ServletRequest#getParameterMap
      */
     public static Map<String, Object> getParametersStartingWith(ServletRequest request, String prefix) {
         Assert.notNull(request, "Request must not be null");
@@ -106,18 +112,63 @@ public abstract class WebUtils {
         while (paramNames != null && paramNames.hasMoreElements()) {
             String paramName = paramNames.nextElement();
             if (prefix.isEmpty() || paramName.startsWith(prefix)) {
-                String unprefixed = paramName.substring(prefix.length());
+                String unPrefixed = paramName.substring(prefix.length());
                 String[] values = request.getParameterValues(paramName);
                 // noinspection StatementWithEmptyBody
                 if (values == null || values.length == 0) {
                     // 什么都不做，根本找不到任何值
                 } else if (values.length > 1) {
-                    params.put(unprefixed, values);
+                    params.put(unPrefixed, values);
                 } else {
-                    params.put(unprefixed, values[0]);
+                    params.put(unPrefixed, values[0]);
                 }
             }
         }
         return params;
+    }
+
+    /**
+     * 基于 HttpServletRequest 创建 HttpHeaders 对象
+     */
+    public static HttpHeaders createHttpHeaders(HttpServletRequest request) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        for (Enumeration<?> names = request.getHeaderNames(); names.hasMoreElements(); ) {
+            String headerName = (String) names.nextElement();
+            for (Enumeration<?> headerValues = request.getHeaders(headerName); headerValues.hasMoreElements(); ) {
+                String headerValue = (String) headerValues.nextElement();
+                httpHeaders.add(headerName, headerValue);
+            }
+        }
+        // HttpServletRequest exposes some headers as properties: we should include those if not already present
+        try {
+            MediaType contentType = httpHeaders.getContentType();
+            if (contentType == null) {
+                String requestContentType = request.getContentType();
+                if (StringUtils.hasLength(requestContentType)) {
+                    contentType = MediaType.parseMediaType(requestContentType);
+                    httpHeaders.setContentType(contentType);
+                }
+            }
+            if (contentType != null && contentType.getCharset() == null) {
+                String requestEncoding = request.getCharacterEncoding();
+                if (StringUtils.hasLength(requestEncoding)) {
+                    Charset charSet = Charset.forName(requestEncoding);
+                    Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+                    params.putAll(contentType.getParameters());
+                    params.put("charset", charSet.toString());
+                    MediaType mediaType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+                    httpHeaders.setContentType(mediaType);
+                }
+            }
+        } catch (InvalidMediaTypeException ex) {
+            // Ignore: simply not exposing an invalid content type in HttpHeaders...
+        }
+        if (httpHeaders.getContentLength() < 0) {
+            int requestContentLength = request.getContentLength();
+            if (requestContentLength != -1) {
+                httpHeaders.setContentLength(requestContentLength);
+            }
+        }
+        return httpHeaders;
     }
 }

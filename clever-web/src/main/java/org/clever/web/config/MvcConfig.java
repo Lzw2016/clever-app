@@ -1,10 +1,12 @@
 package org.clever.web.config;
 
 import lombok.Data;
-import org.clever.transaction.TransactionDefinition;
-import org.clever.transaction.annotation.Isolation;
-import org.clever.transaction.annotation.Propagation;
-import org.clever.web.http.HttpMethod;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.http.HttpMethod;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.time.Duration;
 import java.util.*;
@@ -15,6 +17,7 @@ import java.util.*;
  * 作者：lizw <br/>
  * 创建时间：2023/01/06 15:14 <br/>
  */
+@ConfigurationProperties(prefix = MvcConfig.PREFIX)
 @Data
 public class MvcConfig {
     public static final String PREFIX = WebConfig.PREFIX + ".mvc";
@@ -30,7 +33,7 @@ public class MvcConfig {
     /**
      * mvc支持的Http Method
      */
-    private Set<HttpMethod> httpMethod = new HashSet<HttpMethod>() {{
+    private Set<HttpMethod> httpMethod = new HashSet<>() {{
         add(HttpMethod.POST);
         add(HttpMethod.GET);
         add(HttpMethod.PUT);
@@ -49,12 +52,18 @@ public class MvcConfig {
      */
     private Set<String> allowPackages = new HashSet<>();
     /**
+     * 使用 Transactional 时的默认 datasource 值
+     */
+    private List<String> transactionalDefDatasource = new ArrayList<>();
+    /**
      * 默认的事务配置
      */
+    @NestedConfigurationProperty
     private TransactionalConfig defTransactional = new TransactionalConfig();
     /**
      * 热重载配置
      */
+    @NestedConfigurationProperty
     private HotReload hotReload = new HotReload();
 
     @Data
@@ -70,10 +79,6 @@ public class MvcConfig {
 
     @Data
     public static class TransactionalConfig {
-        /**
-         * 使用 {@code Transactional} 时的默认 datasource 值
-         */
-        private List<String> defDatasource = new ArrayList<>();
         /**
          * 要启用事务的数据源
          */
@@ -122,8 +127,8 @@ public class MvcConfig {
          * 热重载class位置
          * <pre>
          * 1.classpath路径
-         *   classpath:com/mycompany/**&#47;*.xml
-         *   classpath*:com/mycompany/**&#47;*.xml
+         *   classpath:com/app/**&#47;*.xml
+         *   classpath*:com/app/**&#47;*.xml
          * 2.本机绝对路径
          *   file:/home/www/public/
          *   file:D:/resources/static/
@@ -134,10 +139,10 @@ public class MvcConfig {
          * </pre>
          */
         private List<String> locations = Arrays.asList(
-                "./build/classes/java/main",
-                "./build/classes/kotlin/main",
-                "./build/classes/groovy/main",
-                "./out/production/classes"
+            "./build/classes/java/main",
+            "./build/classes/kotlin/main",
+            "./build/classes/groovy/main",
+            "./out/production/classes"
         );
     }
 }

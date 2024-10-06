@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.config;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.List;
  * 作者：lizw <br/>
  * 创建时间：2022/12/26 13:43 <br/>
  */
+@ConfigurationProperties(prefix = MybatisConfig.PREFIX)
 @Data
 public class MybatisConfig {
     public static final String PREFIX = "mybatis";

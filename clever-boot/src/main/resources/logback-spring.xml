@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false" scanPeriod="60 seconds" debug="false">
+    <!-- 配置“转换词” -->
+    <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter"/>
+    <!-- 日志文件名称 -->
+    <springProperty scope="context" name="FILE_NAME" source="logging.file.name" defaultValue="server"/>
+    <property name="ERROR_FILE_NAME" value="error"/>
+    <!--日志文件的保存路径,首先查找系统属性-Dlog.dir,如果存在就使用其；否则，在当前目录下创建名为logs目录做日志存放的目录 -->
+    <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs/${FILE_NAME}"/>
+    <!-- 日志输出格式 -->
+    <property name="ENCODER_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-30([%thread]) %-5level %logger{80} - %msg%n"/>
+    <property name="ENCODER_PATTERN_CONSOLE" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-30([%thread]) %clr(%-5level) %clr(%logger{80}){cyan} - %msg%n"/>
+    <!-- 本地开发环境使用控制台高亮日志 -->
+    <springProfile name="dev | test">
+        <property name="ENCODER_PATTERN_CONSOLE" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-30([%thread]) %clr(%-5level) %clr(%logger{80}){cyan} - %msg%n"/>
+    </springProfile>
+    <!-- 支持k8s环境 -->
+    <property name="POD_ENV" value="${POD_IP:-pod}"/>
+    <springProfile name="prod-k8s">
+        <property name="FILE_NAME" value="${FILE_NAME}.${POD_ENV}"/>
+        <property name="ERROR_FILE_NAME" value="${ERROR_FILE_NAME}.${POD_ENV}"/>
+    </springProfile>
+    <!-- 为LoggerContext设置名称 -->
+    <contextName>${FILE_NAME}</contextName>
+
+    <!-- 控制台日志：输出全部日志到控制台 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${ENCODER_PATTERN_CONSOLE}</Pattern>
+        </encoder>
+    </appender>
+
+    <!-- 文件日志：输出全部日志到文件 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${FILE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${FILE_NAME}.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${ENCODER_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 错误日志：用于将错误日志输出到独立文件 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${ERROR_FILE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${ERROR_FILE_NAME}.%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${ENCODER_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- p6spy忽略的日志输出到文件 -->
+    <logger name="p6spy.ignore" level="DEBUG" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+</configuration>

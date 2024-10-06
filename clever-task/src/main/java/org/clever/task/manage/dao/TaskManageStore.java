@@ -10,6 +10,7 @@ import com.querydsl.sql.SQLQuery;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.Conv;
 import org.clever.core.DateUtils;
 import org.clever.core.model.request.QueryByPage;
@@ -24,8 +25,7 @@ import org.clever.task.core.model.entity.*;
 import org.clever.task.manage.model.JobLogInfo;
 import org.clever.task.manage.model.request.*;
 import org.clever.task.manage.model.response.*;
-import org.clever.transaction.support.TransactionCallback;
-import org.clever.util.Assert;
+import org.springframework.transaction.support.TransactionCallback;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -1,6 +1,7 @@
 package org.clever.data.jdbc.mybatis.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.model.request.QueryByPage;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.core.model.request.page.Page;
@@ -10,7 +11,6 @@ import org.clever.data.jdbc.mybatis.annotations.Param;
 import org.clever.data.jdbc.support.BatchData;
 import org.clever.data.jdbc.support.DbColumnMetaData;
 import org.clever.data.jdbc.support.RowData;
-import org.clever.util.Assert;
 
 import java.lang.reflect.*;
 import java.time.LocalDate;
@@ -38,7 +38,7 @@ public class MyBatisMapperUtils {
             // 获取无参数的造函数
             Constructor<?> ctor = clazz.getDeclaredConstructor();
             // 如果不可访问，尝试设置为可访问
-            if (!ctor.isAccessible()) {
+            if (!ctor.canAccess(null)) {
                 ctor.setAccessible(true);
             }
             ctor.newInstance();
@@ -84,11 +84,11 @@ public class MyBatisMapperUtils {
                 returnList = List.class.isAssignableFrom(returnType);
                 if (returnList && !returnType.isAssignableFrom(ArrayList.class)) {
                     Assert.isTrue(isNewInstance(returnType), "返回值类型没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                    newList = () -> (List<Object>) returnType.newInstance();
+                    newList = () -> (List<Object>) returnType.getDeclaredConstructor().newInstance();
                 }
                 if (returnSet && !returnType.isAssignableFrom(HashSet.class)) {
                     Assert.isTrue(isNewInstance(returnType), "返回值没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                    newSet = () -> (Set<Object>) returnType.newInstance();
+                    newSet = () -> (Set<Object>) returnType.getDeclaredConstructor().newInstance();
                 }
             } else if (returnType.isArray()) {
                 // 返回类型是数组(Array)
@@ -99,7 +99,7 @@ public class MyBatisMapperUtils {
                 returnMap = true;
                 if (!Objects.equals(Map.class, returnType)) {
                     Assert.isTrue(isNewInstance(returnType), "返回值没有无参构造函数: " + returnType.getName() + ", " + errMsgSuffix);
-                    newMap = () -> (Map<Object, Object>) returnType.newInstance();
+                    newMap = () -> (Map<Object, Object>) returnType.getDeclaredConstructor().newInstance();
                 }
             } else if (returnType.isAssignableFrom(Page.class)) {
                 // 返回类型是IPage
@@ -114,7 +114,7 @@ public class MyBatisMapperUtils {
                     returnItemMap = true;
                     if (isNewInstance(returnItemType)) {
                         Class<?> finalCls = returnItemType;
-                        newItemMap = () -> (Map<Object, Object>) finalCls.newInstance();
+                        newItemMap = () -> (Map<Object, Object>) finalCls.getDeclaredConstructor().newInstance();
                     }
                 }
                 // 是否是 queryMetaData

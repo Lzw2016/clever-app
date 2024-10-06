@@ -1,12 +1,13 @@
 package org.clever.data.jdbc.dialects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.model.request.page.IPage;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.support.mybatisplus.ExceptionUtils;
-import org.clever.util.Assert;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -127,12 +128,12 @@ public class DialectFactory {
                 try {
                     Class<?> clazz = Class.forName(dialectClazz);
                     if (IDialect.class.isAssignableFrom(clazz)) {
-                        dialect = (IDialect) clazz.newInstance();
+                        dialect = (IDialect) clazz.getDeclaredConstructor().newInstance();
                         DIALECT_CACHE.put(dialectClazz, dialect);
                     }
-                } catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException | NoSuchMethodException e) {
                     throw ExceptionUtils.mpe("Class : %s is not found", dialectClazz);
-                } catch (IllegalAccessException | InstantiationException e) {
+                } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
                     throw ExceptionUtils.mpe("Class : %s can not be instance", dialectClazz);
                 }
             } else {

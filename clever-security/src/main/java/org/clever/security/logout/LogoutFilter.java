@@ -1,8 +1,10 @@
 package org.clever.security.logout;
 
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.OrderComparator;
+import org.clever.core.Assert;
+import org.clever.core.Ordered;
 import org.clever.core.http.CookieUtils;
 import org.clever.security.SecurityContextHolder;
 import org.clever.security.authentication.AuthenticationFilter;
@@ -20,11 +22,9 @@ import org.clever.security.model.jackson2.event.LogoutFailureEvent;
 import org.clever.security.model.jackson2.event.LogoutSuccessEvent;
 import org.clever.security.utils.HttpRespondHandler;
 import org.clever.security.utils.PathFilterUtils;
-import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
-import org.clever.web.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.List;
 
@@ -58,8 +58,8 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
             HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
         Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
-        OrderComparator.sort(logoutSuccessHandlerList);
-        OrderComparator.sort(logoutFailureHandlerList);
+        Ordered.sort(logoutSuccessHandlerList);
+        Ordered.sort(logoutFailureHandlerList);
         this.securityConfig = securityConfig;
         this.logoutSuccessHandlerList = logoutSuccessHandlerList;
         this.logoutFailureHandlerList = logoutFailureHandlerList;

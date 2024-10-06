@@ -1,11 +1,10 @@
 package org.clever.security.authorization.voter;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.OrderIncrement;
 import org.clever.core.Ordered;
 import org.clever.security.config.SecurityConfig;
 import org.clever.security.model.SecurityContext;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 授权投票器

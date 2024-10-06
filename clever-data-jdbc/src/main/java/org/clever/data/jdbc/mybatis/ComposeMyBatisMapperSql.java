@@ -1,8 +1,8 @@
 package org.clever.data.jdbc.mybatis;
 
+import org.clever.core.Assert;
 import org.clever.data.dynamic.sql.builder.SqlSource;
 import org.clever.data.dynamic.sql.dialect.DbType;
-import org.clever.util.Assert;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

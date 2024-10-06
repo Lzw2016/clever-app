@@ -1,7 +1,10 @@
 package org.clever.security.authorization;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.core.OrderComparator;
+import org.clever.core.Assert;
+import org.clever.core.Ordered;
 import org.clever.security.SecurityContextHolder;
 import org.clever.security.authorization.voter.AuthorizationVoter;
 import org.clever.security.authorization.voter.VoterResult;
@@ -15,12 +18,9 @@ import org.clever.security.model.jackson2.event.AuthorizationFailureEvent;
 import org.clever.security.model.jackson2.event.AuthorizationSuccessEvent;
 import org.clever.security.utils.HttpRespondHandler;
 import org.clever.security.utils.PathFilterUtils;
-import org.clever.util.Assert;
 import org.clever.web.FilterRegistrar;
-import org.clever.web.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -55,19 +55,19 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
     public final HttpRespondHandler httpRespondHandler;
 
     public AuthorizationFilter(
-            SecurityConfig securityConfig,
-            List<AuthorizationVoter> authorizationVoterList,
-            List<AuthorizationSuccessHandler> authorizationSuccessHandlerList,
-            List<AuthorizationFailureHandler> authorizationFailureHandlerList,
-            HttpRespondHandler httpRespondHandler) {
+        SecurityConfig securityConfig,
+        List<AuthorizationVoter> authorizationVoterList,
+        List<AuthorizationSuccessHandler> authorizationSuccessHandlerList,
+        List<AuthorizationFailureHandler> authorizationFailureHandlerList,
+        HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
         Assert.notNull(authorizationVoterList, "授权投票器(AuthorizationVoter)不能为null");
         Assert.notNull(authorizationSuccessHandlerList, "授权成功的处理(AuthorizationSuccessHandler)不能为null");
         Assert.notNull(authorizationFailureHandlerList, "授权成功的处理(AuthorizationFailureHandler)不能为null");
         Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
-        OrderComparator.sort(authorizationVoterList);
-        OrderComparator.sort(authorizationSuccessHandlerList);
-        OrderComparator.sort(authorizationFailureHandlerList);
+        Ordered.sort(authorizationVoterList);
+        Ordered.sort(authorizationSuccessHandlerList);
+        Ordered.sort(authorizationFailureHandlerList);
         this.securityConfig = securityConfig;
         this.authorizationVoterList = authorizationVoterList;
         this.authorizationSuccessHandlerList = authorizationSuccessHandlerList;
@@ -150,21 +150,21 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
                 // 通过
                 passWeight = passWeight + authorizationVoter.getWeight();
                 log.debug(
-                        "### 授权通过 | PassWeight={} | Weight={} | Voter={}",
-                        passWeight, authorizationVoter.getWeight(), authorizationVoter.getClass().getSimpleName()
+                    "### 授权通过 | PassWeight={} | Weight={} | Voter={}",
+                    passWeight, authorizationVoter.getWeight(), authorizationVoter.getClass().getSimpleName()
                 );
             } else if (Objects.equals(VoterResult.REJECT.getId(), voterResult.getId())) {
                 // 驳回
                 passWeight = passWeight - authorizationVoter.getWeight();
                 log.debug(
-                        "### 授权驳回 | PassWeight={} | Weight={} | Voter={}",
-                        passWeight, authorizationVoter.getWeight(), authorizationVoter.getClass().getSimpleName()
+                    "### 授权驳回 | PassWeight={} | Weight={} | Voter={}",
+                    passWeight, authorizationVoter.getWeight(), authorizationVoter.getClass().getSimpleName()
                 );
             } else if (Objects.equals(VoterResult.ABSTAIN.getId(), voterResult.getId())) {
                 // 弃权
                 log.debug(
-                        "### 放弃授权 | PassWeight={} | Weight={} | Voter={}",
-                        passWeight, authorizationVoter.getWeight(), authorizationVoter.getClass().getSimpleName()
+                    "### 放弃授权 | PassWeight={} | Weight={} | Voter={}",
+                    passWeight, authorizationVoter.getWeight(), authorizationVoter.getClass().getSimpleName()
                 );
             } else {
                 throw new AuthorizationInnerException("未知的授权投票结果");
@@ -179,7 +179,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
     protected void onAuthorizationSuccess(AuthorizationContext context) {
         SecurityContext securityContext = context.getSecurityContext();
         AuthorizationSuccessEvent event = new AuthorizationSuccessEvent(
-                securityContext.getUserInfo(), securityContext.getRoles(), securityContext.getPermissions()
+            securityContext.getUserInfo(), securityContext.getRoles(), securityContext.getPermissions()
         );
         for (AuthorizationSuccessHandler handler : authorizationSuccessHandlerList) {
             handler.onAuthorizationSuccess(context.getRequest(), context.getResponse(), event);
@@ -192,7 +192,7 @@ public class AuthorizationFilter implements FilterRegistrar.FilterFuc {
     protected void onAuthorizationFailure(AuthorizationContext context) {
         SecurityContext securityContext = context.getSecurityContext();
         AuthorizationFailureEvent event = new AuthorizationFailureEvent(
-                securityContext.getUserInfo(), securityContext.getRoles(), securityContext.getPermissions()
+            securityContext.getUserInfo(), securityContext.getRoles(), securityContext.getPermissions()
         );
         for (AuthorizationFailureHandler handler : authorizationFailureHandlerList) {
             handler.onAuthorizationFailure(context.getRequest(), context.getResponse(), event);

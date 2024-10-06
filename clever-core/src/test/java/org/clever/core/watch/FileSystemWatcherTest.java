@@ -3,8 +3,8 @@ package org.clever.core.watch;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOCase;
-import org.clever.util.AntPathMatcher;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
 

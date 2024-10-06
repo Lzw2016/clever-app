@@ -6,14 +6,14 @@ import org.clever.core.SystemClock;
 import org.clever.core.function.OneConsumer;
 import org.clever.core.random.RandomUtil;
 import org.clever.data.redis.config.RedisProperties;
-import org.clever.data.redis.connection.DataType;
-import org.clever.data.redis.connection.stream.*;
-import org.clever.data.redis.hash.Jackson2HashMapper;
-import org.clever.data.redis.stream.StreamMessageListenerContainer;
-import org.clever.data.redis.stream.Subscription;
 import org.clever.data.redis.support.RateLimitConfig;
 import org.clever.data.redis.support.RateLimitState;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.connection.DataType;
+import org.springframework.data.redis.connection.stream.*;
+import org.springframework.data.redis.hash.Jackson2HashMapper;
+import org.springframework.data.redis.stream.StreamMessageListenerContainer;
+import org.springframework.data.redis.stream.Subscription;
 
 import java.time.Duration;
 import java.util.*;
@@ -32,7 +32,7 @@ public class RedisTest {
         RedisProperties properties = new RedisProperties();
         properties.setMode(RedisProperties.Mode.Standalone);
         properties.setClientName("test");
-        properties.getStandalone().setHost("192.168.1.201");
+        properties.getStandalone().setHost("192.168.1.211");
         properties.getStandalone().setPort(30007);
         properties.getStandalone().setDatabase(0);
         properties.getStandalone().setPassword("admin123456");
@@ -42,6 +42,7 @@ public class RedisTest {
 
     @Test
     public void t01() {
+        Jackson2HashMapper jackson2HashMapper = new Jackson2HashMapper(false);
         RedisProperties properties = getProperties();
         // data
         Map<String, Object> data = new LinkedHashMap<>();
@@ -66,9 +67,9 @@ public class RedisTest {
         inner.put("inner_09", new Date());
         data.put("data_10", inner);
         // Jackson2HashMapper
-        Map<String, Object> map = Jackson2HashMapper.getSharedInstance().toHash(data);
+        Map<String, Object> map = jackson2HashMapper.toHash(data);
         log.info("### map -> {}", map);
-        log.info("### obj -> {}", Jackson2HashMapper.getSharedInstance().fromHash(map));
+        log.info("### obj -> {}", jackson2HashMapper.fromHash(map));
         long timeout = 600_000;
         // Redis
         Redis redis = new Redis("test", properties);
@@ -289,10 +290,10 @@ public class RedisTest {
         redis.close();
     }
 
-    @Test
-    public void t07() {
-        for (int i = 0; i < 12; i++) {
-            t06(i);
-        }
-    }
+//    @Test
+//    public void t07() {
+//        for (int i = 0; i < 12; i++) {
+//            t06(i);
+//        }
+//    }
 }

@@ -17,8 +17,8 @@ public class QList extends AbstractQResult<ArrayList<Object>> {
     /**
      * @param exprs 需要查询的“表字段、表”
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public QList(Expression<?>... exprs) {
-        // noinspection unchecked,rawtypes
         super((Class) ArrayList.class, RenameStrategy.None, exprs);
     }
 

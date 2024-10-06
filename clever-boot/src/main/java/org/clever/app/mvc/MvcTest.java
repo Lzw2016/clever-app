@@ -1,7 +1,9 @@
 package org.clever.app.mvc;
 
-import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -17,23 +19,18 @@ import org.clever.data.jdbc.DaoFactory;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.QueryDSL;
 import org.clever.data.jdbc.support.ProcedureJdbcCall;
-import org.clever.jdbc.core.SqlOutParameter;
-import org.clever.jdbc.core.SqlParameter;
-import org.clever.jdbc.core.simple.SimpleJdbcCall;
-import org.clever.task.core.model.entity.TaskJobTrigger;
-import org.clever.util.MultiValueMap;
-import org.clever.validation.annotation.Validated;
-import org.clever.web.http.HttpStatus;
-import org.clever.web.http.multipart.MultipartFile;
-import org.clever.web.support.mvc.annotation.*;
+import org.clever.web.Context;
+import org.clever.web.mvc.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
 import java.sql.Types;
 import java.util.*;
-
-import static org.clever.task.core.model.query.QTaskJobTrigger.taskJobTrigger;
 
 /**
  * 作者：lizw <br/>
@@ -156,8 +153,8 @@ public class MvcTest {
     }
 
     // CookieValue | CookieValueMethodArgumentResolver
-    public static Object t11(@CookieValue(required = false) String a, Context ctx) {
-        CookieUtils.setCookieForCurrentPath(ctx.res, "a", "时间: " + System.currentTimeMillis() + " | 特殊字符: ':, '");
+    public static Object t11(@CookieValue(required = false) String a, HttpServletResponse response) {
+        CookieUtils.setCookieForCurrentPath(response, "a", "时间: " + System.currentTimeMillis() + " | 特殊字符: ':, '");
         Map<String, Object> res = new LinkedHashMap<>();
         res.put("a", a);
         return res;
@@ -224,23 +221,23 @@ public class MvcTest {
         return data;
     }
 
-    @Transactional(disabled = true)
-    public static Object t18() {
-        TaskJobTrigger trigger = queryDSL.selectFrom(taskJobTrigger)
-            .where(taskJobTrigger.id.eq(1653059609297231874L))
-            .fetchOne();
-        trigger.setDescription("AAA");
-        queryDSL.update(
-            taskJobTrigger,
-            taskJobTrigger.id.eq(trigger.getId()),
-            trigger,
-            update -> update.set(taskJobTrigger.updateAt, queryDSL.currentDate()),
-            taskJobTrigger.fireCount,
-            taskJobTrigger.createAt,
-            taskJobTrigger.updateAt
-        );
-        return trigger;
-    }
+//    @Transactional(disabled = true)
+//    public static Object t18() {
+//        TaskJobTrigger trigger = queryDSL.selectFrom(taskJobTrigger)
+//            .where(taskJobTrigger.id.eq(1653059609297231874L))
+//            .fetchOne();
+//        trigger.setDescription("AAA");
+//        queryDSL.update(
+//            taskJobTrigger,
+//            taskJobTrigger.id.eq(trigger.getId()),
+//            trigger,
+//            update -> update.set(taskJobTrigger.updateAt, queryDSL.currentDate()),
+//            taskJobTrigger.fireCount,
+//            taskJobTrigger.createAt,
+//            taskJobTrigger.updateAt
+//        );
+//        return trigger;
+//    }
 
     @SneakyThrows
     @Transactional(disabled = true)
@@ -340,17 +337,17 @@ public class MvcTest {
         return R.success(new Object[]{"res"});
     }
 
-    public static R<?> t24() {
-        Jdbc db = DaoFactory.getJdbc("postgresql");
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("param", db.likeBoth("b_"));
-        Object res_1 = db.queryMany("select * from test where a like :param ", paramMap);
-        Object res_2 = queryDSL.selectFrom(taskJobTrigger)
-            .where(taskJobTrigger.id.eq(1653059609297231874L))
-            .where(queryDSL.likeBoth(taskJobTrigger.namespace, "a%b_c"))
-            .fetchOne();
-        return R.success(new Object[]{res_1, res_2});
-    }
+//    public static R<?> t24() {
+//        Jdbc db = DaoFactory.getJdbc("postgresql");
+//        Map<String, Object> paramMap = new HashMap<>();
+//        paramMap.put("param", db.likeBoth("b_"));
+//        Object res_1 = db.queryMany("select * from test where a like :param ", paramMap);
+//        Object res_2 = queryDSL.selectFrom(taskJobTrigger)
+//            .where(taskJobTrigger.id.eq(1653059609297231874L))
+//            .where(queryDSL.likeBoth(taskJobTrigger.namespace, "a%b_c"))
+//            .fetchOne();
+//        return R.success(new Object[]{res_1, res_2});
+//    }
 
     private static final MapperTest mapperTest = DaoFactory.getMapper(MapperTest.class);
 

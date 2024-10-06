@@ -1,15 +1,16 @@
 package org.clever.web.filter;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
+import org.clever.core.http.HttpServletRequestUtils;
 import org.clever.web.FilterRegistrar;
 import org.clever.web.config.MvcConfig;
-import org.clever.web.http.HttpMethod;
-import org.clever.web.support.mvc.HandlerMethod;
-import org.clever.web.support.mvc.method.HandlerMethodResolver;
+import org.clever.web.mvc.HandlerMethod;
+import org.clever.web.mvc.method.HandlerMethodResolver;
+import org.springframework.http.HttpMethod;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -74,8 +75,8 @@ public class MvcHandlerMethodFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         // 当前请求是否满足mvc拦截配置
-        final String reqPath = ctx.req.getPathInfo();
-        final HttpMethod httpMethod = HttpMethod.resolve(ctx.req.getMethod());
+        final String reqPath = HttpServletRequestUtils.getPathWithoutContextPath(ctx.req);
+        final HttpMethod httpMethod = HttpMethod.valueOf(ctx.req.getMethod());
         if (!reqPath.startsWith(mvcConfig.getPath()) || !mvcConfig.getHttpMethod().contains(httpMethod)) {
             ctx.next();
             return;

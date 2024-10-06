@@ -1,9 +1,10 @@
 package org.clever.js.graaljs.utils;
 
+import org.clever.core.Assert;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.graaljs.GraalConstant;
-import org.clever.util.Assert;
 import org.graalvm.polyglot.*;
+import org.graalvm.polyglot.io.IOAccess;
 
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -19,8 +20,8 @@ public class ScriptEngineUtils {
     /**
      * Context 默认选项
      */
-    public static final Map<String, String> CONTEXT_DEFAULT_OPTIONS = new HashMap<String, String>() {{
-        put("js.ecmascript-version", GraalConstant.ECMASCRIPT_VERSION);
+    public static final Map<String, String> CONTEXT_DEFAULT_OPTIONS = new HashMap<>() {{
+        // put("js.ecmascript-version", GraalConstant.ECMASCRIPT_VERSION);
         // "js.nashorn-compat", "true", // EXPERIMENTAL | js.nashorn-compat -> 实验性特性需要删除
         // "js.experimental-foreign-object-prototype", "true" // 实验性特性需要删除
     }};
@@ -55,7 +56,7 @@ public class ScriptEngineUtils {
             // 不允许JavaScript访问环境变量
             .allowEnvironmentAccess(EnvironmentAccess.NONE)
             // 不允许JavaScript对主机的IO操作
-            .allowIO(false)
+            .allowIO(IOAccess.NONE)
             // 不允许JavaScript访问本机接口
             .allowNativeAccess(false)
             // 不允许JavaScript加载Class

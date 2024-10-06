@@ -1,7 +1,5 @@
 package org.clever.js.nashorn;
 
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import lombok.SneakyThrows;
 import org.clever.js.api.AbstractScriptEngineInstance;
 import org.clever.js.api.GlobalConstant;
@@ -11,6 +9,8 @@ import org.clever.js.api.folder.Folder;
 import org.clever.js.api.internal.LoggerConsole;
 import org.clever.js.nashorn.internal.NashornLoggerFactory;
 import org.clever.js.nashorn.support.NashornObjectToString;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngine;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;

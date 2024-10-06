@@ -109,10 +109,10 @@ public class EnginePoolStatus implements Serializable {
         status.setNumActive(pool.getNumActive());
         status.setNumIdle(pool.getNumIdle());
         status.setNumWaiters(pool.getNumWaiters());
-        status.setActiveTimes(pool.getMeanActiveTimeMillis());
-        status.setIdleTimes(pool.getMeanIdleTimeMillis());
-        status.setWaitTimes(pool.getMeanBorrowWaitTimeMillis());
-        status.setMaxBorrowWaitTimeMillis(pool.getMaxBorrowWaitTimeMillis());
+        status.setActiveTimes(pool.getMeanActiveDuration().toMillis());
+        status.setIdleTimes(pool.getMeanIdleDuration().toMillis());
+        status.setWaitTimes(pool.getMeanBorrowWaitDuration().toMillis());
+        status.setMaxBorrowWaitTimeMillis(pool.getMaxBorrowWaitDuration().toMillis());
         status.setCreatedCount(pool.getCreatedCount());
         status.setBorrowedCount(pool.getBorrowedCount());
         status.setReturnedCount(pool.getReturnedCount());

@@ -1,15 +1,13 @@
 package org.clever.app;
 
-import io.javalin.http.Context;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.app.mvc.MvcTest;
-import org.clever.core.LocalVariableTableParameterNameDiscoverer;
+import org.clever.web.Context;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 
 /**
  * 作者：lizw <br/>
@@ -26,7 +24,5 @@ public class ClassTest {
         for (Parameter parameter : method.getParameters()) {
             log.info("###--> {}: {}", parameter.getType().getName(), parameter.getName());
         }
-        String[] parameterNames = new LocalVariableTableParameterNameDiscoverer(true).getParameterNames(method);
-        log.info("###--> {}", Arrays.toString(parameterNames));
     }
 }

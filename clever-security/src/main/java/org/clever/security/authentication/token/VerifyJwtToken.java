@@ -1,13 +1,12 @@
 package org.clever.security.authentication.token;
 
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.clever.core.OrderIncrement;
 import org.clever.core.Ordered;
 import org.clever.security.config.SecurityConfig;
 import org.clever.security.exception.AuthenticationException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * JWT-Token验证器

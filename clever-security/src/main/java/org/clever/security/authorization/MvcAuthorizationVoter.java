@@ -1,5 +1,6 @@
 package org.clever.security.authorization;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.security.annotation.CheckPermission;
 import org.clever.security.authorization.voter.AuthorizationVoter;
@@ -8,9 +9,7 @@ import org.clever.security.config.SecurityConfig;
 import org.clever.security.model.SecurityContext;
 import org.clever.security.utils.CheckPermissionUtils;
 import org.clever.web.filter.MvcHandlerMethodFilter;
-import org.clever.web.support.mvc.HandlerMethod;
-
-import javax.servlet.http.HttpServletRequest;
+import org.clever.web.mvc.HandlerMethod;
 
 /**
  * 为 MVC 对应的 HandlerMethod 检查授权, MVC Method{@link CheckPermission} 注解的支持

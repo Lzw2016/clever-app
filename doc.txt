@@ -2,7 +2,6 @@
 clever-spring           参考spring最核心的代码实现：通用类、工具类、注解扩展、类型反射、IO流、应用环境、基础类型转换、Bean类型转换
 clever-core             封装常用的工具类: 序列化反序列化、HTTP、编码解码、ID生成、Bean转换验证、Excel、异常、验证码等等
 clever-web              基于javalin封装servlet web服务器的实现,参考spring mvc部分注解的实现,支持web mvc动态调用java class(包含kotlin或groovy等JVM语言,需要编译器支持)
-clever-groovy           基于groovy实现web mvc动态调用groovy class(无需编译器支持)
 
 clever-js-api           JS引擎API层
 clever-js-graaljs       graaljs引擎实现(推荐)
@@ -30,8 +29,6 @@ clever-boot             应用启动项目,各个组件模块整合示例
 
 clever-boot -> ...
 🡓
-clever-groovy -> groovy
-🡓
 clever-web → javalin
 🡓
 clever-core → cglib jackson commons-lang3 commons-io commons-codec json guava okhttp3
@@ -52,6 +49,8 @@ clever-data-redis → commons-pool2 lettuce jedis
 
 ### 其它
 javalin文档
+6.0新特性            https://javalin.io/news/javalin-6.0.0-stable.html
+5.x升级6.x升级手册    https://javalin.io/migration-guide-javalin-5-to-6
 5.0新特性            https://javalin.io/news/javalin-5.0.0-stable.html
 4.x升级5.x升级手册    https://javalin.io/migration-guide-javalin-4-to-5
 4.x文档：            https://javalin.io/archive/docs/v4.6.X.html
@@ -67,7 +66,7 @@ Javalin app = Javalin.create().events(event -> {
     event.wsHandlerAdded(wsHandlerMetaInfo -> { ... });
 });
 app.start() // serverStarting -> (serverStarted || serverStartFailed)
-app.stop() // serverStopping -> serverStopped
+app.stop()  // serverStopping -> serverStopped
 ###---
 请求生命周期
 Javalin#before              // runs first, can throw exception (which will skip any endpoint handlers)
@@ -151,3 +150,127 @@ Javalin.create(config -> {
   });
 });
 --------------------------
+
+6.x ----------------------
+生命周期
+Javalin app = Javalin.create().events(event -> {
+    event.serverStarting(() -> { ... });
+    event.serverStarted(() -> { ... });
+    event.serverStartFailed(() -> { ... });
+    event.serverStopping(() -> { ... });
+    event.serverStopped(() -> { ... });
+    event.handlerAdded(handlerMetaInfo -> { ... });
+    event.wsHandlerAdded(wsHandlerMetaInfo -> { ... });
+});
+app.start() // serverStarting -> (serverStarted || serverStartFailed)
+app.stop()  // serverStopping -> serverStopped
+###---
+请求生命周期
+Javalin#before              // runs first, can throw exception (which will skip any endpoint handlers)
+Javalin#get/post/patch/etc  // runs second, can throw exception
+Javalin#error               // runs third, can throw exception
+Javalin#after               // runs fourth, can throw exception
+Javalin#exception           // runs any time a handler throws (cannot throw exception)
+JavalinConfig#requestLogger // runs after response is written to client
+JavalinConfig#accessManager // wraps all your endpoint handlers in a lambda of your choice
+###---
+静态文件
+run before-handlers
+run endpoint-handlers
+if no endpoint-handler found
+    run static-file-handlers
+    if static-file-found
+        static-file-handler sends response
+    else
+        response is 404
+run after-handlers
+###---
+静态文件配置
+Javalin.create(config -> {
+  config.staticFiles.add(staticFiles -> {
+    staticFiles.hostedPath = "/";                   // change to host files on a subpath, like '/assets'
+    staticFiles.directory = "/public";              // the directory where your files are located
+    staticFiles.location = Location.CLASSPATH;      // Location.CLASSPATH (jar) or Location.EXTERNAL (file system)
+    staticFiles.precompress = false;                // if the files should be pre-compressed and cached in memory (optimization)
+    staticFiles.aliasCheck = null;                  // you can configure this to enable symlinks (= ContextHandler.ApproveAliases())
+    staticFiles.headers = Map.of(...);              // headers that will be set for the files
+    staticFiles.skipFileFunction = req -> false;    // you can use this to skip certain files in the dir, based on the HttpServletRequest
+    staticFiles.mimeTypes.add(mimeType, ext);       // you can add custom mimetypes for extensions
+  });
+});
+###---
+--------------------------
+[OK] useVirtualThreads
+[OK] showJavalinBanner
+[NO] validation
+[NO] startupWatcherEnabled
+[OK] http
+[OK]     generateEtags
+[OK]     prefer405over404
+[OK]     maxRequestSize
+[OK]     defaultContentType
+[OK]     asyncTimeout
+[OK] router
+[OK]     contextPath
+[OK]     ignoreTrailingSlashes
+[OK]     treatMultipleSlashesAsSingleSlash
+[OK]     caseInsensitiveRoutes
+[OK] jetty
+[OK]     defaultHost
+[OK]     defaultPort
+[OK]     multipartConfig
+[OK]     threadPool
+[OK] spaRoot
+[OK]     hostedPath
+[OK]     filePath
+[OK]     location
+[OK] staticFiles
+[OK]     enableWebjars
+[OK]     hostedPath
+[OK]     directory
+[OK]     location
+[OK]     precompress
+[NO]     aliasCheck
+[OK]     headers
+[NO]     skipFileFunction
+[??]     mimeTypes
+[OK] requestLogger
+[NO]     RequestLogger
+[NO]     WsConfig
+[OK] bundledPlugins
+[NO]     enableRouteOverview
+[NO]     enableBasicAuth
+[NO]     enableGlobalHeaders
+[OK]     enableCors
+[OK]     enableHttpAllowedMethodsOnRoutes
+[OK]     enableDevLogging
+[OK]     enableRedirectToLowercasePaths
+[OK]     enableSslRedirects
+[  ] events
+[  ]     serverStarting
+[  ]     serverStarted
+[  ]     serverStartFailed
+[  ]     serverStopFailed
+[  ]     serverStopping
+[  ]     serverStopped
+[NO] contextResolver
+[NO]     ip
+[NO]     host
+[NO]     scheme
+[NO]     url
+[NO]     fullUrl
+[NO] pvt
+[NO]     eventManager
+[NO]     wsRouter
+[NO]     internalRouter
+[NO]     appDataManager
+[NO]     pluginManager
+[NO]     jsonMapper
+[NO]     requestLogger
+[NO]     resourceHandler
+[NO]     singlePageHandler
+[NO]     wsLogger
+[NO]     compressionStrategy
+[NO]     asyncExecutor
+[NO]     servletRequestLifecycle
+[NO]     servlet

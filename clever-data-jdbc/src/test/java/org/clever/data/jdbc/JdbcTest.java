@@ -2,8 +2,8 @@ package org.clever.data.jdbc;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.clever.jdbc.core.ConnectionCallback;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.ConnectionCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -171,31 +171,31 @@ public class JdbcTest {
     public void t11() {
         Jdbc jdbc = newJdbc();
         int c = jdbc.startBatch()
-            .update("update test set a=:p1 where id=1", new HashMap<String, Object>() {{
+            .update("update test set a=:p1 where id=1", new HashMap<>() {{
                 put("p1", "1");
             }})
-            .update("update test set a=:p1 where id=1", new HashMap<String, Object>() {{
+            .update("update test set a=:p1 where id=1", new HashMap<>() {{
                 put("p1", "2");
             }})
-            .update("update test set a=:p1 where id=2", new HashMap<String, Object>() {{
+            .update("update test set a=:p1 where id=2", new HashMap<>() {{
                 put("p1", "3");
             }})
-            .update("update test set a=:p1 where id=1", new HashMap<String, Object>() {{
+            .update("update test set a=:p1 where id=1", new HashMap<>() {{
                 put("p1", "4");
             }})
             .execute();
         log.info("-> {}", c);
         int[] cs = jdbc.batchUpdate("update test set a=:p1 where id=1", new ArrayList<Map<String, Object>>() {{
-            add(new HashMap<String, Object>() {{
+            add(new HashMap<>() {{
                 put("p1", "1");
             }});
-            add(new HashMap<String, Object>() {{
+            add(new HashMap<>() {{
                 put("p1", "2");
             }});
-            add(new HashMap<String, Object>() {{
+            add(new HashMap<>() {{
                 put("p1", "3");
             }});
-            add(new HashMap<String, Object>() {{
+            add(new HashMap<>() {{
                 put("p1", "4");
             }});
         }});

@@ -19,7 +19,7 @@ public class OgnlMemberAccess implements MemberAccess {
         Object result = null;
         if (isAccessible(context, target, member, propertyName)) {
             AccessibleObject accessible = (AccessibleObject) member;
-            if (!accessible.isAccessible()) {
+            if (!accessible.canAccess(target)) {
                 result = Boolean.FALSE;
                 accessible.setAccessible(true);
             }

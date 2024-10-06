@@ -27,6 +27,7 @@ public class JavaInteropTest {
 
     private ScriptEngineInstance<?, ?> engineInstance;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     public void before1() {
         // clever-js-graaljs
@@ -42,7 +43,6 @@ public class JavaInteropTest {
                     Value::hasMembers,
                     value -> {
                         TestBean bean = new TestBean();
-                        // noinspection unchecked
                         BeanCopyUtils.toBean(
                             (Map<String, Object>) InteropScriptToJavaUtils.INSTANCE.deepToJavaObject(value),
                             bean

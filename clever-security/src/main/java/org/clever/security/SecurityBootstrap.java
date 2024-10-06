@@ -3,10 +3,9 @@ package org.clever.security;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.boot.context.properties.bind.Binder;
 import org.clever.core.AppContextHolder;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
-import org.clever.core.env.Environment;
 import org.clever.core.mapper.JacksonMapper;
 import org.clever.security.authentication.AuthenticationFilter;
 import org.clever.security.authentication.token.RefreshJwtToken;
@@ -29,7 +28,8 @@ import org.clever.security.login.*;
 import org.clever.security.logout.LogoutFilter;
 import org.clever.security.model.jackson2.SecurityJackson2Module;
 import org.clever.security.utils.HttpRespondHandler;
-import org.clever.util.Assert;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -175,16 +175,26 @@ public class SecurityBootstrap {
     public static SecurityBootstrap create(Environment environment) {
         SecurityConfig securityConfig = Binder.get(environment).bind(SecurityConfig.PREFIX, SecurityConfig.class).orElseGet(SecurityConfig::new);
         AppContextHolder.registerBean("securityConfig", securityConfig, true);
-        DataSourceConfig dataSource = Optional.of(securityConfig.getDataSource()).orElse(new DataSourceConfig());
-        securityConfig.setDataSource(dataSource);
-        LoginConfig login = Optional.of(securityConfig.getLogin()).orElse(new LoginConfig());
-        securityConfig.setLogin(login);
-        LogoutConfig logout = Optional.of(securityConfig.getLogout()).orElse(new LogoutConfig());
-        securityConfig.setLogout(logout);
-        AesKeyConfig reqAesKey = Optional.of(securityConfig.getReqAesKey()).orElse(new AesKeyConfig());
-        securityConfig.setReqAesKey(reqAesKey);
-        TokenConfig token = Optional.of(securityConfig.getToken()).orElse(new TokenConfig());
-        securityConfig.setToken(token);
+        DataSourceConfig dataSource = Optional.ofNullable(securityConfig.getDataSource()).orElseGet(() -> {
+            securityConfig.setDataSource(new DataSourceConfig());
+            return securityConfig.getDataSource();
+        });
+        LoginConfig login = Optional.ofNullable(securityConfig.getLogin()).orElseGet(() -> {
+            securityConfig.setLogin(new LoginConfig());
+            return securityConfig.getLogin();
+        });
+        LogoutConfig logout = Optional.ofNullable(securityConfig.getLogout()).orElseGet(() -> {
+            securityConfig.setLogout(new LogoutConfig());
+            return securityConfig.getLogout();
+        });
+        AesKeyConfig reqAesKey = Optional.ofNullable(securityConfig.getReqAesKey()).orElseGet(() -> {
+            securityConfig.setReqAesKey(new AesKeyConfig());
+            return securityConfig.getReqAesKey();
+        });
+        TokenConfig token = Optional.ofNullable(securityConfig.getToken()).orElseGet(() -> {
+            securityConfig.setToken(new TokenConfig());
+            return securityConfig.getToken();
+        });
         List<String> logs = new ArrayList<>();
         logs.add("security: ");
         logs.add("  enable                : " + securityConfig.isEnable());
@@ -255,13 +265,13 @@ public class SecurityBootstrap {
     public synchronized AuthenticationFilter getAuthenticationFilter() {
         if (authenticationFilter == null) {
             authenticationFilter = new AuthenticationFilter(
-                    securityConfig,
-                    VERIFY_JWT_TOKEN_LIST,
-                    SECURITY_CONTEXT_REPOSITORY,
-                    AUTHENTICATION_SUCCESS_HANDLER_LIST,
-                    AUTHENTICATION_FAILURE_HANDLER_LIST,
-                    REFRESH_JWT_TOKEN,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                VERIFY_JWT_TOKEN_LIST,
+                SECURITY_CONTEXT_REPOSITORY,
+                AUTHENTICATION_SUCCESS_HANDLER_LIST,
+                AUTHENTICATION_FAILURE_HANDLER_LIST,
+                REFRESH_JWT_TOKEN,
+                HTTP_RESPOND_HANDLER
             );
         }
         return authenticationFilter;
@@ -270,16 +280,16 @@ public class SecurityBootstrap {
     public synchronized LoginFilter getLoginFilter() {
         if (loginFilter == null) {
             loginFilter = new LoginFilter(
-                    securityConfig,
-                    LOGIN_DATA_COLLECT_LIST,
-                    VERIFY_LOGIN_DATA_LIST,
-                    LOAD_USER_LIST,
-                    VERIFY_USER_INFO_LIST,
-                    ADD_JWT_TOKEN_EXT_DATA_LIST,
-                    LOGIN_SUCCESS_HANDLER_LIST,
-                    LOGIN_FAILURE_HANDLER_LIST,
-                    SECURITY_CONTEXT_REPOSITORY,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                LOGIN_DATA_COLLECT_LIST,
+                VERIFY_LOGIN_DATA_LIST,
+                LOAD_USER_LIST,
+                VERIFY_USER_INFO_LIST,
+                ADD_JWT_TOKEN_EXT_DATA_LIST,
+                LOGIN_SUCCESS_HANDLER_LIST,
+                LOGIN_FAILURE_HANDLER_LIST,
+                SECURITY_CONTEXT_REPOSITORY,
+                HTTP_RESPOND_HANDLER
             );
         }
         return loginFilter;
@@ -288,10 +298,10 @@ public class SecurityBootstrap {
     public synchronized LogoutFilter getLogoutFilter() {
         if (logoutFilter == null) {
             logoutFilter = new LogoutFilter(
-                    securityConfig,
-                    LOGOUT_SUCCESS_HANDLER_LIST,
-                    LOGOUT_FAILURE_HANDLER_LIST,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                LOGOUT_SUCCESS_HANDLER_LIST,
+                LOGOUT_FAILURE_HANDLER_LIST,
+                HTTP_RESPOND_HANDLER
             );
         }
         return logoutFilter;
@@ -300,11 +310,11 @@ public class SecurityBootstrap {
     public synchronized AuthorizationFilter getAuthorizationFilter() {
         if (authorizationFilter == null) {
             authorizationFilter = new AuthorizationFilter(
-                    securityConfig,
-                    AUTHORIZATION_VOTER_LIST,
-                    AUTHORIZATION_SUCCESS_HANDLER_LIST,
-                    AUTHORIZATION_FAILURE_HANDLER_LIST,
-                    HTTP_RESPOND_HANDLER
+                securityConfig,
+                AUTHORIZATION_VOTER_LIST,
+                AUTHORIZATION_SUCCESS_HANDLER_LIST,
+                AUTHORIZATION_FAILURE_HANDLER_LIST,
+                HTTP_RESPOND_HANDLER
             );
         }
         return authorizationFilter;

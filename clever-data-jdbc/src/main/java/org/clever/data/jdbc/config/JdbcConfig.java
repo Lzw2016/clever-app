@@ -2,6 +2,8 @@ package org.clever.data.jdbc.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.util.*;
 
@@ -9,6 +11,7 @@ import java.util.*;
  * 作者：lizw <br/>
  * 创建时间：2022/12/26 13:39 <br/>
  */
+@ConfigurationProperties(prefix = JdbcConfig.PREFIX)
 @Data
 public class JdbcConfig {
     public static final String PREFIX = "jdbc";
@@ -25,14 +28,17 @@ public class JdbcConfig {
      * p6spy 打印SQL日志配置 <br />
      * 实现类: org.clever.data.jdbc.metrics.Slf4JLogger
      */
+    @NestedConfigurationProperty
     private P6SpyLog p6spylog = new P6SpyLog();
     /**
      * jdbc性能监控配置
      */
+    @NestedConfigurationProperty
     private JdbcMetrics metrics = new JdbcMetrics();
     /**
      * JDBC数据源全局配置
      */
+    @NestedConfigurationProperty
     private HikariConfig global = new HikariConfig();
     /**
      * JDBC数据源集合(数据源名称 --> 数据源配置)
@@ -57,6 +63,10 @@ public class JdbcConfig {
          * 忽略的SQL语句(包含匹配，大小写敏感)
          */
         private Set<String> ignoreContainsSql = new HashSet<>();
+        /**
+         * 忽略的线程名(包含匹配，大小写敏感)
+         */
+        private Set<String> ignoreThread = new HashSet<>();
     }
 
     @Data

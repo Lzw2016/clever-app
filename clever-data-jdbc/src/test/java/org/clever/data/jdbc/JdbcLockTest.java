@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 @Slf4j
 public class JdbcLockTest {
     private Jdbc newJdbc() {
-        //return BaseTest.newMysql();
+        // return BaseTest.newMysql();
         return BaseTest.newPostgresql();
     }
 

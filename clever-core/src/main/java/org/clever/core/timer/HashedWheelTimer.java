@@ -1,9 +1,10 @@
 package org.clever.core.timer;
 
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.Assert;
 import org.clever.core.PlatformOS;
-import org.clever.util.Assert;
 
+import java.lang.ref.Cleaner;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Queue;
@@ -83,9 +84,13 @@ public class HashedWheelTimer implements Timer {
      */
     private static void reportTooManyInstances() {
         String resourceType = HashedWheelTimer.class.getSimpleName();
-        log.error("你创造了太多" + resourceType + " 实例。" + resourceType + "是可重用的共享资源，因此只创建少数实例。");
+        log.error("你创造了太多{} 实例。{}是可重用的共享资源，因此只需要创建少数实例。", resourceType, resourceType);
     }
 
+    /**
+     * 当前实例被GC时的清理回调
+     */
+    private final Cleaner cleaner = Cleaner.create();
     /**
      * 时间轮基本时间长度(纳秒)
      */
@@ -239,18 +244,8 @@ public class HashedWheelTimer implements Timer {
         if (INSTANCE_COUNTER.incrementAndGet() > INSTANCE_COUNT_LIMIT && WARNED_TOO_MANY_INSTANCES.compareAndSet(false, true)) {
             reportTooManyInstances();
         }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            super.finalize();
-        } finally {
-            // 该对象将被 GC 处理，我们要确保减少活动实例计数。
-            if (WORKER_STATE_UPDATER.getAndSet(this, WORKER_STATE_SHUTDOWN) != WORKER_STATE_SHUTDOWN) {
-                INSTANCE_COUNTER.decrementAndGet();
-            }
-        }
+        // 该对象将被 GC 处理，我们要确保减少活动实例计数。
+        cleaner.register(this, INSTANCE_COUNTER::decrementAndGet);
     }
 
     /**

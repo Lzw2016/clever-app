@@ -1,12 +1,12 @@
 package org.clever.js.nashorn.utils;
 
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.js.api.GlobalConstant;
 import org.clever.js.api.ScriptObjectType;
 import org.clever.js.nashorn.utils.support.CustomClassFilter;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngine;
+import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
+import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngineFactory;

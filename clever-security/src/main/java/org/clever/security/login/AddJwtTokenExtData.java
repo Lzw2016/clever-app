@@ -1,11 +1,11 @@
 package org.clever.security.login;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.clever.core.OrderIncrement;
 import org.clever.core.Ordered;
 import org.clever.security.config.TokenConfig;
 import org.clever.security.model.UserInfo;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**

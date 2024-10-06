@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.StrFormatter;
 import org.clever.core.exception.ExceptionUtils;
 import org.clever.core.mapper.JacksonMapper;
@@ -11,7 +12,6 @@ import org.clever.core.tuples.TupleTwo;
 import org.clever.task.core.TaskStore;
 import org.clever.task.core.model.entity.*;
 import org.clever.task.core.support.TaskContext;
-import org.clever.util.Assert;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
@@ -108,7 +108,7 @@ public class JobContext {
      * @param name  名称
      * @param value 值
      */
-    void setInnerData(String name, Object value) {
+    public void setInnerData(String name, Object value) {
         innerData.put(name, value);
     }
 

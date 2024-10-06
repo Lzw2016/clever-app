@@ -1,0 +1,152 @@
+app:
+  root-path: './'
+
+startup-task:
+  pool-size: 8
+  timed-task:
+    - name: '测试定时任务'
+      enable: true
+      interval: 120s
+      clazz: 'org.clever.app.task.TaskTest'
+      method: 'job01'
+  cmd-task:
+    - name: '持续编译源码'
+      enable: false
+      async: true
+      work-dir: './'
+      cmd:
+        windows: 'gradlew.bat classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        linux: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+        macos: './gradlew     classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn'
+
+mybatis:
+  enable: true
+  watcher: true
+  interval: 1s
+  locations:
+    - fileType: filesystem
+      location: './clever-boot/src/main/kotlin'
+      filter: '**/*.xml'
+    - fileType: filesystem
+      location: './clever-boot/src/main/java'
+      filter: '**/*.xml'
+    #- fileType: jar
+    #  location: 'classpath*:org/clever/app/**/*.xml'
+    #  filter: ''
+    #- fileType: filesystem
+    #  location: './clever-data-jdbc/src/test/resources/performance_test'
+    #  filter: '**/*.xml'
+
+jdbc:
+  enable: true
+  default-name: 'mysql'
+  data-source:
+    mysql:
+      jdbc-url: jdbc:p6spy:mysql://192.168.1.211:30019/test
+      username: admin
+      password: admin123456
+      minimum-idle: 2
+      maximum-pool-size: 100
+      connection-test-query: 'select 1 from dual'
+    postgresql:
+      jdbc-url: jdbc:p6spy:postgresql://192.168.1.211:30010/test
+      username: admin
+      password: admin123456
+      minimum-idle: 2
+      maximum-pool-size: 100
+      connection-test-query: 'select 1'
+      data-source-properties:
+        stringtype: unspecified
+    #oracle:
+    #  jdbcUrl: jdbc:p6spy:oracle:thin:@122.9.140.63:1521:wms8dev
+    #  username: wms8dev
+    #  password: lmis9system
+    #  minimum-idle: 2
+    #  maximum-pool-size: 100
+    #  data-source-properties: 'select 1 from dual'
+
+redis:
+  enable: true
+  default-name: 'default'
+  data-source:
+    default:
+      mode: standalone
+      standalone:
+        host: '192.168.1.211'
+        port: 30007
+        database: 0
+        password: 'admin123456'
+
+web:
+  http:
+    static-file:
+      - hosted-path: '/'
+        directory: './clever-boot/src/main/resources/static'
+        location: external
+  resources:
+    enable: true
+    mappings:
+      - hosted-path: '/'
+        location: './clever-boot/src/main/resources/static'
+  mvc:
+    path: '/api/'
+    http-method: [ 'POST', 'GET' ]
+    package-mapping:
+      - path-prefix: '/app'
+        package-prefix: 'org.clever.app.mvc'
+      - path-prefix: '/task'
+        package-prefix: 'org.clever.task.manage.mvc'
+    allow-packages:
+      - 'org.clever.app.mvc.'
+      - 'org.clever.task.manage.mvc.'
+    transactional-def-datasource: [ ]
+    def-transactional:
+      datasource: [ ]
+      timeout: -1
+      read-only: false
+    hot-reload:
+      enable: true
+      # watchFile: './build/.hotReload'
+      interval: 1s
+      exclude-packages:
+        - 'org.clever.task.core.model'
+      exclude-classes:
+        - 'org.clever.task.core.model.JobInfo'
+        - 'org.clever.task.core.model.AbstractTrigger'
+        - 'org.clever.task.core.job.JobContext'
+      locations:
+        - './clever-boot/out/production/classes'
+        - './clever-task/out/production/classes'
+        #- './clever-boot/build/classes/java/main'
+        #- './clever-boot/build/classes/kotlin/main'
+        #- './clever-task/build/classes/java/main'
+  security:
+    enable: false
+    data-source:
+      jdbc-name: "mysql"
+      enable-redis: true
+      redis-name: "default"
+      redis-namespace: "security"
+
+timed-task:
+  enable: false
+  standby: true
+  jdbc-name: 'postgresql'
+  namespace: 'default'
+  instance-name: 'node01'
+  # namespace: 'lzw'
+  # instance-name: 'n01'
+  description: 'dev节点01'
+  heartbeat-interval: 10000
+  scheduler-executor-pool-size: 16
+  job-executor-pool-size: 64
+  job-executor-queue-size: 64
+  load-weight: 1.0
+  shell-job-working-dir: './shell_job_log'
+  log-retention: 3d
+  js-executor:
+    engine-pool:
+      max-idle: 8
+      min-idle: 0
+      max-total: 8
+      max-wait: 30s

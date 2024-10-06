@@ -44,7 +44,7 @@ public class MultiThreadTest {
             try {
                 engineInstance.require("/pool2-test").callMember("t01");
             } catch (Exception e) {
-                e.printStackTrace();
+                log.info(e.getMessage(), e);
             }
         });
         thread.start();

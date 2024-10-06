@@ -1,0 +1,176 @@
+spring:
+  application.name: clever
+  profiles.active: dev
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    name: '${clever.name:server}'
+    path: './logs/${logging.file.name}'
+  level:
+    root: info
+    org.springframework.jdbc.datasource.DataSourceTransactionManager: info
+    org.springframework.jdbc.datasource.DataSourceUtils: info
+    org.springframework.core.HotReloadClassLoader: debug
+    org.springframework.security: debug
+    com.zaxxer.hikari.HikariConfig: debug
+    #org.eclipse.jetty.util.log: warn
+
+app:
+  root-path: './'
+
+jdbc:
+  p6spylog:
+    enable: true
+    slow: 800
+    ignore-sql:
+      - 'begin dbms_output.enable(); end;'
+      - 'declare     num integer := 1000; begin     dbms_output.get_lines(?, num);     dbms_output.disable(); end;'
+      - 'select 1'
+      - 'select 1 from dual'
+      - 'select now()'
+      - 'select now(6) from dual'
+    ignore-contains-sql:
+      - 'pg_advisory'
+      - 'pg_try_advisory'
+      - ' task_http_job '
+      - ' task_java_job '
+      - ' task_job '
+      - ' task_job_log '
+      - ' task_job_trigger '
+      - ' task_job_trigger_log '
+      - ' task_js_job '
+      - ' task_report '
+      - ' task_scheduler '
+      - ' task_scheduler_log '
+      - ' task_shell_job '
+      - ' task_job_console_log '
+      - ' task_scheduler_cmd '
+    ignore-thread:
+      - 'task-scheduler-pool-'
+  metrics:
+    enable: true
+    max-sql-count: 200
+    histogram: [ 20, 50, 100, 200, 500, 1000, 2000, 5000, 20000 ]
+    histogram-top-n: 3
+  global:
+    driver-class-name: 'com.p6spy.engine.spy.P6SpyDriver'
+    autocommit: true
+    maximum-pool-size: 100
+    minimum-idle: 5
+    max-lifetime: 21600000
+    connection-timeout: 30000
+    connection-test-query: 'select 1'
+    exception-override-class-name: 'org.clever.data.jdbc.hikari.HikariPreventQueryTimeoutEviction'
+    #dataSourceProperties:
+    #  stringtype: unspecified
+
+redis:
+  global:
+    mode: standalone
+    ssl: false
+    read-timeout: 30s
+    connect-timeout: 10s
+    shutdown-timeout: 100ms
+    client-name: 'clever-app'
+    pool:
+      enabled: true
+      max-idle: 8
+      min-idle: 0
+      max-active: 8
+      max-wait: 30s
+      time-between-eviction-runs: 1m
+
+web:
+  host: '0.0.0.0'
+  port: 9090
+  show-javalin-banner: false
+  use-virtual-threads: false
+  thread-pool-max: 250
+  thread-pool-min: 8
+  thread-pool-name: 'jetty-exec'
+  enable-dev-logging: false
+  enable-http-allowed-methods-on-routes: false
+  enable-redirect-to-lowercase-paths: false
+  jackson:
+    locale: 'zh_CN'
+    date-format: 'yyyy-MM-dd HH:mm:ss'
+  http:
+    context-path: '/'
+    generate-etags: true
+    max-request-size: 10MB
+    multipart:
+      max-file-size: 10MB
+      max-total-request-size: 50MB
+  resources:
+    enable: false
+  echo:
+    enable: true
+    ignore-paths:
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/*.pdf'
+  cors:
+    enable: true
+    path-pattern: [ '/**' ]
+    allowed-origin-patterns: [ '*' ]
+    allowed-origins: [ ]
+    allowed-methods: [ '*' ]
+    allowed-headers: [ '*' ]
+    exposed-headers: [ ]
+    allow-credentials: true
+    max-age: 3600
+  mvc:
+    http-Method: [ 'POST', 'GET' ]
+    def-transactional:
+      propagation: required
+      isolation: default
+      timeout: -1
+      read-only: false
+  security:
+    ignore-paths:
+      - '/favicon.ico'
+      - '/dist/**'
+      - '/static/**'
+      - '/**/*.png'
+      - '/**/*.ico'
+      - '/**/*.js'
+      - '/**/*.css'
+      - '/**/*.html'
+      - '/**/*.ts'
+      - '/**/*.tsx'
+      - '/**/*.map'
+      - '/**/*.png'
+      - '/**/*.jpg'
+      - '/**/*.gif'
+      - '/**/*.ttf'
+      - '/**/*.woff'
+      - '/**/*.woff2'
+      - '/**/.git'
+    ignore-auth-paths: [ ]
+    ignore-auth-failed-paths: [ ]
+    current-user-path: '/current_user'
+    login:
+      paths: [ '/login' ]
+      post-only: true
+      allow-repeat-login: true
+      concurrent-login-count: 1
+      allow-after-login: true
+    logout:
+      path: '/logout'
+    token:
+      secret-key: 'security'
+      token-validity: 30d
+      jwt-token-name: 'authorization'
+      refresh-token-name: 'refresh-token'

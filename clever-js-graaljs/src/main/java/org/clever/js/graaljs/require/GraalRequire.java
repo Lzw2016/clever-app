@@ -1,5 +1,6 @@
 package org.clever.js.graaljs.require;
 
+import org.clever.core.Assert;
 import org.clever.js.api.ScriptEngineContext;
 import org.clever.js.api.folder.Folder;
 import org.clever.js.api.module.Module;
@@ -7,7 +8,6 @@ import org.clever.js.api.require.AbstractRequire;
 import org.clever.js.api.require.Require;
 import org.clever.js.graaljs.module.GraalModule;
 import org.clever.js.graaljs.utils.ScriptEngineUtils;
-import org.clever.util.Assert;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 

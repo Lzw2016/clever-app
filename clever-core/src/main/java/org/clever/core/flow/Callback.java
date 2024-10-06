@@ -27,7 +27,6 @@ public interface Callback extends Ordered {
 
     /**
      * 任务执行成功后的回调(可以覆盖 Worker 返回值) <br/>
-     *
      */
     void after(CallbackContext.After context);
 
@@ -51,7 +50,7 @@ public interface Callback extends Ordered {
     /**
      * 任务回调的执行顺序
      *
-     * @see org.clever.core.Ordered
+     * @see Ordered
      */
     @Override
     default double getOrder() {

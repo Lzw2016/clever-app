@@ -1,10 +1,9 @@
 package org.clever.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.clever.core.Assert;
 import org.clever.security.model.SecurityContext;
 import org.clever.security.model.UserInfo;
-import org.clever.util.Assert;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 作者：lizw <br/>

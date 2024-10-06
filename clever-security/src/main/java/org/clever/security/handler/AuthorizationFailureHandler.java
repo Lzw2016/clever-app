@@ -1,10 +1,9 @@
 package org.clever.security.handler;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.clever.core.Ordered;
 import org.clever.security.model.jackson2.event.AuthorizationFailureEvent;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 授权失败处理

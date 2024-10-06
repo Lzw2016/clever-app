@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
 import org.clever.core.RenameStrategy;
 import org.clever.data.jdbc.querydsl.utils.SQLClause;
-import org.clever.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

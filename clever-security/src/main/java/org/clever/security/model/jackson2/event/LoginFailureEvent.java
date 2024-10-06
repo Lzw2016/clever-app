@@ -1,12 +1,12 @@
 package org.clever.security.model.jackson2.event;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import org.clever.security.exception.LoginException;
 import org.clever.security.model.UserInfo;
 import org.clever.security.model.request.AbstractLoginReq;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 
 /**

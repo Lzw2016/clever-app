@@ -14,20 +14,21 @@ val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVer
 val buildSnapshot = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
-    const val springBootVersion = "2.6.15"
-    const val springCloudVersion = "2021.0.9"
-    const val javalinVersion = "4.6.8"
+    const val springBootVersion = "3.3.4"
+    const val springCloudVersion = "2023.0.3"
+    const val javalinVersion = "6.3.0"
+    const val jettyVersion = "11.0.24"
     const val kotlinVersion = "2.0.20"
     const val kotlinxCoroutinesVersion = "1.7.3"
-    const val groovyVersion = "4.0.22"
-    const val graaljsVersion = "21.3.10"
+    const val groovyVersion = "4.0.23"
+    const val graaljsVersion = "23.1.4"
     const val nashornVersion = "15.4"
-    const val javetVersion = "3.1.3"
+    const val javetVersion = "3.1.8"
     const val antlr4Version = "4.9.3"
     const val jmhVersion = "1.37"
-    const val querydslVersion = "5.0.0"
+    const val querydslVersion = "5.1.0"
     const val schemacrawlerVersion = "16.19.11"
-    const val poiVersion = "4.1.2"
+    const val poiVersion = "5.2.5"
 }
 
 buildscript {
@@ -38,8 +39,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.apache.commons:commons-lang3:3.12.0")
-        classpath("commons-io:commons-io:2.11.0")
+        classpath("org.apache.commons:commons-lang3:3.17.0")
+        classpath("commons-io:commons-io:2.16.1")
     }
 }
 
@@ -52,8 +53,8 @@ plugins {
 
 idea {
     project {
-        jdkName = "1.8"
-        languageLevel = IdeaLanguageLevel("1.8")
+        jdkName = "17"
+        languageLevel = IdeaLanguageLevel("17")
     }
     module {
         isDownloadJavadoc = true
@@ -78,8 +79,8 @@ allprojects {
         // resolutionStrategy.cacheChangingModulesFor(0, "seconds")
     }
 
-    java.sourceCompatibility = JavaVersion.VERSION_1_8
-    java.targetCompatibility = JavaVersion.VERSION_1_8
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    java.targetCompatibility = JavaVersion.VERSION_17
 
     tasks.compileJava {
         options.encoding = "UTF-8"
@@ -109,48 +110,37 @@ subprojects {
             mavenBom("org.springframework.boot:spring-boot-dependencies:${Ver.springBootVersion}")
             mavenBom("org.springframework.cloud:spring-cloud-dependencies:${Ver.springCloudVersion}")
             mavenBom("org.jetbrains.kotlinx:kotlinx-coroutines-bom:${Ver.kotlinxCoroutinesVersion}")
+            mavenBom("org.eclipse.jetty:jetty-bom:${Ver.jettyVersion}")
         }
 
         dependencies {
             // performance test
             dependency("org.openjdk.jmh:jmh-core:${Ver.jmhVersion}")
             dependency("org.openjdk.jmh:jmh-generator-annprocess:${Ver.jmhVersion}")
-            // javax
-            dependency("javax.servlet:javax.servlet-api:4.0.1")
-            dependency("javax.inject:javax.inject:1")
-            dependency("javax.persistence:persistence-api:1.0.2")
-            dependency("jakarta.persistence:jakarta.persistence-api:2.2.3")
-            dependency("com.google.code.findbugs:jsr305:3.0.2")
-            dependency("org.glassfish:javax.el:3.0.0")
-            // 新版本jdk缺少的lib
-            dependency("javax.xml.bind:jaxb-api:2.3.1")
-            // validation
-            dependency("javax.validation:validation-api:2.0.1.Final")
-            dependency("org.hibernate.validator:hibernate-validator:6.2.5.Final")
+            // jakarta
+            dependency("org.glassfish:jakarta.el:4.0.2")
             // time
-            dependency("joda-time:joda-time:2.10.14")
-            dependency("org.joda:joda-convert:2.2.2")
+            dependency("joda-time:joda-time:2.12.7")
+            dependency("org.joda:joda-convert:2.2.3")
             // jdbc
             dependency("p6spy:p6spy:3.9.1")
-            dependency("com.oracle.database.jdbc:ojdbc8:21.6.0.0.1")
-            dependency("com.oracle.database.nls:orai18n:21.3.0.0")
-            dependency("org.postgresql:postgresql:42.3.6")
+            dependency("org.postgresql:postgresql:42.5.6")
             dependency("mysql:mysql-connector-java:8.0.33")
             dependency("com.mysql:mysql-connector-j:8.0.33")
-            dependency("com.microsoft.sqlserver:mssql-jdbc:11.2.1.jre8")
+            dependency("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre8")
+            dependency("com.oracle.database.jdbc:ojdbc8:21.6.0.0.1")
+            dependency("com.oracle.database.nls:orai18n:21.3.0.0")
             // apache commons
-            dependency("commons-io:commons-io:2.11.0")
-            dependency("org.apache.commons:commons-text:1.9")
-            dependency("org.apache.commons:commons-email:1.5")
-            dependency("commons-beanutils:commons-beanutils:1.9.4")
+            dependency("commons-io:commons-io:2.16.1")
+            dependency("org.apache.commons:commons-text:1.12.0")
             // http相关
-            dependency("com.squareup.okhttp3:okhttp:4.9.3")
-            dependency("com.squareup.retrofit2:converter-jackson:2.9.0")
-            dependency("com.squareup.retrofit2:retrofit:2.9.0")
+            dependency("com.squareup.okhttp3:okhttp:4.12.0")
+            dependency("com.squareup.retrofit2:converter-jackson:2.11.0")
+            dependency("com.squareup.retrofit2:retrofit:2.11.0")
             // json、xml相关
-            dependency("org.json:json:20210307")
-            dependency("com.alibaba:fastjson:1.2.78")
-            dependency("com.thoughtworks.xstream:xstream:1.4.19")
+            dependency("org.json:json:20240303")
+            dependency("com.alibaba.fastjson2:fastjson2:2.0.53")
+            dependency("com.thoughtworks.xstream:xstream:1.4.20")
             // 反射相关
             dependency("net.jodah:typetools:0.6.3")
             dependency("cglib:cglib:3.3.0")
@@ -169,12 +159,13 @@ subprojects {
             dependency("org.apache.groovy:groovy:${Ver.groovyVersion}")
             // graaljs
             dependency("org.graalvm.truffle:truffle-api:${Ver.graaljsVersion}")
-            dependency("org.graalvm.sdk:graal-sdk:${Ver.graaljsVersion}")
-            dependency("org.graalvm.js:js-scriptengine:${Ver.graaljsVersion}")
-            dependency("org.graalvm.js:js:${Ver.graaljsVersion}")
-            dependency("org.graalvm.tools:profiler:${Ver.graaljsVersion}")
-            dependency("org.graalvm.tools:chromeinspector:${Ver.graaljsVersion}")
-            dependency("org.graalvm.compiler:compiler:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:polyglot:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:js-community:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:js:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:inspect-community:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:inspect:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:profiler-community:${Ver.graaljsVersion}")
+            dependency("org.graalvm.polyglot:profiler:${Ver.graaljsVersion}")
             // nashorn
             dependency("org.openjdk.nashorn:nashorn-core:${Ver.nashornVersion}")
             // javet
@@ -194,7 +185,7 @@ subprojects {
             dependency("org.apache.poi:poi-ooxml:${Ver.poiVersion}")
             dependency("org.apache.poi:poi-ooxml:${Ver.poiVersion}")
             dependency("org.apache.poi:poi-ooxml-schemas:${Ver.poiVersion}")
-            dependency("com.alibaba:easyexcel:3.3.2")
+            dependency("com.alibaba:easyexcel:4.0.3")
             // querydsl
             dependency("com.querydsl:querydsl-core:${Ver.querydslVersion}")
             dependency("com.querydsl:querydsl-sql:${Ver.querydslVersion}")
@@ -214,18 +205,15 @@ subprojects {
             dependency("us.fatehi:schemacrawler-sqlserver:${Ver.schemacrawlerVersion}")
             dependency("us.fatehi:schemacrawler-mysql:${Ver.schemacrawlerVersion}")
             // 其他工具包
-            dependency("org.jetbrains:annotations:23.0.0")
-            dependency("com.google.guava:guava:31.0.1-jre")
+            dependency("com.google.guava:guava:33.2.1-jre")
             dependency("com.google.zxing:javase:3.4.1")
-            dependency("ognl:ognl:3.2.21")
-            dependency("com.github.jsqlparser:jsqlparser:4.4")
-            dependency("com.jfinal:enjoy:5.0.3")
+            dependency("ognl:ognl:3.3.5")
+            dependency("com.github.jsqlparser:jsqlparser:4.6")
+            dependency("com.jfinal:enjoy:5.1.3")
             dependency("com.belerweb:pinyin4j:2.5.1")
-            dependency("org.ow2.asm:asm:7.1")
             dependency("org.apache.commons:commons-math3:3.6.1")
-            dependency("org.javassist:javassist:3.28.0-GA")
             dependency("org.redisson:redisson:3.19.3")
-            dependency("de.ruedigermoeller:fst:2.57")
+            // dependency("de.ruedigermoeller:fst:2.57")
         }
     }
 
@@ -272,7 +260,6 @@ subprojects {
         repositories {
             maven {
                 // setUrl("https://nexus.msvc.top/repository/maven-${if (buildSnapshot) "snapshots" else "releases"}/")
-                @Suppress("HttpUrlsUsage")
                 setUrl("http://all.msvc.top:30005/api/packages/clever/maven")
                 isAllowInsecureProtocol = true
                 credentials(HttpHeaderCredentials::class) {

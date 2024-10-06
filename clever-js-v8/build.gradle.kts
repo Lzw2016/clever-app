@@ -7,12 +7,12 @@ dependencies {
     api(project(":clever-js-api"))
     if (os.isMacOsX) {
         // MacOS (x86_64 and arm64)
-        api("com.caoccao.javet:javet-macos:3.0.2")
+        api("com.caoccao.javet:javet-macos")
     } else if (os.isLinux && (cpuArch == "aarch64" || cpuArch == "arm64")) {
         // Linux (arm64)
-        api("com.caoccao.javet:javet-linux-arm64:3.0.2")
+        api("com.caoccao.javet:javet-linux-arm64")
     } else {
         // Linux and Windows (x86_64)
-        api("com.caoccao.javet:javet:3.0.2")
+        api("com.caoccao.javet:javet")
     }
 }

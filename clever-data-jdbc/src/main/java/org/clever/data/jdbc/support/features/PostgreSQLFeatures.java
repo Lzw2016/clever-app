@@ -68,7 +68,7 @@ public class PostgreSQLFeatures extends DataBaseFeatures {
                 break;
             }
         }
-        return Optional.of(locked).orElse(false);
+        return Optional.ofNullable(locked).orElse(false);
     }
 
     @SuppressWarnings("DuplicatedCode")
@@ -80,6 +80,6 @@ public class PostgreSQLFeatures extends DataBaseFeatures {
         paramMap.put("lockKey1", lockKey.getValue1());
         paramMap.put("lockKey2", lockKey.getValue2());
         Boolean released = jdbc.queryBoolean("select pg_advisory_unlock(:lockKey1, :lockKey2)", paramMap);
-        return Optional.of(released).orElse(false);
+        return Optional.ofNullable(released).orElse(false);
     }
 }

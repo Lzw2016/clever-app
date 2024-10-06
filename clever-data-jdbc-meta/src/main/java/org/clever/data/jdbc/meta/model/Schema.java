@@ -2,8 +2,8 @@ package org.clever.data.jdbc.meta.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.clever.core.Assert;
 import org.clever.data.dynamic.sql.dialect.DbType;
-import org.clever.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;

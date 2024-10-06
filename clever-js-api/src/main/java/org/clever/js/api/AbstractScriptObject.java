@@ -1,7 +1,7 @@
 package org.clever.js.api;
 
 
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 /**
  * 作者：lizw <br/>

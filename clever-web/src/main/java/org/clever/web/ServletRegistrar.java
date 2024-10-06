@@ -1,25 +1,22 @@
 package org.clever.web;
 
-import io.javalin.core.JavalinConfig;
-import io.javalin.http.Context;
-import io.javalin.http.HandlerType;
+import io.javalin.config.JavalinConfig;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.clever.core.Assert;
 import org.clever.core.BannerUtils;
 import org.clever.core.exception.ExceptionUtils;
-import org.clever.core.reflection.ReflectionsUtils;
-import org.clever.util.Assert;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Servlet 注册器
@@ -29,8 +26,7 @@ import java.util.*;
  */
 @Slf4j
 public class ServletRegistrar {
-    // 保存 JavalinConfig.inner.appAttributes
-    private Map<String, Object> appAttributes = Collections.emptyMap();
+    private JavalinConfig javalinConfig;
     /**
      * Servlet列表
      */
@@ -44,7 +40,7 @@ public class ServletRegistrar {
      * @param name     Servlet名称
      * @param order    顺序，值越小，优先级越高
      */
-    public ServletRegistrar addServlet(Servlet servlet, String pathSpec, String name, double order) {
+    public ServletRegistrar addServlet(HttpServlet servlet, String pathSpec, String name, double order) {
         Assert.notNull(servlet, "servlet 不能为 null");
         Assert.isNotBlank(pathSpec, "pathSpec 不能为空");
         servlets.add(new OrderServlet(servlet, pathSpec, order, name));
@@ -62,8 +58,7 @@ public class ServletRegistrar {
     public ServletRegistrar addServlet(ServletFuc servlet, String pathSpec, String name, double order) {
         Assert.notNull(servlet, "servlet 不能为 null");
         Assert.isNotBlank(pathSpec, "pathSpec 不能为空");
-        servlets.add(new OrderServlet(new ServletAdapter(pathSpec, servlet) {
-        }, pathSpec, order, name));
+        servlets.add(new OrderServlet(new ServletAdapter(servlet), pathSpec, order, name));
         return this;
     }
 
@@ -74,7 +69,7 @@ public class ServletRegistrar {
      * @param pathSpec Servlet处理路径
      * @param name     Servlet名称
      */
-    public ServletRegistrar addServlet(Servlet servlet, String pathSpec, String name) {
+    public ServletRegistrar addServlet(HttpServlet servlet, String pathSpec, String name) {
         return addServlet(servlet, pathSpec, name, 0);
     }
 
@@ -89,19 +84,19 @@ public class ServletRegistrar {
         return addServlet(servlet, pathSpec, name, 0);
     }
 
-    synchronized void init(ServletContextHandler servletContextHandler, JavalinConfig.Inner inner) {
+    synchronized void init(ServletContextHandler servletContextHandler, JavalinConfig config) {
         Assert.notNull(servletContextHandler, "servletContextHandler 不能为 null");
-        Assert.notNull(inner, "inner 不能为 null");
-        appAttributes = inner.appAttributes;
+        Assert.notNull(config, "参数 config 不能为 null");
         servlets.sort(Comparator.comparingDouble(o -> o.order));
+        this.javalinConfig = config;
         List<String> logs = new ArrayList<>();
         int idx = 1;
         for (OrderServlet item : servlets) {
             logs.add(String.format(
-                    "%2s. path=%s%s",
-                    idx++,
-                    item.pathSpec,
-                    StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
+                "%2s. path=%s%s",
+                idx++,
+                item.pathSpec,
+                StringUtils.isNoneBlank(item.name) ? String.format(" | %s", item.name) : ""
             ));
             servletContextHandler.addServlet(new ServletHolder(item.servlet), item.pathSpec);
         }
@@ -112,7 +107,7 @@ public class ServletRegistrar {
 
     @Data
     private static class OrderServlet {
-        private final Servlet servlet;
+        private final HttpServlet servlet;
         private final String pathSpec;
         private final double order;
         private final String name;
@@ -123,48 +118,23 @@ public class ServletRegistrar {
         void service(Context ctx) throws Exception;
     }
 
-    public class ServletAdapter implements Servlet {
-        private final String pathSpec;
+    public class ServletAdapter extends HttpServlet {
         private final ServletFuc fuc;
 
-        public ServletAdapter(String pathSpec, ServletFuc fuc) {
+        public ServletAdapter(ServletFuc fuc) {
             Assert.notNull(fuc, "fuc 不能为 null");
             this.fuc = fuc;
-            this.pathSpec = pathSpec;
         }
 
         @Override
-        public void init(ServletConfig config) {
-        }
-
-        @Override
-        public ServletConfig getServletConfig() {
-            return null;
-        }
-
-        @Override
-        public void service(ServletRequest req, ServletResponse res) {
-            Context ctx = new Context((HttpServletRequest) req, (HttpServletResponse) res, appAttributes);
-            // 参考 io.javalin.http.util.ContextUtil#update
-            // String requestUri = StringUtils.removeStart(ctx.req.getRequestURI(), ctx.req.getContextPath());
-            ReflectionsUtils.setFieldValue(ctx, "matchedPath", pathSpec);
-            // ReflectionsUtils.setFieldValue(ctx, "pathParamMap", Collections.emptyMap());
-            ReflectionsUtils.setFieldValue(ctx, "handlerType", HandlerType.Companion.fromServletRequest(ctx.req));
-            ReflectionsUtils.setFieldValue(ctx, "endpointHandlerPath", pathSpec);
+        protected void service(HttpServletRequest req, HttpServletResponse res) {
+            Context ctx = new Context(req, res, javalinConfig);
             try {
                 fuc.service(ctx);
+                Context.flushResultStream(ctx);
             } catch (Exception e) {
                 throw ExceptionUtils.unchecked(e);
             }
-        }
-
-        @Override
-        public String getServletInfo() {
-            return null;
-        }
-
-        @Override
-        public void destroy() {
         }
     }
 }

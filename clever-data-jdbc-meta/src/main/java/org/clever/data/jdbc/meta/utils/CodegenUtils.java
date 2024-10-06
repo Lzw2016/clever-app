@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.clever.core.Assert;
 import org.clever.core.NamingUtils;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
@@ -22,8 +23,7 @@ import org.clever.data.jdbc.meta.model.Schema;
 import org.clever.data.jdbc.meta.model.SchemaWrapper;
 import org.clever.data.jdbc.meta.model.Table;
 import org.clever.data.jdbc.support.DbColumnMetaData;
-import org.clever.util.Assert;
-import org.clever.util.ClassUtils;
+import org.springframework.util.ClassUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;

@@ -3,7 +3,7 @@ package org.clever.core.reflection;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.clever.util.Assert;
+import org.clever.core.Assert;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -40,8 +40,11 @@ public class ReflectionsUtils {
      *
      * @param method 目标方法实例
      */
-    public static void makeAccessible(Method method) {
-        if ((!Modifier.isPublic(method.getModifiers()) || !Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.isAccessible()) {
+    public static void makeAccessible(final Method method, final Object obj) {
+        if (Modifier.isPublic(method.getModifiers()) && Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+            return;
+        }
+        if (!method.canAccess(obj)) {
             method.setAccessible(true);
         }
     }
@@ -51,11 +54,11 @@ public class ReflectionsUtils {
      *
      * @param field 成员变量实例
      */
-    private static void makeAccessible(Field field) {
-        if ((!Modifier.isPublic(field.getModifiers())
-            || !Modifier.isPublic(field.getDeclaringClass().getModifiers())
-            || Modifier.isFinal(field.getModifiers()))
-            && !field.isAccessible()) {
+    private static void makeAccessible(final Field field, final Object obj) {
+        if (Modifier.isPublic(field.getModifiers()) && Modifier.isPublic(field.getDeclaringClass().getModifiers()) && Modifier.isFinal(field.getModifiers())) {
+            return;
+        }
+        if (!field.canAccess(obj)) {
             field.setAccessible(true);
         }
     }
@@ -70,7 +73,7 @@ public class ReflectionsUtils {
      * @param parameterTypes 方法签名参数类型
      * @return 方法实例，获取失败返回null
      */
-    private static Method getAccessibleMethod(final Object obj, final String methodName, final Class<?>... parameterTypes) {
+    public static Method getAccessibleMethod(final Object obj, final String methodName, final Class<?>... parameterTypes) {
         Class<?> searchType = obj.getClass();
         while (searchType != Object.class) {
             try {
@@ -78,7 +81,7 @@ public class ReflectionsUtils {
                 // noinspection ConstantConditions
                 if (method != null) {
                     // 强制设置方法可以访问(public)
-                    makeAccessible(method);
+                    makeAccessible(method, obj);
                     return method;
                 } else {
                     continue;
@@ -101,14 +104,14 @@ public class ReflectionsUtils {
      * @param methodName 方法名称
      * @return 方法实例，获取失败返回null
      */
-    private static Method getAccessibleMethodByName(final Object obj, final String methodName) {
+    public static Method getAccessibleMethodByName(final Object obj, final String methodName) {
         Class<?> searchType = obj.getClass();
         while (searchType != Object.class) {
             Method[] methods = searchType.getDeclaredMethods();
             for (Method method : methods) {
                 if (method.getName().equals(methodName)) {
                     // 强制设置方法可以访问(public)
-                    makeAccessible(method);
+                    makeAccessible(method, obj);
                     return method;
                 }
             }
@@ -133,7 +136,7 @@ public class ReflectionsUtils {
                 // noinspection ConstantConditions
                 if (field != null) {
                     // 强制设置成员变量可以访问(public)
-                    makeAccessible(field);
+                    makeAccessible(field, obj);
                     return field;
                 } else {
                     continue;
@@ -337,7 +340,7 @@ public class ReflectionsUtils {
      */
     public static Class<?> getUserClass(Object instance) {
         Class<?> clazz = instance.getClass();
-        if (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+        if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
             Class<?> superClass = clazz.getSuperclass();
             if (superClass != null && !Object.class.equals(superClass)) {
                 return superClass;
@@ -355,9 +358,7 @@ public class ReflectionsUtils {
      */
     public static Field getField(Class<?> entityClass, String fieldName) {
         try {
-            Field field = entityClass.getDeclaredField(fieldName);
-            makeAccessible(field);
-            return field;
+            return entityClass.getDeclaredField(fieldName);
         } catch (NoSuchFieldException ignored) {
         }
         return null;

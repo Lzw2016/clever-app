@@ -1,9 +1,9 @@
 package org.clever.data.jdbc.support;
 
 import lombok.Getter;
-import org.clever.jdbc.SQLWarningException;
-import org.clever.jdbc.core.JdbcTemplate;
-import org.clever.util.Assert;
+import org.springframework.jdbc.SQLWarningException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -108,9 +108,9 @@ public class JdbcTemplateWrapper extends JdbcTemplate {
             } else if (logger.isInfoEnabled()) {
                 while (warningToLog != null) {
                     logger.info("SQLWarning: SQL state '" +
-                            warningToLog.getSQLState() + "', error code '" +
-                            warningToLog.getErrorCode() + "', message [" +
-                            warningToLog.getMessage() + "]"
+                        warningToLog.getSQLState() + "', error code '" +
+                        warningToLog.getErrorCode() + "', message [" +
+                        warningToLog.getMessage() + "]"
                     );
                     warningToLog = warningToLog.getNextWarning();
                 }

@@ -1,8 +1,7 @@
 package org.clever.task.manage.model.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * 作者：lizw <br/>

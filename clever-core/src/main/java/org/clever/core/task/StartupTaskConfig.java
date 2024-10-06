@@ -1,6 +1,7 @@
 package org.clever.core.task;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
  * 作者：lizw <br/>
  * 创建时间：2023/01/19 09:14 <br/>
  */
+@ConfigurationProperties(prefix = StartupTaskConfig.PREFIX)
 @Data
 public class StartupTaskConfig {
     public static final String PREFIX = "startup-task";
