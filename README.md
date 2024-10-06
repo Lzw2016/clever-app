@@ -11,7 +11,7 @@
 #### 启动时间短且稳定
 
 在SpringBoot项目中，随着项目规模的扩大和依赖项的增多，启动时间往往会显著增加，我参与的许多项目启动时间都超过了1分钟，有的甚至达到了3分钟。
-然而，使用`clever-app`框架，我们采用了一种不同的方法：函数式编程模式，这使得系统启动时间大幅缩短，仅需3到10秒。
+然而，我们采用了一种不同的方法：函数式编程模式，这使得系统启动时间大幅缩短，仅需3到10秒。
 这种速度的提升不受项目规模或依赖数量的影响。
 
 以下是我的测试结果：
@@ -23,7 +23,7 @@
 
 #### 代码即改即生效
 
-`clever-app`提供了强大的类热重载功能，这意味着您在开发过程中无需重启服务即可实时查看代码更改的效果。
+提供了强大的类热重载功能，这意味着您在开发过程中无需重启服务即可实时查看代码更改的效果。
 只需通过IDE进行增量编译，改动的代码即刻生效，完全不需要依赖像`jrebel`这样的工具。
 更令人兴奋的是，内置的热重载技术在生产环境中同样稳定可靠。在项目开发过程中，从代码修改到生效的时间通常在3秒以内。
 这样的效率提升，让您的开发流程更加流畅，减少了等待时间，提高了生产力。
@@ -32,7 +32,7 @@
 
 推荐使用Kotlin的函数式编程模式，它能够简化您的业务开发流程，让您摆脱传统的Controller/Service/Dao模式。
 采用Kotlin，您可以享受到类似Go语言的简洁和高效。
-此外，`clever-app`也完全支持Java，以及标准的SpringBoot开发模式，确保您能够根据自己的喜好和项目需求灵活选择。
+此外，也完全支持Java，以及标准的SpringBoot开发模式，确保您能够根据自己的喜好和项目需求灵活选择。
 
 #### 可观测性优先
 
@@ -211,27 +211,27 @@ dependencies {
 
 ```yaml
 logging:
-  config: classpath:logback-spring.xml
-  file:
-    name: '${clever.name:server}'
-    path: './logs/${logging.file.name}'
-  level:
-    root: info
-    org.springframework.jdbc.datasource.DataSourceTransactionManager: info
-    org.springframework.jdbc.datasource.DataSourceUtils: info
-    org.springframework.core.HotReloadClassLoader: debug
-    org.springframework.security: debug
-    com.zaxxer.hikari.HikariConfig: debug
+    config: classpath:logback-spring.xml
+    file:
+        name: '${clever.name:server}'
+        path: './logs/${logging.file.name}'
+    level:
+        root: info
+        org.springframework.jdbc.datasource.DataSourceTransactionManager: info
+        org.springframework.jdbc.datasource.DataSourceUtils: info
+        org.springframework.core.HotReloadClassLoader: debug
+        org.springframework.security: debug
+        com.zaxxer.hikari.HikariConfig: debug
 ```
-系统日志配置与SpringBoot配置一致。
 
+系统日志配置与SpringBoot配置一致。
 
 #### 基础配置
 
 ```yaml
 app:
-  # 用于设置应用的根路径，其它路径配置项的相对路径就是这个配置
-  root-path: './'
+    # 用于设置应用的根路径，其它路径配置项的相对路径就是这个配置
+    root-path: './'
 
 # 单节点定时任务
 startup-task:
@@ -311,6 +311,7 @@ jdbc:
 ```
 
 代码使用：
+
 ```java
 // 获取默认的数据源
 private static final Jdbc jdbc = DaoFactory.getJdbc();
@@ -355,6 +356,7 @@ redis:
 ```
 
 代码使用：
+
 ```java
 // 获取默认的数据源
 private static final Redis redis = RedisAdmin.getRedis();
@@ -400,6 +402,59 @@ web:
                 #- './clever-examples-javalin/build/classes/java/main'
                 #- './clever-examples-javalin/build/classes/kotlin/main'
 ```
+
+内置的过滤器链：
+
+```text
+🡓
+ApplyConfigFilter (应用web配置,如: ContentType、CharacterEncoding 等等)
+🡓
+EchoFilter(请求日志)
+🡓
+ExceptionHandlerFilter (异常处理)
+🡓
+GlobalRequestParamsFilter (获取全局请求参数: QueryBySort、QueryByPage)
+🡓
+CorsFilter (跨域处理)
+🡓
+MvcHandlerMethodFilter (解析获取MVC的HandlerMethod)
+🡓
+SecurityFilter (认证授权)
+    🡓
+    AuthenticationFilter
+    🡓
+    LoginFilter
+    🡓
+    LogoutFilter
+    🡓
+    AuthorizationFilter
+    🡓
+🡓
+StaticResourceFilter (静态资源映射)
+🡓
+MvcFilter (before[可提前响应请求] -> invokeMethod[自定义MVC: 响应请求] -> after -> finally[执行before后一定会执行, 可以处理异常])
+    🡓
+    HandlerInterceptor
+        🡓
+        ArgumentsValidated (MVC数据验证@Validated)
+        🡓
+        TransactionInterceptor (JDBC事务处理)
+        🡓
+    🡓
+🡓
+```
+
+内置函数式MVC支持的注解:
+
+| 内置注解                                          | 兼容Spring注解                                                 | 用途                      |
+|:----------------------------------------------|:-----------------------------------------------------------|:------------------------|
+| `org.clever.web.mvc.annotation.RequestBody`   | `org.springframework.web.bind.annotation.RequestBody`      | 读取请求body参数              |
+| `org.clever.web.mvc.annotation.RequestParam`  | `org.springframework.web.bind.annotation.RequestParam`     | 读取请求查询字符串或表单参数          |
+| `org.clever.web.mvc.annotation.RequestPart`   | `org.springframework.web.bind.annotation.RequestPart`      | 读取请求文件上传参数              |
+| `org.clever.web.mvc.annotation.RequestHeader` | `org.springframework.web.bind.annotation.RequestHeader`    | 读取HTTP请求头参数             |
+| `org.clever.web.mvc.annotation.CookieValue`   | `org.springframework.web.bind.annotation.CookieValue`      | 读取HTTP cookie参数         |
+| `org.clever.web.mvc.annotation.Validated`     | `org.springframework.validation.annotation.Validated`      | 启用请求参数验证(支持JSR 303验证注解) |
+| `org.clever.web.mvc.annotation.Transactional` | `org.springframework.transaction.annotation.Transactional` | 设置JDBC数据源事务             |
 
 #### 安全认证配置
 
@@ -447,6 +502,21 @@ web:
             enable-redis: true
             redis-name: "default"
             redis-namespace: "security"
+```
+
+认证授权过滤器链：
+
+```text
+🡓
+AuthenticationFilter - 身份认证拦截 (读取请求token -> 使用刷新token(RefreshJwtToken) -> 验证token(VerifyJwtToken) -> 加载SecurityContext并绑定到当前线程(SecurityContextRepository))
+🡓
+LoginFilter          - 登录拦截 (收集登录数据(LoginDataCollect) -> 校验登录数据(VerifyLoginData) -> 加载用户信息(LoadUser) -> 校验用户信息(VerifyUserInfo) -> 创建token(AddJwtTokenExtData) -> 缓存SecurityContext(SecurityContextRepository))
+🡓
+LogoutFilter         - 登出拦截 (删除Token)
+🡓
+AuthorizationFilter  - 权限授权拦截 (获取SecurityContext -> 授权投票器开始投票(自定义) -> 根据投票结果判断是否授权通过)
+    AuthorizationVoter(授权投票器)
+🡓
 ```
 
 #### 分布式定时任务配置
