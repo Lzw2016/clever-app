@@ -446,15 +446,15 @@ MvcFilter (before[可提前响应请求] -> invokeMethod[自定义MVC: 响应请
 
 内置函数式MVC支持的注解:
 
-| 内置注解                                          | 兼容Spring注解                                                 | 用途                      |
-|:----------------------------------------------|:-----------------------------------------------------------|:------------------------|
-| `org.clever.web.mvc.annotation.RequestBody`   | `org.springframework.web.bind.annotation.RequestBody`      | 读取请求body参数              |
-| `org.clever.web.mvc.annotation.RequestParam`  | `org.springframework.web.bind.annotation.RequestParam`     | 读取请求查询字符串或表单参数          |
-| `org.clever.web.mvc.annotation.RequestPart`   | `org.springframework.web.bind.annotation.RequestPart`      | 读取请求文件上传参数              |
-| `org.clever.web.mvc.annotation.RequestHeader` | `org.springframework.web.bind.annotation.RequestHeader`    | 读取HTTP请求头参数             |
-| `org.clever.web.mvc.annotation.CookieValue`   | `org.springframework.web.bind.annotation.CookieValue`      | 读取HTTP cookie参数         |
-| `org.clever.web.mvc.annotation.Validated`     | `org.springframework.validation.annotation.Validated`      | 启用请求参数验证(支持JSR 303验证注解) |
-| `org.clever.web.mvc.annotation.Transactional` | `org.springframework.transaction.annotation.Transactional` | 设置JDBC数据源事务             |
+| 内置注解                                          | 兼容Spring注解      | 用途                      |
+|:----------------------------------------------|:----------------|:------------------------|
+| `org.clever.web.mvc.annotation.RequestBody`   | `RequestBody`   | 读取请求body参数              |
+| `org.clever.web.mvc.annotation.RequestParam`  | `RequestParam`  | 读取请求查询字符串或表单参数          |
+| `org.clever.web.mvc.annotation.RequestPart`   | `RequestPart`   | 读取请求文件上传参数              |
+| `org.clever.web.mvc.annotation.RequestHeader` | `RequestHeader` | 读取HTTP请求头参数             |
+| `org.clever.web.mvc.annotation.CookieValue`   | `CookieValue`   | 读取HTTP cookie参数         |
+| `org.clever.web.mvc.annotation.Validated`     | `Validated`     | 启用请求参数验证(支持JSR 303验证注解) |
+| `org.clever.web.mvc.annotation.Transactional` | `Transactional` | 设置JDBC数据源事务             |
 
 #### 安全认证配置
 
