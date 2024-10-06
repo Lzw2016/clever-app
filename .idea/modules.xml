@@ -3,6 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-core/clever-app.clever-core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-core/clever-app.clever-core.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-api/clever-app.clever-js-api.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-graaljs/clever-app.clever-js-graaljs.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.test.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-js-nashorn/clever-app.clever-js-nashorn.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/clever-task-ext/clever-app.clever-task-ext.main.iml" filepath="$PROJECT_DIR$/.idea/modules/clever-task-ext/clever-app.clever-task-ext.main.iml" />
     </modules>
   </component>
