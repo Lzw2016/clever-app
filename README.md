@@ -185,27 +185,109 @@ dependencies {
 
 ## 模块说明
 
-| 模块名                     | 完成进度 | 说明                                                                                                      |
-|:------------------------|:-----|:--------------------------------------------------------------------------------------------------------|
-| clever-spring           | 已完成  | 对spring的轻度封装，以适应底层框架需要                                                                                  |
-| clever-core             | 已完成  | 封装常用的工具类: 序列化反序列化、HTTP、编码解码、ID生成、Bean转换验证、Excel、异常、验证码等等                                                |
-| clever-data-dynamic-sql | 已完成  | 完全兼容mybatis语法的sql模版，实现动态sql能力                                                                           |
-| clever-data-commons     | 已完成  | 数据访问层公共能力封装                                                                                             |
-| clever-data-jdbc        | 已完成  | 参考spring-jdbc实现对JDBC操作的轻度封装，同时支持mybatis、query-dsl用法                                                     |
-| clever-data-jdbc-meta   | 已完成  | 实现读取数据库元数据功能，支持读取数据库：表结构、索引、主键、序列、函数、存储过程。并且支持数据库数据同步和表结构同步                                             |
-| clever-data-redis       | 已完成  | 基于spring-data-redis实现对Redis操作的轻度封装                                                                      |
-| clever-data-mongodb     | 未开始  | 实现对mongodb操作的轻度封装                                                                                       |
-| clever-data-rabbitmq    | 进行中  | 实现对rabbitmq操作的轻度封装                                                                                      |
-| clever-data-rocketmq    | 未开始  | 实现对rocketmq操作的轻度封装                                                                                      |
-| clever-data-kafka       | 未开始  | 实现对kafka操作的轻度封装                                                                                         |
-| clever-web              | 已完成  | 基于javalin封装servlet web服务器的实现,参考spring mvc部分注解的实现,支持web mvc动态调用java class(包含kotlin或groovy等JVM语言,需要编译器支持) |
-| clever-security         | 已完成  | 实现一套RBAC模型的权限认证功能                                                                                       |
-| clever-js-api           | 已完成  | 定义JavaScript引擎API                                                                                       |
-| clever-js-graaljs       | 已完成  | graaljs引擎实现(推荐)                                                                                         |
-| clever-js-nashorn       | 已完成  | nashorn引擎实现                                                                                             |
-| clever-js-v8            | 进行中  | v8引擎实现                                                                                                  |
-| clever-js-shim          | 进行中  | 用于桥接Java与JS组件                                                                                           |
-| clever-openapi          | 未开始  | 自动扫描生成Open API接口文档(类似swagger文档)                                                                         |
+<!--suppress HtmlDeprecatedAttribute -->
+<table>
+  <tr>
+    <th style="text-align: left;width: 200px;" width="200px">模块名</th>
+    <th style="text-align: center;width: 100px;" width="100x">完成进度</th>
+    <th style="text-align: left;">说明</th>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-spring</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">对spring的轻度封装，以适应底层框架需要</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-core</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">封装常用的工具类: 序列化反序列化、HTTP、编码解码、ID生成、Bean转换验证、Excel、异常、验证码等等</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-dynamic-sql</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">完全兼容mybatis语法的sql模版，实现动态sql能力</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-commons</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">数据访问层公共能力封装</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-jdbc</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">参考spring-jdbc实现对JDBC操作的轻度封装，同时支持mybatis、query-dsl用法</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-jdbc-meta</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">实现读取数据库元数据功能，支持读取数据库：表结构、索引、主键、序列、函数、存储过程。并且支持数据库数据同步和表结构同步</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-redis</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">基于spring-data-redis实现对Redis操作的轻度封装</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-mongodb</td>
+    <td style="text-align: center;">未开始</td>
+    <td style="text-align: left;">实现对mongodb操作的轻度封装</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-rabbitmq</td>
+    <td style="text-align: center;">进行中</td>
+    <td style="text-align: left;">实现对rabbitmq操作的轻度封装</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-rocketmq</td>
+    <td style="text-align: center;">未开始</td>
+    <td style="text-align: left;">实现对rocketmq操作的轻度封装</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-data-kafka</td>
+    <td style="text-align: center;">未开始</td>
+    <td style="text-align: left;">实现对kafka操作的轻度封装</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-web</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">基于javalin封装servlet web服务器的实现,参考spring mvc部分注解的实现,支持web mvc动态调用java class(包含kotlin或groovy等JVM语言,需要编译器支持)</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-security</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">实现一套RBAC模型的权限认证功能</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-js-api</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">定义JavaScript引擎API</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-js-graaljs</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">graaljs引擎实现(推荐)</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-js-nashorn</td>
+    <td style="text-align: center;">已完成</td>
+    <td style="text-align: left;">nashorn引擎实现</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-js-v8</td>
+    <td style="text-align: center;">进行中</td>
+    <td style="text-align: left;">v8引擎实现</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-js-shim</td>
+    <td style="text-align: center;">进行中</td>
+    <td style="text-align: left;">用于桥接Java与JS组件</td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">clever-openapi</td>
+    <td style="text-align: center;">未开始</td>
+    <td style="text-align: left;">自动扫描生成Open API接口文档(类似swagger文档)</td>
+  </tr>
+</table>
 
 #### 系统日志配置
 
