@@ -84,7 +84,7 @@
     </repositories>
     <!-- 指定版本 -->
     <properties>
-        <cleverVersion>3.3.4.0</cleverVersion>
+        <cleverVersion>3.3.4.0-SNAPSHOT</cleverVersion>
     </properties>
     <!-- 按需引入依赖 -->
     <dependencies>
@@ -142,7 +142,7 @@ repositories {
     }
 }
 // 指定版本
-val cleverVersion = "3.3.4.0"
+val cleverVersion = "3.3.4.0-SNAPSHOT"
 dependencies {
     // 按需引入依赖
     api("org.clever:clever-spring:${cleverVersion}")
@@ -167,7 +167,7 @@ repositories {
     }
 }
 // 指定版本
-ext.cleverVersion = "3.3.4.0"
+ext.cleverVersion = "3.3.4.0-SNAPSHOT"
 dependencies {
     // 按需引入依赖
     api("org.clever:clever-spring:${cleverVersion}")
