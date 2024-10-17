@@ -82,6 +82,18 @@ public class Conv extends Conversion {
         return result.shortValue();
     }
 
+    public static Byte asByte(Object obj) {
+        return asByte(obj, (short) 0);
+    }
+
+    public static Byte asByte(Object obj, Short def) {
+        Number result = asNumber(obj, def);
+        if (result == null) {
+            return null;
+        }
+        return result.byteValue();
+    }
+
     public static Double asDouble(Object obj) {
         return asDouble(obj, 0D);
     }

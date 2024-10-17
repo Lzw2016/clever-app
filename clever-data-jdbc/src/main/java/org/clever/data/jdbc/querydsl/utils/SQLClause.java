@@ -90,6 +90,8 @@ public class SQLClause {
             fieldValue = ((Boolean) fieldValue) ? 1 : 0;
         } else if (fieldType.isAssignableFrom(Number.class)) {
             fieldValue = Conv.asDecimal(fieldValue);
+        } else if (fieldType.isAssignableFrom(Byte.class) || fieldType.isAssignableFrom(byte.class)) {
+            fieldValue = Conv.asByte(fieldValue);
         } else if (fieldType.isAssignableFrom(Short.class) || fieldType.isAssignableFrom(short.class)) {
             fieldValue = Conv.asShort(fieldValue);
         } else if (fieldType.isAssignableFrom(Integer.class) || fieldType.isAssignableFrom(int.class)) {
