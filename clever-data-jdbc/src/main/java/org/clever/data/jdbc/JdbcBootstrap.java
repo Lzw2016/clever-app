@@ -196,6 +196,7 @@ public class JdbcBootstrap {
         dataSource.forEach((name, config) -> {
             logs.add("    " + name + ": ");
             logs.add("      jdbcUrl        : " + config.getJdbcUrl());
+            logs.add("      username       : " + config.getUsername());
             logs.add("      minimumIdle    : " + config.getMinimumIdle());
             logs.add("      maximumPoolSize: " + config.getMaximumPoolSize());
         });
