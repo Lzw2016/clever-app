@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * SQLClause 工具类
@@ -86,8 +87,8 @@ public class SQLClause {
             return null;
         }
         Class<?> fieldType = path.getType();
-        if (fieldValue instanceof Boolean && Number.class.isAssignableFrom(fieldType)) {
-            fieldValue = ((Boolean) fieldValue) ? 1 : 0;
+        if ((fieldValue instanceof Boolean || "false".equals(fieldValue) || "true".equals(fieldValue)) && Number.class.isAssignableFrom(fieldType)) {
+            fieldValue = (Objects.equals(fieldValue, true) || Objects.equals(fieldValue, "true")) ? 1 : 0;
         } else if (fieldType.isAssignableFrom(Number.class)) {
             fieldValue = Conv.asDecimal(fieldValue);
         } else if (fieldType.isAssignableFrom(Byte.class) || fieldType.isAssignableFrom(byte.class)) {
@@ -114,6 +115,9 @@ public class SQLClause {
             fieldValue = Conv.asDate(fieldValue);
         } else if (fieldType.isAssignableFrom(Timestamp.class)) {
             fieldValue = Conv.asTimestamp(fieldValue);
+        } else if (fieldType.isAssignableFrom(java.sql.Date.class)) {
+            Date date = Conv.asDate(fieldValue);
+            fieldValue = new java.sql.Date(date.getTime());
         }
         return fieldValue;
     }
