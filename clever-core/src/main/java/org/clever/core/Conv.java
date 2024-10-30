@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
@@ -135,6 +136,22 @@ public class Conv extends Conversion {
         return asTimestamp(obj, new Timestamp(SystemClock.now()));
     }
 
+    public static Time asTime(Object obj, Time def) {
+        Time result = def;
+        try {
+            Date date = DateUtils.parseDate(obj);
+            if (date != null) {
+                result = new Time(date.getTime());
+            }
+        } catch (Exception ignored) {
+        }
+        return result;
+    }
+
+    public static Time asTime(Object obj) {
+        return asTime(obj, new Time(SystemClock.now()));
+    }
+
     public static String asString(Object obj) {
         return asString(obj, StringUtils.EMPTY);
     }
@@ -182,8 +199,8 @@ public class Conv extends Conversion {
         if (obj instanceof String) {
             String value = asString(obj);
             return (value.equalsIgnoreCase("true")
-                    || value.equalsIgnoreCase("yes")
-                    || value.equalsIgnoreCase("y"));
+                || value.equalsIgnoreCase("yes")
+                || value.equalsIgnoreCase("y"));
         }
         try {
             return Boolean.parseBoolean(String.valueOf(obj));
@@ -265,9 +282,9 @@ public class Conv extends Conversion {
             return null;
         }
         if (obj instanceof Integer
-                || obj instanceof Long
-                || obj instanceof Float
-                || obj instanceof Double) {
+            || obj instanceof Long
+            || obj instanceof Float
+            || obj instanceof Double) {
             return new BigDecimal(obj.toString()).toString();
         }
         return obj.toString();

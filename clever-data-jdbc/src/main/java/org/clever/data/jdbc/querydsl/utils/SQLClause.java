@@ -10,7 +10,9 @@ import org.clever.core.Conv;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.*;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
@@ -113,11 +115,35 @@ public class SQLClause {
             fieldValue = Conv.asString(fieldValue);
         } else if (fieldType.isAssignableFrom(Date.class)) {
             fieldValue = Conv.asDate(fieldValue);
-        } else if (fieldType.isAssignableFrom(Timestamp.class)) {
-            fieldValue = Conv.asTimestamp(fieldValue);
         } else if (fieldType.isAssignableFrom(java.sql.Date.class)) {
             Date date = Conv.asDate(fieldValue);
             fieldValue = new java.sql.Date(date.getTime());
+        } else if (fieldType.isAssignableFrom(Timestamp.class)) {
+            fieldValue = Conv.asTimestamp(fieldValue);
+        } else if (fieldType.isAssignableFrom(Time.class)) {
+            fieldValue = Conv.asTime(fieldValue);
+        } else if (fieldType.isAssignableFrom(Instant.class)) {
+            fieldValue = Conv.asDate(fieldValue).toInstant();
+        } else if (fieldType.isAssignableFrom(LocalDate.class)) {
+            Date date = Conv.asDate(fieldValue);
+            fieldValue = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        } else if (fieldType.isAssignableFrom(LocalTime.class)) {
+            Date date = Conv.asDate(fieldValue);
+            fieldValue = date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+        } else if (fieldType.isAssignableFrom(LocalDateTime.class)) {
+            Date date = Conv.asDate(fieldValue);
+            fieldValue = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        } else if (fieldType.isAssignableFrom(ZonedDateTime.class)) {
+            Date date = Conv.asDate(fieldValue);
+            fieldValue = date.toInstant().atZone(ZoneId.systemDefault());
+        } else if (fieldType.isAssignableFrom(OffsetTime.class)) {
+            Date date = Conv.asDate(fieldValue);
+            ZonedDateTime zonedDateTime = date.toInstant().atZone(ZoneId.systemDefault());
+            fieldValue = zonedDateTime.toLocalTime().atOffset(zonedDateTime.getOffset());
+        } else if (fieldType.isAssignableFrom(OffsetDateTime.class)) {
+            Date date = Conv.asDate(fieldValue);
+            ZonedDateTime zonedDateTime = date.toInstant().atZone(ZoneId.systemDefault());
+            fieldValue = zonedDateTime.toLocalDateTime().atOffset(zonedDateTime.getOffset());
         }
         return fieldValue;
     }
