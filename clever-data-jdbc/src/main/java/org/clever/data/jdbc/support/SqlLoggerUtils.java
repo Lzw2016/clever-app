@@ -109,8 +109,7 @@ public class SqlLoggerUtils {
      * @param res 查询结果Object
      */
     public static void printfTotal(Object res) {
-        if (res instanceof Collection) {
-            Collection<?> resCollection = (Collection<?>) res;
+        if (res instanceof Collection<?> resCollection) {
             log.debug(LOG_TOTAL, resCollection.size());
         } else {
             log.debug(LOG_TOTAL, res == null ? 0 : 1);
@@ -183,7 +182,7 @@ public class SqlLoggerUtils {
         }
         StringBuilder sb = new StringBuilder(params.size() * 15 + 32);
         for (Object param : params) {
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(", ");
             }
             sb.append(paramToString(param));
@@ -199,7 +198,7 @@ public class SqlLoggerUtils {
         for (Map.Entry<String, ?> paramEntry : paramMap.entrySet()) {
             String name = paramEntry.getKey();
             Object value = paramEntry.getValue();
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(", ");
             }
             sb.append(name).append("=").append(paramToString(value));
