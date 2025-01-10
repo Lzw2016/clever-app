@@ -3,8 +3,11 @@ package org.clever.data.jdbc.meta;
 import lombok.extern.slf4j.Slf4j;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.codegen.CodegenCodeConfig;
+import org.clever.data.jdbc.meta.codegen.CodegenType;
 import org.clever.data.jdbc.meta.utils.CodegenUtils;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
 
 /**
  * 作者：lizw <br/>
@@ -20,14 +23,15 @@ public class CodegenUtilsTest {
     public void t01() {
         Jdbc jdbc = BaseTest.newMysql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-            .setOutDir("../clever-task/src/main/java/org/clever/task/core/model")
+            .setOutDir(new File("../clever-task/src/main/java/org/clever/task/core/model").getAbsolutePath())
             .setPackageName("org.clever.task.core.model")
-            // .removeCodegenType(CodegenType.JAVA_ENTITY)
-            // .removeCodegenType(CodegenType.JAVA_QUERYDSL)
+            .removeCodegenType(CodegenType.JAVA_ENTITY)
+            .removeCodegenType(CodegenType.JAVA_QUERYDSL)
             // .addCodegenType(CodegenType.GROOVY_ENTITY)
             // .addCodegenType(CodegenType.GROOVY_QUERYDSL)
             // .addCodegenType(CodegenType.KOTLIN_ENTITY)
             // .addCodegenType(CodegenType.KOTLIN_QUERYDSL)
+            .addCodegenType(CodegenType.DB_DOC_MARKDOWN)
             .addTablePrefix("task_")
             .addTable("task_scheduler")
             .addSchema("public")
@@ -42,7 +46,7 @@ public class CodegenUtilsTest {
     public void t02() {
         Jdbc jdbc = BaseTest.newMysql();
         CodegenCodeConfig config = new CodegenCodeConfig()
-            .setOutDir("../clever-data-jdbc/src/main/java/org/clever/data/jdbc/support")
+            .setOutDir(new File("../clever-data-jdbc/src/main/java/org/clever/data/jdbc/support").getAbsolutePath())
             .setPackageName("org.clever.data.jdbc.support")
             .addTable("biz_code")
             .addTable("auto_increment_id")

@@ -67,8 +67,8 @@ public class Table extends AttributedObject {
             return null;
         }
         return columns.stream()
-                .filter(column -> columnName.equalsIgnoreCase(column.getName()))
-                .findFirst().orElse(null);
+            .filter(column -> columnName.equalsIgnoreCase(column.getName()))
+            .findFirst().orElse(null);
     }
 
     public void addIndex(Index index) {
@@ -81,7 +81,25 @@ public class Table extends AttributedObject {
             return null;
         }
         return indices.stream()
-                .filter(index -> indexName.equalsIgnoreCase(index.getName()))
-                .findFirst().orElse(null);
+            .filter(index -> indexName.equalsIgnoreCase(index.getName()))
+            .findFirst().orElse(null);
+    }
+
+    /**
+     * 返回所有的索引(包含主键索引)
+     */
+    @JsonIgnore
+    public List<Index> getAllIndex() {
+        List<Index> allIndex = new ArrayList<>(indices.size() + 1);
+        if (primaryKey != null) {
+            Index index = new Index(primaryKey.getTable());
+            index.setName(primaryKey.getName());
+            index.setUnique(true);
+            primaryKey.getColumns().forEach(index::addColumn);
+            primaryKey.getAttributes().forEach(index::setAttribute);
+            allIndex.add(index);
+        }
+        allIndex.addAll(indices);
+        return allIndex;
     }
 }

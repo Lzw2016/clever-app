@@ -49,12 +49,12 @@
 | #(column.ordinalPosition) | #escape(column.name) | #escape(dataType) | escape(primaryKey) | #(column.isNotNull()?'Y':'N') | #(idx) | #escape(column.defaultValue) | #escape(column.comment) |
 #end
 
-#if(!table.indices.isEmpty())
+#if(!table.allIndex.isEmpty())
 **表索引：**
 
 | 序号 | 索引名 | 索引字段 | 唯一索引 |
 | :--- | :--- | :--- | :--- |
-#for(index : table.indices)
+#for(index : table.allIndex)
 | #(for.count) | #escape(index.name) | #for(column : index.columns)#escape(column.name)#if(!for.last), #end#end |  #escape(index.isUnique()?'Y':'N') |
 #end
 

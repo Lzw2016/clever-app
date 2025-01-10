@@ -14,7 +14,7 @@ val buildVersion = System.getenv("buildVersion") ?: project.properties["buildVer
 val buildSnapshot = (System.getenv("buildSnapshot") ?: project.properties["buildSnapshot"] as String).toBoolean()
 
 object Ver {
-    const val springBootVersion = "3.3.4"
+    const val springBootVersion = "3.3.7"
     const val springCloudVersion = "2023.0.3"
     const val javalinVersion = "6.3.0"
     const val jettyVersion = "11.0.24"
