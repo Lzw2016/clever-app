@@ -28,6 +28,11 @@ public class MySQLMetaData extends AbstractMetaData {
     }
 
     @Override
+    public String getVersion() {
+        return jdbc.queryString("select version() from dual");
+    }
+
+    @Override
     public String currentSchema() {
         return StringUtils.lowerCase(jdbc.queryString("select database() from dual"));
     }
@@ -43,6 +48,7 @@ public class MySQLMetaData extends AbstractMetaData {
                                         Set<String> ignoreTables,
                                         Set<String> ignoreTablesPrefix,
                                         Set<String> ignoreTablesSuffix) {
+        final String version = getVersion();
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
         final Map<String, Object> params = new HashMap<>();
@@ -62,7 +68,7 @@ public class MySQLMetaData extends AbstractMetaData {
         List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : schemas) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
-            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, name));
+            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, version, name));
         }
         // 查询表信息
         sql.setLength(0);
@@ -93,7 +99,7 @@ public class MySQLMetaData extends AbstractMetaData {
             if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
                 continue;
             }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, name));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.MYSQL, version, name));
             Table table = new Table(schema);
             table.setName(tableName);
             table.setComment(comment);
@@ -208,68 +214,207 @@ public class MySQLMetaData extends AbstractMetaData {
         // grant select on *.* to `admin`@`%`;
         sql.setLength(0);
         params.clear();
-        sql.append("select ");
-        sql.append("    db          as `schemaName`, ");
-        sql.append("    name        as `name`, ");
-        sql.append("    type        as `type`, ");
-        sql.append("    param_list, ");
-        sql.append("    returns, ");
-        sql.append("    body_utf8, ");
-        sql.append("    language, ");
-        sql.append("    specific_name, ");
-        sql.append("    comment ");
-        sql.append("from mysql.proc ");
-        sql.append("where lower(type) in ('procedure','function') ");
-        if (!schemasName.isEmpty()) {
-            sql.append("and lower(db) in (").append(createWhereIn(params, schemasName)).append(") ");
-        }
-        if (!ignoreSchemas.isEmpty()) {
-            sql.append("and lower(db) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
-        }
-        sql.append("order by db, type, name, specific_name ");
-        List<Map<String, Object>> routines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
-        for (Map<String, Object> map : routines) {
-            String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
-            String name = Conv.asString(map.get("name")).toLowerCase();
-            String type = Conv.asString(map.get("type")).toLowerCase();
-            String paramList = StringUtils.toEncodedString((byte[]) map.get("param_list"), StandardCharsets.UTF_8);
-            String returns = StringUtils.toEncodedString((byte[]) map.get("returns"), StandardCharsets.UTF_8);
-            String body = StringUtils.toEncodedString((byte[]) map.get("body_utf8"), StandardCharsets.UTF_8);
-            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.MYSQL, sName));
-            Procedure procedure = new Procedure(schema);
-            procedure.setName(name);
-            // ROUTINE_TYPE 可能的值包括：
-            //   PROCEDURE 表示存储过程
-            //   FUNCTION 表示函数
-            procedure.setFunction("FUNCTION".equalsIgnoreCase(type));
-            StringBuilder definition = new StringBuilder();
-            String stripChars = "\r\n";
-            if (procedure.isFunction()) {
-                // CREATE FUNCTION function_name(parameter_list)
-                // RETURNS return_datatype
-                // [characteristic ...]
-                // routine_body
-                definition.append("create function ").append(toLiteral(name)).append("(").append(LINE)
-                    .append(StringUtils.strip(paramList, stripChars)).append(LINE)
-                    .append(")").append(LINE)
-                    .append("returns ").append(returns).append(LINE)
-                    .append(StringUtils.strip(body, stripChars));
-            } else {
-                // CREATE PROCEDURE procedure_name(parameter_list)
-                // [characteristics]
-                // routine_body
-                definition.append("create procedure ").append(toLiteral(name)).append("(").append(LINE)
-                    .append(StringUtils.strip(paramList, stripChars)).append(LINE)
-                    .append(")").append(LINE)
-                    .append(StringUtils.strip(body, stripChars));
+        if (version.startsWith("8.")) {
+            // mysql 8.x
+            sql.append("select ");
+            sql.append("    routine_catalog, ");
+            sql.append("    routine_schema  as `schemaName`, ");
+            sql.append("    specific_name, ");
+            sql.append("    routine_name    as `name`, ");
+            sql.append("    routine_type    as `type`, ");
+            sql.append("    routine_body, ");
+            sql.append("    routine_definition, ");
+            sql.append("    definer, ");
+            sql.append("    routine_comment, ");
+            sql.append("    dtd_identifier, ");
+            sql.append("    is_deterministic, ");
+            sql.append("    data_type, ");
+            sql.append("    character_maximum_length, ");
+            sql.append("    character_octet_length, ");
+            sql.append("    numeric_precision, ");
+            sql.append("    numeric_scale, ");
+            sql.append("    datetime_precision, ");
+            sql.append("    character_set_name, ");
+            sql.append("    collation_name ");
+            sql.append("from information_schema.routines ");
+            sql.append("where lower(routine_type) in ('procedure', 'function') ");
+            if (!schemasName.isEmpty()) {
+                sql.append("and lower(routine_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
             }
-            String def = StringUtils.trim(definition.toString());
-            if (!StringUtils.endsWith(def, ";")) {
-                def = def + ";";
+            if (!ignoreSchemas.isEmpty()) {
+                sql.append("and lower(routine_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
             }
-            procedure.setDefinition(def);
-            procedure.getAttributes().putAll(map);
-            schema.addProcedure(procedure);
+            sql.append("order by routine_catalog, routine_schema, routine_type, routine_name, specific_name ");
+            List<Map<String, Object>> routines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+            sql.setLength(0);
+            params.clear();
+            sql.append("select ");
+            sql.append("    specific_catalog, ");
+            sql.append("    specific_schema as `schemaName`, ");
+            sql.append("    specific_name   as `name`, ");
+            sql.append("    routine_type    as `type`, ");
+            sql.append("    ordinal_position, ");
+            sql.append("    parameter_mode, ");
+            sql.append("    parameter_name, ");
+            sql.append("    dtd_identifier, ");
+            sql.append("    data_type, ");
+            sql.append("    character_maximum_length, ");
+            sql.append("    character_octet_length, ");
+            sql.append("    numeric_precision, ");
+            sql.append("    numeric_scale, ");
+            sql.append("    datetime_precision, ");
+            sql.append("    character_set_name, ");
+            sql.append("    collation_name ");
+            sql.append("from information_schema.parameters ");
+            sql.append("where ordinal_position > 0 ");
+            sql.append("    and lower(routine_type) in ('procedure', 'function') ");
+            if (!schemasName.isEmpty()) {
+                sql.append("and lower(specific_schema) in (").append(createWhereIn(params, schemasName)).append(") ");
+            }
+            if (!ignoreSchemas.isEmpty()) {
+                sql.append("and lower(specific_schema) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+            }
+            sql.append("order by specific_catalog, specific_schema, routine_type, specific_name, ordinal_position ");
+            List<Map<String, Object>> routineParameters = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+            for (Map<String, Object> map : routines) {
+                String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+                String name = Conv.asString(map.get("name")).toLowerCase();
+                String type = Conv.asString(map.get("type")).toLowerCase();
+                List<Map<String, Object>> parameters = routineParameters.stream().filter(row ->
+                    Objects.equals(Conv.asString(row.get("specific_catalog")), Conv.asString(map.get("routine_catalog"))) &&
+                        Objects.equals(Conv.asString(row.get("schemaName")), Conv.asString(map.get("schemaName"))) &&
+                        Objects.equals(Conv.asString(row.get("name")), Conv.asString(map.get("specific_name"))) &&
+                        Objects.equals(Conv.asString(row.get("type")), Conv.asString(map.get("type")))
+                ).sorted(Comparator.comparing(o -> Conv.asLong(o.get("ordinal_position")))).toList();
+                String body = Conv.asString(map.get("routine_definition"));
+                Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.MYSQL, version, sName));
+                Procedure procedure = new Procedure(schema);
+                procedure.setName(name);
+                // ROUTINE_TYPE 可能的值包括：
+                //   PROCEDURE 表示存储过程
+                //   FUNCTION 表示函数
+                procedure.setFunction("FUNCTION".equalsIgnoreCase(type));
+                StringBuilder definition = new StringBuilder();
+                String stripChars = "\r\n";
+                if (procedure.isFunction()) {
+                    // CREATE FUNCTION function_name(parameter_list)
+                    // RETURNS return_datatype [deterministic]
+                    // [characteristic ...]
+                    // routine_body
+                    definition.append("create function ").append(toLiteral(name)).append("(").append(LINE);
+                    for (int idx = 0; idx < parameters.size(); idx++) {
+                        Map<String, Object> parameter = parameters.get(idx);
+                        String parameterName = Conv.asString(parameter.get("parameter_name"));
+                        String dtdIdentifier = Conv.asString(parameter.get("dtd_identifier"));
+                        definition.append(TAB).append(toLiteral(parameterName)).append(" ").append(dtdIdentifier);
+                        if ((idx + 1) < parameters.size()) {
+                            definition.append(", ");
+                        }
+                        definition.append(LINE);
+                    }
+                    definition.append(")").append(LINE);
+                    String dtdIdentifier = Conv.asString(map.get("dtd_identifier"));
+                    Boolean isDeterministic = Conv.asBoolean(map.get("is_deterministic"));
+                    definition.append("returns ").append(dtdIdentifier);
+                    if (isDeterministic) {
+                        definition.append(" deterministic");
+                    }
+                    definition.append(LINE).append(StringUtils.strip(body, stripChars));
+                } else {
+                    // CREATE PROCEDURE procedure_name(parameter_list)
+                    // [characteristics]
+                    // routine_body
+                    definition.append("create procedure ").append(toLiteral(name)).append("(").append(LINE);
+                    for (int idx = 0; idx < parameters.size(); idx++) {
+                        Map<String, Object> parameter = parameters.get(idx);
+                        String parameter_mode = Conv.asString(parameter.get("parameter_mode"));
+                        String parameterName = Conv.asString(parameter.get("parameter_name"));
+                        String dtdIdentifier = Conv.asString(parameter.get("dtd_identifier"));
+                        definition.append(TAB);
+                        if (StringUtils.isNotBlank(parameter_mode)) {
+                            definition.append(parameter_mode).append(" ");
+                        }
+                        definition.append(toLiteral(parameterName)).append(" ").append(dtdIdentifier);
+                        if ((idx + 1) < parameters.size()) {
+                            definition.append(", ");
+                        }
+                        definition.append(LINE);
+                    }
+                    definition.append(")").append(LINE).append(StringUtils.strip(body, stripChars));
+                }
+                String def = StringUtils.trim(definition.toString());
+                if (!StringUtils.endsWith(def, ";")) {
+                    def = def + ";";
+                }
+                procedure.setDefinition(def);
+                procedure.getAttributes().putAll(map);
+                schema.addProcedure(procedure);
+            }
+        } else {
+            // mysql 5.x
+            sql.append("select ");
+            sql.append("    db          as `schemaName`, ");
+            sql.append("    name        as `name`, ");
+            sql.append("    type        as `type`, ");
+            sql.append("    param_list, ");
+            sql.append("    returns, ");
+            sql.append("    body_utf8, ");
+            sql.append("    language, ");
+            sql.append("    specific_name, ");
+            sql.append("    comment ");
+            sql.append("from mysql.proc ");
+            sql.append("where lower(type) in ('procedure','function') ");
+            if (!schemasName.isEmpty()) {
+                sql.append("and lower(db) in (").append(createWhereIn(params, schemasName)).append(") ");
+            }
+            if (!ignoreSchemas.isEmpty()) {
+                sql.append("and lower(db) not in (").append(createWhereIn(params, ignoreSchemas)).append(") ");
+            }
+            sql.append("order by db, type, name, specific_name ");
+            List<Map<String, Object>> routines = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
+            for (Map<String, Object> map : routines) {
+                String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
+                String name = Conv.asString(map.get("name")).toLowerCase();
+                String type = Conv.asString(map.get("type")).toLowerCase();
+                String paramList = StringUtils.toEncodedString((byte[]) map.get("param_list"), StandardCharsets.UTF_8);
+                String returns = StringUtils.toEncodedString((byte[]) map.get("returns"), StandardCharsets.UTF_8);
+                String body = StringUtils.toEncodedString((byte[]) map.get("body_utf8"), StandardCharsets.UTF_8);
+                Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.MYSQL, version, sName));
+                Procedure procedure = new Procedure(schema);
+                procedure.setName(name);
+                // ROUTINE_TYPE 可能的值包括：
+                //   PROCEDURE 表示存储过程
+                //   FUNCTION 表示函数
+                procedure.setFunction("FUNCTION".equalsIgnoreCase(type));
+                StringBuilder definition = new StringBuilder();
+                String stripChars = "\r\n";
+                if (procedure.isFunction()) {
+                    // CREATE FUNCTION function_name(parameter_list)
+                    // RETURNS return_datatype
+                    // [characteristic ...]
+                    // routine_body
+                    definition.append("create function ").append(toLiteral(name)).append("(").append(LINE)
+                        .append(StringUtils.strip(paramList, stripChars)).append(LINE)
+                        .append(")").append(LINE)
+                        .append("returns ").append(returns).append(LINE)
+                        .append(StringUtils.strip(body, stripChars));
+                } else {
+                    // CREATE PROCEDURE procedure_name(parameter_list)
+                    // [characteristics]
+                    // routine_body
+                    definition.append("create procedure ").append(toLiteral(name)).append("(").append(LINE)
+                        .append(StringUtils.strip(paramList, stripChars)).append(LINE)
+                        .append(")").append(LINE)
+                        .append(StringUtils.strip(body, stripChars));
+                }
+                String def = StringUtils.trim(definition.toString());
+                if (!StringUtils.endsWith(def, ";")) {
+                    def = def + ";";
+                }
+                procedure.setDefinition(def);
+                procedure.getAttributes().putAll(map);
+                schema.addProcedure(procedure);
+            }
         }
         // 返回数据
         List<Schema> result = new ArrayList<>(mapSchema.values());
@@ -759,7 +904,7 @@ public class MySQLMetaData extends AbstractMetaData {
             return String.format("`%s`", objName);
         }
         String[] keywords = new String[]{
-            "primary","unique",
+            "primary", "unique",
         };
         if (StringUtils.equalsAnyIgnoreCase(objName, keywords)) {
             return String.format("`%s`", objName);

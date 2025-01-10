@@ -40,6 +40,11 @@ public class PostgreSQLMetaData extends AbstractMetaData {
     }
 
     @Override
+    public String getVersion() {
+        return jdbc.queryString("select version()");
+    }
+
+    @Override
     public String currentSchema() {
         return StringUtils.lowerCase(jdbc.queryString("select current_schema()"));
     }
@@ -55,6 +60,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
                                         Set<String> ignoreTables,
                                         Set<String> ignoreTablesPrefix,
                                         Set<String> ignoreTablesSuffix) {
+        final String version = getVersion();
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
         final Map<String, Object> params = new HashMap<>();
@@ -73,7 +79,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
         List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : schemas) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
-            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, name));
+            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, version, name));
         }
         // 查询表信息
         sql.setLength(0);
@@ -111,7 +117,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
                 continue;
             }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, name));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.POSTGRE_SQL, version, name));
             Table table = new Table(schema);
             table.setName(tableName);
             table.setComment(comment);
@@ -372,7 +378,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             String arguments = Conv.asString(map.get("arguments"));
             String proSrc = Conv.asString(map.get("proSrc"));
             String lanName = Conv.asString(map.get("lanName"));
-            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.POSTGRE_SQL, sName));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.POSTGRE_SQL, version, sName));
             Procedure procedure = new Procedure(schema);
             procedure.setName(name);
             // a.prokind 可能的值包括：
@@ -427,7 +433,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             Long maxValue = Conv.asLong(map.get("maxValue"), null);
             Long increment = Conv.asLong(map.get("increment"), null);
             boolean cycle = Conv.asBoolean(map.get("cycle"));
-            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.POSTGRE_SQL, sName));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.POSTGRE_SQL, version, sName));
             Sequence sequence = new Sequence(schema);
             sequence.setName(name);
             sequence.setMinValue(minValue);
@@ -785,7 +791,7 @@ public class PostgreSQLMetaData extends AbstractMetaData {
             return "\"" + objName + "\"";
         }
         String[] keywords = new String[]{
-            "primary","unique",
+            "primary", "unique",
         };
         if (StringUtils.equalsAnyIgnoreCase(objName, keywords)) {
             return "\"" + objName + "\"";

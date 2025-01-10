@@ -54,6 +54,11 @@ public class OracleMetaData extends AbstractMetaData {
     }
 
     @Override
+    public String getVersion() {
+        return jdbc.queryString("select * from v$version");
+    }
+
+    @Override
     public String currentSchema() {
         return StringUtils.lowerCase(jdbc.queryString("select sys_context('userenv', 'current_schema') from dual"));
     }
@@ -69,6 +74,7 @@ public class OracleMetaData extends AbstractMetaData {
                                         Set<String> ignoreTables,
                                         Set<String> ignoreTablesPrefix,
                                         Set<String> ignoreTablesSuffix) {
+        final String version = getVersion();
         // 所有的 Schema | Map<schemaName, Schema>
         final Map<String, Schema> mapSchema = new HashMap<>();
         final Map<String, Object> params = new HashMap<>();
@@ -87,7 +93,7 @@ public class OracleMetaData extends AbstractMetaData {
         List<Map<String, Object>> schemas = jdbc.queryMany(sql.toString(), params, RenameStrategy.None);
         for (Map<String, Object> map : schemas) {
             String schemaName = Conv.asString(map.get("schemaName")).toLowerCase();
-            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.ORACLE, name));
+            mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.ORACLE, version, name));
         }
         // 查询表信息
         sql.setLength(0);
@@ -122,7 +128,7 @@ public class OracleMetaData extends AbstractMetaData {
             if (ignoreTablesSuffix.stream().anyMatch(tableName::endsWith)) {
                 continue;
             }
-            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.ORACLE, name));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, name -> new Schema(DbType.ORACLE, version, name));
             Table table = new Table(schema);
             table.setName(tableName);
             table.setComment(comment);
@@ -323,7 +329,7 @@ public class OracleMetaData extends AbstractMetaData {
             String name = Conv.asString(map.get("name")).toLowerCase();
             String type = Conv.asString(map.get("type")).toLowerCase();
             String definition = Conv.asString(map.get("definition"));
-            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.ORACLE, sName));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.ORACLE, version, sName));
             String key = String.format("schemaName=%s|type=%s|name=%s", schemaName, type, name);
             TupleTwo<StringBuilder, Procedure> tuple = routineMap.get(key);
             if (tuple == null) {
@@ -378,7 +384,7 @@ public class OracleMetaData extends AbstractMetaData {
             Long maxValue = Conv.asLong(map.get("maxValue"), null);
             Long increment = Conv.asLong(map.get("increment"), null);
             boolean cycle = Conv.asBoolean(map.get("cycle"));
-            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.ORACLE, sName));
+            Schema schema = mapSchema.computeIfAbsent(schemaName, sName -> new Schema(DbType.ORACLE, version, sName));
             Sequence sequence = new Sequence(schema);
             sequence.setName(name);
             sequence.setMinValue(minValue);
@@ -713,7 +719,7 @@ public class OracleMetaData extends AbstractMetaData {
             return "\"" + objName + "\"";
         }
         String[] keywords = new String[]{
-            "primary","unique",
+            "primary", "unique",
         };
         if (StringUtils.equalsAnyIgnoreCase(objName, keywords)) {
             return "\"" + objName + "\"";

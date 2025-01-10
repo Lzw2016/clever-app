@@ -30,7 +30,7 @@ public class SchemaWrapper extends Schema {
     private final Set<String> tablesSuffix;
 
     public SchemaWrapper(Schema schema, Set<String> tablesPrefix, Set<String> tablesSuffix) {
-        super(schema.getDbType(), schema.getName());
+        super(schema.getDbType(), schema.getVersion(), schema.getName());
         this.rawSchema = schema;
         this.tablesPrefix = tablesPrefix;
         this.tablesSuffix = tablesSuffix;
@@ -47,8 +47,8 @@ public class SchemaWrapper extends Schema {
             return null;
         }
         return getTables().stream()
-                .filter(table -> tableName.equalsIgnoreCase(table.getName()))
-                .findFirst().orElse(null);
+            .filter(table -> tableName.equalsIgnoreCase(table.getName()))
+            .findFirst().orElse(null);
     }
 
     @Override

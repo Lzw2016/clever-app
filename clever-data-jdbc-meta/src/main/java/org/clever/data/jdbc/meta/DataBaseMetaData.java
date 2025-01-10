@@ -22,6 +22,11 @@ public interface DataBaseMetaData {
     Jdbc getJdbc();
 
     /**
+     * 获取当前数据的版本
+     */
+    String getVersion();
+    
+    /**
      * 获取数据库连接默认的Schema名
      */
     String currentSchema();

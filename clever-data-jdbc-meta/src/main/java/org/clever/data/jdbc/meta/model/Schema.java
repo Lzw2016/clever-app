@@ -22,6 +22,10 @@ public class Schema extends AttributedObject {
      */
     private final DbType dbType;
     /**
+     * 数据库版本
+     */
+    private String version;
+    /**
      * 数据库 schema 名称
      */
     private String name;
@@ -43,8 +47,9 @@ public class Schema extends AttributedObject {
         this.dbType = dbType;
     }
 
-    public Schema(DbType dbType, String name) {
+    public Schema(DbType dbType, String version, String name) {
         this(dbType);
+        this.version = version;
         this.name = name;
     }
 
@@ -58,8 +63,8 @@ public class Schema extends AttributedObject {
             return null;
         }
         return tables.stream()
-                .filter(table -> tableName.equalsIgnoreCase(table.getName()))
-                .findFirst().orElse(null);
+            .filter(table -> tableName.equalsIgnoreCase(table.getName()))
+            .findFirst().orElse(null);
     }
 
     public void addSequence(Sequence sequence) {
@@ -72,8 +77,8 @@ public class Schema extends AttributedObject {
             return null;
         }
         return sequences.stream()
-                .filter(sequence -> sequenceName.equalsIgnoreCase(sequence.getName()))
-                .findFirst().orElse(null);
+            .filter(sequence -> sequenceName.equalsIgnoreCase(sequence.getName()))
+            .findFirst().orElse(null);
     }
 
     public void addProcedure(Procedure procedure) {
@@ -86,7 +91,7 @@ public class Schema extends AttributedObject {
             return null;
         }
         return procedures.stream()
-                .filter(procedure -> procedureName.equalsIgnoreCase(procedure.getName()))
-                .findFirst().orElse(null);
+            .filter(procedure -> procedureName.equalsIgnoreCase(procedure.getName()))
+            .findFirst().orElse(null);
     }
 }

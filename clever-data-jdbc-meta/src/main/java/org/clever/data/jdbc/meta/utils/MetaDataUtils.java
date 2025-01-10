@@ -27,16 +27,12 @@ public class MetaDataUtils {
      */
     public static AbstractMetaData createMetaData(Jdbc jdbc) {
         Assert.notNull(jdbc, "参数 jdbc 不能为null");
-        switch (jdbc.getDbType()) {
-            case MYSQL:
-                return new MySQLMetaData(jdbc);
-            case POSTGRE_SQL:
-                return new PostgreSQLMetaData(jdbc);
-            case ORACLE:
-                return new OracleMetaData(jdbc);
-            default:
-                throw new UnsupportedOperationException("不支持的数据库: " + jdbc.getDbType().getDb());
-        }
+        return switch (jdbc.getDbType()) {
+            case MYSQL -> new MySQLMetaData(jdbc);
+            case POSTGRE_SQL -> new PostgreSQLMetaData(jdbc);
+            case ORACLE -> new OracleMetaData(jdbc);
+            default -> throw new UnsupportedOperationException("不支持的数据库: " + jdbc.getDbType().getDb());
+        };
     }
 
     /**
