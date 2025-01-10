@@ -41,7 +41,7 @@ public class Table extends AttributedObject {
      */
     private PrimaryKey primaryKey;
     /**
-     * 表的索引
+     * 表的索引(不包含主键索引)
      */
     private final List<Index> indices = new ArrayList<>();
 

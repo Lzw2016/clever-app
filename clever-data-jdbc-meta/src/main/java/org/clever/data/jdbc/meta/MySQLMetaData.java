@@ -188,16 +188,6 @@ public class MySQLMetaData extends AbstractMetaData {
             if (column == null) {
                 continue;
             }
-            Index index = table.getIndex(name);
-            if (index == null) {
-                boolean unique = !Conv.asBoolean(map.get("nonUnique"));
-                index = new Index(table);
-                index.setName(name);
-                index.setUnique(unique);
-                index.getAttributes().putAll(map);
-                table.addIndex(index);
-            }
-            index.addColumn(column);
             // 主键的索引名称是 “PRIMARY”
             if ("PRIMARY".equalsIgnoreCase(name)) {
                 PrimaryKey primaryKey = table.getPrimaryKey();
@@ -208,6 +198,17 @@ public class MySQLMetaData extends AbstractMetaData {
                     table.setPrimaryKey(primaryKey);
                 }
                 primaryKey.addColumn(column);
+            } else {
+                Index index = table.getIndex(name);
+                if (index == null) {
+                    boolean unique = !Conv.asBoolean(map.get("nonUnique"));
+                    index = new Index(table);
+                    index.setName(name);
+                    index.setUnique(unique);
+                    index.getAttributes().putAll(map);
+                    table.addIndex(index);
+                }
+                index.addColumn(column);
             }
         }
         // 查询存储过程&函数 -> 用户必须要有“数据库服务器select权限(navicat授权)”才能查询到 routine_definition 字段
