@@ -469,15 +469,12 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
             return StringUtils.trim(column.getDefaultValue());
         }
         // 不同数据库需要做映射 defaultValue
-        switch (targetDb) {
-            case MYSQL:
-                return DefaultValueMapping.mysql(column);
-            case ORACLE:
-                return DefaultValueMapping.oracle(column);
-            case POSTGRE_SQL:
-                return DefaultValueMapping.postgresql(column);
-        }
-        return StringUtils.trim(column.getDefaultValue());
+        return switch (targetDb) {
+            case MYSQL -> DefaultValueMapping.mysql(column);
+            case ORACLE -> DefaultValueMapping.oracle(column);
+            case POSTGRE_SQL -> DefaultValueMapping.postgresql(column);
+            default -> StringUtils.trim(column.getDefaultValue());
+        };
     }
 
     public String updateColumnPosition(Table table) {
