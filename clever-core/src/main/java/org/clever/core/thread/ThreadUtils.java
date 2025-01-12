@@ -2,10 +2,13 @@ package org.clever.core.thread;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.Assert;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 线程工具类
@@ -14,6 +17,20 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Slf4j
 public class ThreadUtils {
+    public static ThreadPoolExecutor createThreadPool(int core, int max, BlockingQueue<Runnable> queue, String namingPattern) {
+        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+            core, max, 16, TimeUnit.SECONDS,
+            queue,
+            new BasicThreadFactory.Builder()
+                .namingPattern(namingPattern)
+                .daemon(true)
+                .build(),
+            new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+        threadPool.allowCoreThreadTimeOut(true);
+        return threadPool;
+    }
+
     /**
      * 休眠当前线程，忽略中断异常
      */

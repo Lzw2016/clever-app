@@ -4,7 +4,10 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.clever.core.AppShutdownHook;
 import org.clever.core.OrderIncrement;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 全局共享的线程池
@@ -36,21 +39,7 @@ public class SharedThreadPoolExecutor {
             if (CACHED_POOL != null) {
                 CACHED_POOL.shutdownNow();
             }
-        }, OrderIncrement.MAX - 1, "停止SharedThreadPool");
-    }
-
-    private static ThreadPoolExecutor createThreadPool(int core, int max, BlockingQueue<Runnable> queue, String namingPattern) {
-        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
-            core, max, 16, TimeUnit.SECONDS,
-            queue,
-            new BasicThreadFactory.Builder()
-                .namingPattern(namingPattern)
-                .daemon(true)
-                .build(),
-            new ThreadPoolExecutor.CallerRunsPolicy()
-        );
-        threadPool.allowCoreThreadTimeOut(true);
-        return threadPool;
+        }, OrderIncrement.MAX - 10, "停止SharedThreadPool");
     }
 
     /**
@@ -64,7 +53,7 @@ public class SharedThreadPoolExecutor {
     public static ThreadPoolExecutor getSmall() {
         synchronized (LOCK_SMALL) {
             if (SMALL == null) {
-                SMALL = createThreadPool(
+                SMALL = ThreadUtils.createThreadPool(
                     2,
                     32,
                     new SynchronousQueue<>(),
@@ -86,7 +75,7 @@ public class SharedThreadPoolExecutor {
     public static ThreadPoolExecutor getNormal() {
         synchronized (LOCK_NORMAL) {
             if (NORMAL == null) {
-                NORMAL = createThreadPool(
+                NORMAL = ThreadUtils.createThreadPool(
                     16,
                     32,
                     new ArrayBlockingQueue<>(64),
@@ -108,7 +97,7 @@ public class SharedThreadPoolExecutor {
     public static ThreadPoolExecutor getLarge() {
         synchronized (LOCK_LARGE) {
             if (LARGE == null) {
-                LARGE = createThreadPool(
+                LARGE = ThreadUtils.createThreadPool(
                     512,
                     1024,
                     new ArrayBlockingQueue<>(20480),

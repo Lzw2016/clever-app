@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.clever.core.Assert;
+import org.clever.core.Conv;
 import org.clever.core.RenameStrategy;
 import org.clever.core.SystemClock;
 import org.clever.core.exception.ExceptionUtils;
@@ -73,7 +74,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static org.clever.data.jdbc.support.query.QAutoIncrementId.autoIncrementId;
 import static org.clever.data.jdbc.support.query.QBizCode.bizCode;
@@ -4256,8 +4256,8 @@ public class Jdbc extends AbstractDataSource {
             Exception exception = null;
             try {
                 // TupleFour<jdbc直接使用的sql, jdbc的sql参数设置器, 原始sql, 原始sql参数>
-                final List<TupleFour<String, PreparedStatementSetter, String, Map<String, Object>>> pssList = batchSql.stream().map(this::newCreatorFactory).collect(Collectors.toList());
-                return jdbc.jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) connection -> {
+                final List<TupleFour<String, PreparedStatementSetter, String, Map<String, Object>>> pssList = batchSql.stream().map(this::newCreatorFactory).toList();
+                return Conv.asInteger(jdbc.jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) connection -> {
                     // Map<jdbc直接使用的sql, TupleThree<PreparedStatement, 原始sql, 原始sql参数>>
                     final Map<String, TupleThree<PreparedStatement, String, List<Map<String, Object>>>> stmts = new LinkedHashMap<>(batchSql.size());
                     // 创建 PreparedStatement 且设置参数
@@ -4293,7 +4293,7 @@ public class Jdbc extends AbstractDataSource {
                     }
                     SqlLoggerUtils.printfUpdateTotal(sumChange);
                     return sumChange;
-                });
+                }));
             } catch (Exception e) {
                 exception = e;
                 throw e;

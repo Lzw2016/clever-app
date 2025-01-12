@@ -40,6 +40,9 @@ public class Conv extends Conversion {
     }
 
     public static Integer asInteger(Object obj, Integer def) {
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        }
         Number result = asNumber(obj, def);
         if (result == null) {
             return null;
@@ -52,6 +55,9 @@ public class Conv extends Conversion {
     }
 
     public static Long asLong(Object obj, Long def) {
+        if (obj instanceof Long) {
+            return (Long) obj;
+        }
         Number result = asNumber(obj, def);
         if (result == null) {
             return null;
@@ -64,6 +70,9 @@ public class Conv extends Conversion {
     }
 
     public static Float asFloat(Object obj, Float def) {
+        if (obj instanceof Float) {
+            return (Float) obj;
+        }
         Number result = asNumber(obj, def);
         if (result == null) {
             return null;
@@ -76,6 +85,9 @@ public class Conv extends Conversion {
     }
 
     public static Short asShort(Object obj, Short def) {
+        if (obj instanceof Short) {
+            return (Short) obj;
+        }
         Number result = asNumber(obj, def);
         if (result == null) {
             return null;
@@ -88,6 +100,9 @@ public class Conv extends Conversion {
     }
 
     public static Byte asByte(Object obj, Short def) {
+        if (obj instanceof Byte) {
+            return (Byte) obj;
+        }
         Number result = asNumber(obj, def);
         if (result == null) {
             return null;
@@ -100,6 +115,9 @@ public class Conv extends Conversion {
     }
 
     public static Double asDouble(Object obj, Double def) {
+        if (obj instanceof Double) {
+            return (Double) obj;
+        }
         Number result = asNumber(obj, def);
         if (result == null) {
             return null;

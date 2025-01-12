@@ -24,6 +24,7 @@
         FROM
         bas_area a
         <where>
+            1=1
             --@ AND a.is_enable = #{is_enable}
             --@ AND a.area_classify = #{area_classify}
             --@ AND a.area_code = #{area_code}

@@ -208,12 +208,12 @@ subprojects {
             dependency("com.google.guava:guava:33.2.1-jre")
             dependency("com.google.zxing:javase:3.4.1")
             dependency("ognl:ognl:3.3.5")
-            dependency("com.github.jsqlparser:jsqlparser:4.6")
+            dependency("com.github.jsqlparser:jsqlparser:5.1")
             dependency("com.jfinal:enjoy:5.1.3")
             dependency("com.belerweb:pinyin4j:2.5.1")
             dependency("org.apache.commons:commons-math3:3.6.1")
             dependency("org.redisson:redisson:3.19.3")
-            // dependency("de.ruedigermoeller:fst:2.57")
+            dependency("de.ruedigermoeller:fst:3.0.3")
         }
     }
 

@@ -5,7 +5,6 @@ import org.clever.core.Assert;
 import org.clever.core.model.request.page.IPage;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
-import org.clever.data.jdbc.support.mybatisplus.ExceptionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -132,9 +131,9 @@ public class DialectFactory {
                         DIALECT_CACHE.put(dialectClazz, dialect);
                     }
                 } catch (ClassNotFoundException | NoSuchMethodException e) {
-                    throw ExceptionUtils.mpe("Class : %s is not found", dialectClazz);
+                    throw new IllegalArgumentException(String.format("Class : %s is not found", dialectClazz), e);
                 } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
-                    throw ExceptionUtils.mpe("Class : %s can not be instance", dialectClazz);
+                    throw new IllegalArgumentException(String.format("Class : %s can not be instance", dialectClazz), e);
                 }
             } else {
                 // 缓存方言
@@ -154,34 +153,18 @@ public class DialectFactory {
      * @return 分页语句组装类
      */
     private static IDialect getDialectByDbType(DbType dbType) {
-        switch (dbType) {
-            case MYSQL:
-            case MARIADB:
-            case CLICK_HOUSE:
-            case OCEAN_BASE:
-                return new MySqlDialect();
-            case ORACLE:
-            case DM:
-                return new OracleDialect();
-            case ORACLE_12C:
-                return new Oracle12cDialect();
-            case DB2:
-                return new DB2Dialect();
-            case H2:
-                return new H2Dialect();
-            case HSQL:
-                return new HSQLDialect();
-            case SQLITE:
-                return new SQLiteDialect();
-            case POSTGRE_SQL:
-            case PHOENIX:
-                return new PostgreDialect();
-            case SQL_SERVER2005:
-                return new SQLServer2005Dialect();
-            case SQL_SERVER:
-                return new SQLServerDialect();
-            default:
-                throw ExceptionUtils.mpe("%s database not supported.", dbType.getDb());
-        }
+        return switch (dbType) {
+            case MYSQL, MARIADB, CLICK_HOUSE, OCEAN_BASE -> new MySqlDialect();
+            case ORACLE, DM -> new OracleDialect();
+            case ORACLE_12C -> new Oracle12cDialect();
+            case DB2 -> new DB2Dialect();
+            case H2 -> new H2Dialect();
+            case HSQL -> new HSQLDialect();
+            case SQLITE -> new SQLiteDialect();
+            case POSTGRE_SQL, PHOENIX -> new PostgreDialect();
+            case SQL_SERVER2005 -> new SQLServer2005Dialect();
+            case SQL_SERVER -> new SQLServerDialect();
+            default -> throw new IllegalArgumentException(String.format("%s database not supported.", dbType.getDb()));
+        };
     }
 }

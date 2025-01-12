@@ -7,8 +7,8 @@ import org.clever.core.NamingUtils;
 import org.clever.core.RenameStrategy;
 import org.clever.core.model.request.QueryBySort;
 import org.clever.core.tuples.TupleTwo;
-import org.clever.data.jdbc.support.mybatisplus.SqlInfo;
-import org.clever.data.jdbc.support.mybatisplus.SqlParserUtils;
+import org.clever.data.jdbc.support.sqlparser.CountSqlOptimizer;
+import org.clever.data.jdbc.support.sqlparser.JSqlParserCountSqlOptimizer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +23,27 @@ public class SqlUtils {
     public static final String DESC = "DESC";
     public static final String COMMA = ",";
     /**
+     * count sql优化器
+     */
+    private final static CountSqlOptimizer COUNT_SQL_OPTIMIZER = new JSqlParserCountSqlOptimizer();
+    /**
      * Count Sql 缓存(最大4096条数据)
      */
     private static final Cache<String, String> COUNT_SQL_CACHE = CacheBuilder.newBuilder().maximumSize(4096).initialCapacity(256).build();
+
+    /**
+     * 获取优化后的count查询sql语句
+     *
+     * @param sql 原始sql
+     */
+    public static String getCountSql(String sql) {
+        String countSql = COUNT_SQL_CACHE.getIfPresent(StringUtils.trim(sql));
+        if (StringUtils.isBlank(countSql)) {
+            countSql = COUNT_SQL_OPTIMIZER.getCountSql(sql, CountSqlOptimizer.DEFAULT_OPTIONS);
+            COUNT_SQL_CACHE.put(sql, countSql);
+        }
+        return countSql;
+    }
 
     /**
      * 查询SQL拼接Order By
@@ -35,7 +53,7 @@ public class SqlUtils {
      * @return ignore
      */
     public static String concatOrderBy(String originalSql, QueryBySort queryBySort) {
-        if (null != queryBySort && queryBySort.getOrderFields() != null && queryBySort.getOrderFields().size() > 0) {
+        if (null != queryBySort && queryBySort.getOrderFields() != null && !queryBySort.getOrderFields().isEmpty()) {
             List<String> orderFields = queryBySort.getOrderFieldsSql();
             List<String> sorts = queryBySort.getSortsSql();
             StringBuilder buildSql = new StringBuilder(originalSql);
@@ -60,33 +78,18 @@ public class SqlUtils {
                 }
                 String orderByStr = concatOrderBuilder(orderField, sort.toUpperCase());
                 if (StringUtils.isNotBlank(orderByStr)) {
-                    if (orderBySql.length() > 0) {
+                    if (!orderBySql.isEmpty()) {
                         orderBySql.append(COMMA).append(' ');
                     }
                     orderBySql.append(orderByStr.trim());
                 }
             }
-            if (orderBySql.length() > 0) {
-                buildSql.append(" ORDER BY ").append(orderBySql.toString());
+            if (!orderBySql.isEmpty()) {
+                buildSql.append(" ORDER BY ").append(orderBySql);
             }
             return buildSql.toString();
         }
         return originalSql;
-    }
-
-    /**
-     * 获取优化后的count查询sql语句
-     *
-     * @param sql 原始sql
-     */
-    public static String getCountSql(String sql) {
-        String countSql = COUNT_SQL_CACHE.getIfPresent(StringUtils.trim(sql));
-        if (StringUtils.isBlank(countSql)) {
-            SqlInfo sqlInfo = SqlParserUtils.getOptimizeCountSql(true, null, sql);
-            countSql = sqlInfo.getSql();
-            COUNT_SQL_CACHE.put(sql, countSql);
-        }
-        return countSql;
     }
 
     /**

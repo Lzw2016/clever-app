@@ -40,7 +40,7 @@ public class Page<T> implements IPage<T> {
      */
     protected List<OrderItem> orders = new ArrayList<>();
     /**
-     * 自动优化 COUNT SQL
+     * 自动优化 count sql
      */
     protected boolean optimizeCountSql = true;
     /**

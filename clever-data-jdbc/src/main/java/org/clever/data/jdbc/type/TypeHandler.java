@@ -6,19 +6,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public interface TypeHandler<T> {
-    void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
+    /**
+     * 设置SQL参数
+     */
+    void setParameter(PreparedStatement ps, int idx, T parameter, JdbcType jdbcType) throws SQLException;
 
     /**
-     * Gets the result.
-     *
-     * @param rs         the rs
-     * @param columnName Colunm name, when configuration <code>useColumnLabel</code> is <code>false</code>
-     * @return the result
-     * @throws SQLException the SQL exception
+     * 根据 column name 读取SQL返回值
      */
     T getResult(ResultSet rs, String columnName) throws SQLException;
 
+    /**
+     * 根据 column index 读取SQL返回值
+     */
     T getResult(ResultSet rs, int columnIndex) throws SQLException;
 
+    /**
+     * 根据 column index 读取存储过程返回值
+     */
     T getResult(CallableStatement cs, int columnIndex) throws SQLException;
 }

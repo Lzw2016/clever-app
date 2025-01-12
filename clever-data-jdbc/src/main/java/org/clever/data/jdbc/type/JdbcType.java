@@ -6,8 +6,7 @@ import java.util.Map;
 
 public enum JdbcType {
     /*
-     * This is added to enable basic support for the
-     * ARRAY data type - but a custom type handler is still required
+     * 添加它是为了启用对 ARRAY 数据类型的基本支持 - 但仍然需要自定义类型处理程序
      */
     ARRAY(Types.ARRAY),
     BIT(Types.BIT),

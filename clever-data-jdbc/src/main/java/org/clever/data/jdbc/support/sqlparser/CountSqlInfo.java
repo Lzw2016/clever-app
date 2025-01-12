@@ -1,4 +1,4 @@
-package org.clever.data.jdbc.support.mybatisplus;
+package org.clever.data.jdbc.support.sqlparser;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -7,12 +7,11 @@ import lombok.experimental.Accessors;
  * 作者：lizw <br/>
  * 创建时间：2021/06/12 11:05 <br/>
  */
-@SuppressWarnings("ALL")
 @Data
 @Accessors(chain = true)
-public class SqlInfo {
+public class CountSqlInfo {
     /**
-     * SQL 内容
+     * count sql 内容
      */
     private String sql;
     /**
@@ -20,7 +19,7 @@ public class SqlInfo {
      */
     private boolean orderBy = true;
 
-    public static SqlInfo newInstance() {
-        return new SqlInfo();
+    public static CountSqlInfo newInstance() {
+        return new CountSqlInfo();
     }
 }
