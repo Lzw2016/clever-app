@@ -3,45 +3,45 @@
 <mapper namespace="BasPackage">
     <select id="selectPackageItems">
         select p.package_code,
-               p.package_name,
-               pi.package_id,
-               pi.package_item_id,
-               pi.package_level,
-               (select dict_text
-                from bas_dict_items
-                where dict_code = 'PACK_LEVEL'
-                  and pi.package_level = dict_value)                              as package_level_name,
-               pi.package_meas,
-               pi.package_unit,
-               pi.is_unpack,
-               pi.is_master,
-               pi.length,
-               pi.width,
-               pi.high,
-               pi.volume,
-               pi.weight,
-               pi.cno,
-               pi.cno_box_num,
-               pi.barcode,
-               (select package_meas
-                from bas_package_items
-                where p.package_id = package_id and is_master = 1 and ROWNUM = 1) as primary_meas
+        p.package_name,
+        pi.package_id,
+        pi.package_item_id,
+        pi.package_level,
+        (select dict_text
+        from bas_dict_items
+        where dict_code = 'PACK_LEVEL'
+        and pi.package_level = dict_value) as package_level_name,
+        pi.package_meas,
+        pi.package_unit,
+        pi.is_unpack,
+        pi.is_master,
+        pi.length,
+        pi.width,
+        pi.high,
+        pi.volume,
+        pi.weight,
+        pi.cno,
+        pi.cno_box_num,
+        pi.barcode,
+        (select package_meas
+        from bas_package_items
+        where p.package_id = package_id and is_master = 1 and ROWNUM = 1) as primary_meas
         from bas_package p
-             inner join bas_package_items pi on p.package_id = pi.package_id
+        inner join bas_package_items pi on p.package_id = pi.package_id
         where p.is_enable = 1
-          and pi.is_enable = 1
-          --@ and p.item_id = #{item_id}
+        and pi.is_enable = 1
+        --@ and p.item_id = #{item_id}
         order by pi.package_level
     </select>
     <select id="selectPackage">
         select p.package_code,
-               p.package_name,
-               (select item_name from bas_item where item_id = p.item_id) as item_name,
-               p.package_supply_id,
-               p.create_at,
-               p.create_by,
-               p.update_at,
-               p.update_by
+        p.package_name,
+        (select item_name from bas_item where item_id = p.item_id) as item_name,
+        p.package_supply_id,
+        p.create_at,
+        p.create_by,
+        p.update_at,
+        p.update_by
         from bas_package p
         where p.is_enable = 1
 

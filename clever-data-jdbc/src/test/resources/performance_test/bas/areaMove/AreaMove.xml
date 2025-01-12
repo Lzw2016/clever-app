@@ -4,23 +4,23 @@
     <!--查询列表-->
     <select id="queryAllAreaMove" resultType="map">
         select t.transition_id,
-               t.wh_id,
-               t.order_type,
-               t.order_biz_type,
-               t.pickup_type,
-               t.work_mode,
-               t.from_area_id,
-               (select area_name from bas_area ba where ba.area_id = t.from_area_id) as from_area_name,
-               t.target_area_id,
-               (select area_name from bas_area ba where ba.area_id = t.target_area_id) as target_area_name,
-               t.carriy_mode,
-               t.create_at,
-               t.update_at,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        t.wh_id,
+        t.order_type,
+        t.order_biz_type,
+        t.pickup_type,
+        t.work_mode,
+        t.from_area_id,
+        (select area_name from bas_area ba where ba.area_id = t.from_area_id) as from_area_name,
+        t.target_area_id,
+        (select area_name from bas_area ba where ba.area_id = t.target_area_id) as target_area_name,
+        t.carriy_mode,
+        t.create_at,
+        t.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
         from bas_area_transition t
         where
-            t.wh_id = #{wh_id}
+        t.wh_id = #{wh_id}
         order by t.create_by desc
     </select>
 

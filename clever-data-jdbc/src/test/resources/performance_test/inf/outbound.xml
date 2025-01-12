@@ -8,135 +8,135 @@
 
     <update id="insert_infkpd_hz">
         insert into order_out
-                  (order_out_id,
-                   order_out_code,
-                   owner_id,
-                   wh_id,
-                   order_type,
-                   order_biz_type,
-                   status,
-                   customer_id,
-                   dates,
-                   pickup_type,
-                   bill_staff,
-                   remark)
-                 select          #{order_out_id},
-                                  a.danj_no,
-                                 NVL(C.OWNER_ID,A.HUOZ_ID),
-                                 D.WH_ID,
-                                 #{order_type},
-                                 #{order_biz_type},
-                                 10,
-                                 b.customer_id,
-                                 to_char(RIQI_DATE,'yyyy-mm-dd'),
-                                 a.tih_way,
-                                 a.yew_staff,
-                                 a.note
-                            from inf_ck_kpd_bill a left join bas_customer b on #{danw_id}=b.customer_id_erp and b.CUSTOM_TYPE= 2
-                                                    LEFT JOIN BAS_OWNER    C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id
-                                                    inner join bas_wh      d on a.wlzx_code=d.WH_CODE
-                           where danj_no = #{danj_no}
-                             and huoz_id = #{huoz_id}
+        (order_out_id,
+        order_out_code,
+        owner_id,
+        wh_id,
+        order_type,
+        order_biz_type,
+        status,
+        customer_id,
+        dates,
+        pickup_type,
+        bill_staff,
+        remark)
+        select #{order_out_id},
+        a.danj_no,
+        NVL(C.OWNER_ID,A.HUOZ_ID),
+        D.WH_ID,
+        #{order_type},
+        #{order_biz_type},
+        10,
+        b.customer_id,
+        to_char(RIQI_DATE,'yyyy-mm-dd'),
+        a.tih_way,
+        a.yew_staff,
+        a.note
+        from inf_ck_kpd_bill a left join bas_customer b on #{danw_id}=b.customer_id_erp and b.CUSTOM_TYPE= 2
+        LEFT JOIN BAS_OWNER C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id
+        inner join bas_wh d on a.wlzx_code=d.WH_CODE
+        where danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
 
-                             and rownum = 1
+        and rownum = 1
     </update>
 
     <update id="insert_infkpd_mx">
         insert into order_out_details
-  (order_out_id,
-   line_no,
-   item_id,
-   package_id,
-   qty,
-   quality,
-   lot01,
-   lot12,
-   status,
-   BUSINESS_CODE,
-   BUSINESS_CODE_LINE,
-   KAIP_DW,
-   FAC_ERP)
-        select   #{order_out_id},
-                 rownum,
-                 b.item_id,
-                 d.package_id,
-                 a.num,
-                 2,
-                 a.lot,
-                 a.kub_erp,
-                 10,--初始状态
-                 a.danj_no,
-                 a.hanghao,
-                 a.KAIP_DW,
-                 a.FAC_ERP
-            from inf_ck_kpd_bill a  left join bas_item b  on a.shangp_id=b.item_code
-                                    left join bas_owner c on a.huoz_id=c.owner_code and b.owner_id=c.owner_id
-                                    left join bas_package d on b.item_id=d.item_id
+        (order_out_id,
+        line_no,
+        item_id,
+        package_id,
+        qty,
+        quality,
+        lot01,
+        lot12,
+        status,
+        BUSINESS_CODE,
+        BUSINESS_CODE_LINE,
+        KAIP_DW,
+        FAC_ERP)
+        select #{order_out_id},
+        rownum,
+        b.item_id,
+        d.package_id,
+        a.num,
+        2,
+        a.lot,
+        a.kub_erp,
+        10,--初始状态
+        a.danj_no,
+        a.hanghao,
+        a.KAIP_DW,
+        a.FAC_ERP
+        from inf_ck_kpd_bill a left join bas_item b on a.shangp_id=b.item_code
+        left join bas_owner c on a.huoz_id=c.owner_code and b.owner_id=c.owner_id
+        left join bas_package d on b.item_id=d.item_id
 
-           where danj_no = #{danj_no}
-             and huoz_id = #{huoz_id}
+        where danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
     </update>
 
     <update id="insert_infkpd_old">
         INSERT INTO INF_CK_KPD_BILL_OLD
         SELECT *
-          FROM INF_CK_KPD_BILL
-         WHERE danj_no = #{danj_no}
-           and huoz_id = #{huoz_id}
+        FROM INF_CK_KPD_BILL
+        WHERE danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
     </update>
 
     <update id="insert_infkpd_merge">
-       insert into order_out_merge
-  (order_merge_id,
-   order_merge_code,
-   line_no,
-   pickup_type,
-   dates,
-   customer_id,
-   owner_id,
-   wh_id,
-   order_type,
-   order_biz_type,
-   item_id,
-   package_id,
-   qty,
-   quality,
-   lot01,
-   lot12,
-   bill_staff,
-   is_merge,
-   BUSINESS_CODE_LINE,
-   KAIP_DW,
-   FAC_ERP)
-select           #{order_out_id},
-                 a.danj_no,
-                 rownum,
-                 a.tih_way,
-                 to_char(RIQI_DATE,'yyyy-mm-dd'),
-                 b.customer_id,
-                 c.owner_id,
-                 d.wh_id,
-                 #{order_type},
-                 #{order_biz_type},
-                 b.item_id,
-                 d.package_id,
-                 a.num,
-                 2,
-                 a.lot,
-                 a.kub_erp,
-                 a.yew_staff,
-                 1,
-                 a.hanghao,
-                 a.KAIP_DW,
-                 a.FAC_ERP
-            from inf_ck_kpd_bill a  left join bas_customer b on #{danw_id}=b.customer_id_erp and b.CUSTOM_TYPE= 2
-                                    LEFT JOIN BAS_OWNER    C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id and c.owner_id=b1.owner_id
-                                    inner join bas_wh      d on a.wlzx_code=d.WH_CODE
-                                    left join bas_item b1  on a.shangp_id=b1.item_code
-                                    left join bas_package d1 on b1.item_id=d1.item_id
+        insert into order_out_merge
+        (order_merge_id,
+        order_merge_code,
+        line_no,
+        pickup_type,
+        dates,
+        customer_id,
+        owner_id,
+        wh_id,
+        order_type,
+        order_biz_type,
+        item_id,
+        package_id,
+        qty,
+        quality,
+        lot01,
+        lot12,
+        bill_staff,
+        is_merge,
+        BUSINESS_CODE_LINE,
+        KAIP_DW,
+        FAC_ERP)
+        select #{order_out_id},
+        a.danj_no,
+        rownum,
+        a.tih_way,
+        to_char(RIQI_DATE,'yyyy-mm-dd'),
+        b.customer_id,
+        c.owner_id,
+        d.wh_id,
+        #{order_type},
+        #{order_biz_type},
+        b.item_id,
+        d.package_id,
+        a.num,
+        2,
+        a.lot,
+        a.kub_erp,
+        a.yew_staff,
+        1,
+        a.hanghao,
+        a.KAIP_DW,
+        a.FAC_ERP
+        from inf_ck_kpd_bill a left join bas_customer b on #{danw_id}=b.customer_id_erp and b.CUSTOM_TYPE= 2
+        LEFT JOIN BAS_OWNER C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id and c.owner_id=b1.owner_id
+        inner join bas_wh d on a.wlzx_code=d.WH_CODE
+        left join bas_item b1 on a.shangp_id=b1.item_code
+        left join bas_package d1 on b1.item_id=d1.item_id
 
-           where danj_no = #{danj_no}
-             and huoz_id = #{huoz_id}
+        where danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
 
     </update>
 

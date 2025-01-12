@@ -19,9 +19,9 @@ import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 public class NashornRequire extends AbstractRequire<NashornScriptEngine, ScriptObjectMirror> {
 
     public NashornRequire(
-            ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> context,
-            Module<ScriptObjectMirror> currentModule,
-            Folder currentModuleFolder) {
+        ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> context,
+        Module<ScriptObjectMirror> currentModule,
+        Folder currentModuleFolder) {
         super(context, currentModule, currentModuleFolder);
     }
 
@@ -36,31 +36,31 @@ public class NashornRequire extends AbstractRequire<NashornScriptEngine, ScriptO
 
     @Override
     protected AbstractRequire<NashornScriptEngine, ScriptObjectMirror> newRequire(
-            ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext,
-            Folder currentModuleFolder) {
+        ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext,
+        Folder currentModuleFolder) {
         return new NashornRequire(engineContext, currentModuleFolder);
     }
 
     @Override
     protected Module<ScriptObjectMirror> newModule(
-            ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext,
-            String id,
-            String filename,
-            ScriptObjectMirror exports,
-            Module<ScriptObjectMirror> parent,
-            Require<ScriptObjectMirror> require) {
+        ScriptEngineContext<NashornScriptEngine, ScriptObjectMirror> engineContext,
+        String id,
+        String filename,
+        ScriptObjectMirror exports,
+        Module<ScriptObjectMirror> parent,
+        Require<ScriptObjectMirror> require) {
         return new NashornModule(engineContext, id, filename, exports, parent, require);
     }
 
     @Override
     protected void moduleFunctionCall(
-            ScriptObjectMirror function,
-            ScriptObjectMirror that,
-            ScriptObjectMirror exports,
-            Require<ScriptObjectMirror> require,
-            ScriptObjectMirror module,
-            String filename,
-            String dirname) {
+        ScriptObjectMirror function,
+        ScriptObjectMirror that,
+        ScriptObjectMirror exports,
+        Require<ScriptObjectMirror> require,
+        ScriptObjectMirror module,
+        String filename,
+        String dirname) {
         function.call(that, exports, require, module, filename, dirname);
     }
 }

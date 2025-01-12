@@ -23,62 +23,61 @@
         t.ITEM_ID
 
         FROM
-            (
-            SELECT
-                MEMO,
-                to_char( LEDGER_TIME, 'yyyy-mm-dd' ) LEDGER_TIME,
-                ORDER_CODE,
-                SUM( QTY ) QTY,
-                SUM( QTY_IN ) QTY_IN,
-                SUM( QTY_OUT ) QTY_OUT,
-                SUM( QTY + QTY_IN - QTY_OUT ) STOCK,
-                WH_ID,
-                ITEM_ID,
-                LOC_ID,
-                CUSTOM_ID,
-                LOT_ID,
-                LEDGER_ID
-            FROM
-                INV_LEDGER
-            GROUP BY
-                MEMO,
-                to_char( LEDGER_TIME, 'yyyy-mm-dd' ),
-                LOT_ID,
-                LOC_ID,
-                WH_ID,
-                ITEM_ID,
-                ORDER_CODE,
-                CUSTOM_ID,
-                LEDGER_ID
-            ) T
-            INNER JOIN BAS_LOT_ATT BLA ON BLA.LOT_ID = T.LOT_ID
-            INNER JOIN BAS_CUSTOMER BC ON BC.CUSTOMER_ID = T.CUSTOM_ID
-            INNER JOIN BAS_ITEM BI ON BI.ITEM_ID = T.ITEM_ID
-            INNER JOIN BAS_LOCATION BL ON BL.LOC_ID = T.LOC_ID
-            INNER JOIN BAS_WH BW ON BW.WH_ID = T.WH_ID
+        (
+        SELECT
+        MEMO,
+        to_char( LEDGER_TIME, 'yyyy-mm-dd' ) LEDGER_TIME,
+        ORDER_CODE,
+        SUM( QTY ) QTY,
+        SUM( QTY_IN ) QTY_IN,
+        SUM( QTY_OUT ) QTY_OUT,
+        SUM( QTY + QTY_IN - QTY_OUT ) STOCK,
+        WH_ID,
+        ITEM_ID,
+        LOC_ID,
+        CUSTOM_ID,
+        LOT_ID,
+        LEDGER_ID
+        FROM
+        INV_LEDGER
+        GROUP BY
+        MEMO,
+        to_char( LEDGER_TIME, 'yyyy-mm-dd' ),
+        LOT_ID,
+        LOC_ID,
+        WH_ID,
+        ITEM_ID,
+        ORDER_CODE,
+        CUSTOM_ID,
+        LEDGER_ID
+        ) T
+        INNER JOIN BAS_LOT_ATT BLA ON BLA.LOT_ID = T.LOT_ID
+        INNER JOIN BAS_CUSTOMER BC ON BC.CUSTOMER_ID = T.CUSTOM_ID
+        INNER JOIN BAS_ITEM BI ON BI.ITEM_ID = T.ITEM_ID
+        INNER JOIN BAS_LOCATION BL ON BL.LOC_ID = T.LOC_ID
+        INNER JOIN BAS_WH BW ON BW.WH_ID = T.WH_ID
         WHERE
-            BLA.LOT12 = '5000'
-            AND T.memo IN ( '入库-上架回传-记-实际货位库存账', '入库-上架回传-记-实际货位库存账-ZZP', '拣货记帐' )
-            <if test="#obj.notEmpty(start_date)">
-                and  T.LEDGER_TIME >= #{start_date}
-            </if>
-            <if test="#obj.notEmpty(end_date)">
-                and  T.LEDGER_TIME &lt;= #{end_date}
-            </if>
-            <if test = "#obj.notEmpty(customer)" >
-                and BC.CUSTOMER_CODE = #{customer}
-            </if>
-            <if test = "#obj.notEmpty(item)" >
-                and BI.ITEM_CODE = #{item}
-            </if>
-            <if test = "#obj.notEmpty(lot01)" >
-                and BLA.LOT01 = #{lot01}
-            </if>
-            <if test = "#obj.notEmpty(order_code)" >
-                and T.ORDER_CODE = #{order_code}
-            </if>
+        BLA.LOT12 = '5000'
+        AND T.memo IN ( '入库-上架回传-记-实际货位库存账', '入库-上架回传-记-实际货位库存账-ZZP', '拣货记帐' )
+        <if test="#obj.notEmpty(start_date)">
+            and T.LEDGER_TIME >= #{start_date}
+        </if>
+        <if test="#obj.notEmpty(end_date)">
+            and T.LEDGER_TIME &lt;= #{end_date}
+        </if>
+        <if test="#obj.notEmpty(customer)">
+            and BC.CUSTOMER_CODE = #{customer}
+        </if>
+        <if test="#obj.notEmpty(item)">
+            and BI.ITEM_CODE = #{item}
+        </if>
+        <if test="#obj.notEmpty(lot01)">
+            and BLA.LOT01 = #{lot01}
+        </if>
+        <if test="#obj.notEmpty(order_code)">
+            and T.ORDER_CODE = #{order_code}
+        </if>
     </select>
-
 
 
 </mapper>

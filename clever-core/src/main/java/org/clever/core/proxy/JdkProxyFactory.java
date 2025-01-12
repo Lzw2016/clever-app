@@ -105,9 +105,9 @@ public class JdkProxyFactory {
     public <T> T createProxy() {
         Assert.notNull(interceptor, "未设置 interceptor");
         return (T) Proxy.newProxyInstance(
-                classLoader,
-                interfaces.toArray(new Class[0]),
-                interceptor
+            classLoader,
+            interfaces.toArray(new Class[0]),
+            interceptor
         );
     }
 

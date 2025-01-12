@@ -4,29 +4,29 @@
 
     <select id="queryOrder1">
         select oi.order_in_id,
-               oi.order_in_code,
-               oi.supplier_id,
-               bc.customer_code,
-               bc.customer_name as supplier_name,
-               oi.dates,
-               oi.asn_staff,
-               (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
-               oi.business_code,
-               oi.order_type,
-               oi.order_biz_type,
-               bo.owner_code,
-               bo.owner_name,
-               oi.is_complete
+        oi.order_in_code,
+        oi.supplier_id,
+        bc.customer_code,
+        bc.customer_name as supplier_name,
+        oi.dates,
+        oi.asn_staff,
+        (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+        oi.business_code,
+        oi.order_type,
+        oi.order_biz_type,
+        bo.owner_code,
+        bo.owner_name,
+        oi.is_complete
         from order_in oi
-             inner join bas_customer bc on oi.supplier_id = bc.customer_id
-             inner join bas_owner bo on bo.owner_id = oi.owner_id
-             inner join asn_in ai on ai.asn_in_id = oi.asn_in_id
+        inner join bas_customer bc on oi.supplier_id = bc.customer_id
+        inner join bas_owner bo on bo.owner_id = oi.owner_id
+        inner join asn_in ai on ai.asn_in_id = oi.asn_in_id
         where exists(
-                      select 1 from cmd_in
-                      where order_id = oi.order_in_id
-                        and cmd_state >= 20
-                        <![CDATA[and cmd_state < 60 ]]>
-                  )
+        select 1 from cmd_in
+        where order_id = oi.order_in_id
+        and cmd_state >= 20
+        <![CDATA[and cmd_state < 60 ]]>
+        )
         and oi.wh_id = #{wh_id}
         <if test="#obj.notEmpty(ownerArr)">
             and oi.owner_id in
@@ -34,7 +34,7 @@
                 #{item}
             </foreach>
         </if>
-        --@ and ai.business_code like '%' ||  #{business_code} || '%'
+        --@ and ai.business_code like '%' || #{business_code} || '%'
         order by oi.order_in_id desc
     </select>
 
@@ -96,22 +96,22 @@
              inner join bas_location i1 on i1.loc_id = c.loc_id_real
              inner join bas_lot_att j on c.lot_id = j.lot_id
         where c.cmd_state >= 20 and c.cmd_state < 60  and c.quality_flg != 88  and c.quality_flg != 1]]>
-          --@ and c.order_type = #{order_type}
-          <if test="!#obj.isEmpty(tab)">
+        --@ and c.order_type = #{order_type}
+        <if test="!#obj.isEmpty(tab)">
             and c.order_id = #{order_in_id}
-          </if>
-          <!--&#45;&#45;@ and c.order_id = #{order_in_id}-->
-          --% and c.business_code like #{business_code}
-          --% and c.barcode like #{container_code}
-          --% and ( d.item_code like #{item_code} or d.logogram like #{item_code})
-          --% and h.area_code like #{area_code}
-          and c.wh_id = #{wh_id}
-            <if test="#obj.notEmpty(ownerArr)">
-                and c.owner_id in
-                <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
+        </if>
+        <!--&#45;&#45;@ and c.order_id = #{order_in_id}-->
+        --% and c.business_code like #{business_code}
+        --% and c.barcode like #{container_code}
+        --% and ( d.item_code like #{item_code} or d.logogram like #{item_code})
+        --% and h.area_code like #{area_code}
+        and c.wh_id = #{wh_id}
+        <if test="#obj.notEmpty(ownerArr)">
+            and c.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
         order by c.order_id desc, c.order_line_no asc
     </select>
 
@@ -184,13 +184,13 @@
              left join rule_apply e on e.match_id = c.item_id and e.rule_type = 1
              left join rule_putaway rp on rp.rule_putaway_id = e.rule_id
         where c.cmd_state >= 20 and c.cmd_state < 60 and c.quality_flg != 88  and c.quality_flg != 1 ]]>
-          --@ and c.business_code = #{business_code}
-          --@ and c.order_id = #{order_in_id}
-          --@ and c.order_type = #{order_type}
-          --@ and c.order_line_no = #{order_line_no}
-          --@ and c.barcode = #{barcode}
-          --@ and d.approval_no = #{approval_no}
-          --@ and ( d.item_code like '%' || #{item_code} || '%' or d.approval_no like '%' || #{item_code} || '%' or d.logogram like '%' || #{item_code} || '%' OR f.BARCODE = #{item_code} OR g.BARCODE = #{item_code})
+        --@ and c.business_code = #{business_code}
+        --@ and c.order_id = #{order_in_id}
+        --@ and c.order_type = #{order_type}
+        --@ and c.order_line_no = #{order_line_no}
+        --@ and c.barcode = #{barcode}
+        --@ and d.approval_no = #{approval_no}
+        --@ and ( d.item_code like '%' || #{item_code} || '%' or d.approval_no like '%' || #{item_code} || '%' or d.logogram like '%' || #{item_code} || '%' OR f.BARCODE = #{item_code} OR g.BARCODE = #{item_code})
         order by i1.loc_code, c.order_id desc, c.order_line_no asc
 
     </select>

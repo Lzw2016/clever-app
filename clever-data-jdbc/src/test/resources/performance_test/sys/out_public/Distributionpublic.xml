@@ -154,7 +154,8 @@
         0, <!--其它药品数-->
         0, <!--赠品数-->
         0, <!--总金额-->
-        decode(ROUND(sum((t_pack.length * t_pack.width * t_pack.high / t_pack.package_meas) * MOD(t_mx.qty, t_pack.package_meas) / 1000000), 2), 0, 1, ROUND(sum((t_pack.length * t_pack.width * t_pack.high / t_pack.package_meas) * MOD(t_mx.qty, t_pack.package_meas) / 1000000), 2)), <!--总体积-->
+        decode(ROUND(sum((t_pack.length * t_pack.width * t_pack.high / t_pack.package_meas) * MOD(t_mx.qty, t_pack.package_meas) / 1000000), 2), 0, 1, ROUND(sum((t_pack.length * t_pack.width * t_pack.high / t_pack.package_meas) *
+        MOD(t_mx.qty, t_pack.package_meas) / 1000000), 2)), <!--总体积-->
         decode(ROUND(sum(t_pack.weight * MOD(t_mx.qty, t_pack.package_meas)),2), null, 1, 0, 1, ROUND(sum(t_pack.weight * MOD(t_mx.qty, t_pack.package_meas)),2)), <!--总重量-->
         0, <!--是否重新装车-->
         sysdate, <!--开票时间-->
@@ -201,103 +202,103 @@
 
     <insert id="insert_Distribution_details">
         insert into distribution_count_details
-          (barcode,
-           split_order_no,
-           distribution_count_id,
-           distribution_no,
-           stage_code,
-           scatter_mark,
-           task_status,
-           pack_no,
-           is_enable,
-           is_pda_review,
-           item_id,
-           lot_id,
-           is_split,
-           qty,
-           is_refrigerate,
-           refrigerate_box_code)
+        (barcode,
+        split_order_no,
+        distribution_count_id,
+        distribution_no,
+        stage_code,
+        scatter_mark,
+        task_status,
+        pack_no,
+        is_enable,
+        is_pda_review,
+        item_id,
+        lot_id,
+        is_split,
+        qty,
+        is_refrigerate,
+        refrigerate_box_code)
         select
-         t.barcode,
-         0,
-         t.order_id,
-         NULL,
-         t.collect_stage_id,
-         t.is_unpack,
-         t.cmd_state,
-         t.pack_no,
-         1,
-         1,
-         t.ITEM_ID,
-         t.LOT_ID,
-         0,
-         sum((t.qty - MOD(t.qty, t_pack.package_meas)) /
-                     t_pack.package_meas),
-         (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id=t.ITEM_ID),
-         'N/A'
-         from cmd_out t INNER JOIN BAS_PACKAGE_ITEMS t_pack ON t.PACKAGE_ID=t_pack.Package_Id AND t_pack.Package_Level=3
-         WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 AND t.IS_UNPACK!=1 and (t.merge_barcode is null or t.merge_barcode = 'N/A')
-         and t.order_id=#{order_id}
-         group by t.barcode,t.order_id,t.collect_stage_id,t.is_unpack,t.cmd_state,t.pack_no,t.item_id,t.lot_id
-         UNION ALL
+        t.barcode,
+        0,
+        t.order_id,
+        NULL,
+        t.collect_stage_id,
+        t.is_unpack,
+        t.cmd_state,
+        t.pack_no,
+        1,
+        1,
+        t.ITEM_ID,
+        t.LOT_ID,
+        0,
+        sum((t.qty - MOD(t.qty, t_pack.package_meas)) /
+        t_pack.package_meas),
+        (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id=t.ITEM_ID),
+        'N/A'
+        from cmd_out t INNER JOIN BAS_PACKAGE_ITEMS t_pack ON t.PACKAGE_ID=t_pack.Package_Id AND t_pack.Package_Level=3
+        WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 AND t.IS_UNPACK!=1 and (t.merge_barcode is null or t.merge_barcode = 'N/A')
+        and t.order_id=#{order_id}
+        group by t.barcode,t.order_id,t.collect_stage_id,t.is_unpack,t.cmd_state,t.pack_no,t.item_id,t.lot_id
+        UNION ALL
         select
-         t.barcode,
-         0,
-         t.order_id,
-         NULL,
-         t.collect_stage_id,
-         t.is_unpack,
-         t.cmd_state,
-         t.pack_no,
-         1,
-         1,
-         NULL,
-         NULL,
-         0,
-         1,
-         (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id =
-         (SELECT T1.ITEM_ID FROM CMD_OUT T1 WHERE T1.BARCODE=t.BARCODE AND ROWNUM=1)),
-         'N/A'
-         from cmd_out t
-         WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 AND t.IS_UNPACK=1 and t.order_id=#{order_id} and (t.merge_barcode is null or t.merge_barcode = 'N/A')
-         group by t.barcode,t.order_id,t.collect_stage_id,t.is_unpack,t.cmd_state,t.pack_no
-         UNION ALL
+        t.barcode,
+        0,
+        t.order_id,
+        NULL,
+        t.collect_stage_id,
+        t.is_unpack,
+        t.cmd_state,
+        t.pack_no,
+        1,
+        1,
+        NULL,
+        NULL,
+        0,
+        1,
+        (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id =
+        (SELECT T1.ITEM_ID FROM CMD_OUT T1 WHERE T1.BARCODE=t.BARCODE AND ROWNUM=1)),
+        'N/A'
+        from cmd_out t
+        WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 AND t.IS_UNPACK=1 and t.order_id=#{order_id} and (t.merge_barcode is null or t.merge_barcode = 'N/A')
+        group by t.barcode,t.order_id,t.collect_stage_id,t.is_unpack,t.cmd_state,t.pack_no
+        UNION ALL
         select
-         t.merge_barcode,
-         0,
-         t.order_id,
-         NULL,
-         t.collect_stage_id,
-         1,
-         t.cmd_state,
-         '合箱',
-         1,
-         1,
-         NULL,
-         NULL,
-         0,
-         1,
-         (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id =
-         (SELECT T1.ITEM_ID FROM CMD_OUT T1 WHERE T1.MERGE_BARCODE=t.MERGE_BARCODE AND ROWNUM=1)),
-         'N/A'
-         from cmd_out t
-         WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 and t.order_id=#{order_id} and t.merge_barcode is not null and t.merge_barcode != 'N/A'
-         group by t.order_id,t.collect_stage_id,t.cmd_state,t.merge_barcode
+        t.merge_barcode,
+        0,
+        t.order_id,
+        NULL,
+        t.collect_stage_id,
+        1,
+        t.cmd_state,
+        '合箱',
+        1,
+        1,
+        NULL,
+        NULL,
+        0,
+        1,
+        (SELECT decode(t_sku.STOCK_ENV, 4, 1,0) FROM BAS_ITEM t_sku WHERE t_sku.Item_Id =
+        (SELECT T1.ITEM_ID FROM CMD_OUT T1 WHERE T1.MERGE_BARCODE=t.MERGE_BARCODE AND ROWNUM=1)),
+        'N/A'
+        from cmd_out t
+        WHERE t.IS_SHORT=0 AND t.QTY!=0 AND t.ORDER_TYPE!=6 and t.order_id=#{order_id} and t.merge_barcode is not null and t.merge_barcode != 'N/A'
+        group by t.order_id,t.collect_stage_id,t.cmd_state,t.merge_barcode
     </insert>
 
     <insert id="insert_order_load_details_cold">
         insert into order_load_details_cold
         (order_id,
-         customer_id,
-         item_id,
-         lot_id,
-         price,
-         qty,
-         pack_no,
-         is_unpack,
-         is_append,
-         barcode,
-         is_load_confirma
+        customer_id,
+        item_id,
+        lot_id,
+        price,
+        qty,
+        pack_no,
+        is_unpack,
+        is_append,
+        barcode,
+        is_load_confirma
         )
         select t.ORDER_ID, od.CUSTOMER_ID, t.ITEM_ID, t.LOT_ID, t.PRICE, t.qty, t.PACK_NO, t.IS_UNPACK, t.IS_APPEND, t.BARCODE, 0 from CMD_OUT t
         inner join ORDER_OUT od on od.ORDER_OUT_ID = t.ORDER_ID

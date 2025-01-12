@@ -19,9 +19,9 @@ public class BannerUtils {
 
     protected static void printConfig(Logger log, String title, Object logs) {
         String sb = "\n" + LINE_FIRST + "\n" +
-                "╠═════ " + StringUtils.trim(title) + " ═════\n" +
-                JacksonMapper.getInstance().toJsonPretty(logs) + "\n" +
-                LINE_LAST;
+            "╠═════ " + StringUtils.trim(title) + " ═════\n" +
+            JacksonMapper.getInstance().toJsonPretty(logs) + "\n" +
+            LINE_LAST;
         log.info(sb);
     }
 
@@ -31,9 +31,9 @@ public class BannerUtils {
             lines.add(LINE_START);
         }
         String sb = "\n" + LINE_FIRST + "\n" +
-                "╠═════ " + StringUtils.trim(title) + " ═════\n" +
-                StringUtils.join(lines, "\n") + "\n" +
-                LINE_LAST;
+            "╠═════ " + StringUtils.trim(title) + " ═════\n" +
+            StringUtils.join(lines, "\n") + "\n" +
+            LINE_LAST;
         log.info(sb);
     }
 }

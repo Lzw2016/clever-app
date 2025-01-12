@@ -16,7 +16,7 @@ public class StringToDateConverter implements TypeConverter {
             return false;
         }
         return ClassUtils.isAssignable(source.getClass(), String.class, true)
-                && ClassUtils.isAssignable(targetType, Date.class, true);
+            && ClassUtils.isAssignable(targetType, Date.class, true);
     }
 
     @Override

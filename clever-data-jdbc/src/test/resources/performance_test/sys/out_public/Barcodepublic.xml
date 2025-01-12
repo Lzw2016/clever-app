@@ -5,15 +5,15 @@
     <insert id="insert_cold">
         insert into cold_temp_data
         (
-            order_out_code,
-            barcode,
-            has_upload
+        order_out_code,
+        barcode,
+        has_upload
         )
         values
         (
-            #{order_out_code},
-            #{barcode},
-            0
+        #{order_out_code},
+        #{barcode},
+        0
         )
     </insert>
 
@@ -34,9 +34,9 @@
         left join order_wave ow on t_cmd.wave_id = ow.wave_id
         left join order_out t_o on t_o.order_out_id = t_cmd.order_id
         left join bas_area_transition t_area on t_cmd.area_id = t_area.from_area_id
-            and t_area.order_type in (2,3)
-            and t_area.target_area_id=t_loc.area_id
-            and t_area.wh_id = t_cmd.wh_id
+        and t_area.order_type in (2,3)
+        and t_area.target_area_id=t_loc.area_id
+        and t_area.wh_id = t_cmd.wh_id
         inner join bas_item bi on t_cmd.item_id = bi.item_id
         where t_cmd.pick_group = #{pick_group}
     </select>
@@ -48,21 +48,21 @@
     <insert id="insertConveyor">
         INSERT INTO
         WCS.WCS_TASK(
-                 SN,
-				 TASK_ID,
-				 BATCH_NO,
-				 PLAN_TARGET_NO,
-				 TASK_TYPE,
-				 RESERVED_FIELD1,
-				 RESERVED_FIELD2,
-				 RESERVED_FIELD3,
-				 RESERVED_FIELD4,
-				 RESERVED_FIELD5
-				 )
+        SN,
+        TASK_ID,
+        BATCH_NO,
+        PLAN_TARGET_NO,
+        TASK_TYPE,
+        RESERVED_FIELD1,
+        RESERVED_FIELD2,
+        RESERVED_FIELD3,
+        RESERVED_FIELD4,
+        RESERVED_FIELD5
+        )
         VALUES
         <foreach collection="wcsTaskArr" separator="," item="item" index="index">
             (#{item.SN}, #{item.TASK_ID}, #{item.BATCH_NO}, #{item.PLAN_TARGET_NO}, '1',
-             '', '', '', '', '')
+            '', '', '', '', '')
         </foreach>
     </insert>
 

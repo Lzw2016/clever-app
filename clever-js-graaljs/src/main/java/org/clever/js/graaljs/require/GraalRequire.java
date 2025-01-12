@@ -18,9 +18,9 @@ import org.graalvm.polyglot.Value;
 public class GraalRequire extends AbstractRequire<Context, Value> {
 
     public GraalRequire(
-            ScriptEngineContext<Context, Value> context,
-            Module<Value> currentModule,
-            Folder currentModuleFolder) {
+        ScriptEngineContext<Context, Value> context,
+        Module<Value> currentModule,
+        Folder currentModuleFolder) {
         super(context, currentModule, currentModuleFolder);
     }
 
@@ -36,31 +36,31 @@ public class GraalRequire extends AbstractRequire<Context, Value> {
 
     @Override
     protected AbstractRequire<Context, Value> newRequire(
-            ScriptEngineContext<Context, Value> engineContext,
-            Folder currentModuleFolder) {
+        ScriptEngineContext<Context, Value> engineContext,
+        Folder currentModuleFolder) {
         return new GraalRequire(engineContext, currentModuleFolder);
     }
 
     @Override
     protected Module<Value> newModule(
-            ScriptEngineContext<Context, Value> engineContext,
-            String id,
-            String filename,
-            Value exports,
-            Module<Value> parent,
-            Require<Value> require) {
+        ScriptEngineContext<Context, Value> engineContext,
+        String id,
+        String filename,
+        Value exports,
+        Module<Value> parent,
+        Require<Value> require) {
         return new GraalModule(engineContext, id, filename, exports, parent, require);
     }
 
     @Override
     protected void moduleFunctionCall(
-            Value function,
-            Value that,
-            Value exports,
-            Require<Value> require,
-            Value module,
-            String filename,
-            String dirname) {
+        Value function,
+        Value that,
+        Value exports,
+        Require<Value> require,
+        Value module,
+        String filename,
+        String dirname) {
         Assert.isTrue(function.canExecute(), "参数function必须是一个可执行函数ScriptObject");
         Context engine = engineContext.getEngine();
         try {

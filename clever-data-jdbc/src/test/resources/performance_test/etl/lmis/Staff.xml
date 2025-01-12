@@ -19,7 +19,7 @@
 
     <select id="queryAllRole">
         SELECT JIAOS_ID,
-               JIAOS_NAME
+        JIAOS_NAME
         FROM SYS_ROLE_LIST
     </select>
 

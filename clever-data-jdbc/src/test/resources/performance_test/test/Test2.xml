@@ -5,54 +5,54 @@
     <select id="queryExampleCustom">
         select customer_id
         from (select customer_id
-              from bas_customer
-              where custom_type = 2
-              order by dbms_random.random) a
+        from bas_customer
+        where custom_type = 2
+        order by dbms_random.random) a
         where rownum = 1
     </select>
 
     <select id="queryExamplePackLot">
         select tt.item_id,
-               item_code,
-               item_desc,
-               package_meas     uom_meas,
-               package_meas,
-               pi1.PACKAGE_MEAS primary_meas,
-               item_name,
-               manufacturer,
-               tt.package_id,
-               package_name,
-               tt.lot_id,
-               lot01,
-               lot02,
-               lot03,
-               stock_env,
-               0                price,
-               package_level,
-               is_unpack,
-               package_item_id,
-               qty,
-               qty              qty_uom,
-               quality
+        item_code,
+        item_desc,
+        package_meas uom_meas,
+        package_meas,
+        pi1.PACKAGE_MEAS primary_meas,
+        item_name,
+        manufacturer,
+        tt.package_id,
+        package_name,
+        tt.lot_id,
+        lot01,
+        lot02,
+        lot03,
+        stock_env,
+        0 price,
+        package_level,
+        is_unpack,
+        package_item_id,
+        qty,
+        qty qty_uom,
+        quality
         from (
-                 select lot_id,
-                        item_id,
-                        package_id,
-                        loc_id,
-                        lpn,
-                        quality,
-                        qty
-                 from inv_loc
-                 where IS_LOCK = 0
-                   and owner_id = #{ownerId}
-                   and wh_id = #{whId}
-                   and QTY > 0
-                 order by dbms_random.random
-             ) tt
-             inner join bas_item i on i.ITEM_ID = tt.ITEM_ID
-             inner join bas_package p on p.package_id = tt.package_id
-             inner join bas_package_items pi1 on pi1.package_id = tt.package_id and pi1.PACKAGE_LEVEL = 1
-             inner join BAS_LOT_ATT lot on lot.LOT_ID = tt.LOT_ID
+        select lot_id,
+        item_id,
+        package_id,
+        loc_id,
+        lpn,
+        quality,
+        qty
+        from inv_loc
+        where IS_LOCK = 0
+        and owner_id = #{ownerId}
+        and wh_id = #{whId}
+        and QTY > 0
+        order by dbms_random.random
+        ) tt
+        inner join bas_item i on i.ITEM_ID = tt.ITEM_ID
+        inner join bas_package p on p.package_id = tt.package_id
+        inner join bas_package_items pi1 on pi1.package_id = tt.package_id and pi1.PACKAGE_LEVEL = 1
+        inner join BAS_LOT_ATT lot on lot.LOT_ID = tt.LOT_ID
         where rownum &lt;= #{rownum}
     </select>
 

@@ -120,11 +120,11 @@ public class DefaultVerifyUserInfo implements VerifyUserInfo {
         // 获取当前用户并发登录数量
         final Date now = new Date();
         long concurrentLoginCount = SecurityDataSource.getQueryDSL().select(sysJwtToken)
-                .from(sysJwtToken)
-                .where(sysJwtToken.expiredTime.isNull().or(sysJwtToken.expiredTime.gt(DateUtils.toTimestamp(now))))
-                .where(sysJwtToken.disable.eq(EnumConstant.ENABLED_0))
-                .where(sysJwtToken.userId.eq(userInfo.getUserId()))
-                .fetchCount();
+            .from(sysJwtToken)
+            .where(sysJwtToken.expiredTime.isNull().or(sysJwtToken.expiredTime.gt(DateUtils.toTimestamp(now))))
+            .where(sysJwtToken.disable.eq(EnumConstant.ENABLED_0))
+            .where(sysJwtToken.userId.eq(userInfo.getUserId()))
+            .fetchCount();
         if (concurrentLoginCount >= loginConfig.getConcurrentLoginCount()) {
             throw new ConcurrentLoginException("当前用户并发登录次数达到上限");
         }

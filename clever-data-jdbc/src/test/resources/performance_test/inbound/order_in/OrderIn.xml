@@ -3,9 +3,9 @@
 <mapper namespace="OrderIn">
     <select id="queryAsnDetailsByCom">
         select
-            a.item_id, a.package_id, b.owner_id, b.supplier_id,
-            b.asn_in_code,a.qty,a.asn_in_id,a.asn_line_no,a.order_qty,
-            b.order_type, b.order_biz_type, b.business_code , a.business_code_line
+        a.item_id, a.package_id, b.owner_id, b.supplier_id,
+        b.asn_in_code,a.qty,a.asn_in_id,a.asn_line_no,a.order_qty,
+        b.order_type, b.order_biz_type, b.business_code , a.business_code_line
         from asn_in_details a
         inner join asn_in b on a.asn_in_id = b.asn_in_id
         <where>
@@ -27,7 +27,7 @@
         select a.qty, nvl(a.order_qty, 0) as order_qty
         from asn_in_details a
         where a.asn_in_id = #{asn_in_id}
-          and a.asn_line_no = #{asn_line_no}
+        and a.asn_line_no = #{asn_line_no}
     </select>
 
     <select id="queryMinStatusAsnDetails">
@@ -65,7 +65,7 @@
             </foreach>
         </where>
     </select>
-    
+
     <select id="queryItemLot">
         select item_id, lot01, lot02, lot03 from bas_lot_att
         <where>
@@ -79,20 +79,20 @@
 
     <select id="queryMaxLineNo">
         select * from (
-            select order_in_id, order_in_code, max(order_line_no) as line_no from (
-                select t.order_in_id, t1.order_in_code, t.order_line_no from order_in_details t
-                inner join order_in t1 on t.order_in_id = t1.order_in_id
-                where t.asn_in_id = #{asn_in_id} and t1.order_staff_id = #{user_id}
-            ) group by order_in_id, order_in_code order by order_in_id desc
+        select order_in_id, order_in_code, max(order_line_no) as line_no from (
+        select t.order_in_id, t1.order_in_code, t.order_line_no from order_in_details t
+        inner join order_in t1 on t.order_in_id = t1.order_in_id
+        where t.asn_in_id = #{asn_in_id} and t1.order_staff_id = #{user_id}
+        ) group by order_in_id, order_in_code order by order_in_id desc
         ) where rownum = 1
     </select>
 
     <select id="orderInRejectEnd">
         select order_id from (
-            select
-                ci.order_id,
-                decode(count(1), count(decode(ci.quality_flg, 88, 1, decode(ci.qty, 0, 1, NULL))), 1, 0) flg
-            from cmd_in ci group by ci.order_id
+        select
+        ci.order_id,
+        decode(count(1), count(decode(ci.quality_flg, 88, 1, decode(ci.qty, 0, 1, NULL))), 1, 0) flg
+        from cmd_in ci group by ci.order_id
         ) t where t.flg > 0
     </select>
 

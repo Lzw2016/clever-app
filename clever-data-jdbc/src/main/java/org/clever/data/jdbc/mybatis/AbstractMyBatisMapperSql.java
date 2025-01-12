@@ -30,13 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
     private static final AtomicInteger EXECUTOR_COUNT = new AtomicInteger(0);
     private static final ThreadPoolExecutor LOAD_XML_EXECUTOR = new ThreadPoolExecutor(
-            2, 8, 60, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(16),
-            new BasicThreadFactory.Builder()
-                    .namingPattern("load-mybatis-%d")
-                    .daemon(true)
-                    .build(),
-            new ThreadPoolExecutor.CallerRunsPolicy()
+        2, 8, 60, TimeUnit.SECONDS,
+        new ArrayBlockingQueue<>(16),
+        new BasicThreadFactory.Builder()
+            .namingPattern("load-mybatis-%d")
+            .daemon(true)
+            .build(),
+        new ThreadPoolExecutor.CallerRunsPolicy()
     );
     protected final Logger log = LoggerFactory.getLogger(getClass());
     /**
@@ -330,10 +330,10 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
             if (e.getCause() instanceof SAXParseException) {
                 SAXParseException saxParseException = (SAXParseException) e.getCause();
                 String error = String.format(
-                        "#第%d行，第%d列存在错误: %s",
-                        saxParseException.getLineNumber(),
-                        saxParseException.getColumnNumber(),
-                        saxParseException.getMessage()
+                    "#第%d行，第%d列存在错误: %s",
+                    saxParseException.getLineNumber(),
+                    saxParseException.getColumnNumber(),
+                    saxParseException.getMessage()
                 );
                 log.error("# 解析sql.xml文件失败 | error={}", error);
             }

@@ -35,9 +35,9 @@
     <select id="queryAllLocGroup">
         -- 逻辑区域维护表
         SELECT kub,
-               ljqy,
-               beiz,
-               house_id
+        ljqy,
+        beiz,
+        house_id
         FROM jc_ljqywh t
     </select>
 

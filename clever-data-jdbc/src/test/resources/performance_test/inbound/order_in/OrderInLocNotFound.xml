@@ -3,9 +3,9 @@
 <mapper namespace="OrderInLocNotFound">
     <select id="queryList">
         select
-            a.item_id,a.item_code
+        a.item_id,a.item_code
         from bas_item a
         where
-            a.ITEM_ID in (${itemIdList})
+        a.ITEM_ID in (${itemIdList})
     </select>
 </mapper>

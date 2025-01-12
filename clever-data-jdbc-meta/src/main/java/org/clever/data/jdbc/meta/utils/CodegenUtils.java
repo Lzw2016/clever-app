@@ -203,8 +203,8 @@ public class CodegenUtils {
         List<Column> columns = table.getColumns();
         for (Column column : columns) {
             DbColumnMetaData columnMetaData = columnsMetaData.stream()
-                    .filter(meta -> column.getName().equalsIgnoreCase(meta.getColumnName()))
-                    .findFirst().orElse(null);
+                .filter(meta -> column.getName().equalsIgnoreCase(meta.getColumnName()))
+                .findFirst().orElse(null);
             EntityPropertyModel property = new EntityPropertyModel();
             if (columnMetaData == null) {
                 throw new UnsupportedOperationException("不能获取 DbColumnMetaData，字段名: " + column.getName());
@@ -239,9 +239,9 @@ public class CodegenUtils {
 
     private static List<CodegenHandler> getCodegenHandlerByScope(CodegenCodeConfig config, TemplateScope scope) {
         return config.getCodegenTypes().stream()
-                .map(CodegenUtils::getCodegenHandler)
-                .filter(handler -> Objects.equals(scope, handler.getScope()))
-                .collect(Collectors.toList());
+            .map(CodegenUtils::getCodegenHandler)
+            .filter(handler -> Objects.equals(scope, handler.getScope()))
+            .collect(Collectors.toList());
     }
 
     /**

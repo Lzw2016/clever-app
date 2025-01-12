@@ -36,8 +36,8 @@ public class FieldError {
             return new ArrayList<>();
         }
         return errors.stream().filter(Objects::nonNull)
-                .map(error -> error.message)
-                .collect(Collectors.toList());
+            .map(error -> error.message)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -56,8 +56,8 @@ public class FieldError {
         }
         final String tmp = separator == null ? ": " : separator;
         return errors.stream().filter(Objects::nonNull)
-                .map(error -> error.filed + tmp + error.message)
-                .collect(Collectors.toList());
+            .map(error -> error.filed + tmp + error.message)
+            .collect(Collectors.toList());
     }
 
     /**

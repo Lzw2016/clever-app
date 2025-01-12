@@ -37,7 +37,7 @@ public class MultiExceptionWrapper extends RuntimeException {
         }
         return msg;
     }
-    
+
     protected Throwable[] getAllErrs(Throwable[] errs) {
         List<Throwable> errList = new ArrayList<>(errs == null ? 0 : errs.length);
         if (errs != null) {

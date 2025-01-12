@@ -22,7 +22,7 @@
         a.update_at,
         nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
         nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
-        FROM bas_ice_forcer a inner  join bas_wh_owner bwo on a.wh_id = bwo.wh_id
+        FROM bas_ice_forcer a inner join bas_wh_owner bwo on a.wh_id = bwo.wh_id
         where 1 = 1
         <if test="forcer_no!= null and forcer_no != '' and forcer_no != 'N/A'">
             AND a.forcer_no = #{forcer_no} AND a.forcer_no != 'N/A'

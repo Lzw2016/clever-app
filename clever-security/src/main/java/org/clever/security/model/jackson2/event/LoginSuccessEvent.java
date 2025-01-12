@@ -57,13 +57,13 @@ public class LoginSuccessEvent implements Serializable {
     private Date rtExpiredTime;
 
     public LoginSuccessEvent(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            LoginConfig loginConfig,
-            AbstractLoginReq loginData,
-            UserInfo userInfo,
-            String jwtToken,
-            Claims claims) {
+        HttpServletRequest request,
+        HttpServletResponse response,
+        LoginConfig loginConfig,
+        AbstractLoginReq loginData,
+        UserInfo userInfo,
+        String jwtToken,
+        Claims claims) {
         this.request = request;
         this.response = response;
         this.loginConfig = loginConfig;

@@ -39,63 +39,63 @@
     <!--冷藏品装箱查询(明细)-->
     <select id="queryColdPackDetails" resultType="map">
         SELECT t_lcp.barcode,
-               t_hz.order_load_id,
-               t_hz.order_load_code,
-               t_dw.customer_code,
-               t_dw.customer_name,
-               t_sp.item_code,
-               t_sp.item_name,
-               t_sp.item_specification,
-               t_sp.remark,
-               t_sp.manufacturer,
-               t_lcp.lot_id,
-               t_lot.lot01,
-               SUM(t_lcp.qty)qty,
-               t_lcp.price,
-               SUM(t_lcp.qty * t_lcp.price) amount,
-               t_lcp.pack_no,
-               t_lcp.cold_box_no,
-               t_lcp.ice_chops_message,
-               t_lcp.item_id,
-               t_lcp.order_id
+        t_hz.order_load_id,
+        t_hz.order_load_code,
+        t_dw.customer_code,
+        t_dw.customer_name,
+        t_sp.item_code,
+        t_sp.item_name,
+        t_sp.item_specification,
+        t_sp.remark,
+        t_sp.manufacturer,
+        t_lcp.lot_id,
+        t_lot.lot01,
+        SUM(t_lcp.qty)qty,
+        t_lcp.price,
+        SUM(t_lcp.qty * t_lcp.price) amount,
+        t_lcp.pack_no,
+        t_lcp.cold_box_no,
+        t_lcp.ice_chops_message,
+        t_lcp.item_id,
+        t_lcp.order_id
         FROM order_load_details t_mx
-             INNER JOIN order_load_details_cold t_lcp ON t_mx.bill_id = t_lcp.order_id
-             INNER JOIN order_load t_hz ON t_mx.order_load_id = t_hz.order_load_id
-             INNER JOIN bas_item t_sp ON t_lcp.item_id = t_sp.item_id
-             INNER JOIN bas_customer t_dw ON t_lcp.customer_id = t_dw.customer_id
-             INNER JOIN bas_lot_att t_lot ON t_lcp.lot_id = t_lot.lot_id
+        INNER JOIN order_load_details_cold t_lcp ON t_mx.bill_id = t_lcp.order_id
+        INNER JOIN order_load t_hz ON t_mx.order_load_id = t_hz.order_load_id
+        INNER JOIN bas_item t_sp ON t_lcp.item_id = t_sp.item_id
+        INNER JOIN bas_customer t_dw ON t_lcp.customer_id = t_dw.customer_id
+        INNER JOIN bas_lot_att t_lot ON t_lcp.lot_id = t_lot.lot_id
         GROUP BY t_hz.order_load_code,
-                 t_hz.order_load_id,
-                 t_dw.customer_code,
-                 t_dw.customer_name,
-                 t_mx.order_load_id,
-                 t_lcp.pack_no,
-                 t_lcp.cold_box_no,
-                 t_lcp.ice_chops_message,
-                 t_sp.item_code,
-                 t_sp.item_name,
-                 t_sp.item_specification,
-                 t_sp.remark,
-                 t_sp.manufacturer,
-                 t_lcp.lot_id,
-                 t_lot.lot01,
-                 t_lcp.price,
-                 t_lcp.barcode,
-                 t_mx.load_sequence,
-                 t_lcp.item_id,
-                 t_lcp.order_id
+        t_hz.order_load_id,
+        t_dw.customer_code,
+        t_dw.customer_name,
+        t_mx.order_load_id,
+        t_lcp.pack_no,
+        t_lcp.cold_box_no,
+        t_lcp.ice_chops_message,
+        t_sp.item_code,
+        t_sp.item_name,
+        t_sp.item_specification,
+        t_sp.remark,
+        t_sp.manufacturer,
+        t_lcp.lot_id,
+        t_lot.lot01,
+        t_lcp.price,
+        t_lcp.barcode,
+        t_mx.load_sequence,
+        t_lcp.item_id,
+        t_lcp.order_id
         ORDER BY t_mx.load_sequence ASC,
-                 t_lcp.pack_no ASC
+        t_lcp.pack_no ASC
     </select>
     <!--标识查询-->
     <select id="queryIs" resultType="map">
         SELECT T.is_cold_print,
-               T.is_pack_review,
-               T.order_load_id,
-               T.order_load_code
+        T.is_pack_review,
+        T.order_load_id,
+        T.order_load_code
         FROM order_load T
         WHERE T.wh_id = #{wh_id}
-          AND T.order_load_id = #{order_load_id}
+        AND T.order_load_id = #{order_load_id}
     </select>
     <!--查询冷藏箱号-->
     <select id="queryColdBoxNo" resultType="map">
@@ -108,8 +108,8 @@
         SELECT BIANHAO 冷藏箱号
         FROM JC_RQZLB
         WHERE RONGQ_TYPE = '5'
-          AND RONGQ_STATE = '0'
-          AND HOUSE_ID = #{HOUSE_ID} ${@com.yvan.Sql@phrase('AND', 'BIANHAO like')}
+        AND RONGQ_STATE = '0'
+        AND HOUSE_ID = #{HOUSE_ID} ${@com.yvan.Sql@phrase('AND', 'BIANHAO like')}
         ORDER BY BIANHAO ASC
     </select>
 
@@ -118,11 +118,11 @@
         SELECT JC_ZHIYDOC.ZHIY_NAME, JC_ZHIYDOC.ZHIY_ID
         FROM JC_ZHIYDOC, jc_ckzydz t
         WHERE SHEBDL_NAME = #{SHEBDL_NAME}
-          AND JC_ZHIYDOC.Zhiy_Id = t.zhiy_id
-          AND t.house_id = #{HOUSE_ID}
-          AND BEACTIVE = 'Y'
-          AND (PKG_TMS_PUB.F_GANGWEI_CHK(#{HOUSE_ID}, JC_ZHIYDOC.zhiy_id, '装车复核员') = 'Y' OR
-               PKG_TMS_PUB.F_GANGWEI_CHK(#{HOUSE_ID}, JC_ZHIYDOC.zhiy_id, '配送员') = 'Y')
+        AND JC_ZHIYDOC.Zhiy_Id = t.zhiy_id
+        AND t.house_id = #{HOUSE_ID}
+        AND BEACTIVE = 'Y'
+        AND (PKG_TMS_PUB.F_GANGWEI_CHK(#{HOUSE_ID}, JC_ZHIYDOC.zhiy_id, '装车复核员') = 'Y' OR
+        PKG_TMS_PUB.F_GANGWEI_CHK(#{HOUSE_ID}, JC_ZHIYDOC.zhiy_id, '配送员') = 'Y')
     </select>
 
     <!--修改冷藏品打印标识-->
@@ -130,6 +130,6 @@
         UPDATE ORDER_LOAD
         SET IS_COLD_PRINT = #{flg}
         WHERE ORDER_LOAD_ID = #{order_load_id}
-          AND IS_COLD_PRINT = DECODE(#{flg}, 1, 0, 1)
+        AND IS_COLD_PRINT = DECODE(#{flg}, 1, 0, 1)
     </update>
 </mapper>

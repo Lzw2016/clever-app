@@ -3,17 +3,17 @@
 <mapper namespace="Staff">
     <select id="getAllHwxd">
         select shangp_id,
-               xuhao,
-               kub,
-               luoj_area,
-               hwxd_type,
-               yez_id,
-               house_id
+        xuhao,
+        kub,
+        luoj_area,
+        hwxd_type,
+        yez_id,
+        house_id
         from JC_SPHWXD_MX t
---      where rownum &lt;  1000
---         where SHANGP_ID in (
---                             'SPH00099773', 'SPH00002183', 'SPH00032041'
---             )
+        -- where rownum &lt; 1000
+        -- where SHANGP_ID in (
+        -- 'SPH00099773', 'SPH00002183', 'SPH00032041'
+        -- )
         order by shangp_id, kub, xuhao
     </select>
 </mapper>

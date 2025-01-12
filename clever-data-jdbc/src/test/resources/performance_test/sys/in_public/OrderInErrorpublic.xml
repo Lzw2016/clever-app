@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="OrderInPut">
-    
+
     <update id="backAsnQty">
         update asn_in_details set order_qty = order_qty - #{updateQty}
         where asn_in_id = #{asnInId} and asn_line_no = #{asnLineNo} and order_qty - #{updateQty} >= 0
@@ -14,11 +14,11 @@
 
     <select id="getAsnEndStatus">
         select
-            ai.multiple_receive,
-            (
-                select decode(count(1), count(decode(qty, order_qty, 1, NULL)), 1, 0) from asn_in_details aid
-                where aid.asn_in_id = ai.asn_in_id and aid.qty = aid.order_qty
-            ) as asn_end
+        ai.multiple_receive,
+        (
+        select decode(count(1), count(decode(qty, order_qty, 1, NULL)), 1, 0) from asn_in_details aid
+        where aid.asn_in_id = ai.asn_in_id and aid.qty = aid.order_qty
+        ) as asn_end
         from asn_in ai
         where ai.asn_in_id = #{asn_in_id}
     </select>

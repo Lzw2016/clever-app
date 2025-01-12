@@ -29,9 +29,9 @@ public class BatchJobLogListener implements JobListener {
 
     public BatchJobLogListener() {
         scheduled = new ScheduledThreadPoolExecutor(
-                1,
-                new BasicThreadFactory.Builder().namingPattern("task-log-pool-%d").daemon(true).build(),
-                new ThreadPoolExecutor.CallerRunsPolicy()
+            1,
+            new BasicThreadFactory.Builder().namingPattern("task-log-pool-%d").daemon(true).build(),
+            new ThreadPoolExecutor.CallerRunsPolicy()
         );
         scheduled.scheduleAtFixedRate(this::batchSaveLog, 100, GlobalConstant.SAVE_LOG_INTERVAL, TimeUnit.MILLISECONDS);
         AppShutdownHook.addShutdownHook(this::stop, OrderIncrement.NORMAL + 100, "停止定时任务Job日志记录");

@@ -79,10 +79,10 @@ public class DefaultLoginFailureHandler implements LoginFailureHandler {
         }
         final Date now = new Date();
         SysLoginFailedCount loginFailedCount = queryDSL.selectFrom(sysLoginFailedCount)
-                .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
-                .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
-                .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
-                .fetchFirst();
+            .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
+            .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
+            .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
+            .fetchFirst();
         int failedCount = 1;
         if (loginFailedCount == null) {
             // 新增数据
@@ -99,11 +99,11 @@ public class DefaultLoginFailureHandler implements LoginFailureHandler {
         } else {
             // 更新数据
             queryDSL.update(sysLoginFailedCount).
-                    set(sysLoginFailedCount.failedCount, sysLoginFailedCount.failedCount.add(1))
-                    .set(sysLoginFailedCount.lastLoginTime, now)
-                    .set(sysLoginFailedCount.updateAt, now)
-                    .where(sysLoginFailedCount.id.eq(loginFailedCount.getId()))
-                    .execute();
+                set(sysLoginFailedCount.failedCount, sysLoginFailedCount.failedCount.add(1))
+                .set(sysLoginFailedCount.lastLoginTime, now)
+                .set(sysLoginFailedCount.updateAt, now)
+                .where(sysLoginFailedCount.id.eq(loginFailedCount.getId()))
+                .execute();
             failedCount = loginFailedCount.getFailedCount() + 1;
         }
         log.debug("### 增加用户连续登录失败次数: {} | userId=[{}]", failedCount, userInfo.getUserId());

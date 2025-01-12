@@ -85,16 +85,16 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
     public final HttpRespondHandler httpRespondHandler;
 
     public LoginFilter(
-            SecurityConfig securityConfig,
-            List<LoginDataCollect> loginDataCollectList,
-            List<VerifyLoginData> verifyLoginDataList,
-            List<LoadUser> loadUserList,
-            List<VerifyUserInfo> verifyUserInfoList,
-            List<AddJwtTokenExtData> addJwtTokenExtDataList,
-            List<LoginSuccessHandler> loginSuccessHandlerList,
-            List<LoginFailureHandler> loginFailureHandlerList,
-            SecurityContextRepository securityContextRepository,
-            HttpRespondHandler httpRespondHandler) {
+        SecurityConfig securityConfig,
+        List<LoginDataCollect> loginDataCollectList,
+        List<VerifyLoginData> verifyLoginDataList,
+        List<LoadUser> loadUserList,
+        List<VerifyUserInfo> verifyUserInfoList,
+        List<AddJwtTokenExtData> addJwtTokenExtDataList,
+        List<LoginSuccessHandler> loginSuccessHandlerList,
+        List<LoginFailureHandler> loginFailureHandlerList,
+        SecurityContextRepository securityContextRepository,
+        HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
         Assert.notEmpty(loginDataCollectList, "登录数据收集器(LoginDataCollect)不存在");
         Assert.notEmpty(verifyLoginDataList, "用户登录验证器(VerifyLoginData)不存在");
@@ -289,13 +289,13 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         LoginSuccessEvent loginSuccessEvent = new LoginSuccessEvent(
-                context.getRequest(),
-                context.getResponse(),
-                securityConfig.getLogin(),
-                context.getLoginData(),
-                context.getUserInfo(),
-                context.getJwtToken(),
-                context.getClaims()
+            context.getRequest(),
+            context.getResponse(),
+            securityConfig.getLogin(),
+            context.getLoginData(),
+            context.getUserInfo(),
+            context.getJwtToken(),
+            context.getClaims()
         );
         if (StringUtils.isNotBlank(context.getRefreshToken())) {
             loginSuccessEvent.setRefreshToken(context.getRefreshToken());
@@ -314,11 +314,11 @@ public class LoginFilter implements FilterRegistrar.FilterFuc {
             return;
         }
         LoginFailureEvent loginFailureEvent = new LoginFailureEvent(
-                context.getRequest(),
-                context.getResponse(),
-                context.getLoginData(),
-                context.getUserInfo(),
-                context.getLoginException()
+            context.getRequest(),
+            context.getResponse(),
+            context.getLoginData(),
+            context.getUserInfo(),
+            context.getLoginException()
         );
         for (LoginFailureHandler handler : loginFailureHandlerList) {
             handler.onLoginFailure(context.getRequest(), context.getResponse(), loginFailureEvent);

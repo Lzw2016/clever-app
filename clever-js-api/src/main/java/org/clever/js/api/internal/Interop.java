@@ -23,11 +23,11 @@ import java.util.*;
  */
 public abstract class Interop<T> {
     private static final String[] DATE_PATTERNS = {
-            "yyyy-MM-dd HH:mm:ss",
-            "yyyy-MM-dd HH:mm:ss.SSS",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-            "EEE MMM dd HH:mm:ss zzz yyyy",
-            "yyyy-MM-dd", "HH:mm:ss",
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd HH:mm:ss.SSS",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "EEE MMM dd HH:mm:ss zzz yyyy",
+        "yyyy-MM-dd", "HH:mm:ss",
     };
 
     protected Interop() {

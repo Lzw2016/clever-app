@@ -130,18 +130,18 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         Assert.notNull(loginData, "loginData不能为null");
         Assert.notNull(userInfo, "userInfo不能为null");
         SysLoginFailedCount loginFailedCount = queryDSL.selectFrom(sysLoginFailedCount)
+            .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
+            .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
+            .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
+            .fetchOne();
+        if (loginFailedCount != null) {
+            SecurityDataSource.getQueryDSL().update(sysLoginFailedCount)
+                .set(sysLoginFailedCount.deleteFlag, EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_1)
+                .set(sysLoginFailedCount.updateAt, new Date())
                 .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
                 .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
                 .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
-                .fetchOne();
-        if (loginFailedCount != null) {
-            SecurityDataSource.getQueryDSL().update(sysLoginFailedCount)
-                    .set(sysLoginFailedCount.deleteFlag, EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_1)
-                    .set(sysLoginFailedCount.updateAt, new Date())
-                    .where(sysLoginFailedCount.deleteFlag.eq(EnumConstant.LOGIN_FAILED_COUNT_DELETE_FLAG_0))
-                    .where(sysLoginFailedCount.userId.eq(userInfo.getUserId()))
-                    .where(sysLoginFailedCount.loginType.eq(loginData.getLoginType()))
-                    .execute();
+                .execute();
             log.debug("### 清除用户连续登录失败次数: {} | userId=[{}]", loginFailedCount.getFailedCount(), loginFailedCount.getUserId());
         }
     }
@@ -162,35 +162,35 @@ public class DefaultLoginSuccessHandler implements LoginSuccessHandler {
         if (loginConfig.isAllowAfterLogin()) {
             // 获取当前用户并发登录数量
             long realConcurrentLoginCount = queryDSL.selectFrom(sysJwtToken)
-                    .where(sysJwtToken.userId.eq(userInfo.getUserId()))
-                    .where(sysJwtToken.disable.eq(EnumConstant.DISABLE_0))
-                    .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(now)))
-                    .fetchCount();
+                .where(sysJwtToken.userId.eq(userInfo.getUserId()))
+                .where(sysJwtToken.disable.eq(EnumConstant.DISABLE_0))
+                .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(now)))
+                .fetchCount();
             long disableCount = realConcurrentLoginCount - loginConfig.getConcurrentLoginCount();
             if (disableCount >= 1) {
                 // 挤下最早登录的用户
                 List<SysJwtToken> jwtTokenList = queryDSL.selectFrom(sysJwtToken)
-                        .where(sysJwtToken.userId.eq(userInfo.getUserId()))
-                        .where(sysJwtToken.disable.eq(EnumConstant.DISABLE_0))
-                        .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(now)))
-                        .orderBy(sysJwtToken.createAt.asc())
-                        .limit(disableCount)
-                        .fetch();
+                    .where(sysJwtToken.userId.eq(userInfo.getUserId()))
+                    .where(sysJwtToken.disable.eq(EnumConstant.DISABLE_0))
+                    .where(sysJwtToken.expiredTime.isNotNull().and(sysJwtToken.expiredTime.gt(now)))
+                    .orderBy(sysJwtToken.createAt.asc())
+                    .limit(disableCount)
+                    .fetch();
                 if (jwtTokenList != null && !jwtTokenList.isEmpty()) {
                     disableCount = queryDSL.update(sysJwtToken)
-                            .set(sysJwtToken.disable, EnumConstant.DISABLE_1)
-                            .set(sysJwtToken.disableReason, EnumConstant.JWT_TOKEN_DISABLE_REASON_2)
-                            .set(sysJwtToken.updateAt, now)
-                            .where(sysJwtToken.id.in(jwtTokenList.stream().map(SysJwtToken::getId).collect(Collectors.toSet())))
-                            .execute();
+                        .set(sysJwtToken.disable, EnumConstant.DISABLE_1)
+                        .set(sysJwtToken.disableReason, EnumConstant.JWT_TOKEN_DISABLE_REASON_2)
+                        .set(sysJwtToken.updateAt, now)
+                        .where(sysJwtToken.id.in(jwtTokenList.stream().map(SysJwtToken::getId).collect(Collectors.toSet())))
+                        .execute();
                     if (dataSource.isEnableRedis()) {
                         List<String> keys = jwtTokenList.stream()
-                                .map(token -> SecurityRedisKey.getTokenKey(
-                                        dataSource.getRedisNamespace(),
-                                        Conv.asString(userInfo.getUserId()),
-                                        Conv.asString(token.getId())
-                                )).collect(Collectors.toList());
-                        keys.forEach(key-> redis.kExpire(key, Redis.DEL_TIME_OUT));
+                            .map(token -> SecurityRedisKey.getTokenKey(
+                                dataSource.getRedisNamespace(),
+                                Conv.asString(userInfo.getUserId()),
+                                Conv.asString(token.getId())
+                            )).collect(Collectors.toList());
+                        keys.forEach(key -> redis.kExpire(key, Redis.DEL_TIME_OUT));
                     }
                     log.debug("### 挤下最早登录的用户 -> userId={} | disableCount={}", userInfo.getUserId(), disableCount);
                 }

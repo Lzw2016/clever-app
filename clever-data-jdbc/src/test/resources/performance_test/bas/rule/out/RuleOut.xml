@@ -12,12 +12,12 @@
 
     <select id="queryAllRuleOut">
         select t.rule_out_id,
-               t.wh_id,
-               t.name,
-               t.create_at,
-               t.create_by,
-               t.update_at,
-               t.update_by
+        t.wh_id,
+        t.name,
+        t.create_at,
+        t.create_by,
+        t.update_at,
+        t.update_by
         from rule_out t
         --@ where t.name like #{name}
     </select>

@@ -4,21 +4,21 @@
 
     <select id="queryAllRuleOutItem">
         select t.rule_item_id,
-               t.rule_out_id,
-               t.rule_order,
-               t.rule_name,
-               t.order_type,
-               t.order_biz_type,
-               t.pack_level,
-               t.target_pack_level,
-               t.quality,
-               t.loc_expr,
-               t.stock_match_mode,
-               t.is_enable,
-               t.create_at,
-               t.update_at,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        t.rule_out_id,
+        t.rule_order,
+        t.rule_name,
+        t.order_type,
+        t.order_biz_type,
+        t.pack_level,
+        t.target_pack_level,
+        t.quality,
+        t.loc_expr,
+        t.stock_match_mode,
+        t.is_enable,
+        t.create_at,
+        t.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
         from rule_out_items t
         where t.is_enable = 1
         --@ AND t.rule_item_id = #{rule_item_id}

@@ -79,17 +79,17 @@ public class MapRowMapper extends ColumnMapRowMapper {
             obj = clob.getSubString(1, (int) clob.length());
         } else if ("oracle.sql.TIMESTAMP".equals(className)
             || "oracle.sql.TIMESTAMPTZ".equals(className)
-            || "oracle.sql.TIMESTAMPLTZ".equals(className)) { // ------------------------------------------------------------------ java.sql.Timestamp
+            || "oracle.sql.TIMESTAMPLTZ".equals(className)) { // --------------------------------------------------------------------------- java.sql.Timestamp
             obj = rs.getTimestamp(index);
         } else if (className.startsWith("oracle.sql.DATE")) {
             String metaDataClassName = rs.getMetaData().getColumnClassName(index);
-            if ("java.sql.Timestamp".equals(metaDataClassName) || "oracle.sql.TIMESTAMP".equals(metaDataClassName)) { // -------------- java.sql.Timestamp
+            if ("java.sql.Timestamp".equals(metaDataClassName) || "oracle.sql.TIMESTAMP".equals(metaDataClassName)) { // ------------------- java.sql.Timestamp
                 obj = rs.getTimestamp(index);
-            } else { // --------------------------------------------------------------------------------------------------------------- java.util.Date
+            } else { // -------------------------------------------------------------------------------------------------------------------- java.util.Date
                 java.sql.Date date = rs.getDate(index);
                 obj = date == null ? null : new java.util.Date(date.getTime());
             }
-        } else if (obj instanceof java.sql.Date) { // --------------------------------------------------------------------------------- java.util.Date
+        } else if (obj instanceof java.sql.Date) { // -------------------------------------------------------------------------------------- java.util.Date
             if ("java.sql.Timestamp".equals(rs.getMetaData().getColumnClassName(index))) {
                 obj = rs.getTimestamp(index);
             }

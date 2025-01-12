@@ -6,13 +6,13 @@
         SELECT *
         FROM cmd_out_job
         WHERE wh_id = wh_id
-          and cmd_job_type = cmd_job_type
-          and pick_group = pick_group
-          and area_id = area_id
-          and order_id = order_id
-          and cmd_line_no = cmd_line_no
-          and order_type = order_type
-          and order_biz_type = order_biz_type
+        and cmd_job_type = cmd_job_type
+        and pick_group = pick_group
+        and area_id = area_id
+        and order_id = order_id
+        and cmd_line_no = cmd_line_no
+        and order_type = order_type
+        and order_biz_type = order_biz_type
     </insert>
     <select id="get_cmd_job" resultType="map">
         SELECT *
@@ -29,72 +29,72 @@
     <update id="upcmd_job">
         update cmd_out_job
         set is_complete = #{is_complete},
-            create_at   = now()
+        create_at = now()
         where cmd_job_id = #{cmd_job_id}
     </update>
 
     <select id="get_bill_state" resultType="map">
         SELECT order_id, item_id, status
         FROM (SELECT DISTINCT order_id,
-                              item_id,
-                              CASE
-                                  WHEN cmd_state IN (40, 50, 70)
-                                      THEN (SELECT CASE MIN(cmd_state)
-                                                       --拣货索取
-                                                       WHEN 40 THEN 110
-                                                       --拣货索取
-                                                       WHEN 50 THEN 110
-                                                       --内复核索取
-                                                       WHEN 70 THEN 130
-                                                       ELSE 0 END
-                                            FROM cmd_out
-                                            WHERE cmd_state IN (40, 50, 70)
-                                              AND order_type IN (2, 6)
-                                              AND is_short = 0
-                                              AND item_id = T.item_id
-                                              AND order_id = T.order_id)
-                                  WHEN cmd_state IN (60, 90, 1000)
-                                      THEN
-                                      CASE
-                                          WHEN (SELECT COUNT(*)
-                                                FROM cmd_out T_ZL
-                                                WHERE T_ZL.order_id = T.order_id
-                                                  AND T_ZL.item_id = T.item_id
-                                                  AND EXISTS(SELECT 'X'
-                                                             FROM (SELECT order_id, item_id, MIN(cmd_state) cmd_state
-                                                                   FROM cmd_out T2
-                                                                   WHERE T2.cmd_state IN (60, 90, 1000)
-                                                                     AND T2.order_type IN (2, 6)
-                                                                     AND T2.is_short = 0
-                                                                   GROUP BY T2.order_id, T2.item_id) T3
-                                                             WHERE T3.order_id = T_ZL.order_id
-                                                               AND T3.item_id = T_ZL.item_id
-                                                               AND T3.cmd_state > T_ZL.cmd_state)
-                                                  AND T_ZL.cmd_state >= 10
-                                                  AND order_type IN (2, 6)
-                                                  AND T_ZL.is_short = 0) = 0
-                                              THEN
-                                              CASE (SELECT MIN(cmd_state)
-                                                    FROM cmd_out
-                                                    WHERE item_id = T.item_id
-                                                      AND order_id = T.order_id
-                                                      AND cmd_state IN (60, 90, 1000)
-                                                      AND order_type IN (2, 6)
-                                                      AND is_short = 0)
-                                                  --拣货确认
-                                                  WHEN 60 THEN 120
-                                                  --内复核确认
-                                                  WHEN 90 THEN 140
-                                                  --作业终止
-                                                  WHEN 1000 THEN 1000
-                                                  ELSE 0 END
-                                          ELSE 0 END
-                                  ELSE 0 END status
-              FROM cmd_out T
-              WHERE ((EXISTS(SELECT 'X' FROM cmd_out t1 WHERE t1.cmd_id = T.cmd_id_super AND t1.order_type = 2) AND
-                      order_type = 6) or T.order_type = 2)
-                --@ AND area_id = #{area_id}
-                AND pick_group = #{pick_group}) A
+        item_id,
+        CASE
+        WHEN cmd_state IN (40, 50, 70)
+        THEN (SELECT CASE MIN(cmd_state)
+        --拣货索取
+        WHEN 40 THEN 110
+        --拣货索取
+        WHEN 50 THEN 110
+        --内复核索取
+        WHEN 70 THEN 130
+        ELSE 0 END
+        FROM cmd_out
+        WHERE cmd_state IN (40, 50, 70)
+        AND order_type IN (2, 6)
+        AND is_short = 0
+        AND item_id = T.item_id
+        AND order_id = T.order_id)
+        WHEN cmd_state IN (60, 90, 1000)
+        THEN
+        CASE
+        WHEN (SELECT COUNT(*)
+        FROM cmd_out T_ZL
+        WHERE T_ZL.order_id = T.order_id
+        AND T_ZL.item_id = T.item_id
+        AND EXISTS(SELECT 'X'
+        FROM (SELECT order_id, item_id, MIN(cmd_state) cmd_state
+        FROM cmd_out T2
+        WHERE T2.cmd_state IN (60, 90, 1000)
+        AND T2.order_type IN (2, 6)
+        AND T2.is_short = 0
+        GROUP BY T2.order_id, T2.item_id) T3
+        WHERE T3.order_id = T_ZL.order_id
+        AND T3.item_id = T_ZL.item_id
+        AND T3.cmd_state > T_ZL.cmd_state)
+        AND T_ZL.cmd_state >= 10
+        AND order_type IN (2, 6)
+        AND T_ZL.is_short = 0) = 0
+        THEN
+        CASE (SELECT MIN(cmd_state)
+        FROM cmd_out
+        WHERE item_id = T.item_id
+        AND order_id = T.order_id
+        AND cmd_state IN (60, 90, 1000)
+        AND order_type IN (2, 6)
+        AND is_short = 0)
+        --拣货确认
+        WHEN 60 THEN 120
+        --内复核确认
+        WHEN 90 THEN 140
+        --作业终止
+        WHEN 1000 THEN 1000
+        ELSE 0 END
+        ELSE 0 END
+        ELSE 0 END status
+        FROM cmd_out T
+        WHERE ((EXISTS(SELECT 'X' FROM cmd_out t1 WHERE t1.cmd_id = T.cmd_id_super AND t1.order_type = 2) AND
+        order_type = 6) or T.order_type = 2)
+        --@ AND area_id = #{area_id}
+        AND pick_group = #{pick_group}) A
         WHERE status != 0
         ORDER BY order_id, item_id
     </select>
@@ -169,73 +169,73 @@
         where t.order_out_id = #{order_id}
         group by item_id
         minus
-        ---minus   pgsql使用except oracle 使用minus  该函数用于比较两个数据集差异
+        ---minus pgsql使用except oracle 使用minus 该函数用于比较两个数据集差异
         select item_id, sum(t1.qty)
         from cmd_out t1
         where t1.order_type = 2
-          and t1.order_id = #{order_id}
+        and t1.order_id = #{order_id}
         group by item_id
     </select>
 
     <select id="get_insupload_zl" resultType="map">
         SELECT A.order_out_code,
-               A.customer_id,
-               A.owner_id,
-               A.riqi_date,
-               A.bill_staff,
-               A.order_type,
-               A.order_biz_type,
-               A.pickup_type,
-               A.item_id,
-               A.lot_id,
-               A.is_short,
-               A.order_out_id,
-               A.wh_id,
-               SUM(A.qty) qtys
+        A.customer_id,
+        A.owner_id,
+        A.riqi_date,
+        A.bill_staff,
+        A.order_type,
+        A.order_biz_type,
+        A.pickup_type,
+        A.item_id,
+        A.lot_id,
+        A.is_short,
+        A.order_out_id,
+        A.wh_id,
+        SUM(A.qty) qtys
         FROM (SELECT T_KPD.order_out_code,
-                     T_KPD.customer_id,
-                     T_KPD.owner_id,
-                     T_KPD.riqi_date,
-                     T_KPD.bill_staff,
-                     T_ZL.order_type,
-                     T_ZL.order_biz_type,
-                     T_KPD.pickup_type,
-                     T_ZL.item_id,
-                     T_ZL.qty,
-                     T_ZL.lot_id,
-                     T_ZL.is_short,
-                     T_KPD.order_out_id,
-                     T_ZL.wh_id
-              FROM cmd_out T_ZL
-                   LEFT JOIN
-                   (SELECT DISTINCT order_out_code,
-                                    T_HZ.order_out_id,
-                                    T_HZ.order_type,
-                                    T_HZ.order_biz_type,
-                                    customer_id,
-                                    owner_id,
-                                    SYSDATE riqi_date, --当前时间
-                                    bill_staff,
-                                    pickup_type
-                    FROM order_out T_HZ
-                    WHERE T_HZ.order_out_id = #{order_id}) T_KPD ON T_ZL.order_id = T_KPD.order_out_id
-              WHERE T_ZL.order_type != 6 --不等于盘点任务
-                AND T_ZL.qty != 0        --数量为0不上传
-                --------------------------------------------------------------------2014-06-04
-                AND T_ZL.order_id = #{order_id}) A
+        T_KPD.customer_id,
+        T_KPD.owner_id,
+        T_KPD.riqi_date,
+        T_KPD.bill_staff,
+        T_ZL.order_type,
+        T_ZL.order_biz_type,
+        T_KPD.pickup_type,
+        T_ZL.item_id,
+        T_ZL.qty,
+        T_ZL.lot_id,
+        T_ZL.is_short,
+        T_KPD.order_out_id,
+        T_ZL.wh_id
+        FROM cmd_out T_ZL
+        LEFT JOIN
+        (SELECT DISTINCT order_out_code,
+        T_HZ.order_out_id,
+        T_HZ.order_type,
+        T_HZ.order_biz_type,
+        customer_id,
+        owner_id,
+        SYSDATE riqi_date, --当前时间
+        bill_staff,
+        pickup_type
+        FROM order_out T_HZ
+        WHERE T_HZ.order_out_id = #{order_id}) T_KPD ON T_ZL.order_id = T_KPD.order_out_id
+        WHERE T_ZL.order_type != 6 --不等于盘点任务
+        AND T_ZL.qty != 0 --数量为0不上传
+        --------------------------------------------------------------------2014-06-04
+        AND T_ZL.order_id = #{order_id}) A
         GROUP BY A.order_out_code,
-                 A.customer_id,
-                 A.owner_id,
-                 A.riqi_date,
-                 A.bill_staff,
-                 A.order_type,
-                 A.order_biz_type,
-                 A.pickup_type,
-                 A.item_id,
-                 A.lot_id,
-                 A.is_short,
-                 A.order_out_id,
-                 A.wh_id
+        A.customer_id,
+        A.owner_id,
+        A.riqi_date,
+        A.bill_staff,
+        A.order_type,
+        A.order_biz_type,
+        A.pickup_type,
+        A.item_id,
+        A.lot_id,
+        A.is_short,
+        A.order_out_id,
+        A.wh_id
     </select>
 
     <select id="get_ck_mx" resultType="map">
@@ -258,33 +258,33 @@
         0) as str from dual
     </select>
 
-  <select id="get_ck_ds_mx" resultType="map">
+    <select id="get_ck_ds_mx" resultType="map">
         SELECT NVL((SELECT LISTAGG( T.ORDER_NO || ',') WITHIN GROUP(ORDER BY T.order_id, T.ORDER_NO)
-             FROM CMD_BARCODE T
-            WHERE
-            T.order_id = #{order_id}
-            --t.order_id = 116242142447289479
+        FROM CMD_BARCODE T
+        WHERE
+        T.order_id = #{order_id}
+        --t.order_id = 116242142447289479
         AND T.ORDER_NO != 'N/A'
-            AND ROWNUM <![CDATA[ < ]]> 20
-            GROUP BY T.order_id),
-           0) as str_1,
-       (SELECT T1.UDF1
-          FROM ORDER_OUT T, BAS_DICT_ITEMS T1
-         WHERE T.PICKUP_TYPE = T1.DICT_VALUE
-           and t1.dict_code = 'PICKUP_TYPE'
-           --AND T.ORDER_OUT_ID = 116242142447289479
-           AND T.ORDER_OUT_ID = #{order_id}
-           ) AS STR_2,
-       (SELECT COUNT(DISTINCT BARCODE)
-          FROM CMD_OUT T2
-         WHERE
-           --T2.ORDER_ID = 116242142447289479
-           T2.ORDER_ID = #{order_id}
-           AND T2.IS_SHORT = 0
-           AND T2.ORDER_TYPE = 2
-           AND T2.QTY != 0
-           AND T2.BARCODE != 'N/A') AS STR_3
-           from dual
+        AND ROWNUM <![CDATA[ < ]]> 20
+        GROUP BY T.order_id),
+        0) as str_1,
+        (SELECT T1.UDF1
+        FROM ORDER_OUT T, BAS_DICT_ITEMS T1
+        WHERE T.PICKUP_TYPE = T1.DICT_VALUE
+        and t1.dict_code = 'PICKUP_TYPE'
+        --AND T.ORDER_OUT_ID = 116242142447289479
+        AND T.ORDER_OUT_ID = #{order_id}
+        ) AS STR_2,
+        (SELECT COUNT(DISTINCT BARCODE)
+        FROM CMD_OUT T2
+        WHERE
+        --T2.ORDER_ID = 116242142447289479
+        T2.ORDER_ID = #{order_id}
+        AND T2.IS_SHORT = 0
+        AND T2.ORDER_TYPE = 2
+        AND T2.QTY != 0
+        AND T2.BARCODE != 'N/A') AS STR_3
+        from dual
     </select>
 
     <select id="queryCmdInOrHis">

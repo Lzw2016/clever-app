@@ -9,14 +9,14 @@
         b.qty,
         decode(a.order_qty, b.qty, 1, 0)
         from (select aid.business_code, aid.business_code_line, sum(aid.order_qty) order_qty
-          from (select ai.business_code, aid.business_code_line, aid.order_qty from asn_in_details aid
-                       inner join asn_in ai on aid.asn_in_id = ai.asn_in_id
-                union all
-                select ai.business_code, aid.business_code_line, aid.order_qty from wms8_his.asn_in_details aid
-                       inner join wms8_his.asn_in ai on aid.asn_in_id = ai.asn_in_id
-                ) aid
-         group by aid.business_code, aid.business_code_line
-         ) a
+        from (select ai.business_code, aid.business_code_line, aid.order_qty from asn_in_details aid
+        inner join asn_in ai on aid.asn_in_id = ai.asn_in_id
+        union all
+        select ai.business_code, aid.business_code_line, aid.order_qty from wms8_his.asn_in_details aid
+        inner join wms8_his.asn_in ai on aid.asn_in_id = ai.asn_in_id
+        ) aid
+        group by aid.business_code, aid.business_code_line
+        ) a
         inner join (select YEWDJ_NO, HANGH_CGD, sum(num) qty from inf_rk_sc_bill group by YEWDJ_NO, HANGH_CGD) b
         on a.business_code = b.YEWDJ_NO
         and a.business_code_line = b.HANGH_CGD
@@ -24,23 +24,23 @@
     </select>
     <select id="inv_in">
         select a.item_id,
-           a.package_id,
-           a.order_qty,
-           a.asn_qty,
-           (b.qty + b.qty_in) as qty_total,
-           b.qty,
-           b.qty_in,
-           decode(a.order_qty, (b.qty + b.qty_in), 1, 0)
+        a.package_id,
+        a.order_qty,
+        a.asn_qty,
+        (b.qty + b.qty_in) as qty_total,
+        b.qty,
+        b.qty_in,
+        decode(a.order_qty, (b.qty + b.qty_in), 1, 0)
         from (select aid.item_id, aid.package_id, sum(aid.order_qty) order_qty, sum(asn_qty) as asn_qty
-              from (select item_id, package_id, order_qty, qty as asn_qty
-                      from asn_in_details
-                    union all
-                    select item_id, package_id, order_qty, qty as asn_qty
-                      from wms8_his.asn_in_details) aid
-             group by aid.item_id, aid.package_id) a
+        from (select item_id, package_id, order_qty, qty as asn_qty
+        from asn_in_details
+        union all
+        select item_id, package_id, order_qty, qty as asn_qty
+        from wms8_his.asn_in_details) aid
+        group by aid.item_id, aid.package_id) a
         inner join (select item_id, package_id, sum(qty) qty, sum(qty_in) qty_in
-                   from inv_loc
-                  group by item_id, package_id) b
+        from inv_loc
+        group by item_id, package_id) b
         on a.item_id = b.item_id
         and a.package_id = b.package_id
         where a.order_qty != (b.qty + b.qty_in)
@@ -48,23 +48,23 @@
     </select>
 
     <select id="searchInv">
-         select a.item_id,
-           a.package_id,
-           a.qty,
-           b.item_id    inv_item_id,
-           b.package_id inv_package_id,
-           b.inv_qty
-          from (select item_id, package_id, sum(qty) qty
-                  from (select aid.item_id, aid.package_id, aid.qty
-                          from asn_in_details aid
-                         inner join asn_in ai
-                            on aid.asn_in_id = ai.asn_in_id
-                         where ai.remark = #{remark})
-                 group by item_id, package_id) a
-         inner join (select item_id, package_id, sum(qty) inv_qty
-                       from inv_loc
-                      group by item_id, package_id) b
-            on a.item_id = b.item_id
-           and a.package_id = b.package_id
+        select a.item_id,
+        a.package_id,
+        a.qty,
+        b.item_id inv_item_id,
+        b.package_id inv_package_id,
+        b.inv_qty
+        from (select item_id, package_id, sum(qty) qty
+        from (select aid.item_id, aid.package_id, aid.qty
+        from asn_in_details aid
+        inner join asn_in ai
+        on aid.asn_in_id = ai.asn_in_id
+        where ai.remark = #{remark})
+        group by item_id, package_id) a
+        inner join (select item_id, package_id, sum(qty) inv_qty
+        from inv_loc
+        group by item_id, package_id) b
+        on a.item_id = b.item_id
+        and a.package_id = b.package_id
     </select>
 </mapper>

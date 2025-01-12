@@ -127,13 +127,13 @@ public class JdkProxyUtilsTest {
         final AImpl aImpl = new AImpl();
         JdkProxyFactory proxyFactory = new JdkProxyFactory(aImpl);
         B proxy = proxyFactory.addInterface(B.class)
-                .setInterceptor((rawObj, proxy1, method, args) -> {
-                    log.info("---> JDK前置处理 | method={}", method);
-                    Object obj = method.invoke(aImpl, args);
-                    log.info("JDK后置处理 <---");
-                    return obj;
-                })
-                .createProxy();
+            .setInterceptor((rawObj, proxy1, method, args) -> {
+                log.info("---> JDK前置处理 | method={}", method);
+                Object obj = method.invoke(aImpl, args);
+                log.info("JDK后置处理 <---");
+                return obj;
+            })
+            .createProxy();
         proxy.a("aaa");
         try {
             proxy.b("bbb");

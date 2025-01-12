@@ -42,16 +42,16 @@ public class Reflector {
     private void addDefaultConstructor(Class<?> clazz) {
         Constructor<?>[] constructors = clazz.getDeclaredConstructors();
         Arrays.stream(constructors)
-                .filter(constructor -> constructor.getParameterTypes().length == 0).findAny()
-                .ifPresent(constructor -> this.defaultConstructor = constructor);
+            .filter(constructor -> constructor.getParameterTypes().length == 0).findAny()
+            .ifPresent(constructor -> this.defaultConstructor = constructor);
     }
 
     private void addGetMethods(Class<?> clazz) {
         Map<String, List<Method>> conflictingGetters = new HashMap<>();
         Method[] methods = getClassMethods(clazz);
         Arrays.stream(methods)
-                .filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
-                .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
+            .filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
+            .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
         resolveGetterConflicts(conflictingGetters);
     }
 
@@ -69,9 +69,9 @@ public class Reflector {
                 if (candidateType.equals(winnerType)) {
                     if (!boolean.class.equals(candidateType)) {
                         throw new ReflectionException(
-                                "Illegal overloaded getter method with ambiguous type for property "
-                                        + propName + " in class " + winner.getDeclaringClass()
-                                        + ". This breaks the JavaBeans specification and can cause unpredictable results.");
+                            "Illegal overloaded getter method with ambiguous type for property "
+                                + propName + " in class " + winner.getDeclaringClass()
+                                + ". This breaks the JavaBeans specification and can cause unpredictable results.");
                     } else if (candidate.getName().startsWith("is")) {
                         winner = candidate;
                     }
@@ -82,9 +82,9 @@ public class Reflector {
                         winner = candidate;
                     } else {
                         throw new ReflectionException(
-                                "Illegal overloaded getter method with ambiguous type for property "
-                                        + propName + " in class " + winner.getDeclaringClass()
-                                        + ". This breaks the JavaBeans specification and can cause unpredictable results.");
+                            "Illegal overloaded getter method with ambiguous type for property "
+                                + propName + " in class " + winner.getDeclaringClass()
+                                + ". This breaks the JavaBeans specification and can cause unpredictable results.");
                     }
             }
             addGetMethod(propName, winner);
@@ -103,8 +103,8 @@ public class Reflector {
         Map<String, List<Method>> conflictingSetters = new HashMap<>();
         Method[] methods = getClassMethods(clazz);
         Arrays.stream(methods)
-                .filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
-                .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
+            .filter(m -> m.getParameterTypes().length == 1 && PropertyNamer.isSetter(m.getName()))
+            .forEach(m -> addMethodConflict(conflictingSetters, PropertyNamer.methodToProperty(m.getName()), m));
         resolveSetterConflicts(conflictingSetters);
     }
 
@@ -155,9 +155,9 @@ public class Reflector {
             return setter1;
         }
         throw new ReflectionException(
-                "Ambiguous setters defined for property '" + property
-                        + "' in class '" + setter2.getDeclaringClass()
-                        + "' with types '" + paramType1.getName() + "' and '" + paramType2.getName() + "'.");
+            "Ambiguous setters defined for property '" + property
+                + "' in class '" + setter2.getDeclaringClass()
+                + "' with types '" + paramType1.getName() + "' and '" + paramType2.getName() + "'.");
     }
 
     private void addSetMethod(String name, Method method) {

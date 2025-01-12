@@ -14,27 +14,27 @@
 
     <select id="queryOrderMerge">
         select a.customer_id,
-               a.order_merge_id,
-               a.order_merge_code,
-               count(distinct a.item_id)                 as items,
-               sum(a.qty * c.volume)                     as volume,
-               sum(a.qty * c.weight)                     as weight,
-               sum(ceil(a.qty / d.package_meas))         as boxs,
-               a.dates,
-               b.customer_code,
-               b.customer_name,
-               b.customer_code || ',' || b.customer_name as msg
+        a.order_merge_id,
+        a.order_merge_code,
+        count(distinct a.item_id) as items,
+        sum(a.qty * c.volume) as volume,
+        sum(a.qty * c.weight) as weight,
+        sum(ceil(a.qty / d.package_meas)) as boxs,
+        a.dates,
+        b.customer_code,
+        b.customer_name,
+        b.customer_code || ',' || b.customer_name as msg
         from order_out_merge a
-             inner join bas_customer b on a.customer_id = b.customer_id
-             left join bas_package_items c on c.package_level = 1 and c.package_id = a.package_id
-             left join bas_package_items d on d.package_level = 3 and d.package_id = a.package_id
+        inner join bas_customer b on a.customer_id = b.customer_id
+        left join bas_package_items c on c.package_level = 1 and c.package_id = a.package_id
+        left join bas_package_items d on d.package_level = 3 and d.package_id = a.package_id
         where a.is_merge != 1
-              --@ and a.dates >= #{start_date}
-              --@ and a.dates &lt;= #{end_date}
-              --@ and a.owner_id = #{owner_id}
-              --@ and a.wh_id = #{wh_id}
-              --@ and a.customer_id = #{customer_id}
-              --% and a.order_merge_code like #{order_merge_code}
+        --@ and a.dates >= #{start_date}
+        --@ and a.dates &lt;= #{end_date}
+        --@ and a.owner_id = #{owner_id}
+        --@ and a.wh_id = #{wh_id}
+        --@ and a.customer_id = #{customer_id}
+        --% and a.order_merge_code like #{order_merge_code}
         group by a.customer_id, a.order_merge_id, a.order_merge_code, a.dates, b.customer_code, b.customer_name
     </select>
 

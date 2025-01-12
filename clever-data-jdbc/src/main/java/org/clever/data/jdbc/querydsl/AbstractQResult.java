@@ -140,6 +140,7 @@ public abstract class AbstractQResult<T> extends FactoryExpressionBase<T> {
 
     /**
      * 数据行转换成Map
+     *
      * @param args 数据行
      */
     protected LinkedHashMap<String, Object> toMap(Object... args) {

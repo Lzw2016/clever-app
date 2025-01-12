@@ -33,14 +33,14 @@ public class NetUtil {
      */
     public static String longToIpv4(long longIP) {
         // 直接右移24位
-        return (longIP >>> 24) +
-                "." +
-                // 将高8位置0，然后右移16位
-                ((longIP & 0x00FFFFFF) >>> 16) +
-                "." +
-                ((longIP & 0x0000FFFF) >>> 8) +
-                "." +
-                (longIP & 0x000000FF);
+        return (longIP >>> 24)
+            + "."
+            // 将高8位置0，然后右移16位
+            + ((longIP & 0x00FFFFFF) >>> 16)
+            + "."
+            + ((longIP & 0x0000FFFF) >>> 8)
+            + "."
+            + (longIP & 0x000000FF);
     }
 
     /**

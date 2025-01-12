@@ -20,11 +20,11 @@ public class CmdTaskTest {
         // cmd.setCmd("gradlew.bat clever-boot:classes --continuous");
         cmd.setCmd("dir");
         CmdTask cmdTask = new CmdTask(
-                "测试",
-                false,
-                null,
-                new File("D:\\SourceCode\\clever\\clever-app"),
-                cmd
+            "测试",
+            false,
+            null,
+            new File("D:\\SourceCode\\clever\\clever-app"),
+            cmd
         );
         cmdTask.start();
     }
@@ -34,15 +34,15 @@ public class CmdTaskTest {
     public void t02() {
         File workDir = new File("D:\\SourceCode\\clever\\clever-app");
         Process proc = Runtime.getRuntime().exec(new String[]{
-                        "cmd",
-                        "/q",
-                        "/c",
-                        // "gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon",
-                        "gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon",
-                        // "dir",
-                },
-                null,
-                workDir
+                "cmd",
+                "/q",
+                "/c",
+                // "gradlew.bat clever-boot:classes --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon",
+                "gradlew.bat clever-boot:classes --continuous --watch-fs --build-cache --configuration-cache --configuration-cache-problems=warn --daemon",
+                // "dir",
+            },
+            null,
+            workDir
         );
         BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream(), "GBK"));
         BufferedReader err = new BufferedReader(new InputStreamReader(proc.getErrorStream(), "GBK"));

@@ -83,12 +83,12 @@ public class SnowFlake {
      */
     public SnowFlake(long workerId, long datacenterId) {
         Assert.isFalse(
-                workerId > MAX_WORKER_ID || workerId < 0,
-                String.format("worker Id can't be greater than %d or less than 0", MAX_WORKER_ID)
+            workerId > MAX_WORKER_ID || workerId < 0,
+            String.format("worker Id can't be greater than %d or less than 0", MAX_WORKER_ID)
         );
         Assert.isFalse(
-                datacenterId > MAX_DATACENTER_ID || datacenterId < 0,
-                String.format("datacenter Id can't be greater than %d or less than 0", MAX_DATACENTER_ID)
+            datacenterId > MAX_DATACENTER_ID || datacenterId < 0,
+            String.format("datacenter Id can't be greater than %d or less than 0", MAX_DATACENTER_ID)
         );
         this.workerId = workerId;
         this.datacenterId = datacenterId;
@@ -172,9 +172,9 @@ public class SnowFlake {
         lastTimestamp = timestamp;
         // 时间戳部分 | 数据中心部分 | 机器标识部分 | 序列号部分
         return ((timestamp - START_STAMP) << TIMESTAMP_LEFT_SHIFT)
-                | (datacenterId << DATACENTER_ID_SHIFT)
-                | (workerId << WORKER_ID_SHIFT)
-                | sequence;
+            | (datacenterId << DATACENTER_ID_SHIFT)
+            | (workerId << WORKER_ID_SHIFT)
+            | sequence;
     }
 
     protected long tilNextMillis(long lastTimestamp) {

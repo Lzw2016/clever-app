@@ -157,10 +157,10 @@ public class ClassLoaderWrapper {
 
     ClassLoader[] getClassLoaders(ClassLoader classLoader) {
         return new ClassLoader[]{
-                classLoader,
-                defaultClassLoader,
-                Thread.currentThread().getContextClassLoader(),
-                getClass().getClassLoader(),
-                systemClassLoader};
+            classLoader,
+            defaultClassLoader,
+            Thread.currentThread().getContextClassLoader(),
+            getClass().getClassLoader(),
+            systemClassLoader};
     }
 }

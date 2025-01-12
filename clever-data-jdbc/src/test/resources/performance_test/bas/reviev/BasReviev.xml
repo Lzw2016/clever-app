@@ -3,47 +3,47 @@
 <mapper namespace="BasReviev">
     <select id="queryOne">
         SELECT bas_review.review_id,
-               bas_review.wh_id,
-               bas_review.reivew_code,
-               bas_review.review_category,
-               bas_review.reivew_workload,
-               bas_review.remark,
-               bas_review.is_enable,
-               /*bas_review.create_by,*/
-               bas_review.create_at,
-               /*bas_review.update_by,*/
-               bas_review.update_at,
-               bas_review_owner.owner_id,
-               bas_review_area.area_id,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = bas_review.create_by), bas_review.create_by) create_by,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = bas_review.update_by), bas_review.update_by) update_by
+        bas_review.wh_id,
+        bas_review.reivew_code,
+        bas_review.review_category,
+        bas_review.reivew_workload,
+        bas_review.remark,
+        bas_review.is_enable,
+        /*bas_review.create_by,*/
+        bas_review.create_at,
+        /*bas_review.update_by,*/
+        bas_review.update_at,
+        bas_review_owner.owner_id,
+        bas_review_area.area_id,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = bas_review.create_by), bas_review.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = bas_review.update_by), bas_review.update_by) update_by
 
         FROM bas_review bas_review
-             LEFT JOIN bas_review_owner bas_review_owner ON bas_review_owner.review_id = bas_review.review_id
-             LEFT JOIN bas_review_area bas_review_area ON bas_review_area.review_id = bas_review.review_id
+        LEFT JOIN bas_review_owner bas_review_owner ON bas_review_owner.review_id = bas_review.review_id
+        LEFT JOIN bas_review_area bas_review_area ON bas_review_area.review_id = bas_review.review_id
         where 1 = 1
         --@ AND bas_review.review_id = #{review_id}
     </select>
     <!--查询全部内复核台信息-->
     <select id="queryAllReviev">
         SELECT t2.area_id,
-               t3.owner_id,
-               T.review_id,
-               T.wh_id,
-               T.reivew_code,
-               T.review_category,
-               T.reivew_workload,
-               T.remark,
-               T.is_enable,
-               /*T.create_by,*/
-               T.create_at,
-               /*T2.update_by,*/
-               T2.update_at,
-                nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.create_by), T.create_by) create_by,
-                nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.update_by), T.update_by) update_by
+        t3.owner_id,
+        T.review_id,
+        T.wh_id,
+        T.reivew_code,
+        T.review_category,
+        T.reivew_workload,
+        T.remark,
+        T.is_enable,
+        /*T.create_by,*/
+        T.create_at,
+        /*T2.update_by,*/
+        T2.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.create_by), T.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.update_by), T.update_by) update_by
         FROM bas_review T
-             left join bas_review_area t2 on t2.review_id = T.review_id
-             left join bas_review_owner t3 on t3.review_id = T.review_id
+        left join bas_review_area t2 on t2.review_id = T.review_id
+        left join bas_review_owner t3 on t3.review_id = T.review_id
         where T.is_enable = 1
         <if test="#obj.notEmpty(ownerList)">
             and t3.owner_id in
@@ -56,18 +56,18 @@
     <!--查询复核台滑道绑定信息-->
     <select id="queryReviewSilde">
         SELECT T.review_id,
-               T.review_slide_code,
-               T.review_stage_limit,
-               T2.slide_name,
-               T2.is_enable,
-               /*T.create_by,*/
-               T.create_at,
-               /*T.update_by,*/
-               T.update_at,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.create_by), T.create_by) create_by,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.update_by), T.update_by) update_by
+        T.review_slide_code,
+        T.review_stage_limit,
+        T2.slide_name,
+        T2.is_enable,
+        /*T.create_by,*/
+        T.create_at,
+        /*T.update_by,*/
+        T.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.create_by), T.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = T.update_by), T.update_by) update_by
         FROM bas_review_slide T
-             LEFT JOIN bas_slide T2 ON T2.slide_code = T.review_slide_code
+        LEFT JOIN bas_slide T2 ON T2.slide_code = T.review_slide_code
         where T.is_enable = 1
         --@ AND T.review_id = #{review_id}
     </select>

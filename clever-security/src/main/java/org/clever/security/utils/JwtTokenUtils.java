@@ -101,9 +101,9 @@ public class JwtTokenUtils {
         // 签名私钥
         Key key = getHmacShaKey(tokenConfig.getSecretKey(), claims.getSubject());
         return Jwts.builder()
-                .setClaims(claims)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
+            .setClaims(claims)
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact();
     }
 
     /**
@@ -128,13 +128,13 @@ public class JwtTokenUtils {
         try {
             // 通过密钥验证Token
             return Jwts.parserBuilder()
-                    // .requireIssuer(tokenConfig.getIssuer())
-                    // .requireAudience(tokenConfig.getAudience())
-                    // .requireSubject(uid)
-                    .setAllowedClockSkewSeconds(60)
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(jwtToken).getBody();
+                // .requireIssuer(tokenConfig.getIssuer())
+                // .requireAudience(tokenConfig.getAudience())
+                // .requireSubject(uid)
+                .setAllowedClockSkewSeconds(60)
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(jwtToken).getBody();
         } catch (SignatureException e) {
             // 签名异常
             throw new ParserJwtTokenException("Token签名异常", e);

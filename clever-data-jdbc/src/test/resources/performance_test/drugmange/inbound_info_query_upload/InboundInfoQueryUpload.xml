@@ -3,7 +3,7 @@
 <mapper namespace="InboundInfoQueryUpload">
     <!--检索所有药监管理-入库信息-->
     <select id="queryAllInboundInfo" resultType="map">
-        SELECT  distinct
+        SELECT distinct
         ta.order_id,
         td.order_in_code,
         ta.supervise_code,
@@ -27,7 +27,8 @@
         td.business_code
         FROM
         supervise_in ta
-        inner JOIN ( SELECT order_in_id, order_in_code, order_biz_type, supplier_id,order_type,business_code FROM order_in UNION ALL SELECT order_in_id, order_in_code, order_biz_type, supplier_id,order_type,business_code FROM wms8_his.order_in ) td ON ta.order_id = td.order_in_id
+        inner JOIN ( SELECT order_in_id, order_in_code, order_biz_type, supplier_id,order_type,business_code FROM order_in UNION ALL SELECT order_in_id, order_in_code, order_biz_type, supplier_id,order_type,business_code FROM
+        wms8_his.order_in ) td ON ta.order_id = td.order_in_id
         left JOIN bas_item tb ON ta.item_id = tb.item_id
         left JOIN bas_owner tc ON ta.owner_id = tc.owner_id
         left JOIN bas_customer te ON td.supplier_id = te.customer_id
@@ -68,114 +69,114 @@
 
     <!--导出XML-->
     <update id="exportXml" parameterType="map">
-     <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
-      UPDATE SUPERVISE_IN T set T.UPLOAD_FLG = '1'
-      WHERE T.ORDER_ID = #{item.order_id}
-      AND T.SUPERVISE_CODE = #{item.supervise_code}
-      AND T.UPLOAD_FLG = '0'
-     </foreach>
+        <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+            UPDATE SUPERVISE_IN T set T.UPLOAD_FLG = '1'
+            WHERE T.ORDER_ID = #{item.order_id}
+            AND T.SUPERVISE_CODE = #{item.supervise_code}
+            AND T.UPLOAD_FLG = '0'
+        </foreach>
     </update>
 
     <!--入库药监码弹出框查询-->
     <select id="InbountSuperviseSearch" resultType="map">
         SELECT
-            t.order_in_id,
-            t.order_in_code,
-            t.order_biz_type,
-            '入库' supervise_type,
-            t1.item_code,
-            t1.item_name,
-            t1.item_specification,
-            t1.manufacturer,
-            t.item_id,
-            t2.owner_id,
-            t2.owner_name,
-            t3.package_id,
-            t3.package_unit,
-            t3.package_meas,
-            t4.lot_id,
-            t4.lot01
+        t.order_in_id,
+        t.order_in_code,
+        t.order_biz_type,
+        '入库' supervise_type,
+        t1.item_code,
+        t1.item_name,
+        t1.item_specification,
+        t1.manufacturer,
+        t.item_id,
+        t2.owner_id,
+        t2.owner_name,
+        t3.package_id,
+        t3.package_unit,
+        t3.package_meas,
+        t4.lot_id,
+        t4.lot01
         FROM
-            (
-                SELECT DISTINCT
-                    t2.order_in_code,
-                    t2.order_in_id,
-                    t.item_id,
-                    t2.owner_id,
-                    t2.order_biz_type,
-                    t.lot_id
-                FROM
-                    Order_In_Details t
-                        INNER JOIN order_In t2 ON t.order_in_id = t2.order_in_id
-                    where 1 = 1
-                         --@ AND t2.order_in_code = #{__queryValue}
-            ) t
-                left JOIN bas_item t1 ON t.item_id = t1.item_id
-                left JOIN bas_owner t2 ON t.owner_id = t2.owner_id
-                left JOIN bas_package_items t3 ON t.item_id = t3.item_id AND t3.package_level = 3
-                left JOIN bas_lot_att t4 ON t.lot_id = t4.lot_id
+        (
+        SELECT DISTINCT
+        t2.order_in_code,
+        t2.order_in_id,
+        t.item_id,
+        t2.owner_id,
+        t2.order_biz_type,
+        t.lot_id
+        FROM
+        Order_In_Details t
+        INNER JOIN order_In t2 ON t.order_in_id = t2.order_in_id
+        where 1 = 1
+        --@ AND t2.order_in_code = #{__queryValue}
+        ) t
+        left JOIN bas_item t1 ON t.item_id = t1.item_id
+        left JOIN bas_owner t2 ON t.owner_id = t2.owner_id
+        left JOIN bas_package_items t3 ON t.item_id = t3.item_id AND t3.package_level = 3
+        left JOIN bas_lot_att t4 ON t.lot_id = t4.lot_id
     </select>
 
     <select id="getCKDJL" resultType="map">
         select t.ds_yewdj_no RUCKD_NO, '2' JIANG_TYPE,
         t1.SHANGP_NO 商品编号,
-                t1.CHINESE_NAME 中文名称,
-                t1.YAOP_GUIG 规格,
-                t1.CHANDI 产地,
-                t1.BAOZ_DANW 包装单位,
-                t1.BAOZ_NUM 包装数量,
-                t1.PIZ_NO 批准文号,
-                t1.LENGTH 长,
-                t1.WIDTH 宽,
-                t1.HEIGHT 高,
-                t1.WEIGHT 重量,
-                t1.ZHENGJ_ABC 整件ABC分类,
-                t1.ZHONGBZ 中包装,
-                t1.ZHUJ_CODE 助记码,
-                t1.SHANGP_ID 商品内码,
-                t2.DANW_ID,
-                t2.DANW_NAME
-          from (select distinct t.ds_yewdj_no, t.shangp_id, t2.danw_id
-                  from CK_KPD_MX t
-                 inner join CK_KPD_HZ t2
-                    on t.danj_no = t2.danj_no) t
-         inner join jc_spzl t1
-            on t.shangp_id = t1.shangp_id
-         inner join jc_dwzl t2
-            on t.danw_id = t2.danw_id
-         where 1=1 AND t1.JIANG_FLG = 'Y'
-         ${@com.yvan.Sql@phrase('AND', 't.ds_yewdj_no like')}
+        t1.CHINESE_NAME 中文名称,
+        t1.YAOP_GUIG 规格,
+        t1.CHANDI 产地,
+        t1.BAOZ_DANW 包装单位,
+        t1.BAOZ_NUM 包装数量,
+        t1.PIZ_NO 批准文号,
+        t1.LENGTH 长,
+        t1.WIDTH 宽,
+        t1.HEIGHT 高,
+        t1.WEIGHT 重量,
+        t1.ZHENGJ_ABC 整件ABC分类,
+        t1.ZHONGBZ 中包装,
+        t1.ZHUJ_CODE 助记码,
+        t1.SHANGP_ID 商品内码,
+        t2.DANW_ID,
+        t2.DANW_NAME
+        from (select distinct t.ds_yewdj_no, t.shangp_id, t2.danw_id
+        from CK_KPD_MX t
+        inner join CK_KPD_HZ t2
+        on t.danj_no = t2.danj_no) t
+        inner join jc_spzl t1
+        on t.shangp_id = t1.shangp_id
+        inner join jc_dwzl t2
+        on t.danw_id = t2.danw_id
+        where 1=1 AND t1.JIANG_FLG = 'Y'
+        ${@com.yvan.Sql@phrase('AND', 't.ds_yewdj_no like')}
     </select>
 
     <select id="getRKDJL" resultType="map">
         select t.yewdj_no RUCKD_NO, '1' JIANG_TYPE,
         t1.SHANGP_NO 商品编号,
-                t1.CHINESE_NAME 中文名称,
-                t1.YAOP_GUIG 规格,
-                t1.CHANDI 产地,
-                t1.BAOZ_DANW 包装单位,
-                t1.BAOZ_NUM 包装数量,
-                t1.PIZ_NO 批准文号,
-                t1.LENGTH 长,
-                t1.WIDTH 宽,
-                t1.HEIGHT 高,
-                t1.WEIGHT 重量,
-                t1.ZHENGJ_ABC 整件ABC分类,
-                t1.ZHONGBZ 中包装,
-                t1.ZHUJ_CODE 助记码,
-                t1.SHANGP_ID 商品内码,
-                t2.DANW_ID,
-                t2.DANW_NAME
-          from (select distinct t2.yewdj_no, t.shangp_id, t2.danw_id
-                  from RK_KPD_MX t
-                 inner join RK_KPD_HZ t2
-                    on t.danj_no = t2.danj_no) t
-         inner join jc_spzl t1
-            on t.shangp_id = t1.shangp_id
-         inner join jc_dwzl t2
-            on t.danw_id = t2.danw_id
-         where 1=1 AND t1.JIANG_FLG = 'Y'
-         ${@com.yvan.Sql@phrase('AND', 't.yewdj_no like')}
+        t1.CHINESE_NAME 中文名称,
+        t1.YAOP_GUIG 规格,
+        t1.CHANDI 产地,
+        t1.BAOZ_DANW 包装单位,
+        t1.BAOZ_NUM 包装数量,
+        t1.PIZ_NO 批准文号,
+        t1.LENGTH 长,
+        t1.WIDTH 宽,
+        t1.HEIGHT 高,
+        t1.WEIGHT 重量,
+        t1.ZHENGJ_ABC 整件ABC分类,
+        t1.ZHONGBZ 中包装,
+        t1.ZHUJ_CODE 助记码,
+        t1.SHANGP_ID 商品内码,
+        t2.DANW_ID,
+        t2.DANW_NAME
+        from (select distinct t2.yewdj_no, t.shangp_id, t2.danw_id
+        from RK_KPD_MX t
+        inner join RK_KPD_HZ t2
+        on t.danj_no = t2.danj_no) t
+        inner join jc_spzl t1
+        on t.shangp_id = t1.shangp_id
+        inner join jc_dwzl t2
+        on t.danw_id = t2.danw_id
+        where 1=1 AND t1.JIANG_FLG = 'Y'
+        ${@com.yvan.Sql@phrase('AND', 't.yewdj_no like')}
     </select>
 
 

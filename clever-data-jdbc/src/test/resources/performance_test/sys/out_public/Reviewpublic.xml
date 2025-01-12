@@ -17,9 +17,9 @@
         inner join bas_location t_loc on t_cmd.loc_id_real =t_loc.loc_id
         left join order_out t_o on t_o.order_out_id = t_cmd.order_id
         left join bas_area_transition t_area on t_cmd.area_id = t_area.from_area_id
-            and t_area.order_type in (2,3)
-            and t_area.target_area_id=t_loc.area_id
-            and t_area.wh_id = t_cmd.wh_id
+        and t_area.order_type in (2,3)
+        and t_area.target_area_id=t_loc.area_id
+        and t_area.wh_id = t_cmd.wh_id
         inner join bas_item bi on t_cmd.item_id = bi.item_id
         where t_cmd.pick_group = #{pick_group} and t_cmd.cmd_line_no = #{cmd_line_no}
     </select>

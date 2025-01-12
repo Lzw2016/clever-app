@@ -59,16 +59,16 @@ public class RequestInfo implements Serializable {
     @Override
     public String toString() {
         return "RequestInfo{" +
-                "loginName='" + loginName + '\'' +
-                ", requestTime=" + requestTime +
-                ", requestUri='" + requestUri + '\'' +
-                ", method='" + method + '\'' +
-                ", params='" + params + '\'' +
-                ", processTime=" + processTime +
-                ", remoteAddr='" + remoteAddr + '\'' +
-                ", userAgent='" + userAgent + '\'' +
-                ", hasException='" + hasException + '\'' +
-                ", exceptionInfo='" + (exceptionInfo == null ? "0" : exceptionInfo.length()) + '\'' +
-                '}';
+            "loginName='" + loginName + '\'' +
+            ", requestTime=" + requestTime +
+            ", requestUri='" + requestUri + '\'' +
+            ", method='" + method + '\'' +
+            ", params='" + params + '\'' +
+            ", processTime=" + processTime +
+            ", remoteAddr='" + remoteAddr + '\'' +
+            ", userAgent='" + userAgent + '\'' +
+            ", hasException='" + hasException + '\'' +
+            ", exceptionInfo='" + (exceptionInfo == null ? "0" : exceptionInfo.length()) + '\'' +
+            '}';
     }
 }

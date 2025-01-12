@@ -20,31 +20,31 @@
 
     <select id="queryWave">
         select a.status as wave_status,
-            b.status as wave_line_status,
-            c.owner_id,
-            a.dispatch_type,
-            c.wh_id,
-            c.order_out_id,
-            c.order_out_code,
-            c.order_type,
-            c.order_biz_type,
-            c.customer_id,
-            d.package_id,
-            d.package_item_id,
-            d.item_id,
-            d.qty,
-            d.line_no,
-            d.lot01,d.lot02,
-            d.lot03,d.lot04,d.lot05,d.lot06,d.lot07,d.lot08,d.lot09,d.lot10,d.lot11,d.lot12,
-            d.quality,
-            c.status as order_status,c.slide_id,c.slide_code,
-            d.status as order_line_status,a.wave_no,a.wave_id,a.priority,nvl(d.cancel_qty,0) as cancel_qty,
-            nvl(d.bwave_cancel_qty,0) as bwave_cancel_qty
-            from order_wave a
-            inner join order_wave_details b on a.wave_id = b.wave_id
-            inner join order_out c on c.order_out_id = b.order_out_id
-            inner join order_out_details d on d.order_out_id = c.order_out_id
-            where c.order_biz_type != 24 and a.wave_id = #{wave_id} and (d.status = 40 or a.status = 35)
+        b.status as wave_line_status,
+        c.owner_id,
+        a.dispatch_type,
+        c.wh_id,
+        c.order_out_id,
+        c.order_out_code,
+        c.order_type,
+        c.order_biz_type,
+        c.customer_id,
+        d.package_id,
+        d.package_item_id,
+        d.item_id,
+        d.qty,
+        d.line_no,
+        d.lot01,d.lot02,
+        d.lot03,d.lot04,d.lot05,d.lot06,d.lot07,d.lot08,d.lot09,d.lot10,d.lot11,d.lot12,
+        d.quality,
+        c.status as order_status,c.slide_id,c.slide_code,
+        d.status as order_line_status,a.wave_no,a.wave_id,a.priority,nvl(d.cancel_qty,0) as cancel_qty,
+        nvl(d.bwave_cancel_qty,0) as bwave_cancel_qty
+        from order_wave a
+        inner join order_wave_details b on a.wave_id = b.wave_id
+        inner join order_out c on c.order_out_id = b.order_out_id
+        inner join order_out_details d on d.order_out_id = c.order_out_id
+        where c.order_biz_type != 24 and a.wave_id = #{wave_id} and (d.status = 40 or a.status = 35)
     </select>
 
     <select id="queryWaveList">

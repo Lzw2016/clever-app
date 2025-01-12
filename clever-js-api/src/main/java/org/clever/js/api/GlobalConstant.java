@@ -96,12 +96,12 @@ public interface GlobalConstant {
      * 默认不允许访问的Class
      */
     Set<Class<?>> DEFAULT_DENY_ACCESS_CLASS = Collections.unmodifiableSet(
-            new HashSet<>(
-                    Arrays.asList(
-                            System.class,
-                            Thread.class
-                    )
+        new HashSet<>(
+            Arrays.asList(
+                System.class,
+                Thread.class
             )
+        )
     );
 
     /**

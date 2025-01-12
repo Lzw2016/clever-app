@@ -54,11 +54,11 @@ public class DefaultLogoutSuccessHandler implements LogoutSuccessHandler {
     protected void disableJwtToken(Claims claims) {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
         queryDSL.update(sysJwtToken)
-                .set(sysJwtToken.disable, EnumConstant.DISABLE_1)
-                .set(sysJwtToken.disableReason, EnumConstant.JWT_TOKEN_DISABLE_REASON_3)
-                .set(sysJwtToken.updateAt, new Date())
-                .where(sysJwtToken.id.eq(Long.parseLong(claims.getId())))
-                .execute();
+            .set(sysJwtToken.disable, EnumConstant.DISABLE_1)
+            .set(sysJwtToken.disableReason, EnumConstant.JWT_TOKEN_DISABLE_REASON_3)
+            .set(sysJwtToken.updateAt, new Date())
+            .where(sysJwtToken.id.eq(Long.parseLong(claims.getId())))
+            .execute();
         log.debug("### 登出成功 -> userId={} | token id={}", claims.getSubject(), claims.getId());
     }
 

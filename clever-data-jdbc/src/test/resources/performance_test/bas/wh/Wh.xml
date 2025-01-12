@@ -18,14 +18,14 @@
 
     <select id="getWhOwner" resultType="map">
         select 'S' FLAG,
-               t1.owner_id,
-               t1.owner_code,
-               t1.owner_name,
-               t.owner_id ori_owner_id
+        t1.owner_id,
+        t1.owner_code,
+        t1.owner_name,
+        t.owner_id ori_owner_id
         from bas_owner t1
-            inner join bas_wh_owner t on t1.owner_id = t.owner_id
+        inner join bas_wh_owner t on t1.owner_id = t.owner_id
         where 1 = 1
-            --@ AND t.wh_id = #{wh_id}
+        --@ AND t.wh_id = #{wh_id}
     </select>
 
 

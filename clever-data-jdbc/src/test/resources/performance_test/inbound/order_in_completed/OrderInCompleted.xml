@@ -4,20 +4,20 @@
 
     <select id="query">
         select oi.order_in_id,
-               oi.order_in_code,
-               oi.supplier_id,
-               bc.customer_code,
-               bc.customer_name as supplier_name,
-               oi.dates,
-               oi.asn_staff,
-               oi.business_code,
-               oi.order_type,
-               oi.order_biz_type,
-               oi.is_complete,
-               (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
-               (select decode(count(1), count(ci.put_staff_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as order_is_put
+        oi.order_in_code,
+        oi.supplier_id,
+        bc.customer_code,
+        bc.customer_name as supplier_name,
+        oi.dates,
+        oi.asn_staff,
+        oi.business_code,
+        oi.order_type,
+        oi.order_biz_type,
+        oi.is_complete,
+        (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+        (select decode(count(1), count(ci.put_staff_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as order_is_put
         from order_in oi
-             inner join bas_customer bc on oi.supplier_id = bc.customer_id
+        inner join bas_customer bc on oi.supplier_id = bc.customer_id
         where oi.IS_COMPLETE = 0 and oi.WH_ID = #{wh_id}
         <!--and  not exists (
             select 1 from cmd_in ci
@@ -35,10 +35,10 @@
         --@ and oi.business_code = #{business_code}
         <if test="#obj.notEmpty(item_code)">
             and exists(
-                select 1 from cmd_in ci
-                inner join bas_item bi on ci.item_id = bi.item_id
-                where ci.order_id = oi.order_in_id
-                --% and (bi.item_code like #{item_code} or bi.logogram like #{item_code} or bi.APPROVAL_NO like #{item_code})
+            select 1 from cmd_in ci
+            inner join bas_item bi on ci.item_id = bi.item_id
+            where ci.order_id = oi.order_in_id
+            --% and (bi.item_code like #{item_code} or bi.logogram like #{item_code} or bi.APPROVAL_NO like #{item_code})
             )
         </if>
         order by oi.order_in_id desc
@@ -46,59 +46,59 @@
 
     <select id="queryDetails">
         select d.item_id,
-               d.item_code,
-               d.item_name,
-               d.logogram,
-               d.manufacturer,
-               d.origin,
-               d.is_double_quality,
-               f.package_unit,
-               floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1))                 AS medium,
-               c.lot_id,
-               c.qty,
-               c.quality_flg,
-               decode(c.is_unpack, 1, 0, floor(nvl(c.qty, 0) / nvl(g.package_meas, 1))) AS order_qty_piece,
-               decode(c.is_unpack, 1, c.qty, 0) AS order_qty_less,
-               c.order_id                                                             as order_in_id,
-               c.order_line_no,
-               c.package_id,
-               c.lpn,
-               c.price,
-               c.asn_in_id,
-               c.asn_line_no,
-               c.business_code,
-               c.cmd_line_no,
-               c.loc_id,
-               i.loc_code,
-               h.area_id,
-               h.area_code,
-               h.area_name,
-               j.lot01,
-               j.lot02,
-               j.lot03,
-               (select user_name from sys_user where user_id = c.QUALITY_EMPLOYEE_ID) as quality_employee,
-               c.splity_employee_id,
-               (select user_name from sys_user where user_id = c.splity_employee_id) as splity_employee,
-               c.update_employee,
-               c.order_type,
-               c.order_biz_type,
-               c.barcode,
-               aid.qty as asn_qty,
-               CASE when c.put_staff_id is NULL THEN 0 ELSE 1 END                        is_put_flg,
-               CASE when c.quality_employee_id is NULL THEN 0 ELSE 1 END                 is_quality_flg
+        d.item_code,
+        d.item_name,
+        d.logogram,
+        d.manufacturer,
+        d.origin,
+        d.is_double_quality,
+        f.package_unit,
+        floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1)) AS medium,
+        c.lot_id,
+        c.qty,
+        c.quality_flg,
+        decode(c.is_unpack, 1, 0, floor(nvl(c.qty, 0) / nvl(g.package_meas, 1))) AS order_qty_piece,
+        decode(c.is_unpack, 1, c.qty, 0) AS order_qty_less,
+        c.order_id as order_in_id,
+        c.order_line_no,
+        c.package_id,
+        c.lpn,
+        c.price,
+        c.asn_in_id,
+        c.asn_line_no,
+        c.business_code,
+        c.cmd_line_no,
+        c.loc_id,
+        i.loc_code,
+        h.area_id,
+        h.area_code,
+        h.area_name,
+        j.lot01,
+        j.lot02,
+        j.lot03,
+        (select user_name from sys_user where user_id = c.QUALITY_EMPLOYEE_ID) as quality_employee,
+        c.splity_employee_id,
+        (select user_name from sys_user where user_id = c.splity_employee_id) as splity_employee,
+        c.update_employee,
+        c.order_type,
+        c.order_biz_type,
+        c.barcode,
+        aid.qty as asn_qty,
+        CASE when c.put_staff_id is NULL THEN 0 ELSE 1 END is_put_flg,
+        CASE when c.quality_employee_id is NULL THEN 0 ELSE 1 END is_quality_flg
         from cmd_in c
-             inner join bas_item d on d.item_id = c.item_id
-             inner join bas_lot_att e on e.lot_id = c.lot_id
-             inner join asn_in_details aid on aid.asn_in_id = c.asn_in_id and aid.ASN_LINE_NO = c.ASN_LINE_NO
-             inner join bas_package_items f
-                        on f.PACKAGE_ID = c.PACKAGE_ID and f.item_id = c.item_id and f.PACKAGE_LEVEL =
-                                                                                     '1'
-             inner join bas_package_items g
-                        on g.PACKAGE_ID = c.PACKAGE_ID and g.item_id = c.item_id and g.PACKAGE_LEVEL =
-                                                                                     '3'
-             left join bas_area h on h.area_id = c.area_id
-             left join bas_location i on i.loc_id = c.loc_id
-             left join bas_lot_att j on c.lot_id = j.lot_id
+        inner join bas_item d on d.item_id = c.item_id
+        inner join bas_lot_att e on e.lot_id = c.lot_id
+        inner join asn_in_details aid on aid.asn_in_id = c.asn_in_id and aid.ASN_LINE_NO = c.ASN_LINE_NO
+        inner join bas_package_items f
+        on f.PACKAGE_ID = c.PACKAGE_ID and f.item_id = c.item_id and f.PACKAGE_LEVEL =
+        '1'
+        inner join bas_package_items g
+        on g.PACKAGE_ID = c.PACKAGE_ID and g.item_id = c.item_id and g.PACKAGE_LEVEL =
+        '3'
+        left join bas_area h on h.area_id = c.area_id
+        left join bas_location i on i.loc_id = c.loc_id
+        left join bas_lot_att j on c.lot_id = j.lot_id
         where c.order_id = #{order_in_id} and c.WH_ID = #{wh_id} and c.qty > 0
         <if test="#obj.notEmpty(ownerArr)">
             and c.owner_id in
@@ -128,31 +128,31 @@
     </select>
 
     <select id="qureyForm">
-         select
-            bo.owner_code ,
-            bo.owner_name ,
-            ci.business_code,
-            ci.business_code_line,
-            oi.order_in_code,
-            bc.customer_code,
-            bc.customer_name,
-            bi.item_code,
-            bi.item_name,
-            case when bi.item_specification = 'N/A' then '*'
-            else bi.item_specification
-            end item_specification,
-            bpi.package_unit,
-            bpi.package_meas,
-            SUM(ci.qty_plan) qty_plan,
-            SUM(oid.qty) order_qty,
-            SUM(ci.qty) QTY,
-            oid.lot01,
-            oid.lot02,
-            oid.lot03,
-            ci.CMD_STATE,
-            aid.qty as total
+        select
+        bo.owner_code ,
+        bo.owner_name ,
+        ci.business_code,
+        ci.business_code_line,
+        oi.order_in_code,
+        bc.customer_code,
+        bc.customer_name,
+        bi.item_code,
+        bi.item_name,
+        case when bi.item_specification = 'N/A' then '*'
+        else bi.item_specification
+        end item_specification,
+        bpi.package_unit,
+        bpi.package_meas,
+        SUM(ci.qty_plan) qty_plan,
+        SUM(oid.qty) order_qty,
+        SUM(ci.qty) QTY,
+        oid.lot01,
+        oid.lot02,
+        oid.lot03,
+        ci.CMD_STATE,
+        aid.qty as total
         from cmd_in ci
-        inner join  order_in  oi on oi.order_in_id = ci.order_id
+        inner join order_in oi on oi.order_in_id = ci.order_id
         inner join order_in_details oid on ci.order_id = oid.order_in_id and ci.order_line_no = oid.order_line_no
         inner join asn_in_details aid on ci.asn_in_id = aid.asn_in_id and ci.asn_line_no = aid.asn_line_no
         inner join bas_item bi on bi.item_id = oid.item_id
@@ -170,23 +170,23 @@
         --@ and oid.lot01 = #{lot01}
         --% and ci.business_code like #{business_code}
         group by
-            bo.owner_code ,
-            bo.owner_name ,
-            ci.business_code,
-            ci.business_code_line,
-            oi.order_in_code,
-            bc.customer_code,
-            bc.customer_name,
-            bi.item_code,
-            bi.item_name,
-            item_specification,
-            bpi.package_unit,
-            bpi.package_meas,
-            oid.lot01,
-            oid.lot02,
-            oid.lot03,
-            ci.CMD_STATE,
-            aid.qty
+        bo.owner_code ,
+        bo.owner_name ,
+        ci.business_code,
+        ci.business_code_line,
+        oi.order_in_code,
+        bc.customer_code,
+        bc.customer_name,
+        bi.item_code,
+        bi.item_name,
+        item_specification,
+        bpi.package_unit,
+        bpi.package_meas,
+        oid.lot01,
+        oid.lot02,
+        oid.lot03,
+        ci.CMD_STATE,
+        aid.qty
 
 
     </select>

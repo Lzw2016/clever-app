@@ -45,9 +45,9 @@ public class DefaultRefreshJwtToken implements RefreshJwtToken {
             // 当token过期时，前端可能同时发送多个请求(并发)，而此时这些请求都带有相同的token和refreshToken，所以服务端对于这些请求需要返回相同的NewJwtToken
             final int delaySeconds = 60;
             if (useToken != null
-                    && useToken.getRtCreateTokenId() != null
-                    && useToken.getRtUseTime() != null
-                    && DateUtils.pastSeconds(useToken.getRtUseTime(), now) <= delaySeconds) {
+                && useToken.getRtCreateTokenId() != null
+                && useToken.getRtUseTime() != null
+                && DateUtils.pastSeconds(useToken.getRtUseTime(), now) <= delaySeconds) {
                 SysJwtToken rtCreateToken = queryDSL.select(sysJwtToken).from(sysJwtToken).where(sysJwtToken.id.eq(useToken.getRtCreateTokenId())).fetchOne();
                 if (rtCreateToken != null) {
                     return BeanMapper.mapper(rtCreateToken, NewJwtToken.class);
@@ -55,12 +55,12 @@ public class DefaultRefreshJwtToken implements RefreshJwtToken {
             }
             // 验证当前Token，异常场景 --> 1.token不存在，2.token未过期，3.token被禁用，4.刷新Token值为空，5.刷新Token内容不一致，6.刷新Token已过期，7.刷新Token无效
             if (useToken == null
-                    || (useToken.getExpiredTime() != null && now.compareTo(useToken.getExpiredTime()) < 0)
-                    || !Objects.equals(useToken.getDisable(), EnumConstant.DISABLE_0)
-                    || StringUtils.isBlank(useToken.getRefreshToken())
-                    || !Objects.equals(useJwtRefreshToken.getUseRefreshToken(), useToken.getRefreshToken())
-                    || (useToken.getRtExpiredTime() != null && now.compareTo(useToken.getRtExpiredTime()) >= 0)
-                    || !Objects.equals(useToken.getRtState(), EnumConstant.JWT_TOKEN_REFRESH_TOKEN_STATE_1)) {
+                || (useToken.getExpiredTime() != null && now.compareTo(useToken.getExpiredTime()) < 0)
+                || !Objects.equals(useToken.getDisable(), EnumConstant.DISABLE_0)
+                || StringUtils.isBlank(useToken.getRefreshToken())
+                || !Objects.equals(useJwtRefreshToken.getUseRefreshToken(), useToken.getRefreshToken())
+                || (useToken.getRtExpiredTime() != null && now.compareTo(useToken.getRtExpiredTime()) >= 0)
+                || !Objects.equals(useToken.getRtState(), EnumConstant.JWT_TOKEN_REFRESH_TOKEN_STATE_1)) {
                 return null;
             }
             // 新增Token

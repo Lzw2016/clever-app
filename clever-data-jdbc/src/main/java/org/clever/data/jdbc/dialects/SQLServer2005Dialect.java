@@ -48,10 +48,10 @@ public class SQLServer2005Dialect extends AbstractDialect {
         paramMap.put(firstMark, firstParam);
         paramMap.put(secondMark, secondParam);
         return "WITH selectTemp AS (SELECT " + distinctStr + "TOP 100 PERCENT " +
-                " ROW_NUMBER() OVER (" + orderBy + ") as __row_number__, " + pagingBuilder +
-                ") SELECT * FROM selectTemp WHERE __row_number__ BETWEEN " +
-                //FIX#299：原因：mysql中limit 10(offset,size) 是从第10开始（不包含10）,；而这里用的BETWEEN是两边都包含，所以改为offset+1
-                firstParam + " AND " + secondParam + " ORDER BY __row_number__";
+            " ROW_NUMBER() OVER (" + orderBy + ") as __row_number__, " + pagingBuilder +
+            ") SELECT * FROM selectTemp WHERE __row_number__ BETWEEN " +
+            //FIX#299：原因：mysql中limit 10(offset,size) 是从第10开始（不包含10）,；而这里用的BETWEEN是两边都包含，所以改为offset+1
+            firstParam + " AND " + secondParam + " ORDER BY __row_number__";
     }
 
     @Override
@@ -77,10 +77,10 @@ public class SQLServer2005Dialect extends AbstractDialect {
         long firstParam = offset + 1;
         long secondParam = offset + limit;
         return "WITH selectTemp AS (SELECT " + distinctStr + "TOP 100 PERCENT " +
-                " ROW_NUMBER() OVER (" + orderBy + ") as __row_number__, " + pagingBuilder +
-                ") SELECT * FROM selectTemp WHERE __row_number__ BETWEEN " +
-                //FIX#299：原因：mysql中limit 10(offset,size) 是从第10开始（不包含10）,；而这里用的BETWEEN是两边都包含，所以改为offset+1
-                firstParam + " AND " + secondParam + " ORDER BY __row_number__";
+            " ROW_NUMBER() OVER (" + orderBy + ") as __row_number__, " + pagingBuilder +
+            ") SELECT * FROM selectTemp WHERE __row_number__ BETWEEN " +
+            //FIX#299：原因：mysql中limit 10(offset,size) 是从第10开始（不包含10）,；而这里用的BETWEEN是两边都包含，所以改为offset+1
+            firstParam + " AND " + secondParam + " ORDER BY __row_number__";
     }
 
     @Override

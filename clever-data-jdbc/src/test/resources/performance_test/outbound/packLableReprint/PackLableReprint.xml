@@ -43,7 +43,7 @@
         b.order_type in ( 2, 3 )
         and b.cmd_state >= 50
         and b.is_unpack = 0
-        <if test = "#obj.notEmpty(queryValue)" >
+        <if test="#obj.notEmpty(queryValue)">
             and (
             o.order_out_code like '%' || #{queryValue} || '%'
             or f.user_name like '%' || #{queryValue} || '%'
@@ -52,7 +52,7 @@
             or e.item_code like '%' || #{queryValue} || '%'
             )
         </if>
-        <if test = "#obj.notEmpty(order_type)" >
+        <if test="#obj.notEmpty(order_type)">
             and b.order_type = #{order_type}
         </if>
         <if test="#obj.notEmpty(start_date)">
@@ -85,7 +85,6 @@
         b.pick_group desc
         ) x
     </select>
-
 
 
 </mapper>

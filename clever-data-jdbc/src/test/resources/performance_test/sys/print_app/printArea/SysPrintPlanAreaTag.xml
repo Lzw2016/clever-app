@@ -11,25 +11,25 @@
     <insert id="insert">
         insert into SYS_PRINT_PLAN_AREA_TAG
         (
-            plan_code,
-            area_code,
-            print_tag,
-            tag_desc,
-            create_at,
-            update_at,
-            create_by,
-            update_by
+        plan_code,
+        area_code,
+        print_tag,
+        tag_desc,
+        create_at,
+        update_at,
+        create_by,
+        update_by
         )
         values
         (
-            #{row.plan_code},
-            #{row.area_code},
-            #{row.print_tag},
-            #{row.tag_desc},
-            #{row.create_at},
-            #{row.update_at},
-            #{row.create_by},
-            #{row.update_by}
+        #{row.plan_code},
+        #{row.area_code},
+        #{row.print_tag},
+        #{row.tag_desc},
+        #{row.create_at},
+        #{row.update_at},
+        #{row.create_by},
+        #{row.update_by}
         )
 
     </insert>
@@ -37,9 +37,9 @@
     <delete id="delete">
         delete from SYS_PRINT_PLAN_AREA_TAG
         where
-            PLAN_CODE = #{plan_code}
-            and AREA_ID = #{area_id}
-            and PRINT_TAG = #{print_tag}
+        PLAN_CODE = #{plan_code}
+        and AREA_ID = #{area_id}
+        and PRINT_TAG = #{print_tag}
     </delete>
 
 </mapper>

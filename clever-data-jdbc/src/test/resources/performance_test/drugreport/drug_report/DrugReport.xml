@@ -4,33 +4,33 @@
 
     <select id="queryOrder">
         select oi.order_in_id,
-               oi.order_in_code,
-               oi.supplier_id,
-               bc.customer_code,
-               bc.customer_name as supplier_name,
-               oi.dates,
-               oi.asn_staff,
-               oi.business_code,
-               oi.order_type,
-               oi.order_biz_type,
-               (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
-               oi.is_complete
+        oi.order_in_code,
+        oi.supplier_id,
+        bc.customer_code,
+        bc.customer_name as supplier_name,
+        oi.dates,
+        oi.asn_staff,
+        oi.business_code,
+        oi.order_type,
+        oi.order_biz_type,
+        (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+        oi.is_complete
         from order_in oi
-             left join bas_customer bc on oi.supplier_id = bc.customer_id
+        left join bas_customer bc on oi.supplier_id = bc.customer_id
         where
-            (CASE
-                WHEN (select count(p.photo_id) from photos p where p.order_id = oi.order_in_id) = '0' THEN '0'
-                ELSE CASE
-                        WHEN (select count(*) from  (select count(oid.order_in_id) from order_in_details oid where oid.order_in_id = oi.order_in_id
-                            group by (oid.order_in_id,oid.item_id,oid.lot_id))t)
-                                 = (select count(p.path)
-                            from photos p where p.order_id = oi.order_in_id) THEN '1'
-                        ELSE '0'
-                     END
-             END ) = 0
-             /* exists(
-            select 1 from order_in_details oid
-            inner join photos p on p.order_id = oid.order_in_id and p.item_id = oid.item_id and p.lot_id = oid.lot_id
+        (CASE
+        WHEN (select count(p.photo_id) from photos p where p.order_id = oi.order_in_id) = '0' THEN '0'
+        ELSE CASE
+        WHEN (select count(*) from (select count(oid.order_in_id) from order_in_details oid where oid.order_in_id = oi.order_in_id
+        group by (oid.order_in_id,oid.item_id,oid.lot_id))t)
+        = (select count(p.path)
+        from photos p where p.order_id = oi.order_in_id) THEN '1'
+        ELSE '0'
+        END
+        END ) = 0
+        /* exists(
+        select 1 from order_in_details oid
+        inner join photos p on p.order_id = oid.order_in_id and p.item_id = oid.item_id and p.lot_id = oid.lot_id
         where oi.order_in_id = oid.order_in_id and p.path is null
         )*/
         <if test="#obj.notEmpty(order_in_code)">
@@ -44,7 +44,7 @@
             and exists(select 1 from cmd_in where order_id = oi.order_in_id and barcode = #{barcode})
         </if>
         <if test="#obj.notEmpty(start_date )  ">
-            AND to_char(oi.dates,'yyyy-mm-dd') &gt;=  #{start_date }
+            AND to_char(oi.dates,'yyyy-mm-dd') &gt;= #{start_date }
         </if>
         <if test="#obj.notEmpty(end_date) ">
             AND to_char(oi.dates,'yyyy-mm-dd') &lt;= #{end_date}
@@ -61,7 +61,7 @@
     </select>
 
     <select id="queryOrderDetails">
-        SELECT  bla.lot_id,
+        SELECT bla.lot_id,
         bla.lot01,
         bla.lot02,
         bla.lot03,
@@ -127,7 +127,7 @@
         CASE WHEN (select COUNT(*) from photos where item_id = bi.item_id AND lot_id = bla.lot_id AND photo_type = 1 AND package_id = t.package_id ) > 1 THEN p.path
         ELSE case
         when p.path is not null then p.path
-        else (select path from photos where item_id = bi.item_id AND lot_id = bla.lot_id AND package_id = t.package_id  and photo_type = 1 and rownum = 1 )
+        else (select path from photos where item_id = bi.item_id AND lot_id = bla.lot_id AND package_id = t.package_id and photo_type = 1 and rownum = 1 )
         end
         END path ,
         -- p.path,
@@ -153,12 +153,12 @@
         bc.customer_name
         FROM (select * from order_in union all select * from wms8_his.order_in) oi
         INNER JOIN (select * from order_in_details union all select * from wms8_his.order_in_details) oid ON oid.order_in_id = oi.order_in_id
-        INNER JOIN (select * from cmd_in union all select * from wms8_his.cmd_in) c_in  ON c_in.order_id = oid.order_in_id and c_in.order_line_no = oid.order_line_no
+        INNER JOIN (select * from cmd_in union all select * from wms8_his.cmd_in) c_in ON c_in.order_id = oid.order_in_id and c_in.order_line_no = oid.order_line_no
         INNER JOIN bas_customer bc ON oi.supplier_id = bc.customer_id
         WHERE oi.order_biz_type NOT IN (12, 14)
         and c_in.quality_flg = 2
         and bc.customer_code != 'D900'
-        GROUP BY  oid.lot_id,oid.item_id, oid.package_id,oi.supplier_id, bc.customer_code,bc.customer_name
+        GROUP BY oid.lot_id,oid.item_id, oid.package_id,oi.supplier_id, bc.customer_code,bc.customer_name
         ) t
         INNER JOIN bas_lot_att bla ON t.lot_id = bla.lot_id
         INNER JOIN bas_item bi ON bi.item_id = t.item_id
@@ -224,51 +224,51 @@
 
     <select id="pdaQueryOrderDetails">
         select d.item_id,
-               d.item_code,
-               d.item_name,
-               d.logogram,
-               d.manufacturer,
-               d.origin,
-               '2' as quality_flg,
-               ci.quality,
-               ci.qty,
-               ci.order_id,
-               ci.owner_id,
-               ci.item_id,
-               ci.package_id,
-               ci.loc_id,
-               ci.lot_id,
-               ci.lpn,
-               ci.barcode,
-               oi.supplier_id,
-               oi.order_in_code,
-               oi.order_type,
-               oi.order_biz_type,
-               ci.asn_line_no,
-               ci.asn_in_id,
-               oid.order_in_id,
-               oid.order_line_no,
-               (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
-               j.lot01,
-               j.lot02,
-               j.lot03,
-               oi.business_code,
-               g.package_meas,
-               floor(nvl(ci.qty, 0) / nvl(g.package_meas, 1)) AS order_piece, -- 验收件数
-               mod(ci.qty, nvl(g.package_meas, 1))            AS order_less   -- 验收零货数量
+        d.item_code,
+        d.item_name,
+        d.logogram,
+        d.manufacturer,
+        d.origin,
+        '2' as quality_flg,
+        ci.quality,
+        ci.qty,
+        ci.order_id,
+        ci.owner_id,
+        ci.item_id,
+        ci.package_id,
+        ci.loc_id,
+        ci.lot_id,
+        ci.lpn,
+        ci.barcode,
+        oi.supplier_id,
+        oi.order_in_code,
+        oi.order_type,
+        oi.order_biz_type,
+        ci.asn_line_no,
+        ci.asn_in_id,
+        oid.order_in_id,
+        oid.order_line_no,
+        (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+        j.lot01,
+        j.lot02,
+        j.lot03,
+        oi.business_code,
+        g.package_meas,
+        floor(nvl(ci.qty, 0) / nvl(g.package_meas, 1)) AS order_piece, -- 验收件数
+        mod(ci.qty, nvl(g.package_meas, 1)) AS order_less -- 验收零货数量
 
         from cmd_in ci
-             inner join order_in_details oid on ci.ORDER_ID = oid.ORDER_IN_ID and ci.ORDER_LINE_NO = oid.ORDER_LINE_NO
-             inner join order_in oi on oid.order_in_id = oi.order_in_id
-             inner join bas_item d on d.item_id = ci.item_id
-             inner join bas_package_items f
-                        on f.PACKAGE_ID = ci.PACKAGE_ID and f.item_id = ci.item_id and f.PACKAGE_LEVEL =
-                                                                                       '1'
-             inner join bas_package_items g
-                        on g.PACKAGE_ID = ci.PACKAGE_ID and g.item_id = ci.item_id and g.PACKAGE_LEVEL =
-                                                                                       '3'
-             inner join bas_lot_att j on ci.lot_id = j.lot_id
-             inner join bas_customer bc on bc.customer_id = oi.supplier_id
+        inner join order_in_details oid on ci.ORDER_ID = oid.ORDER_IN_ID and ci.ORDER_LINE_NO = oid.ORDER_LINE_NO
+        inner join order_in oi on oid.order_in_id = oi.order_in_id
+        inner join bas_item d on d.item_id = ci.item_id
+        inner join bas_package_items f
+        on f.PACKAGE_ID = ci.PACKAGE_ID and f.item_id = ci.item_id and f.PACKAGE_LEVEL =
+        '1'
+        inner join bas_package_items g
+        on g.PACKAGE_ID = ci.PACKAGE_ID and g.item_id = ci.item_id and g.PACKAGE_LEVEL =
+        '3'
+        inner join bas_lot_att j on ci.lot_id = j.lot_id
+        inner join bas_customer bc on bc.customer_id = oi.supplier_id
         where ci.cmd_state <![CDATA[ < 20 ]]>
         --@ and ci.business_code = #{business_code}
         --@ and d.approval_no = #{approval_no}

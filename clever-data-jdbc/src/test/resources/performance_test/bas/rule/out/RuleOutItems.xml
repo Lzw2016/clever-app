@@ -4,21 +4,21 @@
 
     <select id="queryAllRuleOutItem">
         select t.rule_item_id,
-               t.rule_out_id,
-               t.rule_order,
-               t.rule_name,
-               t.order_type,
-               t.order_biz_type,
-               t.pack_level,
-               t.target_pack_level,
-               t.quality,
-               t.loc_expr,
-               t.stock_match_mode,
-               t.is_enable,
-               t.create_at,
-               t.create_by,
-               t.update_at,
-               t.update_by
+        t.rule_out_id,
+        t.rule_order,
+        t.rule_name,
+        t.order_type,
+        t.order_biz_type,
+        t.pack_level,
+        t.target_pack_level,
+        t.quality,
+        t.loc_expr,
+        t.stock_match_mode,
+        t.is_enable,
+        t.create_at,
+        t.create_by,
+        t.update_at,
+        t.update_by
         from rule_out_items t
         where t.is_enable = 1
         --@ AND t.rule_item_id = #{rule_item_id}

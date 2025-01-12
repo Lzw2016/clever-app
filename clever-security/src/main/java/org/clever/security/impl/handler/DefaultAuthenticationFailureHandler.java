@@ -34,9 +34,9 @@ public class DefaultAuthenticationFailureHandler implements AuthenticationFailur
         } catch (Exception ignored) {
         }
         if (dataSource.isEnableRedis()
-                && event.getUserId() != null
-                && event.getClaims() != null
-                && StringUtils.isNotBlank(event.getClaims().getId())) {
+            && event.getUserId() != null
+            && event.getClaims() != null
+            && StringUtils.isNotBlank(event.getClaims().getId())) {
             String key = SecurityRedisKey.getTokenKey(dataSource.getRedisNamespace(), Conv.asString(event.getUserId()), event.getClaims().getId());
             redis.kExpire(key, Redis.DEL_TIME_OUT);
         }

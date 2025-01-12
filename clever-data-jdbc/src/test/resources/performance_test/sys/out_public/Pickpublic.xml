@@ -5,7 +5,7 @@
         select param_value
         from bas_param
         where param_code = #{param_code}
-          and wh_id = #{wh_id}
+        and wh_id = #{wh_id}
     </select>
 
     <select id="getobtaincheck1" resultType="map">
@@ -13,9 +13,9 @@
         SELECT COUNT(*)
         FROM cmd_staff T
         WHERE T.STAFF_ID = #{staff_id}
-          AND T.TASK_TYPE = 10
-          AND T.task_biz_type = #{task_biz_type}
-          AND T.WH_ID = #{wh_id}
+        AND T.TASK_TYPE = 10
+        AND T.task_biz_type = #{task_biz_type}
+        AND T.WH_ID = #{wh_id}
         --@ AND T.WORK_MODE = #{work_mode}
         --@ AND T.PICK_GROUP = #{pick_group}
     </select>
@@ -25,192 +25,192 @@
         SELECT COUNT(*)
         FROM cmd_staff T
         WHERE T.TASK_TYPE = 10
-          AND T.WH_ID = #{wh_id}
-          AND T.PICK_GROUP = #{pick_group}
+        AND T.WH_ID = #{wh_id}
+        AND T.PICK_GROUP = #{pick_group}
     </select>
 
     <select id="getobtaincheck3" resultType="map">
         SELECT t.PICK_GROUP
         FROM cmd_staff T
         WHERE T.STAFF_ID = #{staff_id}
-          AND T.TASK_TYPE = 10
-          AND T.task_biz_type = #{task_biz_type}
-          AND T.WH_ID = #{wh_id}
-          --@ AND T.WORK_MODE = #{work_mode}
-          --@ AND T.PICK_GROUP = #{pick_group}
+        AND T.TASK_TYPE = 10
+        AND T.task_biz_type = #{task_biz_type}
+        AND T.WH_ID = #{wh_id}
+        --@ AND T.WORK_MODE = #{work_mode}
+        --@ AND T.PICK_GROUP = #{pick_group}
         order by t.CREATE_AT LIMIT 1
     </select>
 
     <select id="getfirst_cmd" resultType="map">
         SELECT area_id,
-               order_type
+        order_type
         FROM (
-                 SELECT T_XJ.area_id,
-                        T_XJ.order_type
-                 FROM cmd_out T_XJ
-                      INNER join bas_area T_KF on T_XJ.area_id = T_XJ.area_id and T_XJ.wh_id = T_KF.wh_id
-                      INNER JOIN sys_user_pick T_JHY ON T_XJ.area_id = T_JHY.area_id AND T_JHY.user_id = #{pick_staff_id}
-                      INNER JOIN sys_user_owner t_hz
-                                 ON T_XJ.WH_ID = t_hz.wh_id AND T_XJ.OWNER_ID = T_HZ.owner_id AND t_hz.user_id = #{pick_staff_id}
-                 WHERE T_XJ.CMD_STATE = 20
-                   AND T_XJ.is_active = 1
-                   AND T_XJ.wh_id = #{wh_id}
-                   AND NOT EXISTS(SELECT 'X'
-                                  FROM cmd_out A
-                                  WHERE A.order_id = T_XJ.order_id
-                                    AND A.CMD_STATE = T_XJ.CMD_STATE
-                                    AND A.QTY_PLAN != QTY
-                                    AND A.ORDER_TYPE != 9)
-                 ORDER BY decode(T_XJ.order_type, 9, 0, 1), --盘点任务永远第一
-                          T_JHY.pick_order,
-                          T_JHY.pick_priority ASC
-             ) B LIMIT  1
+        SELECT T_XJ.area_id,
+        T_XJ.order_type
+        FROM cmd_out T_XJ
+        INNER join bas_area T_KF on T_XJ.area_id = T_XJ.area_id and T_XJ.wh_id = T_KF.wh_id
+        INNER JOIN sys_user_pick T_JHY ON T_XJ.area_id = T_JHY.area_id AND T_JHY.user_id = #{pick_staff_id}
+        INNER JOIN sys_user_owner t_hz
+        ON T_XJ.WH_ID = t_hz.wh_id AND T_XJ.OWNER_ID = T_HZ.owner_id AND t_hz.user_id = #{pick_staff_id}
+        WHERE T_XJ.CMD_STATE = 20
+        AND T_XJ.is_active = 1
+        AND T_XJ.wh_id = #{wh_id}
+        AND NOT EXISTS(SELECT 'X'
+        FROM cmd_out A
+        WHERE A.order_id = T_XJ.order_id
+        AND A.CMD_STATE = T_XJ.CMD_STATE
+        AND A.QTY_PLAN != QTY
+        AND A.ORDER_TYPE != 9)
+        ORDER BY decode(T_XJ.order_type, 9, 0, 1), --盘点任务永远第一
+        T_JHY.pick_order,
+        T_JHY.pick_priority ASC
+        ) B LIMIT 1
     </select>
 
     <select id="get_cmd_zj" resultType="map">
         select t_cmd.order_id,
-               t_cmd.cmd_line_no,
-               t_cmd.item_id,
-               t_cmd.package_id,
-               t_cmd.owner_id,
-               t_cmd.lot_id,
-               t_cmd.area_id,
-               t_cmd.order_type,
-               t_cmd.order_biz_type,
-               --t_hw.zidloc_flg, 是否自动化货位 预留
-               --t_kf.fenjj_flg, 出库是否走输送线
+        t_cmd.cmd_line_no,
+        t_cmd.item_id,
+        t_cmd.package_id,
+        t_cmd.owner_id,
+        t_cmd.lot_id,
+        t_cmd.area_id,
+        t_cmd.order_type,
+        t_cmd.order_biz_type,
+        --t_hw.zidloc_flg, 是否自动化货位 预留
+        --t_kf.fenjj_flg, 出库是否走输送线
 
-               t_cmd.qty_plan / bpi.package_meas jians_num,
-               t_cmd.area_id                     frmarea,
-               t_hw_to.area_id                   toarea,
-               t_cmd.loc_id,
-               t_cmd.loc_id_real,
-               t_cmd.lpn,
-               t_hw_to.loc_abc                   huow_abc,
-               t_kf.review_type,
-               t_kf.pick_work_type,
-               t_kf.pick_mode,
-               t_cmd.wh_id
+        t_cmd.qty_plan / bpi.package_meas jians_num,
+        t_cmd.area_id frmarea,
+        t_hw_to.area_id toarea,
+        t_cmd.loc_id,
+        t_cmd.loc_id_real,
+        t_cmd.lpn,
+        t_hw_to.loc_abc huow_abc,
+        t_kf.review_type,
+        t_kf.pick_work_type,
+        t_kf.pick_mode,
+        t_cmd.wh_id
         from cmd_out t_cmd
-             inner join bas_area t_kf on t_cmd.area_id = t_kf.area_id and t_cmd.wh_id = t_kf.wh_id
-             inner join bas_location t_hw on t_cmd.loc_id = t_hw.loc_id
-             left join bas_location t_hw_to on t_cmd.loc_id_real = t_hw_to.loc_id
-             inner join sys_user_pick t_jhy
-                        on t_cmd.area_id = t_jhy.area_id and t_cmd.wh_id = t_jhy.wh_id and t_jhy.user_id =
-                                                                                           #{pick_staff_id}
-             inner join sys_user_owner t_jhy2 on t_cmd.owner_id = t_jhy2.owner_id and t_cmd.wh_id = t_jhy2.wh_id and
-                                                 t_jhy2.user_id = #{pick_staff_id}
-             inner join bas_item t_sp on t_cmd.item_id = t_sp.item_id
-             inner join bas_package_items bpi on t_cmd.item_id = bpi.item_id and t_cmd.package_id = bpi.package_id and
-                                                 bpi.package_level = 3
+        inner join bas_area t_kf on t_cmd.area_id = t_kf.area_id and t_cmd.wh_id = t_kf.wh_id
+        inner join bas_location t_hw on t_cmd.loc_id = t_hw.loc_id
+        left join bas_location t_hw_to on t_cmd.loc_id_real = t_hw_to.loc_id
+        inner join sys_user_pick t_jhy
+        on t_cmd.area_id = t_jhy.area_id and t_cmd.wh_id = t_jhy.wh_id and t_jhy.user_id =
+        #{pick_staff_id}
+        inner join sys_user_owner t_jhy2 on t_cmd.owner_id = t_jhy2.owner_id and t_cmd.wh_id = t_jhy2.wh_id and
+        t_jhy2.user_id = #{pick_staff_id}
+        inner join bas_item t_sp on t_cmd.item_id = t_sp.item_id
+        inner join bas_package_items bpi on t_cmd.item_id = bpi.item_id and t_cmd.package_id = bpi.package_id and
+        bpi.package_level = 3
 
         WHERE T_CMD.pick_group = #{pick_group} --空值用 N/A
-          AND T_CMD.wh_id = #{wh_id}
-          --@ AND T_CMD.area_id = #{area_id}
-          --@ AND T_CMD.order_type = #{order_type}
-          AND NOT EXISTS
-            (SELECT 'X'
-             FROM cmd_out t_cmd2
-             WHERE t_cmd2.order_id = T_CMD.order_id
-               AND t_cmd2.cmd_state = T_CMD.cmd_state
-               AND t_cmd2.qty != t_cmd2.qty_plan
-               AND t_cmd2.order_type != 9)
-          AND T_CMD.cmd_state = 20
-          AND T_CMD.is_unpack = 0              --不拆包就是整件任务
-          AND T_CMD.is_active = 1
-          --AND T_CMD.KUB != PKG_UTL_CST.KUB_LTK 需要排除掉自动化作业任务，预留
+        AND T_CMD.wh_id = #{wh_id}
+        --@ AND T_CMD.area_id = #{area_id}
+        --@ AND T_CMD.order_type = #{order_type}
+        AND NOT EXISTS
+        (SELECT 'X'
+        FROM cmd_out t_cmd2
+        WHERE t_cmd2.order_id = T_CMD.order_id
+        AND t_cmd2.cmd_state = T_CMD.cmd_state
+        AND t_cmd2.qty != t_cmd2.qty_plan
+        AND t_cmd2.order_type != 9)
+        AND T_CMD.cmd_state = 20
+        AND T_CMD.is_unpack = 0 --不拆包就是整件任务
+        AND T_CMD.is_active = 1
+        --AND T_CMD.KUB != PKG_UTL_CST.KUB_LTK 需要排除掉自动化作业任务，预留
         ORDER BY T_JHY.pick_order,
-                 T_CMD.cmd_order,
-                 T_HW.loc_pick_sort,
-                 T_HW.loc_code,
-                 T_CMD.item_id,
-                 T_CMD.lot_id
+        T_CMD.cmd_order,
+        T_HW.loc_pick_sort,
+        T_HW.loc_code,
+        T_CMD.item_id,
+        T_CMD.lot_id
     </select>
 
     <select id="get_cmd_lh" resultType="map">
         SELECT T_CMD.order_id,
-               T_CMD.cmd_line_no,
-               T_CMD.item_id,
-               t_cmd.package_id,
-               T_CMD.owner_id,
-               T_CMD.lot_id,
-               T_CMD.area_id,
-               T_CMD.order_type,
-               T_CMD.order_biz_type,
-               --T_HW.ZIDLOC_FLG,  是否自动化货位 预留
-               --T_KF.FENJJ_FLG,   出库是否走输送线
+        T_CMD.cmd_line_no,
+        T_CMD.item_id,
+        t_cmd.package_id,
+        T_CMD.owner_id,
+        T_CMD.lot_id,
+        T_CMD.area_id,
+        T_CMD.order_type,
+        T_CMD.order_biz_type,
+        --T_HW.ZIDLOC_FLG, 是否自动化货位 预留
+        --T_KF.FENJJ_FLG, 出库是否走输送线
 
-               t_cmd.qty_plan / bpi.package_meas JIANS_NUM,
-               T_CMD.area_id                     FRMarea,
-               T_HW_TO.area_id                   TOarea,
-               T_CMD.loc_id,
-               T_CMD.loc_id_real,
-               T_CMD.lpn,
-               T_HW_TO.loc_abc                   HUOW_ABC,
-               T_KF.review_type,
-               T_KF.pick_work_type,
-               T_KF.pick_mode,
-               T_CMD.wh_id
+        t_cmd.qty_plan / bpi.package_meas JIANS_NUM,
+        T_CMD.area_id FRMarea,
+        T_HW_TO.area_id TOarea,
+        T_CMD.loc_id,
+        T_CMD.loc_id_real,
+        T_CMD.lpn,
+        T_HW_TO.loc_abc HUOW_ABC,
+        T_KF.review_type,
+        T_KF.pick_work_type,
+        T_KF.pick_mode,
+        T_CMD.wh_id
         FROM cmd_out T_CMD
-             INNER join bas_area T_KF on T_CMD.area_id = T_KF.area_id and T_CMD.wh_id = T_KF.wh_id
-             INNER join bas_location T_HW on T_CMD.loc_id = T_HW.loc_id
-             left join bas_location T_HW_TO on T_CMD.loc_id_real = T_HW_TO.loc_id
-             INNER join sys_user_pick T_JHY
-                        on T_CMD.area_id = T_JHY.area_id and t_cmd.wh_id = T_JHY.wh_id and T_JHY.user_id = #{pick_staff_id}
-             INNER join sys_user_owner t_jhy2
-                        on t_cmd.owner_id = t_jhy2.owner_id and t_cmd.wh_id = t_jhy2.wh_id and t_jhy2.user_id = #{pick_staff_id}
-             INNER join bas_item T_SP on T_CMD.item_id = t_sp.item_id
-             INNER join bas_package_items bpi
-                        on t_cmd.item_id = bpi.item_id and T_CMD.package_id = bpi.package_id and bpi.package_level = 3
+        INNER join bas_area T_KF on T_CMD.area_id = T_KF.area_id and T_CMD.wh_id = T_KF.wh_id
+        INNER join bas_location T_HW on T_CMD.loc_id = T_HW.loc_id
+        left join bas_location T_HW_TO on T_CMD.loc_id_real = T_HW_TO.loc_id
+        INNER join sys_user_pick T_JHY
+        on T_CMD.area_id = T_JHY.area_id and t_cmd.wh_id = T_JHY.wh_id and T_JHY.user_id = #{pick_staff_id}
+        INNER join sys_user_owner t_jhy2
+        on t_cmd.owner_id = t_jhy2.owner_id and t_cmd.wh_id = t_jhy2.wh_id and t_jhy2.user_id = #{pick_staff_id}
+        INNER join bas_item T_SP on T_CMD.item_id = t_sp.item_id
+        INNER join bas_package_items bpi
+        on t_cmd.item_id = bpi.item_id and T_CMD.package_id = bpi.package_id and bpi.package_level = 3
 
         WHERE T_CMD.pick_group = #{pick_group} --空值用 N/A
-          AND T_CMD.wh_id = #{wh_id}
-          AND NOT EXISTS
-            (SELECT 'X'
-             FROM cmd_out t_cmd2
-             WHERE t_cmd2.order_id = T_CMD.order_id
-               AND t_cmd2.cmd_state = T_CMD.cmd_state
-               AND t_cmd2.qty != t_cmd2.qty_plan
-               AND t_cmd2.order_type != 9)
-          --零货索取时，同一拆分单中有一行明细没激活无法索取任务，为了包装订单的出库同步性
-          AND NOT EXISTS(SELECT 'X'
-                         FROM cmd_out t_cmd3
-                         WHERE t_cmd3.review_group = T_CMD.review_group
-                           AND t_cmd3.wh_id = T_CMD.wh_id
-                           AND t_cmd3.is_append = 0 --排除没有激活的追加拣货 王翔 2017/10/19
-                           AND t_cmd3.is_active = 1)
-          AND NOT EXISTS
-            (SELECT 'X'
-             FROM cmd_out t_cmd4
-             WHERE t_cmd4.pick_group = T_CMD.pick_group
-               AND t_cmd4.area_id = T_CMD.area_id
-               and t_cmd4.cmd_state != 30)
-          AND T_CMD.cmd_state = 30
-          AND T_CMD.is_unpack = 1              --拆包就是零货任务
-          AND T_CMD.is_active = 1
+        AND T_CMD.wh_id = #{wh_id}
+        AND NOT EXISTS
+        (SELECT 'X'
+        FROM cmd_out t_cmd2
+        WHERE t_cmd2.order_id = T_CMD.order_id
+        AND t_cmd2.cmd_state = T_CMD.cmd_state
+        AND t_cmd2.qty != t_cmd2.qty_plan
+        AND t_cmd2.order_type != 9)
+        --零货索取时，同一拆分单中有一行明细没激活无法索取任务，为了包装订单的出库同步性
+        AND NOT EXISTS(SELECT 'X'
+        FROM cmd_out t_cmd3
+        WHERE t_cmd3.review_group = T_CMD.review_group
+        AND t_cmd3.wh_id = T_CMD.wh_id
+        AND t_cmd3.is_append = 0 --排除没有激活的追加拣货 王翔 2017/10/19
+        AND t_cmd3.is_active = 1)
+        AND NOT EXISTS
+        (SELECT 'X'
+        FROM cmd_out t_cmd4
+        WHERE t_cmd4.pick_group = T_CMD.pick_group
+        AND t_cmd4.area_id = T_CMD.area_id
+        and t_cmd4.cmd_state != 30)
+        AND T_CMD.cmd_state = 30
+        AND T_CMD.is_unpack = 1 --拆包就是零货任务
+        AND T_CMD.is_active = 1
         ORDER BY T_JHY.pick_order,
-                 T_CMD.cmd_order,
-                 T_HW.loc_pick_sort,
-                 T_HW.loc_code,
-                 T_CMD.item_id,
-                 T_CMD.lot_id limit  1
+        T_CMD.cmd_order,
+        T_HW.loc_pick_sort,
+        T_HW.loc_code,
+        T_CMD.item_id,
+        T_CMD.lot_id limit 1
     </select>
     <update id="uppickcmd10">
         update cmd_out
-        set cmd_state       = #{cmd_state},
-            work_mode       = #{work_mode},
-            pick_group      = #{pick_group},
-            pick_staff_id   = #{pick_staff_id},
-            pick_obtain_time= now()
+        set cmd_state = #{cmd_state},
+        work_mode = #{work_mode},
+        pick_group = #{pick_group},
+        pick_staff_id = #{pick_staff_id},
+        pick_obtain_time= now()
         where order_id = #{order_id}
-          and cmd_line_no = #{cmd_line_no}
+        and cmd_line_no = #{cmd_line_no}
     </update>
     <update id="uppickcmd20">
         update cmd_out
-        set cmd_state       = #{cmd_state},
-            work_mode       = #{work_mode},
-            pick_staff_id   = #{pick_staff_id},
-            pick_obtain_time= now()
+        set cmd_state = #{cmd_state},
+        work_mode = #{work_mode},
+        pick_staff_id = #{pick_staff_id},
+        pick_obtain_time= now()
         where pick_group = #{pick_group}
         --@ AND area_id = #{area_id}
     </update>

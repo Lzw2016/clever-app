@@ -91,12 +91,12 @@ public abstract class Tuple implements Iterable<Object>, Serializable, Comparabl
     public final Object getValue(final int index) {
         if (index >= getSize()) {
             throw new IllegalArgumentException(
-                    String.format(
-                            "Cannot retrieve position %s in %s. Positions for this class start with 0 and end with %s",
-                            index,
-                            this.getClass().getSimpleName(),
-                            (getSize() - 1)
-                    )
+                String.format(
+                    "Cannot retrieve position %s in %s. Positions for this class start with 0 and end with %s",
+                    index,
+                    this.getClass().getSimpleName(),
+                    (getSize() - 1)
+                )
             );
         }
         return this.valueArray[index];

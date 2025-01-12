@@ -24,9 +24,9 @@ public class AppShutdownHook {
             int idx = 1;
             for (ShutdownTask task : SHUTDOWN_TASK_LIST) {
                 log.info(
-                        "# 执行停机任务 {}{}",
-                        String.format("%-2s", idx++),
-                        StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : ""
+                    "# 执行停机任务 {}{}",
+                    String.format("%-2s", idx++),
+                    StringUtils.isNoneBlank(task.name) ? String.format(" | %s", task.name) : ""
                 );
                 try {
                     task.runnable.run();

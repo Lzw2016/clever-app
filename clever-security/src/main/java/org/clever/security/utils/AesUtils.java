@@ -15,9 +15,9 @@ public class AesUtils {
      */
     public static String encode(String key, String iv, CharSequence rawPassword) {
         byte[] data = CryptoUtils.aesEncrypt(
-                rawPassword.toString().getBytes(StandardCharsets.UTF_8),
-                EncodeDecodeUtils.decodeHex(key),
-                EncodeDecodeUtils.decodeHex(iv)
+            rawPassword.toString().getBytes(StandardCharsets.UTF_8),
+            EncodeDecodeUtils.decodeHex(key),
+            EncodeDecodeUtils.decodeHex(iv)
         );
         return EncodeDecodeUtils.encodeBase64(data);
     }
@@ -27,9 +27,9 @@ public class AesUtils {
      */
     public static String decode(String key, String iv, CharSequence encodedPassword) {
         return CryptoUtils.aesDecrypt(
-                EncodeDecodeUtils.decodeBase64(encodedPassword.toString()),
-                EncodeDecodeUtils.decodeHex(key),
-                EncodeDecodeUtils.decodeHex(iv)
+            EncodeDecodeUtils.decodeBase64(encodedPassword.toString()),
+            EncodeDecodeUtils.decodeHex(key),
+            EncodeDecodeUtils.decodeHex(iv)
         );
     }
 }

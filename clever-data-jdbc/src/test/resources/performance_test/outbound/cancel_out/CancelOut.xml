@@ -18,7 +18,7 @@
         where a.wh_id = #{wh_id} and a.status &lt; #{status}
         and ((a.status >= 70 and a.status &lt; 120) or a.status &lt; 30
         or exists(select 1 from cmd_out where a.order_out_id = order_id and barcode != 'N/A' and barcode is not null
-            and pack_no != 'N/A' and pack_no is not null and cmd_state in (90)))
+        and pack_no != 'N/A' and pack_no is not null and cmd_state in (90)))
         --@ and a.dates >= #{start_date}
         --@ and a.dates &lt;= #{end_date}
         --@ and a.owner_id = #{owner_id}

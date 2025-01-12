@@ -49,8 +49,8 @@
         FROM
         inv_loc TA,
         bas_item TB
-            left join rule_apply T1 on T1.match_id = TB.item_id and T1.match_type = 4 and T1.rule_type = 1 and T1.is_enable = 1
-            left join rule_putaway T2 on T2.rule_putaway_id = T1.rule_id,
+        left join rule_apply T1 on T1.match_id = TB.item_id and T1.match_type = 4 and T1.rule_type = 1 and T1.is_enable = 1
+        left join rule_putaway T2 on T2.rule_putaway_id = T1.rule_id,
         bas_location TC,
         bas_lot_att TD,
         bas_area TF,
@@ -71,35 +71,35 @@
         AND TC.area_id = TF.area_id
         AND TA.wh_id = #{wh_id}
         AND TC.loc_classify != 9
-        <if test = "loc_classify != null and loc_classify != '' and loc_classify != '%'">
+        <if test="loc_classify != null and loc_classify != '' and loc_classify != '%'">
             AND TC.loc_classify = #{loc_classify}
         </if>
-        <if test = "area_code != null and area_code != ''">
+        <if test="area_code != null and area_code != ''">
             AND TF.area_code = #{area_code}
         </if>
-        <if test = "loc_code != null and loc_code != ''">
+        <if test="loc_code != null and loc_code != ''">
             AND TC.loc_code LIKE '%' || #{loc_code} || '%'
         </if>
-        <if test = "item_code != null and item_code != ''">
+        <if test="item_code != null and item_code != ''">
             AND ((TB.item_code LIKE '%' || #{item_code} || '%') OR (TT.barcode LIKE '%' || #{item_code} || '%') OR (UPPER(TB.logogram) LIKE '%' || UPPER(#{item_code}) || '%') OR (TB.approval_no LIKE '%' || #{item_code} || '%'))
         </if>
         <if test="item_code_list!= null and item_code_list.size() > 0">
             AND item_code in (#{item_code_list})
         </if>
-        <if test = "owner_id != null and owner_id != ''">
+        <if test="owner_id != null and owner_id != ''">
             AND TA.owner_id = #{owner_id}
         </if>
         AND TA.owner_id IN (#{owner_id_list})
-        <if test = "is_expensive != null and is_expensive != ''">
+        <if test="is_expensive != null and is_expensive != ''">
             AND TB.is_expensive = #{is_expensive}
         </if>
-        <if test = "road_text != null and road_text != ''">
+        <if test="road_text != null and road_text != ''">
             AND TC.road_text like '%' || #{road_text} || '%'
         </if>
-        <if test = "first_code != null and first_code != ''">
+        <if test="first_code != null and first_code != ''">
             AND T2.name like UPPER(#{first_code}) || '%'
         </if>
-        <if test = "is_distribution != null and is_distribution != 0">
+        <if test="is_distribution != null and is_distribution != 0">
             -- AND TD.lot12 = '7006'
             AND TF.area_code in ('THZZK', 'THGK', 'THCYK' ,'THK')
         </if>
@@ -108,127 +108,127 @@
 
     <select id="getCheckTaskOrder" resultType="map">
         select
-            hz.chk_no,
-            hz.chk_id,
-            hz.create_at
+        hz.chk_no,
+        hz.chk_id,
+        hz.create_at
         from
-            pda_check hz
+        pda_check hz
         where
-            hz.is_complete = 0
-            and hz.chk_id in (
-                select
-                    T.chk_id
-                from
-                    pda_check_details T
-                where
-                    1=1
-                    and T.qty3 is null
-                    <if test="type != null and type == 1">
-                        and T.qty1 is null and T.qty2 is null
-                    </if>
-                    <if test="type != null and type == 2">
-                        and T.qty1 is not null and T.qty2 is null
-                        <if test="show_diff != null and show_diff == true">
-                            and T.qty <![CDATA[ <> ]]> T.qty1
-                        </if>
-                    </if>
-                    <if test="type != null and type == 3">
-                        and T.qty1 is not null and T.qty2 is not null
-                        and ((T.qty <![CDATA[ <> ]]> T.qty1) or (T.qty <![CDATA[ <> ]]> T.qty2))
-                    </if>
-            )
+        hz.is_complete = 0
+        and hz.chk_id in (
+        select
+        T.chk_id
+        from
+        pda_check_details T
+        where
+        1=1
+        and T.qty3 is null
+        <if test="type != null and type == 1">
+            and T.qty1 is null and T.qty2 is null
+        </if>
+        <if test="type != null and type == 2">
+            and T.qty1 is not null and T.qty2 is null
+            <if test="show_diff != null and show_diff == true">
+                and T.qty <![CDATA[ <> ]]> T.qty1
+            </if>
+        </if>
+        <if test="type != null and type == 3">
+            and T.qty1 is not null and T.qty2 is not null
+            and ((T.qty <![CDATA[ <> ]]> T.qty1) or (T.qty <![CDATA[ <> ]]> T.qty2))
+        </if>
+        )
         order by
-            hz.chk_no
+        hz.chk_no
     </select>
 
     <select id="getCheckTaskArea" resultType="map">
         select
-            T1.chk_id,
-            T3.area_code,
-            T3.area_id,
-            T2.road_no,
-            T2.road_text,
-            count(T1.loc_id) Z_TS,
-            sum(case when T1.qty1 is not null then 1 else 0 end) qty1_TS,
-            sum(case when T1.qty2 is not null then 1 else 0 end) qty2_TS,
-            sum(case when T1.qty3 is not null then 1 else 0 end) qty3_TS
+        T1.chk_id,
+        T3.area_code,
+        T3.area_id,
+        T2.road_no,
+        T2.road_text,
+        count(T1.loc_id) Z_TS,
+        sum(case when T1.qty1 is not null then 1 else 0 end) qty1_TS,
+        sum(case when T1.qty2 is not null then 1 else 0 end) qty2_TS,
+        sum(case when T1.qty3 is not null then 1 else 0 end) qty3_TS
         from
-            pda_check_details T1,
-            bas_location T2,
-            bas_area T3
+        pda_check_details T1,
+        bas_location T2,
+        bas_area T3
         where
-            T1.chk_id = #{chk_id}
-            and T1.loc_id = T2.loc_id
-            and T2.area_id = T3.area_id
-            and T1.qty3 is null
-            <if test="type != null and type == 1">
-                and T1.qty1 is null and T1.qty2 is null
+        T1.chk_id = #{chk_id}
+        and T1.loc_id = T2.loc_id
+        and T2.area_id = T3.area_id
+        and T1.qty3 is null
+        <if test="type != null and type == 1">
+            and T1.qty1 is null and T1.qty2 is null
+        </if>
+        <if test="type != null and type == 2">
+            and T1.qty1 is not null and T1.qty2 is null
+            <if test="show_diff != null and show_diff == true">
+                and T1.qty <![CDATA[ <> ]]> T1.qty1
             </if>
-            <if test="type != null and type == 2">
-                and T1.qty1 is not null and T1.qty2 is null
-                <if test="show_diff != null and show_diff == true">
-                    and T1.qty <![CDATA[ <> ]]> T1.qty1
-                </if>
-            </if>
-            <if test="type != null and type == 3">
-                and T1.qty1 is not null and T1.qty2 is not null
-                and ((T1.qty <![CDATA[ <> ]]> T1.qty1) or (T1.qty <![CDATA[ <> ]]> T1.qty2))
-            </if>
+        </if>
+        <if test="type != null and type == 3">
+            and T1.qty1 is not null and T1.qty2 is not null
+            and ((T1.qty <![CDATA[ <> ]]> T1.qty1) or (T1.qty <![CDATA[ <> ]]> T1.qty2))
+        </if>
         group by
-            T1.chk_id,
-            T3.area_code,
-            T3.area_id,
-            T2.road_no,
-            T2.road_text
+        T1.chk_id,
+        T3.area_code,
+        T3.area_id,
+        T2.road_no,
+        T2.road_text
         order by
-            T3.area_code, T2.road_text
+        T3.area_code, T2.road_text
     </select>
 
     <select id="getCheckTaskDetails" resultType="map">
         select
-            T1.*,
-            T2.loc_code,
-            T2.area_id,
-            T2.road_no,
-            T3.package_meas,
-            T3.package_unit,
-            T4.lot01,
-            T4.lot04,
-            T5.item_code,
-            T5.item_name,
-            T5.manufacturer
+        T1.*,
+        T2.loc_code,
+        T2.area_id,
+        T2.road_no,
+        T3.package_meas,
+        T3.package_unit,
+        T4.lot01,
+        T4.lot04,
+        T5.item_code,
+        T5.item_name,
+        T5.manufacturer
         from
-            pda_check_details T1,
-            bas_location T2,
-            bas_package_items T3,
-            bas_lot_att T4,
-            bas_item T5
+        pda_check_details T1,
+        bas_location T2,
+        bas_package_items T3,
+        bas_lot_att T4,
+        bas_item T5
         where
-            T1.chk_id = #{chk_id}
-            and T1.loc_id = T2.loc_id
-            and T1.item_id = T3.item_id
-            and T1.package_id = T3.package_id
-            and T3.package_level = 3
-            and T1.lot_id = T4.lot_id
-            and T1.item_id = T5.item_id
-            and T1.owner_id = T5.owner_id
-            and T2.area_id = #{area_id}
-            and T2.road_no = #{road_no}
-            and T1.qty3 is null
-            <if test="type != null and type == 1">
-                and T1.qty1 is null and T1.qty2 is null
+        T1.chk_id = #{chk_id}
+        and T1.loc_id = T2.loc_id
+        and T1.item_id = T3.item_id
+        and T1.package_id = T3.package_id
+        and T3.package_level = 3
+        and T1.lot_id = T4.lot_id
+        and T1.item_id = T5.item_id
+        and T1.owner_id = T5.owner_id
+        and T2.area_id = #{area_id}
+        and T2.road_no = #{road_no}
+        and T1.qty3 is null
+        <if test="type != null and type == 1">
+            and T1.qty1 is null and T1.qty2 is null
+        </if>
+        <if test="type != null and type == 2">
+            and T1.qty1 is not null and T1.qty2 is null
+            <if test="show_diff != null and show_diff == true">
+                and T1.qty <![CDATA[ <> ]]> T1.qty1
             </if>
-            <if test="type != null and type == 2">
-                and T1.qty1 is not null and T1.qty2 is null
-                <if test="show_diff != null and show_diff == true">
-                    and T1.qty <![CDATA[ <> ]]> T1.qty1
-                </if>
-            </if>
-            <if test="type != null and type == 3">
-                and T1.qty1 is not null and T1.qty2 is not null
-                and ((T1.qty <![CDATA[ <> ]]> T1.qty1) or (T1.qty <![CDATA[ <> ]]> T1.qty2))
-            </if>
-            order by T1.chk_id, T2.loc_code
+        </if>
+        <if test="type != null and type == 3">
+            and T1.qty1 is not null and T1.qty2 is not null
+            and ((T1.qty <![CDATA[ <> ]]> T1.qty1) or (T1.qty <![CDATA[ <> ]]> T1.qty2))
+        </if>
+        order by T1.chk_id, T2.loc_code
     </select>
 
 </mapper>

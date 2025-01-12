@@ -4,12 +4,12 @@
 
     <select id="queryLot" resultType="map">
         select distinct
-            t1.item_id,
-            t1.lot01,
-            t1.lot02,
-            t1.lot03,
-            t2.item_code,
-            t2.item_name
+        t1.item_id,
+        t1.lot01,
+        t1.lot02,
+        t1.lot03,
+        t2.item_code,
+        t2.item_name
         from bas_lot_att t1, bas_item t2
         where
         t1.item_id = t2.item_id

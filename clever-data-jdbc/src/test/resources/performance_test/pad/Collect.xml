@@ -53,32 +53,32 @@
     <!--客户已集运仓位件数查询-->
     <select id="queryCollectByCustomer">
         SELECT
-            bs.stage_code,
-            t.qty
+        bs.stage_code,
+        t.qty
         FROM
-            (
-                SELECT
-                    *
-                FROM
-                    cmd_out co
-                WHERE
-                    co.barcode != 'N/A'
-		AND concat( co.order_id, co.cmd_line_no ) IN (
-		SELECT
-			concat( min( t.order_id ), min( t.cmd_line_no ) )
-		FROM
-			cmd_out t
-		WHERE
-			t.wh_id = #{wh_id}
-		GROUP BY
-			t.barcode
-		)
-            ) t
-                INNER JOIN order_out oo ON oo.order_out_id = t.order_id
-                INNER JOIN bas_customer bc ON bc.customer_id = oo.customer_id
-                LEFT JOIN bas_stage bs ON bs.stage_id = t.collect_stage_id
+        (
+        SELECT
+        *
+        FROM
+        cmd_out co
         WHERE
-          bc.CUSTOMER_CODE = #{customer_code}
-          AND t.collect_staff_id IS NOT NULL
+        co.barcode != 'N/A'
+        AND concat( co.order_id, co.cmd_line_no ) IN (
+        SELECT
+        concat( min( t.order_id ), min( t.cmd_line_no ) )
+        FROM
+        cmd_out t
+        WHERE
+        t.wh_id = #{wh_id}
+        GROUP BY
+        t.barcode
+        )
+        ) t
+        INNER JOIN order_out oo ON oo.order_out_id = t.order_id
+        INNER JOIN bas_customer bc ON bc.customer_id = oo.customer_id
+        LEFT JOIN bas_stage bs ON bs.stage_id = t.collect_stage_id
+        WHERE
+        bc.CUSTOMER_CODE = #{customer_code}
+        AND t.collect_staff_id IS NOT NULL
     </select>
 </mapper>

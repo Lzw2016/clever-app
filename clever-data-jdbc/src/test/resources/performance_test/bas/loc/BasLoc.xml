@@ -36,15 +36,15 @@
         select bl.*, ba.area_name, ba.area_code
         from bas_location bl, bas_area ba
         where bl.is_enable = 1
-          and bl.AREA_ID = ba.AREA_ID
-          and bl.wh_id = #{wh_id}
-          and bl.owner_id in (#{owner_id_list})
-          --@ and bl.area_id = #{area_id}
-          ${@com.galaxis.wms.ext.Sql@phrase('AND', 'bl.loc_code like')}
-            <if test = "area_code != null and area_code != ''">
-                AND ba.area_code = #{area_code}
-            </if>
-         order by bl.loc_code asc
+        and bl.AREA_ID = ba.AREA_ID
+        and bl.wh_id = #{wh_id}
+        and bl.owner_id in (#{owner_id_list})
+        --@ and bl.area_id = #{area_id}
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'bl.loc_code like')}
+        <if test="area_code != null and area_code != ''">
+            AND ba.area_code = #{area_code}
+        </if>
+        order by bl.loc_code asc
     </select>
 
     <!--根据商品ID和批号ID查询当前仓库下货位数据-->
@@ -54,10 +54,10 @@
         inner join bas_area ba on bl.AREA_ID = ba.AREA_ID
         inner join inv_loc il on il.loc_id = bl.loc_id
         where bl.is_enable = 1
-          and il.item_id = #{item_id}
-          and il.lot_id = #{lot_id}
-          and bl.wh_id = #{wh_id}
-          ${@com.galaxis.wms.ext.Sql@phrase('AND', 'bl.loc_code like')}
+        and il.item_id = #{item_id}
+        and il.lot_id = #{lot_id}
+        and bl.wh_id = #{wh_id}
+        ${@com.galaxis.wms.ext.Sql@phrase('AND', 'bl.loc_code like')}
     </select>
 
     <select id="queryAllLoc">
@@ -95,11 +95,11 @@
         t.loc_mixes_num,
         nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
         nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by,
-       ba.area_name,
-       bo.owner_name
+        ba.area_name,
+        bo.owner_name
         from bas_location t
-             inner join bas_area ba on ba.area_id = t.area_id
-             inner join bas_owner bo on bo.owner_id = t.owner_id
+        inner join bas_area ba on ba.area_id = t.area_id
+        inner join bas_owner bo on bo.owner_id = t.owner_id
         <where>
             t.is_enable != -1
             --@ AND ba.area_classify = #{area_classify}
@@ -116,8 +116,8 @@
 
     <select id="queryLocByLocCode">
         select max(t.road_no) road_no_end ,min(t.road_no) road_no_start,max(t.row_no) row_no_end,
-               min(t.row_no) row_no_start,max(t.cno_no) cno_no_end, min(t.cno_no) cno_no_start,
-               max(t.column_no) column_no_end,min(t.column_no) column_no_start
+        min(t.row_no) row_no_start,max(t.cno_no) cno_no_end, min(t.cno_no) cno_no_start,
+        max(t.column_no) column_no_end,min(t.column_no) column_no_start
         from bas_location t
         where t.is_enable = 1 AND t.area_id = #{area_id} group by t.area_id
     </select>
@@ -125,128 +125,128 @@
 
     <select id="queryLocFrom" resultType="map">
         SELECT *
-        FROM (SELECT TC.loc_id                          loc_id,
-                     TC.loc_code                        loc_code,
-                     TC.loc_classify                    loc_classify,
-                     TC.area_id                         area_id,
-                     TD.lot_id                          lot_id,
-                     trunc(TA.qty / TG.package_meas)    js,
-                     mod(TA.qty, TG.package_meas)       lss,
-                     TA.qty                             qty,
-                     TD.lot01                           lot01,
-                     TD.lot02                           lot02,
-                     TD.lot03                           lot03,
-                     TA.quality                         quality,
-                     TA.quality                         quality2,
-                     TA.lpn                             lpn,
-                     TM.area_code,
-                     TM.area_name,
-                     TF.package_id,
-                     TF.package_code,
-                     TF.package_name,
-                     TF.package_supply_id,
-                     TG.package_unit,
-                     TG.package_meas,
-                     TG.package_item_id,
-                     DECODE(TC.loc_type, '4', 'Y', 'N') is_auto_loc
-              FROM inv_loc TA, bas_item TB, bas_location TC, bas_lot_att TD, bas_package TF, bas_package_items TG,
-                   bas_area TM, --bas_param TH,
-                   (SELECT TX.owner_id, TX.loc_id, TX.item_id, TX.lot_id, TX.wh_id
-                    FROM inv_loc TX
-                    WHERE TX.qty > 0
-                      AND TX.wh_id = #{wh_id}
-                    GROUP BY TX.owner_id, TX.loc_id, TX.item_id, TX.wh_id, TX.lot_id
-                    HAVING COUNT(TX.quality) = 1) TE
-              WHERE TA.item_id = TB.item_id
-                AND TA.owner_id = TB.owner_id
-                AND TA.loc_id = TC.loc_id
-                AND TA.wh_id = TC.wh_id
-                AND TA.lot_id = TD.lot_id
-                AND TA.item_id = TD.item_id
-                AND TA.package_id = TF.package_id
-                AND TB.item_id = TF.item_id
-                AND TF.package_id = TG.package_id
-                AND TG.package_level = 3
-                AND TM.area_id = TC.area_id
+        FROM (SELECT TC.loc_id loc_id,
+        TC.loc_code loc_code,
+        TC.loc_classify loc_classify,
+        TC.area_id area_id,
+        TD.lot_id lot_id,
+        trunc(TA.qty / TG.package_meas) js,
+        mod(TA.qty, TG.package_meas) lss,
+        TA.qty qty,
+        TD.lot01 lot01,
+        TD.lot02 lot02,
+        TD.lot03 lot03,
+        TA.quality quality,
+        TA.quality quality2,
+        TA.lpn lpn,
+        TM.area_code,
+        TM.area_name,
+        TF.package_id,
+        TF.package_code,
+        TF.package_name,
+        TF.package_supply_id,
+        TG.package_unit,
+        TG.package_meas,
+        TG.package_item_id,
+        DECODE(TC.loc_type, '4', 'Y', 'N') is_auto_loc
+        FROM inv_loc TA, bas_item TB, bas_location TC, bas_lot_att TD, bas_package TF, bas_package_items TG,
+        bas_area TM, --bas_param TH,
+        (SELECT TX.owner_id, TX.loc_id, TX.item_id, TX.lot_id, TX.wh_id
+        FROM inv_loc TX
+        WHERE TX.qty > 0
+        AND TX.wh_id = #{wh_id}
+        GROUP BY TX.owner_id, TX.loc_id, TX.item_id, TX.wh_id, TX.lot_id
+        HAVING COUNT(TX.quality) = 1) TE
+        WHERE TA.item_id = TB.item_id
+        AND TA.owner_id = TB.owner_id
+        AND TA.loc_id = TC.loc_id
+        AND TA.wh_id = TC.wh_id
+        AND TA.lot_id = TD.lot_id
+        AND TA.item_id = TD.item_id
+        AND TA.package_id = TF.package_id
+        AND TB.item_id = TF.item_id
+        AND TF.package_id = TG.package_id
+        AND TG.package_level = 3
+        AND TM.area_id = TC.area_id
 
-                AND TA.qty - TA.qty_out - TA.qty_rep_out > 0
-                AND TA.owner_id = TE.owner_id
-                AND TB.item_id = TE.item_id
-                AND TC.loc_id = TE.loc_id
-                AND TD.lot_id = TE.lot_id
-                AND TB.item_id = #{item_id}
-                AND TC.loc_type <![CDATA[ <> ]]> '4'
-                AND TA.is_lock = '0'
-                --AND TH.wh_id = #{wh_id}
-                --AND TH.owner_id = #{owner_id}
-                --AND TH.param_code = 'MOVE_LOC_CLASSIFY'
-                --<![CDATA[ AND INSTR(TH.param_value, '-' + TC.loc_classify + '-') < 1 ]]>
-                AND TC.loc_classify NOT IN ('7', '4')
-                AND TA.owner_id = #{owner_id}
-                AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TC.loc_code like')}
+        AND TA.qty - TA.qty_out - TA.qty_rep_out > 0
+        AND TA.owner_id = TE.owner_id
+        AND TB.item_id = TE.item_id
+        AND TC.loc_id = TE.loc_id
+        AND TD.lot_id = TE.lot_id
+        AND TB.item_id = #{item_id}
+        AND TC.loc_type <![CDATA[ <> ]]> '4'
+        AND TA.is_lock = '0'
+        --AND TH.wh_id = #{wh_id}
+        --AND TH.owner_id = #{owner_id}
+        --AND TH.param_code = 'MOVE_LOC_CLASSIFY'
+        --<![CDATA[ AND INSTR(TH.param_value, '-' + TC.loc_classify + '-') < 1 ]]>
+        AND TC.loc_classify NOT IN ('7', '4')
+        AND TA.owner_id = #{owner_id}
+        AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TC.loc_code like')}
 
-              UNION
+        UNION
 
-              SELECT
-                  TC.loc_id loc_id,
-                  TC.loc_code loc_code,
-                  TC.loc_classify loc_classify,
-                  TC.area_id area_id,
-                  TD.lot_id lot_id,
-                  trunc(TA.qty / TG.package_meas) js,
-                  mod (TA.qty, TG.package_meas) lss,
-                  TA.qty qty,
-                  TD.lot01 lot01,
-                  TD.lot02 lot02,
-                  TD.lot03 lot03,
-                  TA.quality quality,
-                  TA.quality quality2,
-                  TA.lpn lpn,
-                  TM.area_code,
-                  TM.area_name,
-                  TF.package_id,
-                  TF.package_code,
-                  TF.package_name,
-                  TF.package_supply_id,
-                  TG.package_unit,
-                  TG.package_meas,
-                  TG.package_item_id,
-                  DECODE(TC.loc_type, '4', 'Y', 'N') is_auto_loc
-              FROM inv_loc TA, bas_item TB, bas_location TC, bas_lot_att TD, bas_package TF, bas_package_items TG, bas_area TM, --bas_param TH,
-                  (SELECT TX.owner_Id, TX.loc_id, TX.item_id, TX.lot_id, TX.wh_id FROM inv_loc TX WHERE TX.qty >0 AND TX.wh_id = #{wh_id} GROUP BY TX.owner_id, TX.loc_id, TX.item_id, TX.wh_id, TX.lot_id HAVING COUNT(TX.quality)=1) TE
-              WHERE
-                  TA.item_id = TB.item_id
-                AND TA.owner_id = TB.owner_id
-                AND TA.loc_id = TC.loc_id
-                AND TA.wh_id = TC.wh_id
-                AND TA.lot_id = TD.lot_id
-                AND TA.item_id = TD.item_id
-                AND TA.package_id = TF.package_id
-                AND TB.item_id = TF.item_id
-                AND TF.package_id = TG.package_id
-                AND TG.package_level = 3
-                AND TM.area_id = TC.area_id
+        SELECT
+        TC.loc_id loc_id,
+        TC.loc_code loc_code,
+        TC.loc_classify loc_classify,
+        TC.area_id area_id,
+        TD.lot_id lot_id,
+        trunc(TA.qty / TG.package_meas) js,
+        mod (TA.qty, TG.package_meas) lss,
+        TA.qty qty,
+        TD.lot01 lot01,
+        TD.lot02 lot02,
+        TD.lot03 lot03,
+        TA.quality quality,
+        TA.quality quality2,
+        TA.lpn lpn,
+        TM.area_code,
+        TM.area_name,
+        TF.package_id,
+        TF.package_code,
+        TF.package_name,
+        TF.package_supply_id,
+        TG.package_unit,
+        TG.package_meas,
+        TG.package_item_id,
+        DECODE(TC.loc_type, '4', 'Y', 'N') is_auto_loc
+        FROM inv_loc TA, bas_item TB, bas_location TC, bas_lot_att TD, bas_package TF, bas_package_items TG, bas_area TM, --bas_param TH,
+        (SELECT TX.owner_Id, TX.loc_id, TX.item_id, TX.lot_id, TX.wh_id FROM inv_loc TX WHERE TX.qty >0 AND TX.wh_id = #{wh_id} GROUP BY TX.owner_id, TX.loc_id, TX.item_id, TX.wh_id, TX.lot_id HAVING COUNT(TX.quality)=1) TE
+        WHERE
+        TA.item_id = TB.item_id
+        AND TA.owner_id = TB.owner_id
+        AND TA.loc_id = TC.loc_id
+        AND TA.wh_id = TC.wh_id
+        AND TA.lot_id = TD.lot_id
+        AND TA.item_id = TD.item_id
+        AND TA.package_id = TF.package_id
+        AND TB.item_id = TF.item_id
+        AND TF.package_id = TG.package_id
+        AND TG.package_level = 3
+        AND TM.area_id = TC.area_id
 
-                AND TA.qty - TA.qty_out - TA.qty_rep_out
-                  > 0
-                AND TA.owner_id = TE.owner_Id
-                AND TB.item_id = TE.item_id
-                AND TC.loc_id = TE.loc_id
-                AND TD.lot_id = TE.lot_id
-                AND TB.item_id = #{item_id}
-                AND TC.loc_type != '4'
-                AND TA.is_lock ='0'
-                  --AND TH.wh_id = #{wh_id}
-                  --AND TH.owner_id = #{owner_id}
-                  --AND TH.param_code = 'MOVE_LOC_CLASSIFY'
-                  --AND INSTR(TH.param_value, '-' + TC.loc_classify + '-') > 0
-                AND TA.owner_id = #{owner_id}
-                AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TC.loc_code like')}
-             ) X
+        AND TA.qty - TA.qty_out - TA.qty_rep_out
+        > 0
+        AND TA.owner_id = TE.owner_Id
+        AND TB.item_id = TE.item_id
+        AND TC.loc_id = TE.loc_id
+        AND TD.lot_id = TE.lot_id
+        AND TB.item_id = #{item_id}
+        AND TC.loc_type != '4'
+        AND TA.is_lock ='0'
+        --AND TH.wh_id = #{wh_id}
+        --AND TH.owner_id = #{owner_id}
+        --AND TH.param_code = 'MOVE_LOC_CLASSIFY'
+        --AND INSTR(TH.param_value, '-' + TC.loc_classify + '-') > 0
+        AND TA.owner_id = #{owner_id}
+        AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TC.loc_code like')}
+        ) X
     </select>
 
     <select id="queryLocTo" resultType="map">
-    <![CDATA[
+        <![CDATA[
         SELECT X.loc_code      loc_code,
                X.area_id       area_id,
                X.is_auto_loc   is_auto_loc,
@@ -280,269 +280,269 @@
                    AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}
          ) X
      ]]>
-     </select>
+    </select>
 
-<!--    <select id="queryLocTo" resultType="map">-->
-<!--    <![CDATA[-->
-<!--        SELECT X.loc_code      loc_code,-->
-<!--               X.area_id       area_id,-->
-<!--               X.is_auto_loc   is_auto_loc,-->
-<!--               X.loc_id        loc_id,-->
-<!--               X.loc_classify  loc_classify,-->
-<!--               CASE-->
-<!--                   WHEN X.loc_classify = '2' THEN '6'-->
-<!--                   ELSE '' END YK_TYPE,-->
-<!--               X.loc_owner_id  loc_owner_id,-->
-<!--               X.area_code     area_code,-->
-<!--               X.area_name     area_name-->
-<!--        FROM (-->
-<!--                 SELECT TA.loc_code                        loc_code,-->
-<!--                        TA.area_id                         area_id,-->
-<!--                        DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
-<!--                        TA.loc_id                          loc_id,-->
-<!--                        TA.loc_classify                    loc_classify,-->
-<!--                        TA.owner_id                        loc_owner_id,-->
-<!--                        #{owner_id}                        owner_id,-->
-<!--                        TC.area_code,-->
-<!--                        TC.area_name-->
-<!--                 FROM bas_location TA, inv_loc TB, bas_area TC-->
-<!--                 WHERE TA.loc_id = TB.loc_id-->
-<!--                   AND TB.item_id = #{item_id}-->
-<!--                   AND TB.package_id = #{package_id}-->
-<!--                   AND TB.lot_id = #{lot_id}-->
-<!--                   AND TA.loc_classify = #{loc_classify}-->
-<!--                   AND TA.loc_type not in ('2', '4')-->
-<!--                   AND TA.is_lock = '0'-->
-<!--                   AND TA.loc_code LIKE '%'-->
-<!--                   AND TA.wh_id = TB.wh_id-->
-<!--                   AND TA.wh_id = #{wh_id}-->
-<!--                   AND TA.owner_id = #{owner_id}-->
-<!--                   AND TC.area_id = TA.area_id-->
-<!--                   AND TC.wh_id = TA.wh_id-->
-<!--                     ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
+    <!--    <select id="queryLocTo" resultType="map">-->
+    <!--    <![CDATA[-->
+    <!--        SELECT X.loc_code      loc_code,-->
+    <!--               X.area_id       area_id,-->
+    <!--               X.is_auto_loc   is_auto_loc,-->
+    <!--               X.loc_id        loc_id,-->
+    <!--               X.loc_classify  loc_classify,-->
+    <!--               CASE-->
+    <!--                   WHEN X.loc_classify = '2' THEN '6'-->
+    <!--                   ELSE '' END YK_TYPE,-->
+    <!--               X.loc_owner_id  loc_owner_id,-->
+    <!--               X.area_code     area_code,-->
+    <!--               X.area_name     area_name-->
+    <!--        FROM (-->
+    <!--                 SELECT TA.loc_code                        loc_code,-->
+    <!--                        TA.area_id                         area_id,-->
+    <!--                        DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
+    <!--                        TA.loc_id                          loc_id,-->
+    <!--                        TA.loc_classify                    loc_classify,-->
+    <!--                        TA.owner_id                        loc_owner_id,-->
+    <!--                        #{owner_id}                        owner_id,-->
+    <!--                        TC.area_code,-->
+    <!--                        TC.area_name-->
+    <!--                 FROM bas_location TA, inv_loc TB, bas_area TC-->
+    <!--                 WHERE TA.loc_id = TB.loc_id-->
+    <!--                   AND TB.item_id = #{item_id}-->
+    <!--                   AND TB.package_id = #{package_id}-->
+    <!--                   AND TB.lot_id = #{lot_id}-->
+    <!--                   AND TA.loc_classify = #{loc_classify}-->
+    <!--                   AND TA.loc_type not in ('2', '4')-->
+    <!--                   AND TA.is_lock = '0'-->
+    <!--                   AND TA.loc_code LIKE '%'-->
+    <!--                   AND TA.wh_id = TB.wh_id-->
+    <!--                   AND TA.wh_id = #{wh_id}-->
+    <!--                   AND TA.owner_id = #{owner_id}-->
+    <!--                   AND TC.area_id = TA.area_id-->
+    <!--                   AND TC.wh_id = TA.wh_id-->
+    <!--                     ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
 
-<!--                 UNION-->
+    <!--                 UNION-->
 
-<!--                 SELECT-->
-<!--                     TA.loc_code loc_code,-->
-<!--                     TA.area_id area_id,-->
-<!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
-<!--                     TA.loc_id loc_id,-->
-<!--                     TA.loc_classify loc_classify,-->
-<!--                     TA.owner_id loc_owner_id,-->
-<!--                     #{owner_id} owner_id,-->
-<!--                     TC.area_code,-->
-<!--                     TC.area_name-->
-<!--                 FROM bas_location TA, bas_area TC-->
-<!--                 WHERE ( NOT EXISTS ( SELECT 'X' FROM inv_loc T1 WHERE T1.loc_id = TA.loc_id-->
-<!--                   AND T1.wh_id = TA.wh_id) )-->
-<!--                   AND TA.loc_mixes_mode <> '4'-->
-<!--                   AND TA.loc_classify = #{loc_classify}-->
-<!--                   AND TA.loc_type in ('2'-->
-<!--                     , '4')-->
-<!--                   AND TA.is_lock = '0'-->
-<!--                   AND TA.loc_code LIKE '%'-->
-<!--                   AND TA.wh_id = #{wh_id}-->
-<!--                   AND TA.owner_id = #{owner_id}-->
-<!--                   AND TC.area_id = TA.area_id-->
-<!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
+    <!--                 SELECT-->
+    <!--                     TA.loc_code loc_code,-->
+    <!--                     TA.area_id area_id,-->
+    <!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
+    <!--                     TA.loc_id loc_id,-->
+    <!--                     TA.loc_classify loc_classify,-->
+    <!--                     TA.owner_id loc_owner_id,-->
+    <!--                     #{owner_id} owner_id,-->
+    <!--                     TC.area_code,-->
+    <!--                     TC.area_name-->
+    <!--                 FROM bas_location TA, bas_area TC-->
+    <!--                 WHERE ( NOT EXISTS ( SELECT 'X' FROM inv_loc T1 WHERE T1.loc_id = TA.loc_id-->
+    <!--                   AND T1.wh_id = TA.wh_id) )-->
+    <!--                   AND TA.loc_mixes_mode <> '4'-->
+    <!--                   AND TA.loc_classify = #{loc_classify}-->
+    <!--                   AND TA.loc_type in ('2'-->
+    <!--                     , '4')-->
+    <!--                   AND TA.is_lock = '0'-->
+    <!--                   AND TA.loc_code LIKE '%'-->
+    <!--                   AND TA.wh_id = #{wh_id}-->
+    <!--                   AND TA.owner_id = #{owner_id}-->
+    <!--                   AND TC.area_id = TA.area_id-->
+    <!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
 
-<!--                 UNION-->
+    <!--                 UNION-->
 
-<!--                 SELECT-->
-<!--                     TA.loc_code loc_code,-->
-<!--                     TA.area_id area_id,-->
-<!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
-<!--                     TA.loc_id loc_id,-->
-<!--                     TA.loc_classify loc_classify,-->
-<!--                     TA.owner_id loc_owner_id,-->
-<!--                     #{owner_id} owner_id,-->
-<!--                     TC.area_code,-->
-<!--                     TC.area_name-->
-<!--                 FROM bas_location TA, bas_area TC-->
-<!--                 WHERE TA.loc_mixes_mode = '4'-->
-<!--                   AND TA.loc_classify = #{loc_classify}-->
-<!--                   AND TA.loc_type not in ('2'-->
-<!--                     , '4')-->
-<!--                   AND TA.is_lock ='0'-->
-<!--                   AND TA.loc_code LIKE '%'-->
-<!--                   AND TA.wh_id = #{wh_id}-->
-<!--                   AND TA.owner_id = #{owner_id}-->
-<!--                   AND TC.area_id = TA.area_id-->
-<!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
+    <!--                 SELECT-->
+    <!--                     TA.loc_code loc_code,-->
+    <!--                     TA.area_id area_id,-->
+    <!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
+    <!--                     TA.loc_id loc_id,-->
+    <!--                     TA.loc_classify loc_classify,-->
+    <!--                     TA.owner_id loc_owner_id,-->
+    <!--                     #{owner_id} owner_id,-->
+    <!--                     TC.area_code,-->
+    <!--                     TC.area_name-->
+    <!--                 FROM bas_location TA, bas_area TC-->
+    <!--                 WHERE TA.loc_mixes_mode = '4'-->
+    <!--                   AND TA.loc_classify = #{loc_classify}-->
+    <!--                   AND TA.loc_type not in ('2'-->
+    <!--                     , '4')-->
+    <!--                   AND TA.is_lock ='0'-->
+    <!--                   AND TA.loc_code LIKE '%'-->
+    <!--                   AND TA.wh_id = #{wh_id}-->
+    <!--                   AND TA.owner_id = #{owner_id}-->
+    <!--                   AND TC.area_id = TA.area_id-->
+    <!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
 
-<!--                 UNION-->
+    <!--                 UNION-->
 
-<!--                 SELECT-->
-<!--                     TA.loc_code loc_code,-->
-<!--                     TA.area_id area_id,-->
-<!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
-<!--                     TA.loc_id loc_id,-->
-<!--                     TA.loc_classify loc_classify,-->
-<!--                     TA.owner_id loc_owner_id,-->
-<!--                     #{owner_id} owner_id,-->
-<!--                     TC.area_code,-->
-<!--                     TC.area_name-->
-<!--                 FROM bas_location TA, bas_area TC-->
-<!--                 WHERE-->
-<!--                     TA.loc_classify <> '2'-->
-<!--                   AND TA.loc_classify = #{loc_classify}-->
-<!--                   AND TA.loc_type not in ('2'-->
-<!--                     , '4')-->
-<!--                   AND TA.is_lock ='0'-->
-<!--                   AND TA.loc_code LIKE '%'-->
-<!--                   AND TA.wh_id = #{wh_id}-->
-<!--                   AND TA.owner_id = #{owner_id}-->
-<!--                   AND TC.area_id = TA.area_id-->
-<!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
+    <!--                 SELECT-->
+    <!--                     TA.loc_code loc_code,-->
+    <!--                     TA.area_id area_id,-->
+    <!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
+    <!--                     TA.loc_id loc_id,-->
+    <!--                     TA.loc_classify loc_classify,-->
+    <!--                     TA.owner_id loc_owner_id,-->
+    <!--                     #{owner_id} owner_id,-->
+    <!--                     TC.area_code,-->
+    <!--                     TC.area_name-->
+    <!--                 FROM bas_location TA, bas_area TC-->
+    <!--                 WHERE-->
+    <!--                     TA.loc_classify <> '2'-->
+    <!--                   AND TA.loc_classify = #{loc_classify}-->
+    <!--                   AND TA.loc_type not in ('2'-->
+    <!--                     , '4')-->
+    <!--                   AND TA.is_lock ='0'-->
+    <!--                   AND TA.loc_code LIKE '%'-->
+    <!--                   AND TA.wh_id = #{wh_id}-->
+    <!--                   AND TA.owner_id = #{owner_id}-->
+    <!--                   AND TC.area_id = TA.area_id-->
+    <!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
 
-<!--                 UNION-->
+    <!--                 UNION-->
 
-<!--                 SELECT-->
-<!--                     TA.loc_code loc_code,-->
-<!--                     TA.area_id area_id,-->
-<!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
-<!--                     TA.loc_id loc_id,-->
-<!--                     TA.loc_classify loc_classify,-->
-<!--                     TA.owner_id loc_owner_id,-->
-<!--                     #{owner_id} owner_id,-->
-<!--                     TC.area_code,-->
-<!--                     TC.area_name-->
-<!--                 FROM bas_location TA, inv_loc TB, bas_area TC-->
-<!--                 WHERE TA.loc_id = TB.loc_id-->
-<!--                   AND TB.item_id =#{item_id}-->
-<!--                   AND TB.package_id = #{package_id}-->
-<!--                   AND TB.lot_id = #{lot_id}-->
-<!--                   AND TA.loc_classify = #{loc_classify}-->
-<!--                   AND TA.loc_classify not in ('2'-->
-<!--                     , '4'-->
-<!--                     , '7')-->
-<!--                   AND TA.loc_type not in ('2'-->
-<!--                     , '4')-->
-<!--                   AND TA.is_lock = '0'-->
-<!--                   AND TA.loc_code LIKE '%'-->
-<!--                   AND TA.wh_id = TB.wh_id-->
-<!--                   AND TA.wh_id = #{wh_id}-->
-<!--                   AND TA.owner_id = #{owner_id}-->
-<!--                   AND TC.area_id = TA.area_id-->
-<!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
+    <!--                 SELECT-->
+    <!--                     TA.loc_code loc_code,-->
+    <!--                     TA.area_id area_id,-->
+    <!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
+    <!--                     TA.loc_id loc_id,-->
+    <!--                     TA.loc_classify loc_classify,-->
+    <!--                     TA.owner_id loc_owner_id,-->
+    <!--                     #{owner_id} owner_id,-->
+    <!--                     TC.area_code,-->
+    <!--                     TC.area_name-->
+    <!--                 FROM bas_location TA, inv_loc TB, bas_area TC-->
+    <!--                 WHERE TA.loc_id = TB.loc_id-->
+    <!--                   AND TB.item_id =#{item_id}-->
+    <!--                   AND TB.package_id = #{package_id}-->
+    <!--                   AND TB.lot_id = #{lot_id}-->
+    <!--                   AND TA.loc_classify = #{loc_classify}-->
+    <!--                   AND TA.loc_classify not in ('2'-->
+    <!--                     , '4'-->
+    <!--                     , '7')-->
+    <!--                   AND TA.loc_type not in ('2'-->
+    <!--                     , '4')-->
+    <!--                   AND TA.is_lock = '0'-->
+    <!--                   AND TA.loc_code LIKE '%'-->
+    <!--                   AND TA.wh_id = TB.wh_id-->
+    <!--                   AND TA.wh_id = #{wh_id}-->
+    <!--                   AND TA.owner_id = #{owner_id}-->
+    <!--                   AND TC.area_id = TA.area_id-->
+    <!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
 
-<!--                 UNION-->
+    <!--                 UNION-->
 
-<!--                 SELECT-->
-<!--                     TA.loc_code loc_code,-->
-<!--                     TA.area_id area_id,-->
-<!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
-<!--                     TA.loc_id loc_id,-->
-<!--                     TA.loc_classify loc_classify,-->
-<!--                     TA.owner_id loc_owner_id,-->
-<!--                     #{owner_id} owner_id,-->
-<!--                     TC.area_code,-->
-<!--                     TC.area_name-->
-<!--                 FROM bas_location TA, bas_area TC-->
-<!--                 WHERE ( NOT EXISTS ( SELECT 'X' FROM inv_loc T2 WHERE T2.loc_id = TA.loc_id))-->
-<!--                 &#45;&#45; AND EXISTS (SELECT 'X' FROM JC_SPHWXD_MX WHERE LUOJ_AREA = TA.LUOJ_AREA AND SHANGP_ID = #{item_id})-->
-<!--                   AND TA.loc_classify = #{loc_classify}-->
-<!--                   AND TA.loc_classify not in ('4'-->
-<!--                     , '5'-->
-<!--                     , '7')-->
-<!--                   AND TA.loc_type not in ('2'-->
-<!--                     , '4')-->
-<!--                   AND TA.is_lock ='0'-->
-<!--                   AND TA.loc_code LIKE '%'-->
-<!--                   AND TA.wh_id = #{wh_id}-->
-<!--                   AND TA.owner_id = #{owner_id}-->
-<!--                   AND TC.area_id = TA.area_id-->
-<!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
-<!--             ) X-->
-<!--        where X.loc_owner_id in (#{owner_id_list})-->
-<!--        ]]>-->
-<!--    </select>-->
+    <!--                 SELECT-->
+    <!--                     TA.loc_code loc_code,-->
+    <!--                     TA.area_id area_id,-->
+    <!--                     DECODE(TA.loc_type, '4', 'Y', 'N') is_auto_loc,-->
+    <!--                     TA.loc_id loc_id,-->
+    <!--                     TA.loc_classify loc_classify,-->
+    <!--                     TA.owner_id loc_owner_id,-->
+    <!--                     #{owner_id} owner_id,-->
+    <!--                     TC.area_code,-->
+    <!--                     TC.area_name-->
+    <!--                 FROM bas_location TA, bas_area TC-->
+    <!--                 WHERE ( NOT EXISTS ( SELECT 'X' FROM inv_loc T2 WHERE T2.loc_id = TA.loc_id))-->
+    <!--                 &#45;&#45; AND EXISTS (SELECT 'X' FROM JC_SPHWXD_MX WHERE LUOJ_AREA = TA.LUOJ_AREA AND SHANGP_ID = #{item_id})-->
+    <!--                   AND TA.loc_classify = #{loc_classify}-->
+    <!--                   AND TA.loc_classify not in ('4'-->
+    <!--                     , '5'-->
+    <!--                     , '7')-->
+    <!--                   AND TA.loc_type not in ('2'-->
+    <!--                     , '4')-->
+    <!--                   AND TA.is_lock ='0'-->
+    <!--                   AND TA.loc_code LIKE '%'-->
+    <!--                   AND TA.wh_id = #{wh_id}-->
+    <!--                   AND TA.owner_id = #{owner_id}-->
+    <!--                   AND TC.area_id = TA.area_id-->
+    <!--                   AND TC.wh_id = TA.wh_id ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}-->
+    <!--             ) X-->
+    <!--        where X.loc_owner_id in (#{owner_id_list})-->
+    <!--        ]]>-->
+    <!--    </select>-->
 
     <select id="queryChangeLoc" resultType="map">
         SELECT X.loc_id,
-               X.loc_code,
-               X.loc_classify,
-               X.owner_id,
-               X.loc_auto_flag,
-               X.area_id,
-               X.area_code,
-               X.area_name
+        X.loc_code,
+        X.loc_classify,
+        X.owner_id,
+        X.loc_auto_flag,
+        X.area_id,
+        X.area_code,
+        X.area_name
         FROM (
-                 SELECT TA.loc_code,
-                        DECODE(TA.loc_type, '4', 'Y', 'N') loc_auto_flag,
-                        TA.area_id,
-                        TA.loc_id,
-                        TA.loc_classify,
-                        TA.owner_id,
-                        TC.area_code,
-                        TC.area_name
-                 FROM bas_location TA, inv_loc TB, bas_area TC
-                 WHERE TA.loc_id = TB.loc_id
-                   AND TB.item_id = #{item_id}
-                   AND TB.lot_id = #{lot_id}
-                   AND TA.loc_classify = '2'
-                   AND TA.is_lock = '0'
-                   AND TC.area_id = TA.area_id
-                   AND TC.wh_id = TA.wh_id
-                   AND TA.wh_id = TB.wh_id
-                   AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}
+        SELECT TA.loc_code,
+        DECODE(TA.loc_type, '4', 'Y', 'N') loc_auto_flag,
+        TA.area_id,
+        TA.loc_id,
+        TA.loc_classify,
+        TA.owner_id,
+        TC.area_code,
+        TC.area_name
+        FROM bas_location TA, inv_loc TB, bas_area TC
+        WHERE TA.loc_id = TB.loc_id
+        AND TB.item_id = #{item_id}
+        AND TB.lot_id = #{lot_id}
+        AND TA.loc_classify = '2'
+        AND TA.is_lock = '0'
+        AND TC.area_id = TA.area_id
+        AND TC.wh_id = TA.wh_id
+        AND TA.wh_id = TB.wh_id
+        AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}
 
-                 UNION
+        UNION
 
-                 SELECT
-                     TA.loc_code,
-                     DECODE(TA.loc_type, '4', 'Y', 'N') loc_auto_flag,
-                     TA.area_id,
-                     TA.loc_id,
-                     TA.loc_classify,
-                     TA.owner_id,
-                     TC.area_code,
-                     TC.area_name
-                 FROM bas_location TA, bas_area TC
-                 WHERE
-                     TA.loc_classify = #{loc_classify}
-                   AND TA.is_lock ='0'
-                   AND TC.area_id = TA.area_id
-                   AND TC.wh_id = TA.wh_id
-                   AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}
+        SELECT
+        TA.loc_code,
+        DECODE(TA.loc_type, '4', 'Y', 'N') loc_auto_flag,
+        TA.area_id,
+        TA.loc_id,
+        TA.loc_classify,
+        TA.owner_id,
+        TC.area_code,
+        TC.area_name
+        FROM bas_location TA, bas_area TC
+        WHERE
+        TA.loc_classify = #{loc_classify}
+        AND TA.is_lock ='0'
+        AND TC.area_id = TA.area_id
+        AND TC.wh_id = TA.wh_id
+        AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}
 
-                 UNION
+        UNION
 
-                 SELECT
-                     TA.loc_code,
-                     DECODE(TA.loc_type, '4', 'Y', 'N') loc_auto_flag,
-                     TA.area_id,
-                     TA.loc_id,
-                     TA.loc_classify,
-                     TA.owner_id,
-                     TC.area_code,
-                     TC.area_name
-                 FROM bas_location TA, bas_area TC
-                 WHERE
-                     TA.loc_classify != #{loc_classify}
-                   AND TA.is_lock ='0'
-                   AND TC.area_id = TA.area_id
-                   AND TC.wh_id = TA.wh_id
-                   AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}
-             ) X
+        SELECT
+        TA.loc_code,
+        DECODE(TA.loc_type, '4', 'Y', 'N') loc_auto_flag,
+        TA.area_id,
+        TA.loc_id,
+        TA.loc_classify,
+        TA.owner_id,
+        TC.area_code,
+        TC.area_name
+        FROM bas_location TA, bas_area TC
+        WHERE
+        TA.loc_classify != #{loc_classify}
+        AND TA.is_lock ='0'
+        AND TC.area_id = TA.area_id
+        AND TC.wh_id = TA.wh_id
+        AND TA.wh_id = #{wh_id} ${@com.galaxis.wms.ext.Sql@phrase('AND', 'TA.loc_code like')}
+        ) X
         where X.owner_id in (#{owner_id_list})
     </select>
 
     <select id="updateBatch">
         update bas_location t
-            set t.loc_type = #{loc_type},
-                t.loc_env = #{loc_env},
-                t.owner_id = #{owner_id},
-            t.loc_use = #{loc_use}, t.loc_abc = #{loc_abc}, t.is_lock = #{is_lock},
-            t.length = #{length},t.width = #{width},t.high = #{high},t.volume = #{volume},
-            t.volume_used = #{volume_used},t.weight = #{weight},t.weight_used = #{weight_used},
-            t.is_enable = #{is_enable}
-            where t.area_id = #{area_id}
-              and t.road_no &gt;= #{road_no_start}  and  t.road_no &lt;= #{road_no_end}
-              and t.row_no &gt;= #{row_no_start}  and  t.row_no &lt;= #{row_no_end}
-              and t.column_no &gt;= #{column_no_start}  and  t.column_no &lt;= #{column_no_end}
-              and t.cno_no &gt;= #{cno_no_start}  and  t.cno_no &lt;= #{cno_no_end}
+        set t.loc_type = #{loc_type},
+        t.loc_env = #{loc_env},
+        t.owner_id = #{owner_id},
+        t.loc_use = #{loc_use}, t.loc_abc = #{loc_abc}, t.is_lock = #{is_lock},
+        t.length = #{length},t.width = #{width},t.high = #{high},t.volume = #{volume},
+        t.volume_used = #{volume_used},t.weight = #{weight},t.weight_used = #{weight_used},
+        t.is_enable = #{is_enable}
+        where t.area_id = #{area_id}
+        and t.road_no &gt;= #{road_no_start} and t.road_no &lt;= #{road_no_end}
+        and t.row_no &gt;= #{row_no_start} and t.row_no &lt;= #{row_no_end}
+        and t.column_no &gt;= #{column_no_start} and t.column_no &lt;= #{column_no_end}
+        and t.cno_no &gt;= #{cno_no_start} and t.cno_no &lt;= #{cno_no_end}
     </select>
 
 </mapper>

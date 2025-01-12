@@ -173,8 +173,7 @@ public class XNode {
     }
 
     private String getBodyData(Node child) {
-        if (child.getNodeType() == Node.CDATA_SECTION_NODE
-                || child.getNodeType() == Node.TEXT_NODE) {
+        if (child.getNodeType() == Node.CDATA_SECTION_NODE || child.getNodeType() == Node.TEXT_NODE) {
             String data = ((CharacterData) child).getData();
             data = PropertyParser.parse(data, variables);
             return data;

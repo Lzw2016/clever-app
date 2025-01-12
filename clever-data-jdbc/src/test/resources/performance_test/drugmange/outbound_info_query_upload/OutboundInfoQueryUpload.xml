@@ -30,27 +30,27 @@
         WHERE
         tb.jiang_flg = 1
         AND ta.order_type = 2
-          <if test="#obj.notEmpty(is_upload)">
-              AND ta.is_upload = #{is_upload}
-          </if>
-          <if test="#obj.notEmpty(order_out_code)">
-              AND td.order_out_code like '%' || #{ order_out_code } || '%'
-          </if>
-          <if test="#obj.notEmpty(order_biz_type)">
-              AND td.order_biz_type = #{ order_biz_type }
-          </if>
-          <if test="#obj.notEmpty(customer_id)">
-              AND ta.customer_id = #{ customer_id }
-          </if>
-          <if test="#obj.notEmpty(create_by)">
-              AND ta.create_by = #{ create_by }
-          </if>
-          <if test="#obj.notEmpty(start_date)">
-              AND TO_CHAR(ta.create_at,'YYYY-MM-DD') >= #{ start_date }
-          </if>
-          <if test="#obj.notEmpty(end_date)">
-              AND TO_CHAR(ta.create_at,'YYYY-MM-DD') &lt;= #{ end_date }
-          </if>
+        <if test="#obj.notEmpty(is_upload)">
+            AND ta.is_upload = #{is_upload}
+        </if>
+        <if test="#obj.notEmpty(order_out_code)">
+            AND td.order_out_code like '%' || #{ order_out_code } || '%'
+        </if>
+        <if test="#obj.notEmpty(order_biz_type)">
+            AND td.order_biz_type = #{ order_biz_type }
+        </if>
+        <if test="#obj.notEmpty(customer_id)">
+            AND ta.customer_id = #{ customer_id }
+        </if>
+        <if test="#obj.notEmpty(create_by)">
+            AND ta.create_by = #{ create_by }
+        </if>
+        <if test="#obj.notEmpty(start_date)">
+            AND TO_CHAR(ta.create_at,'YYYY-MM-DD') >= #{ start_date }
+        </if>
+        <if test="#obj.notEmpty(end_date)">
+            AND TO_CHAR(ta.create_at,'YYYY-MM-DD') &lt;= #{ end_date }
+        </if>
     </select>
     <!--导出XML,更新上传标识-->
     <update id="exportXml" parameterType="map">
@@ -60,53 +60,53 @@
             AND T.DRUP_CODE = #{item.drup_code}
             AND T.IS_UPLOAD = '0'
         </foreach>
-       <!-- <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
-            UPDATE SUPERVISE_IN T set T.UPLOAD_FLG = '1'
-            WHERE T.ORDER_ID = #{item.order_id}
-            AND T.SUPERVISE_CODE = #{item.supervise_code}
-            AND T.UPLOAD_FLG = '0'
-        </foreach>-->
+        <!-- <foreach collection="list" item="item" index="index" open="begin" close=";end;" separator=";">
+             UPDATE SUPERVISE_IN T set T.UPLOAD_FLG = '1'
+             WHERE T.ORDER_ID = #{item.order_id}
+             AND T.SUPERVISE_CODE = #{item.supervise_code}
+             AND T.UPLOAD_FLG = '0'
+         </foreach>-->
     </update>
     <!--出库药监码弹出框查询-->
     <select id="OutbountSuperviseSearch" resultType="map">
         SELECT
-            t.order_out_id,
-            t.order_out_code,
-            t.order_biz_type,
-            '出库' supervise_type,
-            ta.item_code,
-            ta.item_name,
-            ta.item_specification,
-            ta.manufacturer,
-            td.lot_id,
-            td.lot01,
-            tc.package_id,
-            tc.package_unit,
-            tc.package_meas,
-            ta.approval_no,
-            ta.item_abc,
-            ta.item_id,
-            tb.owner_id,
-            tb.owner_name
+        t.order_out_id,
+        t.order_out_code,
+        t.order_biz_type,
+        '出库' supervise_type,
+        ta.item_code,
+        ta.item_name,
+        ta.item_specification,
+        ta.manufacturer,
+        td.lot_id,
+        td.lot01,
+        tc.package_id,
+        tc.package_unit,
+        tc.package_meas,
+        ta.approval_no,
+        ta.item_abc,
+        ta.item_id,
+        tb.owner_id,
+        tb.owner_name
         FROM
-            (
-                SELECT DISTINCT
-                    tb.order_out_code,
-                    tb.order_out_id,
-                    t.item_id,
-                    tb.owner_id,
-                    tb.order_biz_type
-                FROM
-                    order_out_details t
-                        LEFT JOIN order_out tb ON t.order_out_id = tb.order_out_id
-            ) t
-                LEFT JOIN bas_item ta ON t.item_id = ta.item_id
-                LEFT JOIN bas_owner tb ON t.owner_id = tb.owner_id
-                LEFT JOIN bas_package_items tc ON t.item_id = tc.item_id AND tc.package_level = 3
-                LEFT JOIN bas_lot_att td ON t.item_id = td.item_id
+        (
+        SELECT DISTINCT
+        tb.order_out_code,
+        tb.order_out_id,
+        t.item_id,
+        tb.owner_id,
+        tb.order_biz_type
+        FROM
+        order_out_details t
+        LEFT JOIN order_out tb ON t.order_out_id = tb.order_out_id
+        ) t
+        LEFT JOIN bas_item ta ON t.item_id = ta.item_id
+        LEFT JOIN bas_owner tb ON t.owner_id = tb.owner_id
+        LEFT JOIN bas_package_items tc ON t.item_id = tc.item_id AND tc.package_level = 3
+        LEFT JOIN bas_lot_att td ON t.item_id = td.item_id
         WHERE
-            ta.is_supervise = 1
-         ${@com.yvan.Sql@phrase('AND', 't.order_out_code like')}
+        ta.is_supervise = 1
+        ${@com.yvan.Sql@phrase('AND', 't.order_out_code like')}
     </select>
 
 </mapper>

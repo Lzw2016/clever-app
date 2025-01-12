@@ -1,122 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="UnqualifiedGoodsDestroyRecords">
-<!--    <update id="sql_bhgspztz">-->
-<!--        UPDATE GSP_BHGYPQRB_HZ SET ZHUANCTZ_FLG = 'Y' WHERE DANJ_NO = #{DANJ_NO}-->
-<!--    </update>-->
+    <!--    <update id="sql_bhgspztz">-->
+    <!--        UPDATE GSP_BHGYPQRB_HZ SET ZHUANCTZ_FLG = 'Y' WHERE DANJ_NO = #{DANJ_NO}-->
+    <!--    </update>-->
     <insert id="addGspBhgypxhjlb">
         insert into gsp_bhgypxhjlb
         (
-            DANJ_NO,
-            SHANGP_ID,
-            LOT,
-            XIAOHZ_NUM,
-            PRICE,
-            AMOUNT,
-            XIAOH_REASON,
-            XIAOH_WAY,
-            XIAOH_ADDRESS,
-            XIAOH_DATE,
-            YUNS_TOOL,
-            YUNS_STAFF,
-            XIAOHHXC_SITUATION,
-            XIAOHZXR_NOTE,
-            XIAOHJDR_NOTE,
-            YAOJBMRY_NOTE,
-            CAOZ_STAFF,
-            NOTES,
-            YEZ_ID,
-            YEZ_NAME,
-            HOUSE_ID,
-            YUNS_STAFF_ID,
-            CAOZ_STAFF_ID
+        DANJ_NO,
+        SHANGP_ID,
+        LOT,
+        XIAOHZ_NUM,
+        PRICE,
+        AMOUNT,
+        XIAOH_REASON,
+        XIAOH_WAY,
+        XIAOH_ADDRESS,
+        XIAOH_DATE,
+        YUNS_TOOL,
+        YUNS_STAFF,
+        XIAOHHXC_SITUATION,
+        XIAOHZXR_NOTE,
+        XIAOHJDR_NOTE,
+        YAOJBMRY_NOTE,
+        CAOZ_STAFF,
+        NOTES,
+        YEZ_ID,
+        YEZ_NAME,
+        HOUSE_ID,
+        YUNS_STAFF_ID,
+        CAOZ_STAFF_ID
         )
         values
         (
-            #{danj_no},
-            #{shangp_id},
-            #{lot},
-            #{xiaohz_num},
-            #{price},
-            #{amount},
-            #{xiaoh_reason},
-            #{xiaoh_way},
-            #{xiaoh_address},
-            SYSDATE,
-            #{yuns_tool},
-            #{yuns_staff},
-            #{xiaohhxc_situation},
-            #{xiaohzxr_note},
-            #{xiaohjdr_note},
-            #{yaojbmry_note},
-            #{CAOZ_STAFF},
-            #{notes},
-            #{yez_id},
-            #{owner_name},
-            #{HOUSE_ID},
-            #{YUNS_STAFF_ID},
-            #{CAOZ_STAFF_ID}
+        #{danj_no},
+        #{shangp_id},
+        #{lot},
+        #{xiaohz_num},
+        #{price},
+        #{amount},
+        #{xiaoh_reason},
+        #{xiaoh_way},
+        #{xiaoh_address},
+        SYSDATE,
+        #{yuns_tool},
+        #{yuns_staff},
+        #{xiaohhxc_situation},
+        #{xiaohzxr_note},
+        #{xiaohjdr_note},
+        #{yaojbmry_note},
+        #{CAOZ_STAFF},
+        #{notes},
+        #{yez_id},
+        #{owner_name},
+        #{HOUSE_ID},
+        #{YUNS_STAFF_ID},
+        #{CAOZ_STAFF_ID}
         )
     </insert>
 
     <select id="selectBhgspxhjlTqHz" resultType="map">
         select DISTINCT BHG_HZ.DANJ_NO,BHG_HZ.RIQI_DATE,BHG_HZ.ZHIJ_STAFF,BHG_HZ.CAOZ_STAFF,
-                        BHG_HZ.XIAC_FLG,BHG_HZ.ZHUANCTZ_FLG,BHG_HZ.ZHIJ_STAFF_ID,BHG_HZ.CAOZ_STAFF_ID
+        BHG_HZ.XIAC_FLG,BHG_HZ.ZHUANCTZ_FLG,BHG_HZ.ZHIJ_STAFF_ID,BHG_HZ.CAOZ_STAFF_ID
         from GSP_BHGYPQRB_HZ BHG_HZ,
-             GSP_BHGYPQRB_MX BHG_MX
+        GSP_BHGYPQRB_MX BHG_MX
         WHERE BHG_HZ.DANJ_NO = BHG_MX.DANJ_NO
-          AND BHG_HZ.RIQI_DATE <![CDATA[>=]]> TO_DATE(#{BEG_DATE}, 'yyyy-mm-dd') AND BHG_HZ.RIQI_DATE <![CDATA[<=]]> TO_DATE(#{END_DATE}, 'yyyy-mm-dd')
-          AND BHG_HZ.XIAC_FLG = '0'
-          AND BHG_HZ.ZHUANCTZ_FLG ='0'
-          AND BHG_MX.SHENH_FLG = '1'
-          AND BHG_HZ.HOUSE_ID = #{HOUSE_ID}
-          AND BHG_HZ.yans_zz is not null AND BHG_HZ.zhig_bz is not null
+        AND BHG_HZ.RIQI_DATE <![CDATA[>=]]> TO_DATE(#{BEG_DATE}, 'yyyy-mm-dd') AND BHG_HZ.RIQI_DATE <![CDATA[<=]]> TO_DATE(#{END_DATE}, 'yyyy-mm-dd')
+        AND BHG_HZ.XIAC_FLG = '0'
+        AND BHG_HZ.ZHUANCTZ_FLG ='0'
+        AND BHG_MX.SHENH_FLG = '1'
+        AND BHG_HZ.HOUSE_ID = #{HOUSE_ID}
+        AND BHG_HZ.yans_zz is not null AND BHG_HZ.zhig_bz is not null
     </select>
 
     <select id="selectBhgspxhjlTqMx" resultType="map">
         SELECT
-            TA.DANJ_NO,  -- 单据编号
-            TA.DANJ_SORT,  -- 单据行号
-            TA.SHANGP_ID,  -- 商品ID
-            TB.item_code,   -- 商品编号
-            TB.item_name,  -- 中文名
-            TB.manufacturer,  -- 生产厂家
-            TB.item_specification,    -- 药品规格
-            -- TB.BAOZ_DANW,   -- 包装数量
-            TB.approval_no,   -- 批准文号
-            TB.remark,  -- 备注
-            TA.LOT,  -- 批号
-            -- TE.YOUX_DATE,  -- 是否优先出库
-            TE.lot02,  -- 生产日期
-            TE.lot03,  -- 有效期至
-            TE.lot01,  -- 批号
-            TA.DANW_ID,  -- 单位编号
-            TC.customer_code,  -- 单位编号
-            TC.customer_name,  -- 单位名称
-            TA.RUK_NUM,  -- 入库数量
-            TA.BUHGP_NUM,  -- 不合格品数量
-            TA.ZHILQK_REFLECTION,  -- 质量情况反馈
-            TA.SUOZBM_OPINION,   -- 所在部门意见
-            TA.ZHILGLBM_AFFIRMATION,  -- 质量管理部门意见
-            TA.SHENH_FLG,  -- 是否审核
-            TA.ZHUANCTZ_FLG,  -- 是否转成台账
-            TA.YUAN_NO,  -- 原单据编号
-            TA.HANGHAO_OLD,  -- 原行号
-            TA.YEZ_ID,  -- 货主ID
-            TD.owner_name,  -- 货主名称
-            TD.owner_code,  -- 货主名称
-            '*' YAOP_GUIG,  -- 规格
-            TF.package_unit BAOZ_DANW,  -- 包装单位
-            (select bp.package_name from bas_package bp where TA.SHANGP_ID = bp.item_id) package_name,  -- 包装名称
-            'NHK' TO_KUB
-            -- (SELECT T.loc_id FROM bas_location /*JC_HWZD*/ T WHERE T.loc_classify='4' AND T.is_lock='0' AND T.owner_id=TA.YEZ_ID AND ROWNUM=1) TO_HUOW_ID
+        TA.DANJ_NO, -- 单据编号
+        TA.DANJ_SORT, -- 单据行号
+        TA.SHANGP_ID, -- 商品ID
+        TB.item_code, -- 商品编号
+        TB.item_name, -- 中文名
+        TB.manufacturer, -- 生产厂家
+        TB.item_specification, -- 药品规格
+        -- TB.BAOZ_DANW, -- 包装数量
+        TB.approval_no, -- 批准文号
+        TB.remark, -- 备注
+        TA.LOT, -- 批号
+        -- TE.YOUX_DATE, -- 是否优先出库
+        TE.lot02, -- 生产日期
+        TE.lot03, -- 有效期至
+        TE.lot01, -- 批号
+        TA.DANW_ID, -- 单位编号
+        TC.customer_code, -- 单位编号
+        TC.customer_name, -- 单位名称
+        TA.RUK_NUM, -- 入库数量
+        TA.BUHGP_NUM, -- 不合格品数量
+        TA.ZHILQK_REFLECTION, -- 质量情况反馈
+        TA.SUOZBM_OPINION, -- 所在部门意见
+        TA.ZHILGLBM_AFFIRMATION, -- 质量管理部门意见
+        TA.SHENH_FLG, -- 是否审核
+        TA.ZHUANCTZ_FLG, -- 是否转成台账
+        TA.YUAN_NO, -- 原单据编号
+        TA.HANGHAO_OLD, -- 原行号
+        TA.YEZ_ID, -- 货主ID
+        TD.owner_name, -- 货主名称
+        TD.owner_code, -- 货主名称
+        '*' YAOP_GUIG, -- 规格
+        TF.package_unit BAOZ_DANW, -- 包装单位
+        (select bp.package_name from bas_package bp where TA.SHANGP_ID = bp.item_id) package_name, -- 包装名称
+        'NHK' TO_KUB
+        -- (SELECT T.loc_id FROM bas_location /*JC_HWZD*/ T WHERE T.loc_classify='4' AND T.is_lock='0' AND T.owner_id=TA.YEZ_ID AND ROWNUM=1) TO_HUOW_ID
         FROM GSP_BHGYPQRB_MX TA, bas_item TB, bas_customer /*JC_DWZL*/ TC, bas_owner /*JC_HZZL*/ TD, bas_lot_att /*JC_PHWHB*/ TE,bas_package_items TF
         WHERE TA.SHANGP_ID = TB.item_id
-          AND TA.DANW_ID = TC.customer_id
-          AND TA.YEZ_ID = TD.owner_id
-          AND TA.LOT = TE.lot_id
-          AND TA.SHANGP_ID = TE.item_id
-          AND (TA.SHANGP_ID = TF.item_id AND TF.PACKAGE_LEVEL = '3')
-          --@ and TA.DANJ_NO = #{DANJ_NO}
+        AND TA.DANW_ID = TC.customer_id
+        AND TA.YEZ_ID = TD.owner_id
+        AND TA.LOT = TE.lot_id
+        AND TA.SHANGP_ID = TE.item_id
+        AND (TA.SHANGP_ID = TF.item_id AND TF.PACKAGE_LEVEL = '3')
+        --@ and TA.DANJ_NO = #{DANJ_NO}
     </select>
 </mapper>

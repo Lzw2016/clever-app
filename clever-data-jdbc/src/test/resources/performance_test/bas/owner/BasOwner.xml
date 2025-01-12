@@ -35,37 +35,37 @@
 
     <select id="queryAllOwner">
         select t.owner_id,
-               t.owner_code,
-               t.owner_name,
-               t.logogram,
-               t.contact,
-               t.telephone,
-               t.province,
-               t.city,
-               t.zip,
-               t.address,
-               t.remark,
-               t.is_default_owner,
-               t.is_enable,
-               /*t.create_by,*/
-               t.create_at,
-               /*t.update_by,*/
-               t.update_at,
-               t1.wh_id,
-              -- t2.wh_name,
-              nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
-              nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        t.owner_code,
+        t.owner_name,
+        t.logogram,
+        t.contact,
+        t.telephone,
+        t.province,
+        t.city,
+        t.zip,
+        t.address,
+        t.remark,
+        t.is_default_owner,
+        t.is_enable,
+        /*t.create_by,*/
+        t.create_at,
+        /*t.update_by,*/
+        t.update_at,
+        t1.wh_id,
+        -- t2.wh_name,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
         from bas_owner t
-            inner join bas_wh_owner t1 on t1.owner_id = t.owner_id
-            -- inner join bas_wh t2 on t2.wh_id = t1.wh_id
+        inner join bas_wh_owner t1 on t1.owner_id = t.owner_id
+        -- inner join bas_wh t2 on t2.wh_id = t1.wh_id
         where t.is_enable = 1
-              and t1.wh_id = #{wh_id}
-<!--        <if test="#obj.notEmpty(ownerList)">-->
-<!--            and t.owner_id in-->
-<!--            <foreach collection="ownerList" separator="," item="item" index="index" open="(" close=")">-->
-<!--                #{item}-->
-<!--            </foreach>-->
-<!--        </if>-->
+        and t1.wh_id = #{wh_id}
+        <!--        <if test="#obj.notEmpty(ownerList)">-->
+        <!--            and t.owner_id in-->
+        <!--            <foreach collection="ownerList" separator="," item="item" index="index" open="(" close=")">-->
+        <!--                #{item}-->
+        <!--            </foreach>-->
+        <!--        </if>-->
         --@ AND t.owner_code = #{owner_code}
         --@ AND t.owner_name = #{owner_name}
     </select>

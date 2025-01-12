@@ -13,42 +13,42 @@
     <select id="queryOut">
         select
         distinct
-            o.order_out_code,
-            b.barcode,
-            o.order_out_id,
-            o.order_type,
-            o.order_biz_type,
-            o.dates,
-            t.customer_code,
-            t.customer_name
-            from
-            cmd_out b
-            inner join order_out o on b.order_id = o.order_out_id
-            inner join bas_item m on m.item_id = b.item_id
-            inner join bas_customer t on o.customer_id = t.customer_id
-            where
-            b.order_type in ( 2, 3 )
-            and b.cmd_state >= 50
-            and not exists (select 1 from cold_out_info t1 where t1.order_out_code = o.order_out_code and t1.barcode = b.barcode)
-            and m.stock_env = 4
-            <if test="#obj.notEmpty(zxdList)">
-                and b.barcode in
-                <foreach collection="zxdList" separator="," item="item" index="index" open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test="#obj.notEmpty(order_out_code)">
-                and o.order_out_code like '%' || #{order_out_code} || '%'
-            </if>
-            <if test="#obj.notEmpty(barcode)">
-                and b.barcode like '%' || #{barcode} || '%'
-            </if>
-            <if test="#obj.notEmpty(startDate)">
-                and o.dates >= #{startDate}
-            </if>
-            <if test="#obj.notEmpty(endDate)">
-                and o.dates &lt;= #{endDate}
-            </if>
+        o.order_out_code,
+        b.barcode,
+        o.order_out_id,
+        o.order_type,
+        o.order_biz_type,
+        o.dates,
+        t.customer_code,
+        t.customer_name
+        from
+        cmd_out b
+        inner join order_out o on b.order_id = o.order_out_id
+        inner join bas_item m on m.item_id = b.item_id
+        inner join bas_customer t on o.customer_id = t.customer_id
+        where
+        b.order_type in ( 2, 3 )
+        and b.cmd_state >= 50
+        and not exists (select 1 from cold_out_info t1 where t1.order_out_code = o.order_out_code and t1.barcode = b.barcode)
+        and m.stock_env = 4
+        <if test="#obj.notEmpty(zxdList)">
+            and b.barcode in
+            <foreach collection="zxdList" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="#obj.notEmpty(order_out_code)">
+            and o.order_out_code like '%' || #{order_out_code} || '%'
+        </if>
+        <if test="#obj.notEmpty(barcode)">
+            and b.barcode like '%' || #{barcode} || '%'
+        </if>
+        <if test="#obj.notEmpty(startDate)">
+            and o.dates >= #{startDate}
+        </if>
+        <if test="#obj.notEmpty(endDate)">
+            and o.dates &lt;= #{endDate}
+        </if>
     </select>
 
     <select id="queryAll">

@@ -56,8 +56,8 @@ public class DefaultSecurityContextRepository implements SecurityContextReposito
             TupleTwo<SysSecurityContext, SecurityContext> tupleTwo = newSecurityContext(userId);
             if (tupleTwo == null) {
                 queryDSL.delete(sysSecurityContext)
-                        .where(sysSecurityContext.userId.eq(userId))
-                        .execute();
+                    .where(sysSecurityContext.userId.eq(userId))
+                    .execute();
                 return null;
             }
             SysSecurityContext userSecurityContext = queryDSL.selectFrom(sysSecurityContext).where(sysSecurityContext.userId.eq(userId)).fetchOne();
@@ -72,10 +72,10 @@ public class DefaultSecurityContextRepository implements SecurityContextReposito
                 return tupleTwo.getValue2();
             }
             queryDSL.update(sysSecurityContext)
-                    .set(sysSecurityContext.securityContext, JacksonMapper.getInstance().toJson(tupleTwo.getValue2()))
-                    .set(sysSecurityContext.updateAt, new Date())
-                    .where(sysSecurityContext.id.eq(userSecurityContext.getId()))
-                    .execute();
+                .set(sysSecurityContext.securityContext, JacksonMapper.getInstance().toJson(tupleTwo.getValue2()))
+                .set(sysSecurityContext.updateAt, new Date())
+                .where(sysSecurityContext.id.eq(userSecurityContext.getId()))
+                .execute();
             return tupleTwo.getValue2();
         });
         // SecurityContext写入Redis缓存
@@ -102,8 +102,8 @@ public class DefaultSecurityContextRepository implements SecurityContextReposito
                 queryDSL.select(sysUser.id).from(sysUser).where(sysUser.id.eq(Conv.asLong(userId))).forUpdate().fetchOne();
                 // 开始加载SecurityContext
                 SysSecurityContext userSecurityContext = queryDSL.selectFrom(sysSecurityContext)
-                        .where(sysSecurityContext.userId.eq(Conv.asLong(userId)))
-                        .fetchOne();
+                    .where(sysSecurityContext.userId.eq(Conv.asLong(userId)))
+                    .fetchOne();
                 if (userSecurityContext == null) {
                     TupleTwo<SysSecurityContext, SecurityContext> tupleTwo = newSecurityContext(userId);
                     if (tupleTwo == null) {
@@ -134,30 +134,30 @@ public class DefaultSecurityContextRepository implements SecurityContextReposito
     protected TupleTwo<SysSecurityContext, SecurityContext> newSecurityContext(Long userId) {
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
         SysUser user = queryDSL.select(sysUser)
-                .from(sysUser)
-                .where(sysUser.id.eq(userId))
-                .fetchOne();
+            .from(sysUser)
+            .where(sysUser.id.eq(userId))
+            .fetchOne();
         if (user == null) {
             return null;
         }
         // 查询角色
         List<Tuple> roles = queryDSL.select(sysRole.roleCode, sysRole.id)
-                .from(sysUserRole).leftJoin(sysRole).on(sysUserRole.roleId.eq(sysRole.id))
-                .where(sysRole.isEnable.eq(EnumConstant.ENABLED_1))
-                .where(sysUserRole.userId.eq(userId))
-                .fetch();
+            .from(sysUserRole).leftJoin(sysRole).on(sysUserRole.roleId.eq(sysRole.id))
+            .where(sysRole.isEnable.eq(EnumConstant.ENABLED_1))
+            .where(sysUserRole.userId.eq(userId))
+            .fetch();
         // 查询权限
         List<String> rolePermissions = queryDSL.select(sysResource.permission).distinct()
-                .from(sysResource).leftJoin(sysRoleResource).on(sysResource.id.eq(sysRoleResource.resourceId))
-                .where(sysResource.permission.isNotNull())
-                .where(sysResource.isEnable.eq(EnumConstant.ENABLED_1))
-                .where(sysRoleResource.roleId.in(roles.stream().map(item -> item.get(sysRole.id)).collect(Collectors.toSet())))
-                .fetch();
+            .from(sysResource).leftJoin(sysRoleResource).on(sysResource.id.eq(sysRoleResource.resourceId))
+            .where(sysResource.permission.isNotNull())
+            .where(sysResource.isEnable.eq(EnumConstant.ENABLED_1))
+            .where(sysRoleResource.roleId.in(roles.stream().map(item -> item.get(sysRole.id)).collect(Collectors.toSet())))
+            .fetch();
         // SecurityContext
         SecurityContext securityContext = new SecurityContext(
-                UserInfoConvertUtils.convertToUserInfo(user),
-                roles.stream().map(item -> item.get(sysRole.id)).map(String::valueOf).collect(Collectors.toSet()),
-                new HashSet<>(rolePermissions)
+            UserInfoConvertUtils.convertToUserInfo(user),
+            roles.stream().map(item -> item.get(sysRole.id)).map(String::valueOf).collect(Collectors.toSet()),
+            new HashSet<>(rolePermissions)
         );
         // SysSecurityContext
         SysSecurityContext sysSecurityContext = new SysSecurityContext();

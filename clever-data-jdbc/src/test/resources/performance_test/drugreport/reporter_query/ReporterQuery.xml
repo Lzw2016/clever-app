@@ -4,18 +4,18 @@
 
     <select id="queryListByOrderOutCode" resultType="map">
         select distinct
-            oi.order_in_id,
-            oi.order_in_code,
-            bi.item_name,
-            bi.item_code,
-            bi.origin,
-            CASE bi.item_specification WHEN 'N/A' then '*' ELSE bi.item_specification END as item_specification,
-            ci.lot_id,
-            (select lot01 from bas_lot_att bla where bla.lot_id = ci.lot_id) lot01,
-            p.photo_type,
-            p.path,
-            bc.customer_code,
-            bc.customer_name
+        oi.order_in_id,
+        oi.order_in_code,
+        bi.item_name,
+        bi.item_code,
+        bi.origin,
+        CASE bi.item_specification WHEN 'N/A' then '*' ELSE bi.item_specification END as item_specification,
+        ci.lot_id,
+        (select lot01 from bas_lot_att bla where bla.lot_id = ci.lot_id) lot01,
+        p.photo_type,
+        p.path,
+        bc.customer_code,
+        bc.customer_name
         from (select * from order_in union all select * from wms8_his.order_in) oi
         inner join (select * from cmd_in union all select * from wms8_his.cmd_in ) ci on ci.order_id = oi.order_in_id
         inner join bas_item bi on bi.item_id = ci.item_id
@@ -31,17 +31,17 @@
 
     <select id="queryListByItem" resultType="map">
         select
-           distinct
-           bi.item_name,
-           p.photo_type,
-           p.path,
-           bla.lot_id,
-           bla.lot01,
-           bi.item_code,
-           bi.origin,
-            bc.customer_code,
-            bc.customer_name,
-           CASE bi.item_specification WHEN 'N/A' then '*' ELSE bi.item_specification END as item_specification
+        distinct
+        bi.item_name,
+        p.photo_type,
+        p.path,
+        bla.lot_id,
+        bla.lot01,
+        bi.item_code,
+        bi.origin,
+        bc.customer_code,
+        bc.customer_name,
+        CASE bi.item_specification WHEN 'N/A' then '*' ELSE bi.item_specification END as item_specification
         from bas_item bi
         inner join bas_lot_att bla on bi.item_id = bla.item_id
         left join photos p on p.item_id = bi.item_id and p.lot_id = bla.lot_id
@@ -56,29 +56,29 @@
 
     <select id="GetDanwzlList" resultType="map">
         WITH T3 AS
-                 (SELECT
-                      T.DANW_ID,
-                      T.DANW_NO,
-                      T.YEZ_ID,
-                      T.DANW_NAME,
-                      T.LIANX_STAFF,
-                      T.LIANXR_PHONE,
-                      T.DIZ_PHONE,
-                      T1.YEZ_NAME
-                  FROM JC_DWZL T
-                           LEFT JOIN JC_HZZL T1
-                                     ON T.YEZ_ID = T1.YEZ_ID),DETAIL AS (
-            select
-                ROWNUM         AS "RowNumber",
-                T3.DANW_ID      AS "DanwId",
-                T3.DANW_NO      AS "DanwNo",
-                T3.YEZ_ID       AS "YezId",
-                T3.DANW_NAME    AS "DanwName",
-                T3.LIANX_STAFF  AS "LianxStaff",
-                T3.LIANXR_PHONE AS "lianxrPhone",
-                T3.DIZ_PHONE    AS "Adress",
-                T3.YEZ_NAME    AS "YezName"
-            from T3)
+        (SELECT
+        T.DANW_ID,
+        T.DANW_NO,
+        T.YEZ_ID,
+        T.DANW_NAME,
+        T.LIANX_STAFF,
+        T.LIANXR_PHONE,
+        T.DIZ_PHONE,
+        T1.YEZ_NAME
+        FROM JC_DWZL T
+        LEFT JOIN JC_HZZL T1
+        ON T.YEZ_ID = T1.YEZ_ID),DETAIL AS (
+        select
+        ROWNUM AS "RowNumber",
+        T3.DANW_ID AS "DanwId",
+        T3.DANW_NO AS "DanwNo",
+        T3.YEZ_ID AS "YezId",
+        T3.DANW_NAME AS "DanwName",
+        T3.LIANX_STAFF AS "LianxStaff",
+        T3.LIANXR_PHONE AS "lianxrPhone",
+        T3.DIZ_PHONE AS "Adress",
+        T3.YEZ_NAME AS "YezName"
+        from T3)
         SELECT * FROM DETAIL
         WHERE ROWNUM <![CDATA[<=]]> #{limit} AND "RowNumber"<![CDATA[>]]> #{limit}*(#{page}-1)
     </select>

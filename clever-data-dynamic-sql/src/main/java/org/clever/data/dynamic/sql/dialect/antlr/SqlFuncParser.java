@@ -21,18 +21,18 @@ public class SqlFuncParser extends Parser {
 
     protected static final DFA[] _decisionToDFA;
     protected static final PredictionContextCache _sharedContextCache =
-            new PredictionContextCache();
+        new PredictionContextCache();
     public static final int
-            LPAREN = 1, RPAREN = 2, COMMA = 3, DOT = 4, IDENTIFIER = 5, NULL_LITERAL = 6, BOOL_LITERAL = 7,
-            DECIMAL_LITERAL = 8, FLOAT_LITERAL = 9, STRING_LITERAL = 10, WS = 11;
+        LPAREN = 1, RPAREN = 2, COMMA = 3, DOT = 4, IDENTIFIER = 5, NULL_LITERAL = 6, BOOL_LITERAL = 7,
+        DECIMAL_LITERAL = 8, FLOAT_LITERAL = 9, STRING_LITERAL = 10, WS = 11;
     public static final int
-            RULE_javaFunc = 0, RULE_javaParameterList = 1, RULE_javaParameter = 2,
-            RULE_javaVar = 3, RULE_sqlFunc = 4, RULE_sqlParameterList = 5, RULE_sqlParameter = 6;
+        RULE_javaFunc = 0, RULE_javaParameterList = 1, RULE_javaParameter = 2,
+        RULE_javaVar = 3, RULE_sqlFunc = 4, RULE_sqlParameterList = 5, RULE_sqlParameter = 6;
 
     private static String[] makeRuleNames() {
         return new String[]{
-                "javaFunc", "javaParameterList", "javaParameter", "javaVar", "sqlFunc",
-                "sqlParameterList", "sqlParameter"
+            "javaFunc", "javaParameterList", "javaParameter", "javaVar", "sqlFunc",
+            "sqlParameterList", "sqlParameter"
         };
     }
 
@@ -40,7 +40,7 @@ public class SqlFuncParser extends Parser {
 
     private static String[] makeLiteralNames() {
         return new String[]{
-                null, "'('", "')'", "','", "'.'", null, "'null'"
+            null, "'('", "')'", "','", "'.'", null, "'null'"
         };
     }
 
@@ -48,9 +48,9 @@ public class SqlFuncParser extends Parser {
 
     private static String[] makeSymbolicNames() {
         return new String[]{
-                null, "LPAREN", "RPAREN", "COMMA", "DOT", "IDENTIFIER", "NULL_LITERAL",
-                "BOOL_LITERAL", "DECIMAL_LITERAL", "FLOAT_LITERAL", "STRING_LITERAL",
-                "WS"
+            null, "LPAREN", "RPAREN", "COMMA", "DOT", "IDENTIFIER", "NULL_LITERAL",
+            "BOOL_LITERAL", "DECIMAL_LITERAL", "FLOAT_LITERAL", "STRING_LITERAL",
+            "WS"
         };
     }
 
@@ -805,31 +805,31 @@ public class SqlFuncParser extends Parser {
     }
 
     public static final String _serializedATN =
-            "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\rV\4\2\t\2\4\3\t" +
-                    "\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\3\2\3\2\3\2\6\2\24\n\2\r\2" +
-                    "\16\2\25\3\2\3\2\7\2\32\n\2\f\2\16\2\35\13\2\3\2\3\2\3\3\3\3\3\3\7\3$" +
-                    "\n\3\f\3\16\3\'\13\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4\60\n\4\3\5\3\5\3" +
-                    "\5\7\5\65\n\5\f\5\16\58\13\5\3\6\3\6\3\6\7\6=\n\6\f\6\16\6@\13\6\3\6\3" +
-                    "\6\3\7\3\7\3\7\7\7G\n\7\f\7\16\7J\13\7\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b" +
-                    "\5\bT\n\b\3\b\2\2\t\2\4\6\b\n\f\16\2\2\2a\2\20\3\2\2\2\4 \3\2\2\2\6/\3" +
-                    "\2\2\2\b\61\3\2\2\2\n9\3\2\2\2\fC\3\2\2\2\16S\3\2\2\2\20\23\7\7\2\2\21" +
-                    "\22\7\6\2\2\22\24\7\7\2\2\23\21\3\2\2\2\24\25\3\2\2\2\25\23\3\2\2\2\25" +
-                    "\26\3\2\2\2\26\27\3\2\2\2\27\33\7\3\2\2\30\32\5\4\3\2\31\30\3\2\2\2\32" +
-                    "\35\3\2\2\2\33\31\3\2\2\2\33\34\3\2\2\2\34\36\3\2\2\2\35\33\3\2\2\2\36" +
-                    "\37\7\4\2\2\37\3\3\2\2\2 %\5\6\4\2!\"\7\5\2\2\"$\5\6\4\2#!\3\2\2\2$\'" +
-                    "\3\2\2\2%#\3\2\2\2%&\3\2\2\2&\5\3\2\2\2\'%\3\2\2\2(\60\7\b\2\2)\60\7\t" +
-                    "\2\2*\60\7\n\2\2+\60\7\13\2\2,\60\7\f\2\2-\60\5\b\5\2.\60\5\2\2\2/(\3" +
-                    "\2\2\2/)\3\2\2\2/*\3\2\2\2/+\3\2\2\2/,\3\2\2\2/-\3\2\2\2/.\3\2\2\2\60" +
-                    "\7\3\2\2\2\61\66\7\7\2\2\62\63\7\6\2\2\63\65\7\7\2\2\64\62\3\2\2\2\65" +
-                    "8\3\2\2\2\66\64\3\2\2\2\66\67\3\2\2\2\67\t\3\2\2\28\66\3\2\2\29:\7\7\2" +
-                    "\2:>\7\3\2\2;=\5\f\7\2<;\3\2\2\2=@\3\2\2\2><\3\2\2\2>?\3\2\2\2?A\3\2\2" +
-                    "\2@>\3\2\2\2AB\7\4\2\2B\13\3\2\2\2CH\5\16\b\2DE\7\5\2\2EG\5\16\b\2FD\3" +
-                    "\2\2\2GJ\3\2\2\2HF\3\2\2\2HI\3\2\2\2I\r\3\2\2\2JH\3\2\2\2KT\7\b\2\2LT" +
-                    "\7\t\2\2MT\7\n\2\2NT\7\13\2\2OT\7\f\2\2PT\5\n\6\2QT\5\b\5\2RT\5\2\2\2" +
-                    "SK\3\2\2\2SL\3\2\2\2SM\3\2\2\2SN\3\2\2\2SO\3\2\2\2SP\3\2\2\2SQ\3\2\2\2" +
-                    "SR\3\2\2\2T\17\3\2\2\2\n\25\33%/\66>HS";
+        "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\rV\4\2\t\2\4\3\t" +
+            "\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\3\2\3\2\3\2\6\2\24\n\2\r\2" +
+            "\16\2\25\3\2\3\2\7\2\32\n\2\f\2\16\2\35\13\2\3\2\3\2\3\3\3\3\3\3\7\3$" +
+            "\n\3\f\3\16\3\'\13\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4\60\n\4\3\5\3\5\3" +
+            "\5\7\5\65\n\5\f\5\16\58\13\5\3\6\3\6\3\6\7\6=\n\6\f\6\16\6@\13\6\3\6\3" +
+            "\6\3\7\3\7\3\7\7\7G\n\7\f\7\16\7J\13\7\3\b\3\b\3\b\3\b\3\b\3\b\3\b\3\b" +
+            "\5\bT\n\b\3\b\2\2\t\2\4\6\b\n\f\16\2\2\2a\2\20\3\2\2\2\4 \3\2\2\2\6/\3" +
+            "\2\2\2\b\61\3\2\2\2\n9\3\2\2\2\fC\3\2\2\2\16S\3\2\2\2\20\23\7\7\2\2\21" +
+            "\22\7\6\2\2\22\24\7\7\2\2\23\21\3\2\2\2\24\25\3\2\2\2\25\23\3\2\2\2\25" +
+            "\26\3\2\2\2\26\27\3\2\2\2\27\33\7\3\2\2\30\32\5\4\3\2\31\30\3\2\2\2\32" +
+            "\35\3\2\2\2\33\31\3\2\2\2\33\34\3\2\2\2\34\36\3\2\2\2\35\33\3\2\2\2\36" +
+            "\37\7\4\2\2\37\3\3\2\2\2 %\5\6\4\2!\"\7\5\2\2\"$\5\6\4\2#!\3\2\2\2$\'" +
+            "\3\2\2\2%#\3\2\2\2%&\3\2\2\2&\5\3\2\2\2\'%\3\2\2\2(\60\7\b\2\2)\60\7\t" +
+            "\2\2*\60\7\n\2\2+\60\7\13\2\2,\60\7\f\2\2-\60\5\b\5\2.\60\5\2\2\2/(\3" +
+            "\2\2\2/)\3\2\2\2/*\3\2\2\2/+\3\2\2\2/,\3\2\2\2/-\3\2\2\2/.\3\2\2\2\60" +
+            "\7\3\2\2\2\61\66\7\7\2\2\62\63\7\6\2\2\63\65\7\7\2\2\64\62\3\2\2\2\65" +
+            "8\3\2\2\2\66\64\3\2\2\2\66\67\3\2\2\2\67\t\3\2\2\28\66\3\2\2\29:\7\7\2" +
+            "\2:>\7\3\2\2;=\5\f\7\2<;\3\2\2\2=@\3\2\2\2><\3\2\2\2>?\3\2\2\2?A\3\2\2" +
+            "\2@>\3\2\2\2AB\7\4\2\2B\13\3\2\2\2CH\5\16\b\2DE\7\5\2\2EG\5\16\b\2FD\3" +
+            "\2\2\2GJ\3\2\2\2HF\3\2\2\2HI\3\2\2\2I\r\3\2\2\2JH\3\2\2\2KT\7\b\2\2LT" +
+            "\7\t\2\2MT\7\n\2\2NT\7\13\2\2OT\7\f\2\2PT\5\n\6\2QT\5\b\5\2RT\5\2\2\2" +
+            "SK\3\2\2\2SL\3\2\2\2SM\3\2\2\2SN\3\2\2\2SO\3\2\2\2SP\3\2\2\2SQ\3\2\2\2" +
+            "SR\3\2\2\2T\17\3\2\2\2\n\25\33%/\66>HS";
     public static final ATN _ATN =
-            new ATNDeserializer().deserialize(_serializedATN.toCharArray());
+        new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 
     static {
         _decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];

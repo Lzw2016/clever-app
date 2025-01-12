@@ -59,10 +59,10 @@ public class HashedWheelTimerTest {
     @Test
     public void t03() throws Exception {
         ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor(
-                new BasicThreadFactory.Builder()
-                        .namingPattern("test-%s")
-                        .daemon(true)
-                        .build()
+            new BasicThreadFactory.Builder()
+                .namingPattern("test-%s")
+                .daemon(true)
+                .build()
         );
         ScheduledFuture<?> future_1 = scheduled.scheduleAtFixedRate(() -> log.info("任务1"), 0, 500, TimeUnit.MILLISECONDS);
         ScheduledFuture<?> future_2 = scheduled.scheduleAtFixedRate(() -> log.info("任务2"), 0, 1500, TimeUnit.MILLISECONDS);

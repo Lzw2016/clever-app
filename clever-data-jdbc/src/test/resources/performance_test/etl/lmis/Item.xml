@@ -3,12 +3,12 @@
 <mapper namespace="Item">
     <select id="queryAllItem">
         select
-            a.*,
-            b.lot as lot01,
-            b.shengchan_date as lot02,
-            b.youx_date as lot03
+        a.*,
+        b.lot as lot01,
+        b.shengchan_date as lot02,
+        b.youx_date as lot03
         from jc_spzl a
-                 left join jc_phwhb b on a.shangp_id = b.shangp_id
+        left join jc_phwhb b on a.shangp_id = b.shangp_id
         order by a.shangp_id
     </select>
 </mapper>

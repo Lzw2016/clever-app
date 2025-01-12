@@ -3,146 +3,146 @@
 <mapper namespace="SpjsKpd">
     <select id="sql_spjskpsh_yzbh" resultType="map">
         SELECT A.YEZ_NO 货主编号,A.YEZ_NAME 货主名称,A.YEZ_ID 货主内码
-          FROM JC_HZZL A, JC_CKYZDZ B
-         WHERE A.BEACTIVE='Y'
-           AND A.YEZ_ID = B.YEZ_ID AND B.HOUSE_ID = #{HOUSE_ID}
-           ${@com.yvan.Sql@phrase('AND', 'A.YEZ_NO like')}
+        FROM JC_HZZL A, JC_CKYZDZ B
+        WHERE A.BEACTIVE='Y'
+        AND A.YEZ_ID = B.YEZ_ID AND B.HOUSE_ID = #{HOUSE_ID}
+        ${@com.yvan.Sql@phrase('AND', 'A.YEZ_NO like')}
         ORDER BY A.YEZ_NO
     </select>
 
     <select id="sql_spjskpsh_dwbh" resultType="map">
         SELECT A.DANW_NO 单位编号,
-               A.DANW_NAME 单位名称,
-               A.YEW_STAFF 业务员,
-               A.LIANX_STAFF 联系人,
-               A.LIANXR_PHONE 联系人电话,
-               A.ZHUJ_CODE 助记码,
-               A.DANW_ID 单位内码
-          FROM JC_DWZL A, JC_CKYZDZ B
-          WHERE A.YEZ_ID LIKE #{YEZ_ID}
-           AND A.BEACTIVE='Y'
-           AND A.YEZ_ID = B.YEZ_ID
-           AND B.HOUSE_ID = #{HOUSE_ID}
-           ${@com.yvan.Sql@phrase('AND', 'A.ZHUJ_CODE like', 'A.DANW_NAME like')}
+        A.DANW_NAME 单位名称,
+        A.YEW_STAFF 业务员,
+        A.LIANX_STAFF 联系人,
+        A.LIANXR_PHONE 联系人电话,
+        A.ZHUJ_CODE 助记码,
+        A.DANW_ID 单位内码
+        FROM JC_DWZL A, JC_CKYZDZ B
+        WHERE A.YEZ_ID LIKE #{YEZ_ID}
+        AND A.BEACTIVE='Y'
+        AND A.YEZ_ID = B.YEZ_ID
+        AND B.HOUSE_ID = #{HOUSE_ID}
+        ${@com.yvan.Sql@phrase('AND', 'A.ZHUJ_CODE like', 'A.DANW_NAME like')}
     </select>
 
     <insert id="addGspYpjsdHz">
         insert into GSP_YPJSD_HZ
-          (DANJ_NO,
-           RIQI_DATE,
-           YEZ_ID,
-           DANW_ID,
-           CAOZ_STAFF,
-           ZHIJ_STAFF,
-           YANS_ZZ,
-           ZHIG_BZ,
-           CAOZ_STAFF_ID,
-           ZHIJ_STAFF_ID,
-           HOUSE_ID)
+        (DANJ_NO,
+        RIQI_DATE,
+        YEZ_ID,
+        DANW_ID,
+        CAOZ_STAFF,
+        ZHIJ_STAFF,
+        YANS_ZZ,
+        ZHIG_BZ,
+        CAOZ_STAFF_ID,
+        ZHIJ_STAFF_ID,
+        HOUSE_ID)
         values
-          (#{DANJ_NO},
-           to_date(#{RIQI_DATE},'yyyy-MM-dd'),
-           #{YEZ_ID},
-           #{DANW_ID},
-           #{CAOZ_STAFF},
-           #{ZHIJ_STAFF},
-           '',
-           '',
-           #{CAOZ_STAFF_ID},
-           #{ZHIJ_STAFF_ID},
-           #{HOUSE_ID})
+        (#{DANJ_NO},
+        to_date(#{RIQI_DATE},'yyyy-MM-dd'),
+        #{YEZ_ID},
+        #{DANW_ID},
+        #{CAOZ_STAFF},
+        #{ZHIJ_STAFF},
+        '',
+        '',
+        #{CAOZ_STAFF_ID},
+        #{ZHIJ_STAFF_ID},
+        #{HOUSE_ID})
     </insert>
 
     <insert id="addGspYpjsdMx">
         insert into GSP_YPJSD_MX
-          (DANJ_NO,
-           HANGHAO,
-           SHANGP_NO,
-           SHANGP_NAME,
-           YAOP_GUIG,
-           BAOZ_DANW,
-           BAOZ_NUM,
-           MAKER,
-           PIZ_NO,
-           LOT,
-           SHENGCHAN_DATE,
-           YOUX_DATE,
-           NUM,
-           YANS_NUM,
-           YANS_YIJU,
-           JUSHOU_REASON,
-           ADVISE_ZHIJY,
-           ADVISE_YANSZ,
-           ADVISE_ZHIGB,
-           YAOPZL_STD,
-           SHANGP_ID)
+        (DANJ_NO,
+        HANGHAO,
+        SHANGP_NO,
+        SHANGP_NAME,
+        YAOP_GUIG,
+        BAOZ_DANW,
+        BAOZ_NUM,
+        MAKER,
+        PIZ_NO,
+        LOT,
+        SHENGCHAN_DATE,
+        YOUX_DATE,
+        NUM,
+        YANS_NUM,
+        YANS_YIJU,
+        JUSHOU_REASON,
+        ADVISE_ZHIJY,
+        ADVISE_YANSZ,
+        ADVISE_ZHIGB,
+        YAOPZL_STD,
+        SHANGP_ID)
         values
-          (#{DANJ_NO},
-           #{HANGHAO},
-           #{SHANGP_NO},
-           #{SHANGP_NAME},
-           #{YAOP_GUIG},
-           #{BAOZ_DANW},
-           #{BAOZ_NUM},
-           #{MAKER},
-           #{PIZ_NO},
-           #{LOT},
-           to_date(substr(#{SHENGCHAN_DATE},1,10),'yyyy-MM-dd'),
-           to_date(substr(#{YOUX_DATE},1,10),'yyyy-MM-dd'),
-           #{NUM},
-           #{YANS_NUM},
-           #{YANS_YIJU},
-           #{JUSHOU_REASON},
-           #{ADVISE_ZHIJY},
-           '',
-           '',
-           #{YAOPZL_STD},
-           #{SHANGP_ID})
+        (#{DANJ_NO},
+        #{HANGHAO},
+        #{SHANGP_NO},
+        #{SHANGP_NAME},
+        #{YAOP_GUIG},
+        #{BAOZ_DANW},
+        #{BAOZ_NUM},
+        #{MAKER},
+        #{PIZ_NO},
+        #{LOT},
+        to_date(substr(#{SHENGCHAN_DATE},1,10),'yyyy-MM-dd'),
+        to_date(substr(#{YOUX_DATE},1,10),'yyyy-MM-dd'),
+        #{NUM},
+        #{YANS_NUM},
+        #{YANS_YIJU},
+        #{JUSHOU_REASON},
+        #{ADVISE_ZHIJY},
+        '',
+        '',
+        #{YAOPZL_STD},
+        #{SHANGP_ID})
     </insert>
 
     <select id="selectRejectItems" resultType="map">
         SELECT DISTINCT
-                bi.item_code SHANGP_NO,
-                bi.item_name CHINESE_NAME,
-                bi.item_name SHANGP_NAME,
-                oid.qty NUM,   -- 数量
-                oid.order_qty SHIS_NUM,   -- 实收数量
-                oid.lot_id LOT,     -- 批号
-                oid.order_in_id DANJ_NO,   -- 单据编号
-                oi.order_staff_id SHOUH_STAFF,    -- 收货员
-                oi.asn_staff CAIGOU_STAFF,   -- 采购员
-                -- R_HZ.ZHIJ_STAFF,     -- 质检员
-                oid.lot01,
-                oid.lot02 SHENGCHAN_DATE,   -- 生产日期
-                oid.lot03 YOUX_DATE,        -- 有效期至
-                oi.dates RIQI_DATE,
-                -- to_char(oi.dates,'YYYY-MM-DD') RIQI_DATE,  -- 日期
-                oid.create_at KAIP_TIME,/*R_HZ.KAIP_TIME,*/   -- 开票时间
-                oid.item_id SHANGP_ID,    -- 商品ID
-                oid.package_meas YAOP_GUIG,  -- 规格
-                bi.manufacturer MAKER,       -- 生产厂家
-                oid.package_unit BAOZ_DANW,   -- 包装单位
-                (select bpi.package_meas from bas_item bi left join bas_package bp on bi.item_id = bp.item_id
-                                                          left join bas_package_items bpi on bpi.package_id = bp.package_id
-                 where bpi.package_level = '3' and bi.item_id = oid.item_id)  BAOZ_NUM,    -- 包装数量
-                bi.approval_no PIZ_NO,      -- 批准文号
-                oi.owner_id YEZ_ID,      -- 货主ID
-                bo.owner_code YEZ_NO,      -- 货主编号
-                bo.owner_name YEZ_NAME,    -- 货主名称
-                oi.SUPPLIER_ID /*R_HZ.*/DANW_ID,     -- 单位ID
-                (SELECT customer_code FROM bas_customer/*JC_DWZL J_DW*/ bs WHERE oi.SUPPLIER_ID = bs.customer_id AND ROWNUM=1) DANW_NO,
-                (SELECT customer_name FROM bas_customer/*JC_DWZL J_DW*/ bs WHERE oi.SUPPLIER_ID = bs.customer_id AND ROWNUM=1) DANW_NAME
+        bi.item_code SHANGP_NO,
+        bi.item_name CHINESE_NAME,
+        bi.item_name SHANGP_NAME,
+        oid.qty NUM, -- 数量
+        oid.order_qty SHIS_NUM, -- 实收数量
+        oid.lot_id LOT, -- 批号
+        oid.order_in_id DANJ_NO, -- 单据编号
+        oi.order_staff_id SHOUH_STAFF, -- 收货员
+        oi.asn_staff CAIGOU_STAFF, -- 采购员
+        -- R_HZ.ZHIJ_STAFF, -- 质检员
+        oid.lot01,
+        oid.lot02 SHENGCHAN_DATE, -- 生产日期
+        oid.lot03 YOUX_DATE, -- 有效期至
+        oi.dates RIQI_DATE,
+        -- to_char(oi.dates,'YYYY-MM-DD') RIQI_DATE, -- 日期
+        oid.create_at KAIP_TIME,/*R_HZ.KAIP_TIME,*/ -- 开票时间
+        oid.item_id SHANGP_ID, -- 商品ID
+        oid.package_meas YAOP_GUIG, -- 规格
+        bi.manufacturer MAKER, -- 生产厂家
+        oid.package_unit BAOZ_DANW, -- 包装单位
+        (select bpi.package_meas from bas_item bi left join bas_package bp on bi.item_id = bp.item_id
+        left join bas_package_items bpi on bpi.package_id = bp.package_id
+        where bpi.package_level = '3' and bi.item_id = oid.item_id) BAOZ_NUM, -- 包装数量
+        bi.approval_no PIZ_NO, -- 批准文号
+        oi.owner_id YEZ_ID, -- 货主ID
+        bo.owner_code YEZ_NO, -- 货主编号
+        bo.owner_name YEZ_NAME, -- 货主名称
+        oi.SUPPLIER_ID /*R_HZ.*/DANW_ID, -- 单位ID
+        (SELECT customer_code FROM bas_customer/*JC_DWZL J_DW*/ bs WHERE oi.SUPPLIER_ID = bs.customer_id AND ROWNUM=1) DANW_NO,
+        (SELECT customer_name FROM bas_customer/*JC_DWZL J_DW*/ bs WHERE oi.SUPPLIER_ID = bs.customer_id AND ROWNUM=1) DANW_NAME
         from order_in_details oid, /*RK_KPD_MX R_MX*/
-             bas_item bi, /*JC_SPZL*/  /*J_SP*/
-             order_in oi, /*RK_KPD_HZ R_HZ*/
-             bas_owner bo /*JC_HZZL J_HZ*/
+        bas_item bi, /*JC_SPZL*/ /*J_SP*/
+        order_in oi, /*RK_KPD_HZ R_HZ*/
+        bas_owner bo /*JC_HZZL J_HZ*/
         WHERE 1=1
-          AND oid.item_id = bi.item_id
-          AND oid.order_in_id = oi.order_in_id
-          AND oi.owner_id = bo.owner_id /*J_HZ.YEZ_ID*/
-          AND oid.QUALITY_FLG /*YANS_RLT*/ = '88'   -- 验收评定
-          AND oi.wh_id=#{wh_id}
-            -- AND R_MX.ZHIX_FLG ='N'
+        AND oid.item_id = bi.item_id
+        AND oid.order_in_id = oi.order_in_id
+        AND oi.owner_id = bo.owner_id /*J_HZ.YEZ_ID*/
+        AND oid.QUALITY_FLG /*YANS_RLT*/ = '88' -- 验收评定
+        AND oi.wh_id=#{wh_id}
+        -- AND R_MX.ZHIX_FLG ='N'
         ORDER BY oid.item_id,oid.order_in_id
     </select>
 

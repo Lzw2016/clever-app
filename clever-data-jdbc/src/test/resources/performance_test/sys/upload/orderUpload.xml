@@ -4,7 +4,7 @@
 
     <select id="queryRK" resultType="map">
         select DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, YEW_TYPE, RIQI_DATE from INF_RK_SC_BILL t
-        where 1=1  and YEW_TYPE <![CDATA[<>]]> '4' and YEW_TYPE <![CDATA[<>]]> '5'
+        where 1=1 and YEW_TYPE <![CDATA[<>]]> '4' and YEW_TYPE <![CDATA[<>]]> '5'
         and zt in ('N','E')
         <if test="YEWDJ_NO!=null and YEWDJ_NO!=''">
             AND UPPER(t.YEWDJ_NO) like UPPER('%' || #{YEWDJ_NO} || '%')
@@ -24,7 +24,7 @@
 
     <select id="queryRK_XTD" resultType="map">
         select DANJ_NO, YEWDJ_NO, HUOZ_ID, WLZX_CODE, ZT, ERROR_DESC, YEW_TYPE, RIQI_DATE, CAOZ_STAFF from INF_RK_SC_BILL t
-        where 1=1  and zt in ('N','E') and YEW_TYPE = '4' and (nvl(yn_guid,'uuuu') = 'A' or (yewdj_no like '%-%' and nvl(yn_guid,'uuuu') != 'A'))
+        where 1=1 and zt in ('N','E') and YEW_TYPE = '4' and (nvl(yn_guid,'uuuu') = 'A' or (yewdj_no like '%-%' and nvl(yn_guid,'uuuu') != 'A'))
         <if test="YEWDJ_NO!=null and YEWDJ_NO!=''">
             AND UPPER(t.YEWDJ_NO) like UPPER('%' || #{YEWDJ_NO} || '%')
         </if>
@@ -71,7 +71,7 @@
 
     <select id="queryPD" resultType="map">
         select danj_no, huoz_id, wlzx_code, zt, error_desc,
-            riqi_char, caoz_staff, shangp_id, yingk_num, lot
+        riqi_char, caoz_staff, shangp_id, yingk_num, lot
         from INF_PD_SC_BILL
         where 1=1 and zt in ('N','E') and pd_type = 1
         <if test="DANJ_NO!=null and DANJ_NO!=''">

@@ -15,16 +15,15 @@ public class StringToNumberConverter implements TypeConverter {
         if (source == null) {
             return false;
         }
-        return ClassUtils.isAssignable(source.getClass(), String.class, true)
-                && (
-                ClassUtils.isAssignable(targetType, Number.class, true)
-                        || ClassUtils.isAssignable(targetType, Byte.class, true)
-                        || ClassUtils.isAssignable(targetType, Short.class, true)
-                        || ClassUtils.isAssignable(targetType, Integer.class, true)
-                        || ClassUtils.isAssignable(targetType, Long.class, true)
-                        || ClassUtils.isAssignable(targetType, Float.class, true)
-                        || ClassUtils.isAssignable(targetType, Double.class, true)
-                        || ClassUtils.isAssignable(targetType, BigDecimal.class, true)
+        return ClassUtils.isAssignable(source.getClass(), String.class, true) && (
+            ClassUtils.isAssignable(targetType, Number.class, true)
+                || ClassUtils.isAssignable(targetType, Byte.class, true)
+                || ClassUtils.isAssignable(targetType, Short.class, true)
+                || ClassUtils.isAssignable(targetType, Integer.class, true)
+                || ClassUtils.isAssignable(targetType, Long.class, true)
+                || ClassUtils.isAssignable(targetType, Float.class, true)
+                || ClassUtils.isAssignable(targetType, Double.class, true)
+                || ClassUtils.isAssignable(targetType, BigDecimal.class, true)
         );
     }
 

@@ -36,10 +36,10 @@ public class DaemonExecutor {
 
     public DaemonExecutor(String poolNamePattern) {
         executor = Executors.newSingleThreadScheduledExecutor(
-                new BasicThreadFactory.Builder()
-                        .namingPattern(poolNamePattern)
-                        .daemon(true)
-                        .build()
+            new BasicThreadFactory.Builder()
+                .namingPattern(poolNamePattern)
+                .daemon(true)
+                .build()
         );
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }

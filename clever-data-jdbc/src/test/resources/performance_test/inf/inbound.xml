@@ -8,186 +8,186 @@
 
     <update id="insert_infcgdd_hz">
         insert into asn_in
-          (asn_in_id,
-           asn_in_code,
-           dates,
-           owner_id,
-           wh_id,
-           order_type,
-           order_biz_type,
-           supplier_id,
-           asn_staff,
-           business_code,
-           multiple_receive,
-           remark)
-          select #{asn_in_id},
-                 #{asn_in_code},
-                 to_char(RIQI_DATE,'yyyy-mm-dd'),
-                 NVL(C.OWNER_ID,A.HUOZ_ID),
-                 D.WH_ID,
-                 #{order_type},
-                 #{order_biz_type},
-                 b.customer_id,
-                 a.yew_staff,
-                 a.danj_no,
-                 decode( a.is_dcsh,1,1,0),
-                 a.note
-            from inf_rk_cgdd_bill a left join bas_customer b on a.danw_id=b.customer_id_erp and b.CUSTOM_TYPE= 1
-                                    LEFT JOIN BAS_OWNER    C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id
-                                    inner join bas_wh      d on a.wlzx_code=d.WH_CODE
-           where danj_no = #{danj_no}
-             and huoz_id = #{huoz_id}
+        (asn_in_id,
+        asn_in_code,
+        dates,
+        owner_id,
+        wh_id,
+        order_type,
+        order_biz_type,
+        supplier_id,
+        asn_staff,
+        business_code,
+        multiple_receive,
+        remark)
+        select #{asn_in_id},
+        #{asn_in_code},
+        to_char(RIQI_DATE,'yyyy-mm-dd'),
+        NVL(C.OWNER_ID,A.HUOZ_ID),
+        D.WH_ID,
+        #{order_type},
+        #{order_biz_type},
+        b.customer_id,
+        a.yew_staff,
+        a.danj_no,
+        decode( a.is_dcsh,1,1,0),
+        a.note
+        from inf_rk_cgdd_bill a left join bas_customer b on a.danw_id=b.customer_id_erp and b.CUSTOM_TYPE= 1
+        LEFT JOIN BAS_OWNER C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id
+        inner join bas_wh d on a.wlzx_code=d.WH_CODE
+        where danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
 
-             and rownum = 1
+        and rownum = 1
     </update>
 
     <update id="insert_infcgdd_mx">
         insert into asn_in_details
-          (asn_in_id,
-           asn_line_no,
-           item_id,
-           package_id,
-           qty,
-           lot01,
-           lot12,
-           KAIP_DW,
-           price,
-           order_qty,
-           business_code_line,
-           remark)
-        select   #{asn_in_id},
-                 rownum,
-                 b.item_id,
-                 d.package_id,
-                 a.num,
-                 a.lot,
-                 a.kub_erp,
-                 a.KAIP_DW,
-                 a.price,
-                 0,
-                 a.hanghao,
-                 a.note
-            from inf_rk_cgdd_bill a left join bas_item b  on a.shangp_id=b.item_code
-                                    left join bas_owner c on a.huoz_id=c.owner_code and b.owner_id=c.owner_id
-                                    left join bas_package d on b.item_id=d.item_id
+        (asn_in_id,
+        asn_line_no,
+        item_id,
+        package_id,
+        qty,
+        lot01,
+        lot12,
+        KAIP_DW,
+        price,
+        order_qty,
+        business_code_line,
+        remark)
+        select #{asn_in_id},
+        rownum,
+        b.item_id,
+        d.package_id,
+        a.num,
+        a.lot,
+        a.kub_erp,
+        a.KAIP_DW,
+        a.price,
+        0,
+        a.hanghao,
+        a.note
+        from inf_rk_cgdd_bill a left join bas_item b on a.shangp_id=b.item_code
+        left join bas_owner c on a.huoz_id=c.owner_code and b.owner_id=c.owner_id
+        left join bas_package d on b.item_id=d.item_id
 
-           where danj_no = #{danj_no}
-             and huoz_id = #{huoz_id}
+        where danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
     </update>
 
     <update id="insert_infcgdd_old">
         INSERT INTO INF_RK_CGDD_BILL_OLD
         SELECT *
-          FROM INF_RK_CGDD_BILL
-         WHERE danj_no = #{danj_no}
-           and huoz_id = #{huoz_id}
+        FROM INF_RK_CGDD_BILL
+        WHERE danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
     </update>
 
 
     <update id="insert_infxtd_hz">
         insert into asn_in
-          (asn_in_id,
-           asn_in_code,
-           dates,
-           owner_id,
-           wh_id,
-           order_type,
-           order_biz_type,
-           supplier_id,
-           asn_staff,
-           business_code,
-           multiple_receive,
-           remark)
-          select #{asn_in_id},
-                 #{asn_in_code},
-                 to_char(RIQI_DATE,'yyyy-mm-dd'),
-                 NVL(C.OWNER_ID,A.HUOZ_ID),
-                 D.WH_ID,
-                 #{order_type},
-                 #{order_biz_type},
-                 b.customer_id,
-                 a.yew_staff,
-                 a.danj_no,
-                 1,
-                 a.note
-            from inf_rk_xtd_bill a left join bas_customer b on a.danw_id=b.customer_id_erp b.CUSTOM_TYPE= 1
-                                    LEFT JOIN BAS_OWNER    C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id
-                                    inner join bas_wh      d on a.wlzx_code=d.WH_CODE
-           where danj_no = #{danj_no}
-             and huoz_id = #{huoz_id}
+        (asn_in_id,
+        asn_in_code,
+        dates,
+        owner_id,
+        wh_id,
+        order_type,
+        order_biz_type,
+        supplier_id,
+        asn_staff,
+        business_code,
+        multiple_receive,
+        remark)
+        select #{asn_in_id},
+        #{asn_in_code},
+        to_char(RIQI_DATE,'yyyy-mm-dd'),
+        NVL(C.OWNER_ID,A.HUOZ_ID),
+        D.WH_ID,
+        #{order_type},
+        #{order_biz_type},
+        b.customer_id,
+        a.yew_staff,
+        a.danj_no,
+        1,
+        a.note
+        from inf_rk_xtd_bill a left join bas_customer b on a.danw_id=b.customer_id_erp b.CUSTOM_TYPE= 1
+        LEFT JOIN BAS_OWNER C ON A.HUOZ_ID =C.OWNER_CODE and b.owner_id=c.owner_id
+        inner join bas_wh d on a.wlzx_code=d.WH_CODE
+        where danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
 
-             and rownum = 1
+        and rownum = 1
     </update>
 
     <update id="insert_infxtd_mx">
         insert into asn_in_details
-          (asn_in_id,
-           asn_line_no,
-           item_id,
-           package_id,
-           qty,
-           lot01,
-           lot02,
-           lot03,
-           lot12,
-           KAIP_DW,
-           price,
-           order_qty,
-           business_code_line,
-           remark,
-           FAC_ERP,
-           ZNAME1
-           )
-        select   #{asn_in_id},
-                 rownum,
-                 b.item_id,
-                 d.package_id,
-                 a.num,
-                 a.lot,
-                 a.shengchan_char,
-                 a.youxq_char,
-                 a.kub_erp,
-                 a.KAIP_DW,
-                 a.price,
-                 0,
-                 a.hanghao,
-                 a.note,
-                 a.fac_erp,
-                 a.zname1
-            from inf_rk_xtd_bill a left join bas_item b  on a.shangp_id=b.item_code
-                                    left join bas_owner c on a.huoz_id=c.owner_code and b.owner_id=c.owner_id
-                                    left join bas_package d on b.item_id=d.item_id
+        (asn_in_id,
+        asn_line_no,
+        item_id,
+        package_id,
+        qty,
+        lot01,
+        lot02,
+        lot03,
+        lot12,
+        KAIP_DW,
+        price,
+        order_qty,
+        business_code_line,
+        remark,
+        FAC_ERP,
+        ZNAME1
+        )
+        select #{asn_in_id},
+        rownum,
+        b.item_id,
+        d.package_id,
+        a.num,
+        a.lot,
+        a.shengchan_char,
+        a.youxq_char,
+        a.kub_erp,
+        a.KAIP_DW,
+        a.price,
+        0,
+        a.hanghao,
+        a.note,
+        a.fac_erp,
+        a.zname1
+        from inf_rk_xtd_bill a left join bas_item b on a.shangp_id=b.item_code
+        left join bas_owner c on a.huoz_id=c.owner_code and b.owner_id=c.owner_id
+        left join bas_package d on b.item_id=d.item_id
 
-           where danj_no = #{danj_no}
-             and huoz_id = #{huoz_id}
+        where danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
     </update>
 
     <update id="insert_infxtd_old">
         INSERT INTO inf_rk_xtd_bill_OLD
         SELECT *
-          FROM inf_rk_xtd_bill
-         WHERE danj_no = #{danj_no}
-           and huoz_id = #{huoz_id}
+        FROM inf_rk_xtd_bill
+        WHERE danj_no = #{danj_no}
+        and huoz_id = #{huoz_id}
     </update>
 
     <select id="query_inf_rk_thd_bill" resultType="map">
         select
-            TA.*,
-            TB.item_id,
-            TC.lot_id,
-            TD.wh_id,
-            (select TT.package_id from bas_package TT where TT.item_id = TB.item_id and rownum = 1) package_id
+        TA.*,
+        TB.item_id,
+        TC.lot_id,
+        TD.wh_id,
+        (select TT.package_id from bas_package TT where TT.item_id = TB.item_id and rownum = 1) package_id
         from
-            inf_rk_thd_bill TA,
-            bas_item TB,
-            bas_lot_att TC,
-            bas_wh TD
+        inf_rk_thd_bill TA,
+        bas_item TB,
+        bas_lot_att TC,
+        bas_wh TD
         where
-            TA.mblnr = #{danj_no}
-            AND TA.huoz_id = #{yez_id}
-            AND TA.matnr = TB.item_code
-            AND TA.sgtxt = TC.lot01
-            AND TD.wh_code = TA.wlzx_code
+        TA.mblnr = #{danj_no}
+        AND TA.huoz_id = #{yez_id}
+        AND TA.matnr = TB.item_code
+        AND TA.sgtxt = TC.lot01
+        AND TD.wh_code = TA.wlzx_code
     </select>
 
 </mapper>

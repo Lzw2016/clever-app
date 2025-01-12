@@ -32,114 +32,114 @@
     <select id="getToken">
         select t.*, u.user_code
         from dev_token_example t
-             inner join sys_user u on t.user_name = u.user_name
+        inner join sys_user u on t.user_name = u.user_name
         where t.USER_NAME = #{userName}
-          and t.wh_id = #{wh_id}
+        and t.wh_id = #{wh_id}
     </select>
 
     <select id="getContainer2">
         select t.CONTAINER_CODE
         from bas_container t
         where t.container_state = 0
-          and t.wh_id = #{wh_id}
-          and t.container_type = #{type}
-          and rownum &lt;= #{num}
+        and t.wh_id = #{wh_id}
+        and t.container_type = #{type}
+        and rownum &lt;= #{num}
     </select>
 
     <select id="getContainer">
         select t.CONTAINER_CODE
         from bas_container t
         where t.container_state = 0
-          and t.wh_id = #{wh_id}
-          and t.container_type = #{type}
-          and MOD(to_number(SUBSTR(t.container_code, 3)), #{threadCount}) = #{seq}
-          and rownum &lt;= #{num}
+        and t.wh_id = #{wh_id}
+        and t.container_type = #{type}
+        and MOD(to_number(SUBSTR(t.container_code, 3)), #{threadCount}) = #{seq}
+        and rownum &lt;= #{num}
     </select>
 
     <select id="selectBarCode">
         select container_code
         from bas_container t
         where t.container_state = 0
-          and t.container_type = 1
-          and t.wh_id = #{wh_id}
-          and rownum &lt;= #{rownum}
+        and t.container_type = 1
+        and t.wh_id = #{wh_id}
+        and rownum &lt;= #{rownum}
     </select>
 
     <select id="selectOrderInExampleHz">
         select t.asn_in_id,
-               t.asn_staff,
-               t.dates,
-               t.owner_id,
-               t.wh_id,
-               t.order_type,
-               t.order_biz_type,
-               t.supplier_id,
-               ''              cold_address,
-               ''              cold_company,
-               ''              cold_start_temp,
-               ''              cold_end_temp,
-               ''              cold_transport_tool,
-               ''              cold_wenk_way,
-               ''              cold_transport_person,
-               business_code,
-               0               multiple_receive,
-               customer_code,
-               b.customer_name,
-               b.customer_name supplier_name,
-               owner_name,
-               ''              order_dates,
-               '压力测试'          order_staff,
-               '2'             order_staff_id
+        t.asn_staff,
+        t.dates,
+        t.owner_id,
+        t.wh_id,
+        t.order_type,
+        t.order_biz_type,
+        t.supplier_id,
+        '' cold_address,
+        '' cold_company,
+        '' cold_start_temp,
+        '' cold_end_temp,
+        '' cold_transport_tool,
+        '' cold_wenk_way,
+        '' cold_transport_person,
+        business_code,
+        0 multiple_receive,
+        customer_code,
+        b.customer_name,
+        b.customer_name supplier_name,
+        owner_name,
+        '' order_dates,
+        '压力测试' order_staff,
+        '2' order_staff_id
         from ASN_IN t
-             inner join bas_customer b on t.supplier_id = b.customer_id
-             inner join bas_owner c on t.owner_id = c.owner_id
+        inner join bas_customer b on t.supplier_id = b.customer_id
+        inner join bas_owner c on t.owner_id = c.owner_id
         where asn_in_id = #{asn_in_id}
     </select>
 
     <select id="selectOrderInExampleMx">
         select a.asn_in_id,
-               aa.asn_in_code,
-               a.asn_line_no,
-               a.package_id,
-               a.item_id,
-               c.package_item_id,
-               d.package_item_id                                             primary_item_id,
-               d.package_meas                                                primary_meas,
-               d.package_unit                                                primary_unit,
-               to_number(nvl(g.package_meas, 0) / nvl(c.package_meas, 1))    large,         -- 托盘数量 4级包装
-               floor(nvl(C.package_meas, 0) / nvl(d.package_meas, 1))        medium,        -- 3级包装数量
-               (a.qty - nvl(a.order_qty, 0))                                 surplus_qty,   -- surplus_piece,
-               floor((A.qty - nvl(A.order_qty, 0)) / nvl(C.package_meas, 1)) surplus_piece, -- 可收货件数
-               mod(nvl(A.qty, 0), nvl(C.package_meas, 1))                    surplus_less,  -- 可收零货数量
-               A.order_qty                                                   order_qty,
-               c.package_level,
-               c.package_meas,
-               c.package_unit,
-               #{quality}                                                    quality,
-               #{quality_flg}                                                quality_flg,
-               0                                                             barcode,
-               0                                                             price,
-               a.lot_id,
-               a.lot01,
-               a.lot02,
-               a.lot03,
-               a.lot04,
-               a.lot05,
-               a.lot06,
-               a.lot07,
-               a.lot08,
-               a.lot09,
-               a.lot10,
-               a.lot11,
-               a.lot12
+        aa.asn_in_code,
+        a.asn_line_no,
+        a.package_id,
+        a.item_id,
+        c.package_item_id,
+        d.package_item_id primary_item_id,
+        d.package_meas primary_meas,
+        d.package_unit primary_unit,
+        to_number(nvl(g.package_meas, 0) / nvl(c.package_meas, 1)) large, -- 托盘数量 4级包装
+        floor(nvl(C.package_meas, 0) / nvl(d.package_meas, 1)) medium, -- 3级包装数量
+        (a.qty - nvl(a.order_qty, 0)) surplus_qty, -- surplus_piece,
+        floor((A.qty - nvl(A.order_qty, 0)) / nvl(C.package_meas, 1)) surplus_piece, -- 可收货件数
+        mod(nvl(A.qty, 0), nvl(C.package_meas, 1)) surplus_less, -- 可收零货数量
+        A.order_qty order_qty,
+        c.package_level,
+        c.package_meas,
+        c.package_unit,
+        #{quality} quality,
+        #{quality_flg} quality_flg,
+        0 barcode,
+        0 price,
+        a.lot_id,
+        a.lot01,
+        a.lot02,
+        a.lot03,
+        a.lot04,
+        a.lot05,
+        a.lot06,
+        a.lot07,
+        a.lot08,
+        a.lot09,
+        a.lot10,
+        a.lot11,
+        a.lot12
         from asn_in_details a
-             inner join asn_in aa on a.ASN_IN_ID = aa.ASN_IN_ID
-             inner join bas_item b on a.item_id = b.item_id
-             inner join bas_package_items c on c.package_id = a.package_id and c.package_level = 3
-             inner join bas_package_items d on d.package_id = a.package_id and d.package_level = 1
-             left join bas_dict_items e on e.dict_value = c.package_level and e.dict_code = 'PACK_LEVEL'
-             inner join asn_in f on f.asn_in_id = a.asn_in_id
-             inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 4
+        inner join asn_in aa on a.ASN_IN_ID = aa.ASN_IN_ID
+        inner join bas_item b on a.item_id = b.item_id
+        inner join bas_package_items c on c.package_id = a.package_id and c.package_level = 3
+        inner join bas_package_items d on d.package_id = a.package_id and d.package_level = 1
+        left join bas_dict_items e on e.dict_value = c.package_level and e.dict_code = 'PACK_LEVEL'
+        inner join asn_in f on f.asn_in_id = a.asn_in_id
+        inner join bas_package_items g on g.package_id = a.package_id and g.package_level = 4
         where a.asn_in_id = #{asn_in_id}
     </select>
 

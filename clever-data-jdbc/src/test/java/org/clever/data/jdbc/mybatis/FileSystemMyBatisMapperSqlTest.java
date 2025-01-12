@@ -49,10 +49,10 @@ public class FileSystemMyBatisMapperSqlTest {
         FileSystemMyBatisMapperSql myBatisMapperSql = new FileSystemMyBatisMapperSql(absolutePath);
         //  176ms/次 | 第一次:415ms | 总时间:1767ms | sql.xml文件数量:157
         log.info("{}ms/次 | 第一次:{}ms | 总时间:{}ms | sql.xml文件数量:{}",
-                (endTime - startTime) / count,
-                firstTime,
-                (endTime - startTime),
-                myBatisMapperSql.getAllLastModified().size()
+            (endTime - startTime) / count,
+            firstTime,
+            (endTime - startTime),
+            myBatisMapperSql.getAllLastModified().size()
         );
     }
 

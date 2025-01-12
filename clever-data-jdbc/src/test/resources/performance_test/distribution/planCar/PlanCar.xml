@@ -19,31 +19,31 @@
         T.UPDATE_BY
         FROM BAS_SHIPPING_COMPANY T
         WHERE 1 = 1
-            --@ AND T.WH_ID = #{wh_id}
+        --@ AND T.WH_ID = #{wh_id}
     </select>
 
     <!--查询方向-->
     <select id="getDirectionTree" resultType="list">
         SELECT
-            TA.DIRECTION_ID,
-            TA.WH_ID,
-            TA.DIRECTION_NAME,
-            TA.DIRECTION_PARENT
+        TA.DIRECTION_ID,
+        TA.WH_ID,
+        TA.DIRECTION_NAME,
+        TA.DIRECTION_PARENT
         FROM
-            BAS_DIRECTION TA
-            LEFT JOIN BAS_CUSTOMER TB ON TA.DIRECTION_ID = TB.DIRECTION_ID
+        BAS_DIRECTION TA
+        LEFT JOIN BAS_CUSTOMER TB ON TA.DIRECTION_ID = TB.DIRECTION_ID
         WHERE
-            TB.CUSTOMER_ID IN (
-            SELECT DISTINCT
-                TC.CUSTOMER_ID
-            FROM
-                DISTRIBUTION_COUNT TC
-                LEFT JOIN ORDER_OUT TD ON TC.DISTRIBUTION_COUNT_ID = TD.ORDER_OUT_ID
-            WHERE
-                TC.IS_PLAN_CAR = 0
-            AND TD.STATUS = 160
-            AND TD.REVIEW_PRINT_FLG > 0
-            )
+        TB.CUSTOMER_ID IN (
+        SELECT DISTINCT
+        TC.CUSTOMER_ID
+        FROM
+        DISTRIBUTION_COUNT TC
+        LEFT JOIN ORDER_OUT TD ON TC.DISTRIBUTION_COUNT_ID = TD.ORDER_OUT_ID
+        WHERE
+        TC.IS_PLAN_CAR = 0
+        AND TD.STATUS = 160
+        AND TD.REVIEW_PRINT_FLG > 0
+        )
     </select>
     <!--配送线路查询-->
     <select id="get_tree" resultType="map">
@@ -139,7 +139,7 @@
             --% AND TA.distribution_count_id like #{distribution_count_id}
         </if>
         <if test="#obj.notEmpty(directionNameList) and IS_TREE_QUERY!=null and IS_TREE_QUERY==1 ">
-            and  TE.direction_name in
+            and TE.direction_name in
             <foreach collection="directionNameList" separator="," item="item" index="index" open="(" close=")">
                 #{item.direction_name}
             </foreach>
@@ -150,285 +150,285 @@
     <!--已排车单据查询（汇总）-->
     <select id="getDistributionBill" resultType="map">
         SELECT T.order_load_id,
-               T.order_load_code,
-               T.print_flag,
-               T.create_at,
-               T.create_by,
-               T.start_time,
-               T.dock_no,
-               T.distribution_state,
-               T.pack_reviewer,
-               T.car_code,
-               T.driver,
-               (select count(*) from order_load_details D1 where D1.order_load_id = T.order_load_id)count_row,
-               (select sum(D1.fcl_qty) from order_load_details D1 where D1.order_load_id = T.order_load_id)fcl_qty,
-               (select sum(D1.lcl_qty) from order_load_details D1 where D1.order_load_id = T.order_load_id)lcl_qty,
-               (select sum(D1.fcl_qty+D1.lcl_qty) from order_load_details D1 where D1.order_load_id = T.order_load_id)all_qty,
-               B.car_type,
-               B.model,
-               B.load_weight,
-               B.load_qty,
-               B.state,
-               T.delivery_staff,
-               s.user_name delivery_staff_name,
-               T.shipping_company_id,
-               C.company_name,
-               C.telephone,
-               C.address,
-               C.liaison,
-               C.liaison_phone,
-               T.is_pack_review
+        T.order_load_code,
+        T.print_flag,
+        T.create_at,
+        T.create_by,
+        T.start_time,
+        T.dock_no,
+        T.distribution_state,
+        T.pack_reviewer,
+        T.car_code,
+        T.driver,
+        (select count(*) from order_load_details D1 where D1.order_load_id = T.order_load_id)count_row,
+        (select sum(D1.fcl_qty) from order_load_details D1 where D1.order_load_id = T.order_load_id)fcl_qty,
+        (select sum(D1.lcl_qty) from order_load_details D1 where D1.order_load_id = T.order_load_id)lcl_qty,
+        (select sum(D1.fcl_qty+D1.lcl_qty) from order_load_details D1 where D1.order_load_id = T.order_load_id)all_qty,
+        B.car_type,
+        B.model,
+        B.load_weight,
+        B.load_qty,
+        B.state,
+        T.delivery_staff,
+        s.user_name delivery_staff_name,
+        T.shipping_company_id,
+        C.company_name,
+        C.telephone,
+        C.address,
+        C.liaison,
+        C.liaison_phone,
+        T.is_pack_review
         FROM order_load T
-             LEFT JOIN bas_car B ON T.car_code = B.car_code
-             LEFT JOIN sys_user s ON T.delivery_staff = s.user_id
-             LEFT JOIN bas_shipping_company C ON T.shipping_company_id = C.company_id
+        LEFT JOIN bas_car B ON T.car_code = B.car_code
+        LEFT JOIN sys_user s ON T.delivery_staff = s.user_id
+        LEFT JOIN bas_shipping_company C ON T.shipping_company_id = C.company_id
         WHERE T.wh_id = #{wh_id}
-          AND T.transport_type = #{transport_type}
-          AND T.distribution_state = #{distribution_state}
+        AND T.transport_type = #{transport_type}
+        AND T.distribution_state = #{distribution_state}
     </select>
 
     <!--已排车单据查询（明细）-->
     <select id="getDistributionBillDetails" resultType="map">
         SELECT DISTINCT TA.split_order_no,
-                        TA.billing_time,
-                        TA.sku_type,
-                        TA.pickup_mode,
-                        TA.remark,
-                        TA.distribution_count_id,
-                        TA.is_reload,
-                        TA.sum_amount,
-                        TA.sum_weight,
-                        TA.sum_volume,
-                        TA.cold_drugs_qty,
-                        TA.expensive_drugs_qty,
-                        TA.import_drugs_qty,
-                        TA.psychotropic_drugs_qty,
-                        TA.special_drugs_qty,
-                        TA.other_drugs_qty,
-                        TA.gift_qty,
-                        TA.distribution_type,
-                        TA.sale_type,
-                        TA.settlement_type,
-                        TA.salesman,
-                        TA.drawer,
-                        TA.distribution_count_code,
-                        TB.customer_name,
-                        TC.order_load_id,
-                        TX.order_load_code,
-                        TC.load_sequence,
-                        TC.fcl_qty,
-                        TC.lcl_qty,
-                        (TC.fcl_qty + TC.lcl_qty)all_qty,
-                        TC.quality_qty,
-                        TC.invoice_no,
-                        TC.invoice_box_no,
-                        TC.tag_no,
-                        TC.cold_box_no,
-                        TC.is_review,
-                        TC.delivery_staff,
-                        TC.real_lcl_qty,
-                        TC.real_fcl_qty,
-                        (TC.real_lcl_qty + TC.real_fcl_qty) all_real_qty,
-                        TF.direction_id,
-                        TF.direction_name,
-                        TG.owner_code,
-                        TG.owner_name,
-                        TD.order_out_code
+        TA.billing_time,
+        TA.sku_type,
+        TA.pickup_mode,
+        TA.remark,
+        TA.distribution_count_id,
+        TA.is_reload,
+        TA.sum_amount,
+        TA.sum_weight,
+        TA.sum_volume,
+        TA.cold_drugs_qty,
+        TA.expensive_drugs_qty,
+        TA.import_drugs_qty,
+        TA.psychotropic_drugs_qty,
+        TA.special_drugs_qty,
+        TA.other_drugs_qty,
+        TA.gift_qty,
+        TA.distribution_type,
+        TA.sale_type,
+        TA.settlement_type,
+        TA.salesman,
+        TA.drawer,
+        TA.distribution_count_code,
+        TB.customer_name,
+        TC.order_load_id,
+        TX.order_load_code,
+        TC.load_sequence,
+        TC.fcl_qty,
+        TC.lcl_qty,
+        (TC.fcl_qty + TC.lcl_qty)all_qty,
+        TC.quality_qty,
+        TC.invoice_no,
+        TC.invoice_box_no,
+        TC.tag_no,
+        TC.cold_box_no,
+        TC.is_review,
+        TC.delivery_staff,
+        TC.real_lcl_qty,
+        TC.real_fcl_qty,
+        (TC.real_lcl_qty + TC.real_fcl_qty) all_real_qty,
+        TF.direction_id,
+        TF.direction_name,
+        TG.owner_code,
+        TG.owner_name,
+        TD.order_out_code
         FROM distribution_count TA,
-             bas_customer TB,
-             order_load_details TC,
-             order_out TD,
-             distribution_count_details TE,
-             bas_direction TF,
-             bas_owner TG,
-             order_load TX
+        bas_customer TB,
+        order_load_details TC,
+        order_out TD,
+        distribution_count_details TE,
+        bas_direction TF,
+        bas_owner TG,
+        order_load TX
         WHERE TA.customer_id = TB.customer_id
-          AND TA.distribution_count_id = TC.bill_id
-          AND TA.distribution_count_id = TD.order_out_id
-          AND TA.split_order_no = TC.split_order_no
-          AND TC.fcl_qty + TC.lcl_qty > 0
-          AND TF.direction_id = TB.direction_id
-          AND TG.owner_id = TA.owner_id
-          AND TC.order_load_id = TX.order_load_id
-          AND TX.order_load_id = #{order_load_id}
+        AND TA.distribution_count_id = TC.bill_id
+        AND TA.distribution_count_id = TD.order_out_id
+        AND TA.split_order_no = TC.split_order_no
+        AND TC.fcl_qty + TC.lcl_qty > 0
+        AND TF.direction_id = TB.direction_id
+        AND TG.owner_id = TA.owner_id
+        AND TC.order_load_id = TX.order_load_id
+        AND TX.order_load_id = #{order_load_id}
         GROUP BY TA.split_order_no,
-                 TA.billing_time,
-                 TA.sku_type,
-                 TA.pickup_mode,
-                 TA.remark,
-                 TA.distribution_count_id,
-                 TA.is_reload,
-                 TA.lcl_qty,
-                 TA.sum_amount,
-                 TA.sum_weight,
-                 TA.sum_volume,
-                 TA.cold_drugs_qty,
-                 TA.expensive_drugs_qty,
-                 TA.import_drugs_qty,
-                 TA.psychotropic_drugs_qty,
-                 TA.special_drugs_qty,
-                 TA.other_drugs_qty,
-                 TA.gift_qty,
-                 TA.distribution_type,
-                 TA.sale_type,
-                 TA.settlement_type,
-                 TA.salesman,
-                 TA.drawer,
-                 TA.distribution_count_code,
-                 TB.customer_name,
-                 TC.order_load_id,
-                 TX.order_load_code,
-                 TC.load_sequence,
-                 TC.fcl_qty,
-                 TC.lcl_qty,
-                 TC.quality_qty,
-                 TC.invoice_no,
-                 TC.invoice_box_no,
-                 TC.tag_no,
-                 TC.cold_box_no,
-                 TC.is_review,
-                 TC.delivery_staff,
-                 TC.real_lcl_qty,
-                 TC.real_fcl_qty,
-                 TF.direction_id,
-                 TF.direction_name,
-                 TG.owner_code,
-                 TG.owner_name,
-                 TD.order_out_code
+        TA.billing_time,
+        TA.sku_type,
+        TA.pickup_mode,
+        TA.remark,
+        TA.distribution_count_id,
+        TA.is_reload,
+        TA.lcl_qty,
+        TA.sum_amount,
+        TA.sum_weight,
+        TA.sum_volume,
+        TA.cold_drugs_qty,
+        TA.expensive_drugs_qty,
+        TA.import_drugs_qty,
+        TA.psychotropic_drugs_qty,
+        TA.special_drugs_qty,
+        TA.other_drugs_qty,
+        TA.gift_qty,
+        TA.distribution_type,
+        TA.sale_type,
+        TA.settlement_type,
+        TA.salesman,
+        TA.drawer,
+        TA.distribution_count_code,
+        TB.customer_name,
+        TC.order_load_id,
+        TX.order_load_code,
+        TC.load_sequence,
+        TC.fcl_qty,
+        TC.lcl_qty,
+        TC.quality_qty,
+        TC.invoice_no,
+        TC.invoice_box_no,
+        TC.tag_no,
+        TC.cold_box_no,
+        TC.is_review,
+        TC.delivery_staff,
+        TC.real_lcl_qty,
+        TC.real_fcl_qty,
+        TF.direction_id,
+        TF.direction_name,
+        TG.owner_code,
+        TG.owner_name,
+        TD.order_out_code
         ORDER BY TA.distribution_count_id
     </select>
 
     <!--未配送订单查询（汇总）-->
     <select id="getNotDistributionBill" resultType="map">
         SELECT a.wave_id,
-               b.wave_no,
-               a.order_out_id,
-               a.order_out_code,
-               a.owner_id,
-               (SELECT b.owner_name
-                FROM bas_owner b
-                WHERE a.owner_id = b.owner_id) owner_name,
-               a.dates
+        b.wave_no,
+        a.order_out_id,
+        a.order_out_code,
+        a.owner_id,
+        (SELECT b.owner_name
+        FROM bas_owner b
+        WHERE a.owner_id = b.owner_id) owner_name,
+        a.dates
         FROM order_out a
         LEFT JOIN order_wave b ON a.wave_id = b.wave_id
         WHERE a.wh_id = #{wh_id}
-          AND exists(select 1 from order_out_details b where a.order_out_id = b.order_out_id)
+        AND exists(select 1 from order_out_details b where a.order_out_id = b.order_out_id)
         order by a.wave_id
     </select>
 
     <!--未配送订单(明细)-->
     <select id="getNotDistributionBillDetails" resultType="map">
         SELECT A.order_out_id,
-               A.line_no,
-               A.item_id,
-               A.package_id,
-               A.qty,
-               A.quality,
-               A.create_at,
-               A.create_by,
-               A.update_at,
-               A.update_by,
-               A.package_item_id,
-               A.status,
-               A.lot01,
-               B.item_code,
-               B.item_name,
-               B.item_classify,
-               B.item_category,
-               B.manufacturer,
-               B.stock_env,
-               D.order_out_code,
-               C.customer_code,
-               C.customer_name,
-               E.package_name
+        A.line_no,
+        A.item_id,
+        A.package_id,
+        A.qty,
+        A.quality,
+        A.create_at,
+        A.create_by,
+        A.update_at,
+        A.update_by,
+        A.package_item_id,
+        A.status,
+        A.lot01,
+        B.item_code,
+        B.item_name,
+        B.item_classify,
+        B.item_category,
+        B.manufacturer,
+        B.stock_env,
+        D.order_out_code,
+        C.customer_code,
+        C.customer_name,
+        E.package_name
         FROM order_out_details A,
-             bas_item B,
-             bas_customer C,
-             order_out D,
-             bas_package E
+        bas_item B,
+        bas_customer C,
+        order_out D,
+        bas_package E
         WHERE A.item_id = B.item_id
-          AND A.order_out_id = D.order_out_id
-          AND B.owner_id = D.owner_id
-          AND C.customer_id = D.customer_id
-          AND E.package_id = A.package_id
-          AND A.order_out_id = #{order_out_id}
+        AND A.order_out_id = D.order_out_id
+        AND B.owner_id = D.owner_id
+        AND C.customer_id = D.customer_id
+        AND E.package_id = A.package_id
+        AND A.order_out_id = #{order_out_id}
     </select>
 
     <!--开票单明细查询(上)-->
     <select id="get_kpdmxT" resultType="map">
         SELECT T_KP.YEWDJ_NO,
-               T_DW.DANW_NO,
-               T_DW.DANW_NAME,
-               T_KP.RIQI_DATE,
-               fnc_utl_getzdwh('TIH_WAY', T_KP.TIH_WAY)       TIH_WAY,
-               fnc_utl_getzdwh('ZUOY_STATE', T_KP.ZUOY_STATE) ZUOY_STATE,
-               T_KP.KEH_NOTES
+        T_DW.DANW_NO,
+        T_DW.DANW_NAME,
+        T_KP.RIQI_DATE,
+        fnc_utl_getzdwh('TIH_WAY', T_KP.TIH_WAY) TIH_WAY,
+        fnc_utl_getzdwh('ZUOY_STATE', T_KP.ZUOY_STATE) ZUOY_STATE,
+        T_KP.KEH_NOTES
         FROM CK_KPD_HZ T_KP, JC_DWZL T_DW
         WHERE T_KP.DANW_ID = T_DW.DANW_ID
-          AND T_KP.DANJ_NO = #{DANJ_NO}
+        AND T_KP.DANJ_NO = #{DANJ_NO}
     </select>
 
     <!--开票单明细查询(下)-->
     <select id="get_kpdmxB" resultType="map">
         SELECT T_MX.HANGHAO,
-               T_SP.SHANGP_NO,
-               T_SP.CHINESE_NAME,
-               T_SP.BAOZ_DANW,
-               T_SP.YAOP_GUIG,
-               T_SP.BAOZ_NUM,
-               CASE
-                   WHEN t_hz.ZUOY_STATE > T_MX.ZUOY_STATE THEN fnc_utl_getzdwh('ZUOY_STATE', t_hz.ZUOY_STATE)
-                   ELSE fnc_utl_getzdwh('ZUOY_STATE', T_MX.ZUOY_STATE)
-                   END                                          ZUOY_STATE,
-               T_SP.MAKER,
-               FNC_UTL_SLTOJS(T_SP.SHANGP_ID, T_MX.Num)         JIANSHU,
-               FNC_UTL_SLTOLSS(T_SP.SHANGP_ID, T_MX.Num)        LINGS_NUM,
-               --T_MX.JIANSHU,
-               --T_MX.LINGS_NUM,
-               T_MX.NUM,
-               T_MX.jianshu_ys,
-               T_MX.lingss_ys,
-               T_MX.PRICE,
-               T_MX.AMOUNT,
-               T_MX.JIES_PRICE,
-               T_MX.JIES_AMOUNT,
-               T_MX.TAX_AMOUNT,
-               fnc_utl_getzdwh('LOT_REQUEST', T_MX.LOT_REQUEST) LOT_REQUEST,
-               T_MX.SHANGP_PROPERTY
+        T_SP.SHANGP_NO,
+        T_SP.CHINESE_NAME,
+        T_SP.BAOZ_DANW,
+        T_SP.YAOP_GUIG,
+        T_SP.BAOZ_NUM,
+        CASE
+        WHEN t_hz.ZUOY_STATE > T_MX.ZUOY_STATE THEN fnc_utl_getzdwh('ZUOY_STATE', t_hz.ZUOY_STATE)
+        ELSE fnc_utl_getzdwh('ZUOY_STATE', T_MX.ZUOY_STATE)
+        END ZUOY_STATE,
+        T_SP.MAKER,
+        FNC_UTL_SLTOJS(T_SP.SHANGP_ID, T_MX.Num) JIANSHU,
+        FNC_UTL_SLTOLSS(T_SP.SHANGP_ID, T_MX.Num) LINGS_NUM,
+        --T_MX.JIANSHU,
+        --T_MX.LINGS_NUM,
+        T_MX.NUM,
+        T_MX.jianshu_ys,
+        T_MX.lingss_ys,
+        T_MX.PRICE,
+        T_MX.AMOUNT,
+        T_MX.JIES_PRICE,
+        T_MX.JIES_AMOUNT,
+        T_MX.TAX_AMOUNT,
+        fnc_utl_getzdwh('LOT_REQUEST', T_MX.LOT_REQUEST) LOT_REQUEST,
+        T_MX.SHANGP_PROPERTY
         FROM CK_KPD_MX T_MX, JC_SPZL T_SP, CK_KPD_hz t_hz
         WHERE T_MX.SHANGP_ID = T_SP.SHANGP_ID
-          and T_MX.DANJ_NO = t_hz.DANJ_NO
-          AND T_MX.DANJ_NO = #{DANJ_NO}
-          AND EXISTS(SELECT 'X'
-                     FROM CK_KPD_HZ
-                     WHERE DANJ_NO = T_MX.DANJ_NO
-                       AND YEZ_ID = T_SP.YEZ_ID)
-          AND T_MX.beactive = 'Y'
-          AND T_MX.ysdj_flg = 'N'
+        and T_MX.DANJ_NO = t_hz.DANJ_NO
+        AND T_MX.DANJ_NO = #{DANJ_NO}
+        AND EXISTS(SELECT 'X'
+        FROM CK_KPD_HZ
+        WHERE DANJ_NO = T_MX.DANJ_NO
+        AND YEZ_ID = T_SP.YEZ_ID)
+        AND T_MX.beactive = 'Y'
+        AND T_MX.ysdj_flg = 'N'
     </select>
 
     <!--开票单明细查询-未装车信息-->
     <select id="getOrderNotLoadingBill" resultType="map">
         SELECT
-            t.split_order_no,
-            t.distribution_count_id,
-            t.distribution_no,
-            t.stage_code,
-            t.scatter_mark,
-            t.task_status,
-            t.pack_no,
-            t.is_enable,
-            t.is_pda_review,
-            p.item_code,
-            p.item_name,
-            t.lot_id,
-            x.lot01,
-            t.is_split,
-            nvl( t.qty, 0 ) qty,
-            t.is_refrigerate,
-            t.refrigerate_box_code
+        t.split_order_no,
+        t.distribution_count_id,
+        t.distribution_no,
+        t.stage_code,
+        t.scatter_mark,
+        t.task_status,
+        t.pack_no,
+        t.is_enable,
+        t.is_pda_review,
+        p.item_code,
+        p.item_name,
+        t.lot_id,
+        x.lot01,
+        t.is_split,
+        nvl( t.qty, 0 ) qty,
+        t.is_refrigerate,
+        t.refrigerate_box_code
         FROM
-            distribution_count_details t
+        distribution_count_details t
         LEFT JOIN bas_item p ON t.item_id = p.item_id
         LEFT JOIN bas_lot_att x ON t.lot_id = x.lot_id
         where distribution_count_id = #{ distribution_count_id }
@@ -436,59 +436,59 @@
 
     <!--加单-单据明细查询(通用)-->
     <select id="get_addmx_djmx" resultType="map">
-        select 'true'                               ISJD,
-               LIUSH_BARCODE,
-               CHAIF_ORDER,
-               DANJ_NO,
-               FENPD_NO,
-               ZANCQ_NO,
-               ZHENGS_SIGN,
-               RENW_STATE,
-               BIANHAO,
-               KEY_FLG,
-               TIJI,
-               PDAFH_FLG,
-               SHANGP_ID,
-               LOT,
-               CAIF_FLG,
-               NVL(JIANSHU, 0) - NVL(JIANSHU_SQ, 0) JIANSHU,
-               YUHAI_FLG,
-               LENGCYP_FLG,
-               LENGCX_NO,
-               DAIZ_FLG,
-               NVL(JIANSHU, 0) - NVL(JIANSHU_SQ, 0) JIANSHU_SQ
+        select 'true' ISJD,
+        LIUSH_BARCODE,
+        CHAIF_ORDER,
+        DANJ_NO,
+        FENPD_NO,
+        ZANCQ_NO,
+        ZHENGS_SIGN,
+        RENW_STATE,
+        BIANHAO,
+        KEY_FLG,
+        TIJI,
+        PDAFH_FLG,
+        SHANGP_ID,
+        LOT,
+        CAIF_FLG,
+        NVL(JIANSHU, 0) - NVL(JIANSHU_SQ, 0) JIANSHU,
+        YUHAI_FLG,
+        LENGCYP_FLG,
+        LENGCX_NO,
+        DAIZ_FLG,
+        NVL(JIANSHU, 0) - NVL(JIANSHU_SQ, 0) JIANSHU_SQ
         from PS_SJTJ_MX t
         where NVL(JIANSHU, 0) - NVL(JIANSHU_SQ, 0) > 0
-          and danj_no = #{DANJ_NO}
+        and danj_no = #{DANJ_NO}
     </select>
 
     <!--装车顺序调整弹窗查询-->
     <select id="getLoadSequence" resultType="map">
         SELECT
-            tc.order_load_id,
-            tb.customer_code,
-            tb.customer_name,
-            td.direction_id,
-            td.direction_name,
-            COUNT( DISTINCT ta.distribution_count_id ) bill_qty,
-            SUM( tc.fcl_qty ) fcl_qty,
-            SUM( tc.lcl_qty ) lcl_qty,
-            SUM( tc.fcl_qty + tc.lcl_qty ) all_qty,
-            '' moveflag
+        tc.order_load_id,
+        tb.customer_code,
+        tb.customer_name,
+        td.direction_id,
+        td.direction_name,
+        COUNT( DISTINCT ta.distribution_count_id ) bill_qty,
+        SUM( tc.fcl_qty ) fcl_qty,
+        SUM( tc.lcl_qty ) lcl_qty,
+        SUM( tc.fcl_qty + tc.lcl_qty ) all_qty,
+        '' moveflag
         FROM
-            distribution_count ta
-                LEFT JOIN bas_customer tb on ta.customer_id = tb.customer_id
-                LEFT JOIN order_load_details tc on ta.distribution_count_id = tc.bill_id
-                LEFT JOIN bas_direction td on tb.direction_id = td.direction_id
+        distribution_count ta
+        LEFT JOIN bas_customer tb on ta.customer_id = tb.customer_id
+        LEFT JOIN order_load_details tc on ta.distribution_count_id = tc.bill_id
+        LEFT JOIN bas_direction td on tb.direction_id = td.direction_id
         WHERE
-            ta.split_order_no = tc.split_order_no
-            AND tc.order_load_id = #{ order_load_id }
+        ta.split_order_no = tc.split_order_no
+        AND tc.order_load_id = #{ order_load_id }
         GROUP BY
-            tc.order_load_id,
-            tb.customer_code,
-            tb.customer_name,
-            td.direction_id,
-            td.direction_name
+        tc.order_load_id,
+        tb.customer_code,
+        tb.customer_name,
+        td.direction_id,
+        td.direction_name
     </select>
 
     <!--取装车单明细最大行号-->
@@ -506,11 +506,11 @@
     <!--获取配送数据统计明细-->
     <select id="getBarcode" resultType="map">
         SELECT A.serial_barcode,
-               A.qty,
-               DECODE(A.scatter_mark, '1', '整件', '零货') scatter_mark
+        A.qty,
+        DECODE(A.scatter_mark, '1', '整件', '零货') scatter_mark
         FROM distribution_count_details A
         WHERE A.distribution_count_id = #{distribution_count_id}
-          AND A.is_enable = 1
+        AND A.is_enable = 1
     </select>
     <update id="setQty" parameterType="java.util.List">
         update order_load_details t

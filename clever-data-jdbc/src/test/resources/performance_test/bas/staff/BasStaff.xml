@@ -12,13 +12,13 @@
     <select id="query">
         select A.USER_ID, A.USER_NAME
         from sys_user A
-             inner join SYS_USER_OWNER B on A.USER_ID = B.USER_ID
+        inner join SYS_USER_OWNER B on A.USER_ID = B.USER_ID
         where B.WH_ID = #{wh_id}
     </select>
 
     <select id="queryStage">
-    select A.STAGE_ID, A.STAGE_NAME
-    from bas_stage A
-    where A.WH_ID = #{wh_id}
-</select>
+        select A.STAGE_ID, A.STAGE_NAME
+        from bas_stage A
+        where A.WH_ID = #{wh_id}
+    </select>
 </mapper>

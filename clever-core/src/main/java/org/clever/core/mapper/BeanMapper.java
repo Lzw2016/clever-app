@@ -20,7 +20,7 @@ public class BeanMapper {
 
     static {
         BEAN_CONVERTER.registerConverter(new StringToDateConverter())
-                .registerConverter(new StringToNumberConverter());
+            .registerConverter(new StringToNumberConverter());
     }
 
     public static void registerConverter(TypeConverter converter) {

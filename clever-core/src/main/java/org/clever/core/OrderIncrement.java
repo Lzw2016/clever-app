@@ -51,11 +51,11 @@ public class OrderIncrement {
      */
     public synchronized double order() {
         double order = LEVEL1 * level1Count
-                + LEVEL2 * level2Count
-                + LEVEL3 * level3Count
-                + LEVEL4 * level4Count
-                + LEVEL5 * level5Count
-                + LEVEL6 * level6Count;
+            + LEVEL2 * level2Count
+            + LEVEL3 * level3Count
+            + LEVEL4 * level4Count
+            + LEVEL5 * level5Count
+            + LEVEL6 * level6Count;
         return NumberScaleUtils.round(order, 8);
     }
 

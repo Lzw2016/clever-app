@@ -56,23 +56,23 @@ public class CheckPermissionUtils {
             return false;
         }
         if (checkPermission.roles() != null
-                && checkPermission.roles().length > 0
-                && !securityContext.hasRoles(checkPermission.roles())) {
+            && checkPermission.roles().length > 0
+            && !securityContext.hasRoles(checkPermission.roles())) {
             return false;
         }
         if (checkPermission.permissions() != null
-                && checkPermission.permissions().length > 0
-                && !securityContext.hasPermissions(checkPermission.permissions())) {
+            && checkPermission.permissions().length > 0
+            && !securityContext.hasPermissions(checkPermission.permissions())) {
             return false;
         }
         if (checkPermission.anyRoles() != null
-                && checkPermission.anyRoles().length > 0
-                && !securityContext.hasAnyRoles(checkPermission.anyRoles())) {
+            && checkPermission.anyRoles().length > 0
+            && !securityContext.hasAnyRoles(checkPermission.anyRoles())) {
             return false;
         }
         if (checkPermission.anyPermissions() != null
-                && checkPermission.anyPermissions().length > 0
-                && !securityContext.hasAnyPermissions(checkPermission.anyPermissions())) {
+            && checkPermission.anyPermissions().length > 0
+            && !securityContext.hasAnyPermissions(checkPermission.anyPermissions())) {
             return false;
         }
         if (StringUtils.isNotBlank(checkPermission.expr())) {

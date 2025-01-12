@@ -8,10 +8,10 @@
         TA.qty,
         TA.is_short,
         case when cb.split_no = 'N/A' THEN ('零货'|| TA.pack_no)
-            when cb.split_no = 'Z' THEN ('整件'|| TA.pack_no)
-            else ('' ||TA.pack_no)
+        when cb.split_no = 'Z' THEN ('整件'|| TA.pack_no)
+        else ('' ||TA.pack_no)
         end pack_no,
-       -- TA.pack_no,
+        -- TA.pack_no,
         TA.is_unpack,
         TA.turnbox_no,
         TA.pick_staff_id,
@@ -54,14 +54,14 @@
         THW.loc_code,
         TA.wh_id,
         case when (TA.is_short = 1 or TA.is_short = 2) then TA.area_id
-            else null
-        end append_type,   -- 冲红类型
+        else null
+        end append_type, -- 冲红类型
 
         case when (TA.is_short = 1 or TA.is_short = 2) then
-            case when TA.area_id = 4 then nvl((select user_name from sys_user where user_id = TA.review_staff_id),TA.review_staff_id)
-                when TA.area_id = 2 or TA.area_id = 3 then nvl((select user_name from sys_user where user_id = TA.pick_staff_id),TA.pick_staff_id)
-                else TB.wave_staff_name
-            end
+        case when TA.area_id = 4 then nvl((select user_name from sys_user where user_id = TA.review_staff_id),TA.review_staff_id)
+        when TA.area_id = 2 or TA.area_id = 3 then nvl((select user_name from sys_user where user_id = TA.pick_staff_id),TA.pick_staff_id)
+        else TB.wave_staff_name
+        end
         else ''
         end operator -- 冲红操作员
         FROM CMD_OUT TA
@@ -124,65 +124,65 @@
 
     <select id="queryDetail_pd">
         select
-            t1.*,
-            t2.chk_no,
-            t3.item_code,
-            t3.item_name,
-            t4.loc_code,
-            t4.road_text,
-            t5.area_code,
-            t6.lot01,
-            t6.lot02,
-            t6.lot03,
-            t6.lot12,
-            (select TX.user_name from sys_user TX where TX.user_id = t1.check_staff_id1) check_staff_name1,
-            (select TX.user_name from sys_user TX where TX.user_id = t1.check_staff_id2) check_staff_name2,
-            (select TX.user_name from sys_user TX where TX.user_id = t1.check_staff_id3) check_staff_name3
+        t1.*,
+        t2.chk_no,
+        t3.item_code,
+        t3.item_name,
+        t4.loc_code,
+        t4.road_text,
+        t5.area_code,
+        t6.lot01,
+        t6.lot02,
+        t6.lot03,
+        t6.lot12,
+        (select TX.user_name from sys_user TX where TX.user_id = t1.check_staff_id1) check_staff_name1,
+        (select TX.user_name from sys_user TX where TX.user_id = t1.check_staff_id2) check_staff_name2,
+        (select TX.user_name from sys_user TX where TX.user_id = t1.check_staff_id3) check_staff_name3
         from
-            pda_check_details t1,
-            pda_check t2,
-            bas_item t3,
-            bas_location t4,
-            bas_area t5,
-            bas_lot_att t6
+        pda_check_details t1,
+        pda_check t2,
+        bas_item t3,
+        bas_location t4,
+        bas_area t5,
+        bas_lot_att t6
         where
-            t1.chk_id = t2.chk_id
-            and t1.item_id = t3.item_id
-            and t1.loc_id = t4.loc_id
-            and t4.area_id = t5.area_id
-            and t1.lot_id = t6.lot_id
-            --@ and t5.area_code = #{area_code}
-            --@ and t4.road_text = #{road_text}
-            --@ and t3.item_code = #{item_code}
-            --@ and t1.create_at <![CDATA[ >= ]]> TO_DATE(#{SDATE},'YYYY-MM-DD hh24:mi:ss')
-            --@ and t1.create_at <![CDATA[ <= ]]> TO_DATE(#{EDATE},'YYYY-MM-DD hh24:mi:ss')
-            <choose>
-                <when test="zt == 'CP_PD'">
-                    <![CDATA[
+        t1.chk_id = t2.chk_id
+        and t1.item_id = t3.item_id
+        and t1.loc_id = t4.loc_id
+        and t4.area_id = t5.area_id
+        and t1.lot_id = t6.lot_id
+        --@ and t5.area_code = #{area_code}
+        --@ and t4.road_text = #{road_text}
+        --@ and t3.item_code = #{item_code}
+        --@ and t1.create_at <![CDATA[ >= ]]> TO_DATE(#{SDATE},'YYYY-MM-DD hh24:mi:ss')
+        --@ and t1.create_at <![CDATA[ <= ]]> TO_DATE(#{EDATE},'YYYY-MM-DD hh24:mi:ss')
+        <choose>
+            <when test="zt == 'CP_PD'">
+                <![CDATA[
                         and t1.qty1 is not null
                     ]]>
-                </when>
-                <when test="zt == 'FP_PD'">
-                    <![CDATA[
+            </when>
+            <when test="zt == 'FP_PD'">
+                <![CDATA[
                         and t1.qty1 is not null and t1.qty2 is not null
                     ]]>
-                </when>
-                <when test="zt == 'WCP_PD'">
-                    <![CDATA[
+            </when>
+            <when test="zt == 'WCP_PD'">
+                <![CDATA[
                         and t1.qty1 is null
                     ]]>
-                </when>
-                <when test="zt == 'WFP_PD'">
-                    <![CDATA[
+            </when>
+            <when test="zt == 'WFP_PD'">
+                <![CDATA[
                         and t1.qty1 is not null and t1.qty2 is null
                     ]]>
-                </when>
-                <when test="zt == 'CYQR_PD'">
-                    <![CDATA[
+            </when>
+            <when test="zt == 'CYQR_PD'">
+                <![CDATA[
                         and t1.qty1 is not null and t1.qty2 is not null and t1.qty3 is not null
                     ]]>
-                </when>
-            </choose>
+            </when>
+        </choose>
     </select>
 
     <select id="query">
@@ -408,53 +408,53 @@
                  from cmd_out zl
 		]]>
         where zl.WH_ID = #{wh_id}
-              AND zl.OWNER_ID in
-              <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
-                  #{item}
-              </foreach>
-              AND zl.order_type = 2
-              AND zl.CMD_STATE >= 20
-                   --@ and zl.is_short = #{isShort}
-                   --@ and zl.wh_id = #{whId}
-                   --@ and zl.order_id in ( select ot.order_out_id from order_out_details ot where ot.business_code = #{bizCode} )
-                   --@ and zl.create_time >= TO_DATE(#{SDATE},'YYYY-MM-DD hh24:mi:ss')
-                   --@ and zl.create_time &lt;= TO_DATE(#{EDATE},'YYYY-MM-DD hh24:mi:ss')
-                 group by zl.area_id
-                 order by zl.area_id
-             ) tt
-             inner join bas_area ar on tt.area_id = ar.area_id
+        AND zl.OWNER_ID in
+        <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
+            #{item}
+        </foreach>
+        AND zl.order_type = 2
+        AND zl.CMD_STATE >= 20
+        --@ and zl.is_short = #{isShort}
+        --@ and zl.wh_id = #{whId}
+        --@ and zl.order_id in ( select ot.order_out_id from order_out_details ot where ot.business_code = #{bizCode} )
+        --@ and zl.create_time >= TO_DATE(#{SDATE},'YYYY-MM-DD hh24:mi:ss')
+        --@ and zl.create_time &lt;= TO_DATE(#{EDATE},'YYYY-MM-DD hh24:mi:ss')
+        group by zl.area_id
+        order by zl.area_id
+        ) tt
+        inner join bas_area ar on tt.area_id = ar.area_id
         order by ar.area_code
     </select>
 
     <select id="quyu_pd">
         select
-            count(*) TOTAL,
-            sum(case when (zl.qty1 is not null) then 1 else 0 end) CP,
-            sum(case when (zl.qty1 is not null and zl.qty2 is not null) then 1 else 0 end) FP,
-            sum(case when (zl.qty1 is null) then 1 else 0 end) WCP,
-            sum(case when (zl.qty1 is not null and zl.qty2 is null) then 1 else 0 end) WFP,
-            sum(case when (zl.qty1 is not null and zl.qty2 is not null and zl.qty3 is not null) then 1 else 0 end) CYQR,
-            t3.area_id,
-            t3.area_code,
-            t3.area_name
+        count(*) TOTAL,
+        sum(case when (zl.qty1 is not null) then 1 else 0 end) CP,
+        sum(case when (zl.qty1 is not null and zl.qty2 is not null) then 1 else 0 end) FP,
+        sum(case when (zl.qty1 is null) then 1 else 0 end) WCP,
+        sum(case when (zl.qty1 is not null and zl.qty2 is null) then 1 else 0 end) WFP,
+        sum(case when (zl.qty1 is not null and zl.qty2 is not null and zl.qty3 is not null) then 1 else 0 end) CYQR,
+        t3.area_id,
+        t3.area_code,
+        t3.area_name
         from
-            pda_check_details zl, pda_check t1, bas_location t2, bas_area t3
+        pda_check_details zl, pda_check t1, bas_location t2, bas_area t3
         where
-            zl.owner_id in
-            <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
-                #{item}
-            </foreach>
-            AND zl.chk_id = t1.chk_id
-            AND zl.loc_id = t2.loc_id
-            AND t2.area_id = t3.area_id
-            --@ and t1.wh_id = #{wh_id}
-            --@ and zl.create_at <![CDATA[ >= ]]> TO_DATE(#{SDATE},'YYYY-MM-DD hh24:mi:ss')
-            --@ and zl.create_at <![CDATA[ <= ]]> TO_DATE(#{EDATE},'YYYY-MM-DD hh24:mi:ss')
-            group by
-                t3.area_id,
-                t3.area_code,
-                t3.area_name
-            order by t3.area_code
+        zl.owner_id in
+        <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
+            #{item}
+        </foreach>
+        AND zl.chk_id = t1.chk_id
+        AND zl.loc_id = t2.loc_id
+        AND t2.area_id = t3.area_id
+        --@ and t1.wh_id = #{wh_id}
+        --@ and zl.create_at <![CDATA[ >= ]]> TO_DATE(#{SDATE},'YYYY-MM-DD hh24:mi:ss')
+        --@ and zl.create_at <![CDATA[ <= ]]> TO_DATE(#{EDATE},'YYYY-MM-DD hh24:mi:ss')
+        group by
+        t3.area_id,
+        t3.area_code,
+        t3.area_name
+        order by t3.area_code
     </select>
 
     <select id="quyu_pd_xd">
@@ -481,7 +481,7 @@
         --@ and zl.create_at <![CDATA[ >= ]]> TO_DATE(#{SDATE},'YYYY-MM-DD hh24:mi:ss')
         --@ and zl.create_at <![CDATA[ <= ]]> TO_DATE(#{EDATE},'YYYY-MM-DD hh24:mi:ss')
         group by
-            t2.road_text
+        t2.road_text
         order by t2.road_text
     </select>
 
@@ -497,10 +497,10 @@
         t1.total,
         t1.finish,
         t1.no_finish,
-            /*round(case when t1.total >0 then t1.finish/t1.total*100 else 0 end ,2) totalprecess,
-            t2.reviewTotal,
-            t2.reviewFinish,
-            t2.reviewNoFinish,*/
+        /*round(case when t1.total >0 then t1.finish/t1.total*100 else 0 end ,2) totalprecess,
+        t2.reviewTotal,
+        t2.reviewFinish,
+        t2.reviewNoFinish,*/
         round(case when t1.total >0 then t1.finish/t1.total*100 else 0 end,2) reviewprecess
         from
         -- 查询全部进度
@@ -508,12 +508,12 @@
         co.area_id,
         count(*) as total,
         oo.wave_seq,
-        sum(case when co.cmd_state >=90 then 1  else 0 end ) finish,
+        sum(case when co.cmd_state >=90 then 1 else 0 end ) finish,
         sum(case when co.cmd_state >=60 and co.cmd_state &lt; 90 then 1 else 0 end ) no_finish,
         sum(case when co.cmd_state >=60 and co.cmd_state &lt;= 90 then 1 else 0 end ) reviewTotal
         from cmd_out co inner join order_out oo on co.order_id = oo.order_out_id
-        where  co.wave_id is not null and (oo.wave_seq is not null or oo.wave_seq != 'N/A')
-               and co.order_type != 6
+        where co.wave_id is not null and (oo.wave_seq is not null or oo.wave_seq != 'N/A')
+        and co.order_type != 6
         --@ and co.create_at >= to_date(#{date},'YYYY-MM-DD hh24:mi:ss')
         --% and oo.wave_seq like #{wave_seq}
         AND co.wh_id = #{wh_id}
@@ -524,12 +524,12 @@
         --@ and co.area_id = #{area_id}
         group by co.wave_id,oo.wave_seq,co.area_id
         -- having sum(case when co.cmd_state >=60 and co.cmd_state &lt;= 90 then 1 else 0 end ) >0
-            )t1
+        )t1
     </select>
 
     <!-- 内复核进度查询-明细查询-->
     <select id="queryReviewProcessDetail">
-        select  bc.customer_code,bc.customer_name,bpi.package_unit, oo.wave_seq,ba.area_code,bi.item_code ,bi.item_name,bla.lot01,bla.lot02,bla.lot03,
+        select bc.customer_code,bc.customer_name,bpi.package_unit, oo.wave_seq,ba.area_code,bi.item_code ,bi.item_name,bla.lot01,bla.lot02,bla.lot03,
         nvl((select user_name from sys_user where user_id = co.pick_staff_id),co.pick_staff_id) pick_staff,
         nvl((select user_name from sys_user where user_id = co.review_staff_id),co.review_staff_id) review_staff,
         bl.loc_code,oo.order_out_code,co.review_staff_id
@@ -550,60 +550,60 @@
                 and co.cmd_state >=90
             </if>
             <if test="query_flg == 2">  <!-- 内复核未完成行数-->
-                and  (co.cmd_state >=60
+                and (co.cmd_state >=60
                 and co.cmd_state &lt; 90)
             </if>
         </if>
         --@ and co.wave_id = #{wave_id}
         --@ and co.area_id = #{area_id}
         --@ and oo.wave_seq = #{wave_seq}
-    )t
-    inner join cmd_out co on co.order_id = t.order_id and co.cmd_line_no = t.cmd_line_no
-    inner join order_out oo  on t.order_out_id = oo.order_out_id
-    left join bas_area ba on ba.area_id = co.area_id
-    left join bas_item bi on bi.item_id = co.item_id
-    left join bas_customer bc on bc.customer_id = oo.customer_id
-    left join bas_package_items bpi on bpi.package_id = co.package_id and bpi.item_id = co.item_id and bpi.package_level = 1
-    left join bas_location bl on bl.loc_id = co.loc_id
-    left join bas_lot_att bla on bla.lot_id = co.lot_id
+        )t
+        inner join cmd_out co on co.order_id = t.order_id and co.cmd_line_no = t.cmd_line_no
+        inner join order_out oo on t.order_out_id = oo.order_out_id
+        left join bas_area ba on ba.area_id = co.area_id
+        left join bas_item bi on bi.item_id = co.item_id
+        left join bas_customer bc on bc.customer_id = oo.customer_id
+        left join bas_package_items bpi on bpi.package_id = co.package_id and bpi.item_id = co.item_id and bpi.package_level = 1
+        left join bas_location bl on bl.loc_id = co.loc_id
+        left join bas_lot_att bla on bla.lot_id = co.lot_id
     </select>
 
     <!-- 拣货进度查询-->
     <select id="queryPickProcess">
         select
-            distinct
-            t1.wave_id,
-            t1.wave_seq,
-            '拣货' business_type,
-            (select area_code from bas_area ba where ba.area_id = t1.area_id) area_code,
-            t1.area_id,
-            t1.total,
-            t1.reviewfinish,
-            t1.reviewnofinish,
-            round(case when t1.total >0 then t1.reviewfinish/t1.total*100 else 0 end ,2) reviewprecess
+        distinct
+        t1.wave_id,
+        t1.wave_seq,
+        '拣货' business_type,
+        (select area_code from bas_area ba where ba.area_id = t1.area_id) area_code,
+        t1.area_id,
+        t1.total,
+        t1.reviewfinish,
+        t1.reviewnofinish,
+        round(case when t1.total >0 then t1.reviewfinish/t1.total*100 else 0 end ,2) reviewprecess
         from
-            (select co.wave_id,
-                    co.area_id,
-                    oo.wave_seq,
-                   -- max(oo.wave_seq) wave_seq,
-                    count(*) as total,
-                    sum(case when co.cmd_state >=60 then 1  else 0 end ) reviewfinish,
-                    sum(case when co.cmd_state >=30 and co.cmd_state &lt; 60 then 1 else 0 end ) reviewnofinish,
-                    sum(case when co.cmd_state >=30 and co.cmd_state &lt;= 60 then 1 else 0 end ) reviewtotal
-             from cmd_out co inner join order_out oo on co.order_id = oo.order_out_id
-             where  co.wave_id is not null  and (oo.wave_seq is not null or oo.wave_seq != 'N/A')
-                    and co.order_type != 6
-                    --@ and co.create_at >= to_date(#{date},'YYYY-MM-DD hh24:mi:ss')
-                    AND co.wh_id = #{wh_id}
-                    AND co.OWNER_ID in
-                    <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
-                        #{item}
-                    </foreach>
-                 --@ and co.area_id = #{area_id}
-                    --% and oo.wave_seq like #{wave_seq}
-             group by co.wave_id,oo.wave_seq,co.area_id
-                -- having sum(case when co.cmd_state >=30 and co.cmd_state &lt;= 60 then 1 else 0 end ) >0
-                )t1
+        (select co.wave_id,
+        co.area_id,
+        oo.wave_seq,
+        -- max(oo.wave_seq) wave_seq,
+        count(*) as total,
+        sum(case when co.cmd_state >=60 then 1 else 0 end ) reviewfinish,
+        sum(case when co.cmd_state >=30 and co.cmd_state &lt; 60 then 1 else 0 end ) reviewnofinish,
+        sum(case when co.cmd_state >=30 and co.cmd_state &lt;= 60 then 1 else 0 end ) reviewtotal
+        from cmd_out co inner join order_out oo on co.order_id = oo.order_out_id
+        where co.wave_id is not null and (oo.wave_seq is not null or oo.wave_seq != 'N/A')
+        and co.order_type != 6
+        --@ and co.create_at >= to_date(#{date},'YYYY-MM-DD hh24:mi:ss')
+        AND co.wh_id = #{wh_id}
+        AND co.OWNER_ID in
+        <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
+            #{item}
+        </foreach>
+        --@ and co.area_id = #{area_id}
+        --% and oo.wave_seq like #{wave_seq}
+        group by co.wave_id,oo.wave_seq,co.area_id
+        -- having sum(case when co.cmd_state >=30 and co.cmd_state &lt;= 60 then 1 else 0 end ) >0
+        )t1
 
     </select>
 
@@ -627,7 +627,7 @@
         from cmd_out co
         inner join order_out oo on co.order_id = oo.order_out_id
         where co.wave_id is not null and (oo.wave_seq is not null or oo.wave_seq != 'N/A')
-            and co.order_type != 6
+        and co.order_type != 6
         --@ and co.create_at >= to_date(#{date},'YYYY-MM-DD hh24:mi:ss')
         AND co.wh_id = #{wh_id}
         AND co.OWNER_ID in
@@ -639,7 +639,7 @@
                 and co.cmd_state >=60
             </if>
             <if test="query_flg == 2">  <!-- 拣货未完成行数-->
-                and  (co.cmd_state >=30 and co.cmd_state &lt; 60)
+                and (co.cmd_state >=30 and co.cmd_state &lt; 60)
             </if>
         </if>
         --@ and co.wave_id = #{wave_id}
@@ -772,92 +772,92 @@
 
         select t.*, ow.wave_no, bc.customer_code, bc.customer_name
         from (select co.wave_id,
-                     bc.customer_id,
-                     count(*) total,
-                     sum(case when co.is_collect = 1 then 1 else 0 end) finish,
-                     sum(case when co.is_collect = -1 then 1 else 0 end) nofinish,
-                    sum(case when co.collect_stage_id is not null  then 1 else 0 end) gatherfinish,
-                    sum(case when co.collect_stage_id is null  then 1 else 0 end) gathernofinish
-              from (select *
-                    from cmd_out co
-                    where co.barcode != 'N/A'
-                      and concat(co.order_id, co.cmd_line_no) in
-                          (select concat(min(t.order_id), min(t.cmd_line_no))
-                           from cmd_out t
-                          where  t.wh_id = #{wh_id}
-                            AND t.OWNER_ID in
-                            <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
-                                #{item}
-                            </foreach>
-                            --@ and t.create_at >= to_date(#{start_date},'YYYY-MM-DD hh24:mi:ss')
-                            --@ and t.create_at &lt;= to_date(#{end_date},'YYYY-MM-DD hh24:mi:ss')
-                           group by t.barcode)) co
-                       inner join order_out oo  on co.order_id = oo.order_out_id
-                       inner join bas_customer bc  on bc.customer_id = oo.customer_id
-                group by co.wave_id, bc.customer_id) t
-                 inner join order_wave ow  on ow.wave_id = t.wave_id
-                 inner join bas_customer bc  on bc.customer_id = t.customer_id
-              where 1 = 1
-                    --% and ow.wave_no like #{wave_no}
-                    --% and bc.customer_code like #{customer_code}
+        bc.customer_id,
+        count(*) total,
+        sum(case when co.is_collect = 1 then 1 else 0 end) finish,
+        sum(case when co.is_collect = -1 then 1 else 0 end) nofinish,
+        sum(case when co.collect_stage_id is not null then 1 else 0 end) gatherfinish,
+        sum(case when co.collect_stage_id is null then 1 else 0 end) gathernofinish
+        from (select *
+        from cmd_out co
+        where co.barcode != 'N/A'
+        and concat(co.order_id, co.cmd_line_no) in
+        (select concat(min(t.order_id), min(t.cmd_line_no))
+        from cmd_out t
+        where t.wh_id = #{wh_id}
+        AND t.OWNER_ID in
+        <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
+            #{item}
+        </foreach>
+        --@ and t.create_at >= to_date(#{start_date},'YYYY-MM-DD hh24:mi:ss')
+        --@ and t.create_at &lt;= to_date(#{end_date},'YYYY-MM-DD hh24:mi:ss')
+        group by t.barcode)) co
+        inner join order_out oo on co.order_id = oo.order_out_id
+        inner join bas_customer bc on bc.customer_id = oo.customer_id
+        group by co.wave_id, bc.customer_id) t
+        inner join order_wave ow on ow.wave_id = t.wave_id
+        inner join bas_customer bc on bc.customer_id = t.customer_id
+        where 1 = 1
+        --% and ow.wave_no like #{wave_no}
+        --% and bc.customer_code like #{customer_code}
 
     </select>
 
     <!--集货进度明细查询-->
     <select id="queryCollectProcessDetail">
         select ow.wave_no,
-               bc.customer_code,
-               bc.customer_name,
-               t.collect_pallet_code,
-               nvl((select user_name from sys_user where user_id =  t.review_staff_id),t.review_staff_id) review_staff,
-               t.cmd_state,
-               nvl( (select user_name from sys_user where user_id =  t.collect_staff_id),t.collect_staff_id) collect_staff,
-               nvl( (select user_name from sys_user where user_id =  t.COLLECT_TRANSPORT_STAFF_ID),t.COLLECT_TRANSPORT_STAFF_ID) COLLECT_TRANSPORT_STAFF,
-               bs.stage_code,
-               bs.stage_name,
-               bl.loc_code,
-               t.barcode,
-               oo.order_out_code,
-               nvl( (select user_name from sys_user where user_id =  t.pick_staff_id),t.pick_staff_id) pick_staff,
-               t.merge_barcode,
-               case  when t.merge_barcode = 'N/A' then t.barcode
-                     else t.merge_barcode
-                   end collect_no,
-                case  when t.is_collect = 1 then '已集货'
-                      else '未集货'
-                end collect_state,
-                case  when  t.collect_stage_id is not null then '已集运'
-                    else '未集运'
-                end gather_state
+        bc.customer_code,
+        bc.customer_name,
+        t.collect_pallet_code,
+        nvl((select user_name from sys_user where user_id = t.review_staff_id),t.review_staff_id) review_staff,
+        t.cmd_state,
+        nvl( (select user_name from sys_user where user_id = t.collect_staff_id),t.collect_staff_id) collect_staff,
+        nvl( (select user_name from sys_user where user_id = t.COLLECT_TRANSPORT_STAFF_ID),t.COLLECT_TRANSPORT_STAFF_ID) COLLECT_TRANSPORT_STAFF,
+        bs.stage_code,
+        bs.stage_name,
+        bl.loc_code,
+        t.barcode,
+        oo.order_out_code,
+        nvl( (select user_name from sys_user where user_id = t.pick_staff_id),t.pick_staff_id) pick_staff,
+        t.merge_barcode,
+        case when t.merge_barcode = 'N/A' then t.barcode
+        else t.merge_barcode
+        end collect_no,
+        case when t.is_collect = 1 then '已集货'
+        else '未集货'
+        end collect_state,
+        case when t.collect_stage_id is not null then '已集运'
+        else '未集运'
+        end gather_state
         from (select *
-              from cmd_out co
-              where co.barcode != 'N/A'
-                and concat(co.order_id, co.cmd_line_no) in
-                    (select concat(min(t.order_id), min(t.cmd_line_no))
-                     from cmd_out t
-                        where  t.wh_id = #{wh_id}
-                        AND t.OWNER_ID in
-                        <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
-                            #{item}
-                        </foreach>
-                        --@ and t.wave_id = #{wave_id}
-                        --@ and t.is_collect = #{query_flg}
-                        <if test="#obj.notEmpty(gather_flg)">
-                            <if test="gather_flg == 1">  <!--集运完成行数-->
-                               and t.collect_stage_id is not null
-                            </if>
-                            <if test="gather_flg == 0">  <!-- 集运未完成行数-->
-                                and t.collect_stage_id is null
-                            </if>
-                        </if>
-                     group by t.barcode)) t
-                 inner join order_out oo on oo.order_out_id = t.order_id
-                 inner join bas_customer bc  on bc.customer_id = oo.customer_id
-                 inner join order_wave ow  on ow.wave_id = t.wave_id
-                 left join bas_stage bs on bs.stage_id = t.collect_stage_id
-                 left join bas_location bl on bl.loc_id = t.loc_id
+        from cmd_out co
+        where co.barcode != 'N/A'
+        and concat(co.order_id, co.cmd_line_no) in
+        (select concat(min(t.order_id), min(t.cmd_line_no))
+        from cmd_out t
+        where t.wh_id = #{wh_id}
+        AND t.OWNER_ID in
+        <foreach collection="owner_ids" separator="," item="item" index="index" open="(" close=")">
+            #{item}
+        </foreach>
+        --@ and t.wave_id = #{wave_id}
+        --@ and t.is_collect = #{query_flg}
+        <if test="#obj.notEmpty(gather_flg)">
+            <if test="gather_flg == 1">  <!--集运完成行数-->
+                and t.collect_stage_id is not null
+            </if>
+            <if test="gather_flg == 0">  <!-- 集运未完成行数-->
+                and t.collect_stage_id is null
+            </if>
+        </if>
+        group by t.barcode)) t
+        inner join order_out oo on oo.order_out_id = t.order_id
+        inner join bas_customer bc on bc.customer_id = oo.customer_id
+        inner join order_wave ow on ow.wave_id = t.wave_id
+        left join bas_stage bs on bs.stage_id = t.collect_stage_id
+        left join bas_location bl on bl.loc_id = t.loc_id
         where 1 = 1
-            --@ and oo.customer_id = #{customer_id}
+        --@ and oo.customer_id = #{customer_id}
 
     </select>
 
@@ -865,208 +865,208 @@
     <select id="queryBoxDetail">
         SELECT *
         FROM (SELECT DISTINCT
-              TA.CUSTOMER_ID,
-              TA.CUSTOMER_CODE,
-              TA.CUSTOMER_NAME,
-              TA.ADDRESS,
-              TB.ORDER_OUT_ID,
-              TB.ORDER_OUT_CODE,
-              TC.IS_UNPACK,
-              TC.BARCODE,
-              1 BOX_QTY,
-              (SELECT MERGE_BARCODE
-               FROM CMD_OUT
-               WHERE BARCODE = TC.BARCODE
-                 AND ROWNUM = 1) MERGE_BARCODE,
-              DECODE(TF.SPLIT_NO, 'N/A', '', TD.ITEM_CODE) ITEM_CODE,
-              DECODE(TF.SPLIT_NO, 'N/A', '', TD.ITEM_NAME) ITEM_NAME,
-              DECODE(TF.SPLIT_NO, 'N/A', '', TD.ITEM_SPECIFICATION) ITEM_SPECIFICATION,
-              DECODE(TF.SPLIT_NO, 'N/A', '', TD.MANUFACTURER) MANUFACTURER,
-              (DECODE(TF.SPLIT_NO, 'N/A', '拼箱', '整箱') ||
-               TC.PACK_NO) PACK_NO,
-              (SELECT DICT_TEXT
-               FROM BAS_DICT_ITEMS
-               WHERE DICT_CODE = 'PICKUP_TYPE'
-                 AND DICT_VALUE = TB.PICKUP_TYPE) PICKUP_TYPE,
-              TG.WH_NAME,
-              TI.USER_NAME REVIEW_STAFF
+        TA.CUSTOMER_ID,
+        TA.CUSTOMER_CODE,
+        TA.CUSTOMER_NAME,
+        TA.ADDRESS,
+        TB.ORDER_OUT_ID,
+        TB.ORDER_OUT_CODE,
+        TC.IS_UNPACK,
+        TC.BARCODE,
+        1 BOX_QTY,
+        (SELECT MERGE_BARCODE
+        FROM CMD_OUT
+        WHERE BARCODE = TC.BARCODE
+        AND ROWNUM = 1) MERGE_BARCODE,
+        DECODE(TF.SPLIT_NO, 'N/A', '', TD.ITEM_CODE) ITEM_CODE,
+        DECODE(TF.SPLIT_NO, 'N/A', '', TD.ITEM_NAME) ITEM_NAME,
+        DECODE(TF.SPLIT_NO, 'N/A', '', TD.ITEM_SPECIFICATION) ITEM_SPECIFICATION,
+        DECODE(TF.SPLIT_NO, 'N/A', '', TD.MANUFACTURER) MANUFACTURER,
+        (DECODE(TF.SPLIT_NO, 'N/A', '拼箱', '整箱') ||
+        TC.PACK_NO) PACK_NO,
+        (SELECT DICT_TEXT
+        FROM BAS_DICT_ITEMS
+        WHERE DICT_CODE = 'PICKUP_TYPE'
+        AND DICT_VALUE = TB.PICKUP_TYPE) PICKUP_TYPE,
+        TG.WH_NAME,
+        TI.USER_NAME REVIEW_STAFF
 
-              FROM BAS_CUSTOMER TA
-                       INNER JOIN ORDER_OUT TB
-                                  ON TB.CUSTOMER_ID = TA.CUSTOMER_ID
-                       INNER JOIN CMD_OUT TC
-                                  ON TC.ORDER_ID = TB.ORDER_OUT_ID
-                       INNER JOIN BAS_ITEM TD
-                                  ON TD.ITEM_ID = TC.ITEM_ID
-                       INNER JOIN BAS_LOT_ATT TE
-                                  ON TE.LOT_ID = TC.LOT_ID
-                       INNER JOIN CMD_BARCODE TF
-                                  ON TF.BARCODE = TC.BARCODE
-                       INNER JOIN BAS_WH TG
-                                  ON TG.WH_ID = TB.WH_ID
-                       INNER JOIN SYS_USER TI
-                                  ON TI.USER_ID = TC.REVIEW_STAFF_ID
-              WHERE TC.QTY > 0
-                AND TC.ORDER_BIZ_TYPE IN (22, 21)
-                AND TC.IS_UNPACK = 1
-                AND TB.ORDER_OUT_ID = #{order_out_id}
-                AND TA.CUSTOMER_ID = #{customer_id}
+        FROM BAS_CUSTOMER TA
+        INNER JOIN ORDER_OUT TB
+        ON TB.CUSTOMER_ID = TA.CUSTOMER_ID
+        INNER JOIN CMD_OUT TC
+        ON TC.ORDER_ID = TB.ORDER_OUT_ID
+        INNER JOIN BAS_ITEM TD
+        ON TD.ITEM_ID = TC.ITEM_ID
+        INNER JOIN BAS_LOT_ATT TE
+        ON TE.LOT_ID = TC.LOT_ID
+        INNER JOIN CMD_BARCODE TF
+        ON TF.BARCODE = TC.BARCODE
+        INNER JOIN BAS_WH TG
+        ON TG.WH_ID = TB.WH_ID
+        INNER JOIN SYS_USER TI
+        ON TI.USER_ID = TC.REVIEW_STAFF_ID
+        WHERE TC.QTY > 0
+        AND TC.ORDER_BIZ_TYPE IN (22, 21)
+        AND TC.IS_UNPACK = 1
+        AND TB.ORDER_OUT_ID = #{order_out_id}
+        AND TA.CUSTOMER_ID = #{customer_id}
 
-              UNION ALL
+        UNION ALL
 
-              SELECT DISTINCT
-                  TA.CUSTOMER_ID,
-                  TA.CUSTOMER_CODE,
-                  TA.CUSTOMER_NAME,
-                  TA.ADDRESS,
-                  TB.ORDER_OUT_ID,
-                  TB.ORDER_OUT_CODE,
-                  TC.IS_UNPACK,
-                  TC.BARCODE,
-                  (TC.QTY / (SELECT PACKAGE_MEAS
-                             FROM BAS_PACKAGE_ITEMS
-                             WHERE ITEM_ID = TC.ITEM_ID
-                               AND PACKAGE_LEVEL = 3)) BOX_QTY,
-                  (SELECT MERGE_BARCODE
-                   FROM CMD_OUT
-                   WHERE BARCODE = TC.BARCODE
-                     AND ROWNUM = 1) MERGE_BARCODE,
-                  TD.ITEM_CODE,
-                  TD.ITEM_NAME ITEM_NAME,
-                  TD.ITEM_SPECIFICATION ITEM_SPECIFICATION,
-                  TD.MANUFACTURER MANUFACTURER,
-                  TC.PACK_NO,
-                  (SELECT DICT_TEXT
-                   FROM BAS_DICT_ITEMS
-                   WHERE DICT_CODE = 'PICKUP_TYPE'
-                     AND DICT_VALUE = TB.PICKUP_TYPE) PICKUP_TYPE,
-                  TG.WH_NAME,
-                  TI.USER_NAME REVIEW_STAFF
-              FROM BAS_CUSTOMER TA
-                       LEFT JOIN ORDER_OUT TB
-                                 ON TB.CUSTOMER_ID = TA.CUSTOMER_ID
-                       LEFT JOIN CMD_OUT TC
-                                 ON TC.ORDER_ID = TB.ORDER_OUT_ID
-                       LEFT JOIN BAS_ITEM TD
-                                 ON TD.ITEM_ID = TC.ITEM_ID
-                       LEFT JOIN BAS_LOT_ATT TE
-                                 ON TE.LOT_ID = TC.LOT_ID
-                       LEFT JOIN CMD_BARCODE TF
-                                 ON TF.BARCODE = TC.BARCODE
-                       LEFT JOIN BAS_WH TG
-                                 ON TG.WH_ID = TB.WH_ID
-                       LEFT JOIN SYS_USER TI
-                                 ON TI.USER_ID = TC.REVIEW_STAFF_ID
-              WHERE TC.QTY > 0
-                AND TC.ORDER_BIZ_TYPE IN (22, 21)
-                AND TC.IS_UNPACK = 0
-                AND TB.ORDER_OUT_ID = #{order_out_id}
-                AND TA.CUSTOMER_ID = #{customer_id}
-              ORDER BY ORDER_OUT_CODE, BARCODE)
+        SELECT DISTINCT
+        TA.CUSTOMER_ID,
+        TA.CUSTOMER_CODE,
+        TA.CUSTOMER_NAME,
+        TA.ADDRESS,
+        TB.ORDER_OUT_ID,
+        TB.ORDER_OUT_CODE,
+        TC.IS_UNPACK,
+        TC.BARCODE,
+        (TC.QTY / (SELECT PACKAGE_MEAS
+        FROM BAS_PACKAGE_ITEMS
+        WHERE ITEM_ID = TC.ITEM_ID
+        AND PACKAGE_LEVEL = 3)) BOX_QTY,
+        (SELECT MERGE_BARCODE
+        FROM CMD_OUT
+        WHERE BARCODE = TC.BARCODE
+        AND ROWNUM = 1) MERGE_BARCODE,
+        TD.ITEM_CODE,
+        TD.ITEM_NAME ITEM_NAME,
+        TD.ITEM_SPECIFICATION ITEM_SPECIFICATION,
+        TD.MANUFACTURER MANUFACTURER,
+        TC.PACK_NO,
+        (SELECT DICT_TEXT
+        FROM BAS_DICT_ITEMS
+        WHERE DICT_CODE = 'PICKUP_TYPE'
+        AND DICT_VALUE = TB.PICKUP_TYPE) PICKUP_TYPE,
+        TG.WH_NAME,
+        TI.USER_NAME REVIEW_STAFF
+        FROM BAS_CUSTOMER TA
+        LEFT JOIN ORDER_OUT TB
+        ON TB.CUSTOMER_ID = TA.CUSTOMER_ID
+        LEFT JOIN CMD_OUT TC
+        ON TC.ORDER_ID = TB.ORDER_OUT_ID
+        LEFT JOIN BAS_ITEM TD
+        ON TD.ITEM_ID = TC.ITEM_ID
+        LEFT JOIN BAS_LOT_ATT TE
+        ON TE.LOT_ID = TC.LOT_ID
+        LEFT JOIN CMD_BARCODE TF
+        ON TF.BARCODE = TC.BARCODE
+        LEFT JOIN BAS_WH TG
+        ON TG.WH_ID = TB.WH_ID
+        LEFT JOIN SYS_USER TI
+        ON TI.USER_ID = TC.REVIEW_STAFF_ID
+        WHERE TC.QTY > 0
+        AND TC.ORDER_BIZ_TYPE IN (22, 21)
+        AND TC.IS_UNPACK = 0
+        AND TB.ORDER_OUT_ID = #{order_out_id}
+        AND TA.CUSTOMER_ID = #{customer_id}
+        ORDER BY ORDER_OUT_CODE, BARCODE)
 
         UNION ALL
 
         (SELECT DISTINCT CUSTOMER_ID,
-                         '' CUSTOMER_CODE,
-                         CUSTOMER_NAME,
-                         '' ADDRESS,
-                         ORDER_OUT_ID,
-                         ORDER_OUT_CODE,
-                         1 IS_UNPACK,
-                         BOX_NO BARCODE,
-                         QTY BOX_QTY,
-                         'N/A' MERGE_BARCODE,
-                         NULL ITEM_CODE,
-                         ITEM_NAME,
-                         NULL ITEM_SPECIFICATION,
-                         NULL MANUFACTURER,
-                         '' PACK_NO,
-                         '' PICKUP_TYPE,
-                         '' WH_NAME,
-                         '' REVIEW_STAFF
-         FROM DIY_ORDER_OUT
-         WHERE 1 = 1
-           and ORDER_OUT_ID = #{order_out_id}
-           AND CUSTOMER_ID = #{customer_id})
+        '' CUSTOMER_CODE,
+        CUSTOMER_NAME,
+        '' ADDRESS,
+        ORDER_OUT_ID,
+        ORDER_OUT_CODE,
+        1 IS_UNPACK,
+        BOX_NO BARCODE,
+        QTY BOX_QTY,
+        'N/A' MERGE_BARCODE,
+        NULL ITEM_CODE,
+        ITEM_NAME,
+        NULL ITEM_SPECIFICATION,
+        NULL MANUFACTURER,
+        '' PACK_NO,
+        '' PICKUP_TYPE,
+        '' WH_NAME,
+        '' REVIEW_STAFF
+        FROM DIY_ORDER_OUT
+        WHERE 1 = 1
+        and ORDER_OUT_ID = #{order_out_id}
+        AND CUSTOMER_ID = #{customer_id})
 
     </select>
 
     <!--波次进度查询-->
     <select id="queryWave">
         SELECT
-            wv.wave_no,
-            to_char(zl.create_time,'yyyy-mm-dd') create_time,
-            count( * ) TOTAL,
-            sum( CASE WHEN ( zl.cmd_state >= 60 AND zl.is_short = 0 ) THEN 1 ELSE 0 END ) YJ,
-            sum( CASE WHEN ( zl.cmd_state &lt; 60 AND zl.is_short = 0 ) THEN 1 ELSE 0 END ) WJ,
-            sum( CASE WHEN ( zl.IS_UNPACK = 1 AND zl.cmd_state >= 90 AND zl.is_short = 0 ) THEN 1 ELSE 0 END ) YFH,
-            sum(
-                    CASE
-                        WHEN ( zl.IS_UNPACK = 1 AND zl.cmd_state >= 60 AND zl.cmd_state &lt; 90 AND zl.is_short = 0 ) THEN
-                            1 ELSE 0
-                        END
-                ) WFH,
-            sum( CASE WHEN ( zl.is_short > 0 ) THEN 1 ELSE 0 END ) YCFH,
-            sum(
-                    CASE
+        wv.wave_no,
+        to_char(zl.create_time,'yyyy-mm-dd') create_time,
+        count( * ) TOTAL,
+        sum( CASE WHEN ( zl.cmd_state >= 60 AND zl.is_short = 0 ) THEN 1 ELSE 0 END ) YJ,
+        sum( CASE WHEN ( zl.cmd_state &lt; 60 AND zl.is_short = 0 ) THEN 1 ELSE 0 END ) WJ,
+        sum( CASE WHEN ( zl.IS_UNPACK = 1 AND zl.cmd_state >= 90 AND zl.is_short = 0 ) THEN 1 ELSE 0 END ) YFH,
+        sum(
+        CASE
+        WHEN ( zl.IS_UNPACK = 1 AND zl.cmd_state >= 60 AND zl.cmd_state &lt; 90 AND zl.is_short = 0 ) THEN
+        1 ELSE 0
+        END
+        ) WFH,
+        sum( CASE WHEN ( zl.is_short > 0 ) THEN 1 ELSE 0 END ) YCFH,
+        sum(
+        CASE
 
-                        WHEN ( zl.is_unpack = 0 AND zl.is_short = 0 ) THEN
-                            ceil( zl.QTY / i3.PACKAGE_MEAS ) ELSE 0
-                        END
-                ) PACK_COUNT,
-            count(
-                    DISTINCT (
-                CASE
+        WHEN ( zl.is_unpack = 0 AND zl.is_short = 0 ) THEN
+        ceil( zl.QTY / i3.PACKAGE_MEAS ) ELSE 0
+        END
+        ) PACK_COUNT,
+        count(
+        DISTINCT (
+        CASE
 
-                    WHEN ( zl.PACK_NO != 'N/A' AND zl.is_short = 0 AND zl.is_unpack = 1 ) THEN
-                        zl.barcode ELSE NULL
-                    END
-                )
-                ) UNPACK_COUNT
+        WHEN ( zl.PACK_NO != 'N/A' AND zl.is_short = 0 AND zl.is_unpack = 1 ) THEN
+        zl.barcode ELSE NULL
+        END
+        )
+        ) UNPACK_COUNT
         FROM
-            cmd_out zl
-            INNER JOIN bas_item sp ON sp.item_id = zl.item_id
-            INNER JOIN order_wave wv ON zl.wave_id = wv.wave_id
-            INNER JOIN bas_package_items i3 ON i3.package_id = zl.package_id
-            AND i3.PACKAGE_LEVEL = 3
+        cmd_out zl
+        INNER JOIN bas_item sp ON sp.item_id = zl.item_id
+        INNER JOIN order_wave wv ON zl.wave_id = wv.wave_id
+        INNER JOIN bas_package_items i3 ON i3.package_id = zl.package_id
+        AND i3.PACKAGE_LEVEL = 3
         WHERE
-            zl.WH_ID = 1000000002
-          AND zl.OWNER_ID IN ( 1000 )
-          AND zl.order_type = 2
-          AND zl.CMD_STATE >= 20
-          --@ AND to_char(zl.create_time,'yyyy-mm-dd') >= #{startDate}
-          --@ AND to_char(zl.create_time,'yyyy-mm-dd') &lt;= #{endDate}
-          --@ AND wv.wave_no = #{wave_no}
+        zl.WH_ID = 1000000002
+        AND zl.OWNER_ID IN ( 1000 )
+        AND zl.order_type = 2
+        AND zl.CMD_STATE >= 20
+        --@ AND to_char(zl.create_time,'yyyy-mm-dd') >= #{startDate}
+        --@ AND to_char(zl.create_time,'yyyy-mm-dd') &lt;= #{endDate}
+        --@ AND wv.wave_no = #{wave_no}
         GROUP BY
-            wv.wave_no,
-            to_char(zl.create_time,'yyyy-mm-dd')
+        wv.wave_no,
+        to_char(zl.create_time,'yyyy-mm-dd')
     </select>
 
     <select id="queryDetail_inbound">
         SELECT
-            a.order_id,
-            a.cmd_line_no,
-            a.cmd_state,
-            a.order_type,
-            a.order_biz_type,
-            a.qty,
-            a.lpn,
-            b.lot01,
-            b.lot02,
-            b.lot03,
-            c.item_code,
-            c.item_name,
-            d.package_meas,
-            d.package_unit,
-            e.loc_code
+        a.order_id,
+        a.cmd_line_no,
+        a.cmd_state,
+        a.order_type,
+        a.order_biz_type,
+        a.qty,
+        a.lpn,
+        b.lot01,
+        b.lot02,
+        b.lot03,
+        c.item_code,
+        c.item_name,
+        d.package_meas,
+        d.package_unit,
+        e.loc_code
         FROM
-            cmd_in a
-            INNER JOIN bas_lot_att b ON b.lot_id = a.lot_id
-            INNER JOIN bas_item c ON c.item_id = a.item_id
-            INNER JOIN bas_package_items d ON d.package_item_id = a.package_item_id
-            INNER JOIN bas_location e ON e.loc_id = a.loc_id_real
+        cmd_in a
+        INNER JOIN bas_lot_att b ON b.lot_id = a.lot_id
+        INNER JOIN bas_item c ON c.item_id = a.item_id
+        INNER JOIN bas_package_items d ON d.package_item_id = a.package_item_id
+        INNER JOIN bas_location e ON e.loc_id = a.loc_id_real
         where a.wh_id = #{wh_id}
-            --@ AND a.order_id = #{order_id}
+        --@ AND a.order_id = #{order_id}
         <choose>
             <when test="cmd_state == 'ok_check'">
                 <![CDATA[
@@ -1093,35 +1093,35 @@
     <!--波次明细查询-->
     <select id="queryWaveDetail">
         SELECT
-            wv.wave_no,
-            OO.ORDER_OUT_CODE,
-            zl.CMD_LINE_NO,
-            zl.CMD_STATE,
-            zl.ORDER_TYPE,
-            zl.ORDER_BIZ_TYPE,
-            zl.QTY,
-            zl.IS_UNPACK,
-            la.LOT01,
-            la.LOT02,
-            la.LOT03,
-            sp.ITEM_CODE,
-            sp.ITEM_NAME,
-            i3.PACKAGE_MEAS,
-            i3.PACKAGE_UNIT
+        wv.wave_no,
+        OO.ORDER_OUT_CODE,
+        zl.CMD_LINE_NO,
+        zl.CMD_STATE,
+        zl.ORDER_TYPE,
+        zl.ORDER_BIZ_TYPE,
+        zl.QTY,
+        zl.IS_UNPACK,
+        la.LOT01,
+        la.LOT02,
+        la.LOT03,
+        sp.ITEM_CODE,
+        sp.ITEM_NAME,
+        i3.PACKAGE_MEAS,
+        i3.PACKAGE_UNIT
         FROM
-            cmd_out zl
-                INNER JOIN ORDER_OUT oo ON OO.ORDER_OUT_ID = ZL.ORDER_ID
-                INNER JOIN bas_item sp ON sp.item_id = zl.item_id
-                INNER JOIN BAS_LOT_ATT la ON la.lot_id = zl.lot_id
-                INNER JOIN order_wave wv ON zl.wave_id = wv.wave_id
-                INNER JOIN bas_package_items i3 ON i3.package_item_id = zl.package_item_id
-                AND i3.PACKAGE_LEVEL = 3
+        cmd_out zl
+        INNER JOIN ORDER_OUT oo ON OO.ORDER_OUT_ID = ZL.ORDER_ID
+        INNER JOIN bas_item sp ON sp.item_id = zl.item_id
+        INNER JOIN BAS_LOT_ATT la ON la.lot_id = zl.lot_id
+        INNER JOIN order_wave wv ON zl.wave_id = wv.wave_id
+        INNER JOIN bas_package_items i3 ON i3.package_item_id = zl.package_item_id
+        AND i3.PACKAGE_LEVEL = 3
         WHERE
-          zl.WH_ID = #{wh_id}
-          AND zl.OWNER_ID IN ( 1000 )
-          AND zl.order_type = 2
-          AND zl.CMD_STATE >= 20
-          AND wv.wave_no = #{wave_no}
+        zl.WH_ID = #{wh_id}
+        AND zl.OWNER_ID IN ( 1000 )
+        AND zl.order_type = 2
+        AND zl.CMD_STATE >= 20
+        AND wv.wave_no = #{wave_no}
         <choose>
             <when test="state == 'yj'"><![CDATA[
                 AND zl.cmd_state >= 60 AND zl.is_short = 0

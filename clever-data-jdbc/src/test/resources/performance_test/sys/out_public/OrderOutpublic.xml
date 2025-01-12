@@ -19,7 +19,7 @@
         select min(a.status) as minStatus,a.order_out_id
         from order_out_details a
         <where>
-        a.order_out_id in
+            a.order_out_id in
             <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
                 #{item}
             </foreach>

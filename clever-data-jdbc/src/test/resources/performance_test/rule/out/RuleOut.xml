@@ -20,14 +20,14 @@
 
     <select id="queryAllRuleOut">
         select t.rule_out_id,
-               t.wh_id,
-               t.name,
-               t.create_at,
-               t.update_at,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        t.wh_id,
+        t.name,
+        t.create_at,
+        t.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
         from rule_out t
-        --%   where t.name like #{name}
+        --% where t.name like #{name}
     </select>
 
 </mapper>

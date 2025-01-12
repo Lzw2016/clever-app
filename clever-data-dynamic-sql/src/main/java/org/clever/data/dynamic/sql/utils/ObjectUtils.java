@@ -18,7 +18,7 @@ public class ObjectUtils {
             return false;
         }
         for (Object obj2 : array) {
-            if(obj2 instanceof Character) {
+            if (obj2 instanceof Character) {
                 obj2 = String.valueOf(obj2);
             }
             if (Objects.equals(obj, obj2)) {
@@ -59,11 +59,8 @@ public class ObjectUtils {
         str = str.replace("'", "''");
 
         if (str.contains("%") || str.contains("_")) {
-            str = str.replace("\\", "\\\\")
-                    .replace("%", "\\%")
-                    .replace("_", "\\_");
+            str = str.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
             return "'%" + str + "%' escape '\\'";
-
         } else {
             return "'%" + str + "%'";
         }

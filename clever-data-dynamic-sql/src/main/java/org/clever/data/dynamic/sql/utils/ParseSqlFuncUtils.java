@@ -19,10 +19,10 @@ public class ParseSqlFuncUtils {
     }
 
     public static String parseSqlFunc(
-            final DbType dbType,
-            final String originalSql,
-            final Object parameterObject,
-            final LinkedHashMap<String, Object> sqlVariable) {
+        final DbType dbType,
+        final String originalSql,
+        final Object parameterObject,
+        final LinkedHashMap<String, Object> sqlVariable) {
         Matcher matcher = pattern.matcher(originalSql);
         StringBuilder sqlDialect = new StringBuilder();
         int start = 0;

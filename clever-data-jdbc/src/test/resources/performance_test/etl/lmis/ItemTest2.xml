@@ -3,17 +3,17 @@
 <mapper namespace="Item">
     <select id="queryAllItem">
         SELECT
-            t2.dict_value CUNC_CONDITION2,
-            t3.dict_value YAOP_CATEGORY2,
-            t.*
+        t2.dict_value CUNC_CONDITION2,
+        t3.dict_value YAOP_CATEGORY2,
+        t.*
         FROM test2 t
-             left join bas_dict_items t2 on t2.dict_code='STOCK_ENV' and t.CUNC_CONDITION=t2.udf1
-             left join bas_dict_items t3 on t3.dict_code='ITEM_CLASSIFY' and t.YAOP_CATEGORY=t3.udf1
+        left join bas_dict_items t2 on t2.dict_code='STOCK_ENV' and t.CUNC_CONDITION=t2.udf1
+        left join bas_dict_items t3 on t3.dict_code='ITEM_CLASSIFY' and t.YAOP_CATEGORY=t3.udf1
         where t.SHANGP_NO not in (
-            SELECT (i.item_code) FROM bas_item i where i.owner_id=1000
+        SELECT (i.item_code) FROM bas_item i where i.owner_id=1000
         )
     </select>
 </mapper>
 
-<!--        商品资料，增加行-->
-<!--        4854 -->
+    <!--        商品资料，增加行-->
+    <!--        4854 -->

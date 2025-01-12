@@ -14,9 +14,9 @@
         inner JOIN bas_package bp ON bi.item_id = bp.item_id
         inner join bas_owner bo on bo.owner_id = bi.owner_id
         WHERE 1 = 1
-            --@ and bi.item_id = #{item_id}
-            --@ and bi.item_code = #{item_code}
-            --@ and bo.owner_code = #{owner_code}
+        --@ and bi.item_id = #{item_id}
+        --@ and bi.item_code = #{item_code}
+        --@ and bo.owner_code = #{owner_code}
     </select>
 
 </mapper>

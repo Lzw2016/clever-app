@@ -284,18 +284,18 @@
     <!--获取报告单图片-->
     <select id="getReportPhotos" resultType="map">
         SELECT
-            t.wh_id,
-            t.item_id,
-            t.lot_id,
-            t.photo_id,
-            t.photo_type,
-            t.path
+        t.wh_id,
+        t.item_id,
+        t.lot_id,
+        t.photo_id,
+        t.photo_type,
+        t.path
         FROM
-            photos T
+        photos T
         WHERE
-            T.wh_id =#{wh_id}
-          AND T.item_id =#{item_id}
-          AND T.lot_id =#{lot_id}
+        T.wh_id =#{wh_id}
+        AND T.item_id =#{item_id}
+        AND T.lot_id =#{lot_id}
     </select>
 
     <select id="queryPrintFHD" resultType="map">
@@ -305,40 +305,40 @@
     <!--出库批量新增-根据customer_id查询order_out_code-->
     <select id="queryOrderCodeByCusId" resultType="map">
         select * from (select t.order_out_id, t.order_out_code
-                       from (SELECT oo.order_out_id, oo.order_out_code,oo.wave_id
-                             FROM order_out oo
-                                      left join order_wave ow
-                                                on ow.wave_id = oo.wave_id
-                             WHERE 1 = 1
-                               and oo.customer_id = #{customer_id}
-                               and ow.wave_no not like 'X%'
-                             order by oo.create_at desc) t
-                       where rownum = 1
+        from (SELECT oo.order_out_id, oo.order_out_code,oo.wave_id
+        FROM order_out oo
+        left join order_wave ow
+        on ow.wave_id = oo.wave_id
+        WHERE 1 = 1
+        and oo.customer_id = #{customer_id}
+        and ow.wave_no not like 'X%'
+        order by oo.create_at desc) t
+        where rownum = 1
 
-                       union all
+        union all
 
-                       select t.order_out_id, t.order_out_code
-                       from (SELECT oo.order_out_id, oo.order_out_code,oo.wave_id
-                             FROM order_out oo
+        select t.order_out_id, t.order_out_code
+        from (SELECT oo.order_out_id, oo.order_out_code,oo.wave_id
+        FROM order_out oo
 
-                             WHERE 1 = 1
-                               and oo.customer_id = #{customer_id}
+        WHERE 1 = 1
+        and oo.customer_id = #{customer_id}
 
-                             order by oo.create_at desc) t
-                       where rownum = 1)
+        order by oo.create_at desc) t
+        where rownum = 1)
         where rownum = 1
     </select>
 
     <!--手工单查询-->
     <select id="reviewQueryHand" resultType="map">
         select t.order_out_id, t.order_out_code,bc.customer_code , bc.customer_name,bo.owner_name,t.create_at,t.customer_id,
-               t.print_flg,0 confirm_flg,t.item_type order_biz_type,t.count full_qty
+        t.print_flg,0 confirm_flg,t.item_type order_biz_type,t.count full_qty
         from
         (select
-           t.order_out_id,t.print_flg,t.wh_id,t.order_out_code,t.item_type,t.customer_id,t.owner_id,to_char(t.create_at,'yyyy-mm-dd') create_at,count(*) count
+        t.order_out_id,t.print_flg,t.wh_id,t.order_out_code,t.item_type,t.customer_id,t.owner_id,to_char(t.create_at,'yyyy-mm-dd') create_at,count(*) count
         from diy_order_out t
         group by t.order_out_id,t.wh_id,t.order_out_code,t.item_type,t.customer_id,t.owner_id,to_char(t.create_at,'yyyy-mm-dd'),t.print_flg
-            ) t
+        ) t
         inner join bas_customer bc on bc.customer_id = t.customer_id
         left join bas_owner bo on bo.owner_id = t.owner_id
         <where>
@@ -377,8 +377,8 @@
     </select>
     <!-- 手工录入查询当天是否已经生产单据编号-->
     <select id="queryDiyOutByDate" resultType="map">
-        select * from( select * from diy_order_out t where t.create_at >  TO_DATE(#{date},'YYYY-MM-DD hh24:mi:ss')
-                           and t.customer_id = #{customer_id} order by to_number(substr(t.box_no,(instr(t.box_no,'-')+1))) desc) where rownum = 1
+        select * from( select * from diy_order_out t where t.create_at > TO_DATE(#{date},'YYYY-MM-DD hh24:mi:ss')
+        and t.customer_id = #{customer_id} order by to_number(substr(t.box_no,(instr(t.box_no,'-')+1))) desc) where rownum = 1
 
     </select>
 

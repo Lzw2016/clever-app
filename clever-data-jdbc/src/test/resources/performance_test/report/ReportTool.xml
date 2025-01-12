@@ -4,26 +4,26 @@
 
     <select id="reportSettingQuery1">
         SELECT
-            t.condition_id,
-            t.report_id,
-            t.chinese_name,
-            t.english_name,
-            t.field_type,
-            t.notes,
-            ( SELECT COUNT(bd.dict_code) FROM bas_dict bd WHERE bd.dict_code = T.english_name ) AS dict
+        t.condition_id,
+        t.report_id,
+        t.chinese_name,
+        t.english_name,
+        t.field_type,
+        t.notes,
+        ( SELECT COUNT(bd.dict_code) FROM bas_dict bd WHERE bd.dict_code = T.english_name ) AS dict
         FROM
-            bas_report_condition t
+        bas_report_condition t
         WHERE
-            t.report_id = #{reportId}
+        t.report_id = #{reportId}
         order by condition_id asc
     </select>
 
     <select id="getFieldNameList">
         SELECT
-            t.*,
-            ( SELECT COUNT(bd.dict_code) FROM bas_dict bd WHERE bd.dict_code = t.english_name ) AS dict
+        t.*,
+        ( SELECT COUNT(bd.dict_code) FROM bas_dict bd WHERE bd.dict_code = t.english_name ) AS dict
         FROM
-            bas_report_field t
+        bas_report_field t
         WHERE t.english_name in
         <foreach collection="list" item="field" index="index" open="(" close=")" separator=",">
             #{field}

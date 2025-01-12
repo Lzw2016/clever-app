@@ -52,10 +52,10 @@ public class LogoutFilter implements FilterRegistrar.FilterFuc {
     public final HttpRespondHandler httpRespondHandler;
 
     public LogoutFilter(
-            SecurityConfig securityConfig,
-            List<LogoutSuccessHandler> logoutSuccessHandlerList,
-            List<LogoutFailureHandler> logoutFailureHandlerList,
-            HttpRespondHandler httpRespondHandler) {
+        SecurityConfig securityConfig,
+        List<LogoutSuccessHandler> logoutSuccessHandlerList,
+        List<LogoutFailureHandler> logoutFailureHandlerList,
+        HttpRespondHandler httpRespondHandler) {
         Assert.notNull(securityConfig, "权限系统配置对象(SecurityConfig)不能为null");
         Assert.notNull(httpRespondHandler, "返回响应数据工具(httpRespondHandler)不能为null");
         Ordered.sort(logoutSuccessHandlerList);

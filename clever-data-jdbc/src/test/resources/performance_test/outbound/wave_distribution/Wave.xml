@@ -23,221 +23,221 @@
 
     <select id="sql_data_PSFX_CX" resultType="map">
         select
-            count(distinct(TB.item_id)) item_count,
-            sum(ROUND(TB.qty / TE.package_meas, 2)) zjs,
-            nvl(TG.direction_name , '默认路线') direction_name,
-            count(distinct(TA.order_out_id)) order_count
+        count(distinct(TB.item_id)) item_count,
+        sum(ROUND(TB.qty / TE.package_meas, 2)) zjs,
+        nvl(TG.direction_name , '默认路线') direction_name,
+        count(distinct(TA.order_out_id)) order_count
         from
-            order_out TA,
-            order_out_details TB,
-            bas_item TC,
-            bas_package_items TE,
-            bas_customer TF left join bas_direction TG on TG.direction_id = TF.direction_id,
-            bas_owner TH
+        order_out TA,
+        order_out_details TB,
+        bas_item TC,
+        bas_package_items TE,
+        bas_customer TF left join bas_direction TG on TG.direction_id = TF.direction_id,
+        bas_owner TH
         where
-            TA.order_out_id = TB.order_out_id
-            and TB.item_id = TC.item_id
-            and TE.item_id = TB.item_id
-            and TE.package_id = TB.package_id
-            and TE.package_level = 3
-            and TA.owner_id = TC.owner_id
-            and TB.qty > 0
-            and TB.status = 20
-            and TA.customer_id = TF.customer_id
-            and TH.owner_id = TA.owner_id
-            and TA.wh_id = #{wh_id}
-            and TA.status = 20
-            -- 补充
-            and TA.order_biz_type not in (24, 25)
-            and not exists (
-                select 1
-                from
-                    cmd_out TT
-                where
-                    TT.order_id = TA.order_out_id
-                    and TT.is_short = 0
-            )
+        TA.order_out_id = TB.order_out_id
+        and TB.item_id = TC.item_id
+        and TE.item_id = TB.item_id
+        and TE.package_id = TB.package_id
+        and TE.package_level = 3
+        and TA.owner_id = TC.owner_id
+        and TB.qty > 0
+        and TB.status = 20
+        and TA.customer_id = TF.customer_id
+        and TH.owner_id = TA.owner_id
+        and TA.wh_id = #{wh_id}
+        and TA.status = 20
+        -- 补充
+        and TA.order_biz_type not in (24, 25)
+        and not exists (
+        select 1
+        from
+        cmd_out TT
+        where
+        TT.order_id = TA.order_out_id
+        and TT.is_short = 0
+        )
         group by
-            TG.direction_name
+        TG.direction_name
     </select>
 
     <select id="sql_data_THFS_CX" resultType="map">
         select
-            count(distinct(TB.item_id)) item_count,
-            sum(ROUND(TB.qty / TE.package_meas, 2)) zjs,
-            nvl(TG.direction_name , '默认路线') direction_name,
-            TZ.dict_text pickup_type,
-            count(TA.order_out_id) order_count
+        count(distinct(TB.item_id)) item_count,
+        sum(ROUND(TB.qty / TE.package_meas, 2)) zjs,
+        nvl(TG.direction_name , '默认路线') direction_name,
+        TZ.dict_text pickup_type,
+        count(TA.order_out_id) order_count
         from
-            order_out TA,
-            order_out_details TB,
-            bas_item TC,
-            bas_package_items TE,
-            bas_customer TF left join bas_direction TG on TG.direction_id = TF.direction_id,
-            bas_owner TH,
-            bas_dict_items TZ
+        order_out TA,
+        order_out_details TB,
+        bas_item TC,
+        bas_package_items TE,
+        bas_customer TF left join bas_direction TG on TG.direction_id = TF.direction_id,
+        bas_owner TH,
+        bas_dict_items TZ
         where
-            TA.order_out_id = TB.order_out_id
-            and TB.item_id = TC.item_id
-            and TE.item_id = TB.item_id
-            and TE.package_id = TB.package_id
-            and TE.package_level = 3
-            and TA.owner_id = TC.owner_id
-            and TB.qty > 0
-            and TB.status = 20
-            and TA.customer_id = TF.customer_id
-            and TH.owner_id = TA.owner_id
-            and TA.wh_id = #{wh_id}
-            and TA.status = 20
-            -- 补充
-            and TA.order_biz_type not in (24, 25)
-            and TZ.dict_code = 'PICKUP_TYPE'
-            and TZ.dict_value = TA.pickup_type
-            and not exists (
-                select 1
-                from
-                    cmd_out TT
-                where
-                    TT.order_id = TA.order_out_id
-                    and TT.is_short = 0
-            )
+        TA.order_out_id = TB.order_out_id
+        and TB.item_id = TC.item_id
+        and TE.item_id = TB.item_id
+        and TE.package_id = TB.package_id
+        and TE.package_level = 3
+        and TA.owner_id = TC.owner_id
+        and TB.qty > 0
+        and TB.status = 20
+        and TA.customer_id = TF.customer_id
+        and TH.owner_id = TA.owner_id
+        and TA.wh_id = #{wh_id}
+        and TA.status = 20
+        -- 补充
+        and TA.order_biz_type not in (24, 25)
+        and TZ.dict_code = 'PICKUP_TYPE'
+        and TZ.dict_value = TA.pickup_type
+        and not exists (
+        select 1
+        from
+        cmd_out TT
+        where
+        TT.order_id = TA.order_out_id
+        and TT.is_short = 0
+        )
         group by
-            TG.direction_name, TZ.dict_text
+        TG.direction_name, TZ.dict_text
     </select>
 
     <select id="sql_data_HZ_CX" resultType="map">
         select
-            order_out_id,
-            order_out_code,
-            owner_id,
-            wave_id,
-            customer_id,
-            owner_name,
-            customer_name,
-            customer_code,
-            review_end_time,
-            collect_end_time,
-            remark,
-            bill_staff,
-            dates,
-            dict_text pickup_type,
-            nvl(direction_name , '默认路线') direction_name,
-            order_type,
-            status,
-            sum(qty) qty_sum,
-            sum(js) js_sum,
-            sum(lss) lss_sum,
-            count(item_id) pgs,
-            count(distinct(lot01)) lot_sum
+        order_out_id,
+        order_out_code,
+        owner_id,
+        wave_id,
+        customer_id,
+        owner_name,
+        customer_name,
+        customer_code,
+        review_end_time,
+        collect_end_time,
+        remark,
+        bill_staff,
+        dates,
+        dict_text pickup_type,
+        nvl(direction_name , '默认路线') direction_name,
+        order_type,
+        status,
+        sum(qty) qty_sum,
+        sum(js) js_sum,
+        sum(lss) lss_sum,
+        count(item_id) pgs,
+        count(distinct(lot01)) lot_sum
         from
         (
-            select
-                TA.order_out_id,
-                TA.order_out_code,
-                TA.owner_id,
-                TA.wave_id,
-                TA.customer_id,
-                TH.owner_name,
-                TF.customer_name,
-                TF.customer_code,
-                TA.review_end_time,
-                TA.collect_end_time,
-                TA.remark,
-                TA.bill_staff,
-                TA.dates,
-                TA.pickup_type,
-                TZ.dict_text,
-                TG.direction_name,
-                TA.order_type,
-                TA.status,
-                TB.qty,
-                trunc(TB.qty / TE.package_meas) js,
-                mod(TB.qty, TE.package_meas) lss,
-                TB.item_id,
-                TB.lot01
-            from
-                order_out TA,
-                order_out_details TB,
-                bas_item TC,
-                bas_package_items TE,
-                bas_customer TF left join bas_direction TG on TG.direction_id = TF.direction_id,
-                bas_owner TH,
-                bas_dict_items TZ
-            where
-                TA.order_out_id = TB.order_out_id
-                and TB.item_id = TC.item_id
-                and TE.item_id = TB.item_id
-                and TE.package_id = TB.package_id
-                and TE.package_level = 3
-                and TA.owner_id = TC.owner_id
-                and TB.qty > 0
-                and TB.status = 20
-                and TA.customer_id = TF.customer_id
-                and TH.owner_id = TA.owner_id
-                and TA.wh_id = #{wh_id}
-                and TA.status = 20
-                and TZ.dict_code = 'PICKUP_TYPE'
-                and TZ.dict_value = TA.pickup_type
-                and TA.order_biz_type not in (24, 25)
-                <if test="direction_name!= null and direction_name.size() > 0">
-                    and TG.direction_name in (#{direction_name})
-                </if>
-                <if test="order_code!= null and order_code.size() > 0">
-                    and TA.order_out_code in (#{order_code})
-                </if>
-                <if test="danw_code!= null and danw_code.size() > 0">
-                    and TF.customer_code in (#{danw_code})
-                </if>
-                <if test="pickup_type!= null and pickup_type != ''">
-                    and TA.pickup_type = #{pickup_type}
-                </if>
-                and not exists (
-                    select 1
-                    from
-                        cmd_out TT
-                    where
-                        TT.order_id = TA.order_out_id
-                        and TT.is_short = 0
-                )
+        select
+        TA.order_out_id,
+        TA.order_out_code,
+        TA.owner_id,
+        TA.wave_id,
+        TA.customer_id,
+        TH.owner_name,
+        TF.customer_name,
+        TF.customer_code,
+        TA.review_end_time,
+        TA.collect_end_time,
+        TA.remark,
+        TA.bill_staff,
+        TA.dates,
+        TA.pickup_type,
+        TZ.dict_text,
+        TG.direction_name,
+        TA.order_type,
+        TA.status,
+        TB.qty,
+        trunc(TB.qty / TE.package_meas) js,
+        mod(TB.qty, TE.package_meas) lss,
+        TB.item_id,
+        TB.lot01
+        from
+        order_out TA,
+        order_out_details TB,
+        bas_item TC,
+        bas_package_items TE,
+        bas_customer TF left join bas_direction TG on TG.direction_id = TF.direction_id,
+        bas_owner TH,
+        bas_dict_items TZ
+        where
+        TA.order_out_id = TB.order_out_id
+        and TB.item_id = TC.item_id
+        and TE.item_id = TB.item_id
+        and TE.package_id = TB.package_id
+        and TE.package_level = 3
+        and TA.owner_id = TC.owner_id
+        and TB.qty > 0
+        and TB.status = 20
+        and TA.customer_id = TF.customer_id
+        and TH.owner_id = TA.owner_id
+        and TA.wh_id = #{wh_id}
+        and TA.status = 20
+        and TZ.dict_code = 'PICKUP_TYPE'
+        and TZ.dict_value = TA.pickup_type
+        and TA.order_biz_type not in (24, 25)
+        <if test="direction_name!= null and direction_name.size() > 0">
+            and TG.direction_name in (#{direction_name})
+        </if>
+        <if test="order_code!= null and order_code.size() > 0">
+            and TA.order_out_code in (#{order_code})
+        </if>
+        <if test="danw_code!= null and danw_code.size() > 0">
+            and TF.customer_code in (#{danw_code})
+        </if>
+        <if test="pickup_type!= null and pickup_type != ''">
+            and TA.pickup_type = #{pickup_type}
+        </if>
+        and not exists (
+        select 1
+        from
+        cmd_out TT
+        where
+        TT.order_id = TA.order_out_id
+        and TT.is_short = 0
+        )
         )
         group by
-            order_out_id,
-            order_out_code,
-            owner_id,
-            wave_id,
-            customer_id,
-            owner_name,
-            customer_name,
-            customer_code,
-            review_end_time,
-            collect_end_time,
-            remark,
-            bill_staff,
-            dates,
-            dict_text,
-            direction_name,
-            order_type,
-            status
+        order_out_id,
+        order_out_code,
+        owner_id,
+        wave_id,
+        customer_id,
+        owner_name,
+        customer_name,
+        customer_code,
+        review_end_time,
+        collect_end_time,
+        remark,
+        bill_staff,
+        dates,
+        dict_text,
+        direction_name,
+        order_type,
+        status
     </select>
 
     <select id="query_order_out_list" resultType="map">
         select B.order_out_id , B.line_no, A.wave_id
         from order_out A, order_out_details B
         where
-            A.status = 60
-            and B.status = 60
-            and A.order_out_id = B.order_out_id
-            and A.owner_id in
-            <foreach collection="owner_id_list" item="item" index="index" open="(" separator="," close=")">
-                #{item}
-            </foreach>
+        A.status = 60
+        and B.status = 60
+        and A.order_out_id = B.order_out_id
+        and A.owner_id in
+        <foreach collection="owner_id_list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </select>
 
     <select id="query_order_out_list_2" resultType="map">
         select
-            A.order_out_code, A.order_out_id,
-            B.line_no, B.audit_msg,
-            C.item_code, C.item_name
+        A.order_out_code, A.order_out_id,
+        B.line_no, B.audit_msg,
+        C.item_code, C.item_name
         from order_out A, order_out_details B, bas_item C
         where
         A.status = 15
@@ -252,36 +252,36 @@
 
     <select id="sql_data_DJS" resultType="map">
         SELECT
-               A.DJHZ,
-               A.LSTD,
-               A.ZTDJ,
-               A.PSDJ,
-               A.TYDJ,
-               A.YCDJ,
-               A.DBDJ,
-               A.KCBZDJ,
-               A.KCZLDJ,
-               'N' FRESH,
-               ' ' SPBH,
-               A.RGSQPH,
-               A.CHWSH,
-               A.DJLX,
-               trunc(sysdate) rq,
-               '0' filter
+        A.DJHZ,
+        A.LSTD,
+        A.ZTDJ,
+        A.PSDJ,
+        A.TYDJ,
+        A.YCDJ,
+        A.DBDJ,
+        A.KCBZDJ,
+        A.KCZLDJ,
+        'N' FRESH,
+        ' ' SPBH,
+        A.RGSQPH,
+        A.CHWSH,
+        A.DJLX,
+        trunc(sysdate) rq,
+        '0' filter
         FROM (SELECT
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id} AND order_biz_type not in (24, 25) AND status >= 20 ) DJHZ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id} AND pickup_type = '7' AND status >= 20 ) LSTD,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id} AND pickup_type = '1' AND status >= 20 ) ZTDJ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id} AND pickup_type = '2' AND status >= 20) PSDJ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id} AND pickup_type = '3' AND status >= 20) TYDJ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id}) YCDJ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id} AND order_biz_type = 22 AND status >= 20) DBDJ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id}) KCBZDJ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id}) KCZLDJ,
-                  (SELECT COUNT(1)  FROM order_out  WHERE wh_id = #{wh_id}) RGSQPH,
-                  (SELECT COUNT(*) FROM order_out A WHERE EXISTS (SELECT 1 FROM cmd_out WHERE order_id = A.order_out_id AND is_short = 1 AND wh_id = #{wh_id}) AND wh_id = #{wh_id} AND status >= 20) CHWSH,
-                  '' DJLX
-              FROM DUAL) A
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id} AND order_biz_type not in (24, 25) AND status >= 20 ) DJHZ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id} AND pickup_type = '7' AND status >= 20 ) LSTD,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id} AND pickup_type = '1' AND status >= 20 ) ZTDJ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id} AND pickup_type = '2' AND status >= 20) PSDJ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id} AND pickup_type = '3' AND status >= 20) TYDJ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id}) YCDJ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id} AND order_biz_type = 22 AND status >= 20) DBDJ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id}) KCBZDJ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id}) KCZLDJ,
+        (SELECT COUNT(1) FROM order_out WHERE wh_id = #{wh_id}) RGSQPH,
+        (SELECT COUNT(*) FROM order_out A WHERE EXISTS (SELECT 1 FROM cmd_out WHERE order_id = A.order_out_id AND is_short = 1 AND wh_id = #{wh_id}) AND wh_id = #{wh_id} AND status >= 20) CHWSH,
+        '' DJLX
+        FROM DUAL) A
     </select>
 
     <select id="p_data_sbrws" resultType="map">
@@ -935,86 +935,86 @@
         TA.ZJD,
         TB.create_at
         FROM
-            (
-                select
-                wh_id,
-                wave_id,
-                LEIX,
-                DECODE(JD, -1, -1, ROUND(JD, 2)) LHJD,
-                ROUND(AVG(JD),2) ZJD
-                from
-                (
-                    SELECT T.* FROM
-                    (
-                    SELECT
-                    B.wh_id, B.wave_id, 1 LEIX,
-                    DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id  ELSE NULL END),0,-1,
-                    (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan  ELSE NULL END)  ELSE NULL END)/
-                    COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan  ELSE NULL END))*100) JD
-                    FROM cmd_out A, order_out B
-                    WHERE
-                    A.order_id = B.order_out_id
-                    AND A.is_short = 0
-                    AND A.wh_id = B.wh_id
-                    AND A.order_type NOT IN (6)
-                    AND B.wave_id IS NOT NULL
-                    GROUP BY B.wave_id, B.wh_id
+        (
+        select
+        wh_id,
+        wave_id,
+        LEIX,
+        DECODE(JD, -1, -1, ROUND(JD, 2)) LHJD,
+        ROUND(AVG(JD),2) ZJD
+        from
+        (
+        SELECT T.* FROM
+        (
+        SELECT
+        B.wh_id, B.wave_id, 1 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0,-1,
+        (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL END)/
+        COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM cmd_out A, order_out B
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY B.wave_id, B.wh_id
 
-                    UNION ALL
+        UNION ALL
 
-                    SELECT
-                    B.wh_id, B.wave_id, 2 LEIX,
-                    DECODE(COUNT(CASE WHEN A.is_unpack IN (0) THEN A.order_id  ELSE NULL END),0,-1,
-                    (COUNT(CASE WHEN A.is_unpack IN (0) THEN (CASE WHEN A.cmd_state  >= 60 THEN A.qty_plan  ELSE NULL END)  ELSE NULL END)/
-                    COUNT(CASE WHEN A.is_unpack IN (0) THEN A.qty_plan  ELSE NULL END))*100) JD
-                    FROM cmd_out A, order_out B
-                    WHERE
-                    A.order_id = B.order_out_id
-                    AND A.is_short = 0
-                    AND A.wh_id = B.wh_id
-                    AND A.order_type NOT IN (6)
-                    AND B.wave_id IS NOT NULL
-                    GROUP BY B.wave_id, B.wh_id
+        SELECT
+        B.wh_id, B.wave_id, 2 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (0) THEN A.order_id ELSE NULL END),0,-1,
+        (COUNT(CASE WHEN A.is_unpack IN (0) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL END)/
+        COUNT(CASE WHEN A.is_unpack IN (0) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM cmd_out A, order_out B
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY B.wave_id, B.wh_id
 
-                    UNION ALL
+        UNION ALL
 
-                    SELECT
-                    B.wh_id, B.wave_id, 3 LEIX,
-                    DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id  ELSE NULL END),0, -1,
-                    (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 90 THEN A.qty_plan  ELSE NULL END)  ELSE NULL END)/
-                    COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan  ELSE NULL END))*100) JD
-                    FROM cmd_out A, order_out B
-                    WHERE
-                    A.order_id = B.order_out_id
-                    AND A.is_short = 0
-                    AND A.wh_id = B.wh_id
-                    AND A.order_type NOT IN (6)
-                    AND B.wave_id IS NOT NULL
-                    GROUP BY B.wave_id, B.wh_id
+        SELECT
+        B.wh_id, B.wave_id, 3 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0, -1,
+        (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 90 THEN A.qty_plan ELSE NULL END) ELSE NULL END)/
+        COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM cmd_out A, order_out B
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY B.wave_id, B.wh_id
 
-                    UNION ALL
+        UNION ALL
 
-                    SELECT
-                    B.wh_id, B.wave_id, 4 LEIX,
-                    (COUNT(CASE WHEN A.cmd_state >=110 THEN A.order_id ELSE NULL END)/COUNT(A.order_id))*100 JD
-                    FROM cmd_out A, order_out B
-                    WHERE
-                    A.order_id = B.order_out_id
-                    AND A.is_short = 0
-                    AND A.wh_id = B.wh_id
-                    AND A.order_type NOT IN (6)
-                    AND B.wave_id IS NOT NULL
-                    GROUP BY B.wave_id, B.wh_id
-                    ) T
-                    ORDER BY T.wave_id
-                )
-                group by
-                wh_id,
-                wave_id,
-                LEIX,
-                JD
-            ) TA,
-            order_wave TB
+        SELECT
+        B.wh_id, B.wave_id, 4 LEIX,
+        (COUNT(CASE WHEN A.cmd_state >=110 THEN A.order_id ELSE NULL END)/COUNT(A.order_id))*100 JD
+        FROM cmd_out A, order_out B
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY B.wave_id, B.wh_id
+        ) T
+        ORDER BY T.wave_id
+        )
+        group by
+        wh_id,
+        wave_id,
+        LEIX,
+        JD
+        ) TA,
+        order_wave TB
         <where>
             TA.wave_id = TB.wave_id
             and TA.wh_id = #{wh_id}
@@ -1029,111 +1029,111 @@
 
     <select id="p_Get_dwrwhz" resultType="map">
         SELECT
-            TX.wh_id,
-            TX.wave_id,
-            (select TT.wave_no from order_wave TT where TT.wave_id = TX.wave_id) wave_no,
-            TX.order_out_code,
-            TX.order_out_id,
-            TX.customer_code,
-            TX.customer_name,
-            ROUND(AVG(JD),2) ZJD,
-            TX.owner_id,
-            TX.direction_name,
-            (SELECT COUNT(T1.order_out_id) FROM order_out T, order_out_details T1 WHERE T.order_out_id = T1.order_out_id AND T.order_out_id = TX.order_out_id) TMS,
-            (SELECT T.update_at FROM order_wave T WHERE T.wave_id = TX.wave_id AND ROWNUM=1 ) update_at
+        TX.wh_id,
+        TX.wave_id,
+        (select TT.wave_no from order_wave TT where TT.wave_id = TX.wave_id) wave_no,
+        TX.order_out_code,
+        TX.order_out_id,
+        TX.customer_code,
+        TX.customer_name,
+        ROUND(AVG(JD),2) ZJD,
+        TX.owner_id,
+        TX.direction_name,
+        (SELECT COUNT(T1.order_out_id) FROM order_out T, order_out_details T1 WHERE T.order_out_id = T1.order_out_id AND T.order_out_id = TX.order_out_id) TMS,
+        (SELECT T.update_at FROM order_wave T WHERE T.wave_id = TX.wave_id AND ROWNUM=1 ) update_at
         FROM
         (
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
-            D.direction_name, 1 LEIX,
-            DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0,-1,
-            (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
-            END)/
-            COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
+        D.direction_name, 1 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0,-1,
+        (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
+        END)/
+        COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
-            D.direction_name, 2 LEIX,
-            DECODE(COUNT(CASE WHEN A.is_unpack IN (0) THEN A.order_id ELSE NULL END),0,-1,
-            (COUNT(CASE WHEN A.is_unpack IN (0) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
-            END)/
-            COUNT(CASE WHEN A.is_unpack IN (0) THEN A.qty_plan ELSE NULL END))*100) JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
+        D.direction_name, 2 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (0) THEN A.order_id ELSE NULL END),0,-1,
+        (COUNT(CASE WHEN A.is_unpack IN (0) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
+        END)/
+        COUNT(CASE WHEN A.is_unpack IN (0) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
-            D.direction_name, 3 LEIX,
-            DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0, -1,
-            (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 90 THEN A.qty_plan ELSE NULL END) ELSE NULL
-            END)/
-            COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
+        D.direction_name, 3 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0, -1,
+        (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 90 THEN A.qty_plan ELSE NULL END) ELSE NULL
+        END)/
+        COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
-            D.direction_name, 4 LEIX,
-            (COUNT(CASE WHEN A.cmd_state >= 110 THEN A.order_id ELSE NULL END)/
-            COUNT(A.order_id))*100 JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id,
+        D.direction_name, 4 LEIX,
+        (COUNT(CASE WHEN A.cmd_state >= 110 THEN A.order_id ELSE NULL END)/
+        COUNT(A.order_id))*100 JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
         ) TX
         <where>
             TX.wh_id = #{wh_id}
@@ -1142,119 +1142,119 @@
             </if>
         </where>
         group by
-            TX.wh_id,
-            TX.wave_id,
-            TX.order_out_code,
-            TX.order_out_id,
-            TX.customer_code,
-            TX.customer_name,
-            TX.JD,
-            TX.owner_id,
-            TX.direction_name
+        TX.wh_id,
+        TX.wave_id,
+        TX.order_out_code,
+        TX.order_out_id,
+        TX.customer_code,
+        TX.customer_name,
+        TX.JD,
+        TX.owner_id,
+        TX.direction_name
         ORDER BY
-            TX.wave_id
+        TX.wave_id
     </select>
 
     <select id="p_Get_dwrw" resultType="map">
         SELECT
-            TX.wave_id,
-            (select TT.wave_no from order_wave TT where TT.wave_id = TX.wave_id) wave_no,
-            TX.order_out_code,
-            TX.order_out_id,
-            TX.LEIX,
-            DECODE(TX.JD, -1, -1, ROUND(TX.JD, 2))*0.01 as LHJD,
-            ROUND(AVG(TX.JD),2) ZJD,
-            TX.owner_id,
-            TX.direction_name
+        TX.wave_id,
+        (select TT.wave_no from order_wave TT where TT.wave_id = TX.wave_id) wave_no,
+        TX.order_out_code,
+        TX.order_out_id,
+        TX.LEIX,
+        DECODE(TX.JD, -1, -1, ROUND(TX.JD, 2))*0.01 as LHJD,
+        ROUND(AVG(TX.JD),2) ZJD,
+        TX.owner_id,
+        TX.direction_name
         FROM
         (
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 1 LEIX,
-            DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0,-1,
-            (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
-            END)/
-            COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 1 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0,-1,
+        (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
+        END)/
+        COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 2 LEIX,
-            DECODE(COUNT(CASE WHEN A.is_unpack IN (0) THEN A.order_id ELSE NULL END),0,-1,
-            (COUNT(CASE WHEN A.is_unpack IN (0) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
-            END)/
-            COUNT(CASE WHEN A.is_unpack IN (0) THEN A.qty_plan ELSE NULL END))*100) JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 2 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (0) THEN A.order_id ELSE NULL END),0,-1,
+        (COUNT(CASE WHEN A.is_unpack IN (0) THEN (CASE WHEN A.cmd_state >= 60 THEN A.qty_plan ELSE NULL END) ELSE NULL
+        END)/
+        COUNT(CASE WHEN A.is_unpack IN (0) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 3 LEIX,
-            DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0, -1,
-            (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 90 THEN A.qty_plan ELSE NULL END) ELSE NULL
-            END)/
-            COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 3 LEIX,
+        DECODE(COUNT(CASE WHEN A.is_unpack IN (1) THEN A.order_id ELSE NULL END),0, -1,
+        (COUNT(CASE WHEN A.is_unpack IN (1) THEN (CASE WHEN A.cmd_state >= 90 THEN A.qty_plan ELSE NULL END) ELSE NULL
+        END)/
+        COUNT(CASE WHEN A.is_unpack IN (1) THEN A.qty_plan ELSE NULL END))*100) JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 4 LEIX,
-            (COUNT(CASE WHEN A.cmd_state >= 110 THEN A.order_id ELSE NULL END)/
-            COUNT(A.order_id))*100 JD
-            FROM
-            cmd_out A, order_out B, bas_customer C, bas_direction D
-            WHERE
-            A.order_id = B.order_out_id
-            AND A.is_short = 0
-            AND A.wh_id = B.wh_id
-            AND B.customer_id = C.customer_id
-            AND B.owner_id = C.owner_id
-            AND C.direction_id = D.direction_id
-            AND D.direction_parent is null
-            AND A.order_type NOT IN (6)
-            AND B.wave_id IS NOT NULL
-            GROUP BY
-            B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
+        SELECT
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name, 4 LEIX,
+        (COUNT(CASE WHEN A.cmd_state >= 110 THEN A.order_id ELSE NULL END)/
+        COUNT(A.order_id))*100 JD
+        FROM
+        cmd_out A, order_out B, bas_customer C, bas_direction D
+        WHERE
+        A.order_id = B.order_out_id
+        AND A.is_short = 0
+        AND A.wh_id = B.wh_id
+        AND B.customer_id = C.customer_id
+        AND B.owner_id = C.owner_id
+        AND C.direction_id = D.direction_id
+        AND D.direction_parent is null
+        AND A.order_type NOT IN (6)
+        AND B.wave_id IS NOT NULL
+        GROUP BY
+        B.wh_id, B.wave_id, B.order_out_code, B.order_out_id, C.customer_code, C.customer_name, B.owner_id, D.direction_name
         ) TX
         <where>
             TX.wh_id = #{wh_id}
@@ -1263,13 +1263,13 @@
             </if>
         </where>
         group by
-            TX.wave_id,
-            TX.order_out_code,
-            TX.order_out_id,
-            TX.LEIX,
-            TX.JD,
-            TX.owner_id,
-            TX.direction_name
+        TX.wave_id,
+        TX.order_out_code,
+        TX.order_out_id,
+        TX.LEIX,
+        TX.JD,
+        TX.owner_id,
+        TX.direction_name
     </select>
 
     <select id="p_Get_sxxg" resultType="map">
@@ -1324,14 +1324,14 @@
     <select id="sql_update_apbc_yz" resultType="map">
         SELECT 1 FROM
         (
-            SELECT
-                order_out_id
-             FROM
-                order_out A
-             WHERE
-                status = 40
-                AND NOT EXISTS
-             (SELECT 1 FROM order_wave_details WHERE order_out_id = A.order_out_id AND wh_id = A.wh_id)
+        SELECT
+        order_out_id
+        FROM
+        order_out A
+        WHERE
+        status = 40
+        AND NOT EXISTS
+        (SELECT 1 FROM order_wave_details WHERE order_out_id = A.order_out_id AND wh_id = A.wh_id)
         ) t where
         t.order_out_id in
         <foreach collection="danjNoList" item="item" index="index" open="(" separator="," close=")">
@@ -1344,9 +1344,9 @@
         update order_out t
         set t.wave_id = #{wave_id}, t.status = 40
         where t.order_out_id in
-            <foreach collection="danjNoList" item="item" index="index" open="(" separator="," close=")">
-                #{item}
-            </foreach>
+        <foreach collection="danjNoList" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
         <![CDATA[ and t.status < 40 ]]>
     </update>
 
@@ -1375,154 +1375,154 @@
 
     <select id="p_Get_bcxfhz" resultType="map">
         SELECT TA.wave_no,
-               TA.wave_id,
-               TA.sow_pick_num,
-               TA.DJS,
-               TA.ZZJS,
-               TA.ZZHJS,
-               TA.ZPGS,
-               TA.ZSL,
-               ta.wave_rep_status
+        TA.wave_id,
+        TA.sow_pick_num,
+        TA.DJS,
+        TA.ZZJS,
+        TA.ZZHJS,
+        TA.ZPGS,
+        TA.ZSL,
+        ta.wave_rep_status
         FROM (
-            SELECT
-            DISTINCT wave_id, wave_no, sow_pick_num, DJS, ZZJS, ZPGS, ZZHJS, ZSL,wave_rep_status,wh_id
-            FROM (
-                SELECT
-                    C.wave_id,
-                    C.wave_no,
-                    C.sow_pick_num,
-                    c.wave_rep_status,
-                    COUNT(1) OVER(PARTITION BY A.wh_id, A.wave_id) DJS,
-                    SUM(FLOOR((SELECT SUM(TB.qty / TC.package_meas)
-                FROM
-                    bas_item TA , order_out_details TB , bas_package_items TC
-                WHERE
-                TB.order_out_id = A.order_out_id
-                AND TB.item_id = TA.item_id
-                AND TC.item_id = TB.item_id
-                AND TC.package_id = TB.package_id
-                AND TC.package_level = 3
-                AND TA.owner_id = A.owner_id
-                AND TC.package_meas <![CDATA[ <> ]]> 1))) OVER(PARTITION BY A.wh_id, A.wave_id) ZZJS,
+        SELECT
+        DISTINCT wave_id, wave_no, sow_pick_num, DJS, ZZJS, ZPGS, ZZHJS, ZSL,wave_rep_status,wh_id
+        FROM (
+        SELECT
+        C.wave_id,
+        C.wave_no,
+        C.sow_pick_num,
+        c.wave_rep_status,
+        COUNT(1) OVER(PARTITION BY A.wh_id, A.wave_id) DJS,
+        SUM(FLOOR((SELECT SUM(TB.qty / TC.package_meas)
+        FROM
+        bas_item TA , order_out_details TB , bas_package_items TC
+        WHERE
+        TB.order_out_id = A.order_out_id
+        AND TB.item_id = TA.item_id
+        AND TC.item_id = TB.item_id
+        AND TC.package_id = TB.package_id
+        AND TC.package_level = 3
+        AND TA.owner_id = A.owner_id
+        AND TC.package_meas <![CDATA[ <> ]]> 1))) OVER(PARTITION BY A.wh_id, A.wave_id) ZZJS,
 
-                SUM((SELECT COUNT(DISTINCT(TA.item_id))
-                FROM order_out_details TA
-                WHERE TA.order_out_id = A.order_out_id)) OVER(PARTITION BY A.wh_id, A.wave_id) ZPGS,
+        SUM((SELECT COUNT(DISTINCT(TA.item_id))
+        FROM order_out_details TA
+        WHERE TA.order_out_id = A.order_out_id)) OVER(PARTITION BY A.wh_id, A.wave_id) ZPGS,
 
-                SUM
-                (
-                    (
-                        SELECT CEIL(
-                            SUM(
-                                TA.qty * TC.volume / TO_NUMBER(TB.param_value)
-                            )
-                        )
-                        FROM order_out_details TA, bas_param TB , bas_package_items TC
-                        WHERE TA.order_out_id = A.order_out_id
-                        AND TA.item_id = TC.item_id
-                        AND TA.package_id = TC.package_id
-                        AND TC.package_level = 1
-                        AND TB.param_code = 'LEVEL_VOLUME'
-                        AND TB.wh_id = A.wh_id
-                    )
-                ) OVER(PARTITION BY A.wh_id, A.wave_id) ZZHJS,
+        SUM
+        (
+        (
+        SELECT CEIL(
+        SUM(
+        TA.qty * TC.volume / TO_NUMBER(TB.param_value)
+        )
+        )
+        FROM order_out_details TA, bas_param TB , bas_package_items TC
+        WHERE TA.order_out_id = A.order_out_id
+        AND TA.item_id = TC.item_id
+        AND TA.package_id = TC.package_id
+        AND TC.package_level = 1
+        AND TB.param_code = 'LEVEL_VOLUME'
+        AND TB.wh_id = A.wh_id
+        )
+        ) OVER(PARTITION BY A.wh_id, A.wave_id) ZZHJS,
 
-                SUM((SELECT SUM(TA.qty)
-                FROM order_out_details TA
-                WHERE TA.order_out_id = A.order_out_id)) OVER(PARTITION BY A.wh_id, A.wave_id) ZSL,
-                A.wh_id
+        SUM((SELECT SUM(TA.qty)
+        FROM order_out_details TA
+        WHERE TA.order_out_id = A.order_out_id)) OVER(PARTITION BY A.wh_id, A.wave_id) ZSL,
+        A.wh_id
 
-                FROM order_out A , order_wave C  --, bas_param B
-                WHERE A.status in (30, 35)
-                AND A.wave_id = C.wave_id
---                 AND B.wh_id = A.wh_id
---                 AND B.param_code = 'SELF_MENTION_AUTO_DISTRIBUTION'
---                 AND A.XIAOS_TYPE NOT IN ('5', '6', '9', '8')
---                 AND (BOCI_NO > '00000010' OR
---                 ((BOCI_NO = '00000001' OR BOCI_NO = '00000002') AND
---                 FNC_UTL_GETSYSCS('SELF_MENTION_AUTO_DISTRIBUTION', A.wh_id) = 'N'))
-            )
-            ORDER BY wave_no, wave_id
+        FROM order_out A , order_wave C --, bas_param B
+        WHERE A.status in (30, 35)
+        AND A.wave_id = C.wave_id
+        -- AND B.wh_id = A.wh_id
+        -- AND B.param_code = 'SELF_MENTION_AUTO_DISTRIBUTION'
+        -- AND A.XIAOS_TYPE NOT IN ('5', '6', '9', '8')
+        -- AND (BOCI_NO > '00000010' OR
+        -- ((BOCI_NO = '00000001' OR BOCI_NO = '00000002') AND
+        -- FNC_UTL_GETSYSCS('SELF_MENTION_AUTO_DISTRIBUTION', A.wh_id) = 'N'))
+        )
+        ORDER BY wave_no, wave_id
         ) TA where TA.wh_id=#{wh_id}
     </select>
 
     <select id="p_Get_bcxfmx" resultType="map">
         SELECT
-               TX.wave_id,
-               TX.wave_no,
-               TX.order_out_code,
-               TX.order_out_id,
-               TX.owner_id,
-               TX.pickup_type,
-               TX.PEIS_TYPE,
-               TX.SHANGP_TYPE,
-               TX.customer_name,
-               TX.dates,
-               TX.remark,
-               TX.review_end_time,
-               TX.collect_end_time,
-               TX.ZZJS,
-               TX.ZPGS,
-               TX.ZZHJS,
-               TX.PSFX
+        TX.wave_id,
+        TX.wave_no,
+        TX.order_out_code,
+        TX.order_out_id,
+        TX.owner_id,
+        TX.pickup_type,
+        TX.PEIS_TYPE,
+        TX.SHANGP_TYPE,
+        TX.customer_name,
+        TX.dates,
+        TX.remark,
+        TX.review_end_time,
+        TX.collect_end_time,
+        TX.ZZJS,
+        TX.ZPGS,
+        TX.ZZHJS,
+        TX.PSFX
         FROM
         (
-            SELECT
-                   B.wave_id,
-                   B.wave_no,
-                   A.order_out_code,
-                   A.order_out_id,
-                   A.owner_id,
-                   '' PEIS_TYPE,
-                   (
-                       SELECT T2.direction_name
-                         FROM bas_customer T1, bas_direction T2
-                       WHERE T1.customer_id = A.customer_id
-                         AND T1.direction_id = T2.direction_id
-                         --AND T.MRLX_FLG = 'Y'
-                         AND T1.is_enable = 1
-                   ) PSFX,
-                   A.pickup_type,
-                   '' SHANGP_TYPE,
-                   NVL((SELECT TT.customer_name FROM bas_customer TT WHERE TT.customer_id = A.customer_id), A.customer_id) customer_name,
-                   A.dates,
-                   A.remark,
-                   A.review_end_time,
-                   A.collect_end_time,
-                   SUM(FLOOR((SELECT SUM(T2.qty / T3.package_meas)
-                               FROM bas_item T1, order_out_details T2, bas_package_items T3
-                              WHERE T2.order_out_id = A.order_out_id
-                                AND T3.item_id = T2.item_id
-                                AND T3.package_id = T2.package_id
-                                AND T3.package_level = 3
-                                AND T2.item_id = T1.item_id
-                                AND T1.owner_id = A.owner_id))) OVER(PARTITION BY A.wave_id, A.order_out_id, A.wh_id) ZZJS,
-                   SUM((SELECT COUNT(DISTINCT(TT.item_id))
-                         FROM order_out_details TT
-                        WHERE TT.order_out_id = A.order_out_id)) OVER(PARTITION BY A.wave_id, A.order_out_id, A.wh_id) ZPGS,
+        SELECT
+        B.wave_id,
+        B.wave_no,
+        A.order_out_code,
+        A.order_out_id,
+        A.owner_id,
+        '' PEIS_TYPE,
+        (
+        SELECT T2.direction_name
+        FROM bas_customer T1, bas_direction T2
+        WHERE T1.customer_id = A.customer_id
+        AND T1.direction_id = T2.direction_id
+        --AND T.MRLX_FLG = 'Y'
+        AND T1.is_enable = 1
+        ) PSFX,
+        A.pickup_type,
+        '' SHANGP_TYPE,
+        NVL((SELECT TT.customer_name FROM bas_customer TT WHERE TT.customer_id = A.customer_id), A.customer_id) customer_name,
+        A.dates,
+        A.remark,
+        A.review_end_time,
+        A.collect_end_time,
+        SUM(FLOOR((SELECT SUM(T2.qty / T3.package_meas)
+        FROM bas_item T1, order_out_details T2, bas_package_items T3
+        WHERE T2.order_out_id = A.order_out_id
+        AND T3.item_id = T2.item_id
+        AND T3.package_id = T2.package_id
+        AND T3.package_level = 3
+        AND T2.item_id = T1.item_id
+        AND T1.owner_id = A.owner_id))) OVER(PARTITION BY A.wave_id, A.order_out_id, A.wh_id) ZZJS,
+        SUM((SELECT COUNT(DISTINCT(TT.item_id))
+        FROM order_out_details TT
+        WHERE TT.order_out_id = A.order_out_id)) OVER(PARTITION BY A.wave_id, A.order_out_id, A.wh_id) ZPGS,
 
-                   SUM(
-                        (
-                             SELECT CEIL(
-                                           SUM(
-                                              TA.qty * TC.volume / TO_NUMBER(TB.param_value)
-                                           )
-                                        )
-                             FROM order_out_details TA, bas_param TB, bas_package_items TC
-                             WHERE TA.order_out_id = A.order_out_id
-                             AND TC.item_id = TA.item_id
-                             AND TC.package_id = TA.package_id
-                             AND TC.package_level = 1
-                             AND TB.param_code = 'LEVEL_VOLUME'
-                             AND TB.wh_id = A.wh_id
-                        )
-                   ) OVER(PARTITION BY A.wave_id, A.order_out_id, A.wh_id) ZZHJS,
+        SUM(
+        (
+        SELECT CEIL(
+        SUM(
+        TA.qty * TC.volume / TO_NUMBER(TB.param_value)
+        )
+        )
+        FROM order_out_details TA, bas_param TB, bas_package_items TC
+        WHERE TA.order_out_id = A.order_out_id
+        AND TC.item_id = TA.item_id
+        AND TC.package_id = TA.package_id
+        AND TC.package_level = 1
+        AND TB.param_code = 'LEVEL_VOLUME'
+        AND TB.wh_id = A.wh_id
+        )
+        ) OVER(PARTITION BY A.wave_id, A.order_out_id, A.wh_id) ZZHJS,
 
-                   A.wh_id
+        A.wh_id
 
-              FROM order_out A , order_wave B
-             WHERE A.status in (30, 35)
-             AND A.wave_id = B.wave_id
+        FROM order_out A , order_wave B
+        WHERE A.status in (30, 35)
+        AND A.wave_id = B.wave_id
         ) TX
         WHERE (TX.wave_id = #{wave_id} and TX.wh_id = #{wh_id})
     </select>
@@ -1651,127 +1651,127 @@
 
     <select id="sql_data_ckdmx" resultType="map">
         SELECT D.order_out_code,
-               A.line_no,
-               A.item_id,
-               A.qty - A.cancel_qty - A.bwave_cancel_qty qty_plan,
-               TRUNC((A.qty - A.cancel_qty - A.bwave_cancel_qty) / F.package_meas) js,
-               MOD((A.qty - A.cancel_qty - A.bwave_cancel_qty) , F.package_meas) lss,
-               '' PRICE,
-               '' AMOUNT,
-               '' TAX_AMOUNT,
-               '' JIES_PRICE,
-               '' JIES_AMOUNT,
-               '' KUCBZ_NUM,
-               A.status,
-               '' ZHENGJWCL_NUM,
-               '' LINGHWCL_NUM,
-               '' CUX_DESCRIBE,
-               '' CUOWCL_FLG,
-               A.qty,
-               '' ZANCQ_ID,
-               B.item_classify,
-               B.item_category,
-               B.item_code,
-               B.item_name,
-               '' YAOP_GUIG,
-               B.manufacturer,
-               F.package_unit,
-               F.package_meas,
-               D.order_out_id,
-               A.lot01,
-               D.remark,
-               C.customer_code,
-               C.customer_name
+        A.line_no,
+        A.item_id,
+        A.qty - A.cancel_qty - A.bwave_cancel_qty qty_plan,
+        TRUNC((A.qty - A.cancel_qty - A.bwave_cancel_qty) / F.package_meas) js,
+        MOD((A.qty - A.cancel_qty - A.bwave_cancel_qty) , F.package_meas) lss,
+        '' PRICE,
+        '' AMOUNT,
+        '' TAX_AMOUNT,
+        '' JIES_PRICE,
+        '' JIES_AMOUNT,
+        '' KUCBZ_NUM,
+        A.status,
+        '' ZHENGJWCL_NUM,
+        '' LINGHWCL_NUM,
+        '' CUX_DESCRIBE,
+        '' CUOWCL_FLG,
+        A.qty,
+        '' ZANCQ_ID,
+        B.item_classify,
+        B.item_category,
+        B.item_code,
+        B.item_name,
+        '' YAOP_GUIG,
+        B.manufacturer,
+        F.package_unit,
+        F.package_meas,
+        D.order_out_id,
+        A.lot01,
+        D.remark,
+        C.customer_code,
+        C.customer_name
         FROM order_out_details A, bas_item B, bas_customer C, order_out D, bas_package_items F
         WHERE A.item_id = B.item_id
-              AND A.order_out_id = D.order_out_id
-              AND C.customer_id = D.customer_id
-              AND B.owner_id = D.owner_id
-              AND F.item_id = A.item_id
-              AND F.package_id = A.package_id
-              AND F.package_level = 3
-              AND D.order_out_id = #{DANJ_NO}
+        AND A.order_out_id = D.order_out_id
+        AND C.customer_id = D.customer_id
+        AND B.owner_id = D.owner_id
+        AND F.item_id = A.item_id
+        AND F.package_id = A.package_id
+        AND F.package_level = 3
+        AND D.order_out_id = #{DANJ_NO}
     </select>
 
     <select id="p_Get_bczt" resultType="map">
         SELECT
-            C.wave_no,
-            B.order_out_code,
-            B.order_out_id,
-            B.status,
-            C.wave_rep_status,
-            A.update_at,
-            B.order_biz_type,
-            D.owner_name,
-            D.owner_id
+        C.wave_no,
+        B.order_out_code,
+        B.order_out_id,
+        B.status,
+        C.wave_rep_status,
+        A.update_at,
+        B.order_biz_type,
+        D.owner_name,
+        D.owner_id
         FROM order_wave_details A
         left join order_out B ON A.order_out_id = B.order_out_id and B.order_biz_type not in (24, 25)
         left join order_wave C ON A.wave_id = C.wave_id
         left join bas_owner D ON B.owner_id = D.owner_id
         where B.wh_id = #{wh_id} and b.status <![CDATA[ < ]]> 160
         ORDER BY
-            C.wave_no,
-            A.status,
-            A.order_out_id,
-            A.create_at
+        C.wave_no,
+        A.status,
+        A.order_out_id,
+        A.create_at
     </select>
 
     <select id="sql_getbhmx" resultType="map">
         SELECT
-            B.pick_group,
-            A.item_id,
-            C.item_name,
-            C.item_code,
-            C.manufacturer,
-            BL2.loc_classify XJKUB,
-            G.area_code XJQY,
-            BL2.loc_code XJHW,
-            B.cmd_state XJZT,
-            SU2.user_name XJRY,
-            B.create_time,
-            BL1.loc_code SJHW,
-            A.cmd_state,
-            SU1.user_name SJRY,
-            (SELECT create_at FROM cmd_staff WHERE wh_id = B.wh_id AND order_id = A.order_id AND cmd_line_no = A.cmd_line_no) SJKSSJ,
-            A.lot_id,
-            BL1.loc_classify SJKUB,
-            (select area_code from bas_area where area_id = A.area_id and area_code = #{area_code}) SJQY,
-            TRUNC(A.qty_plan / D.package_meas) js,
-            (SELECT COUNT(DISTINCT pick_group)  FROM  cmd_out WHERE wh_id = B.wh_id AND cmd_id_super = A.cmd_id AND is_active = 0 AND cmd_state = 30) GQXS,
-            A.is_active JIH_FLG,
-            A.order_type,
-            B.cmd_id,
-            B.is_active XJJIH_FLG,
-            B.lpn,
-            B.platform_no,
-            A.wh_id,
-            E.lot01,
-            A.put_obtain_time,
-            A.put_confirm_time,
-            B.pick_obtain_time,
-            B.pick_confirm_time,
-            B.barcode
+        B.pick_group,
+        A.item_id,
+        C.item_name,
+        C.item_code,
+        C.manufacturer,
+        BL2.loc_classify XJKUB,
+        G.area_code XJQY,
+        BL2.loc_code XJHW,
+        B.cmd_state XJZT,
+        SU2.user_name XJRY,
+        B.create_time,
+        BL1.loc_code SJHW,
+        A.cmd_state,
+        SU1.user_name SJRY,
+        (SELECT create_at FROM cmd_staff WHERE wh_id = B.wh_id AND order_id = A.order_id AND cmd_line_no = A.cmd_line_no) SJKSSJ,
+        A.lot_id,
+        BL1.loc_classify SJKUB,
+        (select area_code from bas_area where area_id = A.area_id and area_code = #{area_code}) SJQY,
+        TRUNC(A.qty_plan / D.package_meas) js,
+        (SELECT COUNT(DISTINCT pick_group) FROM cmd_out WHERE wh_id = B.wh_id AND cmd_id_super = A.cmd_id AND is_active = 0 AND cmd_state = 30) GQXS,
+        A.is_active JIH_FLG,
+        A.order_type,
+        B.cmd_id,
+        B.is_active XJJIH_FLG,
+        B.lpn,
+        B.platform_no,
+        A.wh_id,
+        E.lot01,
+        A.put_obtain_time,
+        A.put_confirm_time,
+        B.pick_obtain_time,
+        B.pick_confirm_time,
+        B.barcode
         FROM
-            cmd_in A, cmd_out B, bas_item C, bas_package_items D, bas_lot_att E, bas_area G, bas_location BL1, bas_location BL2, sys_user SU1, sys_user SU2
+        cmd_in A, cmd_out B, bas_item C, bas_package_items D, bas_lot_att E, bas_area G, bas_location BL1, bas_location BL2, sys_user SU1, sys_user SU2
         WHERE
-            A.wh_id = B.wh_id
-            AND A.cmd_id_super = B.cmd_id
-            AND B.item_id = C.item_id
-            AND D.item_id = B.item_id
-            AND D.package_id = B.package_id
-            AND D.package_level = 3
-            AND B.order_type = 3
-            AND B.wh_id = #{wh_id}
-            AND A.cmd_state <![CDATA[ < ]]> 1000
-            AND B.order_biz_type = #{order_biz_type}
-            AND G.area_id = B.area_id
-            AND G.area_code = #{area_code}
-            AND B.cmd_state <![CDATA[ <= ]]> 90
-            AND E.lot_id = B.lot_id
-            AND A.loc_id_real = BL1.loc_id(+)
-            AND B.loc_id = BL2.loc_id(+)
-            AND A.put_staff_id = SU1.user_id(+)
-            AND B.pick_staff_id = SU2.user_id(+)
+        A.wh_id = B.wh_id
+        AND A.cmd_id_super = B.cmd_id
+        AND B.item_id = C.item_id
+        AND D.item_id = B.item_id
+        AND D.package_id = B.package_id
+        AND D.package_level = 3
+        AND B.order_type = 3
+        AND B.wh_id = #{wh_id}
+        AND A.cmd_state <![CDATA[ < ]]> 1000
+        AND B.order_biz_type = #{order_biz_type}
+        AND G.area_id = B.area_id
+        AND G.area_code = #{area_code}
+        AND B.cmd_state <![CDATA[ <= ]]> 90
+        AND E.lot_id = B.lot_id
+        AND A.loc_id_real = BL1.loc_id(+)
+        AND B.loc_id = BL2.loc_id(+)
+        AND A.put_staff_id = SU1.user_id(+)
+        AND B.pick_staff_id = SU2.user_id(+)
         ORDER BY GQXS DESC, B.order_type, B.create_time
     </select>
 

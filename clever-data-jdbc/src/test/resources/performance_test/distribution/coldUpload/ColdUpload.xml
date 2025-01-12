@@ -21,92 +21,92 @@
     <insert id="insert_material_dn_test">
         insert into HXOA_QAS.dbo.material_dn
         (
-            dn_number,
-            company_code,
-            deliver,
-            deliver_desc,
-            deliver_address,
-            receiver,
-            receiver_desc,
-            receiver_address,
-            create_time,
-            state_delivery
+        dn_number,
+        company_code,
+        deliver,
+        deliver_desc,
+        deliver_address,
+        receiver,
+        receiver_desc,
+        receiver_address,
+        create_time,
+        state_delivery
         )
         values
         (
-            #{dn_number},
-            #{company_code},
-            #{deliver},
-            #{deliver_desc},
-            #{deliver_address},
-            #{receiver},
-            #{receiver_desc},
-            #{receiver_address},
-            #{create_time},
-            #{state_delivery}
+        #{dn_number},
+        #{company_code},
+        #{deliver},
+        #{deliver_desc},
+        #{deliver_address},
+        #{receiver},
+        #{receiver_desc},
+        #{receiver_address},
+        #{create_time},
+        #{state_delivery}
         )
     </insert>
 
     <insert id="insert_material_dn_wcs_test">
         insert into HXOA_QAS.dbo.material_dn_wcs
         (
-            dn_number,
-            BoxOrderNum,
-            createTime,
-            flag
+        dn_number,
+        BoxOrderNum,
+        createTime,
+        flag
         )
         values
         (
-            #{dn_number},
-            #{box_order_num},
-            #{create_time},
-            #{flag}
+        #{dn_number},
+        #{box_order_num},
+        #{create_time},
+        #{flag}
         )
     </insert>
 
     <insert id="insert_material_dn_prod">
         insert into HXOA.dbo.material_dn
         (
-            dn_number,
-            company_code,
-            deliver,
-            deliver_desc,
-            deliver_address,
-            receiver,
-            receiver_desc,
-            receiver_address,
-            create_time,
-            state_delivery
+        dn_number,
+        company_code,
+        deliver,
+        deliver_desc,
+        deliver_address,
+        receiver,
+        receiver_desc,
+        receiver_address,
+        create_time,
+        state_delivery
         )
         values
         (
-            #{dn_number},
-            #{company_code},
-            #{deliver},
-            #{deliver_desc},
-            #{deliver_address},
-            #{receiver},
-            #{receiver_desc},
-            #{receiver_address},
-            #{create_time},
-            #{state_delivery}
+        #{dn_number},
+        #{company_code},
+        #{deliver},
+        #{deliver_desc},
+        #{deliver_address},
+        #{receiver},
+        #{receiver_desc},
+        #{receiver_address},
+        #{create_time},
+        #{state_delivery}
         )
     </insert>
 
     <insert id="insert_material_dn_wcs_prod">
         insert into HXOA.dbo.material_dn_wcs
         (
-            dn_number,
-            BoxOrderNum,
-            createTime,
-            flag
+        dn_number,
+        BoxOrderNum,
+        createTime,
+        flag
         )
         values
         (
-            #{dn_number},
-            #{box_order_num},
-            #{create_time},
-            #{flag}
+        #{dn_number},
+        #{box_order_num},
+        #{create_time},
+        #{flag}
         )
     </insert>
 
@@ -190,24 +190,24 @@
                        and co.CMD_STATE >= 90) t
                      where 1 = 1
         ]]>
-                <if test="start_time != null and start_time != ''">
-                    AND to_char(t.review_confirm_time,'yyyy-mm-dd hh:mm:ss') >= #{start_time}
-                </if>
-                <if test="end_time != null and end_time != ''">
-                    AND to_char(t.review_confirm_time,'yyyy-mm-dd hh:mm:ss') <![CDATA[ < ]]> #{end_time}
-                </if>
-                <if test="order_out_code != null and order_out_code != ''">
-                    AND t.order_out_code = #{order_out_code}
-                </if>
-                <if test="customer_code != null and customer_code != ''">
-                    AND (t.customer_code like #{customer_code} or t.customer_name like #{customer_code})
-                </if>
-                <if test="has_upload != null">
-                    AND t.has_upload = #{has_upload}
-                </if>
+        <if test="start_time != null and start_time != ''">
+            AND to_char(t.review_confirm_time,'yyyy-mm-dd hh:mm:ss') >= #{start_time}
+        </if>
+        <if test="end_time != null and end_time != ''">
+            AND to_char(t.review_confirm_time,'yyyy-mm-dd hh:mm:ss') <![CDATA[ < ]]> #{end_time}
+        </if>
+        <if test="order_out_code != null and order_out_code != ''">
+            AND t.order_out_code = #{order_out_code}
+        </if>
+        <if test="customer_code != null and customer_code != ''">
+            AND (t.customer_code like #{customer_code} or t.customer_name like #{customer_code})
+        </if>
+        <if test="has_upload != null">
+            AND t.has_upload = #{has_upload}
+        </if>
     </select>
 
-    <select id="query_material_delivery" resultType = "map" >
+    <select id="query_material_delivery" resultType="map">
         select * from HXOA_QAS.dbo.material_delivery
         where 1=1
         <if test="dn_number != null and dn_number != ''">
@@ -225,7 +225,7 @@
         AND company_code in (#{owner_id_list})
     </select>
 
-    <select id="query_material_receive" resultType = "map" >
+    <select id="query_material_receive" resultType="map">
         select * from HXOA_QAS.dbo.material_receive
         where 1=1
         <if test="dn_number != null and dn_number != ''">
@@ -242,7 +242,7 @@
         </if>
     </select>
 
-    <select id="query_wms_material_delivery" resultType = "map" >
+    <select id="query_wms_material_delivery" resultType="map">
         select t1.*, t2.customer_name from wms_material_delivery t1 left join bas_customer t2 on t1.receiver = t2.customer_code and t2.custom_type = 2
         where 1=1
         <if test="dn_number != null and dn_number != ''">
@@ -262,7 +262,7 @@
         </if>
     </select>
 
-    <select id="query_wms_material_receive" resultType = "map" >
+    <select id="query_wms_material_receive" resultType="map">
         select t1.*, t2.customer_name from wms_material_receive t1 left join bas_customer t2 on t1.receiver = t2.customer_code and t2.custom_type = 1
         where 1=1
         <if test="dn_number != null and dn_number != ''">

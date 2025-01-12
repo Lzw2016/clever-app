@@ -45,9 +45,9 @@ public class DefaultLoadUser implements LoadUser {
         // 根据“loginName”加载用户信息
         final QueryDSL queryDSL = SecurityDataSource.getQueryDSL();
         SysUser user = queryDSL.select(sysUser)
-                .from(sysUser)
-                .where(sysUser.loginName.eq(namePasswordLoginReq.getLoginName()))
-                .fetchOne();
+            .from(sysUser)
+            .where(sysUser.loginName.eq(namePasswordLoginReq.getLoginName()))
+            .fetchOne();
         if (user == null) {
             return null;
         }

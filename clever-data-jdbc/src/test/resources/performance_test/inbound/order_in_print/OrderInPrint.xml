@@ -4,27 +4,27 @@
 
     <select id="queryOrder">
         select oi.order_in_id,
-               oi.order_in_code,
-               oi.supplier_id,
-               bc.customer_code,
-               bc.customer_name as supplier_name,
-               oi.dates,
-               oi.asn_staff,
-               oi.business_code,
-               oi.order_type,
-               oi.order_biz_type,
-               (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
-               oi.is_complete,
-               bo.owner_code,
-               bo.owner_name,
-               oi.check_print_bill,
-               (select decode(count(1), count(ci.put_staff_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_put,
-               (select decode(count(1), count(ci.quality_employee_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_check,
-               (select CASE when count(decode(ci.quality_flg, 88, 1, NULL)) > 0 THEN '1' ELSE '0' END from cmd_in ci where ci.order_id = oi.order_in_id ) as is_reject
+        oi.order_in_code,
+        oi.supplier_id,
+        bc.customer_code,
+        bc.customer_name as supplier_name,
+        oi.dates,
+        oi.asn_staff,
+        oi.business_code,
+        oi.order_type,
+        oi.order_biz_type,
+        (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+        oi.is_complete,
+        bo.owner_code,
+        bo.owner_name,
+        oi.check_print_bill,
+        (select decode(count(1), count(ci.put_staff_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_put,
+        (select decode(count(1), count(ci.quality_employee_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_check,
+        (select CASE when count(decode(ci.quality_flg, 88, 1, NULL)) > 0 THEN '1' ELSE '0' END from cmd_in ci where ci.order_id = oi.order_in_id ) as is_reject
         from order_in oi
-             inner join bas_customer bc on oi.supplier_id = bc.customer_id
-             inner join bas_owner bo on bo.owner_id = oi.owner_id
-        where  oi.WH_ID = #{wh_id}
+        inner join bas_customer bc on oi.supplier_id = bc.customer_id
+        inner join bas_owner bo on bo.owner_id = oi.owner_id
+        where oi.WH_ID = #{wh_id}
         <!--( select decode(count(1), count(case when  ci.cmd_state >= 20 then 1 else NULL end), 1 , 0 )
                     from cmd_in ci where ci.order_id = oi.order_in_id
                 ) = 1
@@ -41,10 +41,10 @@
         --@ and exists(select 1 from cmd_in where order_id = oi.order_in_id and barcode = #{barcode})
         <if test="#obj.notEmpty(item_code)">
             and exists(
-                select 1 from cmd_in ci
-                inner join bas_item bi on ci.item_id = bi.item_id
-                where ci.order_id = oi.order_in_id
-                --% and (bi.item_code like #{item_code} or bi.logogram like #{item_code} or bi.APPROVAL_NO like #{item_code})
+            select 1 from cmd_in ci
+            inner join bas_item bi on ci.item_id = bi.item_id
+            where ci.order_id = oi.order_in_id
+            --% and (bi.item_code like #{item_code} or bi.logogram like #{item_code} or bi.APPROVAL_NO like #{item_code})
             )
         </if>
         --@ and oi.dates > #{dt_start}
@@ -54,109 +54,109 @@
 
     <select id="queryOrderHis">
         select * from (
-            select oi.order_in_id,
-                   oi.order_in_code,
-                   oi.supplier_id,
-                   bc.customer_code,
-                   bc.customer_name as supplier_name,
-                   oi.dates,
-                   oi.asn_staff,
-                   oi.business_code,
-                   oi.order_type,
-                   oi.order_biz_type,
-                   (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
-                   oi.is_complete,
-                   bo.owner_code,
-                   bo.owner_name,
-                   oi.check_print_bill,
-                   (select decode(count(1), count(ci.put_staff_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_put,
-                   (select decode(count(1), count(ci.quality_employee_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_check
-            from wms8_his.order_in oi
-                 inner join bas_customer bc on oi.supplier_id = bc.customer_id
-                 inner join bas_owner bo on bo.owner_id = oi.owner_id
-            where  ( select decode(count(1), count(case when  ci.cmd_state >= 20 then 1 else NULL end), 1 , 0 )
-                    from wms8_his.cmd_in ci where ci.order_id = oi.order_in_id
-                ) = 1
-            and oi.WH_ID = #{wh_id}
-            <if test="#obj.notEmpty(ownerArr)">
-                and oi.owner_id in
-                <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
-            --@ and oi.order_in_code = #{order_in_code}
-            --@ and oi.business_code = #{business_code}
-            --@ and oi.order_biz_type = #{order_biz_type}
-            --@ and exists(select 1 from cmd_in where order_id = oi.order_in_id and barcode = #{barcode})
-            <if test="#obj.notEmpty(item_code)">
-                and exists(
-                    select 1 from wms8_his.cmd_in ci
-                    inner join bas_item bi on ci.item_id = bi.item_id
-                    where ci.order_id = oi.order_in_id
-                    --% and (bi.item_code like #{item_code} or bi.logogram like #{item_code} or bi.APPROVAL_NO like #{item_code})
-                )
-            </if>
-            --@ and oi.dates > #{dt_start}
-            --@ and oi.dates <![CDATA[ < ]]> #{dt_end}
+        select oi.order_in_id,
+        oi.order_in_code,
+        oi.supplier_id,
+        bc.customer_code,
+        bc.customer_name as supplier_name,
+        oi.dates,
+        oi.asn_staff,
+        oi.business_code,
+        oi.order_type,
+        oi.order_biz_type,
+        (select user_name from sys_user where user_id = oi.ORDER_STAFF_ID) as order_staff,
+        oi.is_complete,
+        bo.owner_code,
+        bo.owner_name,
+        oi.check_print_bill,
+        (select decode(count(1), count(ci.put_staff_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_put,
+        (select decode(count(1), count(ci.quality_employee_id), 1, 0) from cmd_in ci where ci.order_id = oi.order_in_id ) as is_check
+        from wms8_his.order_in oi
+        inner join bas_customer bc on oi.supplier_id = bc.customer_id
+        inner join bas_owner bo on bo.owner_id = oi.owner_id
+        where ( select decode(count(1), count(case when ci.cmd_state >= 20 then 1 else NULL end), 1 , 0 )
+        from wms8_his.cmd_in ci where ci.order_id = oi.order_in_id
+        ) = 1
+        and oi.WH_ID = #{wh_id}
+        <if test="#obj.notEmpty(ownerArr)">
+            and oi.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        --@ and oi.order_in_code = #{order_in_code}
+        --@ and oi.business_code = #{business_code}
+        --@ and oi.order_biz_type = #{order_biz_type}
+        --@ and exists(select 1 from cmd_in where order_id = oi.order_in_id and barcode = #{barcode})
+        <if test="#obj.notEmpty(item_code)">
+            and exists(
+            select 1 from wms8_his.cmd_in ci
+            inner join bas_item bi on ci.item_id = bi.item_id
+            where ci.order_id = oi.order_in_id
+            --% and (bi.item_code like #{item_code} or bi.logogram like #{item_code} or bi.APPROVAL_NO like #{item_code})
+            )
+        </if>
+        --@ and oi.dates > #{dt_start}
+        --@ and oi.dates <![CDATA[ < ]]> #{dt_end}
         ) order by order_in_code desc
     </select>
     <!--入库明细单查询-->
     <select id="queryOrderDetails">
         select d.item_id,
-               d.item_code,
-               d.item_name,
-               d.logogram,
-               d.manufacturer,
-               d.origin,
-               d.is_double_quality,
-               f.package_unit,
-               floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1)) AS medium,
-               a.lot_id,
-               a.qty,
-               c.quality_flg,
-               decode(c.is_unpack, 1, 0, floor(nvl(c.qty, 0) / nvl(g.package_meas, 1))) AS order_piece,
-               decode(c.is_unpack, 1, c.qty, 0) AS order_less,
-               a.order_in_id,
-               b.order_in_code,
-               a.order_line_no,
-               a.package_id,
-               a.lpn,
-               a.price,
-               a.asn_in_id,
-               a.asn_line_no,
-               c.barcode,
-               b.business_code,
-               c.cmd_line_no,
-               c.loc_id,
-               c.update_employee,
-               i.loc_code,
-               h.area_id,
-               h.area_code,
-               h.area_name,
-               j.lot01,
-               j.lot02,
-               j.lot03,
-               j.lot04,
-               j.lot12,
-               b.owner_id,
-               (select user_name from sys_user where user_id = c.QUALITY_EMPLOYEE_ID) as quality_employee,
-               (select user_name from sys_user where user_id = c.PUT_STAFF_ID) as put_staff,
-               (select user_name from sys_user where user_id = c.SPLITY_EMPLOYEE_ID) as splity_employee
+        d.item_code,
+        d.item_name,
+        d.logogram,
+        d.manufacturer,
+        d.origin,
+        d.is_double_quality,
+        f.package_unit,
+        floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1)) AS medium,
+        a.lot_id,
+        a.qty,
+        c.quality_flg,
+        decode(c.is_unpack, 1, 0, floor(nvl(c.qty, 0) / nvl(g.package_meas, 1))) AS order_piece,
+        decode(c.is_unpack, 1, c.qty, 0) AS order_less,
+        a.order_in_id,
+        b.order_in_code,
+        a.order_line_no,
+        a.package_id,
+        a.lpn,
+        a.price,
+        a.asn_in_id,
+        a.asn_line_no,
+        c.barcode,
+        b.business_code,
+        c.cmd_line_no,
+        c.loc_id,
+        c.update_employee,
+        i.loc_code,
+        h.area_id,
+        h.area_code,
+        h.area_name,
+        j.lot01,
+        j.lot02,
+        j.lot03,
+        j.lot04,
+        j.lot12,
+        b.owner_id,
+        (select user_name from sys_user where user_id = c.QUALITY_EMPLOYEE_ID) as quality_employee,
+        (select user_name from sys_user where user_id = c.PUT_STAFF_ID) as put_staff,
+        (select user_name from sys_user where user_id = c.SPLITY_EMPLOYEE_ID) as splity_employee
         from order_in_details a
-             inner join order_in b on a.order_in_id = b.order_in_id
-             inner join cmd_in c on c.order_id = a.order_in_id and c.order_line_no = a.order_line_no
-             inner join bas_item d on d.item_id = a.item_id
-             inner join bas_lot_att e on e.lot_id = a.lot_id
-             inner join bas_package_items f
-                        on f.PACKAGE_ID = a.PACKAGE_ID and f.item_id = a.item_id and f.PACKAGE_LEVEL = '1'
-             inner join bas_package_items g
-                        on g.PACKAGE_ID = a.PACKAGE_ID and g.item_id = a.item_id and g.PACKAGE_LEVEL = '3'
-             inner join bas_area h on h.area_id = c.area_id
-             inner join bas_location i on i.loc_id = c.loc_id
-             inner join bas_lot_att j on a.lot_id = j.lot_id
+        inner join order_in b on a.order_in_id = b.order_in_id
+        inner join cmd_in c on c.order_id = a.order_in_id and c.order_line_no = a.order_line_no
+        inner join bas_item d on d.item_id = a.item_id
+        inner join bas_lot_att e on e.lot_id = a.lot_id
+        inner join bas_package_items f
+        on f.PACKAGE_ID = a.PACKAGE_ID and f.item_id = a.item_id and f.PACKAGE_LEVEL = '1'
+        inner join bas_package_items g
+        on g.PACKAGE_ID = a.PACKAGE_ID and g.item_id = a.item_id and g.PACKAGE_LEVEL = '3'
+        inner join bas_area h on h.area_id = c.area_id
+        inner join bas_location i on i.loc_id = c.loc_id
+        inner join bas_lot_att j on a.lot_id = j.lot_id
         where
-              a.order_in_id = #{order_in_id}
-          and b.WH_ID = #{wh_id}
+        a.order_in_id = #{order_in_id}
+        and b.WH_ID = #{wh_id}
         <if test="#obj.notEmpty(qualityFlg)">
             and c.quality_flg= #{qualityFlg}
         </if>
@@ -177,76 +177,76 @@
     <!--历史-->
     <select id="queryOrderDetailsHis">
         select * from (
-            select d.item_id,
-                   d.item_code,
-                   d.item_name,
-                   d.logogram,
-                   d.manufacturer,
-                   d.origin,
-                   d.is_double_quality,
-                   f.package_unit,
-                   floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1)) AS medium,
-                   a.lot_id,
-                   a.qty,
-                   c.quality_flg,
-                   floor(nvl(a.qty, 0) / nvl(g.package_meas, 1)) AS order_piece,
-                   mod(a.qty, nvl(g.package_meas, 1)) AS order_less,
-                   a.order_in_id,
-                   b.order_in_code,
-                   a.order_line_no,
-                   a.package_id,
-                   a.lpn,
-                   a.price,
-                   a.asn_in_id,
-                   a.asn_line_no,
-                   c.barcode,
-                   b.business_code,
-                   c.cmd_line_no,
-                   c.loc_id,
-                   c.update_employee,
-                   i.loc_code,
-                   h.area_id,
-                   h.area_code,
-                   h.area_name,
-                   j.lot01,
-                   j.lot02,
-                   j.lot03,
-                   j.lot04,
-                   j.lot12,
-                   b.owner_id,
-                   (select user_name from sys_user where user_id = c.QUALITY_EMPLOYEE_ID) as quality_employee,
-                   (select user_name from sys_user where user_id = c.PUT_STAFF_ID) as put_staff,
-                   (select user_name from sys_user where user_id = c.SPLITY_EMPLOYEE_ID) as splity_employee
-            from wms8_his.order_in_details a
-                 inner join wms8_his.order_in b on a.order_in_id = b.order_in_id
-                 inner join wms8_his.cmd_in c on c.order_id = a.order_in_id and c.order_line_no = a.order_line_no
-                 inner join bas_item d on d.item_id = a.item_id
-                 inner join bas_lot_att e on e.lot_id = a.lot_id
-                 inner join bas_package_items f
-                            on f.PACKAGE_ID = a.PACKAGE_ID and f.item_id = a.item_id and f.PACKAGE_LEVEL = '1'
-                 inner join bas_package_items g
-                            on g.PACKAGE_ID = a.PACKAGE_ID and g.item_id = a.item_id and g.PACKAGE_LEVEL = '3'
-                 inner join bas_area h on h.area_id = c.area_id
-                 inner join bas_location i on i.loc_id = c.loc_id
-                 inner join bas_lot_att j on a.lot_id = j.lot_id
-            where
-                  a.order_in_id = #{order_in_id}
-              and b.WH_ID = #{wh_id}
-            <if test="#obj.notEmpty(qualityFlg)">
-                and c.quality_flg= #{qualityFlg}
-            </if>
-            <if test="#obj.notEmpty(ownerArr)">
-                and b.owner_id in
-                <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
-            <if test="#obj.notEmpty(barcode)">
-                and c.barcode = #{barcode}
-            </if>
-            <if test="#obj.notEmpty(item_code)">
-                --% and (d.item_code like #{item_code} or d.logogram like #{item_code} or d.APPROVAL_NO like #{item_code})
-            </if>
+        select d.item_id,
+        d.item_code,
+        d.item_name,
+        d.logogram,
+        d.manufacturer,
+        d.origin,
+        d.is_double_quality,
+        f.package_unit,
+        floor(nvl(g.package_meas, 0) / nvl(f.package_meas, 1)) AS medium,
+        a.lot_id,
+        a.qty,
+        c.quality_flg,
+        floor(nvl(a.qty, 0) / nvl(g.package_meas, 1)) AS order_piece,
+        mod(a.qty, nvl(g.package_meas, 1)) AS order_less,
+        a.order_in_id,
+        b.order_in_code,
+        a.order_line_no,
+        a.package_id,
+        a.lpn,
+        a.price,
+        a.asn_in_id,
+        a.asn_line_no,
+        c.barcode,
+        b.business_code,
+        c.cmd_line_no,
+        c.loc_id,
+        c.update_employee,
+        i.loc_code,
+        h.area_id,
+        h.area_code,
+        h.area_name,
+        j.lot01,
+        j.lot02,
+        j.lot03,
+        j.lot04,
+        j.lot12,
+        b.owner_id,
+        (select user_name from sys_user where user_id = c.QUALITY_EMPLOYEE_ID) as quality_employee,
+        (select user_name from sys_user where user_id = c.PUT_STAFF_ID) as put_staff,
+        (select user_name from sys_user where user_id = c.SPLITY_EMPLOYEE_ID) as splity_employee
+        from wms8_his.order_in_details a
+        inner join wms8_his.order_in b on a.order_in_id = b.order_in_id
+        inner join wms8_his.cmd_in c on c.order_id = a.order_in_id and c.order_line_no = a.order_line_no
+        inner join bas_item d on d.item_id = a.item_id
+        inner join bas_lot_att e on e.lot_id = a.lot_id
+        inner join bas_package_items f
+        on f.PACKAGE_ID = a.PACKAGE_ID and f.item_id = a.item_id and f.PACKAGE_LEVEL = '1'
+        inner join bas_package_items g
+        on g.PACKAGE_ID = a.PACKAGE_ID and g.item_id = a.item_id and g.PACKAGE_LEVEL = '3'
+        inner join bas_area h on h.area_id = c.area_id
+        inner join bas_location i on i.loc_id = c.loc_id
+        inner join bas_lot_att j on a.lot_id = j.lot_id
+        where
+        a.order_in_id = #{order_in_id}
+        and b.WH_ID = #{wh_id}
+        <if test="#obj.notEmpty(qualityFlg)">
+            and c.quality_flg= #{qualityFlg}
+        </if>
+        <if test="#obj.notEmpty(ownerArr)">
+            and b.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="#obj.notEmpty(barcode)">
+            and c.barcode = #{barcode}
+        </if>
+        <if test="#obj.notEmpty(item_code)">
+            --% and (d.item_code like #{item_code} or d.logogram like #{item_code} or d.APPROVAL_NO like #{item_code})
+        </if>
         )
         order by order_line_no
     </select>

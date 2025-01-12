@@ -133,8 +133,8 @@ public class PathFilterUtils {
     public static boolean isAuthenticationRequest(String path, String method, SecurityConfig securityConfig) {
         // 当前请求是“登录请求”或“验证码请求”或“注册请求”或“密码找回”
         if (isLoginRequest(path, method, securityConfig)
-                || isLoginCaptchaPath(path, securityConfig)
-                || isRegisterRequest(path, securityConfig)) {
+            || isLoginCaptchaPath(path, securityConfig)
+            || isRegisterRequest(path, securityConfig)) {
             return false;
         }
         List<String> ignorePaths = securityConfig.getIgnorePaths();

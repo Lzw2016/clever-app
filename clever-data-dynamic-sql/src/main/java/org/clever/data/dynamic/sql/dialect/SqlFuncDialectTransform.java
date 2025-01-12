@@ -89,8 +89,8 @@ public class SqlFuncDialectTransform extends SqlFuncParserBaseListener {
             if (parentSqlFuncNode != null && !parentSqlFuncNode.getParams().isEmpty()) {
                 SqlFuncNodeParam param = parentSqlFuncNode.getParams().get(parentSqlFuncNode.getParams().size() - 1);
                 if (SqlFuncNodeParamEnum.SQL_FUNC.equals(param.getType())
-                        && param.getFunc() != null
-                        && Objects.equals(sqlFuncName, param.getFunc().getFuncName())) {
+                    && param.getFunc() != null
+                    && Objects.equals(sqlFuncName, param.getFunc().getFuncName())) {
                     sqlFuncNodeStack.push(param.getFunc());
                 } else {
                     throw new ParseSqlFuncException("解析SQL函数异常：sqlFuncName=" + sqlFuncName + " | param=" + param);

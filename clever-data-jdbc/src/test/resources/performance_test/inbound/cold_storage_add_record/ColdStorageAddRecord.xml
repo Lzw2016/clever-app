@@ -29,7 +29,8 @@
         t.is_cold_upload,
         t.is_photo_upload,
         t.is_complete,
-        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.order_staff_id), (select TT.user_name from sys_user TT where TT.user_id = t.order_staff_id)) order_staff_id,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.order_staff_id), (select TT.user_name from sys_user TT where TT.user_id = t.order_staff_id))
+        order_staff_id,
         t.path
         from (select
         oi.order_in_id,
@@ -55,24 +56,24 @@
         oi.order_type,
         oi.order_biz_type,
         CASE WHEN oi.cold_address != 'N/A'
-                and oi.cold_company != 'N/A'
-                and oi.cold_transport_tool != -1
-                and oi.cold_start_time != 'N/A'
-                and oi.cold_end_time != 'N/A'
-            THEN '是'
-            ELSE '否'
+        and oi.cold_company != 'N/A'
+        and oi.cold_transport_tool != -1
+        and oi.cold_start_time != 'N/A'
+        and oi.cold_end_time != 'N/A'
+        THEN '是'
+        ELSE '否'
         END is_cold_upload,
-        (select p.path  from photos p where p.order_id = oi.order_in_id and p.path is not null and p.photo_type = 2 and rownum = 1 ) path,
+        (select p.path from photos p where p.order_id = oi.order_in_id and p.path is not null and p.photo_type = 2 and rownum = 1 ) path,
         CASE
-            WHEN (select p.path  from photos p where p.order_id = oi.order_in_id and p.photo_type = 2 and rownum = 1) is not null  THEN '是'
-            ELSE '否'
+        WHEN (select p.path from photos p where p.order_id = oi.order_in_id and p.photo_type = 2 and rownum = 1) is not null THEN '是'
+        ELSE '否'
         END is_photo_upload,
         oi.is_complete,
         oi.order_staff_id
         from order_in oi
         where oi.order_biz_type = 11
         <if test="#obj.notEmpty(item_code)">
-              and exists ( select * from order_in_details k where k.item_id in (select j.item_id from bas_item j where j.item_code = #{item_code}) and k.order_in_id = oi.order_in_id)
+            and exists ( select * from order_in_details k where k.item_id in (select j.item_id from bas_item j where j.item_code = #{item_code}) and k.order_in_id = oi.order_in_id)
         </if>
         and exists(select 1 from order_in_details oid inner join bas_item bi on bi.item_id = oid.item_id where bi.stock_env = 4 and oid.order_in_id = oi.order_in_id and oid.quality_flg !=88)
         union all
@@ -101,17 +102,17 @@
         oi.order_biz_type,
         CASE
         WHEN oi.cold_address != 'N/A'
-                and oi.cold_company != 'N/A'
-                and oi.cold_transport_tool != -1
-                and oi.cold_start_time != 'N/A'
-                and oi.cold_end_time != 'N/A'
-            THEN '是'
-            ELSE '否'
+        and oi.cold_company != 'N/A'
+        and oi.cold_transport_tool != -1
+        and oi.cold_start_time != 'N/A'
+        and oi.cold_end_time != 'N/A'
+        THEN '是'
+        ELSE '否'
         END is_cold_upload,
-        (select p.path  from photos p where p.order_id = oi.order_in_id and p.path is not null and rownum &lt;= 1 ) path,
+        (select p.path from photos p where p.order_id = oi.order_in_id and p.path is not null and rownum &lt;= 1 ) path,
         CASE
-        WHEN (select p.path  from photos p where p.order_id = oi.order_in_id and rownum &lt;= 1) is not null  THEN '是'
-            ELSE '否'
+        WHEN (select p.path from photos p where p.order_id = oi.order_in_id and rownum &lt;= 1) is not null THEN '是'
+        ELSE '否'
         END is_photo_upload,
         oi.is_complete,
         oi.order_staff_id
@@ -154,8 +155,8 @@
         t.lot_id,
         t.qty,
         t.quality_flg,
-        floor(nvl(t.qty, 0) / nvl(g.package_meas, 1))          AS order_piece, -- 验收件数
-        mod(t.qty, nvl(g.package_meas, 1))                     AS order_less,  -- 验收零货数量
+        floor(nvl(t.qty, 0) / nvl(g.package_meas, 1)) AS order_piece, -- 验收件数
+        mod(t.qty, nvl(g.package_meas, 1)) AS order_less, -- 验收零货数量
         t.order_in_id,
         t.order_in_code,
         t.order_line_no,
@@ -176,7 +177,8 @@
         j.lot02,
         j.lot03,
         t.owner_id,
-        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.quality_employee_id), (select TT.user_name from sys_user TT where TT.user_id = t.quality_employee_id)) quality_employee_id
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.quality_employee_id), (select TT.user_name from sys_user TT where TT.user_id =
+        t.quality_employee_id)) quality_employee_id
         from
         (select
         a.lot_id,
@@ -234,7 +236,7 @@
         inner join bas_location i on i.loc_id = t.loc_id
         inner join bas_lot_att j on t.lot_id = j.lot_id
         where d.stock_env = 4
-          and t.quality_flg ! =88
+        and t.quality_flg ! =88
         and t.order_in_id = #{order_in_id} <!--and c.cmd_state <![CDATA[ < 20 ]]>-->
         <if test="#obj.notEmpty(barcode)">
             and c.barcode = #{barcode}
@@ -249,26 +251,26 @@
     <select id="queryItemByStockEnvHis">
         select oid.* from wms8_his.order_in_details oid inner join bas_item bi on bi.item_id = oid.item_id
         where oid.order_in_id = #{order_in_id}
-          and bi.stock_env = 4
+        and bi.stock_env = 4
     </select>
 
     <!--冷藏品信息补录-收货信息补录（历史表）-->
     <select id="updateColdStorage">
         update wms8_his.order_in t
         set t.cold_address = #{cold_address},
-         t.cold_company = #{cold_company},
-         t.cold_start_temp = #{cold_start_temp},
-         t.cold_end_temp = #{cold_end_temp},
-         t.cold_transport_tool = #{cold_transport_tool},
-         t.cold_wenk_way = #{cold_wenk_way},
-         t.cold_transport_person = #{cold_transport_person},
-         t.cold_car = #{cold_car},
-         t.cold_start_time = #{cold_start_time},
-         t.cold_end_time = #{cold_end_time},
-         t.cold_photo_id = #{cold_photo_id},
-         t.update_by = #{update_by},
-         t.update_at = #{update_at}
-       where t.order_in_id = #{order_in_id}
+        t.cold_company = #{cold_company},
+        t.cold_start_temp = #{cold_start_temp},
+        t.cold_end_temp = #{cold_end_temp},
+        t.cold_transport_tool = #{cold_transport_tool},
+        t.cold_wenk_way = #{cold_wenk_way},
+        t.cold_transport_person = #{cold_transport_person},
+        t.cold_car = #{cold_car},
+        t.cold_start_time = #{cold_start_time},
+        t.cold_end_time = #{cold_end_time},
+        t.cold_photo_id = #{cold_photo_id},
+        t.update_by = #{update_by},
+        t.update_at = #{update_at}
+        where t.order_in_id = #{order_in_id}
 
     </select>
 

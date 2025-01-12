@@ -31,7 +31,7 @@
         AND TF.package_level = 3
         <if test="list!= null and list.size() > 0">
             AND
-            <foreach collection="list" item="item" index="index" open="("  close=")">
+            <foreach collection="list" item="item" index="index" open="(" close=")">
                 ( TC.loc_code = #{item.loc_code_old} AND TB.item_code = #{item.item_code}
                 AND (TA.owner_id = #{item.owner_id}) AND trim(TD.lot01) = #{item.lot01_old} AND TA.qty >= #{item.qty_old})
                 <if test="index != (list.size() - 1)">
@@ -43,17 +43,17 @@
 
     <select id="queryItemWithPackage" resultType="map">
         select
-            TA.*,
-            TB.package_item_id,
-            TB.package_id,
-            TB.package_meas,
-            TB.package_unit
+        TA.*,
+        TB.package_item_id,
+        TB.package_id,
+        TB.package_meas,
+        TB.package_unit
         from bas_item TA, bas_package_items TB
         where
-            TA.item_code in (#{itemCodeList})
-            and TA.owner_id in (#{owner_id_list})
-            and TA.item_id = TB.item_id
-            and TB.package_level = 3
+        TA.item_code in (#{itemCodeList})
+        and TA.owner_id in (#{owner_id_list})
+        and TA.item_id = TB.item_id
+        and TB.package_level = 3
     </select>
 
     <select id="queryInfo" resultType="map">
@@ -96,10 +96,10 @@
         TC.item_mhdhb,
         TA.is_lock,
         DECODE(TB.loc_type, '4', 'Y', 'N') is_auto_loc
-        FROM   inv_loc TA ,
-        bas_location   TB,
-        bas_item   TC,
-        bas_lot_att  TD,
+        FROM inv_loc TA ,
+        bas_location TB,
+        bas_item TC,
+        bas_lot_att TD,
         bas_package TE,
         bas_package_items TF
         WHERE TA.item_id = TC.item_id

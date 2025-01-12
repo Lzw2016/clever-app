@@ -21,20 +21,20 @@ public class ClientFactory {
     static {
         long timeout = 60L;
         OK_HTTP_CLIENT = new OkHttpClient.Builder()
-                .addInterceptor(chain -> {
-                    Request request = chain.request().newBuilder()
-                            .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
-                            .build();
-                    long start = System.currentTimeMillis();
-                    log.info(String.format("---> 请求 [%1$s] %2$s ", request.method(), request.url()));
-                    Response response = chain.proceed(request);
-                    long end = System.currentTimeMillis();
-                    log.info(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start)));
-                    return response;
-                })
-                .readTimeout(timeout, TimeUnit.SECONDS)
-                .connectTimeout(timeout, TimeUnit.SECONDS)
-                .build();
+            .addInterceptor(chain -> {
+                Request request = chain.request().newBuilder()
+                    .addHeader("Accept-Language", "zh-CN,zh;q=0.8")
+                    .build();
+                long start = System.currentTimeMillis();
+                log.info(String.format("---> 请求 [%1$s] %2$s ", request.method(), request.url()));
+                Response response = chain.proceed(request);
+                long end = System.currentTimeMillis();
+                log.info(String.format("<--- 响应 [%1$d] %2$s (%3$dms)", response.code(), response.request().url(), (end - start)));
+                return response;
+            })
+            .readTimeout(timeout, TimeUnit.SECONDS)
+            .connectTimeout(timeout, TimeUnit.SECONDS)
+            .build();
     }
 
     /**
@@ -47,10 +47,10 @@ public class ClientFactory {
      */
     public static <T> T getClient(String baseUrl, Class<T> clazz) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .client(OK_HTTP_CLIENT)
-                .addConverterFactory(JacksonConverterFactory.create(JacksonMapper.getInstance().getMapper()))
-                .build();
+            .baseUrl(baseUrl)
+            .client(OK_HTTP_CLIENT)
+            .addConverterFactory(JacksonConverterFactory.create(JacksonMapper.getInstance().getMapper()))
+            .build();
         return retrofit.create(clazz);
     }
 }

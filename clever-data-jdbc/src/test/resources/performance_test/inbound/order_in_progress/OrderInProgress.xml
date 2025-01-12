@@ -3,25 +3,25 @@
 <mapper namespace="OrderInPut">
 
     <select id="queryProgress">
-            select
-                order_in_id,
-                order_in_code,
-                business_code,
-                customer_code,
-                supplier_name,
-                check_progress,
-                put_progress,
-                is_complete,
-                ROUND((check_progress * 0.5 + put_progress * 0.5), 4) total_progress
-            from (
-                select
-                    oi.order_in_id,
-                    oi.order_in_code ,
-                    oi.business_code ,
-                    oi.supplier_id ,
-                    bc.customer_code,
-                    oi.is_complete,
-                    bc.customer_name as supplier_name,
+        select
+        order_in_id,
+        order_in_code,
+        business_code,
+        customer_code,
+        supplier_name,
+        check_progress,
+        put_progress,
+        is_complete,
+        ROUND((check_progress * 0.5 + put_progress * 0.5), 4) total_progress
+        from (
+        select
+        oi.order_in_id,
+        oi.order_in_code ,
+        oi.business_code ,
+        oi.supplier_id ,
+        bc.customer_code,
+        oi.is_complete,
+        bc.customer_name as supplier_name,
         ROUND(
         (
         ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id AND cmd_state > 10 ) / NULLIF( ( SELECT COUNT( * ) FROM cmd_in WHERE order_id = oi.order_in_id ), 0 )
@@ -34,17 +34,17 @@
         ),
         4
         ) put_progress
-                from order_in oi
-                inner join bas_customer bc on oi.supplier_id = bc.customer_id
-                where oi.wh_id = #{wh_id}
-                --@ and oi.order_biz_type = #{asn_type}
-                <if test="#obj.notEmpty(ownerArr)">
-                and oi.owner_id in
-                <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
-            )
+        from order_in oi
+        inner join bas_customer bc on oi.supplier_id = bc.customer_id
+        where oi.wh_id = #{wh_id}
+        --@ and oi.order_biz_type = #{asn_type}
+        <if test="#obj.notEmpty(ownerArr)">
+            and oi.owner_id in
+            <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        )
     </select>
     <!--验收进度查询-->
     <select id="queryCheckProgress">
@@ -137,7 +137,7 @@
         LEFT JOIN SYS_USER SU2 ON SU2.USER_ID = T.PUT_STAFF_ID
         LEFT JOIN SYS_USER SU3 ON SU3.USER_ID = OI.ORDER_STAFF_ID
         LEFT JOIN ASN_IN AI ON AI.ASN_IN_ID = T.ASN_IN_ID
-        WHERE   1 = 1   -- CMD_STATE >= 1000
+        WHERE 1 = 1 -- CMD_STATE >= 1000
         AND T.QTY > 0
         AND T.QUALITY_FLG IN ('1','2')
         AND T.BARCODE IS NOT NULL

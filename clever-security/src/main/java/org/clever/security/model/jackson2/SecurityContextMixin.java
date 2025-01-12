@@ -19,8 +19,8 @@ class SecurityContextMixin {
 
     @JsonCreator
     public SecurityContextMixin(
-            @JsonProperty("userInfo") UserInfo userInfo,
-            @JsonProperty("roles") Set<String> roles,
-            @JsonProperty("permissions") Set<String> permissions) {
+        @JsonProperty("userInfo") UserInfo userInfo,
+        @JsonProperty("roles") Set<String> roles,
+        @JsonProperty("permissions") Set<String> permissions) {
     }
 }

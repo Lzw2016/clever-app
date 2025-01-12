@@ -4,16 +4,16 @@
 
     <select id="queryAllDirection">
         SELECT a.direction_id,
-               a.wh_id,
-               (SELECT wh_name FROM bas_wh WHERE wh_id = a.wh_id) AS wh_name,
-               a.direction_name,
-               a.direction_parent,
-               /*a.create_by,*/
-               a.create_at,
-               /*a.update_by,*/
-               a.update_at,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
-               nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
+        a.wh_id,
+        (SELECT wh_name FROM bas_wh WHERE wh_id = a.wh_id) AS wh_name,
+        a.direction_name,
+        a.direction_parent,
+        /*a.create_by,*/
+        a.create_at,
+        /*a.update_by,*/
+        a.update_at,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
         FROM bas_direction a inner join bas_wh_owner bwo on a.wh_id = bwo.wh_id
         --% where a.direction_name like #{direction_name}
         <if test="#obj.notEmpty(ownerList)">

@@ -13,9 +13,9 @@
         bi.manufacturer,
         a.is_enable,
         a.create_at,
-               /*create_by,*/
+        /*create_by,*/
         a.update_at,
-               /*update_by*/
+        /*update_by*/
         nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.create_by), a.create_by) create_by,
         nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = a.update_by), a.update_by) update_by
         FROM bas_package a

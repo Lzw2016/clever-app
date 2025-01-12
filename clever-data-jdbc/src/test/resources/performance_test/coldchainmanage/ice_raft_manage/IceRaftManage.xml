@@ -6,11 +6,11 @@
         insert into cc_icefloe_manage
         (icefloe_manage_id, dates, wh_id,create_by,update_by)
         values
-            (#{icefloe_manage_id},
-             #{dates},
-             #{wh_id},
-             #{create_by},
-             #{create_by})
+        (#{icefloe_manage_id},
+        #{dates},
+        #{wh_id},
+        #{create_by},
+        #{create_by})
     </insert>
 
     <select id="queryFloe">
@@ -52,7 +52,7 @@
         where
         a.wh_id =#{wh_id}
         <if test="!#obj.isEmpty(floe_no)">
-            and a.floe_no in  (#{floe_no})
+            and a.floe_no in (#{floe_no})
         </if>
 
         <if test="!#obj.isEmpty(floe_type)">

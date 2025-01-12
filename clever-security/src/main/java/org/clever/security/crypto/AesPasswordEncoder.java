@@ -29,9 +29,9 @@ public class AesPasswordEncoder implements PasswordEncoder {
     @Override
     public String encode(CharSequence rawPassword) {
         byte[] data = CryptoUtils.aesEncrypt(
-                rawPassword.toString().getBytes(StandardCharsets.UTF_8),
-                EncodeDecodeUtils.decodeHex(key),
-                EncodeDecodeUtils.decodeHex(iv)
+            rawPassword.toString().getBytes(StandardCharsets.UTF_8),
+            EncodeDecodeUtils.decodeHex(key),
+            EncodeDecodeUtils.decodeHex(iv)
         );
         return EncodeDecodeUtils.encodeBase64(data);
     }
@@ -50,9 +50,9 @@ public class AesPasswordEncoder implements PasswordEncoder {
      */
     public String decode(CharSequence encodedPassword) {
         return CryptoUtils.aesDecrypt(
-                EncodeDecodeUtils.decodeBase64(encodedPassword.toString()),
-                EncodeDecodeUtils.decodeHex(key),
-                EncodeDecodeUtils.decodeHex(iv)
+            EncodeDecodeUtils.decodeBase64(encodedPassword.toString()),
+            EncodeDecodeUtils.decodeHex(key),
+            EncodeDecodeUtils.decodeHex(iv)
         );
     }
 }

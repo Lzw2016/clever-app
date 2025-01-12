@@ -6,7 +6,7 @@
         from bas_area A
         <where>
             A.is_enable = 1 and A.wh_id = #{wh_id}
-            <if test = "check_flag != null and check_flag == 1 and loc_classify != null">
+            <if test="check_flag != null and check_flag == 1 and loc_classify != null">
                 A.area_classify <![CDATA[<>]]> '9'
                 and A.loc_classify = #{loc_classify}
             </if>

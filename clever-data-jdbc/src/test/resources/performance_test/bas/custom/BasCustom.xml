@@ -32,9 +32,9 @@
         <where>
             bc.is_enable = 1
             <if test="#obj.notEmpty(ownerArr)">
-               and bc.owner_id in
+                and bc.owner_id in
                 <foreach collection="ownerArr" separator="," item="item" index="index" open="(" close=")">
-                   #{item}
+                    #{item}
                 </foreach>
             </if>
             ${@com.galaxis.wms.ext.Sql@phrase('AND', 'bc.customer_name like', 'bc.customer_code like')}
@@ -43,40 +43,40 @@
 
     <select id="queryAllCustom">
         select t.customer_id,
-               t.customer_code,
-               t.owner_id,
-               t.direction_id,
-               t.custom_type,
-               t.customer_name,
-               /*t.create_by,*/
-               /*t.update_by,*/
-               t.create_at,
-               t.update_at,
-               t.remark,
-               t.is_enable,
-               t.customer_id_erp,
-               t.slide_id,
-               t.slide_code,
-               t.address,
-               t.drug_supervision_code,
-               t.distribution_mode,
-               t.zhuj_code,
-               t.danw_simplename,
-               t.lianx_staff,
-               t.lianx_phone,
-               t.postcode,
-               t.yew_staff,
-               t.shouh_phone,
-               t.shouh_staff,
-               bs.slide_name,
-               bo.owner_name,
-               bd.direction_name,
-                nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
-                nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
+        t.customer_code,
+        t.owner_id,
+        t.direction_id,
+        t.custom_type,
+        t.customer_name,
+        /*t.create_by,*/
+        /*t.update_by,*/
+        t.create_at,
+        t.update_at,
+        t.remark,
+        t.is_enable,
+        t.customer_id_erp,
+        t.slide_id,
+        t.slide_code,
+        t.address,
+        t.drug_supervision_code,
+        t.distribution_mode,
+        t.zhuj_code,
+        t.danw_simplename,
+        t.lianx_staff,
+        t.lianx_phone,
+        t.postcode,
+        t.yew_staff,
+        t.shouh_phone,
+        t.shouh_staff,
+        bs.slide_name,
+        bo.owner_name,
+        bd.direction_name,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.create_by), t.create_by) create_by,
+        nvl((select su.user_name from sys_login_agent sla inner join sys_user su on su.user_id = sla.user_id where to_char(sla.login_id) = t.update_by), t.update_by) update_by
         from bas_customer t
-         left join bas_slide bs on t.slide_id = bs.slide_id
-         left join bas_owner bo on bo.owner_id = t.owner_id
-         left join bas_direction bd on bd.direction_id = t.direction_id
+        left join bas_slide bs on t.slide_id = bs.slide_id
+        left join bas_owner bo on bo.owner_id = t.owner_id
+        left join bas_direction bd on bd.direction_id = t.direction_id
         where t.is_enable = 1
         --@ AND t.customer_code = #{customer_code}
         --@ AND t.customer_name = #{customer_name}

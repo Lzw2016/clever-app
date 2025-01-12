@@ -514,20 +514,20 @@
     <!--快递历史查询打印次数-->
     <select id="expressPrintCountHis">
         SELECT
-            NVL(TA.EXPRESS_PRINT_COUNT,0 ) EXPRESS_PRINT_COUNT
+        NVL(TA.EXPRESS_PRINT_COUNT,0 ) EXPRESS_PRINT_COUNT
         FROM
-            WMS8_HIS.CMD_BARCODE TA
+        WMS8_HIS.CMD_BARCODE TA
         WHERE
-            TA.ORDER_NO = #{order_no}
-          AND ROWNUM = 1
+        TA.ORDER_NO = #{order_no}
+        AND ROWNUM = 1
     </select>
     <!--更新快递历史打印次数-->
     <update id="updatePrintCountHis">
         UPDATE WMS8_HIS.CMD_BARCODE TA
         SET TA.EXPRESS_PRINT_COUNT = #{express_print_count}+1,
-            TA.EXPRESS_PRINT_FLG = 1,
-            TA.EXPRESS_PRINT_DATE = SYSDATE
+        TA.EXPRESS_PRINT_FLG = 1,
+        TA.EXPRESS_PRINT_DATE = SYSDATE
         WHERE
-            TA.ORDER_NO = #{order_no}
+        TA.ORDER_NO = #{order_no}
     </update>
 </mapper>

@@ -64,8 +64,7 @@ public class MergeDataSourceConfig {
         if (Objects.equals(target.getDriverClassName(), DEF_CONFIG.getDriverClassName())) {
             target.setDriverClassName(source.getDriverClassName());
         }
-        if (Objects.equals(target.getExceptionOverrideClassName(), DEF_CONFIG.getExceptionOverrideClassName())
-                && StringUtils.isNotBlank(source.getExceptionOverrideClassName())) {
+        if (Objects.equals(target.getExceptionOverrideClassName(), DEF_CONFIG.getExceptionOverrideClassName()) && StringUtils.isNotBlank(source.getExceptionOverrideClassName())) {
             target.setExceptionOverrideClassName(source.getExceptionOverrideClassName());
         }
         if (Objects.equals(target.getJdbcUrl(), DEF_CONFIG.getJdbcUrl())) {

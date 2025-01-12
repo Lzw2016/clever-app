@@ -20,12 +20,12 @@
         <if test="!#obj.isEmpty(rule_item_id)">
             AND t.RULE_PUTAWAY_ID in (
             select RULE_PUTAWAY_ID from
-                rule_putaway_items where rule_item_id = #{rule_item_id}
+            rule_putaway_items where rule_item_id = #{rule_item_id}
             )
         </if>
         <if test="!#obj.isEmpty(item_id)">
             AND t.RULE_PUTAWAY_ID in (
-                select RULE_ID from rule_apply t1 where t1.match_id = #{item_id}
+            select RULE_ID from rule_apply t1 where t1.match_id = #{item_id}
             )
         </if>
     </select>
@@ -46,27 +46,27 @@
 
     <select id="queryDictForExpr">
         select (
-                   case dict_code
-                       WHEN 'AREA_CLASSIFY' THEN 'loc_classify'
-                       WHEN 'LOC_TYPE' THEN 'loc_type'
-                       WHEN 'LOC_ENV' THEN 'loc_env'
-                       WHEN 'LOC_PROC_MODE' THEN 'loc_proc_mode'
-                       WHEN 'LOC_ABC' THEN 'loc_abc'
-                       WHEN 'LOC_USE' THEN 'loc_use'
-                       end
-                   ) as dict_code,
-               dict_text,
-               dict_value
+        case dict_code
+        WHEN 'AREA_CLASSIFY' THEN 'loc_classify'
+        WHEN 'LOC_TYPE' THEN 'loc_type'
+        WHEN 'LOC_ENV' THEN 'loc_env'
+        WHEN 'LOC_PROC_MODE' THEN 'loc_proc_mode'
+        WHEN 'LOC_ABC' THEN 'loc_abc'
+        WHEN 'LOC_USE' THEN 'loc_use'
+        end
+        ) as dict_code,
+        dict_text,
+        dict_value
         from bas_dict_items
         where dict_code in
-              (
-               'AREA_CLASSIFY',
-               'LOC_TYPE',
-               'LOC_ENV',
-               'LOC_PROC_MODE',
-               'LOC_ABC',
-               'LOC_USE'
-                  )
+        (
+        'AREA_CLASSIFY',
+        'LOC_TYPE',
+        'LOC_ENV',
+        'LOC_PROC_MODE',
+        'LOC_ABC',
+        'LOC_USE'
+        )
     </select>
 
     <select id="queryExcludeLoc">
@@ -74,9 +74,9 @@
         where 1=1
         <if test="!#obj.isEmpty(rule_item_id)">
             and t.loc_id not in (
-                select rpl.loc_id from rule_putaway_loc rpl
-                inner join bas_location bl on bl.loc_id = rpl.loc_id
-                where rpl.rule_item_id = #{rule_item_id}
+            select rpl.loc_id from rule_putaway_loc rpl
+            inner join bas_location bl on bl.loc_id = rpl.loc_id
+            where rpl.rule_item_id = #{rule_item_id}
             )
         </if>
         <if test="!#obj.isEmpty(loc_id)">
@@ -124,10 +124,10 @@
         select *
         from bas_location_group t
         where t.group_id not in (
-            select rplg.group_id
-            from rule_putaway_loc_group rplg
-                 inner join bas_location_group blg on blg.group_id = rplg.group_id
-            where rplg.rule_item_id = #{rule_item_id}
+        select rplg.group_id
+        from rule_putaway_loc_group rplg
+        inner join bas_location_group blg on blg.group_id = rplg.group_id
+        where rplg.rule_item_id = #{rule_item_id}
         )
         --% AND t.group_name like #{group_name}
         --@ AND t.loc_classify = #{loc_classify}
@@ -138,10 +138,10 @@
         select *
         from bas_location_group t
         where t.group_id in (
-            select rplg.group_id
-            from rule_putaway_loc_group rplg
-                 inner join bas_location_group blg on blg.group_id = rplg.group_id
-            where rplg.rule_item_id = #{rule_item_id}
+        select rplg.group_id
+        from rule_putaway_loc_group rplg
+        inner join bas_location_group blg on blg.group_id = rplg.group_id
+        where rplg.rule_item_id = #{rule_item_id}
         )
         --% AND t.group_name like #{group_name}
         --@ AND t.loc_classify = #{loc_classify}

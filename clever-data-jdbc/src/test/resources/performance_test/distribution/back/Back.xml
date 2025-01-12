@@ -4,25 +4,25 @@
     <!--修改实收件数查询-->
     <select id="querySetQty" resultType="map">
         SELECT
-            zcd.order_load_id,
-            zcd.order_line_no,
-            ta.is_split,
-            ta.barcode,
-            ta.scatter_mark,
-            ta.pack_no,
-            ta.lot_id,
-            ta.item_id,
-            tb.item_code,
-            tb.item_name,
-            tb.manufacturer,
-            tb.item_specification,
-            tb.remark,
-            decode( ta.scatter_mark, 1, zcd.fcl_qty, zcd.lcl_qty ) qty,
-            decode( ta.scatter_mark, 1, zcd.real_fcl_qty, zcd.real_lcl_qty ) real_qty
+        zcd.order_load_id,
+        zcd.order_line_no,
+        ta.is_split,
+        ta.barcode,
+        ta.scatter_mark,
+        ta.pack_no,
+        ta.lot_id,
+        ta.item_id,
+        tb.item_code,
+        tb.item_name,
+        tb.manufacturer,
+        tb.item_specification,
+        tb.remark,
+        decode( ta.scatter_mark, 1, zcd.fcl_qty, zcd.lcl_qty ) qty,
+        decode( ta.scatter_mark, 1, zcd.real_fcl_qty, zcd.real_lcl_qty ) real_qty
         FROM
-            order_load_details zcd
-                LEFT JOIN distribution_count_details ta ON zcd.bill_id = ta.distribution_count_id
-                LEFT JOIN bas_item tb ON ta.item_id = tb.item_id
+        order_load_details zcd
+        LEFT JOIN distribution_count_details ta ON zcd.bill_id = ta.distribution_count_id
+        LEFT JOIN bas_item tb ON ta.item_id = tb.item_id
         WHERE
         zcd.order_load_id = #{ order_load_id }
         AND ta.split_order_no = #{ split_order_no }
@@ -31,20 +31,20 @@
     <!--查询装车单明细发货数量-->
     <select id="querySendQty" resultType="map">
         SELECT
-            a.*,
-            ( a.fcl_qty - a.real_fcl_qty ) send_fcl,
-            ( a.lcl_qty - a.real_lcl_qty ) send_lcl
+        a.*,
+        ( a.fcl_qty - a.real_fcl_qty ) send_fcl,
+        ( a.lcl_qty - a.real_lcl_qty ) send_lcl
         FROM
-            order_load_details a
+        order_load_details a
         WHERE
-            a.order_load_id = #{ order_load_id }
+        a.order_load_id = #{ order_load_id }
     </select>
     <!--修改配送数据统计明细索取件数-->
     <update id="setObtainQty">
         UPDATE distribution_count_details t
         SET t.obtain_qty = t.obtain_qty - DECODE( t.scatter_mark, 1, #{ send_fcl }, #{ send_lcl } )
         WHERE
-            t.barcode = #{ barcode }
+        t.barcode = #{ barcode }
     </update>
     <!--查询全部索取完成指令-->
     <select id="queryDemandEnd" resultType="java.lang.Integer">
@@ -62,33 +62,33 @@
     <!--查询出库状态-->
     <select id="queryState" resultType="java.math.BigDecimal">
         SELECT
-            t.status
+        t.status
         FROM
-            order_out t
+        order_out t
         WHERE
-            t.order_out_id = #{ billId }
+        t.order_out_id = #{ billId }
     </select>
     <!--解锁冷藏箱-->
     <update id="setColdBoxFree">
         UPDATE bas_container t
         SET t.container_state = 0
         WHERE
-              t.container_code IN ( SELECT l.cold_box_no FROM order_load_details_cold l WHERE l.order_id = #{billId} )
+        t.container_code IN ( SELECT l.cold_box_no FROM order_load_details_cold l WHERE l.order_id = #{billId} )
     </update>
     <!--清空返回冷藏品明细中冷藏箱编号-->
     <update id="clearOrderCold">
         UPDATE order_load_details_cold t
         SET t.cold_box_no = ''
         WHERE
-            t.order_id =  #{billId}
-          /*AND t.serial_barcode IN (
-            SELECT
-                mx.serial_barcode
-            FROM
-                order_load_details mx
-            WHERE
-                mx.order_load_id = #{order_load_id}
-              AND ( mx.fcl_qty != mx.real_fcl_qty OR mx.lcl_qty != mx.real_lcl_qty )
+        t.order_id = #{billId}
+        /*AND t.serial_barcode IN (
+        SELECT
+        mx.serial_barcode
+        FROM
+        order_load_details mx
+        WHERE
+        mx.order_load_id = #{order_load_id}
+        AND ( mx.fcl_qty != mx.real_fcl_qty OR mx.lcl_qty != mx.real_lcl_qty )
         )*/
     </update>
 </mapper>
