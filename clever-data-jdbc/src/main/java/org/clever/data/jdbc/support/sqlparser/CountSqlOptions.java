@@ -17,7 +17,7 @@ public class CountSqlOptions {
      */
     private boolean optimizeCountSql = true;
     /**
-     * sql解析时，是否优化join连表
+     * sql解析时，是否优化join子句
      */
     private boolean optimizeJoin = false;
 }

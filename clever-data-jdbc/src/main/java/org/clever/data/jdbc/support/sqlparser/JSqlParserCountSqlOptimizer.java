@@ -7,6 +7,7 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 import org.springframework.util.CollectionUtils;
 
@@ -45,19 +46,22 @@ public class JSqlParserCountSqlOptimizer implements CountSqlOptimizer {
         // 影响 SQL 查询结果行数的语法包括: distinct、join、where、group by、having、limit、offset、union
         try {
             boolean wrapperCountSql = false;
-            Select select = (Select) GlobalSqlParser.parse(rawSql);
+            Statement statement = GlobalSqlParser.parse(rawSql);
+            if (!(statement instanceof Select select)) {
+                throw new IllegalArgumentException("rawSql is not select statement");
+            }
             if (select instanceof SetOperationList) {
                 // union TODO 可以继续优化子句
                 return CountSqlOptimizer.getRawCountSql(rawSql);
             } else if (select instanceof PlainSelect plainSelect) {
-                // 优化select字句
+                // 优化select子句
                 Distinct distinct = plainSelect.getDistinct();
                 if (distinct != null) {
                     wrapperCountSql = true;
                 } else {
                     plainSelect.setSelectItems(SELECT_COUNT);
                 }
-                // 优化join字句 TODO 意义不大，需要继续深度优化
+                // 优化join子句 TODO 意义不大，需要继续深度优化
                 List<Join> joins = plainSelect.getJoins();
                 if (options.isOptimizeJoin() && !CollectionUtils.isEmpty(joins)) {
                     boolean canRemoveJoin = true;
@@ -100,7 +104,7 @@ public class JSqlParserCountSqlOptimizer implements CountSqlOptimizer {
                         plainSelect.setJoins(null);
                     }
                 }
-                // 优化group by字句
+                // 优化group by子句
                 GroupByElement groupBy = plainSelect.getGroupBy();
                 if (groupBy != null) {
                     wrapperCountSql = true;
@@ -108,7 +112,7 @@ public class JSqlParserCountSqlOptimizer implements CountSqlOptimizer {
                         plainSelect.setSelectItems(SELECT_ZERO);
                     }
                 }
-                // 优化order by字句
+                // 优化order by子句
                 List<OrderByElement> orderBy = plainSelect.getOrderByElements();
                 if (!CollectionUtils.isEmpty(orderBy)) {
                     plainSelect.setOrderByElements(null);

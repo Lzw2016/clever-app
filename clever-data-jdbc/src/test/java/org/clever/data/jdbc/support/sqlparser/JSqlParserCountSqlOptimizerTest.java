@@ -1,13 +1,18 @@
 package org.clever.data.jdbc.support.sqlparser;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.clever.core.reflection.ReflectionsUtils;
 import org.clever.data.dynamic.sql.builder.SqlSource;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.mybatis.FileSystemMyBatisMapperSql;
+import org.clever.data.jdbc.mybatis.SqlSourceGroup;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 作者：lizw <br/>
@@ -113,7 +118,61 @@ public class JSqlParserCountSqlOptimizerTest {
             "      and c=power(1) and d=power(?) and e=power(:p_e) and e=power(:p_e.value) " +
             "group by a, a1, a2 ";
         CountSqlOptimizer countSqlOptimizer = new JSqlParserCountSqlOptimizer();
-        sql = countSqlOptimizer.getCountSql(sql, new CountSqlOptions(true, false));
+        sql = countSqlOptimizer.getCountSql(sql, new CountSqlOptions(true, true));
         log.info("sql=\n{}", sql);
+    }
+
+    @Test
+    public void test09() {
+        String sql = "select count(1) as contnum " +
+            "from bas_package_items a " +
+            "where a.item_id = ? " +
+            "and ((a.length <= 0 or a.length is null) or (a.width <= 0 or a.width is null) or (a._high <= 0 or a._high is null) or (a.volume <= 0 or a.volume is null) or (a.package_meas <= 0 or a.package_meas is null))";
+        CountSqlOptimizer countSqlOptimizer = new JSqlParserCountSqlOptimizer();
+        sql = countSqlOptimizer.getCountSql(sql, new CountSqlOptions(true, true));
+        log.info("sql=\n{}", sql);
+    }
+
+    @Test
+    public void test_performance_01() {
+        final String absolutePath = new File("./src/test/resources/performance_test").getAbsolutePath();
+        FileSystemMyBatisMapperSql mybatisMapperSql = new FileSystemMyBatisMapperSql(absolutePath);
+        mybatisMapperSql.reloadAll();
+        CountSqlOptimizer countSqlOptimizer = new JSqlParserCountSqlOptimizer();
+        int count = 0;
+        long cost = 0;
+        ConcurrentMap<String, SqlSourceGroup> allSqlSourceGroupMap = ReflectionsUtils.getFieldValue(mybatisMapperSql, "allSqlSourceGroupMap");
+        for (Map.Entry<String, SqlSourceGroup> entry : allSqlSourceGroupMap.entrySet()) {
+            SqlSourceGroup sqlSourceGroup = entry.getValue();
+            ConcurrentMap<String, SqlSource> stdSqlSource = ReflectionsUtils.getFieldValue(sqlSourceGroup, "stdSqlSource");
+            for (SqlSource sqlSource : stdSqlSource.values()) {
+                String sql = sqlSource.getBoundSql(DbType.MYSQL, new HashMap<>()).getSql().toLowerCase();
+                if (StringUtils.isBlank(sql)
+                    || sql.contains("insert into")
+                    || sql.contains("update ")
+                    || sql.contains("delete ")
+                    || sql.contains(" in")
+                    || sql.contains("where 1 = 1 and")
+                    || sql.contains("where ci.wh_id = ? and")
+                    || sql.contains("left join bas_package_items e on a.item_id = e.item_id and e.package_level = 4")
+                    || sql.contains("where --@")
+                    || sql.contains("'库存不足挂起',")
+                    || sql.contains("where 1 = 1 and ")
+                    || sql.contains("a.high <= 0 or a.high is null")
+                    || sql.contains("package_level != 4 and")
+                    || sql.contains("select zhiy_no 职员编号,yans_zz 验收组长")
+                    || sql.contains("where a.order_out_id in")
+                    || sql.contains("where t.english_name in")) {
+                    continue;
+                }
+                final long startTime = System.currentTimeMillis();
+                sql = countSqlOptimizer.getCountSql(sql);
+                final long endTime = System.currentTimeMillis();
+                cost += Math.max((endTime - startTime), 1);
+                count++;
+            }
+        }
+        // 耗时: 775ms | 数量: 252 | 速率: 3.0753968253968256ms/个
+        log.info("耗时: {}ms | 数量: {} | 速率: {}ms/个", cost, count, cost * 1.0 / count);
     }
 }

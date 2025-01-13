@@ -327,8 +327,7 @@ public abstract class AbstractMyBatisMapperSql implements MyBatisMapperSql {
             }
         } catch (Exception e) {
             tupleTwo.setValue2(true);
-            if (e.getCause() instanceof SAXParseException) {
-                SAXParseException saxParseException = (SAXParseException) e.getCause();
+            if (e.getCause() instanceof SAXParseException saxParseException) {
                 String error = String.format(
                     "#第%d行，第%d列存在错误: %s",
                     saxParseException.getLineNumber(),
