@@ -17,6 +17,9 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class ThreadUtils {
+    /**
+     * 创建daemon线程池
+     */
     public static ThreadPoolExecutor createThreadPool(int core, int max, BlockingQueue<Runnable> queue, String namingPattern) {
         ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
             core, max, 16, TimeUnit.SECONDS,

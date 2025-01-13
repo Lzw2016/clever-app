@@ -22,10 +22,16 @@ import java.util.Optional;
 @Slf4j
 public class JSqlParserCountSqlOptimizer implements CountSqlOptimizer {
     /**
-     * 获取jsqlparser中count的SelectItem
+     * 固定的select字句 {@code count(1) as total }
      */
-    protected static final List<SelectItem<?>> COUNT_SELECT_ITEM = Collections.singletonList(
-        new SelectItem<>(new Column().withColumnName("COUNT(1)")).withAlias(new Alias("total"))
+    protected static final List<SelectItem<?>> SELECT_COUNT = Collections.singletonList(
+        new SelectItem<>(new Column().withColumnName("COUNT(1)")).withAlias(new Alias("TOTAL"))
+    );
+    /**
+     * 固定的select字句 {@code 0 as group_row }
+     */
+    protected static final List<SelectItem<?>> SELECT_ZERO = Collections.singletonList(
+        new SelectItem<>(new Column().withColumnName("0")).withAlias(new Alias("GROUP_ROW"))
     );
 
     @Override
@@ -36,45 +42,24 @@ public class JSqlParserCountSqlOptimizer implements CountSqlOptimizer {
         if (!options.isOptimizeCountSql()) {
             return CountSqlOptimizer.getRawCountSql(rawSql);
         }
+        // 影响 SQL 查询结果行数的语法包括: distinct、join、where、group by、having、limit、offset、union
         try {
+            boolean wrapperCountSql = false;
             Select select = (Select) GlobalSqlParser.parse(rawSql);
-            // union语法支持
             if (select instanceof SetOperationList) {
+                // union TODO 可以继续优化子句
                 return CountSqlOptimizer.getRawCountSql(rawSql);
-            }
-            PlainSelect plainSelect = (PlainSelect) select;
-            // 优化 order by 在非分组情况下
-            List<OrderByElement> orderBy = plainSelect.getOrderByElements();
-            if (!CollectionUtils.isEmpty(orderBy)) {
-                boolean canClean = true;
-                for (OrderByElement order : orderBy) {
-                    // order by 里带参数,不去除order by
-                    Expression expression = order.getExpression();
-                    if (!(expression instanceof Column) && expression.toString().contains(Keywords.QUESTION_MARK)) {
-                        canClean = false;
-                        break;
-                    }
+            } else if (select instanceof PlainSelect plainSelect) {
+                // 优化select字句
+                Distinct distinct = plainSelect.getDistinct();
+                if (distinct != null) {
+                    wrapperCountSql = true;
+                } else {
+                    plainSelect.setSelectItems(SELECT_COUNT);
                 }
-                if (canClean) {
-                    plainSelect.setOrderByElements(null);
-                }
-            }
-            Distinct distinct = plainSelect.getDistinct();
-            GroupByElement groupBy = plainSelect.getGroupBy();
-            // 包含 distinct、groupBy 不优化
-            if (null != distinct || null != groupBy) {
-                return CountSqlOptimizer.getRawCountSql(rawSql);
-            }
-            // selectItems 包含 #{} ${}，它将被翻译为?，并且它可能位于函数中：power(#{myInt},2)
-            for (SelectItem<?> item : plainSelect.getSelectItems()) {
-                if (item.toString().contains(Keywords.QUESTION_MARK)) {
-                    return CountSqlOptimizer.getRawCountSql(rawSql);
-                }
-            }
-            // 包含 join 连表,进行判断是否移除 join 连表
-            if (options.isOptimizeJoin()) {
+                // 优化join字句 TODO 意义不大，需要继续深度优化
                 List<Join> joins = plainSelect.getJoins();
-                if (!CollectionUtils.isEmpty(joins)) {
+                if (options.isOptimizeJoin() && !CollectionUtils.isEmpty(joins)) {
                     boolean canRemoveJoin = true;
                     String whereStr = Optional.ofNullable(plainSelect.getWhere()).map(Expression::toString).orElse(Keywords.EMPTY);
                     // 不区分大小写
@@ -115,12 +100,26 @@ public class JSqlParserCountSqlOptimizer implements CountSqlOptimizer {
                         plainSelect.setJoins(null);
                     }
                 }
+                // 优化group by字句
+                GroupByElement groupBy = plainSelect.getGroupBy();
+                if (groupBy != null) {
+                    wrapperCountSql = true;
+                    if (distinct == null) {
+                        plainSelect.setSelectItems(SELECT_ZERO);
+                    }
+                }
+                // 优化order by字句
+                List<OrderByElement> orderBy = plainSelect.getOrderByElements();
+                if (!CollectionUtils.isEmpty(orderBy)) {
+                    plainSelect.setOrderByElements(null);
+                }
             }
-            // 优化 SQL
-            plainSelect.setSelectItems(COUNT_SELECT_ITEM);
-            return select.toString();
+            String sql = select.toString();
+            if (wrapperCountSql) {
+                sql = CountSqlOptimizer.getRawCountSql(sql);
+            }
+            return sql;
         } catch (JSQLParserException e) {
-            // 无法优化使用原 SQL
             log.warn("optimize this sql to a count sql has exception, sql:{}", rawSql, e);
         } catch (Exception e) {
             log.warn("optimize this sql to a count sql has error, sql:{}", rawSql, e);

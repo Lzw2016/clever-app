@@ -14,7 +14,7 @@ public interface CountSqlOptimizer {
      * 返回基于原生sql的简单包装的count sql语句
      */
     static String getRawCountSql(String rawSql) {
-        return String.format("SELECT COUNT(1) FROM ( %s ) TOTAL", rawSql);
+        return String.format("SELECT COUNT(1) AS TOTAL FROM (\n %s \n) TOTAL", rawSql);
     }
 
     /**

@@ -8,4 +8,5 @@ public interface Keywords {
     String EMPTY = "";
     String DOT = ".";
     String QUESTION_MARK = "?";
+    String SEMICOLON = ";";
 }

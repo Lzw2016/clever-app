@@ -1,5 +1,6 @@
 package org.clever.data.jdbc.support.sqlparser;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
@@ -16,6 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * 作者：lizw <br/>
  * 创建时间：2025/01/12 19:02 <br/>
  */
+@Slf4j
 public class GlobalSqlParser {
     /**
      * 默认线程数大小
