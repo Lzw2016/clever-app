@@ -2,6 +2,8 @@ package org.clever.core.model.entity;
 
 import lombok.Data;
 
+import java.io.Serial;
+
 /**
  * 含有基本字段和主键字段的实体类抽象<br/>
  * <p>
@@ -10,6 +12,7 @@ import lombok.Data;
  */
 @Data
 public abstract class IdEntity implements BaseEntity {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

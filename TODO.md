@@ -111,6 +111,8 @@ Oracle(锁名称为字符串，支持超时):
 - [  ] 提供 JdbcMetrics 信息查询接口，查询收集的 sql 执行性能信息
 - [OK] p6spy 支持忽略指定的sql(全匹配和包含匹配)
 - [OK] p6spy 忽略的sql使用debug级别的日志
+- [  ] 更细粒度的sql查询拦截，能实现字段无感加解密、字典自动翻译
+- [  ] 支持全局sql重写，能实现全局的数据权限，自定义字段填充
 
 ### clever-data-jdbc-meta
 

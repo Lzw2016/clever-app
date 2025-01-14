@@ -3,6 +3,8 @@ package org.clever.core.exception;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.io.Serial;
+
 /**
  * 系统业务异常
  * <p>
@@ -12,6 +14,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class BusinessException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

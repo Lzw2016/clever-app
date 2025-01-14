@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.clever.core.model.request.page.Page;
 
+import java.io.Serial;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ import java.util.List;
  * 创建时间：2017-09-02 00:41 <br/>
  */
 public class QueryByPage extends QueryBySort {
+    @Serial
     private static final long serialVersionUID = 1L;
     /**
      * 保存当前请求对应的 QueryByPage 参数数据

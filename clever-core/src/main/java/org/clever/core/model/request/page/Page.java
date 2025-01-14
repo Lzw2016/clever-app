@@ -2,6 +2,7 @@ package org.clever.core.model.request.page;
 
 import lombok.ToString;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("ALL")
 @ToString
 public class Page<T> implements IPage<T> {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
