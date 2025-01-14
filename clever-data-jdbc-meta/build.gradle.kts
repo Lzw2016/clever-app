@@ -12,7 +12,7 @@ dependencies {
     // api("org.apache.groovy:groovy")
     // api("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     testImplementation("org.postgresql:postgresql")
-    testImplementation("mysql:mysql-connector-java")
+    testImplementation("com.mysql:mysql-connector-j")
     testImplementation("com.oracle.database.jdbc:ojdbc8")
     testImplementation("com.alibaba:easyexcel")
 }

@@ -2741,8 +2741,7 @@ public class Jdbc extends AbstractDataSource {
      * 获取数据源信息
      */
     public JdbcInfo getInfo() {
-        if (dataSource instanceof HikariDataSource) {
-            HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
+        if (dataSource instanceof HikariDataSource hikariDataSource) {
             JdbcInfo jdbcInfo = new JdbcInfo();
             jdbcInfo.setDriverClassName(hikariDataSource.getDriverClassName());
             jdbcInfo.setJdbcUrl(hikariDataSource.getJdbcUrl());
@@ -2760,8 +2759,7 @@ public class Jdbc extends AbstractDataSource {
      * 获取数据源状态
      */
     public JdbcDataSourceStatus getStatus() {
-        if (dataSource instanceof HikariDataSource) {
-            HikariDataSource hikariDataSource = (HikariDataSource) dataSource;
+        if (dataSource instanceof HikariDataSource hikariDataSource) {
             HikariPoolMXBean poolMXBean = hikariDataSource.getHikariPoolMXBean();
             JdbcDataSourceStatus status = new JdbcDataSourceStatus();
             status.setTotalConnections(poolMXBean.getTotalConnections());
@@ -3788,6 +3786,7 @@ public class Jdbc extends AbstractDataSource {
         private final Jdbc jdbc;
         private final ResultSetExtractor<T> resultSetExtractor;
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public T execute(JdbcContext context) {
             Page<?> page = new Page<>(1, 1);
@@ -3823,6 +3822,7 @@ public class Jdbc extends AbstractDataSource {
             this(jdbc, returnType, false);
         }
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public T execute(JdbcContext context) {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
@@ -3861,6 +3861,7 @@ public class Jdbc extends AbstractDataSource {
             this(jdbc, rowMapper, false);
         }
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public T execute(JdbcContext context) {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
@@ -3888,6 +3889,7 @@ public class Jdbc extends AbstractDataSource {
         private final Jdbc jdbc;
         private final RowMapper<T> rowMapper;
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public List<T> execute(JdbcContext context) {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
@@ -3909,6 +3911,7 @@ public class Jdbc extends AbstractDataSource {
         private final Jdbc jdbc;
         private final InterruptRowCallbackHandler interruptRowCallbackHandler;
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public Void execute(JdbcContext context) {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
@@ -3930,6 +3933,7 @@ public class Jdbc extends AbstractDataSource {
     protected static class UpdateData implements JdbcExecute<Integer> {
         private final Jdbc jdbc;
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public Integer execute(JdbcContext context) {
             jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
@@ -3950,6 +3954,7 @@ public class Jdbc extends AbstractDataSource {
     protected static class BatchUpdateData implements JdbcExecute<int[]> {
         private final Jdbc jdbc;
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public int[] execute(JdbcContext context) {
             final List<Map<String, Object>> paramList = context.getParamList();
@@ -3979,6 +3984,7 @@ public class Jdbc extends AbstractDataSource {
     private static class InsertData implements JdbcExecute<InsertResult> {
         private final Jdbc jdbc;
 
+        @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public InsertResult execute(JdbcContext context) {
             final Map<String, Object> paramMap = context.getParamMap();

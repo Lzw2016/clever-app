@@ -124,6 +124,7 @@ public class JSqlParserCountSqlOptimizerTest {
 
     @Test
     public void test09() {
+        // TODO bug a._high -> a.high
         String sql = "select count(1) as contnum " +
             "from bas_package_items a " +
             "where a.item_id = ? " +

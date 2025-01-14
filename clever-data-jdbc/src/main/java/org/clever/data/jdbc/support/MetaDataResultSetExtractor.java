@@ -1,7 +1,10 @@
 package org.clever.data.jdbc.support;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.clever.core.NamingUtils;
 import org.clever.core.RenameStrategy;
+import org.clever.core.reflection.ReflectionsUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
@@ -15,6 +18,7 @@ import java.util.List;
  * 作者：lizw <br/>
  * 创建时间：2022/02/24 15:20 <br/>
  */
+@Slf4j
 public class MetaDataResultSetExtractor implements ResultSetExtractor<List<DbColumnMetaData>> {
     public static MetaDataResultSetExtractor create(String sql) {
         return new MetaDataResultSetExtractor(sql, RenameStrategy.None);
@@ -55,16 +59,86 @@ public class MetaDataResultSetExtractor implements ResultSetExtractor<List<DbCol
     public List<DbColumnMetaData> extractData(ResultSet rs) throws SQLException, DataAccessException {
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            DbColumnMetaData columnMetaData = new DbColumnMetaData();
-            columnMetaData.setTableName(metaData.getTableName(i));
-            String columnName = metaData.getColumnName(i);
-            if (needRename) {
-                columnName = NamingUtils.rename(columnName, renameStrategy);
+        for (int idx = 1; idx <= columnCount; idx++) {
+            String catalogName = metaData.getCatalogName(idx);
+            String schemaName = metaData.getSchemaName(idx);
+            String tableName = metaData.getTableName(idx);
+            String columnName = metaData.getColumnName(idx);
+            String columnLabel = metaData.getColumnLabel(idx);
+            String columnTypeName = metaData.getColumnTypeName(idx);
+            Integer columnType = metaData.getColumnType(idx);
+            // 特定数据库处理
+            if (metaData instanceof org.postgresql.jdbc.PgResultSetMetaData) {
+                // Postgres
+                org.postgresql.core.Field[] fields = ReflectionsUtils.getFieldValue(metaData, "fields", false);
+                if (fields != null && fields.length > idx) {
+                    org.postgresql.core.Field field = fields[idx - 1];
+                    if (field != null && field.getMetadata() != null) {
+                        org.postgresql.jdbc.FieldMetadata fieldMetadata = field.getMetadata();
+                        String tmp = ReflectionsUtils.getFieldValue(fieldMetadata, "columnName", false);
+                        if (StringUtils.isNotBlank(tmp)) {
+                            columnName = tmp;
+                        }
+                        tmp = ReflectionsUtils.getFieldValue(fieldMetadata, "tableName", false);
+                        if (StringUtils.isNotBlank(tmp)) {
+                            tableName = tmp;
+                        }
+                        tmp = ReflectionsUtils.getFieldValue(fieldMetadata, "schemaName", false);
+                        if (StringUtils.isNotBlank(tmp)) {
+                            schemaName = tmp;
+                        }
+                        tmp = field.getColumnLabel();
+                        if (StringUtils.isNotBlank(tmp)) {
+                            columnLabel = tmp;
+                        }
+                    }
+                }
+            } else if (metaData instanceof com.mysql.cj.jdbc.result.ResultSetMetaData) {
+                // MySQL
+                com.mysql.cj.result.Field[] fields = ReflectionsUtils.getFieldValue(metaData, "fields", false);
+                if (fields != null && fields.length > idx) {
+                    com.mysql.cj.result.Field field = fields[idx - 1];
+                    if (field != null) {
+                        com.mysql.cj.util.LazyString tmp = ReflectionsUtils.getFieldValue(field, "originalColumnName", false);
+                        if (tmp != null && StringUtils.isNotBlank(tmp.toString())) {
+                            columnName = tmp.toString();
+                        }
+                        tmp = ReflectionsUtils.getFieldValue(field, "originalTableName", false);
+                        if (tmp != null && StringUtils.isNotBlank(tmp.toString())) {
+                            tableName = tmp.toString();
+                        }
+                        tmp = ReflectionsUtils.getFieldValue(field, "databaseName", false);
+                        if (tmp != null && StringUtils.isNotBlank(tmp.toString())) {
+                            catalogName = tmp.toString();
+                        }
+                        String tmpStr = field.getColumnLabel();
+                        if (StringUtils.isNotBlank(tmpStr)) {
+                            columnLabel = tmpStr;
+                        }
+                    }
+                }
             }
+            // 后置处理
+            if (StringUtils.isBlank(columnLabel)) {
+                columnLabel = columnName;
+            }
+            if (needRename) {
+                columnLabel = NamingUtils.rename(columnLabel, renameStrategy);
+            }
+            // 构建 DbColumnMeta
+            DbColumnMetaData columnMetaData = new DbColumnMetaData();
+            columnMetaData.setCatalogName(catalogName);
+            columnMetaData.setSchemaName(schemaName);
+            if (StringUtils.isNotBlank(schemaName)) {
+                columnMetaData.setDatabaseName(schemaName);
+            } else {
+                columnMetaData.setDatabaseName(catalogName);
+            }
+            columnMetaData.setTableName(tableName);
             columnMetaData.setColumnName(columnName);
-            columnMetaData.setColumnTypeName(metaData.getColumnTypeName(i));
-            columnMetaData.setColumnType(metaData.getColumnType(i));
+            columnMetaData.setColumnLabel(columnLabel);
+            columnMetaData.setColumnTypeName(columnTypeName);
+            columnMetaData.setColumnType(columnType);
             headMeta.add(columnMetaData);
         }
         return headMeta;

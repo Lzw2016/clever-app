@@ -124,12 +124,14 @@ subprojects {
             dependency("org.joda:joda-convert:2.2.3")
             // jdbc
             dependency("p6spy:p6spy:3.9.1")
+            // jdbc drive
             dependency("org.postgresql:postgresql:42.5.6")
-            dependency("mysql:mysql-connector-java:8.0.33")
             dependency("com.mysql:mysql-connector-j:8.0.33")
             dependency("com.microsoft.sqlserver:mssql-jdbc:11.2.3.jre8")
             dependency("com.oracle.database.jdbc:ojdbc8:21.6.0.0.1")
             dependency("com.oracle.database.nls:orai18n:21.3.0.0")
+            dependency("com.h2database:h2:2.2.224")
+            dependency("org.xerial:sqlite-jdbc:3.46.1.3")
             // apache commons
             dependency("commons-io:commons-io:2.16.1")
             dependency("org.apache.commons:commons-text:1.12.0")

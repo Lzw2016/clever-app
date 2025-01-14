@@ -2,6 +2,8 @@ package org.clever.data.jdbc;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.clever.core.mapper.JacksonMapper;
+import org.clever.data.jdbc.support.DbColumnMetaData;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.ConnectionCallback;
 
@@ -200,6 +202,23 @@ public class JdbcTest {
             }});
         }});
         log.info("-> {}", cs);
+        jdbc.close();
+    }
+
+    @Test
+    public void t12() {
+        Jdbc jdbc = newJdbc();
+        String sql = """
+            select
+                t.id as a,
+                t.namespace as b,
+                t.report_time as c,
+                (select t2.instance_name from task_scheduler t2 where t2.namespace=t.namespace limit 1) as d,
+                (t.namespace || '_ns') as e
+            from task_report as t
+            """;
+        List<DbColumnMetaData> list = jdbc.queryMetaData(sql);
+        log.info("-> \n{}", JacksonMapper.getInstance().toJson(list));
         jdbc.close();
     }
 }

@@ -11,8 +11,15 @@ dependencies {
     api("p6spy:p6spy")
     api("org.springframework:spring-jdbc")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    // jdbc drive
+    compileOnly("org.postgresql:postgresql")
+    compileOnly("com.mysql:mysql-connector-j")
+    // compileOnly("com.microsoft.sqlserver:mssql-jdbc")
+    // compileOnly("com.oracle.database.jdbc:ojdbc8")
+    // compileOnly("com.h2database:h2")
+    // compileOnly("org.xerial:sqlite-jdbc")
     testImplementation("org.postgresql:postgresql")
-    testImplementation("mysql:mysql-connector-java")
-    testImplementation("com.oracle.database.jdbc:ojdbc8")
+    testImplementation("com.mysql:mysql-connector-j")
     testImplementation("com.microsoft.sqlserver:mssql-jdbc")
+    testImplementation("com.oracle.database.jdbc:ojdbc8")
 }

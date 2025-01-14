@@ -24,14 +24,18 @@ public class GlobalSqlParser {
      */
     private static final int DEFAULT_THREAD_SIZE = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
     /**
-     * sql解析处理线程池
+     * 默认的线程池
      */
-    public static volatile ThreadPoolExecutor EXECUTOR_SERVICE = ThreadUtils.createThreadPool(
+    private static final ThreadPoolExecutor DEF_EXECUTOR_SERVICE = ThreadUtils.createThreadPool(
         DEFAULT_THREAD_SIZE,
         DEFAULT_THREAD_SIZE,
         new ArrayBlockingQueue<>(64),
         "jsqlparser-%d"
     );
+    /**
+     * sql解析处理线程池
+     */
+    public static volatile ThreadPoolExecutor EXECUTOR_SERVICE = DEF_EXECUTOR_SERVICE;
     /**
      * sql解析结果缓存
      */
@@ -46,7 +50,12 @@ public class GlobalSqlParser {
     public static volatile JSqlParserFunction<String, Statements> PARSE_STATEMENTS = sql -> CCJSqlParserUtil.parseStatements(sql, EXECUTOR_SERVICE, null);
 
     static {
-        AppShutdownHook.addShutdownHook(EXECUTOR_SERVICE::shutdownNow, OrderIncrement.NORMAL - 100, "停止SQL解析");
+        AppShutdownHook.addShutdownHook(() -> {
+            DEF_EXECUTOR_SERVICE.shutdownNow();
+            if (!DEF_EXECUTOR_SERVICE.equals(EXECUTOR_SERVICE)) {
+                EXECUTOR_SERVICE.shutdownNow();
+            }
+        }, OrderIncrement.NORMAL - 100, "停止SQL解析");
     }
 
     /**

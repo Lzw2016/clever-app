@@ -3,6 +3,6 @@ dependencies {
     compileOnly(project(":clever-web"))
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.postgresql:postgresql")
-    testImplementation("mysql:mysql-connector-java")
+    testImplementation("com.mysql:mysql-connector-j")
     testImplementation(project(":clever-data-redis"))
 }
