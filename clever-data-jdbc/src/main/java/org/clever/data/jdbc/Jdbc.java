@@ -3792,9 +3792,9 @@ public class Jdbc extends AbstractDataSource {
             Page<?> page = new Page<>(1, 1);
             Map<String, Object> paramMap = new HashMap<>(context.getParamMap());
             String pageSql = DialectFactory.buildPaginationSql(page, context.getSql(), paramMap, jdbc.getDbType(), null);
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(pageSql, paramMap);
                 return jdbc.jdbcTemplate.query(pageSql, paramMap, resultSetExtractor);
             } catch (Exception e) {
@@ -3825,7 +3825,6 @@ public class Jdbc extends AbstractDataSource {
         @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public T execute(JdbcContext context) {
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
                 String sql = context.getSql();
@@ -3833,6 +3832,7 @@ public class Jdbc extends AbstractDataSource {
                     // 改写查询sql，限制查询数据量
                     sql = DialectFactory.buildPaginationSql(0, 1, sql, jdbc.dbType, null);
                 }
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(sql, context.getParamMap());
                 List<T> list = jdbc.jdbcTemplate.query(sql, context.getParamMap(), new SingleColumnRowMapper<>(returnType));
                 return DataAccessUtils.singleResult(list);
@@ -3864,7 +3864,6 @@ public class Jdbc extends AbstractDataSource {
         @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public T execute(JdbcContext context) {
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
                 String sql = context.getSql();
@@ -3872,6 +3871,7 @@ public class Jdbc extends AbstractDataSource {
                     // 改写查询sql，限制查询数据量
                     sql = DialectFactory.buildPaginationSql(0, 1, sql, jdbc.dbType, null);
                 }
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(sql, context.getParamMap());
                 List<T> list = jdbc.jdbcTemplate.query(sql, context.getParamMap(), rowMapper);
                 return DataAccessUtils.singleResult(list);
@@ -3892,9 +3892,9 @@ public class Jdbc extends AbstractDataSource {
         @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public List<T> execute(JdbcContext context) {
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(context.getSql(), context.getParamMap());
                 return jdbc.jdbcTemplate.query(context.getSql(), new MapSqlParameterSource(context.getParamMap()), rowMapper);
             } catch (Exception e) {
@@ -3914,9 +3914,9 @@ public class Jdbc extends AbstractDataSource {
         @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public Void execute(JdbcContext context) {
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(context.getSql(), context.getParamMap());
                 jdbc.jdbcTemplate.query(context.getSql(), new MapSqlParameterSource(context.getParamMap()), (ResultSetExtractor<?>) interruptRowCallbackHandler);
                 return null;
@@ -3936,9 +3936,9 @@ public class Jdbc extends AbstractDataSource {
         @SuppressWarnings("SqlSourceToSinkFlow")
         @Override
         public Integer execute(JdbcContext context) {
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(context.getSql(), context.getParamMap());
                 return jdbc.jdbcTemplate.update(context.getSql(), new MapSqlParameterSource(context.getParamMap()));
             } catch (Exception e) {
@@ -3964,9 +3964,9 @@ public class Jdbc extends AbstractDataSource {
                 paramArray[index] = new MapSqlParameterSource(map);
                 index++;
             }
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(context.getSql(), paramList);
                 int[] updated = jdbc.jdbcTemplate.batchUpdate(context.getSql(), paramArray);
                 SqlLoggerUtils.printfUpdateTotal(updated);
@@ -3995,9 +3995,9 @@ public class Jdbc extends AbstractDataSource {
                 sqlParameterSource = new EmptySqlParameterSource();
             }
             final KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 SqlLoggerUtils.printfSql(context.getSql(), paramMap);
                 int insertCount = jdbc.jdbcTemplate.update(context.getSql(), sqlParameterSource, keyHolder);
                 List<Map<String, Object>> keysList = keyHolder.getKeyList();
@@ -4258,9 +4258,9 @@ public class Jdbc extends AbstractDataSource {
          */
         public int execute() {
             if (batchSql.isEmpty()) return 0;
-            jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
             Exception exception = null;
             try {
+                jdbc.listeners.beforeExec(jdbc.dbType, jdbc.jdbcTemplate);
                 // TupleFour<jdbc直接使用的sql, jdbc的sql参数设置器, 原始sql, 原始sql参数>
                 final List<TupleFour<String, PreparedStatementSetter, String, Map<String, Object>>> pssList = batchSql.stream().map(this::newCreatorFactory).toList();
                 return Conv.asInteger(jdbc.jdbcTemplate.getJdbcOperations().execute((ConnectionCallback<Integer>) connection -> {

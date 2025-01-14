@@ -8,6 +8,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import org.apache.commons.lang3.StringUtils;
@@ -71,16 +72,22 @@ public class JSqlParserTest {
             "';'",
             // ParenthesedSelect
             "(select t2.instance_name from task_scheduler t2 where t2.namespace=t.namespace)",
-            "",
-            "",
+            // EqualsTo
+            "t.job_count=1",
+            // GreaterThan
+            "t.job_count>1",
+            // AndExpression
+            "t.job_count>1 and t.trigger_count=1",
             // 解析失败
-//            "delete from task_report",
-//            "for update",
-//            "t.job_count ; ",
-//            " ; ",
-//            "select t2.instance_name from task_scheduler t2 where t2.namespace=t.namespace",
-//            "(delete from task_report)",
-//            "(update task_report set namespace='' where 1=1)",
+            // "delete from task_report",
+            // "for update",
+            // "t.job_count ; ",
+            // " ; ",
+            // "select t2.instance_name from task_scheduler t2 where t2.namespace=t.namespace",
+            // "delete from task_report",
+            // "(delete from task_report)",
+            // "update task_report set namespace='' where 1=1",
+            // "(update task_report set namespace='' where 1=1)",
         };
         for (String exp : exps) {
             if (StringUtils.isBlank(exp)) {
@@ -92,6 +99,39 @@ public class JSqlParserTest {
             } catch (Exception e) {
                 log.error(exp, e);
             }
+        }
+    }
+
+    @Test
+    public void test03() throws JSQLParserException {
+        String sql = """
+            select id from test where 1=1 group by id ;
+            select 0 as group_row from test where 1=1 group by id;
+
+            update task_report set job_count = 960, job_err_count = 0, trigger_count = 971, misfire_count = 0 where task_report.report_time = '2024-10-02';
+            delete from wms8_his.order_out_details t where exists(select 1 from wms8_his.order_out_0520 t1 where t.order_out_id=t1.order_out_id);
+
+            drop function current_id;
+            create function current_id(
+                seq_name varchar(127)
+            )
+            returns bigint deterministic
+            begin
+                declare _current_val    bigint  default null;
+                set seq_name := trim(seq_name);
+                select current_value into _current_val from auto_increment_id where sequence_name = seq_name;
+                return _current_val;
+            end;
+            alter table test add constraint test_pk_abc primary key (id);
+            alter table test drop primary key;
+            alter table test drop key `primary`;
+            ;
+            ;
+            ;
+            """;
+        Statements statements = CCJSqlParserUtil.parseStatements(sql);
+        for (Statement statement : statements) {
+            log.info("type={} | sql={}", statement.getClass().getName(), statement);
         }
     }
 }

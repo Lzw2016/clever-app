@@ -1,10 +1,12 @@
 package org.clever.data.jdbc.meta;
 
+import org.clever.core.RenameStrategy;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.model.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 获取数据库元数据接口
@@ -165,4 +167,13 @@ public interface DataBaseMetaData {
      * 新增“存储过程、函数”的 DDL 语句
      */
     String createProcedure(Procedure newProcedure);
+
+    /**
+     * 获取查询sql的元数据
+     *
+     * @param sql          sql脚本，参数格式[:param]
+     * @param paramMap     参数，参数格式[:param]
+     * @param resultRename 返回数据字段名重命名策略
+     */
+    QueryMetaData queryMetaData(String sql, Map<String, Object> paramMap, RenameStrategy resultRename);
 }

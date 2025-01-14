@@ -124,7 +124,7 @@ public class JSqlParserCountSqlOptimizerTest {
 
     @Test
     public void test09() {
-        // TODO bug a._high -> a.high
+        // a._high -> a.high | high是保留关键字: net.sf.jsqlparser.parser.ParserKeywordsUtils#ALL_RESERVED_KEYWORDS
         String sql = "select count(1) as contnum " +
             "from bas_package_items a " +
             "where a.item_id = ? " +

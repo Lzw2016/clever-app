@@ -1,13 +1,22 @@
 package org.clever.data.jdbc.meta;
 
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SetOperationList;
 import org.apache.commons.lang3.StringUtils;
 import org.clever.core.Assert;
+import org.clever.core.RenameStrategy;
 import org.clever.core.tuples.TupleTwo;
 import org.clever.data.dynamic.sql.dialect.DbType;
 import org.clever.data.jdbc.Jdbc;
 import org.clever.data.jdbc.meta.inner.ColumnTypeMapping;
 import org.clever.data.jdbc.meta.inner.DefaultValueMapping;
 import org.clever.data.jdbc.meta.model.*;
+import org.clever.data.jdbc.support.DbColumnMetaData;
+import org.clever.data.jdbc.support.sqlparser.GlobalSqlParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
 import java.util.*;
@@ -19,6 +28,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("DuplicatedCode")
 public abstract class AbstractMetaData implements DataBaseMetaData {
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
     protected final Jdbc jdbc;
 
     /**
@@ -517,5 +527,27 @@ public abstract class AbstractMetaData implements DataBaseMetaData {
         // 修改零时表为目标表 alter table sys_lock__tmp rename to sys_lock;
         sql.append(alterTable(table, tmpTable));
         return sql.toString();
+    }
+
+    @Override
+    public QueryMetaData queryMetaData(String sql, Map<String, Object> paramMap, RenameStrategy resultRename) {
+        // TODO 需要与低代码配合
+        List<DbColumnMetaData> list = jdbc.queryMetaData(sql, paramMap, resultRename);
+        // sql解析
+        try {
+            Statement statement = GlobalSqlParser.parse(sql);
+            PlainSelect plainSelect;
+            if (statement instanceof PlainSelect) {
+                plainSelect = (PlainSelect) statement;
+            } else if (statement instanceof SetOperationList setOperationList) {
+                if (!setOperationList.getSelects().isEmpty()) {
+                    Select select = setOperationList.getSelect(0);
+
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Failed to parse sql:%s", sql), e);
+        }
+        return null;
     }
 }
