@@ -49,7 +49,7 @@ public class TreeUtils {
     private static <T extends ITreeNode> String nodesToString(Collection<T> nodes) {
         StringBuilder sb = new StringBuilder();
         for (ITreeNode treeNode : nodes) {
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(", ");
             }
             sb.append(treeNode.getId());
