@@ -292,7 +292,7 @@ public class RedisTest {
 
 //    @Test
 //    public void t07() {
-//        for (int i = 0; i < 12; i++) {
+//        for (int i = 0; i <= 12; i++) {
 //            t06(i);
 //        }
 //    }
